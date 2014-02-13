@@ -1,6 +1,5 @@
 package com.dianping.zebra.group.config;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class DatasourceConfig {
@@ -20,17 +19,15 @@ public class DatasourceConfig {
 	private String initMethod;
 
 	private String destroyMethod;
-	
+
 	private boolean readOnly;
-	
+
 	private int weight;
 
-	private Map<String, String> poolProperties = new HashMap<String, String>();
+	private Map<String, String> poolProperties;
 
 	// for future use
-	private Map<String, String> properties = new HashMap<String, String>();
-
-	private String version;
+	private Map<String, String> properties;
 
 	public String getConnectionUrl() {
 		return connectionUrl;
@@ -72,8 +69,12 @@ public class DatasourceConfig {
 		return userName;
 	}
 
-	public String getVersion() {
-		return version;
+	public int getWeight() {
+		return weight;
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 
 	public void setConnectionUrl(String connectionUrl) {
@@ -112,11 +113,15 @@ public class DatasourceConfig {
 		this.properties = properties;
 	}
 
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
 
-	public void setVersion(String version) {
-		this.version = version;
+	public void setWeight(int weight) {
+		this.weight = weight;
 	}
 }
