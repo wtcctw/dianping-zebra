@@ -1,0 +1,13 @@
+<datasourcesConfigs>
+	<datasourceConfig id="datasource1" readonly="true" weight="10">
+		<driverClass>java.sql.Driver</driverClass>
+		<poolClass>com.mchange.v2.c3p0.impl.C3P0PooledConnectionPoolManager</poolClass>
+		<connectionUrl>jdbc:mysql://127.0.0.1:3306/sample</connectionUrl>
+		<userName>root</userName>
+		<password>123456</password>
+		<initMethod>init</initMethod>
+		<destroyMethod>destroy</destroyMethod>
+	</datasourceConfig>
+	<datasourceConfig id="datasource2" readonly="true" weight="10">
+	</datasourceConfig>
+</datasourcesConfigs>

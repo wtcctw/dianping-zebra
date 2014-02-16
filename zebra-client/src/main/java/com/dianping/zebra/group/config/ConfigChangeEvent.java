@@ -2,6 +2,8 @@ package com.dianping.zebra.group.config;
 
 import java.util.Map;
 
+import com.dianping.zebra.group.config.entity.DatasourceConfig;
+
 public class ConfigChangeEvent {
 	private Map<String, DatasourceConfig> datasourceConfigs;
 
@@ -13,4 +15,8 @@ public class ConfigChangeEvent {
 		return datasourceConfigs;
 	}
 
+	@Override
+	public String toString() {
+		return "ConfigChangeEvent [datasourceConfigs=" + datasourceConfigs + "]";
+	}
 }

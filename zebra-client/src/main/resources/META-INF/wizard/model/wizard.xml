@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wizard package="com.dianping.zebra">
+   <model package="com.dianping.zebra.group.config" name="datasourceConfig">
+      <sample-model>src/test/resources/datasources.xml</sample-model>
+   </model>
+</wizard>

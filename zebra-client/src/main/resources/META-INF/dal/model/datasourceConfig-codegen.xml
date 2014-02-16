@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+  <entity name="datasourcesConfigs" root="true">
+    <entity-ref name="datasourceConfig" type="list" names="datasourceConfigs" />
+  </entity>
+  <entity name="datasourceConfig">
+    <attribute name="id" value-type="String" />
+    <attribute name="readonly" value-type="boolean" />
+    <attribute name="weight" value-type="int" />
+    <element name="driverClass" value-type="String" />
+    <element name="poolClass" value-type="String" />
+    <element name="connectionUrl" value-type="String" />
+    <element name="userName" value-type="String" />
+    <element name="password" value-type="int" />
+    <element name="initMethod" value-type="String" />
+    <element name="destroyMethod" value-type="String" />
+  </entity>
+</model>
+

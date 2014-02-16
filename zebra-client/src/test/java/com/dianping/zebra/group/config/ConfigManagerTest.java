@@ -1,0 +1,26 @@
+package com.dianping.zebra.group.config;
+
+import java.io.IOException;
+
+import org.junit.Test;
+
+public class ConfigManagerTest {
+
+	@Test
+	public void testManager() throws IOException, InterruptedException {
+		LocalXmlConfigManager manager = new LocalXmlConfigManager(ConfigConstants.KEY_DATASOURCE_FILE);
+
+		manager.addListerner(new ConfigChangeListener() {
+
+			@Override
+			public void onChange(ConfigChangeEvent event) {
+				System.out.println("changed");
+				System.out.println(event);
+			}
+		});
+
+		manager.init();
+
+		System.in.read();
+	}
+}
