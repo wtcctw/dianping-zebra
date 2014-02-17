@@ -1,0 +1,38 @@
+<databases>
+	<database id="db1">
+		<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
+		<user></user>
+		<driver-class></driver-class>
+		<password></password>
+		<min-pool-size></min-pool-size>
+		<max-pool-size></max-pool-size>
+		<initial-pool-size></initial-pool-size>
+	</database>
+	<database id="db2">
+		<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
+		<user></user>
+		<driver-class></driver-class>
+		<password></password>
+		<min-pool-size></min-pool-size>
+		<max-pool-size></max-pool-size>
+		<initial-pool-size></initial-pool-size>
+	</database>
+	<database id="db3">
+		<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
+		<user></user>
+		<driver-class></driver-class>
+		<password></password>
+		<min-pool-size></min-pool-size>
+		<max-pool-size></max-pool-size>
+		<initial-pool-size></initial-pool-size>
+	</database>
+	<database id="db4">
+		<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
+		<user></user>
+		<driver-class></driver-class>
+		<password></password>
+		<min-pool-size></min-pool-size>
+		<max-pool-size></max-pool-size>
+		<initial-pool-size></initial-pool-size>
+	</database>
+</databases>
