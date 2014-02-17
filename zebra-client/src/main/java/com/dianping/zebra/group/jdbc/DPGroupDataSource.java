@@ -15,7 +15,10 @@ import javax.sql.DataSource;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.GroupConfigManager;
 import com.dianping.zebra.group.config.GroupConfigManagerFactory;
-import com.dianping.zebra.group.router.DataSourceSelector;
+import com.dianping.zebra.group.manager.GroupDataSourceManager;
+import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
+import com.dianping.zebra.group.router.GroupDataSourceRouter;
+import com.dianping.zebra.group.router.GroupDataSourceRouterFactory;
 
 /**
  * @author Leo Liang
@@ -29,7 +32,9 @@ public class DPGroupDataSource implements DataSource {
 
 	private GroupConfigManager configManager;
 
-	private DataSourceSelector router;
+	private GroupDataSourceRouter router;
+
+	private GroupDataSourceManager dataSourceManager;
 
 	public DPGroupDataSource() {
 		this(null, null);
@@ -41,9 +46,9 @@ public class DPGroupDataSource implements DataSource {
 	}
 
 	public void init() {
-		this.configManager = GroupConfigManagerFactory.getConfigManger(configManagerType);
-		this.configManager.init();
-		this.router = GroupDataSourceRouter.getDataSourceRouter(configManager);
+		this.configManager = GroupConfigManagerFactory.getConfigManger(configManagerType, resourceId);
+		this.router = GroupDataSourceRouterFactory.getDataSourceRouter(configManager);
+		this.dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(configManager);
 	}
 
 	public void setResourceId(String resourceId) {
