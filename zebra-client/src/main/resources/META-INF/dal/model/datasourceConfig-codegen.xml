@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
   <entity name="datasourcesConfigs" root="true">
+    <element name="heartbeat-cycle-time" value-type="int" />
     <entity-ref name="datasourceConfig" type="list" names="datasourceConfigs" />
   </entity>
   <entity name="datasourceConfig">

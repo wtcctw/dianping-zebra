@@ -14,10 +14,10 @@
 			<initSize>3</initSize>
 		</pool-properties>
 		<connection-properties>
-			<readTimeout>10</readTimeout>
+			<readTimeout>100</readTimeout>
 		</connection-properties>
 	</datasourceConfig>
-	<datasourceConfig id="datasource2" readonly="true"
-		weight="10">
+	<datasourceConfig id="datasource2" readonly="true" weight="10">
 	</datasourceConfig>
+	<heartbeat-cycle-time>5000</heartbeat-cycle-time>
 </datasourcesConfigs>

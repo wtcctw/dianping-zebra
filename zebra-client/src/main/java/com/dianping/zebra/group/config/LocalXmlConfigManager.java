@@ -27,6 +27,9 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 
 	private AtomicReference<Map<String, DatasourceConfig>> configCache = new AtomicReference<Map<String, DatasourceConfig>>(
 	      new HashMap<String, DatasourceConfig>());
+	
+	private AtomicReference<Map<String, DatasourceConfig>> availableCache = new AtomicReference<Map<String, DatasourceConfig>>(
+	      new HashMap<String, DatasourceConfig>());
 
 	private List<ConfigChangeListener> listeners = new CopyOnWriteArrayList<ConfigChangeListener>();
 
@@ -134,4 +137,28 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 			}
 		}
 	}
+
+	@Override
+   public void markDown(String id) {
+	   // TODO Auto-generated method stub
+	   
+   }
+
+	@Override
+   public void markUp(String id) {
+	   // TODO Auto-generated method stub
+	   
+   }
+
+	@Override
+   public Map<String, DatasourceConfig> getAvailableDatasources() {
+	   // TODO Auto-generated method stub
+	   return null;
+   }
+
+	@Override
+   public Map<String, DatasourceConfig> getUnAvailableDatasources() {
+	   // TODO Auto-generated method stub
+	   return null;
+   }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model model-package="com.dianping.zebra.group.config" enable-sax-parser="true" enable-xml-builder="true">
 	<entity name="datasourcesConfigs" root="true">
+	    <element name="heartbeat-cycle-time" value-type="int" />
 	    <entity-ref name="datasourceConfig" type="map" names="datasourceConfigs" xml-indent="true" method-find-or-create="true"/>
 	</entity>
 	<entity name="datasourceConfig" dynamic-attributes="true">

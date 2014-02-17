@@ -8,4 +8,12 @@ public interface ConfigManager {
 	public Map<String, DatasourceConfig> getDatasourceConfigs();
 
 	public void addListerner(ConfigChangeListener listener);
+
+	public void markDown(String id);
+
+	public void markUp(String id);
+
+	public Map<String, DatasourceConfig> getAvailableDatasources();
+
+	public Map<String, DatasourceConfig> getUnAvailableDatasources();
 }
