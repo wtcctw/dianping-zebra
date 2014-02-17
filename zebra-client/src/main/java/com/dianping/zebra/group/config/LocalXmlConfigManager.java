@@ -24,7 +24,7 @@ import com.dianping.zebra.group.config.entity.GroupDatasourceConfig;
 import com.dianping.zebra.group.config.transform.DefaultSaxParser;
 import com.dianping.zebra.group.exception.ConfigException;
 
-public class LocalXmlConfigManager implements ConfigManager, Runnable {
+public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(LocalXmlConfigManager.class);
 
@@ -42,7 +42,7 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 	private AtomicReference<Map<String, DatasourceConfig>> unAvailableCache = new AtomicReference<Map<String, DatasourceConfig>>(
 	      new HashMap<String, DatasourceConfig>());
 
-	private List<ConfigChangeListener> listeners = new CopyOnWriteArrayList<ConfigChangeListener>();
+	private List<GroupConfigChangeListener> listeners = new CopyOnWriteArrayList<GroupConfigChangeListener>();
 
 	private AtomicLong lastModifiedTime = new AtomicLong(-1);
 
@@ -58,7 +58,7 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 	}
 
 	@Override
-	public void addListerner(ConfigChangeListener listener) {
+	public void addListerner(GroupConfigChangeListener listener) {
 		listeners.add(listener);
 	}
 
@@ -135,8 +135,8 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 	}
 
 	private void notifyListeners() {
-		for (ConfigChangeListener listener : listeners) {
-			ConfigChangeEvent event = new ConfigChangeEvent(this.groupDatasourceConfig);
+		for (GroupConfigChangeListener listener : listeners) {
+			GroupConfigChangeEvent event = new GroupConfigChangeEvent(this.groupDatasourceConfig);
 			try {
 				listener.onChange(event);
 			} catch (Throwable e) {

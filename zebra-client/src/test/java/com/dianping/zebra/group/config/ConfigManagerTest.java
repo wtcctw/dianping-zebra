@@ -10,10 +10,10 @@ public class ConfigManagerTest {
 	public void testManager() throws IOException, InterruptedException {
 		LocalXmlConfigManager manager = new LocalXmlConfigManager(ConfigConstants.KEY_DATASOURCE_FILE);
 
-		manager.addListerner(new ConfigChangeListener() {
+		manager.addListerner(new GroupConfigChangeListener() {
 
 			@Override
-			public void onChange(ConfigChangeEvent event) {
+			public void onChange(GroupConfigChangeEvent event) {
 				System.out.println("changed");
 				System.out.println(event);
 			}

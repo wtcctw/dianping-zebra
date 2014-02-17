@@ -5,10 +5,10 @@ import java.util.Map;
 import com.dianping.zebra.group.config.entity.DatasourceConfig;
 import com.dianping.zebra.group.config.entity.GroupDatasourceConfig;
 
-public class ConfigChangeEvent {
+public class GroupConfigChangeEvent {
 	private GroupDatasourceConfig groupDatasourceConfig;
 
-	public ConfigChangeEvent(GroupDatasourceConfig groupDatasourceConfig) {
+	public GroupConfigChangeEvent(GroupDatasourceConfig groupDatasourceConfig) {
 		this.groupDatasourceConfig = groupDatasourceConfig;
 	}
 

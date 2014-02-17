@@ -5,7 +5,7 @@ import java.util.Map;
 import com.dianping.zebra.group.config.entity.DatasourceConfig;
 import com.dianping.zebra.group.config.entity.GroupDatasourceConfig;
 
-public interface ConfigManager {
+public interface GroupConfigManager {
 	
 	public void init();
 	
@@ -13,7 +13,7 @@ public interface ConfigManager {
 	
 	public GroupDatasourceConfig getGroupDatasourceConfig();
 
-	public void addListerner(ConfigChangeListener listener);
+	public void addListerner(GroupConfigChangeListener listener);
 
 	public void markDown(String id);
 

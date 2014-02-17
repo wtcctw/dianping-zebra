@@ -2,10 +2,10 @@ package com.dianping.zebra.group.healthcheck;
 
 import java.util.List;
 
-import com.dianping.zebra.group.config.ConfigChangeEvent;
-import com.dianping.zebra.group.config.ConfigChangeListener;
+import com.dianping.zebra.group.config.GroupConfigChangeEvent;
+import com.dianping.zebra.group.config.GroupConfigChangeListener;
 
-public class HealthCheckImpl implements ConfigChangeListener {
+public class HealthCheckImpl implements GroupConfigChangeListener {
 	private int heartbeatTime;
 
 	private List<String> activeDsKeys;
@@ -17,7 +17,7 @@ public class HealthCheckImpl implements ConfigChangeListener {
 	}
 
 	@Override
-	public void onChange(ConfigChangeEvent event) {
+	public void onChange(GroupConfigChangeEvent event) {
 		// TODO Auto-generated method stub
 
 	}
