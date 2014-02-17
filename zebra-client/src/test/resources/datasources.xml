@@ -1,4 +1,4 @@
-<datasourcesConfigs>
+<group-datasource-config>
 	<datasourceConfig id="datasource1" readonly="true"
 		weight="10">
 		<driverClass>java.sql.Driver</driverClass>
@@ -19,5 +19,6 @@
 	</datasourceConfig>
 	<datasourceConfig id="datasource2" readonly="true" weight="10">
 	</datasourceConfig>
-	<heartbeat-cycle-time>5000</heartbeat-cycle-time>
-</datasourcesConfigs>
+	<health-check-interval>5000</health-check-interval>
+	<router-strategy>roundrobin</router-strategy>
+</group-datasource-config>
