@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+  <entity name="databases" root="true">
+    <entity-ref name="database" type="list" names="databases" />
+  </entity>
+  <entity name="database">
+    <attribute name="id" value-type="String" />
+    <element name="jdbc-url" value-type="String" />
+    <element name="user" value-type="String" />
+    <element name="driver-class" value-type="String" />
+    <element name="password" value-type="String" />
+    <element name="min-pool-size" value-type="String" />
+    <element name="max-pool-size" value-type="String" />
+    <element name="initial-pool-size" value-type="String" />
+  </entity>
+</model>
+

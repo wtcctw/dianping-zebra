@@ -19,13 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import com.dianping.zebra.group.config.entity.DatasourceConfig;
-import com.dianping.zebra.group.config.entity.GroupDatasourceConfig;
-import com.dianping.zebra.group.config.transform.DefaultSaxParser;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
 import com.dianping.zebra.group.exception.ConfigException;
 
 public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
-
+	
 	private static final Logger logger = LoggerFactory.getLogger(LocalXmlConfigManager.class);
 
 	private ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -34,13 +34,13 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 
 	private Lock wLock = lock.writeLock();
 
-	private GroupDatasourceConfig groupDatasourceConfig;
+	private GroupDataSourceConfig groupDatasourceConfig;
 
-	private AtomicReference<Map<String, DatasourceConfig>> availableCache = new AtomicReference<Map<String, DatasourceConfig>>(
-	      new HashMap<String, DatasourceConfig>());
+	private AtomicReference<Map<String, DataSourceConfig>> availableCache = new AtomicReference<Map<String, DataSourceConfig>>(
+	      new HashMap<String, DataSourceConfig>());
 
-	private AtomicReference<Map<String, DatasourceConfig>> unAvailableCache = new AtomicReference<Map<String, DatasourceConfig>>(
-	      new HashMap<String, DatasourceConfig>());
+	private AtomicReference<Map<String, DataSourceConfig>> unAvailableCache = new AtomicReference<Map<String, DataSourceConfig>>(
+	      new HashMap<String, DataSourceConfig>());
 
 	private List<GroupConfigChangeListener> listeners = new CopyOnWriteArrayList<GroupConfigChangeListener>();
 
@@ -63,8 +63,8 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 	}
 
 	@Override
-	public Map<String, DatasourceConfig> getDatasourceConfigs() {
-		return groupDatasourceConfig.getDatasourceConfigs();
+	public Map<String, DataSourceConfig> getDatasourceConfigs() {
+		return groupDatasourceConfig.getDataSourceConfigs();
 	}
 
 	private long getMofieiedTime() {
@@ -85,7 +85,7 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 				throw new ConfigException(String.format("config file[%s] doesn't exists.", configFile));
 			}
 
-			availableCache.set(groupDatasourceConfig.getDatasourceConfigs());
+			availableCache.set(groupDatasourceConfig.getDataSourceConfigs());
 			lastModifiedTime.set(getMofieiedTime());
 
 			Thread fileCheckerThread = new Thread(this);
@@ -101,7 +101,7 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 		}
 	}
 
-	private GroupDatasourceConfig loadConfigFromXml() throws SAXException, IOException {
+	private GroupDataSourceConfig loadConfigFromXml() throws SAXException, IOException {
 		return DefaultSaxParser.parse(FileUtils.readFileToString(configFile));
 	}
 
@@ -112,7 +112,7 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 				long newModifiedTime = getMofieiedTime();
 				if (newModifiedTime > lastModifiedTime.get()) {
 					this.lastModifiedTime.set(newModifiedTime);
-					GroupDatasourceConfig newConfig = loadConfigFromXml();
+					GroupDataSourceConfig newConfig = loadConfigFromXml();
 
 					if (newConfig != null && !this.groupDatasourceConfig.toString().equals(newConfig.toString())) {
 						this.groupDatasourceConfig = newConfig;
@@ -136,7 +136,7 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 
 	private void notifyListeners() {
 		for (GroupConfigChangeListener listener : listeners) {
-			GroupConfigChangeEvent event = new GroupConfigChangeEvent(this.groupDatasourceConfig);
+			BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(this.groupDatasourceConfig);
 			try {
 				listener.onChange(event);
 			} catch (Throwable e) {
@@ -147,10 +147,10 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 
 	@Override
 	public void markDown(String id) {
-		synchronized (datasourceConfigCache) {
+		synchronized (dataSourceConfigCache) {
 			if (datasourceConfigCache.get().containsKey(id)) {
 				if (availableCache.get().containsKey(id)) {
-					DatasourceConfig datasourceConfig = availableCache.get().remove(id);
+					DataSourceConfig datasourceConfig = availableCache.get().remove(id);
 
 					unAvailableCache.get().put(id, datasourceConfig);
 				} else {
@@ -169,10 +169,10 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 
 	@Override
 	public void markUp(String id) {
-		synchronized (datasourceConfigCache) {
+		synchronized (dataSourceConfigCache) {
 			if (datasourceConfigCache.get().containsKey(id)) {
 				if (unAvailableCache.get().containsKey(id)) {
-					DatasourceConfig datasourceConfig = unAvailableCache.get().remove(id);
+					DataSourceConfig datasourceConfig = unAvailableCache.get().remove(id);
 
 					availableCache.get().put(id, datasourceConfig);
 				} else {
@@ -190,17 +190,17 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 	}
 
 	@Override
-	public Map<String, DatasourceConfig> getAvailableDatasources() {
+	public Map<String, DataSourceConfig> getAvailableDatasources() {
 		return availableCache.get();
 	}
 
 	@Override
-	public Map<String, DatasourceConfig> getUnAvailableDatasources() {
+	public Map<String, DataSourceConfig> getUnAvailableDatasources() {
 		return unAvailableCache.get();
 	}
 
 	@Override
-	public GroupDatasourceConfig getGroupDatasourceConfig() {
+	public GroupDataSourceConfig getGroupDatasourceConfig() {
 		return this.groupDatasourceConfig;
 	}
 }

@@ -13,7 +13,7 @@ public class ConfigManagerTest {
 		manager.addListerner(new GroupConfigChangeListener() {
 
 			@Override
-			public void onChange(GroupConfigChangeEvent event) {
+			public void onChange(BaseGroupConfigChangeEvent event) {
 				System.out.println("changed");
 				System.out.println(event);
 			}

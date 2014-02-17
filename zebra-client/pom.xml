@@ -67,7 +67,8 @@
                   </goals>
                   <configuration>
                      <manifest><![CDATA[,
-                        ${basedir}/src/main/resources/META-INF/dal/model/datasourceConfig-manifest.xml,
+                        ${basedir}/src/main/resources/META-INF/dal/model/datasource-config-manifest.xml,
+                        ${basedir}/src/main/resources/META-INF/dal/model/databases-manifest.xml,
                      ,]]></manifest>
                   </configuration>
                </execution>

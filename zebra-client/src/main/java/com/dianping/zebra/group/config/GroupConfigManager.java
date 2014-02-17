@@ -2,16 +2,16 @@ package com.dianping.zebra.group.config;
 
 import java.util.Map;
 
-import com.dianping.zebra.group.config.entity.DatasourceConfig;
-import com.dianping.zebra.group.config.entity.GroupDatasourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 
 public interface GroupConfigManager {
 	
 	public void init();
 	
-	public Map<String, DatasourceConfig> getDatasourceConfigs();
+	public Map<String, DataSourceConfig> getDatasourceConfigs();
 	
-	public GroupDatasourceConfig getGroupDatasourceConfig();
+	public GroupDataSourceConfig getGroupDatasourceConfig();
 
 	public void addListerner(GroupConfigChangeListener listener);
 
@@ -19,7 +19,7 @@ public interface GroupConfigManager {
 
 	public void markUp(String id);
 
-	public Map<String, DatasourceConfig> getAvailableDatasources();
+	public Map<String, DataSourceConfig> getAvailableDatasources();
 
-	public Map<String, DatasourceConfig> getUnAvailableDatasources();
+	public Map<String, DataSourceConfig> getUnAvailableDatasources();
 }
