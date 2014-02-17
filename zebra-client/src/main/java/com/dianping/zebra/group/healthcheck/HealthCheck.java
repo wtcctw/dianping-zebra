@@ -1,7 +1,9 @@
 package com.dianping.zebra.group.healthcheck;
 
+import java.sql.SQLException;
+
 public interface HealthCheck {
 
-	public void healthProblemNotify(String dsKey,Throwable e);
+	public void notifyException(String dsKey, SQLException e);
 	
 }
