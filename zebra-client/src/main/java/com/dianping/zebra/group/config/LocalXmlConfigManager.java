@@ -27,8 +27,11 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 
 	private AtomicReference<Map<String, DatasourceConfig>> configCache = new AtomicReference<Map<String, DatasourceConfig>>(
 	      new HashMap<String, DatasourceConfig>());
-	
+
 	private AtomicReference<Map<String, DatasourceConfig>> availableCache = new AtomicReference<Map<String, DatasourceConfig>>(
+	      new HashMap<String, DatasourceConfig>());
+
+	private AtomicReference<Map<String, DatasourceConfig>> unAvailableCache = new AtomicReference<Map<String, DatasourceConfig>>(
 	      new HashMap<String, DatasourceConfig>());
 
 	private List<ConfigChangeListener> listeners = new CopyOnWriteArrayList<ConfigChangeListener>();
@@ -75,6 +78,7 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 			}
 
 			configCache.set(newConfig);
+			availableCache.set(load());
 			lastModifiedTime.set(getMofieiedTime());
 
 			Thread fileCheckerThread = new Thread(this);
@@ -109,6 +113,7 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 					Map<String, DatasourceConfig> newConfig = load();
 
 					if (newConfig != null && !configCache.get().toString().equals(newConfig.toString())) {
+						configCache.set(newConfig);
 						notifyListeners();
 					}
 				}
@@ -139,26 +144,28 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 	}
 
 	@Override
-   public void markDown(String id) {
-	   // TODO Auto-generated method stub
-	   
-   }
+	public void markDown(String id) {
+		synchronized (configCache) {
+			if(configCache.get().containsKey(id)){
+				DatasourceConfig datasourceConfig = availableCache.get().remove(id);
+			}
+		}
+	}
 
 	@Override
-   public void markUp(String id) {
-	   // TODO Auto-generated method stub
-	   
-   }
+	public void markUp(String id) {
+		synchronized (configCache) {
+
+		}
+	}
 
 	@Override
-   public Map<String, DatasourceConfig> getAvailableDatasources() {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
+	public Map<String, DatasourceConfig> getAvailableDatasources() {
+		return availableCache.get();
+	}
 
 	@Override
-   public Map<String, DatasourceConfig> getUnAvailableDatasources() {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
+	public Map<String, DatasourceConfig> getUnAvailableDatasources() {
+		return unAvailableCache.get();
+	}
 }
