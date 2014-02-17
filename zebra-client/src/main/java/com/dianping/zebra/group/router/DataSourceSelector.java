@@ -1,1 +1,0 @@
-package com.dianping.zebra.group.router;/** * 对等数据库选择器。 在数据完全相同的一组库中选择一个库 *  */public interface DataSourceSelector {	/**	 * 对等数据库选择器。 在数据完全相同的一组库中选择一个库	 */	String select();}
