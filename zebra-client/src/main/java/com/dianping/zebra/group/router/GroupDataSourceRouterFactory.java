@@ -1,16 +1,37 @@
 package com.dianping.zebra.group.router;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.dianping.zebra.group.config.GroupConfigManager;
 
 public class GroupDataSourceRouterFactory {
 
+	private static final String ROUNDROBIN = "roundrobin";
+
+	private static AtomicReference<GroupReadWriteDataSourceRouter> readWriteDataSourceRouter = new AtomicReference<GroupReadWriteDataSourceRouter>();
+
 	public static GroupDataSourceRouter getDataSourceRouter(GroupConfigManager configManager) {
 
-		GroupReadWriteDataSourceRouter readWriteDataSourcerouter = new GroupReadWriteDataSourceRouter(
-		      configManager.getAvailableDataSources());
+		String routerStrategy = configManager.getGroupDataSourceConfig().getRouterStrategy();
 
-		configManager.addListerner(readWriteDataSourcerouter);
+		if (ROUNDROBIN.equalsIgnoreCase(routerStrategy)) {
 
-		return readWriteDataSourcerouter;
+			if (readWriteDataSourceRouter.get() == null) {
+				synchronized (readWriteDataSourceRouter) {
+					if (readWriteDataSourceRouter.get() == null) {
+						GroupReadWriteDataSourceRouter _readWriteDataSourceRouter = new GroupReadWriteDataSourceRouter(
+						      configManager.getAvailableDataSources());
+						configManager.addListerner(_readWriteDataSourceRouter);
+						readWriteDataSourceRouter.set(_readWriteDataSourceRouter);
+					}
+				}
+			}
+
+			return readWriteDataSourceRouter.get();
+
+		} else {
+			throw new IllegalArgumentException("Strategy is not correct: " + routerStrategy);
+		}
+
 	}
 }
