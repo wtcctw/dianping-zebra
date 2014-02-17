@@ -63,7 +63,7 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 	}
 
 	@Override
-	public Map<String, DataSourceConfig> getDatasourceConfigs() {
+	public Map<String, DataSourceConfig> getDataSourceConfigs() {
 		return groupDatasourceConfig.getDataSourceConfigs();
 	}
 
@@ -190,17 +190,17 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 	}
 
 	@Override
-	public Map<String, DataSourceConfig> getAvailableDatasources() {
+	public Map<String, DataSourceConfig> getAvailableDataSources() {
 		return availableCache.get();
 	}
 
 	@Override
-	public Map<String, DataSourceConfig> getUnAvailableDatasources() {
+	public Map<String, DataSourceConfig> getUnAvailableDataSources() {
 		return unAvailableCache.get();
 	}
 
 	@Override
-	public GroupDataSourceConfig getGroupDatasourceConfig() {
+	public GroupDataSourceConfig getGroupDataSourceConfig() {
 		return this.groupDatasourceConfig;
 	}
 }

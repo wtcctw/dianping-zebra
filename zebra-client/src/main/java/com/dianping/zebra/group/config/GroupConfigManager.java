@@ -9,9 +9,9 @@ public interface GroupConfigManager {
 	
 	public void init();
 	
-	public Map<String, DataSourceConfig> getDatasourceConfigs();
+	public Map<String, DataSourceConfig> getDataSourceConfigs();
 	
-	public GroupDataSourceConfig getGroupDatasourceConfig();
+	public GroupDataSourceConfig getGroupDataSourceConfig();
 
 	public void addListerner(GroupConfigChangeListener listener);
 
@@ -19,7 +19,7 @@ public interface GroupConfigManager {
 
 	public void markUp(String id);
 
-	public Map<String, DataSourceConfig> getAvailableDatasources();
+	public Map<String, DataSourceConfig> getAvailableDataSources();
 
-	public Map<String, DataSourceConfig> getUnAvailableDatasources();
+	public Map<String, DataSourceConfig> getUnAvailableDataSources();
 }
