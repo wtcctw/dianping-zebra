@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.ConfigManager;
+import com.dianping.zebra.group.config.GroupConfigManagerFactory;
 import com.dianping.zebra.group.router.DataSourceSelector;
 
 /**
