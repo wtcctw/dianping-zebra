@@ -2,7 +2,7 @@ package com.dianping.zebra.group.config;
 
 public class ConfigConstants {
 	
-	public final static String KEY_DATASOURCE_FILE = "datasource.xml";
+	public final static String KEY_DATASOURCE_FILE = "datasources.xml";
 	
 	public final static String KEY_ID = "id";
 

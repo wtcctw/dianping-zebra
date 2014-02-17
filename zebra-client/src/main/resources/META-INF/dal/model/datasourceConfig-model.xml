@@ -3,7 +3,7 @@
 	<entity name="datasourcesConfigs" root="true">
 	    <entity-ref name="datasourceConfig" type="map" names="datasourceConfigs" xml-indent="true" method-find-or-create="true"/>
 	</entity>
-	<entity name="datasourceConfig" dynamic-attributes="true" dynamic-elements="true">
+	<entity name="datasourceConfig" dynamic-attributes="true">
 		<attribute name="id" value-type="String" key="true"/>
 		<attribute name="readonly" value-type="boolean" />
 		<attribute name="weight" value-type="int" />
@@ -14,6 +14,12 @@
 		<element name="password" value-type="int" />
 		<element name="initMethod" value-type="String" />
 		<element name="destroyMethod" value-type="String" />
-	</entity>
+	 </entity>
+	 <entity name="pool-properties">
+	 	<any name="properties"/>
+  	 </entity>
+     <entity name="connection-properties">
+     	<any name="properties"/>
+     </entity>
 </model>
 

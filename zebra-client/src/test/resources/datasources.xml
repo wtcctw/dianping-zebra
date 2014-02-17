@@ -1,13 +1,23 @@
 <datasourcesConfigs>
-	<datasourceConfig id="datasource1" readonly="true" weight="10">
+	<datasourceConfig id="datasource1" readonly="true"
+		weight="10">
 		<driverClass>java.sql.Driver</driverClass>
-		<poolClass>com.mchange.v2.c3p0.impl.C3P0PooledConnectionPoolManager</poolClass>
+		<poolClass>com.mchange.v2.c3p0.impl.C3P0PooledConnectionPoolManager
+		</poolClass>
 		<connectionUrl>jdbc:mysql://127.0.0.1:3306/sample</connectionUrl>
 		<userName>root</userName>
 		<password>123456</password>
 		<initMethod>init</initMethod>
 		<destroyMethod>destroy</destroyMethod>
+		<pool-properties>
+			<maxSize>10</maxSize>
+			<initSize>3</initSize>
+		</pool-properties>
+		<connection-properties>
+			<readTimeout>10</readTimeout>
+		</connection-properties>
 	</datasourceConfig>
-	<datasourceConfig id="datasource2" readonly="true" weight="10">
+	<datasourceConfig id="datasource2" readonly="true"
+		weight="10">
 	</datasourceConfig>
 </datasourcesConfigs>

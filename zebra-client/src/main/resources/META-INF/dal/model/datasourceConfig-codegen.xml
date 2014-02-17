@@ -14,6 +14,15 @@
     <element name="password" value-type="int" />
     <element name="initMethod" value-type="String" />
     <element name="destroyMethod" value-type="String" />
+    <entity-ref name="pool-properties" />
+    <entity-ref name="connection-properties" />
+  </entity>
+  <entity name="pool-properties">
+    <element name="maxSize" value-type="int" />
+    <element name="initSize" value-type="int" />
+  </entity>
+  <entity name="connection-properties">
+    <element name="readTimeout" value-type="int" />
   </entity>
 </model>
 
