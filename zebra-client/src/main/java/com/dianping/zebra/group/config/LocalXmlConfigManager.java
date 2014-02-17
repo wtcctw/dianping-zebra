@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import com.dianping.zebra.group.config.entity.DatasourceConfig;
@@ -20,6 +22,8 @@ import com.dianping.zebra.group.config.transform.DefaultSaxParser;
 import com.dianping.zebra.group.exception.ConfigException;
 
 public class LocalXmlConfigManager implements ConfigManager, Runnable {
+
+	private static final Logger logger = LoggerFactory.getLogger(LocalXmlConfigManager.class);
 
 	private AtomicReference<Map<String, DatasourceConfig>> configCache = new AtomicReference<Map<String, DatasourceConfig>>(
 	      new HashMap<String, DatasourceConfig>());
@@ -35,9 +39,8 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 		if (xmlUrl != null) {
 			this.configFile = FileUtils.toFile(xmlUrl);
 		} else {
-			// TODO throw
+			throw new ConfigException(String.format("config file[%s] doesn't exists.", xmlPath));
 		}
-
 	}
 
 	@Override
@@ -51,9 +54,10 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 	}
 
 	private long getMofieiedTime() {
-
 		if (configFile.exists()) {
 			return configFile.lastModified();
+		} else {
+			logger.warn(String.format("config file[%s] doesn't exists.", configFile));
 		}
 
 		return -1;
@@ -64,8 +68,7 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 			Map<String, DatasourceConfig> newConfig = load();
 
 			if (newConfig == null) {
-				// TODO
-				throw new ConfigException("");
+				throw new ConfigException(String.format("config file[%s] doesn't exists.", configFile));
 			}
 
 			configCache.set(newConfig);
@@ -76,7 +79,8 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 			fileCheckerThread.setDaemon(true);
 			fileCheckerThread.setName("Thread-" + LocalXmlConfigManager.class.getSimpleName());
 			fileCheckerThread.start();
-			// TODO logger
+
+			logger.info("Successfully initialize LocalXmlConfigManager.");
 		} catch (Throwable e) {
 			throw new ConfigException(String.format("fail to initialize group datasources with config file[%s].",
 			      configFile), e);
@@ -106,7 +110,9 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 					}
 				}
 			} catch (Throwable throwable) {
-				// TODO logger
+				if (logger.isDebugEnabled()) {
+					logger.debug(String.format("fail to reload the datasource config[%s]", configFile), throwable);
+				}
 			}
 
 			try {
@@ -124,9 +130,8 @@ public class LocalXmlConfigManager implements ConfigManager, Runnable {
 			try {
 				listener.onChange(event);
 			} catch (Throwable e) {
-				// TODO logger
+				logger.error(String.format("error to notify the listener %s", listener.getName()), e);
 			}
 		}
 	}
-
 }

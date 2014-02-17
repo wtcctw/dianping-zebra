@@ -17,6 +17,11 @@ public class ConfigManagerTest {
 				System.out.println("changed");
 				System.out.println(event);
 			}
+
+			@Override
+			public String getName() {
+				return "mock-listener";
+			}
 		});
 
 		manager.init();
