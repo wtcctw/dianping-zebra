@@ -2,16 +2,19 @@ package com.dianping.zebra.group.healthcheck;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
-import com.dianping.zebra.group.config.ConfigChangeEvent;
-import com.dianping.zebra.group.config.ConfigChangeListener;
-import com.dianping.zebra.group.config.ConfigManager;
+import com.dianping.zebra.group.config.BaseGroupConfigChangeEvent;
+import com.dianping.zebra.group.config.GroupConfigChangeListener;
+import com.dianping.zebra.group.config.GroupConfigManager;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
-public class MysqlHealthCheckImpl implements ConfigChangeListener {
+
+public class MysqlHealthCheckImpl implements GroupConfigChangeListener, HealthCheck {
 	private int healthCheckInterval;
-	private ConfigManager configManager;
+	private GroupConfigManager configManager;
 
-	public MysqlHealthCheckImpl(ConfigManager configManager){
+	public MysqlHealthCheckImpl(GroupConfigManager configManager){
 		this.configManager = configManager;
 //		this.healthCheckInterval = configManager.getXX();
 	}
@@ -21,7 +24,7 @@ public class MysqlHealthCheckImpl implements ConfigChangeListener {
 	}
 
 	@Override
-	public void onChange(ConfigChangeEvent event) {
+	public void onChange(BaseGroupConfigChangeEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -52,5 +55,11 @@ public class MysqlHealthCheckImpl implements ConfigChangeListener {
 	public String getName() {
 		return "health-checke-listener";
 	}
+
+	@Override
+   public void onActiveDataSourceChange(Map<String, DataSourceConfig> configs) {
+	   // TODO Auto-generated method stub
+	   
+   }
 	
 }
