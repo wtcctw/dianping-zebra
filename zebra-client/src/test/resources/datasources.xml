@@ -1,25 +1,12 @@
-<group-data-source-config health-check-interval="5000" router-strategy="roundrobin">
-	<datasources>
-		<data-source-config id="datasource1" readonly="true"
-			weight="10">
-			<driver-class>java.sql.Driver</driver-class>
-			<poolClass>com.mchange.v2.c3p0.impl.C3P0PooledConnectionPoolManager
-			</poolClass>
-			<connectionUrl>jdbc:mysql://127.0.0.1:3306/sample</connectionUrl>
-			<userName>root</userName>
-			<password>123456</password>
-			<initMethod>init</initMethod>
-			<destroyMethod>destroy</destroyMethod>
-			<pool-properties>
-				<maxSize>10</maxSize>
-				<initSize>3</initSize>
-			</pool-properties>
-			<connection-properties>
-				<readTimeout>100</readTimeout>
-			</connection-properties>
-		</data-source-config>
-		<data-source-config id="datasource2" readonly="true"
-			weight="10">
-		</data-source-config>
-	</datasources>
+<group-data-source-config>
+	<data-source-config id="db1" weight="1" readonly="false">
+		<min-pool-size>5</min-pool-size>
+		<max-pool-size>5</max-pool-size>
+	</data-source-config>
+	<data-source-config id="db2" weight="2" readonly="true">
+		<max-pool-size>5</max-pool-size>
+		<initial-pool-size>5</initial-pool-size>
+	</data-source-config>
+	<health-check-interval>10</health-check-interval>
+	<router-strategy>roundrobin</router-strategy>
 </group-data-source-config>

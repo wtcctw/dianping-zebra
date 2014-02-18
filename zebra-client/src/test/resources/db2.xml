@@ -1,0 +1,9 @@
+<database id="db2">
+	<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
+	<user>cdf</user>
+	<driver-class>cdf</driver-class>
+	<password>cfd</password>
+	<min-pool-size>10</min-pool-size>
+	<max-pool-size>10</max-pool-size>
+	<initial-pool-size>10</initial-pool-size>
+</database>

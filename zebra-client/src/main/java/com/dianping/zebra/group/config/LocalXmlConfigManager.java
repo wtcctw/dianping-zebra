@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,13 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import com.dianping.zebra.group.config.database.entity.Database;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
 import com.dianping.zebra.group.exception.ConfigException;
 
 public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(LocalXmlConfigManager.class);
 
 	private ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -49,44 +51,83 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 	private File configFile;
 
 	public LocalXmlConfigManager(String xmlPath) {
+		this.configFile = getFile(xmlPath);
+	}
+
+	@Override
+	public void addListerner(GroupConfigChangeListener listener) {
+		this.listeners.add(listener);
+	}
+
+	@Override
+	public Map<String, DataSourceConfig> getAvailableDataSources() {
+		rLock.lock();
+		try {
+			return this.availableCache.get();
+		} finally {
+			rLock.unlock();
+		}
+	}
+
+	@Override
+	public Map<String, DataSourceConfig> getDataSourceConfigs() {
+		rLock.lock();
+		try {
+			return this.groupDatasourceConfig.getDataSourceConfigs();
+		} finally {
+			rLock.unlock();
+		}
+	}
+
+	private File getFile(String xmlPath) {
 		URL xmlUrl = getClass().getClassLoader().getResource(xmlPath);
 		if (xmlUrl != null) {
-			this.configFile = FileUtils.toFile(xmlUrl);
+			return FileUtils.toFile(xmlUrl);
 		} else {
 			throw new ConfigException(String.format("config file[%s] doesn't exists.", xmlPath));
 		}
 	}
 
 	@Override
-	public void addListerner(GroupConfigChangeListener listener) {
-		listeners.add(listener);
-	}
-
-	@Override
-	public Map<String, DataSourceConfig> getDataSourceConfigs() {
-		return groupDatasourceConfig.getDataSourceConfigs();
+	public GroupDataSourceConfig getGroupDataSourceConfig() {
+		rLock.lock();
+		try {
+			return this.groupDatasourceConfig;
+		} finally {
+			rLock.unlock();
+		}
 	}
 
 	private long getMofieiedTime() {
-		if (configFile.exists()) {
-			return configFile.lastModified();
+		if (this.configFile.exists()) {
+			return this.configFile.lastModified();
 		} else {
-			logger.warn(String.format("config file[%s] doesn't exists.", configFile));
+			logger.warn(String.format("config file[%s] doesn't exists.", this.configFile));
 		}
 
 		return -1;
 	}
 
+	@Override
+	public Map<String, DataSourceConfig> getUnAvailableDataSources() {
+		rLock.lock();
+		try {
+			return this.unAvailableCache.get();
+		} finally {
+			rLock.unlock();
+		}
+	}
+
 	public void init() {
 		try {
-			groupDatasourceConfig = loadConfigFromXml();
+			this.groupDatasourceConfig = loadConfigFromXml();
 
-			if (groupDatasourceConfig == null) {
-				throw new ConfigException(String.format("config file[%s] doesn't exists.", configFile));
+			if (this.groupDatasourceConfig == null) {
+				throw new ConfigException(String.format("config file[%s] doesn't exists.", this.configFile));
 			}
 
-			availableCache.set(groupDatasourceConfig.getDataSourceConfigs());
-			lastModifiedTime.set(getMofieiedTime());
+			this.availableCache.set(loadConfigFromXml().getDataSourceConfigs());
+			this.lastModifiedTime.set(getMofieiedTime());
 
 			Thread fileCheckerThread = new Thread(this);
 
@@ -97,12 +138,119 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 			logger.info("Successfully initialize LocalXmlConfigManager.");
 		} catch (Throwable e) {
 			throw new ConfigException(String.format("fail to initialize group datasources with config file[%s].",
-			      configFile), e);
+			      this.configFile), e);
 		}
 	}
 
 	private GroupDataSourceConfig loadConfigFromXml() throws SAXException, IOException {
-		return DefaultSaxParser.parse(FileUtils.readFileToString(configFile));
+		GroupDataSourceConfig configs = DefaultSaxParser.parse(FileUtils.readFileToString(this.configFile));
+
+		if (configs != null) {
+			for (Entry<String, DataSourceConfig> config : configs.getDataSourceConfigs().entrySet()) {
+				File file = getFile(String.format("%s.xml", config.getKey()));
+				Database database = com.dianping.zebra.group.config.database.transform.DefaultSaxParser.parseEntity(
+				      Database.class, FileUtils.readFileToString(file));
+				mergeAttributes(config.getValue(), database);
+			}
+		}
+
+		return configs;
+	}
+
+	@Override
+	public void markDown(String id) {
+		boolean hasChanged = false;
+		this.wLock.lock();
+		try {
+			Map<String, DataSourceConfig> map = this.groupDatasourceConfig.getDataSourceConfigs();
+
+			if (map.containsKey(id)) {
+				if (this.availableCache.get().containsKey(id)) {
+					DataSourceConfig datasourceConfig = this.availableCache.get().remove(id);
+					hasChanged = true;
+					this.unAvailableCache.get().put(id, datasourceConfig);
+				} else {
+					this.unAvailableCache.get().put(id, map.get(id));
+				}
+			} else {
+				if (this.availableCache.get().containsKey(id)) {
+					this.availableCache.get().remove(id);
+					hasChanged = true;
+				}
+				if (this.unAvailableCache.get().containsKey(id)) {
+					this.unAvailableCache.get().remove(id);
+				}
+			}
+		} finally {
+			this.wLock.unlock();
+		}
+
+		if (hasChanged) {
+			notifyActiveDataSourceListeners();
+		}
+	}
+
+	@Override
+	public void markUp(String id) {
+		boolean hasChanged = false;
+		this.wLock.lock();
+		try {
+			Map<String, DataSourceConfig> map = this.groupDatasourceConfig.getDataSourceConfigs();
+
+			if (map.containsKey(id)) {
+				if (this.unAvailableCache.get().containsKey(id)) {
+					DataSourceConfig datasourceConfig = this.unAvailableCache.get().remove(id);
+
+					this.availableCache.get().put(id, datasourceConfig);
+					hasChanged = true;
+				} else {
+					this.availableCache.get().put(id, map.get(id));
+					hasChanged = true;
+				}
+			} else {
+				if (this.availableCache.get().containsKey(id)) {
+					this.availableCache.get().remove(id);
+					hasChanged = true;
+				}
+				if (this.unAvailableCache.get().containsKey(id)) {
+					this.unAvailableCache.get().remove(id);
+				}
+			}
+		} finally {
+			this.wLock.unlock();
+		}
+
+		if (hasChanged) {
+			notifyActiveDataSourceListeners();
+		}
+	}
+
+	private void mergeAttributes(DataSourceConfig config, Database database) {
+		config.setJdbcUrl(database.getJdbcUrl());
+		config.setUser(database.getUser());
+		config.setDriverClass(database.getDriverClass());
+		config.setPassword(database.getPassword());
+		config.setMinPoolSize(database.getMinPoolSize());
+		config.setMaxPoolSize(database.getMaxPoolSize());
+		config.setInitialPoolSize(database.getInitialPoolSize());
+	}
+
+	private void notifyActiveDataSourceListeners() {
+		GroupDataSourceConfig availableDataSource = new GroupDataSourceConfig();
+		availableDataSource.getDataSourceConfigs().putAll(getAvailableDataSources());
+		BaseGroupConfigChangeEvent event = new ActiveDataSourceChangeEvent(availableDataSource);
+
+		notifyListeners(event);
+	}
+
+	private void notifyListeners(BaseGroupConfigChangeEvent event) {
+		for (GroupConfigChangeListener listener : this.listeners) {
+			try {
+				listener.onChange(event);
+			} catch (Throwable e) {
+				logger.error(String.format("error to notify the listener %s", listener.getName()), e);
+			}
+		}
 	}
 
 	@Override
@@ -110,18 +258,25 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 		while (!Thread.currentThread().isInterrupted()) {
 			try {
 				long newModifiedTime = getMofieiedTime();
-				if (newModifiedTime > lastModifiedTime.get()) {
+				if (newModifiedTime > this.lastModifiedTime.get()) {
 					this.lastModifiedTime.set(newModifiedTime);
 					GroupDataSourceConfig newConfig = loadConfigFromXml();
 
 					if (newConfig != null && !this.groupDatasourceConfig.toString().equals(newConfig.toString())) {
-						this.groupDatasourceConfig = newConfig;
-						notifyListeners();
+						BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(this.groupDatasourceConfig);
+						notifyListeners(event);
+					}
+
+					wLock.lock();
+					try {
+						this.groupDatasourceConfig.mergeAttributes(newConfig);
+					} finally {
+						wLock.unlock();
 					}
 				}
 			} catch (Throwable throwable) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("fail to reload the datasource config[%s]", configFile), throwable);
+					logger.debug(String.format("fail to reload the datasource config[%s]", this.configFile), throwable);
 				}
 			}
 
@@ -132,75 +287,5 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 				// ignore it
 			}
 		}
-	}
-
-	private void notifyListeners() {
-		for (GroupConfigChangeListener listener : listeners) {
-			BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(this.groupDatasourceConfig);
-			try {
-				listener.onChange(event);
-			} catch (Throwable e) {
-				logger.error(String.format("error to notify the listener %s", listener.getName()), e);
-			}
-		}
-	}
-
-	@Override
-	public void markDown(String id) {
-		synchronized (dataSourceConfigCache) {
-			if (datasourceConfigCache.get().containsKey(id)) {
-				if (availableCache.get().containsKey(id)) {
-					DataSourceConfig datasourceConfig = availableCache.get().remove(id);
-
-					unAvailableCache.get().put(id, datasourceConfig);
-				} else {
-					unAvailableCache.get().put(id, datasourceConfigCache.get().get(id));
-				}
-			} else {
-				if (availableCache.get().containsKey(id)) {
-					availableCache.get().remove(id);
-				}
-				if (unAvailableCache.get().containsKey(id)) {
-					unAvailableCache.get().remove(id);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void markUp(String id) {
-		synchronized (dataSourceConfigCache) {
-			if (datasourceConfigCache.get().containsKey(id)) {
-				if (unAvailableCache.get().containsKey(id)) {
-					DataSourceConfig datasourceConfig = unAvailableCache.get().remove(id);
-
-					availableCache.get().put(id, datasourceConfig);
-				} else {
-					availableCache.get().put(id, datasourceConfigCache.get().get(id));
-				}
-			} else {
-				if (availableCache.get().containsKey(id)) {
-					availableCache.get().remove(id);
-				}
-				if (unAvailableCache.get().containsKey(id)) {
-					unAvailableCache.get().remove(id);
-				}
-			}
-		}
-	}
-
-	@Override
-	public Map<String, DataSourceConfig> getAvailableDataSources() {
-		return availableCache.get();
-	}
-
-	@Override
-	public Map<String, DataSourceConfig> getUnAvailableDataSources() {
-		return unAvailableCache.get();
-	}
-
-	@Override
-	public GroupDataSourceConfig getGroupDataSourceConfig() {
-		return this.groupDatasourceConfig;
 	}
 }

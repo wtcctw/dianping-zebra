@@ -1,0 +1,9 @@
+<database id="db1">
+	<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
+	<user>abc</user>
+	<driver-class>abc</driver-class>
+	<password>abc</password>
+	<min-pool-size>5</min-pool-size>
+	<max-pool-size>5</max-pool-size>
+	<initial-pool-size>5</initial-pool-size>
+</database>
