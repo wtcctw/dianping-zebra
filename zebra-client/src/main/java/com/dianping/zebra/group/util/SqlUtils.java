@@ -21,8 +21,6 @@ public class SqlUtils {
 			} else {
 				sqlType = SqlType.SELECT;
 			}
-		} else if (StringUtils.startsWithIgnoreCase(sql, "show")) {
-			sqlType = SqlType.SHOW;
 		} else if (StringUtils.startsWithIgnoreCase(sql, "insert")) {
 			sqlType = SqlType.INSERT;
 		} else if (StringUtils.startsWithIgnoreCase(sql, "update")) {
@@ -41,6 +39,8 @@ public class SqlUtils {
 			sqlType = SqlType.LOAD;
 		} else if (StringUtils.startsWithIgnoreCase(sql, "merge")) {
 			sqlType = SqlType.MERGE;
+		} else if (StringUtils.startsWithIgnoreCase(sql, "show")) {
+			sqlType = SqlType.SHOW;
 		} else {
 			throw new SQLException("only select, insert, update, delete,replace,truncate sql is supported");
 		}
