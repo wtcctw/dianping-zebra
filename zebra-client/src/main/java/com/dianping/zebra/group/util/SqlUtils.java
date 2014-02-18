@@ -10,7 +10,7 @@ import com.dianping.zebra.group.router.SqlType;
 public class SqlUtils {
 	private static final Pattern SELECT_FOR_UPDATE_PATTERN = Pattern.compile("^select\\s+.*\\s+for\\s+update.*$",
 	      Pattern.CASE_INSENSITIVE);
-
+	
 	public static SqlType getSqlType(String sql) throws SQLException {
 		SqlType sqlType = null;
 		sql = sql.trim();
