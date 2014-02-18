@@ -24,6 +24,7 @@ public enum SqlType {
 	private int i;
 
 	private SqlType(boolean isRead, int i) {
+		this.isRead = isRead;
 		this.i = i;
 	}
 
@@ -43,4 +44,5 @@ public enum SqlType {
 		}
 		throw new IllegalArgumentException("Invalid SqlType:" + i);
 	}
+
 }
