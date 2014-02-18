@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -26,7 +25,7 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
 import com.dianping.zebra.group.exception.ConfigException;
 
-public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
+public class LocalXmlConfigManager implements GroupConfigManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(LocalXmlConfigManager.class);
 
@@ -38,11 +37,9 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 
 	private GroupDataSourceConfig groupDatasourceConfig;
 
-	private AtomicReference<Map<String, DataSourceConfig>> availableCache = new AtomicReference<Map<String, DataSourceConfig>>(
-	      new HashMap<String, DataSourceConfig>());
+	private Map<String, DataSourceConfig> availableDsConfig = new HashMap<String, DataSourceConfig>();
 
-	private AtomicReference<Map<String, DataSourceConfig>> unAvailableCache = new AtomicReference<Map<String, DataSourceConfig>>(
-	      new HashMap<String, DataSourceConfig>());
+	private Map<String, DataSourceConfig> unAvailableDsConfig = new HashMap<String, DataSourceConfig>();
 
 	private List<GroupConfigChangeListener> listeners = new CopyOnWriteArrayList<GroupConfigChangeListener>();
 
@@ -61,21 +58,21 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 
 	@Override
 	public Map<String, DataSourceConfig> getAvailableDataSources() {
-		rLock.lock();
+		this.rLock.lock();
 		try {
-			return this.availableCache.get();
+			return this.availableDsConfig;
 		} finally {
-			rLock.unlock();
+			this.rLock.unlock();
 		}
 	}
 
 	@Override
 	public Map<String, DataSourceConfig> getDataSourceConfigs() {
-		rLock.lock();
+		this.rLock.lock();
 		try {
 			return this.groupDatasourceConfig.getDataSourceConfigs();
 		} finally {
-			rLock.unlock();
+			this.rLock.unlock();
 		}
 	}
 
@@ -84,35 +81,50 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 		if (xmlUrl != null) {
 			return FileUtils.toFile(xmlUrl);
 		} else {
-			throw new ConfigException(String.format("config file[%s] doesn't exists.", xmlPath));
+			throw new ConfigException(String.format("config file[%s] doesn't exist.", xmlPath));
 		}
 	}
 
 	@Override
 	public GroupDataSourceConfig getGroupDataSourceConfig() {
-		rLock.lock();
+		this.rLock.lock();
 		try {
 			return this.groupDatasourceConfig;
 		} finally {
-			rLock.unlock();
+			this.rLock.unlock();
 		}
 	}
 
-	private long getMofieiedTime() {
+	private long getLastMofieiedTime() throws SAXException, IOException {
+		long lastModifiedTime = -1;
 		if (this.configFile.exists()) {
-			return this.configFile.lastModified();
+			lastModifiedTime = this.configFile.lastModified();
+
+			GroupDataSourceConfig configs = DefaultSaxParser.parse(FileUtils.readFileToString(this.configFile));
+
+			if (configs != null) {
+				for (Entry<String, DataSourceConfig> config : configs.getDataSourceConfigs().entrySet()) {
+					File file = getFile(String.format("%s.xml", config.getKey()));
+					long time = file.lastModified();
+
+					if (time > lastModifiedTime) {
+						lastModifiedTime = time;
+					}
+				}
+			}
+
 		} else {
 			logger.warn(String.format("config file[%s] doesn't exists.", this.configFile));
 		}
 
-		return -1;
+		return lastModifiedTime;
 	}
 
 	@Override
 	public Map<String, DataSourceConfig> getUnAvailableDataSources() {
 		rLock.lock();
 		try {
-			return this.unAvailableCache.get();
+			return this.unAvailableDsConfig;
 		} finally {
 			rLock.unlock();
 		}
@@ -126,14 +138,14 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 				throw new ConfigException(String.format("config file[%s] doesn't exists.", this.configFile));
 			}
 
-			this.availableCache.set(loadConfigFromXml().getDataSourceConfigs());
-			this.lastModifiedTime.set(getMofieiedTime());
+			this.availableDsConfig = loadConfigFromXml().getDataSourceConfigs();
+			this.lastModifiedTime.set(getLastMofieiedTime());
 
-			Thread fileCheckerThread = new Thread(this);
+			Thread task = new Thread(new ConfigPeroidCheckerTask());
 
-			fileCheckerThread.setDaemon(true);
-			fileCheckerThread.setName("Thread-" + LocalXmlConfigManager.class.getSimpleName());
-			fileCheckerThread.start();
+			task.setDaemon(true);
+			task.setName("Thread-" + LocalXmlConfigManager.class.getSimpleName());
+			task.start();
 
 			logger.info("Successfully initialize LocalXmlConfigManager.");
 		} catch (Throwable e) {
@@ -165,20 +177,20 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 			Map<String, DataSourceConfig> map = this.groupDatasourceConfig.getDataSourceConfigs();
 
 			if (map.containsKey(id)) {
-				if (this.availableCache.get().containsKey(id)) {
-					DataSourceConfig datasourceConfig = this.availableCache.get().remove(id);
+				if (this.availableDsConfig.containsKey(id)) {
+					DataSourceConfig datasourceConfig = this.availableDsConfig.remove(id);
 					hasChanged = true;
-					this.unAvailableCache.get().put(id, datasourceConfig);
+					this.unAvailableDsConfig.put(id, datasourceConfig);
 				} else {
-					this.unAvailableCache.get().put(id, map.get(id));
+					this.unAvailableDsConfig.put(id, map.get(id));
 				}
 			} else {
-				if (this.availableCache.get().containsKey(id)) {
-					this.availableCache.get().remove(id);
+				if (this.availableDsConfig.containsKey(id)) {
+					this.availableDsConfig.remove(id);
 					hasChanged = true;
 				}
-				if (this.unAvailableCache.get().containsKey(id)) {
-					this.unAvailableCache.get().remove(id);
+				if (this.unAvailableDsConfig.containsKey(id)) {
+					this.unAvailableDsConfig.remove(id);
 				}
 			}
 		} finally {
@@ -198,22 +210,22 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 			Map<String, DataSourceConfig> map = this.groupDatasourceConfig.getDataSourceConfigs();
 
 			if (map.containsKey(id)) {
-				if (this.unAvailableCache.get().containsKey(id)) {
-					DataSourceConfig datasourceConfig = this.unAvailableCache.get().remove(id);
+				if (this.unAvailableDsConfig.containsKey(id)) {
+					DataSourceConfig datasourceConfig = this.unAvailableDsConfig.remove(id);
 
-					this.availableCache.get().put(id, datasourceConfig);
+					this.availableDsConfig.put(id, datasourceConfig);
 					hasChanged = true;
 				} else {
-					this.availableCache.get().put(id, map.get(id));
+					this.availableDsConfig.put(id, map.get(id));
 					hasChanged = true;
 				}
 			} else {
-				if (this.availableCache.get().containsKey(id)) {
-					this.availableCache.get().remove(id);
+				if (this.availableDsConfig.containsKey(id)) {
+					this.availableDsConfig.remove(id);
 					hasChanged = true;
 				}
-				if (this.unAvailableCache.get().containsKey(id)) {
-					this.unAvailableCache.get().remove(id);
+				if (this.unAvailableDsConfig.containsKey(id)) {
+					this.unAvailableDsConfig.remove(id);
 				}
 			}
 		} finally {
@@ -253,39 +265,43 @@ public class LocalXmlConfigManager implements GroupConfigManager, Runnable {
 		}
 	}
 
-	@Override
-	public void run() {
-		while (!Thread.currentThread().isInterrupted()) {
-			try {
-				long newModifiedTime = getMofieiedTime();
-				if (newModifiedTime > this.lastModifiedTime.get()) {
-					this.lastModifiedTime.set(newModifiedTime);
-					GroupDataSourceConfig newConfig = loadConfigFromXml();
+	class ConfigPeroidCheckerTask implements Runnable {
 
-					if (newConfig != null && !this.groupDatasourceConfig.toString().equals(newConfig.toString())) {
-						BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(this.groupDatasourceConfig);
-						notifyListeners(event);
+		@Override
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				try {
+					long newModifiedTime = getLastMofieiedTime();
+					if (newModifiedTime > lastModifiedTime.get()) {
+						lastModifiedTime.set(newModifiedTime);
+						GroupDataSourceConfig newConfig = loadConfigFromXml();
+
+						if (newConfig != null && !groupDatasourceConfig.toString().equals(newConfig.toString())) {
+							BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(newConfig);
+							notifyListeners(event);
+							
+							wLock.lock();
+							try {
+								groupDatasourceConfig = newConfig;
+							} finally {
+								wLock.unlock();
+							}
+						}
 					}
-
-					wLock.lock();
-					try {
-						this.groupDatasourceConfig.mergeAttributes(newConfig);
-					} finally {
-						wLock.unlock();
+				} catch (Throwable throwable) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format("fail to reload the datasource config[%s]", configFile), throwable);
 					}
 				}
-			} catch (Throwable throwable) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("fail to reload the datasource config[%s]", this.configFile), throwable);
-				}
-			}
 
-			try {
-				TimeUnit.SECONDS.sleep(10);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				// ignore it
+				try {
+					TimeUnit.SECONDS.sleep(10);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					// ignore it
+				}
 			}
 		}
+
 	}
 }
