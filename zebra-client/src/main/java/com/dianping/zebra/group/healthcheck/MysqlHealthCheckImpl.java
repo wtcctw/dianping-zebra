@@ -55,11 +55,5 @@ public class MysqlHealthCheckImpl implements GroupConfigChangeListener, HealthCh
 	public String getName() {
 		return "health-checke-listener";
 	}
-
-	@Override
-   public void onActiveDataSourceChange(Map<String, DataSourceConfig> configs) {
-	   // TODO Auto-generated method stub
-	   
-   }
 	
 }
