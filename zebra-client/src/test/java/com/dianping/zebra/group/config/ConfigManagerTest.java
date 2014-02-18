@@ -1,11 +1,8 @@
 package com.dianping.zebra.group.config;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.junit.Test;
-
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
 public class ConfigManagerTest {
 
@@ -16,7 +13,7 @@ public class ConfigManagerTest {
 		manager.addListerner(new GroupConfigChangeListener() {
 
 			@Override
-			public void onChange(ActiveDataSourceChangeEvent event) {
+			public void onChange(BaseGroupConfigChangeEvent event) {
 				System.out.println("changed");
 				System.out.println(event);
 			}
@@ -24,11 +21,6 @@ public class ConfigManagerTest {
 			@Override
 			public String getName() {
 				return "mock-listener";
-			}
-
-			@Override
-         public void onActiveDataSourceChange(Map<String, DataSourceConfig> configs) {
-				//do nothing
 			}
 		});
 

@@ -7,6 +7,6 @@
 		<max-pool-size>5</max-pool-size>
 		<initial-pool-size>5</initial-pool-size>
 	</data-source-config>
-	<health-check-interval>10</health-check-interval>
+	<health-check-interval>50</health-check-interval>
 	<router-strategy>roundrobin</router-strategy>
 </group-data-source-config>
