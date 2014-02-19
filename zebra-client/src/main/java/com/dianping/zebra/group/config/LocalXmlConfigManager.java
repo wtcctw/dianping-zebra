@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -23,9 +27,66 @@ import com.dianping.zebra.group.config.database.entity.Database;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
-import com.dianping.zebra.group.exception.ConfigException;
+import com.dianping.zebra.group.exception.GroupConfigException;
 
 public class LocalXmlConfigManager implements GroupConfigManager {
+
+	class ConfigPeroidCheckerTask implements Runnable {
+		@Override
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				try {
+					long newModifiedTime = getLastMofieiedTime();
+					if (newModifiedTime > lastModifiedTime.get()) {
+						lastModifiedTime.set(newModifiedTime);
+						GroupDataSourceConfig newConfig = loadConfigFromXml();
+
+						if (newConfig != null && !groupDatasourceConfig.toString().equals(newConfig.toString())) {
+							BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(newConfig);
+							notifyListeners(event);
+							boolean isAvailDsChanged = false;
+
+							wLock.lock();
+							try {
+								GroupDataSourceConfig oldConfig = groupDatasourceConfig;
+								groupDatasourceConfig = newConfig;
+
+								for (String id : oldConfig.getDataSourceConfigs().keySet()) {
+									if (!newConfig.getDataSourceConfigs().containsKey(id)) {
+										isAvailDsChanged = cleanDataSourceConfigs(id);
+									}
+								}
+
+								for (String id : newConfig.getDataSourceConfigs().keySet()) {
+									if (!oldConfig.getDataSourceConfigs().containsKey(id)) {
+										availableDsConfig.put(id, newConfig.getDataSourceConfigs().get(id));
+										isAvailDsChanged = true;
+									}
+								}
+							} finally {
+								wLock.unlock();
+							}
+
+							if (isAvailDsChanged) {
+								notifyActiveDataSourceListeners();
+							}
+						}
+					}
+				} catch (Throwable throwable) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format("fail to reload the datasource config[%s]", configFile), throwable);
+					}
+				}
+
+				try {
+					TimeUnit.SECONDS.sleep(10);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					// ignore it
+				}
+			}
+		}
+	}
 
 	public static final String ID = "local";
 
@@ -47,6 +108,20 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 
 	private AtomicLong lastModifiedTime = new AtomicLong(-1);
 
+	private ExecutorService listenerNotifyThreadPool = Executors.newFixedThreadPool(5, new ThreadFactory() {
+
+		private AtomicInteger id = new AtomicInteger(0);
+
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread t = new Thread(r);
+			t.setDaemon(true);
+			t.setName("Thread-Notify-" + id.incrementAndGet());
+
+			return t;
+		}
+	});
+
 	private File configFile;
 
 	public LocalXmlConfigManager(String xmlPath) {
@@ -56,6 +131,17 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 	@Override
 	public void addListerner(GroupConfigChangeListener listener) {
 		this.listeners.add(listener);
+	}
+
+	private boolean cleanDataSourceConfigs(String id) {
+		if (availableDsConfig.containsKey(id)) {
+			availableDsConfig.remove(id);
+			return true;
+		}
+		if (unAvailableDsConfig.containsKey(id)) {
+			unAvailableDsConfig.remove(id);
+		}
+		return false;
 	}
 
 	@Override
@@ -83,7 +169,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 		if (xmlUrl != null) {
 			return FileUtils.toFile(xmlUrl);
 		} else {
-			throw new ConfigException(String.format("config file[%s] doesn't exist.", xmlPath));
+			throw new GroupConfigException(String.format("config file[%s] doesn't exist.", xmlPath));
 		}
 	}
 
@@ -141,7 +227,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 			this.groupDatasourceConfig = loadConfigFromXml();
 
 			if (this.groupDatasourceConfig == null) {
-				throw new ConfigException(String.format("config file[%s] doesn't exists.", this.configFile));
+				throw new GroupConfigException(String.format("config file[%s] doesn't exists.", this.configFile));
 			}
 
 			this.availableDsConfig = loadConfigFromXml().getDataSourceConfigs();
@@ -155,7 +241,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 
 			logger.info("Successfully initialize LocalXmlConfigManager.");
 		} catch (Throwable e) {
-			throw new ConfigException(String.format("fail to initialize group datasources with config file[%s].",
+			throw new GroupConfigException(String.format("fail to initialize group datasources with config file[%s].",
 			      this.configFile), e);
 		}
 	}
@@ -191,13 +277,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 					this.unAvailableDsConfig.put(id, map.get(id));
 				}
 			} else {
-				if (this.availableDsConfig.containsKey(id)) {
-					this.availableDsConfig.remove(id);
-					isAvailDsChanged = true;
-				}
-				if (this.unAvailableDsConfig.containsKey(id)) {
-					this.unAvailableDsConfig.remove(id);
-				}
+				isAvailDsChanged = cleanDataSourceConfigs(id);
 			}
 		} finally {
 			this.wLock.unlock();
@@ -226,13 +306,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 					isAvailDsChanged = true;
 				}
 			} else {
-				if (this.availableDsConfig.containsKey(id)) {
-					this.availableDsConfig.remove(id);
-					isAvailDsChanged = true;
-				}
-				if (this.unAvailableDsConfig.containsKey(id)) {
-					this.unAvailableDsConfig.remove(id);
-				}
+				isAvailDsChanged = cleanDataSourceConfigs(id);
 			}
 		} finally {
 			this.wLock.unlock();
@@ -261,62 +335,20 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 		notifyListeners(event);
 	}
 
-	private void notifyListeners(BaseGroupConfigChangeEvent event) {
-		for (GroupConfigChangeListener listener : this.listeners) {
+	private void notifyListeners(final BaseGroupConfigChangeEvent event) {
+		for (final GroupConfigChangeListener listener : this.listeners) {
 			try {
-				listener.onChange(event);
+				Runnable task = new Runnable() {
+
+					@Override
+					public void run() {
+						listener.onChange(event);
+					}
+				};
+
+				this.listenerNotifyThreadPool.submit(task);
 			} catch (Throwable e) {
 				logger.error(String.format("error to notify the listener %s", listener.getName()), e);
-			}
-		}
-	}
-
-	class ConfigPeroidCheckerTask implements Runnable {
-		@Override
-		public void run() {
-			while (!Thread.currentThread().isInterrupted()) {
-				try {
-					long newModifiedTime = getLastMofieiedTime();
-					if (newModifiedTime > lastModifiedTime.get()) {
-						lastModifiedTime.set(newModifiedTime);
-						GroupDataSourceConfig newConfig = loadConfigFromXml();
-
-						if (newConfig != null && !groupDatasourceConfig.toString().equals(newConfig.toString())) {
-							BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(newConfig);
-							notifyListeners(event);
-
-							wLock.lock();
-							try {
-								groupDatasourceConfig = newConfig;
-							} finally {
-								wLock.unlock();
-							}
-							
-							for (String id : groupDatasourceConfig.getDataSourceConfigs().keySet()) {
-								if (!newConfig.getDataSourceConfigs().containsKey(id)) {
-									markDown(id);
-								}
-							}
-
-							for (String id : newConfig.getDataSourceConfigs().keySet()) {
-								if (!groupDatasourceConfig.getDataSourceConfigs().containsKey(id)) {
-									markUp(id);
-								}
-							}
-						}
-					}
-				} catch (Throwable throwable) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("fail to reload the datasource config[%s]", configFile), throwable);
-					}
-				}
-
-				try {
-					TimeUnit.SECONDS.sleep(10);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					// ignore it
-				}
 			}
 		}
 	}
