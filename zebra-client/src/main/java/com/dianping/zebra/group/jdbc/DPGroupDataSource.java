@@ -12,9 +12,12 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.GroupConfigManager;
 import com.dianping.zebra.group.config.GroupConfigManagerFactory;
+import com.dianping.zebra.group.exception.GroupDataSourceException;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
@@ -26,6 +29,10 @@ import com.dianping.zebra.group.router.GroupDataSourceRouterFactory;
  * 
  */
 public class DPGroupDataSource implements DataSource {
+	private PrintWriter out = null;
+
+	private int loginTimeout = 0;
+
 	private String resourceId;
 
 	private String configManagerType = Constants.DEFAULT_CONFIG_MANAGER_TYPE;
@@ -46,6 +53,14 @@ public class DPGroupDataSource implements DataSource {
 	}
 
 	public void init() {
+		if (StringUtils.isBlank(resourceId)) {
+			throw new GroupDataSourceException("resourceId must not be blank");
+		}
+
+		if (StringUtils.isBlank(configManagerType)) {
+			throw new GroupDataSourceException("configManagerType must not be blank");
+		}
+
 		this.configManager = GroupConfigManagerFactory.getConfigManger(configManagerType, resourceId);
 		this.router = GroupDataSourceRouterFactory.getDataSourceRouter(configManager);
 		this.dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(configManager);
@@ -66,8 +81,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public PrintWriter getLogWriter() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return out;
 	}
 
 	/*
@@ -77,8 +91,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public void setLogWriter(PrintWriter out) throws SQLException {
-		// TODO Auto-generated method stub
-
+		this.out = out;
 	}
 
 	/*
@@ -88,8 +101,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public void setLoginTimeout(int seconds) throws SQLException {
-		// TODO Auto-generated method stub
-
+		this.loginTimeout = seconds;
 	}
 
 	/*
@@ -99,8 +111,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public int getLoginTimeout() throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.loginTimeout;
 	}
 
 	/*

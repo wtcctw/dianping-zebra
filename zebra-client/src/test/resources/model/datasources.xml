@@ -18,5 +18,7 @@
 		<initial-pool-size>5</initial-pool-size>
 	</data-source-config>
 	<health-check-interval>10</health-check-interval>
+	<max-error-counter>100</max-error-counter>
+	<retry-times>0</retry-times>
 	<router-strategy>roundrobin</router-strategy>
 </group-data-source-config>

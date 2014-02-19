@@ -3,6 +3,8 @@ package com.dianping.zebra.group.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.dianping.zebra.group.exception.GroupConfigException;
+
 public class GroupConfigManagerFactory {
 
 	private static Map<String, GroupConfigManager> groupConfigManagers = new HashMap<String, GroupConfigManager>();
@@ -15,9 +17,13 @@ public class GroupConfigManagerFactory {
 				groupConfigManager = groupConfigManagers.get(configManagerType);
 
 				if (groupConfigManager == null) {
-					groupConfigManager = new LocalXmlConfigManager(resourceId);
-					groupConfigManager.init();
-					groupConfigManagers.put(configManagerType, groupConfigManager);
+					if (LocalXmlConfigManager.ID.equals(configManagerType)) {
+						groupConfigManager = new LocalXmlConfigManager(resourceId);
+						groupConfigManager.init();
+						groupConfigManagers.put(configManagerType, groupConfigManager);
+					} else {
+						throw new GroupConfigException(String.format("illegal configManagerType[%s]", configManagerType));
+					}
 				}
 
 				return groupConfigManager;
