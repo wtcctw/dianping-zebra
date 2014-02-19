@@ -27,7 +27,7 @@ import com.dianping.zebra.group.config.database.entity.Database;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
-import com.dianping.zebra.group.exception.ConfigException;
+import com.dianping.zebra.group.exception.GroupConfigException;
 
 public class LocalXmlConfigManager implements GroupConfigManager {
 
@@ -169,7 +169,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 		if (xmlUrl != null) {
 			return FileUtils.toFile(xmlUrl);
 		} else {
-			throw new ConfigException(String.format("config file[%s] doesn't exist.", xmlPath));
+			throw new GroupConfigException(String.format("config file[%s] doesn't exist.", xmlPath));
 		}
 	}
 
@@ -227,7 +227,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 			this.groupDatasourceConfig = loadConfigFromXml();
 
 			if (this.groupDatasourceConfig == null) {
-				throw new ConfigException(String.format("config file[%s] doesn't exists.", this.configFile));
+				throw new GroupConfigException(String.format("config file[%s] doesn't exists.", this.configFile));
 			}
 
 			this.availableDsConfig = loadConfigFromXml().getDataSourceConfigs();
@@ -241,7 +241,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 
 			logger.info("Successfully initialize LocalXmlConfigManager.");
 		} catch (Throwable e) {
-			throw new ConfigException(String.format("fail to initialize group datasources with config file[%s].",
+			throw new GroupConfigException(String.format("fail to initialize group datasources with config file[%s].",
 			      this.configFile), e);
 		}
 	}

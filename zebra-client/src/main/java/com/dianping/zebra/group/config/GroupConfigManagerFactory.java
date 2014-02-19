@@ -3,7 +3,7 @@ package com.dianping.zebra.group.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.dianping.zebra.group.exception.ConfigException;
+import com.dianping.zebra.group.exception.GroupConfigException;
 
 public class GroupConfigManagerFactory {
 
@@ -22,7 +22,7 @@ public class GroupConfigManagerFactory {
 						groupConfigManager.init();
 						groupConfigManagers.put(configManagerType, groupConfigManager);
 					} else {
-						throw new ConfigException(String.format("illegal configManagerType[%s]", configManagerType));
+						throw new GroupConfigException(String.format("illegal configManagerType[%s]", configManagerType));
 					}
 				}
 
