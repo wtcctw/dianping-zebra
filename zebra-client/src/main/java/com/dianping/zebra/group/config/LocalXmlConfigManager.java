@@ -31,63 +31,6 @@ import com.dianping.zebra.group.exception.GroupConfigException;
 
 public class LocalXmlConfigManager implements GroupConfigManager {
 
-	class ConfigPeroidCheckerTask implements Runnable {
-		@Override
-		public void run() {
-			while (!Thread.currentThread().isInterrupted()) {
-				try {
-					long newModifiedTime = getLastMofieiedTime();
-					if (newModifiedTime > lastModifiedTime.get()) {
-						lastModifiedTime.set(newModifiedTime);
-						GroupDataSourceConfig newConfig = loadConfigFromXml();
-
-						if (newConfig != null && !groupDatasourceConfig.toString().equals(newConfig.toString())) {
-							BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(newConfig);
-							notifyListeners(event);
-							boolean isAvailDsChanged = false;
-
-							wLock.lock();
-							try {
-								GroupDataSourceConfig oldConfig = groupDatasourceConfig;
-								groupDatasourceConfig = newConfig;
-
-								for (String id : oldConfig.getDataSourceConfigs().keySet()) {
-									if (!newConfig.getDataSourceConfigs().containsKey(id)) {
-										isAvailDsChanged = cleanDataSourceConfigs(id);
-									}
-								}
-
-								for (String id : newConfig.getDataSourceConfigs().keySet()) {
-									if (!oldConfig.getDataSourceConfigs().containsKey(id)) {
-										availableDsConfig.put(id, newConfig.getDataSourceConfigs().get(id));
-										isAvailDsChanged = true;
-									}
-								}
-							} finally {
-								wLock.unlock();
-							}
-
-							if (isAvailDsChanged) {
-								notifyActiveDataSourceListeners();
-							}
-						}
-					}
-				} catch (Throwable throwable) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("fail to reload the datasource config[%s]", configFile), throwable);
-					}
-				}
-
-				try {
-					TimeUnit.SECONDS.sleep(10);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					// ignore it
-				}
-			}
-		}
-	}
-
 	public static final String ID = "local";
 
 	private static final Logger logger = LoggerFactory.getLogger(LocalXmlConfigManager.class);
@@ -349,6 +292,63 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 				this.listenerNotifyThreadPool.submit(task);
 			} catch (Throwable e) {
 				logger.error(String.format("error to notify the listener %s", listener.getName()), e);
+			}
+		}
+	}
+	
+	class ConfigPeroidCheckerTask implements Runnable {
+		@Override
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				try {
+					long newModifiedTime = getLastMofieiedTime();
+					if (newModifiedTime > lastModifiedTime.get()) {
+						lastModifiedTime.set(newModifiedTime);
+						GroupDataSourceConfig newConfig = loadConfigFromXml();
+
+						if (newConfig != null && !groupDatasourceConfig.toString().equals(newConfig.toString())) {
+							BaseGroupConfigChangeEvent event = new BaseGroupConfigChangeEvent(newConfig);
+							notifyListeners(event);
+							boolean isAvailDsChanged = false;
+
+							wLock.lock();
+							try {
+								GroupDataSourceConfig oldConfig = groupDatasourceConfig;
+								groupDatasourceConfig = newConfig;
+
+								for (String id : oldConfig.getDataSourceConfigs().keySet()) {
+									if (!newConfig.getDataSourceConfigs().containsKey(id)) {
+										isAvailDsChanged = cleanDataSourceConfigs(id);
+									}
+								}
+
+								for (String id : newConfig.getDataSourceConfigs().keySet()) {
+									if (!oldConfig.getDataSourceConfigs().containsKey(id)) {
+										availableDsConfig.put(id, newConfig.getDataSourceConfigs().get(id));
+										isAvailDsChanged = true;
+									}
+								}
+							} finally {
+								wLock.unlock();
+							}
+
+							if (isAvailDsChanged) {
+								notifyActiveDataSourceListeners();
+							}
+						}
+					}
+				} catch (Throwable throwable) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format("fail to reload the datasource config[%s]", configFile), throwable);
+					}
+				}
+
+				try {
+					TimeUnit.SECONDS.sleep(10);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					// ignore it
+				}
 			}
 		}
 	}
