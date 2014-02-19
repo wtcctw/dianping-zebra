@@ -30,7 +30,7 @@ public class GroupDataSourceRouterFactory {
 			return readWriteDataSourceRouter.get();
 
 		} else {
-			throw new IllegalArgumentException("Strategy is not correct: " + routerStrategy);
+			throw new IllegalArgumentException("Strategy not supported: " + routerStrategy);
 		}
 
 	}

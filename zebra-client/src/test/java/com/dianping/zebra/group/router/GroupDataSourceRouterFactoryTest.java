@@ -1,5 +1,8 @@
 package com.dianping.zebra.group.router;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +41,21 @@ public class GroupDataSourceRouterFactoryTest {
 		GroupDataSourceTarget target = dataSourceRouter.select(routerInfo);
 
 		isWrite(target);
+	}
+
+	@Test
+	public void testExcludeSelect() {
+		GroupDataSourceRouter dataSourceRouter = GroupDataSourceRouterFactory.getDataSourceRouter(configManager);
+
+		String writeSql = "update a set xx=xx";
+		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(writeSql);
+		GroupDataSourceTarget target = dataSourceRouter.select(routerInfo);
+		isWrite(target);
+
+		Set<GroupDataSourceTarget> excludeTarget = new HashSet<GroupDataSourceTarget>();
+		excludeTarget.add(target);
+		Assert.assertNull(dataSourceRouter.select(routerInfo, excludeTarget));
+
 	}
 
 	private void isRead(GroupDataSourceTarget target) {
