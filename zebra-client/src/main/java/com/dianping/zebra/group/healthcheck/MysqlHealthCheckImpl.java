@@ -1,38 +1,66 @@
 package com.dianping.zebra.group.healthcheck;
 
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dianping.zebra.group.config.BaseGroupConfigChangeEvent;
 import com.dianping.zebra.group.config.GroupConfigChangeListener;
 import com.dianping.zebra.group.config.GroupConfigManager;
+import com.dianping.zebra.group.manager.GroupDataSourceManager;
+import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 
-public class MysqlHealthCheckImpl implements GroupConfigChangeListener, HealthCheck {
+public class MysqlHealthCheckImpl implements HealthCheck {
 	private int healthCheckInterval;
 
 	private int maxErrorTimes;
 
 	private GroupConfigManager configManager;
+	
+	private GroupDataSourceManager groupdatasourcemanager;
 
-	private Map<String, Integer> dskeyFailCount = new ConcurrentHashMap<String, Integer>();
-
-	private LinkedBlockingQueue<dsException> dsqueue = new LinkedBlockingQueue<dsException>();
+	private ConcurrentHashMap<String, AtomicInteger> dskeyFailCount = new ConcurrentHashMap<String, AtomicInteger>();
 
 	public MysqlHealthCheckImpl(GroupConfigManager configManager) {
 		this.configManager = configManager;
-		// this.healthCheckInterval = configManager.getXX();
+		this.groupdatasourcemanager = GroupDataSourceManagerFactory.getGroupDataSourceManger(configManager);
+		this.healthCheckInterval = configManager.getGroupDataSourceConfig().getHealthCheckInterval();
+		this.maxErrorTimes = configManager.getGroupDataSourceConfig().getHealthCheckInterval();
+		configManager.addListerner(new ConfigChangeListener());
 		init();
 	}
 
 	public void notifyException(String dsKey, SQLException e) {
-		dsqueue.add(new dsException(dsKey, e));
+		if (e.getErrorCode() == 0 && e.getSQLState() == null) {
+			dskeyFailCount.putIfAbsent(dsKey, new AtomicInteger(1));
+			AtomicInteger times = dskeyFailCount.get(dsKey);
+			if (times.get() >= maxErrorTimes) {
+				// TODO
+				configManager.markDown(dsKey);
+				// dskeyFailCount.remove(dsKey);
+			} else {
+				// dskeyFailCount.put(tmp.getDsKey(), times.i);
+				times.incrementAndGet();
+			}
+		}
+		// dsqueue.add(new dsException(dsKey, e));
 	}
 
-	@Override
-	public void onChange(BaseGroupConfigChangeEvent event) {
-		// TODO Auto-generated method stub
+	public class ConfigChangeListener implements GroupConfigChangeListener {
+
+		@Override
+		public void onChange(BaseGroupConfigChangeEvent event) {
+			int interval = event.getGroupDatasourceConfig().getHealthCheckInterval();
+			if (interval != healthCheckInterval) {
+				healthCheckInterval = interval;
+				// TODO
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "health-checker-listner";
+		}
 
 	}
 
@@ -42,7 +70,7 @@ public class MysqlHealthCheckImpl implements GroupConfigChangeListener, HealthCh
 		public void run() {
 			while (true) {
 				// TODO
-				dskeyFailCount.clear();
+				dskeyFailCount = new ConcurrentHashMap<String, AtomicInteger>();
 				try {
 					Thread.sleep(healthCheckInterval);
 				} catch (InterruptedException e) {
@@ -55,71 +83,12 @@ public class MysqlHealthCheckImpl implements GroupConfigChangeListener, HealthCh
 
 	}
 
-	private class dsExceptionStat implements Runnable {
-
-		@Override
-		public void run() {
-			while (true) {
-				dsException tmp = dsqueue.poll();
-				//judge condition
-				if (tmp.getE().getErrorCode() == 0 && tmp.getE().getSQLState() == null) {
-					Integer times = dskeyFailCount.get(tmp.getDsKey());
-					if (times == null) {
-						dskeyFailCount.put(tmp.getDsKey(), 1);
-					} else {
-						if (times >= maxErrorTimes) {
-							// TODO
-							configManager.markDown(tmp.getDsKey());
-							dskeyFailCount.remove(tmp.getDsKey());
-						} else {
-							dskeyFailCount.put(tmp.getDsKey(), times + 1);
-						}
-					}
-				}
-			}
-
-		}
-
-	}
-
-	private class dsException {
-		String dsKey;
-
-		SQLException e;
-
-		public String getDsKey() {
-			return dsKey;
-		}
-
-		public void setDsKey(String dsKey) {
-			this.dsKey = dsKey;
-		}
-
-		public SQLException getE() {
-			return e;
-		}
-
-		public void setE(SQLException e) {
-			this.e = e;
-		}
-
-		public dsException(String dsKey, SQLException e) {
-			super();
-			this.dsKey = dsKey;
-			this.e = e;
-		}
-	}
-
 	private void init() {
-		checkHealthCycle checkHealthThread = new checkHealthCycle();
-		dsExceptionStat dsExceptionStatThread = new dsExceptionStat();
-		checkHealthThread.run();
-		dsExceptionStatThread.run();
-	}
-
-	@Override
-	public String getName() {
-		return "health-checke-listener";
+		checkHealthCycle checkHealthTask = new checkHealthCycle();
+		Thread thread = new Thread(checkHealthTask);
+		thread.setDaemon(true);
+		thread.setName("checkHealthTask");
+		thread.start();
 	}
 
 }
