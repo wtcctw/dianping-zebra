@@ -7,7 +7,7 @@ public interface GroupDataSourceManager {
 
 	public void init() throws SQLException;
 
-	public boolean isAvailable(String id) throws SQLException;
+	public boolean isAvailable(String id);
 
 	public Connection getConnection(String id) throws SQLException;
 

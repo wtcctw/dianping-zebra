@@ -1,12 +1,15 @@
 package com.dianping.zebra.group.healthcheck;
 
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dianping.zebra.group.config.BaseGroupConfigChangeEvent;
 import com.dianping.zebra.group.config.GroupConfigChangeListener;
 import com.dianping.zebra.group.config.GroupConfigManager;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 
@@ -35,8 +38,9 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 			dskeyFailCount.putIfAbsent(dsKey, new AtomicInteger(1));
 			AtomicInteger times = dskeyFailCount.get(dsKey);
 			if (times.get() >= maxErrorTimes) {
-				// TODO
-				configManager.markDown(dsKey);
+				if(configManager.getUnAvailableDataSources().containsKey(dsKey) == false){
+					configManager.markDown(dsKey);
+				}
 				// dskeyFailCount.remove(dsKey);
 			} else {
 				// dskeyFailCount.put(tmp.getDsKey(), times.i);
@@ -69,7 +73,14 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		@Override
 		public void run() {
 			while (true) {
-				// TODO
+				Map<String, DataSourceConfig> unAvailableDsMap = configManager.getUnAvailableDataSources();
+				Iterator iter = unAvailableDsMap.keySet().iterator(); 
+				while (iter.hasNext()) { 
+				    Object key = iter.next(); 
+				    if(groupdatasourcemanager.isAvailable((String)key) == true){
+				   	 configManager.markUp((String)key);
+				    }
+				} 
 				dskeyFailCount = new ConcurrentHashMap<String, AtomicInteger>();
 				try {
 					Thread.sleep(healthCheckInterval);
