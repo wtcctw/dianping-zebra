@@ -1,12 +1,9 @@
 package com.dianping.zebra.group.manager;
 
-import java.beans.PropertyVetoException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -14,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +22,7 @@ import com.dianping.zebra.group.config.GroupConfigChangeListener;
 import com.dianping.zebra.group.config.GroupConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.exception.GroupConfigException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
@@ -73,7 +72,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			return null;
 		}
 	}
-	
+
 	public DataSource getDataSource(String id) {
 		return dataSources.get(id);
 	}
@@ -103,49 +102,24 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 	private DataSource initDataSources(DataSourceConfig value) {
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
-		Properties properties = new Properties();
 
-		//properties.setProperty("c3p0.jdbcUrl", value.getJdbcUrl());
-		//dataSource.setUser(value.getUser());
 		try {
-	      dataSource.setDriverClass(value.getDriverClass());
-      } catch (PropertyVetoException e) {
-	      // TODO Auto-generated catch block
-	      e.printStackTrace();
-      }
-		dataSource.setPassword(value.getPassword());
-		dataSource.setInitialPoolSize(value.getInitialPoolSize());
-		dataSource.setMinPoolSize(value.getMinPoolSize());
-		dataSource.setMaxPoolSize(value.getMaxPoolSize());
-		//properties.setProperty("c3p0.user", value.getUser());
-//		properties.setProperty("c3p0.password", value.getPassword());
-//		properties.setProperty("c3p0.minPoolSize", String.valueOf(value.getMinPoolSize()));
-//		properties.setProperty("c3p0.maxPoolSize", String.valueOf(value.getMaxPoolSize()));
-//		properties.setProperty("c3p0.initialPoolSize", String.valueOf(value.getInitialPoolSize()));
+			dataSource.setUser(value.getUser());
+			dataSource.setDriverClass(value.getDriverClass());
+			dataSource.setJdbcUrl(value.getJdbcUrl());
+			dataSource.setPassword(value.getPassword());
+			dataSource.setInitialPoolSize(value.getInitialPoolSize());
+			dataSource.setMinPoolSize(value.getMinPoolSize());
+			dataSource.setMaxPoolSize(value.getMaxPoolSize());
 
-		for (Any any : value.getProperties()) {
-			// TODO franky wu
-			System.out.println(any.getName());
-			properties.setProperty("c3p0." + any.getName(), any.getValue());
+			for (Any any : value.getProperties()) {
+				// TODO franky wu
+				MethodUtils.invokeMethod(dataSource, "set" + StringUtils.capitalize(any.getName()), value.getUser());
+			}
+		} catch (Throwable e) {
+			throw new GroupConfigException(e);
 		}
-			try {
-				MethodUtils.invokeMethod(dataSource, "setUser", value.getUser());
-	         MethodUtils.invokeMethod(dataSource, "setConnectionCustomizerClassName", "com.dianping.zebra.group.manager.DataSourceMonitorCustomizer");
-         } catch (NoSuchMethodException e) {
-	         // TODO Auto-generated catch block
-	         e.printStackTrace();
-         } catch (IllegalAccessException e) {
-	         // TODO Auto-generated catch block
-	         e.printStackTrace();
-         } catch (InvocationTargetException e) {
-	         // TODO Auto-generated catch block
-	         e.printStackTrace();
-         }
-		
-		//dataSource.setProperties(properties);
-		dataSource.setJdbcUrl(value.getJdbcUrl());
-		//dataSource.setConnectionCustomizerClassName("com.dianping.zebra.group.manager.DataSourceMonitorCustomizer");
-		
+
 		return dataSource;
 	}
 
@@ -171,15 +145,20 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					DataSourceConfig value = entry.getValue();
 					DataSourceConfig originDataSourceConfig = dataSourceConfigsCache.get().get(key);
 					if (originDataSourceConfig != null && !originDataSourceConfig.toString().equals(value.toString())) {
-						DataSource dataSource = initDataSources(value);
-						DataSource originDataSource = dataSources.get(key);
+						DataSource dataSource = null;
+						try {
+							dataSource = initDataSources(value);
+							DataSource originDataSource = dataSources.get(key);
 
-						dataSources.put(key, dataSource);
-						boolean isSuccess = toCloseDataSource.offer(originDataSource);
-
-						if (!isSuccess) {
-							logger.warn("blocking queue for closed datasources is full!");
+							dataSources.put(key, dataSource);
+							boolean isSuccess = toCloseDataSource.offer(originDataSource);
+							if (!isSuccess) {
+								logger.warn("blocking queue for closed datasources is full!");
+							}
+						} catch (Throwable e) {
+							logger.warn("cannot init new dataSource due to illegal dataSource config!", e);
 						}
+
 					}
 				}
 
@@ -196,7 +175,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 				if (dataSource != null && dataSource instanceof ComboPooledDataSource) {
 					ComboPooledDataSource comboDataSource = (ComboPooledDataSource) dataSource;
-					
+
 					comboDataSource.close();
 				}
 			}

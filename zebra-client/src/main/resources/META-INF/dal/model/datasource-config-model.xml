@@ -5,6 +5,7 @@
 		<element name="max-error-counter" value-type="int" default-value="3" primitive="true"/>
 		<element name="retry-times" value-type="int" default-value="0" primitive="true"/>
 		<element name="router-strategy" value-type="String" default-value="roundrobin" />
+		<element name="cookie-domain" value-type="String" default-value=".dianping.com" />
 		<entity-ref name="data-source-config" type="map" names="data-source-configs" xml-indent="true" method-find-or-create="true" />
 	</entity>
 	<entity name="data-source-config">
