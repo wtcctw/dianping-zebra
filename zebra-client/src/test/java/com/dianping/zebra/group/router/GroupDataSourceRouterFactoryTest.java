@@ -17,7 +17,7 @@ public class GroupDataSourceRouterFactoryTest {
 	@Before
 	public void init() {
 		String resourceId = "datasources.xml";
-		String configManagerType = "type";
+		String configManagerType = "local";
 		this.configManager = GroupConfigManagerFactory.getConfigManger(configManagerType, resourceId);
 	}
 

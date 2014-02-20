@@ -11,6 +11,9 @@
     <artifactId>${zebra-client.aid}</artifactId>
     <version>${zebra-client.version}</version>
     <packaging>jar</packaging>
+    <properties>
+        <env>dev</env>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -75,6 +78,18 @@
             <version>1.9.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.dianping.lion</groupId>
+            <artifactId>lion-client</artifactId>
+            <version>0.3.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.dianping.lion</groupId>
+            <artifactId>lion-${env}</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -89,8 +104,8 @@
                         <goals>
                             <goal>dal-model</goal>
                         </goals>
-						<configuration>
-							<manifest><![CDATA[,
+                        <configuration>
+                            <manifest><![CDATA[,
                         ${basedir}/src/main/resources/META-INF/dal/model/datasource-config-manifest.xml,
                         ${basedir}/src/main/resources/META-INF/dal/model/databases-manifest.xml,
                      ,]]></manifest>
