@@ -29,7 +29,7 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		this.groupdatasourcemanager = GroupDataSourceManagerFactory.getGroupDataSourceManger(configManager);
 		this.healthCheckInterval = configManager.getGroupDataSourceConfig().getHealthCheckInterval();
 		this.maxErrorTimes = configManager.getGroupDataSourceConfig().getHealthCheckInterval();
-		configManager.addListerner(new ConfigChangeListener());
+		configManager.addListerner(new HealthCheckChangeListener());
 		init();
 	}
 
@@ -50,7 +50,7 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		// dsqueue.add(new dsException(dsKey, e));
 	}
 
-	public class ConfigChangeListener implements GroupConfigChangeListener {
+	public class HealthCheckChangeListener implements GroupConfigChangeListener {
 
 		@Override
 		public void onChange(BaseGroupConfigChangeEvent event) {
@@ -74,7 +74,7 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		public void run() {
 			while (true) {
 				Map<String, DataSourceConfig> unAvailableDsMap = configManager.getUnAvailableDataSources();
-				Iterator iter = unAvailableDsMap.keySet().iterator(); 
+				Iterator<String> iter = unAvailableDsMap.keySet().iterator(); 
 				while (iter.hasNext()) { 
 				    Object key = iter.next(); 
 				    if(groupdatasourcemanager.isAvailable((String)key) == true){
