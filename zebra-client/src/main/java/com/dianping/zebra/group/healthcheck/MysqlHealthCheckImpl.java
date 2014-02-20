@@ -12,6 +12,7 @@ import com.dianping.zebra.group.config.GroupConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
+import com.dianping.zebra.group.router.GroupDataSourceTarget;
 
 public class MysqlHealthCheckImpl implements HealthCheck {
 	private int healthCheckInterval;
@@ -28,18 +29,37 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		this.configManager = configManager;
 		this.groupdatasourcemanager = GroupDataSourceManagerFactory.getGroupDataSourceManger(configManager);
 		this.healthCheckInterval = configManager.getGroupDataSourceConfig().getHealthCheckInterval();
-		this.maxErrorTimes = configManager.getGroupDataSourceConfig().getHealthCheckInterval();
-		configManager.addListerner(new ConfigChangeListener());
+		this.maxErrorTimes = configManager.getGroupDataSourceConfig().getMaxErrorCounter();
+		configManager.addListerner(new HealthCheckChangeListener());
 		init();
 	}
 
-	public void notifyException(String dsKey, SQLException e) {
+	public int getHealthCheckInterval() {
+   	return healthCheckInterval;
+   }
+
+	public void setHealthCheckInterval(int healthCheckInterval) {
+   	this.healthCheckInterval = healthCheckInterval;
+   }
+
+	public int getMaxErrorTimes() {
+   	return maxErrorTimes;
+   }
+
+	public void setMaxErrorTimes(int maxErrorTimes) {
+   	this.maxErrorTimes = maxErrorTimes;
+   }
+
+	public void notifyException(GroupDataSourceTarget dsTarget, SQLException e) {
+		if(dsTarget.isReadOnly() == false){
+			return;
+		}
 		if (e.getErrorCode() == 0 && e.getSQLState() == null) {
-			dskeyFailCount.putIfAbsent(dsKey, new AtomicInteger(1));
-			AtomicInteger times = dskeyFailCount.get(dsKey);
+			dskeyFailCount.putIfAbsent(dsTarget.getId(), new AtomicInteger(1));
+			AtomicInteger times = dskeyFailCount.get(dsTarget.getId());
 			if (times.get() >= maxErrorTimes) {
-				if(configManager.getUnAvailableDataSources().containsKey(dsKey) == false){
-					configManager.markDown(dsKey);
+				if(configManager.getUnAvailableDataSources().containsKey(dsTarget.getId()) == false){
+					configManager.markDown(dsTarget.getId());
 				}
 				// dskeyFailCount.remove(dsKey);
 			} else {
@@ -50,7 +70,7 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		// dsqueue.add(new dsException(dsKey, e));
 	}
 
-	public class ConfigChangeListener implements GroupConfigChangeListener {
+	public class HealthCheckChangeListener implements GroupConfigChangeListener {
 
 		@Override
 		public void onChange(BaseGroupConfigChangeEvent event) {
@@ -74,7 +94,7 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		public void run() {
 			while (true) {
 				Map<String, DataSourceConfig> unAvailableDsMap = configManager.getUnAvailableDataSources();
-				Iterator iter = unAvailableDsMap.keySet().iterator(); 
+				Iterator<String> iter = unAvailableDsMap.keySet().iterator(); 
 				while (iter.hasNext()) { 
 				    Object key = iter.next(); 
 				    if(groupdatasourcemanager.isAvailable((String)key) == true){

@@ -83,11 +83,11 @@
                         ${basedir}/src/main/resources/META-INF/dal/model/datasource-config-manifest.xml,
                         ${basedir}/src/main/resources/META-INF/dal/model/databases-manifest.xml,
                      ,]]></manifest>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 

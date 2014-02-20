@@ -74,6 +74,18 @@ public class DPGroupDataSource implements DataSource {
 		this.configManagerType = configManagerType;
 	}
 
+	public void setConfigManager(GroupConfigManager configManager) {
+		this.configManager = configManager;
+	}
+
+	public void setRouter(GroupDataSourceRouter router) {
+		this.router = router;
+	}
+
+	public void setDataSourceManager(GroupDataSourceManager dataSourceManager) {
+		this.dataSourceManager = dataSourceManager;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -119,10 +131,14 @@ public class DPGroupDataSource implements DataSource {
 	 * 
 	 * @see java.sql.Wrapper#unwrap(java.lang.Class)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return (T) this;
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
 	}
 
 	/*
@@ -132,8 +148,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
+		return this.getClass().isAssignableFrom(iface);
 	}
 
 	/*
@@ -143,8 +158,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return new DPGroupConnection(router, dataSourceManager, configManager);
 	}
 
 	/*
@@ -154,8 +168,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return new DPGroupConnection(router, dataSourceManager, configManager, username, password);
 	}
 
 }

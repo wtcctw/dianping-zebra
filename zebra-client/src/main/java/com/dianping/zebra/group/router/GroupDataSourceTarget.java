@@ -6,13 +6,16 @@ public class GroupDataSourceTarget {
 
 	private boolean readOnly;
 
+	private int weight;
+
 	public GroupDataSourceTarget() {
 		super();
 	}
 
-	public GroupDataSourceTarget(String id, boolean readOnly) {
+	public GroupDataSourceTarget(String id, int weight, boolean readOnly) {
 		super();
 		this.id = id;
+		this.weight = weight;
 		this.readOnly = readOnly;
 	}
 
@@ -22,6 +25,14 @@ public class GroupDataSourceTarget {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public int getWeight() {
+		return weight;
+	}
+
+	public void setWeight(int weight) {
+		this.weight = weight;
 	}
 
 	public boolean isReadOnly() {
