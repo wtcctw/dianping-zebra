@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 public interface GroupDataSourceManager {
 
-	public void init() throws SQLException;
+	public void init() ;
 
 	public boolean isAvailable(String id);
 

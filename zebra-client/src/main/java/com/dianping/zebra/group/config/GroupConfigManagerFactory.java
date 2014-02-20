@@ -25,11 +25,9 @@ public class GroupConfigManagerFactory {
 						throw new GroupConfigException(String.format("illegal configManagerType[%s]", configManagerType));
 					}
 				}
-
-				return groupConfigManager;
 			}
-		} else {
-			return groupConfigManager;
 		}
+
+		return groupConfigManager;
 	}
 }
