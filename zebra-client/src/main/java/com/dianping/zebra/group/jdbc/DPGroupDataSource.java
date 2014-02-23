@@ -15,8 +15,8 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.GroupConfigManager;
-import com.dianping.zebra.group.config.GroupConfigManagerFactory;
+import com.dianping.zebra.group.config1.GroupConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManagerFactory;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;

@@ -10,16 +10,16 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
-import com.dianping.zebra.group.config.GroupConfigManagerFactory;
-import com.dianping.zebra.group.config.LocalXmlConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManagerFactory;
+import com.dianping.zebra.group.config1.LocalGroupConfigManager;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class C3P0GroupDataSourceManagerTest {
 
 	@Test
 	public void testConnect() throws SQLException, IOException {
-		GroupConfigManager groupConfigManager = GroupConfigManagerFactory.getConfigManger(LocalXmlConfigManager.ID,
+		GroupConfigManager groupConfigManager = GroupConfigManagerFactory.getConfigManger(LocalGroupConfigManager.ID,
 		      "datasources.xml");
 		GroupDataSourceManager dataSourceManager = GroupDataSourceManagerFactory
 		      .getGroupDataSourceManger(groupConfigManager);

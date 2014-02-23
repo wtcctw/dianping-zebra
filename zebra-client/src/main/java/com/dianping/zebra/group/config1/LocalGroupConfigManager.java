@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.config;
+package com.dianping.zebra.group.config1;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,11 +29,11 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
 import com.dianping.zebra.group.exception.GroupConfigException;
 
-public class LocalXmlConfigManager implements GroupConfigManager {
+public class LocalGroupConfigManager implements GroupConfigManager {
 
 	public static final String ID = "local";
 
-	private static final Logger logger = LoggerFactory.getLogger(LocalXmlConfigManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(LocalGroupConfigManager.class);
 
 	private ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -65,10 +65,10 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 		}
 	});
 
-	private File configFile;
+	private File resourceId;
 
-	public LocalXmlConfigManager(String xmlPath) {
-		this.configFile = getFile(xmlPath);
+	public LocalGroupConfigManager(String resourceId) {
+		this.resourceId = getFile(resourceId);
 	}
 
 	@Override
@@ -128,14 +128,14 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 
 	private long getLastMofieiedTime() throws SAXException, IOException {
 		long lastModifiedTime = -1;
-		if (this.configFile.exists()) {
-			lastModifiedTime = this.configFile.lastModified();
+		if (this.resourceId.exists()) {
+			lastModifiedTime = this.resourceId.lastModified();
 
 			if (lastModifiedTime > this.lastModifiedTime.get()) {
 				return lastModifiedTime;
 			}
 
-			GroupDataSourceConfig configs = DefaultSaxParser.parse(FileUtils.readFileToString(this.configFile));
+			GroupDataSourceConfig configs = DefaultSaxParser.parse(FileUtils.readFileToString(this.resourceId));
 
 			if (configs != null) {
 				for (Entry<String, DataSourceConfig> config : configs.getDataSourceConfigs().entrySet()) {
@@ -149,7 +149,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 			}
 
 		} else {
-			logger.warn(String.format("config file[%s] doesn't exists.", this.configFile));
+			logger.warn(String.format("config file[%s] doesn't exists.", this.resourceId));
 		}
 
 		return lastModifiedTime;
@@ -170,7 +170,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 			this.groupDatasourceConfig = loadConfigFromXml();
 
 			if (this.groupDatasourceConfig == null) {
-				throw new GroupConfigException(String.format("config file[%s] doesn't exists.", this.configFile));
+				throw new GroupConfigException(String.format("config file[%s] doesn't exists.", this.resourceId));
 			}
 
 			this.availableDsConfig = loadConfigFromXml().getDataSourceConfigs();
@@ -179,18 +179,18 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 			Thread task = new Thread(new ConfigPeroidCheckerTask());
 
 			task.setDaemon(true);
-			task.setName("Thread-" + LocalXmlConfigManager.class.getSimpleName());
+			task.setName("Thread-" + LocalGroupConfigManager.class.getSimpleName());
 			task.start();
 
 			logger.info("Successfully initialize LocalXmlConfigManager.");
 		} catch (Throwable e) {
-			throw new GroupConfigException(String.format("fail to initialize group datasources with config file[%s].",
-			      this.configFile), e);
+			throw new GroupConfigException(String.format("fail to initialize LocalGroupGonfigManager with config file[%s].",
+			      this.resourceId), e);
 		}
 	}
 
 	private GroupDataSourceConfig loadConfigFromXml() throws SAXException, IOException {
-		GroupDataSourceConfig configs = DefaultSaxParser.parse(FileUtils.readFileToString(this.configFile));
+		GroupDataSourceConfig configs = DefaultSaxParser.parse(FileUtils.readFileToString(this.resourceId));
 
 		if (configs != null) {
 			for (Entry<String, DataSourceConfig> config : configs.getDataSourceConfigs().entrySet()) {
@@ -339,7 +339,7 @@ public class LocalXmlConfigManager implements GroupConfigManager {
 					}
 				} catch (Throwable throwable) {
 					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("fail to reload the datasource config[%s]", configFile), throwable);
+						logger.debug(String.format("fail to reload the datasource config[%s]", resourceId), throwable);
 					}
 				}
 

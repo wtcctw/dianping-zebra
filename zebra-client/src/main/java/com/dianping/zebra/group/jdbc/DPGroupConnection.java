@@ -31,7 +31,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;

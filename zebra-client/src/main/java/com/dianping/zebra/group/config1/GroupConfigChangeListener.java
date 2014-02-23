@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.config;
+package com.dianping.zebra.group.config1;
 
 public interface GroupConfigChangeListener {
 

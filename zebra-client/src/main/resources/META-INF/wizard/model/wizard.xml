@@ -6,4 +6,7 @@
    <model package="com.dianping.zebra.group.config.database" name="databases">
       <sample-model>src/test/resources/model/database.xml</sample-model>
    </model>
+   <model package="com.dianping.zebra.group.zebra.system" name="system-config">
+      <sample-model>src/test/resources/model/system.xml</sample-model>
+   </model>
 </wizard>

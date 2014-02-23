@@ -11,5 +11,7 @@ public interface GroupDataSourceManager {
 
 	public Connection getConnection(String id) throws SQLException;
 
+	public Connection getWriteConnection() throws SQLException;
+	
 	public void destory() throws SQLException;
 }

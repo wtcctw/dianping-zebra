@@ -1,0 +1,7 @@
+<system-config>
+	<health-check-interval>10</health-check-interval>
+	<max-error-counter>3</max-error-counter>
+	<retry-times>0</retry-times>
+	<router-strategy>roundrobin</router-strategy>
+	<cookie-domain>.dianping.com</cookie-domain>
+</system-config>

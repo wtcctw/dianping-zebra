@@ -6,19 +6,11 @@ import com.mchange.v2.c3p0.AbstractConnectionCustomizer;
 
 public class DataSourceMonitorCustomizer extends AbstractConnectionCustomizer {
 
-	public void onAcquire(Connection c, String parentDataSourceIdentityToken) throws Exception {
-		System.out.println("-----------acquire-------------");
-	}
-
-	public void onDestroy(Connection c, String parentDataSourceIdentityToken) throws Exception {
-		System.out.println("-----------destroy-------------");
-	}
-
 	public void onCheckOut(Connection c, String parentDataSourceIdentityToken) throws Exception {
-		System.out.println("-----------checkout-------------");
+		C3P0DataSourceRuntimeMonitor.INSTANCE.incCheckedOutCount(parentDataSourceIdentityToken);
 	}
 
 	public void onCheckIn(Connection c, String parentDataSourceIdentityToken) throws Exception {
-		System.out.println("-----------checkin-------------");
+		C3P0DataSourceRuntimeMonitor.INSTANCE.descCheckedOutCount(parentDataSourceIdentityToken);
 	}
 }

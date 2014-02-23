@@ -2,7 +2,7 @@ package com.dianping.zebra.group.router;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManager;
 
 public class GroupDataSourceRouterFactory {
 

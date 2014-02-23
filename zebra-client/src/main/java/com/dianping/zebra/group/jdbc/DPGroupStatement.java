@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 

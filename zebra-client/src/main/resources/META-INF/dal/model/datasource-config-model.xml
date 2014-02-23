@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model model-package="com.dianping.zebra.group.config.datasource" enable-base-visitor="true" enable-sax-parser="true" enable-xml-builder="true" enable-merger="true">
 	<entity name="group-data-source-config" root="true">
-		<element name="health-check-interval" value-type="int" default-value="30" primitive="true"/>
-		<element name="max-error-counter" value-type="int" default-value="3" primitive="true"/>
-		<element name="retry-times" value-type="int" default-value="0" primitive="true"/>
-		<element name="router-strategy" value-type="String" default-value="roundrobin" />
-		<element name="cookie-domain" value-type="String" default-value=".dianping.com" />
 		<entity-ref name="data-source-config" type="map" names="data-source-configs" xml-indent="true" method-find-or-create="true" />
 	</entity>
 	<entity name="data-source-config">
@@ -19,6 +14,7 @@
 		<element name="min-pool-size" value-type="int" primitive="true" />
 		<element name="max-pool-size" value-type="int" primitive="true" />
 		<element name="initial-pool-size" value-type="int" primitive="true" />
+		<element name="connection-customize-class-name" value-type="String" default-value="com.dianping.zebra.group.manager.DataSourceMonitorCustomizer"/>
 		<any name="properties" />
 	</entity>
 </model>

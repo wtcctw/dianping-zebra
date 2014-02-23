@@ -2,7 +2,6 @@
 	<data-source-config id="db1" weight="1" readonly="false">
 		<min-pool-size>5</min-pool-size>
 		<max-pool-size>5</max-pool-size>
-		<connectionCustomizerClassName>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connectionCustomizerClassName>
 	</data-source-config>
 	<data-source-config id="db2" weight="2" readonly="true">
 		<max-pool-size>5</max-pool-size>

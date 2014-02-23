@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.dianping.zebra.group.config.BaseGroupConfigChangeEvent;
-import com.dianping.zebra.group.config.GroupConfigChangeListener;
-import com.dianping.zebra.group.config.GroupConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config1.BaseGroupConfigChangeEvent;
+import com.dianping.zebra.group.config1.GroupConfigChangeListener;
+import com.dianping.zebra.group.config1.GroupConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 import com.dianping.zebra.group.router.GroupDataSourceTarget;

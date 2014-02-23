@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.manager;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManager;
 
 public class GroupDataSourceManagerFactory {
 

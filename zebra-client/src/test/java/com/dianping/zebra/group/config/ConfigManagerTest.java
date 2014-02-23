@@ -6,12 +6,15 @@ import org.junit.Test;
 
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config1.BaseGroupConfigChangeEvent;
+import com.dianping.zebra.group.config1.GroupConfigChangeListener;
+import com.dianping.zebra.group.config1.LocalGroupConfigManager;
 
 public class ConfigManagerTest {
 
 	@Test
 	public void testManager() throws IOException, InterruptedException {
-		LocalXmlConfigManager manager = new LocalXmlConfigManager("datasources.xml");
+		LocalGroupConfigManager manager = new LocalGroupConfigManager("datasources.xml");
 
 		manager.addListerner(new GroupConfigChangeListener() {
 

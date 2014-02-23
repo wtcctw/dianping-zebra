@@ -16,12 +16,12 @@ import org.apache.commons.lang.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.zebra.group.config.ActiveDataSourceChangeEvent;
-import com.dianping.zebra.group.config.BaseGroupConfigChangeEvent;
-import com.dianping.zebra.group.config.GroupConfigChangeListener;
-import com.dianping.zebra.group.config.GroupConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config1.ActiveDataSourceChangeEvent;
+import com.dianping.zebra.group.config1.BaseGroupConfigChangeEvent;
+import com.dianping.zebra.group.config1.GroupConfigChangeListener;
+import com.dianping.zebra.group.config1.GroupConfigManager;
 import com.dianping.zebra.group.exception.GroupConfigException;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -104,6 +104,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 
 		try {
+			dataSource.setIdentityToken(value.getId());
 			dataSource.setUser(value.getUser());
 			dataSource.setDriverClass(value.getDriverClass());
 			dataSource.setJdbcUrl(value.getJdbcUrl());
@@ -111,10 +112,11 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			dataSource.setInitialPoolSize(value.getInitialPoolSize());
 			dataSource.setMinPoolSize(value.getMinPoolSize());
 			dataSource.setMaxPoolSize(value.getMaxPoolSize());
+			dataSource.setConnectionCustomizerClassName(value.getConnectionCustomizeClassName());
 
 			for (Any any : value.getProperties()) {
 				// TODO franky wu
-				MethodUtils.invokeMethod(dataSource, "set" + StringUtils.capitalize(any.getName()), value.getUser());
+				MethodUtils.invokeMethod(dataSource, "set" + StringUtils.capitalize(any.getName()), any.getValue());
 			}
 		} catch (Throwable e) {
 			throw new GroupConfigException(e);
@@ -175,10 +177,25 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 				if (dataSource != null && dataSource instanceof ComboPooledDataSource) {
 					ComboPooledDataSource comboDataSource = (ComboPooledDataSource) dataSource;
+					String dsId = comboDataSource.getIdentityToken();
 
-					comboDataSource.close();
+					if (C3P0DataSourceRuntimeMonitor.INSTANCE.getCheckedOutCount(dsId) <= 0) {
+						comboDataSource.close();
+						C3P0DataSourceRuntimeMonitor.INSTANCE.removeCounter(comboDataSource.getIdentityToken());
+					} else {
+						toCloseDataSource.offer(comboDataSource);
+					}
+				} else {
+					// Normally not happen
+					logger.warn("fail to close dataSource since dataSource is null or dataSource is not an instance of ComboPooledDataSource.");
 				}
 			}
 		}
 	}
+
+	@Override
+   public Connection getWriteConnection() throws SQLException {
+	   // TODO Auto-generated method stub
+	   return null;
+   }
 }

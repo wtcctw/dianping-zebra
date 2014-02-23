@@ -6,8 +6,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
-import com.dianping.zebra.group.config.LocalXmlConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManager;
+import com.dianping.zebra.group.config1.LocalGroupConfigManager;
 import com.dianping.zebra.group.router.GroupDataSourceTarget;
 
 public class MysqlHealthCheckImplTest {
@@ -16,7 +16,7 @@ public class MysqlHealthCheckImplTest {
 	@Before
 	public void init() {
 		String resourceId = "datasources.xml";
-		this.configManager = new LocalXmlConfigManager(resourceId);
+		this.configManager = new LocalGroupConfigManager(resourceId);
 		configManager.init();
 	}
 	
