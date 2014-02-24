@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-import com.dianping.zebra.group.config1.GroupConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 
@@ -22,7 +22,7 @@ import com.dianping.zebra.group.router.GroupDataSourceRouter;
  */
 public class DPGroupStatement implements Statement {
 
-	protected GroupConfigManager configManager;
+	protected DataSourceConfigManager configManager;
 
 	protected GroupDataSourceRouter router;
 
@@ -31,7 +31,7 @@ public class DPGroupStatement implements Statement {
 	protected DPGroupConnection dpGroupConnection;
 
 	public DPGroupStatement(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      GroupConfigManager configManager, DPGroupConnection connection) {
+	      DataSourceConfigManager configManager, DPGroupConnection connection) {
 		this.router = router;
 		this.dataSourceManager = dataSourceManager;
 		this.configManager = configManager;

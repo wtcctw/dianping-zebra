@@ -1,44 +1,39 @@
 package com.dianping.zebra.group.config;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
 import org.junit.Test;
-
-import com.dianping.zebra.group.config.datasource.entity.Any;
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.config1.BaseGroupConfigChangeEvent;
-import com.dianping.zebra.group.config1.GroupConfigChangeListener;
-import com.dianping.zebra.group.config1.LocalGroupConfigManager;
 
 public class ConfigManagerTest {
 
 	@Test
 	public void testManager() throws IOException, InterruptedException {
-		LocalGroupConfigManager manager = new LocalGroupConfigManager("datasources.xml");
-
-		manager.addListerner(new GroupConfigChangeListener() {
-
+		SystemConfigManager systemConfigManager = SystemConfigManagerFactory.getConfigManger("local", "system.properties");
+		
+		System.out.println(systemConfigManager.getSystemConfig());
+		
+		systemConfigManager.addListerner(new PropertyChangeListener() {
+			
 			@Override
-			public void onChange(BaseGroupConfigChangeEvent event) {
-				System.out.println("changed");
-				System.out.println(event);
-				
-				for(DataSourceConfig config : event.getDatasourceConfigs().values()){
-					for(Any any : config.getProperties()){
-						System.out.println(any.getName());
-						System.out.println(any.getValue());
-					}
-				}
-			}
-
-			@Override
-			public String getName() {
-				return "mock-listener";
+			public void propertyChange(PropertyChangeEvent evt) {
+				System.out.println(String.format("Property %s changed from [%s] to [%s]", evt.getPropertyName(),evt.getOldValue(),evt.getNewValue()));
 			}
 		});
+		
+		
+		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local","ds.properties");
 
-		manager.init();
-
+		System.out.println(dataSourceConfigManager.getDataSourceConfigs());
+		dataSourceConfigManager.addListerner(new PropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				System.out.println(String.format("Property %s changed from [%s] to [%s]", evt.getPropertyName(),evt.getOldValue(),evt.getNewValue()));
+			}
+		});
+		
 		System.in.read();
 	}
 }

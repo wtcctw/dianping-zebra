@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config1.GroupConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config1.GroupConfigManagerFactory;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
@@ -37,7 +37,7 @@ public class DPGroupDataSource implements DataSource {
 
 	private String configManagerType = Constants.DEFAULT_CONFIG_MANAGER_TYPE;
 
-	private GroupConfigManager configManager;
+	private DataSourceConfigManager configManager;
 
 	private GroupDataSourceRouter router;
 
@@ -74,7 +74,7 @@ public class DPGroupDataSource implements DataSource {
 		this.configManagerType = configManagerType;
 	}
 
-	public void setConfigManager(GroupConfigManager configManager) {
+	public void setConfigManager(DataSourceConfigManager configManager) {
 		this.configManager = configManager;
 	}
 

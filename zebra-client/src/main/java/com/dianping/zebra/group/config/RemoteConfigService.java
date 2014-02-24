@@ -4,10 +4,7 @@ import java.beans.PropertyChangeListener;
 
 public class RemoteConfigService implements ConfigService{
 	
-	private String resourceId;
-	
 	public RemoteConfigService(String resourceId) {
-		this.resourceId = resourceId;
 	}
 
 	@Override

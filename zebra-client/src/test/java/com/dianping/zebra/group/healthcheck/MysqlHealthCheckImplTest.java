@@ -6,12 +6,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.zebra.group.config1.GroupConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config1.LocalGroupConfigManager;
 import com.dianping.zebra.group.router.GroupDataSourceTarget;
 
 public class MysqlHealthCheckImplTest {
-	private GroupConfigManager configManager;
+	private DataSourceConfigManager configManager;
 
 	@Before
 	public void init() {

@@ -2,7 +2,7 @@ package com.dianping.zebra.group.router;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.dianping.zebra.group.config1.GroupConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 
 public class GroupDataSourceRouterFactory {
 
@@ -10,7 +10,7 @@ public class GroupDataSourceRouterFactory {
 
 	private static AtomicReference<GroupReadWriteDataSourceRouter> readWriteDataSourceRouter = new AtomicReference<GroupReadWriteDataSourceRouter>();
 
-	public static GroupDataSourceRouter getDataSourceRouter(GroupConfigManager configManager) {
+	public static GroupDataSourceRouter getDataSourceRouter(DataSourceConfigManager configManager) {
 
 		String routerStrategy = configManager.getGroupDataSourceConfig().getRouterStrategy();
 

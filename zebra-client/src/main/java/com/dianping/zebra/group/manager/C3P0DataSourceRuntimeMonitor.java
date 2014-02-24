@@ -10,7 +10,11 @@ public enum C3P0DataSourceRuntimeMonitor {
 	private ConcurrentMap<String, AtomicInteger> checkedOutCounter = new ConcurrentHashMap<String, AtomicInteger>();
 
 	public void incCheckedOutCount(String dsId) {
-		checkedOutCounter.putIfAbsent(dsId, new AtomicInteger(0)).incrementAndGet();
+		if (!checkedOutCounter.containsKey(dsId)) {
+			checkedOutCounter.putIfAbsent(dsId, new AtomicInteger(1));
+		} else {
+			checkedOutCounter.get(dsId).incrementAndGet();
+		}
 	}
 
 	public void descCheckedOutCount(String dsId) {

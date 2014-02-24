@@ -7,11 +7,16 @@
         <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>arch-ZebraClient</name>
-    <artifactId>${zebra-client.aid}</artifactId>
-    <version>${zebra-client.version}</version>
+    <name>arch-ZebraEnvironment</name>
+    <artifactId>${zebra-environment.aid}</artifactId>
+    <version>${zebra-environment.version}</version>
     <packaging>jar</packaging>
     <dependencies>
+        <dependency>
+            <groupId>${pom.groupId}</groupId>
+            <artifactId>${zebra-client.aid}</artifactId>
+            <version>${zebra-client.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -37,28 +42,12 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jmock</groupId>
-            <artifactId>jmock-junit4</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.dbunit</groupId>
-            <artifactId>dbunit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -79,27 +68,6 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.unidal.maven.plugins</groupId>
-                <artifactId>codegen-maven-plugin</artifactId>
-                <version>2.0.10</version>
-                <executions>
-                    <execution>
-                        <id>generate dal model files</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>dal-model</goal>
-                        </goals>
-                        <configuration>
-                            <manifest><![CDATA[,
-                        ${basedir}/src/main/resources/META-INF/dal/model/datasource-config-manifest.xml,
-                        ${basedir}/src/main/resources/META-INF/dal/model/databases-manifest.xml,
-                        ${basedir}/src/main/resources/META-INF/dal/model/system-config-manifest.xml,
-                     ,]]></manifest>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>

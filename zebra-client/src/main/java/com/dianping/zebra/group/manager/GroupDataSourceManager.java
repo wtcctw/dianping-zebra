@@ -9,9 +9,9 @@ public interface GroupDataSourceManager {
 
 	public boolean isAvailable(String id);
 
-	public Connection getConnection(String id) throws SQLException;
-
 	public Connection getWriteConnection() throws SQLException;
 	
 	public void destory() throws SQLException;
+
+	public Connection getReadConnection(String id) throws SQLException;
 }

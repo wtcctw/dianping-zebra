@@ -1,12 +1,12 @@
 package com.dianping.zebra.group.manager;
 
-import com.dianping.zebra.group.config1.GroupConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 
 public class GroupDataSourceManagerFactory {
 
 	private static GroupDataSourceManager manager;
 
-	public static GroupDataSourceManager getGroupDataSourceManger(GroupConfigManager groupConfigManager) {
+	public static GroupDataSourceManager getGroupDataSourceManger(DataSourceConfigManager groupConfigManager) {
 		if (manager == null) {
 			synchronized (GroupDataSourceManagerFactory.class) {
 				if (manager == null) {
