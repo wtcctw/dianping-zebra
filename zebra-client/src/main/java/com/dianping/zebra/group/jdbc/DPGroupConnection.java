@@ -179,8 +179,7 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
-		Statement stmt = new DPGroupStatement(router, dataSourceManager, dataSourceConfigManager, systemConfigManager,
-		      this);
+		Statement stmt = new DPGroupStatement(this);
 		openedStatements.add(stmt);
 		return stmt;
 	}
@@ -193,8 +192,7 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
-		PreparedStatement pstmt = new DPGroupPreparedStatement(router, dataSourceManager, dataSourceConfigManager,
-		      systemConfigManager, this, sql);
+		PreparedStatement pstmt = new DPGroupPreparedStatement(this, sql);
 		openedStatements.add(pstmt);
 		return pstmt;
 	}
