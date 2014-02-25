@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -21,6 +22,7 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,12 +30,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.zebra.group.config.GroupConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
+import com.dianping.zebra.group.router.GroupDataSourceRouterInfo;
+import com.dianping.zebra.group.router.GroupDataSourceTarget;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 
 /**
@@ -41,7 +42,6 @@ import com.dianping.zebra.group.util.JDBCExceptionUtils;
  * 
  */
 public class DPGroupConnection implements Connection {
-	private Logger log = LoggerFactory.getLogger(DPGroupConnection.class);
 
 	private GroupConfigManager configManager;
 
@@ -61,7 +61,9 @@ public class DPGroupConnection implements Connection {
 
 	private boolean autoCommit = true;
 
-	private Set<Statement> attachedStatements = new HashSet<Statement>();
+	private int transactionIsolation = -1;
+
+	private Set<Statement> openedStatements = new HashSet<Statement>();
 
 	private void checkClosed() throws SQLException {
 		if (closed) {
@@ -81,6 +83,68 @@ public class DPGroupConnection implements Connection {
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
 	      GroupConfigManager configManager) {
 		this(router, dataSourceManager, configManager, null, null);
+	}
+
+	/**
+	 * 永远不会返回null，如果没有可用connection，则抛出SQLException
+	 */
+	Connection getRealConnection(String sql, boolean forceWrite) throws SQLException {
+		if (forceWrite) {
+			if (wConnection == null) {
+				wConnection = dataSourceManager.getWriteConnection();
+			}
+
+			return wConnection;
+		}
+
+		if (wConnection != null) {
+			return wConnection;
+		}
+
+		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(sql);
+		GroupDataSourceTarget dsTarget = router.select(routerInfo);
+
+		if (dsTarget == null) {
+			throw new SQLException("No available dataSource");
+		}
+
+		if (dsTarget.isReadOnly()) {
+			if (rConnection != null) {
+				return rConnection;
+			} else {
+				int retryTimes = -1;
+				Set<GroupDataSourceTarget> excludeTargets = new HashSet<GroupDataSourceTarget>();
+				List<SQLException> exceptions = new ArrayList<SQLException>();
+
+				while (retryTimes++ < configManager.getGroupDataSourceConfig().getRetryTimes()) {
+					try {
+						rConnection = dataSourceManager.getReadConnection(dsTarget.getId());
+						return rConnection;
+					} catch (SQLException e) {
+						exceptions.add(e);
+						excludeTargets.add(dsTarget);
+						dsTarget = router.select(routerInfo, excludeTargets);
+						if (dsTarget == null) {
+							break;
+						}
+					}
+				}
+
+				if (!exceptions.isEmpty()) {
+					JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
+				} else {
+					throw new SQLException("Can not aquire connection");
+				}
+			}
+		} else {
+			wConnection = dataSourceManager.getWriteConnection();
+			if (wConnection.getAutoCommit() != autoCommit) {
+				wConnection.setAutoCommit(autoCommit);
+			}
+			return wConnection;
+		}
+
+		throw new SQLException("Can not aquire connection");
 	}
 
 	/*
@@ -117,7 +181,7 @@ public class DPGroupConnection implements Connection {
 	public Statement createStatement() throws SQLException {
 		checkClosed();
 		Statement stmt = new DPGroupStatement(router, dataSourceManager, configManager, this);
-		attachedStatements.add(stmt);
+		openedStatements.add(stmt);
 		return stmt;
 	}
 
@@ -130,7 +194,7 @@ public class DPGroupConnection implements Connection {
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
 		PreparedStatement pstmt = new DPGroupPreparedStatement(router, dataSourceManager, configManager, this, sql);
-		attachedStatements.add(pstmt);
+		openedStatements.add(pstmt);
 		return pstmt;
 	}
 
@@ -141,8 +205,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public CallableStatement prepareCall(String sql) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return prepareCall(sql, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 	}
 
 	/*
@@ -171,7 +234,6 @@ public class DPGroupConnection implements Connection {
 			this.wConnection.setAutoCommit(autoCommit);
 		}
 
-		// TODO do we need to set rConnection's autoCommit
 	}
 
 	/*
@@ -199,7 +261,6 @@ public class DPGroupConnection implements Connection {
 
 		if (wConnection != null) {
 			wConnection.commit();
-			// TODO if exception occurs, need to log?
 		}
 	}
 
@@ -234,7 +295,7 @@ public class DPGroupConnection implements Connection {
 
 		List<SQLException> exceptions = new LinkedList<SQLException>();
 		try {
-			for (Statement stmt : attachedStatements) {
+			for (Statement stmt : openedStatements) {
 				try {
 					stmt.close();
 				} catch (SQLException e) {
@@ -257,7 +318,7 @@ public class DPGroupConnection implements Connection {
 				exceptions.add(e);
 			}
 		} finally {
-			attachedStatements.clear();
+			openedStatements.clear();
 			rConnection = null;
 			wConnection = null;
 
@@ -300,8 +361,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void setReadOnly(boolean readOnly) throws SQLException {
-		// TODO Auto-generated method stub
-
+		// do nothing
 	}
 
 	/*
@@ -311,7 +371,6 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public boolean isReadOnly() throws SQLException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -322,8 +381,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void setCatalog(String catalog) throws SQLException {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("setCatalog");
 	}
 
 	/*
@@ -333,8 +391,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public String getCatalog() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getCatalog");
 	}
 
 	/*
@@ -344,8 +401,8 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void setTransactionIsolation(int level) throws SQLException {
-		// TODO Auto-generated method stub
-
+		checkClosed();
+		this.transactionIsolation = level;
 	}
 
 	/*
@@ -355,8 +412,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public int getTransactionIsolation() throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.transactionIsolation;
 	}
 
 	/*
@@ -366,8 +422,14 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public SQLWarning getWarnings() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		checkClosed();
+		if (rConnection != null) {
+			return rConnection.getWarnings();
+		} else if (wConnection != null) {
+			return wConnection.getWarnings();
+		} else {
+			return null;
+		}
 	}
 
 	/*
@@ -377,8 +439,13 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void clearWarnings() throws SQLException {
-		// TODO Auto-generated method stub
-
+		checkClosed();
+		if (rConnection != null) {
+			rConnection.clearWarnings();
+		}
+		if (wConnection != null) {
+			wConnection.clearWarnings();
+		}
 	}
 
 	/*
@@ -388,8 +455,10 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		DPGroupStatement stmt = (DPGroupStatement) createStatement();
+		stmt.setResultSetType(resultSetType);
+		stmt.setResultSetConcurrency(resultSetConcurrency);
+		return stmt;
 	}
 
 	/*
@@ -400,8 +469,10 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
 	      throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql);
+		pstmt.setResultSetType(resultSetType);
+		pstmt.setResultSetConcurrency(resultSetConcurrency);
+		return pstmt;
 	}
 
 	/*
@@ -411,8 +482,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		return prepareCall(sql, resultSetType, resultSetConcurrency, Integer.MIN_VALUE);
 	}
 
 	/*
@@ -422,8 +492,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Map<String, Class<?>> getTypeMap() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getTypeMap");
 	}
 
 	/*
@@ -433,8 +502,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("setTypeMap");
 	}
 
 	/*
@@ -444,8 +512,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void setHoldability(int holdability) throws SQLException {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("setHoldability");
 	}
 
 	/*
@@ -455,8 +522,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public int getHoldability() throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
+		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
 	}
 
 	/*
@@ -466,8 +532,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Savepoint setSavepoint() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("setSavepoint");
 	}
 
 	/*
@@ -477,8 +542,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Savepoint setSavepoint(String name) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("setSavepoint");
 	}
 
 	/*
@@ -488,8 +552,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void rollback(Savepoint savepoint) throws SQLException {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("rollback with savepoint");
 	}
 
 	/*
@@ -499,8 +562,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("releaseSavepoint");
 	}
 
 	/*
@@ -511,8 +573,9 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
 	      throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		DPGroupStatement stmt = (DPGroupStatement) createStatement(resultSetType, resultSetConcurrency);
+		stmt.setResultSetHoldability(resultSetHoldability);
+		return stmt;
 	}
 
 	/*
@@ -523,8 +586,10 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
 	      int resultSetHoldability) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql, resultSetType,
+		      resultSetConcurrency);
+		pstmt.setResultSetHoldability(resultSetHoldability);
+		return pstmt;
 	}
 
 	/*
@@ -535,8 +600,39 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
 	      int resultSetHoldability) throws SQLException {
-		// TODO Auto-generated method stub
+		checkClosed();
+		CallableStatement cstmt = null;
+		// 存储过程强制走写库
+		Connection conn = getRealConnection(sql, true);
+		if (conn != null) {
+			cstmt = getCallableStatement(conn, sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+			DPGroupCallableStatement dpcstmt = new DPGroupCallableStatement(router, dataSourceManager, configManager,
+			      this, cstmt, sql);
+
+			if (resultSetType != Integer.MIN_VALUE) {
+				dpcstmt.setResultSetType(resultSetType);
+				dpcstmt.setResultSetConcurrency(resultSetConcurrency);
+			}
+			if (resultSetHoldability != Integer.MIN_VALUE) {
+				dpcstmt.setResultSetHoldability(resultSetHoldability);
+			}
+			openedStatements.add(dpcstmt);
+			return dpcstmt;
+		}
+
+		// 因为getRealConnection不会返回null，所以这行代码没法到达
 		return null;
+	}
+
+	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
+	      int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		if (resultSetType == Integer.MIN_VALUE) {
+			return conn.prepareCall(sql);
+		} else if (resultSetHoldability == Integer.MIN_VALUE) {
+			return conn.prepareCall(sql, resultSetType, resultSetConcurrency);
+		} else {
+			return conn.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+		}
 	}
 
 	/*
@@ -546,8 +642,9 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql);
+		pstmt.setAutoGeneratedKeys(autoGeneratedKeys);
+		return pstmt;
 	}
 
 	/*
@@ -557,8 +654,9 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql);
+		pstmt.setColumnIndexes(columnIndexes);
+		return pstmt;
 	}
 
 	/*
@@ -568,8 +666,9 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql);
+		pstmt.setColumnNames(columnNames);
+		return pstmt;
 	}
 
 	/*
@@ -579,8 +678,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Clob createClob() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("createClob");
 	}
 
 	/*
@@ -590,8 +688,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Blob createBlob() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("createBlob");
 	}
 
 	/*
@@ -601,8 +698,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public NClob createNClob() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("createNClob");
 	}
 
 	/*
@@ -612,8 +708,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public SQLXML createSQLXML() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("createSQLXML");
 	}
 
 	/*
@@ -623,8 +718,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public boolean isValid(int timeout) throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("isValid");
 	}
 
 	/*
@@ -634,8 +728,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void setClientInfo(String name, String value) throws SQLClientInfoException {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("setClientInfo");
 	}
 
 	/*
@@ -645,8 +738,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public void setClientInfo(Properties properties) throws SQLClientInfoException {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("setClientInfo");
 	}
 
 	/*
@@ -656,8 +748,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public String getClientInfo(String name) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getClientInfo");
 	}
 
 	/*
@@ -667,8 +758,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Properties getClientInfo() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("getClientInfo");
 	}
 
 	/*
@@ -678,8 +768,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("createArrayOf");
 	}
 
 	/*
@@ -689,8 +778,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("createStruct");
 	}
 
 }
