@@ -16,7 +16,9 @@ import org.apache.commons.lang.StringUtils;
 
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config1.GroupConfigManagerFactory;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.zebra.group.config.SystemConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
@@ -37,11 +39,13 @@ public class DPGroupDataSource implements DataSource {
 
 	private String configManagerType = Constants.DEFAULT_CONFIG_MANAGER_TYPE;
 
-	private DataSourceConfigManager configManager;
+	private GroupDataSourceManager dataSourceManager;
 
 	private GroupDataSourceRouter router;
 
-	private GroupDataSourceManager dataSourceManager;
+	private SystemConfigManager systemConfigManager;
+
+	private DataSourceConfigManager dataSourceConfigManager;
 
 	public DPGroupDataSource() {
 		this(null, null);
@@ -61,9 +65,10 @@ public class DPGroupDataSource implements DataSource {
 			throw new GroupDataSourceException("configManagerType must not be blank");
 		}
 
-		this.configManager = GroupConfigManagerFactory.getConfigManger(configManagerType, resourceId);
-		this.router = GroupDataSourceRouterFactory.getDataSourceRouter(configManager);
-		this.dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(configManager);
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, resourceId);
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType, resourceId);
+		this.router = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager, systemConfigManager);
+		this.dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(dataSourceConfigManager);
 	}
 
 	public void setResourceId(String resourceId) {
@@ -74,8 +79,12 @@ public class DPGroupDataSource implements DataSource {
 		this.configManagerType = configManagerType;
 	}
 
-	public void setConfigManager(DataSourceConfigManager configManager) {
-		this.configManager = configManager;
+	public void setSystemConfigManager(SystemConfigManager systemConfigManager) {
+		this.systemConfigManager = systemConfigManager;
+	}
+
+	public void setDataSourceConfigManager(DataSourceConfigManager dataSourceConfigManager) {
+		this.dataSourceConfigManager = dataSourceConfigManager;
 	}
 
 	public void setRouter(GroupDataSourceRouter router) {
@@ -158,7 +167,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		return new DPGroupConnection(router, dataSourceManager, configManager);
+		return new DPGroupConnection(router, dataSourceManager, dataSourceConfigManager, systemConfigManager);
 	}
 
 	/*
@@ -168,7 +177,8 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return new DPGroupConnection(router, dataSourceManager, configManager, username, password);
+		return new DPGroupConnection(router, dataSourceManager, dataSourceConfigManager, systemConfigManager, username,
+		      password);
 	}
 
 }
