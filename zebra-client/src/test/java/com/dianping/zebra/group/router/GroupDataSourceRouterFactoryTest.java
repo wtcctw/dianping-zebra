@@ -7,12 +7,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
-import com.dianping.zebra.group.config.GroupConfigManagerFactory;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config1.GroupConfigManagerFactory;
 
 public class GroupDataSourceRouterFactoryTest {
 
-	private GroupConfigManager configManager;
+	private DataSourceConfigManager configManager;
 
 	@Before
 	public void init() {

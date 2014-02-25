@@ -7,6 +7,7 @@
 		<min-pool-size>5</min-pool-size>
 		<max-pool-size>5</max-pool-size>
 		<initial-pool-size>5</initial-pool-size>
+		<connection-customize-class-name>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connection-customize-class-name>
 	</data-source-config>
 	<data-source-config id="db2" weight="1" readonly="true">
 		<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
@@ -16,9 +17,6 @@
 		<min-pool-size>5</min-pool-size>
 		<max-pool-size>5</max-pool-size>
 		<initial-pool-size>5</initial-pool-size>
+		<connection-customize-class-name>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connection-customize-class-name>
 	</data-source-config>
-	<health-check-interval>10</health-check-interval>
-	<max-error-counter>3</max-error-counter>
-	<retry-times>0</retry-times>
-	<router-strategy>roundrobin</router-strategy>
 </group-data-source-config>

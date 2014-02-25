@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.filter;
+package com.dianping.zebra.environment.filter;
 
 import java.io.IOException;
 
@@ -12,11 +12,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.lion.client.ConfigCache;
-import com.dianping.lion.client.LionException;
-import com.dianping.zebra.group.router.GroupDataSourceContext;
-import com.dianping.zebra.group.util.ZebraUtil;
+import com.dianping.zebra.environment.util.ZebraUtil;
 
 public class GroupDataSourceFilter implements Filter {
 
@@ -32,18 +28,18 @@ public class GroupDataSourceFilter implements Filter {
 
 		if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
 
-			GroupDataSourceContext context = GroupDataSourceContext.get();
+			DPDataSourceContext context = DPDataSourceContext.getContext();
 
 			HttpServletRequest hRequest = (HttpServletRequest) request;
 
-			// 读取cookie，有且时间未过期的话，设置context中forceReadFromMasterByCookie为true
+			// 读取cookie，有且时间未过期的话，设置context中masterFlag为true
 			Cookie zebra = getCookie(hRequest);
 			if (zebra != null) {
 				try {
-					long expireTime = Long.parseLong(ZebraUtil.decrypt(zebra.getValue()));
+					long expireTime = ZebraUtil.decryptTimestamp(zebra.getValue());
 					long now = System.currentTimeMillis();
 					if (expireTime < now) {
-						context.setForceReadFromMasterByCookie(true);
+						context.setMasterFlag(true, false);
 					}
 				} catch (Exception e) {
 				}
@@ -53,12 +49,12 @@ public class GroupDataSourceFilter implements Filter {
 				chain.doFilter(request, response);
 
 				// 从Threadlocal获取forceReadFromMaster值，如果有forceReadFromMaster，set cookie 到 response
-				boolean forceReadFromMaster = context.isForceReadFromMaster();
-				if (forceReadFromMaster) {
+				boolean shouldSetCookie = context.isShouldSetCookie();
+				if (shouldSetCookie) {
 					HttpServletResponse hResponse = (HttpServletResponse) response;
 					long now = System.currentTimeMillis();
 					try {
-						Cookie cookie = new Cookie(COOKIE_NAME, ZebraUtil.encrypt(String.valueOf(now)));
+						Cookie cookie = new Cookie(COOKIE_NAME, ZebraUtil.encryptTimestamp((now)));
 						if (domain != null) {
 							cookie.setDomain(domain);
 						}
@@ -69,7 +65,7 @@ public class GroupDataSourceFilter implements Filter {
 
 			} finally {
 				// 清除ThreadLocal
-				GroupDataSourceContext.clear();
+				DPDataSourceContext.clear();
 			}
 		}
 	}
@@ -90,17 +86,10 @@ public class GroupDataSourceFilter implements Filter {
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		domain = filterConfig.getInitParameter(DOMAIN);
-		if (domain == null) {
-			try {
-				Class.forName("com.dianping.lion.client.ConfigCache");
-				ConfigCache cc = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress());
-				domain = cc.getProperty("domain.lion.xxx");// TODO lion domain key
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException("Without lion, 'domain' should be set from filter config", e);
-			} catch (LionException e) {
-				throw new RuntimeException("Init lion error.", e);
-			}
-		}
+		// String configManagerType;
+		// String resourceId;
+		// String configManagerType;
+		// GroupConfigManagerFactory.getConfigManger(configManagerType, resourceId);
 	}
 
 	@Override

@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
   <entity name="group-data-source-config" root="true">
-    <element name="health-check-interval" value-type="int" />
-    <element name="max-error-counter" value-type="int" />
-    <element name="retry-times" value-type="int" />
-    <element name="router-strategy" value-type="String" />
     <entity-ref name="data-source-config" type="list" names="data-source-configs" />
   </entity>
   <entity name="data-source-config">
@@ -18,6 +14,7 @@
     <element name="min-pool-size" value-type="int" />
     <element name="max-pool-size" value-type="int" />
     <element name="initial-pool-size" value-type="int" />
+    <element name="connection-customize-class-name" value-type="String" />
   </entity>
 </model>
 

@@ -12,6 +12,7 @@
     <element name="min-pool-size" value-type="String" />
     <element name="max-pool-size" value-type="String" />
     <element name="initial-pool-size" value-type="String" />
+    <element name="connection-customize-class-name" value-type="String" />
   </entity>
 </model>
 

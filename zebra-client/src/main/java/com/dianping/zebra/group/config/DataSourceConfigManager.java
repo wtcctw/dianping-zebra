@@ -1,19 +1,17 @@
 package com.dianping.zebra.group.config;
 
+import java.beans.PropertyChangeListener;
 import java.util.Map;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 
-public interface GroupConfigManager {
+public interface DataSourceConfigManager {
 	
 	public void init();
 	
 	public Map<String, DataSourceConfig> getDataSourceConfigs();
 	
-	public GroupDataSourceConfig getGroupDataSourceConfig();
-
-	public void addListerner(GroupConfigChangeListener listener);
+	public void addListerner(PropertyChangeListener listener);
 
 	public void markDown(String id);
 

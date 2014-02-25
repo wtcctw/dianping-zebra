@@ -30,7 +30,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 import com.dianping.zebra.group.router.GroupDataSourceRouterInfo;
@@ -43,7 +46,7 @@ import com.dianping.zebra.group.util.JDBCExceptionUtils;
  */
 public class DPGroupConnection implements Connection {
 
-	private GroupConfigManager configManager;
+	private DataSourceConfigManager configManager;
 
 	private GroupDataSourceRouter router;
 
@@ -72,7 +75,7 @@ public class DPGroupConnection implements Connection {
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      GroupConfigManager configManager, String userName, String password) {
+	      DataSourceConfigManager configManager, String userName, String password) {
 		this.router = router;
 		this.dataSourceManager = dataSourceManager;
 		this.configManager = configManager;
@@ -81,7 +84,7 @@ public class DPGroupConnection implements Connection {
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      GroupConfigManager configManager) {
+	      DataSourceConfigManager configManager) {
 		this(router, dataSourceManager, configManager, null, null);
 	}
 

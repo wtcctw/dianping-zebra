@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model model-package="com.dianping.zebra.group.config.system" enable-sax-parser="true" enable-xml-builder="true">
+	<entity name="system-config" root="true">
+		<element name="health-check-interval" value-type="int" default-value="30" primitive="true" />
+		<element name="max-error-counter" value-type="int" default-value="3" primitive="true" />
+		<element name="retry-times" value-type="int" default-value="0" primitive="true" />
+		<element name="router-strategy" value-type="String" default-value="roundrobin" />
+		<element name="cookie-domain" value-type="String" default-value=".dianping.com" />
+	</entity>
+</model>
