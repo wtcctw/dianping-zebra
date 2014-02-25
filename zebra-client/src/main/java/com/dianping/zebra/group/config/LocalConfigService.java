@@ -82,7 +82,6 @@ public class LocalConfigService implements ConfigService {
 			Thread updateTask= new Thread(new ConfigPeroidCheckerTask());
 			updateTask.setDaemon(true);
 			updateTask.setName("Thread-" + ConfigPeroidCheckerTask.class.getName());
-			
 			updateTask.start();
 		} catch (Throwable e) {
 			throw new GroupConfigException(e);
