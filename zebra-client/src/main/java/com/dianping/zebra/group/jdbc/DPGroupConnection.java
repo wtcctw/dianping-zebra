@@ -52,10 +52,6 @@ public class DPGroupConnection implements Connection {
 
 	private GroupDataSourceManager dataSourceManager;
 
-	private String userName;
-
-	private String password;
-
 	private Connection rConnection;
 
 	private Connection wConnection;
@@ -81,8 +77,6 @@ public class DPGroupConnection implements Connection {
 		this.dataSourceManager = dataSourceManager;
 		this.systemConfigManager = systemConfigManager;
 		this.dataSourceConfigManager = dataSourceConfigManager;
-		this.userName = userName;
-		this.password = password;
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
