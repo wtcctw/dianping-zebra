@@ -24,7 +24,7 @@ public class LocalConfigService implements ConfigService {
 
 	private Logger logger = LoggerFactory.getLogger(LocalConfigService.class);
 
-	private String resourceId;
+	private String resourceFileName;
 
 	private File resourceFile;
 
@@ -35,7 +35,7 @@ public class LocalConfigService implements ConfigService {
 	private AtomicLong lastModifiedTime = new AtomicLong(-1);
 
 	public LocalConfigService(String resourceId) {
-		this.resourceId = resourceId;
+		this.resourceFileName = resourceId + ".properties";
 	}
 
 	@Override
@@ -44,11 +44,11 @@ public class LocalConfigService implements ConfigService {
 	}
 
 	private File getFile() {
-		URL propUrl = getClass().getClassLoader().getResource(this.resourceId);
+		URL propUrl = getClass().getClassLoader().getResource(this.resourceFileName);
 		if (propUrl != null) {
 			return FileUtils.toFile(propUrl);
 		} else {
-			throw new GroupConfigException(String.format("config file[%s] doesn't exist.", this.resourceId));
+			throw new GroupConfigException(String.format("config file[%s] doesn't exist.", this.resourceFileName));
 		}
 	}
 
@@ -61,7 +61,7 @@ public class LocalConfigService implements ConfigService {
 				return lastModifiedTime;
 			}
 		} else {
-			logger.warn(String.format("config file[%s] doesn't exists.", this.resourceId));
+			logger.warn(String.format("config file[%s] doesn't exists.", this.resourceFileName));
 		}
 
 		return lastModifiedTime;
@@ -78,8 +78,8 @@ public class LocalConfigService implements ConfigService {
 			this.props.set(loadConfig());
 			this.resourceFile = getFile();
 			this.lastModifiedTime.set(getLastModifiedTime());
-			
-			Thread updateTask= new Thread(new ConfigPeroidCheckerTask());
+
+			Thread updateTask = new Thread(new ConfigPeroidCheckerTask());
 			updateTask.setDaemon(true);
 			updateTask.setName("Thread-" + ConfigPeroidCheckerTask.class.getName());
 			updateTask.start();
@@ -89,18 +89,18 @@ public class LocalConfigService implements ConfigService {
 	}
 
 	private Properties loadConfig() throws IOException {
-		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(this.resourceId);
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(this.resourceFileName);
 		Properties prop = new Properties();
 
 		if (inputStream != null) {
 			prop.load(inputStream);
 		} else {
-			throw new GroupConfigException(String.format("properties file[%s] doesn't exists.", this.resourceId));
+			throw new GroupConfigException(String.format("properties file[%s] doesn't exists.", this.resourceFileName));
 		}
 
 		return prop;
 	}
-	
+
 	class ConfigPeroidCheckerTask implements Runnable {
 		private void notifyListeners(String key, Object oldValue, Object newValue, int type) {
 			PropertyChangeEvent evt = new AdvancedPropertyChangeEvent(this, key, oldValue, newValue, type);
@@ -145,7 +145,7 @@ public class LocalConfigService implements ConfigService {
 					}
 				} catch (Throwable throwable) {
 					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("fail to reload the datasource config[%s]", resourceId), throwable);
+						logger.debug(String.format("fail to reload the datasource config[%s]", resourceFileName), throwable);
 					}
 				}
 

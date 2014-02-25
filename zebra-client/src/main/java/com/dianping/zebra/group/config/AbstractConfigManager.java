@@ -13,11 +13,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.zebra.group.config.system.entity.SystemConfig;
-
 public abstract class AbstractConfigManager {
 
-	private Logger logger = LoggerFactory.getLogger("ConfigManager");
+	private Logger logger = LoggerFactory.getLogger(AbstractConfigManager.class);
 
 	protected final String resourceId;
 
@@ -44,8 +42,8 @@ public abstract class AbstractConfigManager {
 		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
 	}
 
-	protected int getProperty(SystemConfig config, String key, int defaultValue) {
-		String value = configService.getProperty(key);
+	protected int getProperty(String key, int defaultValue) {
+		String value = configService.getProperty(getKey(key));
 
 		if (StringUtils.isNotBlank(value)) {
 			return Integer.parseInt(value);
@@ -54,8 +52,8 @@ public abstract class AbstractConfigManager {
 		}
 	}
 
-	protected String getProperty(SystemConfig config, String key, String defaultValue) {
-		String value = configService.getProperty(key);
+	protected String getProperty(String key, String defaultValue) {
+		String value = configService.getProperty(getKey(key));
 
 		if (StringUtils.isNotBlank(value)) {
 			return value;
@@ -63,6 +61,8 @@ public abstract class AbstractConfigManager {
 			return defaultValue;
 		}
 	}
+
+	protected abstract String getKey(String key);
 
 	protected abstract void updateProperties(PropertyChangeEvent evt);
 

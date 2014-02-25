@@ -27,7 +27,7 @@ public class C3P0GroupDataSourceManagerTest {
 
 		Statement statement = connection.createStatement();
 
-		boolean execute = statement.execute("select * from test");
+		boolean execute = statement.execute("select * from app_user");
 		ResultSet resultSet = statement.getResultSet();
 
 		while (resultSet.next()) {

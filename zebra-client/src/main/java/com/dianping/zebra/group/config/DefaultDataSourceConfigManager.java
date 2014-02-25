@@ -74,8 +74,17 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
+	@Override
+	protected String getKey(String key) {
+		if (key.equals(this.resourceId)) {
+			return key;
+		} else {
+			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_PROPERTY, key);
+		}
+	}
+
 	private String getKey(String key, String dsId) {
-		return String.format("%s-%s-%s", Constants.DEFAULT_DATASOURCE_KEY, dsId, key);
+		return String.format("%s.%s", dsId, key);
 	}
 
 	@Override
@@ -106,7 +115,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	private GroupDataSourceConfig initDataSourceConfig() throws SAXException, IOException {
-		String appConfig = configService.getProperty(Constants.DEFAULT_DATASOURCE_KEY);
+		String appConfig = configService.getProperty(this.resourceId);
 		GroupDataSourceConfig config = DefaultSaxParser.parse(appConfig);
 		Map<String, DataSourceConfig> dataSourceConfigs = config.getDataSourceConfigs();
 
@@ -114,22 +123,43 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			String dsId = entry.getKey();
 			DataSourceConfig dataSourceConfig = entry.getValue();
 
-			dataSourceConfig.setConnectionCustomizeClassName(configService.getProperty(getKey(
-			      Constants.ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME, dsId)));
-			dataSourceConfig.setDriverClass(configService.getProperty(getKey(Constants.ELEMENT_DRIVER_CLASS, dsId)));
+			dataSourceConfig.setConnectionCustomizeClassName(getProperty(
+			      getKey(Constants.ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME, dsId),
+			      dataSourceConfig.getConnectionCustomizeClassName()));
+			dataSourceConfig.setDriverClass(getProperty(getKey(Constants.ELEMENT_DRIVER_CLASS, dsId),
+			      dataSourceConfig.getDriverClass()));
 			dataSourceConfig.setId(dsId);
-			dataSourceConfig.setInitialPoolSize(Integer.parseInt(configService.getProperty(getKey(
-			      Constants.ELEMENT_INITIAL_POOL_SIZE, dsId))));
-			dataSourceConfig.setJdbcUrl(configService.getProperty(getKey(Constants.ELEMENT_JDBC_URL, dsId)));
-			dataSourceConfig.setMaxPoolSize(Integer.parseInt(configService.getProperty(getKey(
-			      Constants.ELEMENT_MAX_POOL_SIZE, dsId))));
-			dataSourceConfig.setMinPoolSize(Integer.parseInt(configService.getProperty(getKey(
-			      Constants.ELEMENT_MIN_POOL_SIZE, dsId))));
-			dataSourceConfig.setPassword(configService.getProperty(getKey(Constants.ELEMENT_PASSWORD, dsId)));
-			dataSourceConfig.setUser(configService.getProperty(getKey(Constants.ELEMENT_USER, dsId)));
+			dataSourceConfig.setInitialPoolSize(getProperty(getKey(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId),
+			      dataSourceConfig.getInitialPoolSize()));
+			dataSourceConfig.setJdbcUrl(getProperty(getKey(Constants.ELEMENT_JDBC_URL, dsId),
+			      dataSourceConfig.getJdbcUrl()));
+			dataSourceConfig.setMaxPoolSize(getProperty(getKey(Constants.ELEMENT_MAX_POOL_SIZE, dsId),
+			      dataSourceConfig.getMaxPoolSize()));
+			dataSourceConfig.setMinPoolSize(getProperty(getKey(Constants.ELEMENT_MIN_POOL_SIZE, dsId),
+			      dataSourceConfig.getMinPoolSize()));
+			dataSourceConfig.setPassword(getProperty(getKey(Constants.ELEMENT_PASSWORD, dsId),
+			      dataSourceConfig.getPassword()));
+			dataSourceConfig.setUser(getProperty(getKey(Constants.ELEMENT_USER, dsId), dataSourceConfig.getUser()));
 		}
 
+		isValidConfig(dataSourceConfigs);
+
 		return config;
+	}
+
+	private void isValidConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
+		int readNum = 0, writeNum = 0;
+		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
+			if (entry.getValue().isReadonly()) {
+				readNum += 1;
+			} else {
+				writeNum += 1;
+			}
+		}
+
+		if (readNum < 1 || writeNum != 1) {
+			throw new GroupConfigException("Not enough read or write dataSources.");
+		}
 	}
 
 	@Override
@@ -180,6 +210,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		if (evt instanceof AdvancedPropertyChangeEvent) {
 			try {
 				Map<String, DataSourceConfig> config = initDataSourceConfig().getDataSourceConfigs();
+
+				isValidConfig(config);
 
 				wLock.lock();
 				try {
