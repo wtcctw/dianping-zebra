@@ -25,7 +25,8 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
-import com.dianping.zebra.group.config.GroupConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 
@@ -38,9 +39,9 @@ public class DPGroupCallableStatement extends DPGroupPreparedStatement implement
 	private CallableStatement actualCallableStatement;
 
 	public DPGroupCallableStatement(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      GroupConfigManager configManager, DPGroupConnection connection, CallableStatement actualCallableStatement,
-	      String sql) {
-		super(router, dataSourceManager, configManager, connection, sql);
+	      DataSourceConfigManager dataSourceConfigManager, SystemConfigManager systemConfigManager,
+	      DPGroupConnection connection, CallableStatement actualCallableStatement, String sql) {
+		super(router, dataSourceManager, dataSourceConfigManager, systemConfigManager, connection, sql);
 		this.actualCallableStatement = actualCallableStatement;
 	}
 

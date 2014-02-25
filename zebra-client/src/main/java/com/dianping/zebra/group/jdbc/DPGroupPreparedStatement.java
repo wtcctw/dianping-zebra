@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 
 import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 
@@ -46,8 +47,9 @@ public class DPGroupPreparedStatement extends DPGroupStatement implements Prepar
 	private String[] columnNames;
 
 	public DPGroupPreparedStatement(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      DataSourceConfigManager configManager, DPGroupConnection connection, String sql) {
-		super(router, dataSourceManager, configManager, connection);
+	      DataSourceConfigManager dataSourceConfigManager, SystemConfigManager systemConfigManager,
+	      DPGroupConnection connection, String sql) {
+		super(router, dataSourceManager, dataSourceConfigManager, systemConfigManager, connection);
 		this.sql = sql;
 	}
 

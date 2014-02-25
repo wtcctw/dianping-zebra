@@ -19,9 +19,7 @@ import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
-import com.dianping.zebra.group.config1.GroupConfigManagerFactory;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
-import com.dianping.zebra.group.manager.DataSourceMonitorCustomizer;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
@@ -81,8 +79,12 @@ public class DPGroupDataSource implements DataSource {
 		this.configManagerType = configManagerType;
 	}
 
-	public void setConfigManager(DataSourceConfigManager configManager) {
-		this.configManager = configManager;
+	public void setSystemConfigManager(SystemConfigManager systemConfigManager) {
+		this.systemConfigManager = systemConfigManager;
+	}
+
+	public void setDataSourceConfigManager(DataSourceConfigManager dataSourceConfigManager) {
+		this.dataSourceConfigManager = dataSourceConfigManager;
 	}
 
 	public void setRouter(GroupDataSourceRouter router) {
@@ -165,7 +167,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		return new DPGroupConnection(router, dataSourceManager, configManager);
+		return new DPGroupConnection(router, dataSourceManager, dataSourceConfigManager, systemConfigManager);
 	}
 
 	/*
@@ -175,7 +177,8 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return new DPGroupConnection(router, dataSourceManager, configManager, username, password);
+		return new DPGroupConnection(router, dataSourceManager, dataSourceConfigManager, systemConfigManager, username,
+		      password);
 	}
 
 }

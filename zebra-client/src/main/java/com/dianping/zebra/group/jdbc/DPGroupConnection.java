@@ -30,10 +30,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 import com.dianping.zebra.group.router.GroupDataSourceRouterInfo;
@@ -46,7 +44,9 @@ import com.dianping.zebra.group.util.JDBCExceptionUtils;
  */
 public class DPGroupConnection implements Connection {
 
-	private DataSourceConfigManager configManager;
+	private DataSourceConfigManager dataSourceConfigManager;
+
+	private SystemConfigManager systemConfigManager;
 
 	private GroupDataSourceRouter router;
 
@@ -75,17 +75,19 @@ public class DPGroupConnection implements Connection {
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      DataSourceConfigManager configManager, String userName, String password) {
+	      DataSourceConfigManager dataSourceConfigManager, SystemConfigManager systemConfigManager, String userName,
+	      String password) {
 		this.router = router;
 		this.dataSourceManager = dataSourceManager;
-		this.configManager = configManager;
+		this.systemConfigManager = systemConfigManager;
+		this.dataSourceConfigManager = dataSourceConfigManager;
 		this.userName = userName;
 		this.password = password;
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      DataSourceConfigManager configManager) {
-		this(router, dataSourceManager, configManager, null, null);
+	      DataSourceConfigManager dataSourceConfigManager, SystemConfigManager systemConfigManager) {
+		this(router, dataSourceManager, dataSourceConfigManager, systemConfigManager, null, null);
 	}
 
 	/**
@@ -119,7 +121,7 @@ public class DPGroupConnection implements Connection {
 				Set<GroupDataSourceTarget> excludeTargets = new HashSet<GroupDataSourceTarget>();
 				List<SQLException> exceptions = new ArrayList<SQLException>();
 
-				while (retryTimes++ < configManager.getGroupDataSourceConfig().getRetryTimes()) {
+				while (retryTimes++ < systemConfigManager.getSystemConfig().getRetryTimes()) {
 					try {
 						rConnection = dataSourceManager.getReadConnection(dsTarget.getId());
 						return rConnection;
@@ -183,7 +185,8 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
-		Statement stmt = new DPGroupStatement(router, dataSourceManager, configManager, this);
+		Statement stmt = new DPGroupStatement(router, dataSourceManager, dataSourceConfigManager, systemConfigManager,
+		      this);
 		openedStatements.add(stmt);
 		return stmt;
 	}
@@ -196,7 +199,8 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
-		PreparedStatement pstmt = new DPGroupPreparedStatement(router, dataSourceManager, configManager, this, sql);
+		PreparedStatement pstmt = new DPGroupPreparedStatement(router, dataSourceManager, dataSourceConfigManager,
+		      systemConfigManager, this, sql);
 		openedStatements.add(pstmt);
 		return pstmt;
 	}
@@ -609,8 +613,8 @@ public class DPGroupConnection implements Connection {
 		Connection conn = getRealConnection(sql, true);
 		if (conn != null) {
 			cstmt = getCallableStatement(conn, sql, resultSetType, resultSetConcurrency, resultSetHoldability);
-			DPGroupCallableStatement dpcstmt = new DPGroupCallableStatement(router, dataSourceManager, configManager,
-			      this, cstmt, sql);
+			DPGroupCallableStatement dpcstmt = new DPGroupCallableStatement(router, dataSourceManager,
+			      dataSourceConfigManager, systemConfigManager, this, cstmt, sql);
 
 			if (resultSetType != Integer.MIN_VALUE) {
 				dpcstmt.setResultSetType(resultSetType);
