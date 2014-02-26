@@ -41,6 +41,8 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 	private volatile boolean closed = false;
 
+	private volatile String writeId;
+
 	public C3P0GroupDataSourceManager(DataSourceConfigManager groupConfigManager) {
 		this.groupConfigManager = groupConfigManager;
 	}
@@ -62,7 +64,6 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 	@Override
 	public Connection getReadConnection(String id) throws SQLException {
-		checkClosed();
 		return getConnection(id);
 	}
 
@@ -71,6 +72,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 	}
 
 	private Connection getConnection(String id) throws SQLException {
+		checkClosed();
 		DataSource dataSource = dataSources.get(id);
 
 		if (dataSource != null) {
@@ -80,17 +82,20 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		}
 	}
 
+	private void checkConnection(DataSource dataSource) throws SQLException {
+		Connection connection = null;
+		try {
+			connection = dataSource.getConnection();
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			connection.close();
+		}
+	}
+
 	@Override
 	public Connection getWriteConnection() throws SQLException {
-		checkClosed();
-
-		for (DataSourceConfig config : dataSourceConfigsCache.get().values()) {
-			if (config.isReadonly()) {
-				return getConnection(config.getId());
-			}
-		}
-
-		throw new SQLException("Fail to find write dataSource.");
+		return getConnection(this.writeId);
 	}
 
 	@Override
@@ -98,11 +103,18 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		Map<String, DataSourceConfig> available = groupConfigManager.getAvailableDataSources();
 		for (Entry<String, DataSourceConfig> entry : available.entrySet()) {
 			String key = entry.getKey();
+			DataSourceConfig value = entry.getValue();
 			try {
-				this.dataSources.put(key, initDataSources(entry.getValue()));
-			} catch (RuntimeException e) {
+				if (!value.isReadonly()) {
+					this.writeId = key;
+				}
+
+				DataSource dataSource = initDataSources(value);
+				checkConnection(dataSource);
+				this.dataSources.put(key, dataSource);
+			} catch (SQLException e) {
 				logger.error(String.format("fail to connect the database[%s]", key), e);
-				throw e;
+				throw new RuntimeException(e);
 			}
 		}
 
@@ -181,6 +193,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			Map<String, DataSourceConfig> newConfig = groupConfigManager.getAvailableDataSources();
+			String wDsId = null;
 
 			for (Entry<String, DataSourceConfig> entry : newConfig.entrySet()) {
 				String key = entry.getKey();
@@ -198,6 +211,10 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					} else {
 						dataSources.put(key, initDataSources(value));
 					}
+
+					if (!value.isReadonly()) {
+						wDsId = value.getId();
+					}
 				} catch (Throwable e) {
 					logger.warn("cannot init new dataSource due to illegal dataSource config!", e);
 				}
@@ -210,6 +227,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 				}
 			}
 
+			writeId = wDsId;
 			dataSourceConfigsCache.set(newConfig);
 		}
 

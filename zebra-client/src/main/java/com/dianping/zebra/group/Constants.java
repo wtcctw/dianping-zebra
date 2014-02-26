@@ -17,21 +17,31 @@ public class Constants {
 
 	public static final String DEFAULT_DATASOURCE_PROPERTY = "zebra.ds";
 
-	public static final String DEFAULT_DATASOURCE_KEY = "zebra-ds";
+	// DataSource
+	public static final String ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME = "connectionCustomizeClassName";
 
-	public static final String ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME = "connection-customize-class-name";
+	public static final String ELEMENT_DRIVER_CLASS = "driverClass";
 
-	public static final String ELEMENT_DRIVER_CLASS = "driver-class";
+	public static final String ELEMENT_INITIAL_POOL_SIZE = "initialPoolSize";
 
-	public static final String ELEMENT_INITIAL_POOL_SIZE = "initial-pool-size";
+	public static final String ELEMENT_JDBC_URL = "jdbcUrl";
 
-	public static final String ELEMENT_JDBC_URL = "jdbc-url";
+	public static final String ELEMENT_MAX_POOL_SIZE = "maxPoolSize";
 
-	public static final String ELEMENT_MAX_POOL_SIZE = "max-pool-size";
-
-	public static final String ELEMENT_MIN_POOL_SIZE = "min-pool-size";
+	public static final String ELEMENT_MIN_POOL_SIZE = "minPoolSize";
 
 	public static final String ELEMENT_PASSWORD = "password";
 
 	public static final String ELEMENT_USER = "user";
+
+	// System
+	public static final String ELEMENT_COOKIE_DOMAIN = "cookieDomain";
+
+	public static final String ELEMENT_HEALTH_CHECK_INTERVAL = "healthCheckInterval";
+
+	public static final String ELEMENT_MAX_ERROR_COUNTER = "maxErrorCounter";
+
+	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
+
+	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
 }

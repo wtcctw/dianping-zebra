@@ -10,7 +10,7 @@ public class ConfigManagerTest {
 
 	@Test
 	public void testManager() throws IOException, InterruptedException {
-		SystemConfigManager systemConfigManager = SystemConfigManagerFactory.getConfigManger("local", "system.properties");
+		SystemConfigManager systemConfigManager = SystemConfigManagerFactory.getConfigManger("local", "zebra.system");
 		
 		System.out.println(systemConfigManager.getSystemConfig());
 		
@@ -23,7 +23,7 @@ public class ConfigManagerTest {
 		});
 		
 		
-		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local","ds.properties");
+		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local","sample.ds");
 
 		System.out.println(dataSourceConfigManager.getDataSourceConfigs());
 		dataSourceConfigManager.addListerner(new PropertyChangeListener() {
