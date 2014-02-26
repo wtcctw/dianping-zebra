@@ -8,7 +8,7 @@ public class AdvancedPropertyChangeEvent extends PropertyChangeEvent {
 
 	// 1 : add , 2 : delete , 3 : update
 	private int type;
-
+	
 	public AdvancedPropertyChangeEvent(Object source, String propertyName, Object oldValue, Object newValue, int type) {
 		super(source, propertyName, oldValue, newValue);
 		this.type = type;
