@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
@@ -43,8 +42,6 @@ import com.dianping.zebra.group.util.JDBCExceptionUtils;
  * 
  */
 public class DPGroupConnection implements Connection {
-
-	private DataSourceConfigManager dataSourceConfigManager;
 
 	private SystemConfigManager systemConfigManager;
 
@@ -71,17 +68,15 @@ public class DPGroupConnection implements Connection {
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      DataSourceConfigManager dataSourceConfigManager, SystemConfigManager systemConfigManager, String userName,
-	      String password) {
+	      SystemConfigManager systemConfigManager, String userName, String password) {
 		this.router = router;
 		this.dataSourceManager = dataSourceManager;
 		this.systemConfigManager = systemConfigManager;
-		this.dataSourceConfigManager = dataSourceConfigManager;
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      DataSourceConfigManager dataSourceConfigManager, SystemConfigManager systemConfigManager) {
-		this(router, dataSourceManager, dataSourceConfigManager, systemConfigManager, null, null);
+	      SystemConfigManager systemConfigManager) {
+		this(router, dataSourceManager, systemConfigManager, null, null);
 	}
 
 	/**
@@ -603,24 +598,10 @@ public class DPGroupConnection implements Connection {
 		CallableStatement cstmt = null;
 		// 存储过程强制走写库
 		Connection conn = getRealConnection(sql, true);
-		if (conn != null) {
-			cstmt = getCallableStatement(conn, sql, resultSetType, resultSetConcurrency, resultSetHoldability);
-			DPGroupCallableStatement dpcstmt = new DPGroupCallableStatement(router, dataSourceManager,
-			      dataSourceConfigManager, systemConfigManager, this, cstmt, sql);
+		cstmt = getCallableStatement(conn, sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 
-			if (resultSetType != Integer.MIN_VALUE) {
-				dpcstmt.setResultSetType(resultSetType);
-				dpcstmt.setResultSetConcurrency(resultSetConcurrency);
-			}
-			if (resultSetHoldability != Integer.MIN_VALUE) {
-				dpcstmt.setResultSetHoldability(resultSetHoldability);
-			}
-			openedStatements.add(dpcstmt);
-			return dpcstmt;
-		}
-
-		// 因为getRealConnection不会返回null，所以这行代码没法到达
-		return null;
+		openedStatements.add(cstmt);
+		return cstmt;
 	}
 
 	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
