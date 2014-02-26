@@ -6,5 +6,7 @@
 		<element name="retry-times" value-type="int" default-value="0" primitive="true" />
 		<element name="router-strategy" value-type="String" default-value="roundrobin" />
 		<element name="cookie-domain" value-type="String" default-value=".dianping.com" />
+		<element name="cookie-name" value-type="String" default-value="_zd_" />
+    	<element name="encrypt-seed" value-type="String" />
 	</entity>
 </model>

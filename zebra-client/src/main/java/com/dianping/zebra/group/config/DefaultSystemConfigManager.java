@@ -51,6 +51,8 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		config.setMaxErrorCounter(getProperty(Constants.ELEMENT_MAX_ERROR_COUNTER, config.getMaxErrorCounter()));
 		config.setRetryTimes(getProperty(Constants.ELEMENT_RETRY_TIMES, config.getRetryTimes()));
 		config.setRouterStrategy(getProperty(Constants.ELEMENT_ROUTER_STRATEGY, config.getRouterStrategy()));
+		config.setCookieName(getProperty(Constants.ELEMENT_COOKIE_NAME, config.getCookieName()));
+		config.setEncryptSeed(getProperty(Constants.ELEMENT_ENCRYPT_SEED, config.getEncryptSeed()));
 
 		return config;
 	}
@@ -70,6 +72,10 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 				config.setMaxErrorCounter(Integer.parseInt((String) newValue));
 			} else if (key.equals(Constants.ELEMENT_ROUTER_STRATEGY)) {
 				config.setRetryTimes((Integer) newValue);
+			} else if (key.equals(Constants.ELEMENT_COOKIE_NAME)) {
+				config.setCookieName((String) newValue);
+			} else if (key.equals(Constants.ELEMENT_ENCRYPT_SEED)) {
+				config.setEncryptSeed((String) newValue);
 			}
 
 			this.systemConfig.set(config);
