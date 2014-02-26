@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.zebra.group.router.SqlType;
+import com.dianping.zebra.group.SqlType;
 
 public class SqlUtilsTest {
 
