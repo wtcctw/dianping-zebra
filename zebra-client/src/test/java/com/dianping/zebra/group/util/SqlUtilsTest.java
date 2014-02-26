@@ -19,7 +19,7 @@ public class SqlUtilsTest {
 
 	@Test
 	public void testSelectFOrUpdate() throws SQLException {
-		String sql = "select * for update from xx";
+		String sql = "select * from xx for update";
 		SqlType sqlType = SqlUtils.getSqlType(sql);
 		Assert.assertEquals(SqlType.SELECT_FOR_UPDATE, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());
@@ -27,7 +27,7 @@ public class SqlUtilsTest {
 
 	@Test
 	public void testUpdate() throws SQLException {
-		String sql = "update from xx set xx=1";
+		String sql = "update table set xx=1";
 		SqlType sqlType = SqlUtils.getSqlType(sql);
 		Assert.assertEquals(SqlType.UPDATE, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());

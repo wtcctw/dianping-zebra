@@ -21,13 +21,14 @@ public class SystemConfigManagerFactory {
 						systemConfigManager = new DefaultSystemConfigManager(resourceId, new LocalConfigService(resourceId));
 					} else if ("remote".equalsIgnoreCase(configManagerType)) {
 						systemConfigManager = new DefaultSystemConfigManager(resourceId, new RemoteConfigService(resourceId));
-					} else
+					} else {
 						throw new GroupConfigException(
 						      String.format("illegal systemConfigManagerType[%s]", configManagerType));
+					}
+					systemConfigManager.init();
+					systemConfigManagers.put(resourceId, systemConfigManager);
 				}
 
-				systemConfigManager.init();
-				systemConfigManagers.put(resourceId, systemConfigManager);
 			}
 		}
 
