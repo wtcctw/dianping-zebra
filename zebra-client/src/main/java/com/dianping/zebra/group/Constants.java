@@ -44,4 +44,8 @@ public class Constants {
 	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
 
 	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
+	
+	public static final String ELEMENT_COOKIE_NAME = "cookieName";
+	
+	public static final String ELEMENT_ENCRYPT_SEED = "encryptSeed";
 }

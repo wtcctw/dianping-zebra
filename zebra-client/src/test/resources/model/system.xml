@@ -4,4 +4,6 @@
 	<retry-times>0</retry-times>
 	<router-strategy>roundrobin</router-strategy>
 	<cookie-domain>.dianping.com</cookie-domain>
+	<cookie-name>zebra</cookie-name>
+	<encrypt-seed>axsdcs</<encrypt-seed>>
 </system-config>
