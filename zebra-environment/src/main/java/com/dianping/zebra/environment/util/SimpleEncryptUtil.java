@@ -1,6 +1,8 @@
 package com.dianping.zebra.environment.util;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.util.Date;
 
 public class SimpleEncryptUtil {
 
@@ -8,41 +10,42 @@ public class SimpleEncryptUtil {
 
 	private static final String SEED = "6134903131719914204";
 
-	public static final String encrypt(String text) {
+	private static final BigInteger SEED_BIT_INT = new BigInteger(SEED);
+
+	public static final String encrypt(String text) throws UnsupportedEncodingException {
 		if (text == null)
 			return "";
 		if (text.length() == 0)
 			return "";
 
-		BigInteger bi_passwd = new BigInteger(text.getBytes());
+		BigInteger textBigInt = new BigInteger(text.getBytes("UTF-8"));
 
-		BigInteger bi_r0 = new BigInteger(SEED);
-		BigInteger bi_r1 = bi_r0.xor(bi_passwd);
+		BigInteger encrypted = SEED_BIT_INT.xor(textBigInt);
 
-		return bi_r1.toString(RADIX);
+		return encrypted.toString(RADIX);
 	}
 
-	public static final String decrypt(String encrypted) {
+	public static final String decrypt(String encrypted) throws UnsupportedEncodingException {
 		if (encrypted == null)
 			return "";
 		if (encrypted.length() == 0)
 			return "";
 
-		BigInteger bi_confuse = new BigInteger(SEED);
+		BigInteger encryptedBigInt = new BigInteger(encrypted, RADIX);
+		BigInteger decrytedBigInt = encryptedBigInt.xor(SEED_BIT_INT);
 
-		try {
-			BigInteger bi_r1 = new BigInteger(encrypted, RADIX);
-			BigInteger bi_r0 = bi_r1.xor(bi_confuse);
-
-			return new String(bi_r0.toByteArray());
-		} catch (Exception e) {
-			return "";
-		}
+		return new String(decrytedBigInt.toByteArray(), "UTF-8");
 	}
 
-	public static void main(String args[]) {
-		System.out.println(SimpleEncryptUtil.encrypt(System.currentTimeMillis() + ""));
-		System.out.println(SimpleEncryptUtil.decrypt("313339f7fb59a7a1ae07c268ce"));
+	public static void main(String args[]) throws UnsupportedEncodingException {
+		long timestamp = System.currentTimeMillis();
+		System.out.println(timestamp);
+		
+		String enctryptedText = SimpleEncryptUtil.encrypt(timestamp + "");
+		System.out.println(enctryptedText);
+		
+		String dec = SimpleEncryptUtil.decrypt(enctryptedText);
+		System.out.println(dec);
+		System.out.println(new Date(Long.parseLong(dec)));
 	}
-
 }

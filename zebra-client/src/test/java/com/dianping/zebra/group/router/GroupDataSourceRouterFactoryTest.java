@@ -8,23 +8,32 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config1.GroupConfigManagerFactory;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.zebra.group.config.SystemConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 
 public class GroupDataSourceRouterFactoryTest {
 
-	private DataSourceConfigManager configManager;
+	private DataSourceConfigManager dataSourceConfigManager;
+
+	private SystemConfigManager systemConfigManager;
+
+	private GroupDataSourceRouter dataSourceRouter;
 
 	@Before
 	public void init() {
-		String resourceId = "datasources.xml";
+		String dataSourceResourceId = "sample.ds";
+		String systemResourceId = "zebra.system";
 		String configManagerType = "local";
-		this.configManager = GroupConfigManagerFactory.getConfigManger(configManagerType, resourceId);
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType,
+		      dataSourceResourceId);
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType, systemResourceId);
+		this.dataSourceRouter = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager,
+		      systemConfigManager);
 	}
 
 	@Test
 	public void testReadSelect() {
-		GroupDataSourceRouter dataSourceRouter = GroupDataSourceRouterFactory.getDataSourceRouter(configManager);
-
 		String readSql = "select * from a";
 		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(readSql);
 		GroupDataSourceTarget target = dataSourceRouter.select(routerInfo);
@@ -34,8 +43,6 @@ public class GroupDataSourceRouterFactoryTest {
 
 	@Test
 	public void testWriteSelect() {
-		GroupDataSourceRouter dataSourceRouter = GroupDataSourceRouterFactory.getDataSourceRouter(configManager);
-
 		String writeSql = "update a set xx=xx";
 		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(writeSql);
 		GroupDataSourceTarget target = dataSourceRouter.select(routerInfo);
@@ -45,8 +52,6 @@ public class GroupDataSourceRouterFactoryTest {
 
 	@Test
 	public void testExcludeSelect() {
-		GroupDataSourceRouter dataSourceRouter = GroupDataSourceRouterFactory.getDataSourceRouter(configManager);
-
 		String writeSql = "update a set xx=xx";
 		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(writeSql);
 		GroupDataSourceTarget target = dataSourceRouter.select(routerInfo);

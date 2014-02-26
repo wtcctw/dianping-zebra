@@ -9,8 +9,9 @@ public class ZebraUtilTest {
 	@Test
 	public void testNormal() throws Exception {
 		long timestamp = System.currentTimeMillis();
-		String encryptText = ZebraUtil.encryptTimestamp(timestamp);
-		Assert.assertEquals(timestamp, ZebraUtil.decryptTimestamp(encryptText));
+		String encryptedText = ZebraUtil.encryptTimestamp(timestamp);
+		System.out.println(encryptedText);
+		Assert.assertEquals(timestamp, ZebraUtil.decryptTimestamp(encryptedText));
 	}
 
 	@Test
