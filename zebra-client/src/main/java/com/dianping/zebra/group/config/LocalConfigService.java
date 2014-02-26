@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,13 +90,15 @@ public class LocalConfigService implements ConfigService {
 	}
 
 	private Properties loadConfig() throws IOException {
-		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(this.resourceFileName);
 		Properties prop = new Properties();
-
-		if (inputStream != null) {
+		InputStream inputStream = null;
+		try {
+			inputStream = getClass().getClassLoader().getResourceAsStream(this.resourceFileName);
 			prop.load(inputStream);
-		} else {
-			throw new GroupConfigException(String.format("properties file[%s] doesn't exists.", this.resourceFileName));
+		} catch (Throwable e) {
+			throw new GroupConfigException(String.format("properties file[%s] doesn't exists.", this.resourceFileName), e);
+		} finally {
+			IOUtils.closeQuietly(inputStream);
 		}
 
 		return prop;

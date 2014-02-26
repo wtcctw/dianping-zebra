@@ -10,7 +10,7 @@ import org.dbunit.operation.DatabaseOperation;
 import org.h2.tools.RunScript;
 import org.junit.Before;
 
-public class BaseDatabaseTestCase {
+public abstract class BaseDatabaseTestCase {
 
 	private static final String JDBC_DRIVER = org.h2.Driver.class.getName();
 
@@ -22,13 +22,13 @@ public class BaseDatabaseTestCase {
 
 	private DPGroupDataSource dataSource;
 
-	private String configManagerType = "local";
+	// private String configManagerType = "local";
 
-	private String resourceId = "sample.ds";
+	// private String resourceId = "sample.ds";
 
-	private String dataSets = "datasets.xml";
+	// private String dataSets = "datasets.xml";
 
-	private String schema = "src/test/resources/schema.sql";
+	// private String schema = "src/test/resources/schema.sql";
 
 	private void cleanlyInsert(IDataSet dataSet) throws Exception {
 		IDatabaseTester databaseTester = new JdbcDatabaseTester(JDBC_DRIVER, JDBC_URL, USER, PASSWORD);
@@ -40,11 +40,10 @@ public class BaseDatabaseTestCase {
 	@Before
 	public void createTableAndImportDataSet() throws Exception {
 		RunScript.execute(JDBC_URL, USER, PASSWORD, getSchema(), "UTF8", false);
-		IDataSet dataSet = readDataSet();
-		cleanlyInsert(dataSet);
+		cleanlyInsert(readDataSet());
 	}
 
-	protected DataSource dataSource() {
+	protected DataSource getDataSource() {
 		if (this.dataSource == null) {
 			this.dataSource = new DPGroupDataSource(getConfigManagerType(), getResourceId());
 			this.dataSource.init();
@@ -53,21 +52,13 @@ public class BaseDatabaseTestCase {
 		return this.dataSource;
 	}
 
-	protected String getConfigManagerType() {
-		return this.configManagerType;
-	}
+	protected abstract String getConfigManagerType();
 
-	protected String getDataSets() {
-		return this.dataSets;
-	}
+	protected abstract String getDataSets();
 
-	protected String getResourceId() {
-		return this.resourceId;
-	}
+	protected abstract String getResourceId();
 
-	protected String getSchema() {
-		return this.schema;
-	}
+	protected abstract String getSchema();
 
 	private IDataSet readDataSet() throws Exception {
 		return new FlatXmlDataSetBuilder().build(getClass().getClassLoader().getResource(getDataSets()));
