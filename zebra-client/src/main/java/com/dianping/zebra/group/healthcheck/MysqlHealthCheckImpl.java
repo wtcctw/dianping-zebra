@@ -1,15 +1,17 @@
 package com.dianping.zebra.group.healthcheck;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.config1.BaseGroupConfigChangeEvent;
-import com.dianping.zebra.group.config1.GroupConfigChangeListener;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 import com.dianping.zebra.group.router.GroupDataSourceTarget;
@@ -19,47 +21,50 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 
 	private int maxErrorTimes;
 
-	private DataSourceConfigManager configManager;
-	
-	private GroupDataSourceManager groupdatasourcemanager;
+	private DataSourceConfigManager dataSourceConfigManager;
+
+	private SystemConfigManager systemConfigManager;
+
+	private GroupDataSourceManager groupDataSourceManager;
 
 	private ConcurrentHashMap<String, AtomicInteger> dskeyFailCount = new ConcurrentHashMap<String, AtomicInteger>();
 
-	public MysqlHealthCheckImpl(DataSourceConfigManager configManager) {
-		this.configManager = configManager;
-		this.groupdatasourcemanager = GroupDataSourceManagerFactory.getGroupDataSourceManger(configManager);
-		this.healthCheckInterval = configManager.getGroupDataSourceConfig().getHealthCheckInterval();
-		this.maxErrorTimes = configManager.getGroupDataSourceConfig().getMaxErrorCounter();
-		configManager.addListerner(new HealthCheckChangeListener());
+	public MysqlHealthCheckImpl(DataSourceConfigManager dataSourceConfigManager, SystemConfigManager systemConfigManager) {
+		this.dataSourceConfigManager = dataSourceConfigManager;
+		this.systemConfigManager = systemConfigManager;
+		this.groupDataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(dataSourceConfigManager);
+		this.healthCheckInterval = systemConfigManager.getSystemConfig().getHealthCheckInterval();
+		this.maxErrorTimes = systemConfigManager.getSystemConfig().getMaxErrorCounter();
+		this.systemConfigManager.addListerner(new HealthCheckChangeListener());
 		init();
 	}
 
 	public int getHealthCheckInterval() {
-   	return healthCheckInterval;
-   }
+		return healthCheckInterval;
+	}
 
 	public void setHealthCheckInterval(int healthCheckInterval) {
-   	this.healthCheckInterval = healthCheckInterval;
-   }
+		this.healthCheckInterval = healthCheckInterval;
+	}
 
 	public int getMaxErrorTimes() {
-   	return maxErrorTimes;
-   }
+		return maxErrorTimes;
+	}
 
 	public void setMaxErrorTimes(int maxErrorTimes) {
-   	this.maxErrorTimes = maxErrorTimes;
-   }
+		this.maxErrorTimes = maxErrorTimes;
+	}
 
 	public void notifyException(GroupDataSourceTarget dsTarget, SQLException e) {
-		if(dsTarget.isReadOnly() == false){
+		if (dsTarget.isReadOnly() == false) {
 			return;
 		}
 		if (e.getErrorCode() == 0 && e.getSQLState() == null) {
 			dskeyFailCount.putIfAbsent(dsTarget.getId(), new AtomicInteger(1));
 			AtomicInteger times = dskeyFailCount.get(dsTarget.getId());
 			if (times.get() >= maxErrorTimes) {
-				if(configManager.getUnAvailableDataSources().containsKey(dsTarget.getId()) == false){
-					configManager.markDown(dsTarget.getId());
+				if (dataSourceConfigManager.getUnAvailableDataSources().containsKey(dsTarget.getId()) == false) {
+					dataSourceConfigManager.markDown(dsTarget.getId());
 				}
 				// dskeyFailCount.remove(dsKey);
 			} else {
@@ -70,20 +75,17 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		// dsqueue.add(new dsException(dsKey, e));
 	}
 
-	public class HealthCheckChangeListener implements GroupConfigChangeListener {
+	public class HealthCheckChangeListener implements PropertyChangeListener {
 
 		@Override
-		public void onChange(BaseGroupConfigChangeEvent event) {
-			int interval = event.getGroupDatasourceConfig().getHealthCheckInterval();
-			if (interval != healthCheckInterval) {
-				healthCheckInterval = interval;
-				// TODO
+		public void propertyChange(PropertyChangeEvent evt) {
+			if (evt.getPropertyName().equals(Constants.ELEMENT_HEALTH_CHECK_INTERVAL)) {
+				int interval = (Integer) evt.getNewValue();
+				if (interval != healthCheckInterval) {
+					healthCheckInterval = interval;
+					// TODO
+				}
 			}
-		}
-
-		@Override
-		public String getName() {
-			return "health-checker-listner";
 		}
 
 	}
@@ -93,14 +95,14 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		@Override
 		public void run() {
 			while (true) {
-				Map<String, DataSourceConfig> unAvailableDsMap = configManager.getUnAvailableDataSources();
-				Iterator<String> iter = unAvailableDsMap.keySet().iterator(); 
-				while (iter.hasNext()) { 
-				    Object key = iter.next(); 
-				    if(groupdatasourcemanager.isAvailable((String)key) == true){
-				   	 configManager.markUp((String)key);
-				    }
-				} 
+				Map<String, DataSourceConfig> unAvailableDsMap = dataSourceConfigManager.getUnAvailableDataSources();
+				Iterator<String> iter = unAvailableDsMap.keySet().iterator();
+				while (iter.hasNext()) {
+					Object key = iter.next();
+					if (groupDataSourceManager.isAvailable((String) key) == true) {
+						dataSourceConfigManager.markUp((String) key);
+					}
+				}
 				dskeyFailCount = new ConcurrentHashMap<String, AtomicInteger>();
 				try {
 					Thread.sleep(healthCheckInterval);
