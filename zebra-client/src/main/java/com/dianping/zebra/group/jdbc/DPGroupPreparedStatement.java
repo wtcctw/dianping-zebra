@@ -60,6 +60,7 @@ import com.dianping.zebra.group.jdbc.param.StringParamContext;
 import com.dianping.zebra.group.jdbc.param.TimeParamContext;
 import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
+import com.dianping.zebra.group.util.SqlUtils;
 
 /**
  * @author Leo Liang
@@ -404,7 +405,7 @@ public class DPGroupPreparedStatement extends DPGroupStatement implements Prepar
 	 */
 	@Override
 	public boolean execute() throws SQLException {
-		SqlType sqlType = SQLParser.getSqlType(sql);
+		SqlType sqlType = SqlUtils.getSqlType(sql);
 		if (sqlType == SqlType.SELECT || sqlType == SqlType.SELECT_FOR_UPDATE || sqlType == SqlType.SHOW) {
 			executeQuery();
 			return true;
