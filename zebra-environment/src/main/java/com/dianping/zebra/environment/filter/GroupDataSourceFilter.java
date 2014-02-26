@@ -12,15 +12,32 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dianping.zebra.environment.util.ZebraUtil;
+import com.dianping.zebra.group.config.SystemConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 
 public class GroupDataSourceFilter implements Filter {
 
-	private static final String DOMAIN = "domain";
+	private static final String PARAM_CONFIG_MANAGE_TYPE = "configManageType";
 
-	private static final String COOKIE_NAME = "zebra";
+	private static final String PARAM_RESOURCE_ID = "resourceId";
 
-	private String domain;
+	private static final String DEFAULT_CONFIG_MANAGE_TYPE = "local";
+
+	private static final String DEFAULT_RESOURCE_ID = "zebra.system";
+
+	private static final String DEFAULT_COOKIE_NAME = "zebra";
+
+	private static final String DEFAULT_COOKIE_DOMAIN = ".dianping.com";
+
+	private static final long DEFAULT_ENCRYPT_SEED = 2123174217368174103L;
+
+	private String cookieName;
+
+	private String cookieDomain;
+
+	private long encryptSeed;
+
+	private SimpleEncrypt encrypt;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
@@ -36,7 +53,7 @@ public class GroupDataSourceFilter implements Filter {
 			Cookie zebra = getCookie(hRequest);
 			if (zebra != null) {
 				try {
-					long expireTime = ZebraUtil.decryptTimestamp(zebra.getValue());
+					long expireTime = encrypt.decryptTimestamp(zebra.getValue());
 					long now = System.currentTimeMillis();
 					if (expireTime < now) {
 						context.setMasterFlag(true, false);
@@ -54,9 +71,9 @@ public class GroupDataSourceFilter implements Filter {
 					HttpServletResponse hResponse = (HttpServletResponse) response;
 					long now = System.currentTimeMillis();
 					try {
-						Cookie cookie = new Cookie(COOKIE_NAME, ZebraUtil.encryptTimestamp((now)));
-						if (domain != null) {
-							cookie.setDomain(domain);
+						Cookie cookie = new Cookie(cookieName, encrypt.encryptTimestamp((now)));
+						if (cookieDomain != null) {
+							cookie.setDomain(cookieDomain);
 						}
 						hResponse.addCookie(cookie);
 					} catch (Exception e) {
@@ -72,10 +89,10 @@ public class GroupDataSourceFilter implements Filter {
 
 	private Cookie getCookie(HttpServletRequest hRequest) {
 		Cookie zebraCookie = null;
-		Cookie[] cookies = hRequest.getCookies();
-		for (Cookie cookie : cookies) {
+
+		for (Cookie cookie : hRequest.getCookies()) {
 			String cookieName = cookie.getName();
-			if (COOKIE_NAME.equalsIgnoreCase(cookieName)) {
+			if (this.cookieName.equalsIgnoreCase(cookieName)) {
 				zebraCookie = cookie;
 				break;
 			}
@@ -85,11 +102,38 @@ public class GroupDataSourceFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		domain = filterConfig.getInitParameter(DOMAIN);
-		// String configManagerType;
-		// String resourceId;
-		// String configManagerType;
-		// GroupConfigManagerFactory.getConfigManger(configManagerType, resourceId);
+		String resourceId = filterConfig.getInitParameter(PARAM_RESOURCE_ID);
+		if (resourceId == null) {
+			resourceId = DEFAULT_RESOURCE_ID;
+		}
+		String configManagerType = filterConfig.getInitParameter(PARAM_CONFIG_MANAGE_TYPE);
+		if (configManagerType == null) {
+			configManagerType = DEFAULT_CONFIG_MANAGE_TYPE;
+		}
+		SystemConfigManager configManager = SystemConfigManagerFactory.getConfigManger(configManagerType, resourceId);
+
+		this.cookieName = configManager.getSystemConfig().getCookieName();
+		if (this.cookieName == null) {
+			this.cookieName = DEFAULT_COOKIE_NAME;
+		}
+
+		this.cookieDomain = configManager.getSystemConfig().getCookieDomain();
+		if (this.cookieDomain == null) {
+			this.cookieDomain = DEFAULT_COOKIE_DOMAIN;
+		}
+
+		String encryptSeedStr = configManager.getSystemConfig().getEncryptSeed();
+		if (encryptSeedStr != null) {
+			try {
+				this.encryptSeed = Long.parseLong(encryptSeedStr);
+			} catch (RuntimeException e) {
+				throw new IllegalArgumentException("encryptSeed should be numberic", e);
+			}
+		} else {
+			this.encryptSeed = DEFAULT_ENCRYPT_SEED;
+		}
+
+		this.encrypt = new SimpleEncrypt(encryptSeed);
 	}
 
 	@Override
