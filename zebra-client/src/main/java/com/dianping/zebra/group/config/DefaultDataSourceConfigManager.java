@@ -100,7 +100,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	@Override
 	public void init() {
 		try {
-			this.configService.init();
 			this.wLock.lock();
 			try {
 				this.dataSourceConfigCache = initDataSourceConfig().getDataSourceConfigs();

@@ -3,6 +3,7 @@ package com.dianping.zebra.group.config;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -62,7 +63,7 @@ public class LocalConfigService implements ConfigService {
 				return lastModifiedTime;
 			}
 		} else {
-			logger.warn(String.format("config file[%s] doesn't exists.", this.resourceFileName));
+			logger.warn(String.format("config file[%s] doesn't exist.", this.resourceFileName));
 		}
 
 		return lastModifiedTime;
@@ -76,8 +77,8 @@ public class LocalConfigService implements ConfigService {
 	@Override
 	public void init() {
 		try {
-			this.props.set(loadConfig());
 			this.resourceFile = getFile();
+			this.props.set(loadConfig());
 			this.lastModifiedTime.set(getLastModifiedTime());
 
 			Thread updateTask = new Thread(new ConfigPeroidCheckerTask());
@@ -93,10 +94,10 @@ public class LocalConfigService implements ConfigService {
 		Properties prop = new Properties();
 		InputStream inputStream = null;
 		try {
-			inputStream = getClass().getClassLoader().getResourceAsStream(this.resourceFileName);
+			inputStream = new FileInputStream(this.resourceFile);
 			prop.load(inputStream);
 		} catch (Throwable e) {
-			throw new GroupConfigException(String.format("properties file[%s] doesn't exists.", this.resourceFileName), e);
+			throw new GroupConfigException(String.format("fail to read properties file[%s]", this.resourceFileName), e);
 		} finally {
 			IOUtils.closeQuietly(inputStream);
 		}

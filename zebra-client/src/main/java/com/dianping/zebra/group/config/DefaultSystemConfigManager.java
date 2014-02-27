@@ -34,7 +34,6 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 	@Override
 	public void init() {
 		try {
-			this.configService.init();
 			this.systemConfig.set(initSystemConfig());
 		} catch (Throwable e) {
 			throw new GroupConfigException(String.format(

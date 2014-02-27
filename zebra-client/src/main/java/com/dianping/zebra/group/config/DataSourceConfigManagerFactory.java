@@ -18,11 +18,13 @@ public class DataSourceConfigManagerFactory {
 
 				if (dataSourceConfigManager == null) {
 					if ("local".equalsIgnoreCase(configManagerType)) {
-						dataSourceConfigManager = new DefaultDataSourceConfigManager(resourceId, new LocalConfigService(
-						      resourceId));
+						LocalConfigService configService = new LocalConfigService(resourceId);
+						configService.init();
+						dataSourceConfigManager = new DefaultDataSourceConfigManager(resourceId, configService);
 					} else if ("remote".equalsIgnoreCase(configManagerType)) {
-						dataSourceConfigManager = new DefaultDataSourceConfigManager(resourceId, new RemoteConfigService(
-						      resourceId));
+						RemoteConfigService configService = new RemoteConfigService(resourceId);
+						configService.init();
+						dataSourceConfigManager = new DefaultDataSourceConfigManager(resourceId, configService);
 					} else {
 						throw new GroupConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
 						      configManagerType));

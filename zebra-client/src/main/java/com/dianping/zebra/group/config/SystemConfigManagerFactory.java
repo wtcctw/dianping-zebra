@@ -18,9 +18,13 @@ public class SystemConfigManagerFactory {
 
 				if (systemConfigManager == null) {
 					if ("local".equalsIgnoreCase(configManagerType)) {
-						systemConfigManager = new DefaultSystemConfigManager(resourceId, new LocalConfigService(resourceId));
+						LocalConfigService configService = new LocalConfigService(resourceId);
+						configService.init();
+						systemConfigManager = new DefaultSystemConfigManager(resourceId, configService);
 					} else if ("remote".equalsIgnoreCase(configManagerType)) {
-						systemConfigManager = new DefaultSystemConfigManager(resourceId, new RemoteConfigService(resourceId));
+						RemoteConfigService configService = new RemoteConfigService(resourceId);
+						configService.init();
+						systemConfigManager = new DefaultSystemConfigManager(resourceId, configService);
 					} else {
 						throw new GroupConfigException(
 						      String.format("illegal systemConfigManagerType[%s]", configManagerType));
