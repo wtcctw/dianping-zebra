@@ -109,8 +109,9 @@ public class DPGroupConnection implements Connection {
 				int retryTimes = -1;
 				Set<GroupDataSourceTarget> excludeTargets = new HashSet<GroupDataSourceTarget>();
 				List<SQLException> exceptions = new ArrayList<SQLException>();
+				int systemRetryTimes = systemConfigManager.getSystemConfig().getRetryTimes();
 
-				while (retryTimes++ < systemConfigManager.getSystemConfig().getRetryTimes()) {
+				while (retryTimes++ < systemRetryTimes) {
 					try {
 						rConnection = dataSourceManager.getReadConnection(dsTarget.getId());
 						return rConnection;

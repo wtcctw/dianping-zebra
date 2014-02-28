@@ -97,7 +97,6 @@ public class DPGroupStatement implements Statement {
 	}
 
 	protected void closeCurrentResultSet() throws SQLException {
-
 		if (currentResultSet != null) {
 			try {
 				currentResultSet.close();
@@ -107,7 +106,6 @@ public class DPGroupStatement implements Statement {
 				currentResultSet = null;
 			}
 		}
-
 	}
 
 	protected ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {

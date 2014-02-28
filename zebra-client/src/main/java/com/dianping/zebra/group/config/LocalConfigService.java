@@ -47,6 +47,7 @@ public class LocalConfigService implements ConfigService {
 
 	private File getFile() {
 		URL propUrl = getClass().getClassLoader().getResource(this.resourceFileName);
+		
 		if (propUrl != null) {
 			return FileUtils.toFile(propUrl);
 		} else {
@@ -110,7 +111,11 @@ public class LocalConfigService implements ConfigService {
 			PropertyChangeEvent evt = new AdvancedPropertyChangeEvent(this, key, oldValue, newValue, type);
 
 			for (PropertyChangeListener listener : listeners) {
-				listener.propertyChange(evt);
+				try {
+					listener.propertyChange(evt);
+				} catch (Throwable e) {
+					logger.warn("fail to notify listener", e);
+				}
 			}
 		}
 
@@ -145,6 +150,7 @@ public class LocalConfigService implements ConfigService {
 							}
 						}
 
+						lastModifiedTime.set(newModifiedTime);
 						props.set(loadConfig());
 					}
 				} catch (Throwable throwable) {
@@ -154,7 +160,7 @@ public class LocalConfigService implements ConfigService {
 				}
 
 				try {
-					TimeUnit.SECONDS.sleep(10);
+					TimeUnit.SECONDS.sleep(5);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 					// ignore it

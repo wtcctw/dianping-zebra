@@ -42,7 +42,6 @@ public class GroupDataSourceFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 	      ServletException {
-
 		if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
 
 			DPDataSourceContext context = DPDataSourceContext.getContext();
@@ -88,16 +87,21 @@ public class GroupDataSourceFilter implements Filter {
 	}
 
 	private Cookie getCookie(HttpServletRequest hRequest) {
-		Cookie zebraCookie = null;
+		Cookie[] cookies = hRequest.getCookies();
 
-		for (Cookie cookie : hRequest.getCookies()) {
-			String cookieName = cookie.getName();
-			if (this.cookieName.equalsIgnoreCase(cookieName)) {
-				zebraCookie = cookie;
-				break;
+		if (cookies != null) {
+			Cookie zebraCookie = null;
+			for (Cookie cookie : cookies) {
+				String cookieName = cookie.getName();
+				if (this.cookieName.equalsIgnoreCase(cookieName)) {
+					zebraCookie = cookie;
+					break;
+				}
 			}
+			return zebraCookie;
+		} else {
+			return null;
 		}
-		return zebraCookie;
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import org.dbunit.operation.DatabaseOperation;
 import org.h2.tools.RunScript;
 import org.junit.Before;
 
-public abstract class BaseDatabaseTestCase {
+public abstract class SingleDatabaseTestCase {
 
 	private static final String JDBC_DRIVER = org.h2.Driver.class.getName();
 
@@ -22,25 +22,18 @@ public abstract class BaseDatabaseTestCase {
 
 	private DPGroupDataSource dataSource;
 
-	// private String configManagerType = "local";
-
-	// private String resourceId = "sample.ds";
-
-	// private String dataSets = "datasets.xml";
-
-	// private String schema = "src/test/resources/schema.sql";
-
-	private void cleanlyInsert(IDataSet dataSet) throws Exception {
-		IDatabaseTester databaseTester = new JdbcDatabaseTester(JDBC_DRIVER, JDBC_URL, USER, PASSWORD);
+	protected void cleanlyInsert(String driver, String jdbcUrl, String user, String password, IDataSet dataSet)
+	      throws Exception {
+		IDatabaseTester databaseTester = new JdbcDatabaseTester(driver, jdbcUrl, user, password);
 		databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
 		databaseTester.setDataSet(dataSet);
 		databaseTester.onSetup();
 	}
 
 	@Before
-	public void createTableAndImportDataSet() throws Exception {
+	protected void createTableAndImportDataSet() throws Exception {
 		RunScript.execute(JDBC_URL, USER, PASSWORD, getSchema(), "UTF8", false);
-		cleanlyInsert(readDataSet());
+		cleanlyInsert(JDBC_DRIVER, JDBC_URL, USER, PASSWORD, readDataSet());
 	}
 
 	protected DataSource getDataSource() {
@@ -59,6 +52,10 @@ public abstract class BaseDatabaseTestCase {
 	protected abstract String getResourceId();
 
 	protected abstract String getSchema();
+
+	protected IDataSet readDataSet(String dataSets) throws Exception {
+		return new FlatXmlDataSetBuilder().build(getClass().getClassLoader().getResource(dataSets));
+	}
 
 	private IDataSet readDataSet() throws Exception {
 		return new FlatXmlDataSetBuilder().build(getClass().getClassLoader().getResource(getDataSets()));
