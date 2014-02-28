@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -16,6 +18,11 @@ import org.junit.Test;
 import com.dianping.zebra.group.exception.GroupConfigException;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
 
+/**
+ * 
+ * @author damonzhu
+ * 
+ */
 public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 
 	@Test(expected = GroupDataSourceException.class)
@@ -61,34 +68,146 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		conn.prepareCall("select * from PERSON");
 	}
 
-	@Test
+	// @Test
 	// TODO
-	public void testCallableStatementUseWriteConnection() throws Exception {
-		Connection conn = getDataSource().getConnection();
+	public void test_callable_statement_use_write_connection() throws Exception {
+		execute(new ConnectionCallback() {
 
-		conn.prepareCall("select * from PERSON");
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				Statement statement1 = conn.prepareCall("select * from PERSON");
+				ResultSet rsSet1 = statement1.getResultSet();
+				rsSet1.next();
+				String value = rsSet1.getString(2);
+				Assert.assertEquals("writer", value);
+				return null;
+			}
+		});
+
 	}
 
 	@Test
-	public void test_create_single_statement() throws Exception {
-		Connection connection = getDataSource().getConnection();
+	public void test_create_single_read_statement_on_same_connection() throws Exception {
+		execute(new StatementCallback() {
 
-		Statement statement = connection.createStatement();
-		boolean result = statement.execute("select * from PERSON");
+			@Override
+			public Object doInStatement(Statement stmt) throws Exception {
+				boolean result = stmt.execute("select * from PERSON");
 
-		assertTrue(result);
-		ResultSet rsSet = statement.getResultSet();
-		rsSet.next();
-		Assert.assertEquals("Bob", rsSet.getString(2));
-		rsSet.next();
-		Assert.assertEquals("Alice", rsSet.getString(2));
-		rsSet.next();
-		Assert.assertEquals("Charlie", rsSet.getString(2));
+				assertTrue(result);
+				ResultSet rsSet = stmt.getResultSet();
+				rsSet.next();
+				Assert.assertNotSame("writer", rsSet.getString(2));
+				return null;
+			}
+		});
 	}
 
 	@Test
-	public void test_create_double_statement() {
+	public void test_create_read_write_statement_on_same_connection() throws Exception {
+		execute(new ConnectionCallback() {
 
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				Assert.assertNotSame("writer", executeSelectSql(conn, "select * from PERSON"));
+				executeUpdateSql(conn, "update PERSON set NAME = 'writer-new'");
+				Assert.assertEquals("writer-new", executeSelectSql(conn, "select * from PERSON"));
+				return null;
+			}
+		});
+	}
+
+	@Test
+	public void test_create_write_read_statement_on_same_connection() throws Exception {
+		execute(new ConnectionCallback() {
+
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				executeUpdateSql(conn, "update PERSON set NAME = 'writer-new'");
+				Assert.assertEquals("writer-new", executeSelectSql(conn, "select * from PERSON"));
+				return null;
+			}
+		});
+	}
+
+	@Test
+	public void test_create_multi_read_statement_on_same_connection() throws Exception {
+		execute(new ConnectionCallback() {
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				String value = executeSelectSql(conn, "select * from PERSON");
+				Assert.assertNotSame("writer", value);
+				Assert.assertEquals(value, executeSelectSql(conn, "select * from PERSON"));
+				return null;
+			}
+		});
+	}
+
+	@Test
+	public void test_create_multi_write_statement_on_same_connection() throws Exception {
+		execute(new ConnectionCallback() {
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				executeUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
+				executeUpdateSql(conn, "update PERSON set NAME = 'writer-new2'");
+
+				Assert.assertEquals("writer-new2", executeSelectSql(conn, "select * from PERSON"));
+				return null;
+			}
+		});
+	}
+
+	@Test
+	public void test_create_multi_read_statement_on_different_connection() throws Exception {
+		final Set<String> set = new HashSet<String>();
+
+		for (int i = 0; i < 100; i++) {
+			execute(new StatementCallback() {
+				@Override
+				public Object doInStatement(Statement stmt) throws Exception {
+					set.add(executeSelectSql(stmt, "select * from PERSON"));
+					return null;
+				}
+			});
+		}
+
+		Assert.assertEquals(2, set.size());
+		for (String value : set) {
+			Assert.assertNotSame("writer", value);
+		}
+	}
+
+	@Test
+	public void test_create_write_read_statement_on_different_connection() throws Exception {
+		final Set<String> set = new HashSet<String>();
+
+		for (int i = 0; i < 100; i++) {
+			if (i % 2 == 0) {
+				execute(new StatementCallback() {
+					@Override
+					public Object doInStatement(Statement stmt) throws Exception {
+						set.add(executeSelectSql(stmt, "select * from PERSON"));
+						return null;
+					}
+				});
+
+			} else {
+				execute(new StatementCallback() {
+					@Override
+					public Object doInStatement(Statement stmt) throws Exception {
+						executeUpdateSql(stmt, "update PERSON set NAME = 'writer-new'");
+						Assert.assertEquals("writer-new", executeSelectSql(stmt, "select * from PERSON"));
+						return null;
+					}
+				});
+
+			}
+		}
+
+		Assert.assertEquals(2, set.size());
+		for (String value : set) {
+			Assert.assertNotSame("writer-new", value);
+		}
 	}
 
 	@Test
@@ -191,4 +310,29 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		return entries;
 	}
 
+	public void executeUpdateSql(Connection conn, String sql) throws SQLException {
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
+	}
+	
+	public void executeUpdateSql(Statement stmt, String sql) throws SQLException {
+		stmt.execute(sql);
+	}
+
+	public String executeSelectSql(Connection conn, String sql) throws SQLException {
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
+		ResultSet rsSet = stmt.getResultSet();
+		rsSet.next();
+
+		return rsSet.getString(2);
+	}
+
+	public String executeSelectSql(Statement stmt, String sql) throws SQLException {
+		stmt.execute(sql);
+		ResultSet rsSet = stmt.getResultSet();
+		rsSet.next();
+
+		return rsSet.getString(2);
+	}
 }

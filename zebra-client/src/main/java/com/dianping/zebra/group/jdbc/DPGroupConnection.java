@@ -86,12 +86,21 @@ public class DPGroupConnection implements Connection {
 		if (forceWrite) {
 			if (wConnection == null) {
 				wConnection = dataSourceManager.getWriteConnection();
+				wConnection.setAutoCommit(autoCommit);
 			}
 
 			return wConnection;
 		}
 
 		if (wConnection != null) {
+			return wConnection;
+		}
+
+		if (!autoCommit) {
+			wConnection = dataSourceManager.getWriteConnection();
+			if (wConnection.getAutoCommit() != autoCommit) {
+				wConnection.setAutoCommit(autoCommit);
+			}
 			return wConnection;
 		}
 

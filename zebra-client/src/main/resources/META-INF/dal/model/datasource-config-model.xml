@@ -14,6 +14,7 @@
 		<element name="min-pool-size" value-type="int" primitive="true" />
 		<element name="max-pool-size" value-type="int" primitive="true" />
 		<element name="initial-pool-size" value-type="int" primitive="true" />
+		<element name="checkout-timeout" value-type="int" primitive="true" default-value="1000"/>
 		<element name="connection-customize-class-name" value-type="String" default-value="com.dianping.zebra.group.manager.DataSourceMonitorCustomizer"/>
 		<any name="properties" />
 	</entity>

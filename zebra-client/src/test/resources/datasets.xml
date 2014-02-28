@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataset>
-  <PERSON NAME="Bob1" LAST_NAME="Doe1" AGE="18"/>
-  <PERSON NAME="Bob2" LAST_NAME="Doe2" AGE="23"/>
-  <PERSON NAME="Bob3" LAST_NAME="Doe3" AGE="42"/>
+  <PERSON NAME="writer" LAST_NAME="writer" AGE="18"/>
 </dataset>
 
 
