@@ -260,6 +260,27 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 			}
 		}
 	}
+	
+	@Test
+	public void test_batch() throws Exception{
+		execute(new StatementCallback() {
+			
+			@Override
+			public Object doInStatement(Statement stmt) throws Exception {
+				for(int i = 0 ; i < 100 ; i++){
+					stmt.addBatch("update PERSON set NAME = 'writer-new'");
+				}
+				
+				int[] executeBatch = stmt.executeBatch();
+				
+				for(int i = 0 ; i < 100 ; i++){
+					Assert.assertEquals(1, executeBatch[i]);
+				}
+				
+				return null;
+			}
+		});
+	}
 
 	@Override
 	protected String getConfigManagerType() {

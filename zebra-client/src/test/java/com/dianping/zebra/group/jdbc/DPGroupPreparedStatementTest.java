@@ -4,30 +4,49 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 
 public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 	
+	private String selectSql = "select * from PERSON p where p.NAME = ?";
+	
+	private String updateSql = "update PERSON p set p.Name = ? where p.NAME = ?";
+	
 	@Test
-	public void test_write_and_read_perpared_statement() throws Exception{
+	public void test_read_and_write_perpared_statement() throws Exception{
 		execute(new ConnectionCallback() {
 			@Override
 			public Object doInConnection(Connection conn) throws Exception {
-				PreparedStatement ps = conn.prepareStatement("select * from PERSON p where p.NAME = ?");
-				
+				conn.setAutoCommit(false);
+				PreparedStatement ps = conn.prepareStatement(selectSql);
 				ps.setString(1, "writer");
-				
 				ResultSet executeQuery = ps.executeQuery();
-				
 				executeQuery.next();
+				Assert.assertEquals("writer", executeQuery.getString(2));
+				ps.close();
 				
-				System.out.println(executeQuery.getString(2));
+				PreparedStatement ps1 = conn.prepareStatement(updateSql);
+				ps1.setString(1, "writer-new");
+				ps1.setString(2, "writer");
+				ps1.executeUpdate();
+				ps1.close();
+				
+				PreparedStatement ps2 = conn.prepareStatement(selectSql);
+				ps2.setString(1, "writer-new");
+				ResultSet executeQuery2 = ps2.executeQuery();
+				executeQuery2.next();
+				Assert.assertEquals("writer-new", executeQuery2.getString(2));
+				ps2.close();
+				
+				conn.commit();
 				return null;
 			}
 		});
 	}
-
+	
 	@Override
 	protected String getConfigManagerType() {
 		return "local";
