@@ -1,23 +1,34 @@
 <group-data-source-config>
-	<data-source-config id="db1" weight="1" readonly="false">
-		<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
-		<user></user>
-		<driver-class></driver-class>
-		<password>123456</password>
-		<min-pool-size>5</min-pool-size>
+	<data-source-config id="db1" weight="2" readonly="false">
+		<jdbc-url>jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1</jdbc-url>
+		<user>sa</user>
+		<driver-class>org.h2.Driver</driver-class>
+		<password></password>
+		<min-pool-size>1</min-pool-size>
 		<max-pool-size>5</max-pool-size>
-		<initial-pool-size>5</initial-pool-size>
+		<initial-pool-size>4</initial-pool-size>
 		<checkout-timeout>1000</checkout-timeout>
 		<connection-customize-class-name>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connection-customize-class-name>
 	</data-source-config>
-	<data-source-config id="db2" weight="1" readonly="true">
-		<jdbc-url>jdbc:mysql://127.0.0.1:3306/sample</jdbc-url>
-		<user></user>
-		<driver-class></driver-class>
+	<data-source-config id="db2" weight="2" readonly="true">
+		<jdbc-url>jdbc:h2:mem:test1;MVCC=TRUE;DB_CLOSE_DELAY=-1</jdbc-url>
+		<user>sa</user>
+		<driver-class>org.h2.Driver</driver-class>
 		<password></password>
-		<min-pool-size>5</min-pool-size>
-		<max-pool-size>5</max-pool-size>
-		<initial-pool-size>5</initial-pool-size>
+		<min-pool-size>2</min-pool-size>
+		<max-pool-size>6</max-pool-size>
+		<initial-pool-size>4</initial-pool-size>
+		<checkout-timeout>1000</checkout-timeout>
+		<connection-customize-class-name>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connection-customize-class-name>
+	</data-source-config>
+	<data-source-config id="db3" weight="2" readonly="true">
+		<jdbc-url>jdbc:h2:mem:test2;MVCC=TRUE;DB_CLOSE_DELAY=-1</jdbc-url>
+		<user>sa</user>
+		<driver-class>org.h2.Driver</driver-class>
+		<password></password>
+		<min-pool-size>2</min-pool-size>
+		<max-pool-size>6</max-pool-size>
+		<initial-pool-size>4</initial-pool-size>
 		<checkout-timeout>1000</checkout-timeout>
 		<connection-customize-class-name>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connection-customize-class-name>
 	</data-source-config>
