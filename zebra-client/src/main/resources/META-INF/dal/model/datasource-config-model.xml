@@ -7,13 +7,14 @@
 		<attribute name="id" value-type="String" key="true" />
 		<attribute name="weight" value-type="int" primitive="true" default-value="1"/>
 		<attribute name="readonly" value-type="boolean" primitive="true" default-value="true"/>
-		<element name="jdbc-url" value-type="String" />
-		<element name="user" value-type="String" />
-		<element name="driver-class" value-type="String" />
-		<element name="password" value-type="String" />
+		<element name="jdbc-url" value-type="String" primitive="true" default-value=""/>
+		<element name="user" value-type="String" primitive="true" default-value=""/>
+		<element name="driver-class" value-type="String" primitive="true" default-value=""/>
+		<element name="password" value-type="String" primitive="true" default-value=""/>
 		<element name="min-pool-size" value-type="int" primitive="true" />
 		<element name="max-pool-size" value-type="int" primitive="true" />
 		<element name="initial-pool-size" value-type="int" primitive="true" />
+		<element name="checkout-timeout" value-type="int" primitive="true" default-value="1000"/>
 		<element name="connection-customize-class-name" value-type="String" default-value="com.dianping.zebra.group.manager.DataSourceMonitorCustomizer"/>
 		<any name="properties" />
 	</entity>

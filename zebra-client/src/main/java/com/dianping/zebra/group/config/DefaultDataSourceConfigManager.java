@@ -138,6 +138,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			      dataSourceConfig.getMinPoolSize()));
 			dataSourceConfig.setPassword(getProperty(getKey(Constants.ELEMENT_PASSWORD, dsId),
 			      dataSourceConfig.getPassword()));
+			dataSourceConfig.setCheckoutTimeout(getProperty(getKey(Constants.ELEMENT_CHECKOUT_TIMEOUT, dsId),
+			      dataSourceConfig.getCheckoutTimeout()));
 			dataSourceConfig.setUser(getProperty(getKey(Constants.ELEMENT_USER, dsId), dataSourceConfig.getUser()));
 		}
 

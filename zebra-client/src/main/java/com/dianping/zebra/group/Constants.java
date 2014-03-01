@@ -48,4 +48,6 @@ public class Constants {
 	public static final String ELEMENT_COOKIE_NAME = "cookieName";
 	
 	public static final String ELEMENT_ENCRYPT_SEED = "encryptSeed";
+	
+   public static final String ELEMENT_CHECKOUT_TIMEOUT = "checkoutTimeout";
 }

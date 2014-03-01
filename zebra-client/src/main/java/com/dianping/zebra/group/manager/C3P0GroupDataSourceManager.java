@@ -82,14 +82,17 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		}
 	}
 
-	private void checkConnection(DataSource dataSource) throws SQLException {
+	private boolean checkConnection(DataSource dataSource) throws Throwable {
 		Connection connection = null;
 		try {
 			connection = dataSource.getConnection();
-		} catch (SQLException e) {
+			return connection != null;
+		} catch (Throwable e) {
 			throw e;
 		} finally {
-			connection.close();
+			if (connection != null) {
+				connection.close();
+			}
 		}
 	}
 
@@ -110,9 +113,10 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 				}
 
 				DataSource dataSource = initDataSources(value);
-				checkConnection(dataSource);
-				this.dataSources.put(key, dataSource);
-			} catch (SQLException e) {
+				if (checkConnection(dataSource)) {
+					this.dataSources.put(key, dataSource);
+				}
+			} catch (Throwable e) {
 				logger.error(String.format("fail to connect the database[%s]", key), e);
 				throw new RuntimeException(e);
 			}
@@ -140,6 +144,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			dataSource.setInitialPoolSize(value.getInitialPoolSize());
 			dataSource.setMinPoolSize(value.getMinPoolSize());
 			dataSource.setMaxPoolSize(value.getMaxPoolSize());
+			dataSource.setCheckoutTimeout(value.getCheckoutTimeout());
 			dataSource.setConnectionCustomizerClassName(value.getConnectionCustomizeClassName());
 
 			for (Any any : value.getProperties()) {
