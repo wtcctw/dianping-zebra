@@ -96,6 +96,13 @@ public class DPGroupPreparedStatement extends DPGroupStatement implements Prepar
 	public void setColumnNames(String[] columnNames) {
 		this.columnNames = columnNames;
 	}
+	
+	protected ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
+		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
+		setParams(pstmt);
+		this.currentResultSet = pstmt.executeQuery();
+		return this.currentResultSet;
+	}
 
 	/*
 	 * (non-Javadoc)
