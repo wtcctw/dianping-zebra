@@ -17,8 +17,10 @@ import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 import com.dianping.zebra.group.router.GroupDataSourceTarget;
 
 public class MysqlHealthCheckImpl implements HealthCheck {
+	// TODO thread not safe
 	private int healthCheckInterval;
 
+	// TODO thread not safe
 	private int maxErrorTimes;
 
 	private DataSourceConfigManager dataSourceConfigManager;
@@ -36,6 +38,7 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 		this.healthCheckInterval = systemConfigManager.getSystemConfig().getHealthCheckInterval();
 		this.maxErrorTimes = systemConfigManager.getSystemConfig().getMaxErrorCounter();
 		this.systemConfigManager.addListerner(new HealthCheckChangeListener());
+		// TODO thread not safe
 		init();
 	}
 
@@ -56,6 +59,7 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 	}
 
 	public void notifyException(GroupDataSourceTarget dsTarget, SQLException e) {
+		// TODO comment
 		if (dsTarget.isReadOnly() == false) {
 			return;
 		}
@@ -87,11 +91,9 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 				}
 			}
 		}
-
 	}
 
 	private class checkHealthCycle implements Runnable {
-
 		@Override
 		public void run() {
 			while (true) {
@@ -106,22 +108,18 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 				dskeyFailCount = new ConcurrentHashMap<String, AtomicInteger>();
 				try {
 					Thread.sleep(healthCheckInterval);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (InterruptedException ignore) {
 				}
 			}
-
 		}
-
 	}
 
-	private void init() {
+	@Override
+	public void init() {
 		checkHealthCycle checkHealthTask = new checkHealthCycle();
 		Thread thread = new Thread(checkHealthTask);
 		thread.setDaemon(true);
-		thread.setName("checkHealthTask");
+		thread.setName("CheckHealthTask");
 		thread.start();
 	}
-
 }
