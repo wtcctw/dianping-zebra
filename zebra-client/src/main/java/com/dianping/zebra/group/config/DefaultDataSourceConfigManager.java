@@ -54,11 +54,37 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
+	public Map<String, DataSourceConfig> copyDataSourceConfig(Map<String, DataSourceConfig> config) {
+		Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<String, DataSourceConfig>();
+
+		for (Entry<String, DataSourceConfig> entry : config.entrySet()) {
+			String dsId = entry.getKey();
+			DataSourceConfig newDataSourceConfig = new DataSourceConfig();
+			DataSourceConfig originDataSourceConfig = entry.getValue();
+
+			newDataSourceConfig.setConnectionCustomizeClassName(originDataSourceConfig.getConnectionCustomizeClassName());
+			newDataSourceConfig.setDriverClass(originDataSourceConfig.getDriverClass());
+			newDataSourceConfig.setId(dsId);
+			newDataSourceConfig.setInitialPoolSize(originDataSourceConfig.getInitialPoolSize());
+			newDataSourceConfig.setJdbcUrl(originDataSourceConfig.getJdbcUrl());
+			newDataSourceConfig.setMaxPoolSize(originDataSourceConfig.getMaxPoolSize());
+			newDataSourceConfig.setMinPoolSize(originDataSourceConfig.getMinPoolSize());
+			newDataSourceConfig.setPassword(originDataSourceConfig.getPassword());
+			newDataSourceConfig.setCheckoutTimeout(originDataSourceConfig.getCheckoutTimeout());
+			newDataSourceConfig.setUser(originDataSourceConfig.getUser());
+			newDataSourceConfig.setProperties(originDataSourceConfig.getProperties());
+
+			dataSourceConfigs.put(dsId, newDataSourceConfig);
+		}
+
+		return dataSourceConfigs;
+	}
+
 	@Override
 	public Map<String, DataSourceConfig> getAvailableDataSources() {
 		this.rLock.lock();
 		try {
-			return this.availableDsConfig;
+			return copyDataSourceConfig(this.availableDsConfig);
 		} finally {
 			this.rLock.unlock();
 		}
@@ -68,7 +94,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	public Map<String, DataSourceConfig> getDataSourceConfigs() {
 		this.rLock.lock();
 		try {
-			return this.dataSourceConfigCache;
+			return copyDataSourceConfig(this.dataSourceConfigCache);
 		} finally {
 			this.rLock.unlock();
 		}
@@ -91,7 +117,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	public Map<String, DataSourceConfig> getUnAvailableDataSources() {
 		this.rLock.lock();
 		try {
-			return this.unAvailableDsConfig;
+			return copyDataSourceConfig(this.unAvailableDsConfig);
 		} finally {
 			this.rLock.unlock();
 		}
@@ -141,6 +167,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			dataSourceConfig.setCheckoutTimeout(getProperty(getKey(Constants.ELEMENT_CHECKOUT_TIMEOUT, dsId),
 			      dataSourceConfig.getCheckoutTimeout()));
 			dataSourceConfig.setUser(getProperty(getKey(Constants.ELEMENT_USER, dsId), dataSourceConfig.getUser()));
+			dataSourceConfig.setProperties(dataSourceConfig.getProperties());
 		}
 
 		isValidConfig(dataSourceConfigs);
