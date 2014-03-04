@@ -103,7 +103,7 @@ public class GroupDataSourceFilter implements Filter {
 		}
 		String configManagerType = filterConfig.getInitParameter(PARAM_CONFIG_MANAGE_TYPE);
 		if (configManagerType == null) {
-			configManagerType = Constants.LOCAL_CONFIG_MANAGER_TYPE;
+			configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 		}
 
 		configManager = SystemConfigManagerFactory.getConfigManger(configManagerType, resourceId);
