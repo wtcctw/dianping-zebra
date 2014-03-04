@@ -10,6 +10,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -20,8 +21,8 @@ public class C3P0GroupDataSourceManagerTest {
 	public void testConnect() throws SQLException, IOException {
 		DataSourceConfigManager groupConfigManager = DataSourceConfigManagerFactory.getConfigManager("local",
 		      "ds.properties");
-		GroupDataSourceManager dataSourceManager = GroupDataSourceManagerFactory
-		      .getGroupDataSourceManger(groupConfigManager);
+		GroupDataSourceManager dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(
+		      groupConfigManager, Constants.CONNECTION_POOL_TYPE_C3P0);
 
 		Connection connection = dataSourceManager.getReadConnection("db1");
 

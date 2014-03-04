@@ -52,6 +52,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		config.setRouterStrategy(getProperty(Constants.ELEMENT_ROUTER_STRATEGY, config.getRouterStrategy()));
 		config.setCookieName(getProperty(Constants.ELEMENT_COOKIE_NAME, config.getCookieName()));
 		config.setEncryptSeed(getProperty(Constants.ELEMENT_ENCRYPT_SEED, config.getEncryptSeed()));
+		config.setCookieExpiredTime(getProperty(Constants.ELEMENT_COOKIE_EXPIRED_TIME, config.getCookieExpiredTime()));
 
 		return config;
 	}
@@ -75,6 +76,8 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 				config.setCookieName((String) newValue);
 			} else if (key.equals(Constants.ELEMENT_ENCRYPT_SEED)) {
 				config.setEncryptSeed((String) newValue);
+			} else if (key.equals(Constants.ELEMENT_COOKIE_EXPIRED_TIME)) {
+				config.setCookieExpiredTime(Integer.parseInt((String) newValue));
 			}
 		}
 	}

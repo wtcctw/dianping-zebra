@@ -86,19 +86,19 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		}
 	}
 
-	private boolean checkConnection(DataSource dataSource) throws Throwable {
-		Connection connection = null;
-		try {
-			connection = dataSource.getConnection();
-			return connection != null;
-		} catch (Throwable e) {
-			throw e;
-		} finally {
-			if (connection != null) {
-				connection.close();
-			}
-		}
-	}
+//	private boolean checkConnection(DataSource dataSource) throws Throwable {
+//		Connection connection = null;
+//		try {
+//			connection = dataSource.getConnection();
+//			return connection != null;
+//		} catch (Throwable e) {
+//			throw e;
+//		} finally {
+//			if (connection != null) {
+//				connection.close();
+//			}
+//		}
+//	}
 
 	@Override
 	public Connection getWriteConnection() throws SQLException {

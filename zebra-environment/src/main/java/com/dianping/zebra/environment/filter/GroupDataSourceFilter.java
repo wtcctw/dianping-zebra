@@ -12,25 +12,17 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 
 public class GroupDataSourceFilter implements Filter {
 
-	// TODO Constants
 	private static final String PARAM_CONFIG_MANAGE_TYPE = "configManageType";
 
 	private static final String PARAM_RESOURCE_ID = "resourceId";
 
-	private static final String DEFAULT_CONFIG_MANAGE_TYPE = "local";
-
-	private static final String DEFAULT_RESOURCE_ID = "zebra.system";
-
-	private static final String DEFAULT_COOKIE_NAME = "zebra";
-
-	private static final String DEFAULT_COOKIE_DOMAIN = ".dianping.com";
-
-	private static final long DEFAULT_ENCRYPT_SEED = 2123174217368174103L;
+	private SystemConfigManager configManager;
 
 	private String cookieName;
 
@@ -38,50 +30,48 @@ public class GroupDataSourceFilter implements Filter {
 
 	private long encryptSeed;
 
+	private int cookieExpiredTime;
+
 	private SimpleEncrypt encrypt;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 	      ServletException {
 		if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
-
-			DPDataSourceContext context = DPDataSourceContext.getContext();
-
-			HttpServletRequest hRequest = (HttpServletRequest) request;
-
-			// 读取cookie，有且时间未过期的话，设置context中masterFlag为true
-			Cookie zebra = getCookie(hRequest);
-			if (zebra != null) {
-				try {
-					long expireTime = encrypt.decryptTimestamp(zebra.getValue());
-					long now = System.currentTimeMillis();
-					if (expireTime < now) {
-						context.setMasterFlag(true, false);
-					}
-				} catch (Exception e) {
-				}
-			}
-
 			try {
-				chain.doFilter(request, response);
+				DPDataSourceContext context = DPDataSourceContext.getContext();
+				HttpServletRequest hRequest = (HttpServletRequest) request;
+				HttpServletResponse hResponse = (HttpServletResponse) response;
 
-				// 从Threadlocal获取forceReadFromMaster值，如果有forceReadFromMaster，set cookie 到 response
-				boolean shouldSetCookie = context.isShouldSetCookie();
-				if (shouldSetCookie) {
-					HttpServletResponse hResponse = (HttpServletResponse) response;
-					long now = System.currentTimeMillis();
+				// 读取cookie，有且时间未过期的话，设置context中masterFlag为true
+				Cookie zebra = getCookie(hRequest);
+				if (zebra != null) {
 					try {
-						Cookie cookie = new Cookie(cookieName, encrypt.encryptTimestamp((now)));
-						if (cookieDomain != null) {
-							cookie.setDomain(cookieDomain);
+						long expireTime = encrypt.decryptTimestamp(zebra.getValue());
+						long now = System.currentTimeMillis();
+						if (expireTime < now) {
+							context.setMasterFlag(true, false);
 						}
-						hResponse.addCookie(cookie);
 					} catch (Exception e) {
 					}
 				}
 
+				chain.doFilter(request, response);
+				
+				// 从Threadlocal获取forceReadFromMaster值，如果有forceReadFromMaster，set cookie 到 response
+				boolean shouldSetCookie = context.isShouldSetCookie();
+				if (shouldSetCookie) {
+					long expiredTime = System.currentTimeMillis() + cookieExpiredTime * 1000;
+					try {
+						Cookie cookie = new Cookie(cookieName, encrypt.encryptTimestamp(expiredTime));
+						cookie.setDomain(cookieDomain);
+						cookie.setMaxAge(cookieExpiredTime);
+
+						hResponse.addCookie(cookie);
+					} catch (Exception e) {
+					}
+				}
 			} finally {
-				// 清除ThreadLocal
 				DPDataSourceContext.clear();
 			}
 		}
@@ -109,33 +99,24 @@ public class GroupDataSourceFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 		String resourceId = filterConfig.getInitParameter(PARAM_RESOURCE_ID);
 		if (resourceId == null) {
-			resourceId = DEFAULT_RESOURCE_ID;
+			resourceId = Constants.RESOURCE_ID_SYSTEM_CONFIG;
 		}
 		String configManagerType = filterConfig.getInitParameter(PARAM_CONFIG_MANAGE_TYPE);
 		if (configManagerType == null) {
-			configManagerType = DEFAULT_CONFIG_MANAGE_TYPE;
+			configManagerType = Constants.LOCAL_CONFIG_MANAGER_TYPE;
 		}
-		SystemConfigManager configManager = SystemConfigManagerFactory.getConfigManger(configManagerType, resourceId);
+
+		configManager = SystemConfigManagerFactory.getConfigManger(configManagerType, resourceId);
 
 		this.cookieName = configManager.getSystemConfig().getCookieName();
-		if (this.cookieName == null) {
-			this.cookieName = DEFAULT_COOKIE_NAME;
-		}
-
 		this.cookieDomain = configManager.getSystemConfig().getCookieDomain();
-		if (this.cookieDomain == null) {
-			this.cookieDomain = DEFAULT_COOKIE_DOMAIN;
-		}
+		this.cookieExpiredTime = configManager.getSystemConfig().getCookieExpiredTime();
 
 		String encryptSeedStr = configManager.getSystemConfig().getEncryptSeed();
-		if (encryptSeedStr != null) {
-			try {
-				this.encryptSeed = Long.parseLong(encryptSeedStr);
-			} catch (RuntimeException e) {
-				throw new IllegalArgumentException("encryptSeed should be numberic", e);
-			}
-		} else {
-			this.encryptSeed = DEFAULT_ENCRYPT_SEED;
+		try {
+			this.encryptSeed = Long.parseLong(encryptSeedStr);
+		} catch (RuntimeException e) {
+			throw new IllegalArgumentException("encryptSeed should be numberic", e);
 		}
 
 		this.encrypt = new SimpleEncrypt(encryptSeed);

@@ -50,11 +50,9 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 			addExtensionMethod.setAccessible(true);
 
 			trackerContextExist = true;
-
 		} catch (Exception e) {
 			logger.warn("No App context: " + e.getMessage(), e);
 		}
-
 	}
 
 	public static DPDataSourceContext getContext() {
@@ -113,10 +111,9 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 	// **************** 以下代码与TrackerContext相关 ***************************
 
 	private static DPDataSourceContext getFromTrackerContext() {
-		DPDataSourceContext _dsContext = null;
+		DPDataSourceContext dsContext = null;
 
 		if (trackerContextExist) {
-
 			try {
 				Object trackerContext = getContextMethod.invoke(null);
 
@@ -124,19 +121,17 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 					trackerContext = trackerContextClass.newInstance();
 					setContextMethod.invoke(null, trackerContext);
 				}
-				_dsContext = (DPDataSourceContext) getExtensionMethod.invoke(trackerContext, CONTEXT_NAME);
-
+				dsContext = (DPDataSourceContext) getExtensionMethod.invoke(trackerContext, CONTEXT_NAME);
 			} catch (Exception e) {
 				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
 			}
 		}
 
-		return _dsContext;
+		return dsContext;
 	}
 
 	private static void putIntoTrackerContext(DPDataSourceContext _dsContext) {
 		if (trackerContextExist) {
-
 			try {
 				Object trackerContext = getContextMethod.invoke(null);
 
@@ -162,5 +157,4 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 			}
 		}
 	}
-
 }

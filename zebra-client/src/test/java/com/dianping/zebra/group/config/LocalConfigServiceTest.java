@@ -38,7 +38,7 @@ public class LocalConfigServiceTest {
 		Assert.assertEquals("2", localConfigService.getProperty(getKey(Constants.ELEMENT_RETRY_TIMES)));
 		Assert.assertEquals(".dianping.com", localConfigService.getProperty(getKey(Constants.ELEMENT_COOKIE_DOMAIN)));
 		Assert.assertEquals("zebra", localConfigService.getProperty(getKey(Constants.ELEMENT_COOKIE_NAME)));
-		Assert.assertEquals("xaxd", localConfigService.getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED)));
+		Assert.assertEquals("2123174217368174103", localConfigService.getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED)));
 	}
 
 	@Test
