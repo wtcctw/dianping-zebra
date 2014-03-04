@@ -23,6 +23,7 @@ public class HealthCheckFactory {
 			}
 			return mysqlHealthCheck.get();
 		}
+		//TODO else throw exception
 		return null;
 	}
 }

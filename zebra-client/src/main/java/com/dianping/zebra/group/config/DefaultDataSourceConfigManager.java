@@ -62,6 +62,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			DataSourceConfig newDataSourceConfig = new DataSourceConfig();
 			DataSourceConfig originDataSourceConfig = entry.getValue();
 
+			newDataSourceConfig.setWeight(originDataSourceConfig.getWeight());
+			newDataSourceConfig.setReadonly(originDataSourceConfig.getReadonly());
 			newDataSourceConfig.setConnectionCustomizeClassName(originDataSourceConfig.getConnectionCustomizeClassName());
 			newDataSourceConfig.setDriverClass(originDataSourceConfig.getDriverClass());
 			newDataSourceConfig.setId(dsId);
