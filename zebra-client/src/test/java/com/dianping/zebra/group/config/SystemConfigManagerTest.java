@@ -17,11 +17,12 @@ public class SystemConfigManagerTest {
 		Assert.assertEquals(10, config.getHealthCheckInterval());
 		Assert.assertEquals(3, config.getMaxErrorCounter());
 		Assert.assertEquals(2, config.getRetryTimes());
+		Assert.assertEquals(2, config.getCookieExpiredTime());
 		Assert.assertEquals("roundrobin", config.getRouterStrategy());
 		Assert.assertEquals("roundrobin", config.getRouterStrategy());
 		Assert.assertEquals(".dianping.com", config.getCookieDomain());
 		Assert.assertEquals("zebra", config.getCookieName());
-		Assert.assertEquals("xaxd", config.getEncryptSeed());
+		Assert.assertEquals("2123174217368174103", config.getEncryptSeed());
 	}
 
 }

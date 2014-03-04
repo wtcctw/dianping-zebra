@@ -32,6 +32,8 @@ public class GroupDataSourceFilter implements Filter {
 
 	private static final long DEFAULT_ENCRYPT_SEED = 2123174217368174103L;
 
+	private SystemConfigManager configManager;
+
 	private String cookieName;
 
 	private String cookieDomain;
@@ -56,6 +58,7 @@ public class GroupDataSourceFilter implements Filter {
 					long expireTime = encrypt.decryptTimestamp(zebra.getValue());
 					long now = System.currentTimeMillis();
 					if (expireTime < now) {
+						// TODO 能不能抽出一个方法叫 setShouldSetCookie
 						context.setMasterFlag(true, false);
 					}
 				} catch (Exception e) {
@@ -71,15 +74,20 @@ public class GroupDataSourceFilter implements Filter {
 					HttpServletResponse hResponse = (HttpServletResponse) response;
 					long now = System.currentTimeMillis();
 					try {
-						Cookie cookie = new Cookie(cookieName, encrypt.encryptTimestamp((now)));
+						// TODO bug
+						Cookie cookie = new Cookie(cookieName,
+						      encrypt.encryptTimestamp((now + DEFAULT_COOKIE_TIME_OUT * 1000)));
 						if (cookieDomain != null) {
 							cookie.setDomain(cookieDomain);
+						} else {
+							// TODO set default domain
 						}
+
+						cookie.setMaxAge(DEFAULT_COOKIE_TIME_OUT);
 						hResponse.addCookie(cookie);
 					} catch (Exception e) {
 					}
 				}
-
 			} finally {
 				// 清除ThreadLocal
 				DPDataSourceContext.clear();
@@ -115,7 +123,8 @@ public class GroupDataSourceFilter implements Filter {
 		if (configManagerType == null) {
 			configManagerType = DEFAULT_CONFIG_MANAGE_TYPE;
 		}
-		SystemConfigManager configManager = SystemConfigManagerFactory.getConfigManger(configManagerType, resourceId);
+		
+		configManager = SystemConfigManagerFactory.getConfigManger(configManagerType, resourceId);
 
 		this.cookieName = configManager.getSystemConfig().getCookieName();
 		if (this.cookieName == null) {

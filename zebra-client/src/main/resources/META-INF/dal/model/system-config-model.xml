@@ -8,5 +8,6 @@
 		<element name="cookie-domain" value-type="String" default-value=".dianping.com" />
 		<element name="cookie-name" value-type="String" default-value="_zd_" />
     	<element name="encrypt-seed" value-type="String" />
+    	<element name="cookie-expired-time" value-type="int" default-value="2" primitive="true" />
 	</entity>
 </model>

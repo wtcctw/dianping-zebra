@@ -38,17 +38,18 @@ public class LocalConfigServiceTest {
 		Assert.assertEquals("2", localConfigService.getProperty(getKey(Constants.ELEMENT_RETRY_TIMES)));
 		Assert.assertEquals(".dianping.com", localConfigService.getProperty(getKey(Constants.ELEMENT_COOKIE_DOMAIN)));
 		Assert.assertEquals("zebra", localConfigService.getProperty(getKey(Constants.ELEMENT_COOKIE_NAME)));
-		Assert.assertEquals("xaxd", localConfigService.getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED)));
+		Assert.assertEquals("2123174217368174103", localConfigService.getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED)));
 	}
 
 	@Test
 	public void testChangeKeyAndGet() throws IOException, InterruptedException {
+		TimeUnit.SECONDS.sleep(1);
 		Properties prop = loadProperties(resourceId);
 		prop.setProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL), "5");
 		saveProperties(resourceId, prop);
 
 		//System.in.read();
-		TimeUnit.SECONDS.sleep(20);
+		TimeUnit.SECONDS.sleep(6);
 		
 		Assert.assertEquals("5", localConfigService.getProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL)));
 	}
