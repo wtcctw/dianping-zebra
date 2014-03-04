@@ -3,6 +3,7 @@ package com.dianping.zebra.group.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.GroupConfigException;
 
 public class SystemConfigManagerFactory {
@@ -17,11 +18,11 @@ public class SystemConfigManagerFactory {
 				systemConfigManager = systemConfigManagers.get(resourceId);
 
 				if (systemConfigManager == null) {
-					if ("local".equalsIgnoreCase(configManagerType)) {
+					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
 						LocalConfigService configService = new LocalConfigService(resourceId);
 						configService.init();
 						systemConfigManager = new DefaultSystemConfigManager(resourceId, configService);
-					} else if ("remote".equalsIgnoreCase(configManagerType)) {
+					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
 						RemoteConfigService configService = new RemoteConfigService(resourceId);
 						configService.init();
 						systemConfigManager = new DefaultSystemConfigManager(resourceId, configService);

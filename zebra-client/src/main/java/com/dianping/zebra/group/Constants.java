@@ -11,7 +11,10 @@ package com.dianping.zebra.group;
  * 
  */
 public class Constants {
-	public static final String DEFAULT_CONFIG_MANAGER_TYPE = "remote";
+	public static final String CONNECTION_POOL_TYPE_C3P0 = "c3p0";
+
+	public static final String CONFIG_MANAGER_TYPE_REMOTE = "remote";
+	public static final String CONFIG_MANAGER_TYPE_LOCAL = "local";
 
 	public static final String RESOURCE_ID_SYSTEM_CONFIG = "zebra.system";
 
@@ -44,10 +47,10 @@ public class Constants {
 	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
 
 	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
-	
+
 	public static final String ELEMENT_COOKIE_NAME = "cookieName";
-	
+
 	public static final String ELEMENT_ENCRYPT_SEED = "encryptSeed";
-	
-   public static final String ELEMENT_CHECKOUT_TIMEOUT = "checkoutTimeout";
+
+	public static final String ELEMENT_CHECKOUT_TIMEOUT = "checkoutTimeout";
 }

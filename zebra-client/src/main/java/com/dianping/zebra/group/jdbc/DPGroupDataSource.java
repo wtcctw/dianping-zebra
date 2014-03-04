@@ -37,7 +37,9 @@ public class DPGroupDataSource implements DataSource {
 
 	private String resourceId;
 
-	private String configManagerType = Constants.DEFAULT_CONFIG_MANAGER_TYPE;
+	private String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+
+	private String connectionPoolType = Constants.CONNECTION_POOL_TYPE_C3P0;
 
 	private GroupDataSourceManager dataSourceManager;
 
@@ -69,7 +71,12 @@ public class DPGroupDataSource implements DataSource {
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
 		      Constants.RESOURCE_ID_SYSTEM_CONFIG);
 		this.router = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager, systemConfigManager);
-		this.dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(dataSourceConfigManager);
+		this.dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(dataSourceConfigManager,
+		      connectionPoolType);
+	}
+
+	public void setConnectionPoolType(String connectionPoolType) {
+		this.connectionPoolType = connectionPoolType;
 	}
 
 	public void setResourceId(String resourceId) {

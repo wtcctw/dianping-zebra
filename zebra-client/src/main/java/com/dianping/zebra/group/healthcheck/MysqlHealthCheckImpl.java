@@ -13,7 +13,6 @@ import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
-import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 import com.dianping.zebra.group.router.GroupDataSourceTarget;
 
 public class MysqlHealthCheckImpl implements HealthCheck {
@@ -31,10 +30,11 @@ public class MysqlHealthCheckImpl implements HealthCheck {
 
 	private ConcurrentHashMap<String, AtomicInteger> dskeyFailCount = new ConcurrentHashMap<String, AtomicInteger>();
 
-	public MysqlHealthCheckImpl(DataSourceConfigManager dataSourceConfigManager, SystemConfigManager systemConfigManager) {
+	public MysqlHealthCheckImpl(DataSourceConfigManager dataSourceConfigManager,
+	      SystemConfigManager systemConfigManager, GroupDataSourceManager groupDataSourceManager) {
 		this.dataSourceConfigManager = dataSourceConfigManager;
 		this.systemConfigManager = systemConfigManager;
-		this.groupDataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(dataSourceConfigManager);
+		this.groupDataSourceManager = groupDataSourceManager;
 		this.healthCheckInterval = systemConfigManager.getSystemConfig().getHealthCheckInterval();
 		this.maxErrorTimes = systemConfigManager.getSystemConfig().getMaxErrorCounter();
 		this.systemConfigManager.addListerner(new HealthCheckChangeListener());

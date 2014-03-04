@@ -6,7 +6,8 @@ public class GroupDataSourceManagerFactory {
 
 	private static GroupDataSourceManager manager;
 
-	public static GroupDataSourceManager getGroupDataSourceManger(DataSourceConfigManager groupConfigManager) {
+	public static GroupDataSourceManager getGroupDataSourceManger(DataSourceConfigManager groupConfigManager,
+	      String connectionPoolType) {
 		if (manager == null) {
 			synchronized (GroupDataSourceManagerFactory.class) {
 				if (manager == null) {
