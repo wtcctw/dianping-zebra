@@ -17,6 +17,7 @@ import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 
 public class GroupDataSourceFilter implements Filter {
 
+	// TODO Constants
 	private static final String PARAM_CONFIG_MANAGE_TYPE = "configManageType";
 
 	private static final String PARAM_RESOURCE_ID = "resourceId";

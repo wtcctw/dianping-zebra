@@ -76,8 +76,6 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 			} else if (key.equals(Constants.ELEMENT_ENCRYPT_SEED)) {
 				config.setEncryptSeed((String) newValue);
 			}
-
-			this.systemConfig.set(config);
 		}
 	}
 }

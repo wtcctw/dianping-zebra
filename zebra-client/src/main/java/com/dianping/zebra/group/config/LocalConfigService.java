@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class LocalConfigService implements ConfigService {
 
 	private File getFile() {
 		URL propUrl = getClass().getClassLoader().getResource(this.resourceFileName);
-		
+
 		if (propUrl != null) {
 			return FileUtils.toFile(propUrl);
 		} else {
@@ -56,18 +56,12 @@ public class LocalConfigService implements ConfigService {
 	}
 
 	private long getLastModifiedTime() {
-		long lastModifiedTime = -1;
 		if (this.resourceFile.exists()) {
-			lastModifiedTime = this.resourceFile.lastModified();
-
-			if (lastModifiedTime > this.lastModifiedTime.get()) {
-				return lastModifiedTime;
-			}
+			return this.resourceFile.lastModified();
 		} else {
 			logger.warn(String.format("config file[%s] doesn't exist.", this.resourceFileName));
+			return -1;
 		}
-
-		return lastModifiedTime;
 	}
 
 	@Override
@@ -107,8 +101,8 @@ public class LocalConfigService implements ConfigService {
 	}
 
 	class ConfigPeroidCheckerTask implements Runnable {
-		private void notifyListeners(String key, Object oldValue, Object newValue, int type) {
-			PropertyChangeEvent evt = new AdvancedPropertyChangeEvent(this, key, oldValue, newValue, type);
+		private void notifyListeners(String key, Object oldValue, Object newValue) {
+			PropertyChangeEvent evt = new AdvancedPropertyChangeEvent(this, key, oldValue, newValue);
 
 			for (PropertyChangeListener listener : listeners) {
 				try {
@@ -128,30 +122,17 @@ public class LocalConfigService implements ConfigService {
 						Properties oldProps = props.get();
 						Properties newProps = loadConfig();
 
-						for (Entry<Object, Object> entry : newProps.entrySet()) {
-							String key = (String) entry.getKey();
-							Object oldValue = oldProps.get(key);
-							Object newValue = entry.getValue();
+						for (String key : newProps.stringPropertyNames()) {
+							String oldValue = oldProps.getProperty(key);
+							String newValue = newProps.getProperty(key);
 
-							if (oldProps.containsKey(key)) {
-								if (!newValue.equals(oldValue)) {
-									notifyListeners(key, oldValue, newValue, 3);
-								}
-							} else {
-								notifyListeners(key, oldValue, newValue, 2);
-							}
-						}
-
-						for (Entry<Object, Object> entry : oldProps.entrySet()) {
-							String key = (String) entry.getKey();
-
-							if (!newProps.containsKey(key)) {
-								notifyListeners(key, entry.getValue(), null, 3);
+							if (!StringUtils.equals(oldValue, newValue)) {
+								notifyListeners(key, oldValue, newValue);
 							}
 						}
 
 						lastModifiedTime.set(newModifiedTime);
-						props.set(loadConfig());
+						props.set(newProps);
 					}
 				} catch (Throwable throwable) {
 					if (logger.isDebugEnabled()) {
