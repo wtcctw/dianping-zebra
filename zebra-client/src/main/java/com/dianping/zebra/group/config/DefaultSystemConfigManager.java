@@ -79,8 +79,6 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 			} else if (key.equals(Constants.ELEMENT_COOKIE_EXPIRED_TIME)) {
 				config.setCookieExpiredTime(Integer.parseInt((String) newValue));
 			}
-
-			this.systemConfig.set(config);
 		}
 	}
 }

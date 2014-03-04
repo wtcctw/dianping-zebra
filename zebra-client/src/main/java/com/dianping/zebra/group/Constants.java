@@ -12,6 +12,8 @@ package com.dianping.zebra.group;
  */
 public class Constants {
 	public static final String DEFAULT_CONFIG_MANAGER_TYPE = "remote";
+	
+	public static final String LOCAL_CONFIG_MANAGER_TYPE = "local";
 
 	public static final String RESOURCE_ID_SYSTEM_CONFIG = "zebra.system";
 

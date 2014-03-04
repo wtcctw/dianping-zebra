@@ -43,14 +43,14 @@ public class LocalConfigServiceTest {
 
 	@Test
 	public void testChangeKeyAndGet() throws IOException, InterruptedException {
-		TimeUnit.SECONDS.sleep(1);
+		TimeUnit.SECONDS.sleep(3);
 		Properties prop = loadProperties(resourceId);
 		prop.setProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL), "5");
 		saveProperties(resourceId, prop);
 
-		//System.in.read();
-		TimeUnit.SECONDS.sleep(6);
-		
+//		 System.in.read();
+		TimeUnit.SECONDS.sleep(5);
+
 		Assert.assertEquals("5", localConfigService.getProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL)));
 	}
 
@@ -79,8 +79,7 @@ public class LocalConfigServiceTest {
 
 	private void saveProperties(String resourceId, Properties properties) throws IOException {
 		URL url = getClass().getClassLoader().getResource(resourceId + ".properties");
-		
-		System.out.println(url.getPath());
+
 		FileWriter writer = null;
 		try {
 			writer = new FileWriter(url.getPath());
