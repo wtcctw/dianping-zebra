@@ -70,7 +70,7 @@ public class DPGroupDataSource implements DataSource {
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, resourceId);
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
 		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
-		this.router = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager, systemConfigManager);
+		this.router = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
 		this.dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(dataSourceConfigManager,
 		      connectionPoolType);
 	}

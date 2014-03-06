@@ -39,6 +39,8 @@ public class Constants {
 
 	public static final String ELEMENT_USER = "user";
 
+	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
+
 	// System
 	public static final String ELEMENT_COOKIE_DOMAIN = "cookieDomain";
 
@@ -48,8 +50,6 @@ public class Constants {
 
 	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
 
-	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
-
 	public static final String ELEMENT_COOKIE_NAME = "cookieName";
 
 	public static final String ELEMENT_ENCRYPT_SEED = "encryptSeed";
@@ -57,4 +57,7 @@ public class Constants {
 	public static final String ELEMENT_CHECKOUT_TIMEOUT = "checkoutTimeout";
 
 	public static final String ELEMENT_COOKIE_EXPIRED_TIME = "cookieExpiredTime";
+
+	// router
+	public static final String ROUTER_STRATEGY_ROUNDROBIN = "roundrobin";
 }

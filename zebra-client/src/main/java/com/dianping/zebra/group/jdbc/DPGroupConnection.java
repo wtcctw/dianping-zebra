@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.manager.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
@@ -42,6 +43,8 @@ import com.dianping.zebra.group.util.JDBCExceptionUtils;
  * 
  */
 public class DPGroupConnection implements Connection {
+
+	private DataSourceConfigManager dataSourceConfigManager;
 
 	private SystemConfigManager systemConfigManager;
 
@@ -94,11 +97,10 @@ public class DPGroupConnection implements Connection {
 			return wConnection;
 		}
 
-		if (wConnection != null) {
-			return wConnection;
-		}
-
-		if (!autoCommit) {
+		if (!autoCommit && dataSourceConfigManager.isTransactionForceWrite()) {
+			if (wConnection != null) {
+				return wConnection;
+			}
 			wConnection = dataSourceManager.getWriteConnection();
 			if (wConnection.getAutoCommit() != autoCommit) {
 				wConnection.setAutoCommit(autoCommit);
@@ -143,6 +145,9 @@ public class DPGroupConnection implements Connection {
 				}
 			}
 		} else {
+			if (wConnection != null) {
+				return wConnection;
+			}
 			wConnection = dataSourceManager.getWriteConnection();
 			if (wConnection.getAutoCommit() != autoCommit) {
 				wConnection.setAutoCommit(autoCommit);
