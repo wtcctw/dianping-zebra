@@ -15,7 +15,7 @@ public class GroupDataSourceRouterFactory {
 	      SystemConfigManager systemConfigManager) {
 
 		String routerStrategy = systemConfigManager.getSystemConfig().getRouterStrategy();
-
+		//TODO rename
 		if (ROUNDROBIN.equalsIgnoreCase(routerStrategy)) {
 
 			if (readWriteDataSourceRouter.get() == null) {

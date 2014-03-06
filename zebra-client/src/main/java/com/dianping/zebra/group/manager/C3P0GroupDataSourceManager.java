@@ -35,7 +35,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 	private Map<String, DataSource> dataSources = new ConcurrentHashMap<String, DataSource>();
 
-	private BlockingQueue<DataSource> toCloseDataSource = new LinkedBlockingQueue<DataSource>();
+	private BlockingQueue<DataSource> toBeCloseDataSource = new LinkedBlockingQueue<DataSource>();
 
 	private DataSourceConfigManager groupConfigManager;
 
@@ -58,7 +58,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		closed = true;
 
 		for (DataSource dataSource : this.dataSources.values()) {
-			this.toCloseDataSource.offer(dataSource);
+			this.toBeCloseDataSource.offer(dataSource);
 		}
 	}
 
@@ -169,7 +169,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
-					DataSource dataSource = toCloseDataSource.take();
+					DataSource dataSource = toBeCloseDataSource.take();
 
 					if (dataSource != null && dataSource instanceof ComboPooledDataSource) {
 						ComboPooledDataSource comboDataSource = (ComboPooledDataSource) dataSource;
@@ -179,7 +179,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 							comboDataSource.close();
 							C3P0DataSourceRuntimeMonitor.INSTANCE.removeCounter(comboDataSource.getIdentityToken());
 						} else {
-							toCloseDataSource.offer(comboDataSource);
+							toBeCloseDataSource.offer(comboDataSource);
 						}
 					} else {
 						// Normally not happen
@@ -238,7 +238,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 		private void destoryDataSource(DataSource dataSource) {
 			if (dataSource != null) {
-				boolean isSuccess = toCloseDataSource.offer(dataSource);
+				boolean isSuccess = toBeCloseDataSource.offer(dataSource);
 				if (!isSuccess) {
 					logger.warn("blocking queue for closed datasources is full!");
 				}
