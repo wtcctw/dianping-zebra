@@ -39,7 +39,7 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] {});
 			setContextMethod = contextHolderClass.getDeclaredMethod("setTrackerContext",
 			      new Class[] { trackerContextClass });
-			clearContextMethod = contextHolderClass.getDeclaredMethod("clearContext", new Class[] { trackerContextClass });
+			clearContextMethod = contextHolderClass.getDeclaredMethod("clearContext");
 			getExtensionMethod = trackerContextClass.getDeclaredMethod("getExtension", new Class[] { String.class });
 			addExtensionMethod = trackerContextClass.getDeclaredMethod("addExtension", new Class[] { String.class });
 
