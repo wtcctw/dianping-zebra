@@ -270,12 +270,12 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	@Override
-   public String getRouterStrategy() {
-	   return null;
-   }
+	public String getRouterStrategy() {
+		return null;
+	}
 
 	@Override
-   public boolean isTransactionForceWrite() {
-	   return false;
-   }
+	public boolean isTransactionForceWrite() {
+		return false;
+	}
 }
