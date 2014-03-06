@@ -72,7 +72,7 @@ public class GroupDataSourceFilter implements Filter {
 					}
 				}
 			} finally {
-				DPDataSourceContext.clear();
+				DPDataSourceContext.clearContext();
 			}
 		}
 	}
