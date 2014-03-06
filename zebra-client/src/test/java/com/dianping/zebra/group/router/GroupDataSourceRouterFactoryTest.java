@@ -58,7 +58,7 @@ public class GroupDataSourceRouterFactoryTest {
 
 	private void isRead(GroupDataSourceTarget target) {
 		System.out.println(target);
-		Assert.assertEquals("db2", target.getId());
+		Assert.assertEquals("db3", target.getId());
 		Assert.assertEquals(true, target.isReadOnly());
 	}
 
