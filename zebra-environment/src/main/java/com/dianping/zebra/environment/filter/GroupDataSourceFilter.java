@@ -99,7 +99,7 @@ public class GroupDataSourceFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 		String resourceId = filterConfig.getInitParameter(PARAM_RESOURCE_ID);
 		if (resourceId == null) {
-			resourceId = Constants.RESOURCE_ID_SYSTEM_CONFIG;
+			resourceId = Constants.DEFAULT_SYSTEM_RESOURCE_ID;
 		}
 		String configManagerType = filterConfig.getInitParameter(PARAM_CONFIG_MANAGE_TYPE);
 		if (configManagerType == null) {

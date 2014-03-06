@@ -107,7 +107,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		if (key.equals(this.resourceId)) {
 			return key;
 		} else {
-			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_PROPERTY, key);
+			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, key);
 		}
 	}
 
@@ -268,4 +268,14 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			}
 		}
 	}
+
+	@Override
+   public String getRouterStrategy() {
+	   return null;
+   }
+
+	@Override
+   public boolean isTransactionForceWrite() {
+	   return false;
+   }
 }

@@ -11,6 +11,10 @@ public interface DataSourceConfigManager {
 	
 	public Map<String, DataSourceConfig> getDataSourceConfigs();
 	
+	public String getRouterStrategy();
+	
+	public boolean isTransactionForceWrite();
+	
 	public void addListerner(PropertyChangeListener listener);
 
 	public void markDown(String id);

@@ -18,9 +18,9 @@ public class Constants {
 
 	public static final String CONFIG_MANAGER_TYPE_LOCAL = "local";
 
-	public static final String RESOURCE_ID_SYSTEM_CONFIG = "zebra.system";
+	public static final String DEFAULT_SYSTEM_RESOURCE_ID = "zebra.v2.system";
 
-	public static final String DEFAULT_DATASOURCE_PROPERTY = "zebra.ds";
+	public static final String DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX = "zebra.v2.ds";
 
 	// DataSource
 	public static final String ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME = "connectionCustomizeClassName";

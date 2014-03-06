@@ -20,7 +20,7 @@ public class C3P0GroupDataSourceManagerTest {
 	@Test
 	public void testConnect() throws SQLException, IOException {
 		DataSourceConfigManager groupConfigManager = DataSourceConfigManagerFactory.getConfigManager("local",
-		      "ds.properties");
+		      "sample.ds");
 		GroupDataSourceManager dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(
 		      groupConfigManager, Constants.CONNECTION_POOL_TYPE_C3P0);
 
@@ -28,7 +28,7 @@ public class C3P0GroupDataSourceManagerTest {
 
 		Statement statement = connection.createStatement();
 
-		boolean execute = statement.execute("select * from app_user");
+		boolean execute = statement.execute("select * from PERSON");
 		ResultSet resultSet = statement.getResultSet();
 
 		while (resultSet.next()) {

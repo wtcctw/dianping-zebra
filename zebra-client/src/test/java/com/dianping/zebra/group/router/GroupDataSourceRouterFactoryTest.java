@@ -23,7 +23,7 @@ public class GroupDataSourceRouterFactoryTest {
 	@Before
 	public void init() {
 		String dataSourceResourceId = "sample.ds";
-		String systemResourceId = "zebra.system";
+		String systemResourceId = "zebra.v2.system";
 		String configManagerType = "local";
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType,
 		      dataSourceResourceId);

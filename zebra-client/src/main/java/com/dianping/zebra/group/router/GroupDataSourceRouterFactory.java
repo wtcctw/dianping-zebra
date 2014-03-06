@@ -11,10 +11,10 @@ public class GroupDataSourceRouterFactory {
 
 	private static AtomicReference<GroupReadWriteDataSourceRouter> readWriteDataSourceRouter = new AtomicReference<GroupReadWriteDataSourceRouter>();
 
-	public static GroupDataSourceRouter getDataSourceRouter(DataSourceConfigManager configManager,
+	public static GroupDataSourceRouter getDataSourceRouter(DataSourceConfigManager dataSourceConfigManager,
 	      SystemConfigManager systemConfigManager) {
 
-		String routerStrategy = systemConfigManager.getSystemConfig().getRouterStrategy();
+		String routerStrategy = dataSourceConfigManager.getRouterStrategy();
 
 		if (ROUNDROBIN.equalsIgnoreCase(routerStrategy)) {
 
@@ -22,8 +22,8 @@ public class GroupDataSourceRouterFactory {
 				synchronized (readWriteDataSourceRouter) {
 					if (readWriteDataSourceRouter.get() == null) {
 						GroupReadWriteDataSourceRouter _readWriteDataSourceRouter = new GroupReadWriteDataSourceRouter(
-						      configManager);
-						configManager.addListerner(_readWriteDataSourceRouter);
+						      dataSourceConfigManager);
+						dataSourceConfigManager.addListerner(_readWriteDataSourceRouter);
 						readWriteDataSourceRouter.set(_readWriteDataSourceRouter);
 					}
 				}

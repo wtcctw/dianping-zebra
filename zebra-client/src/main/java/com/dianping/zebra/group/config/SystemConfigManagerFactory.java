@@ -23,7 +23,7 @@ public class SystemConfigManagerFactory {
 						configService.init();
 						systemConfigManager = new DefaultSystemConfigManager(resourceId, configService);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
-						RemoteConfigService configService = new RemoteConfigService(resourceId);
+						LionConfigService configService = new LionConfigService(resourceId);
 						configService.init();
 						systemConfigManager = new DefaultSystemConfigManager(resourceId, configService);
 					} else {
