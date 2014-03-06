@@ -49,9 +49,9 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		      config.getHealthCheckInterval()));
 		config.setMaxErrorCounter(getProperty(Constants.ELEMENT_MAX_ERROR_COUNTER, config.getMaxErrorCounter()));
 		config.setRetryTimes(getProperty(Constants.ELEMENT_RETRY_TIMES, config.getRetryTimes()));
-		config.setRouterStrategy(getProperty(Constants.ELEMENT_ROUTER_STRATEGY, config.getRouterStrategy()));
 		config.setCookieName(getProperty(Constants.ELEMENT_COOKIE_NAME, config.getCookieName()));
 		config.setEncryptSeed(getProperty(Constants.ELEMENT_ENCRYPT_SEED, config.getEncryptSeed()));
+		config.setCookieExpiredTime(getProperty(Constants.ELEMENT_COOKIE_EXPIRED_TIME, config.getCookieExpiredTime()));
 
 		return config;
 	}
@@ -69,15 +69,15 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 				config.setHealthCheckInterval(Integer.parseInt((String) newValue));
 			} else if (key.equals(Constants.ELEMENT_MAX_ERROR_COUNTER)) {
 				config.setMaxErrorCounter(Integer.parseInt((String) newValue));
-			} else if (key.equals(Constants.ELEMENT_ROUTER_STRATEGY)) {
+			} else if (key.equals(Constants.ELEMENT_RETRY_TIMES)) {
 				config.setRetryTimes((Integer) newValue);
 			} else if (key.equals(Constants.ELEMENT_COOKIE_NAME)) {
 				config.setCookieName((String) newValue);
 			} else if (key.equals(Constants.ELEMENT_ENCRYPT_SEED)) {
 				config.setEncryptSeed((String) newValue);
+			} else if (key.equals(Constants.ELEMENT_COOKIE_EXPIRED_TIME)) {
+				config.setCookieExpiredTime(Integer.parseInt((String) newValue));
 			}
-
-			this.systemConfig.set(config);
 		}
 	}
 }

@@ -4,13 +4,20 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.sql.DataSource;
 
@@ -35,13 +42,21 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 	private Map<String, DataSource> dataSources = new ConcurrentHashMap<String, DataSource>();
 
-	private BlockingQueue<DataSource> toBeCloseDataSource = new LinkedBlockingQueue<DataSource>();
+	private BlockingQueue<DataSource> toBeClosedDataSource = new LinkedBlockingQueue<DataSource>();
 
 	private DataSourceConfigManager groupConfigManager;
 
 	private volatile boolean closed = false;
 
 	private volatile String writeId;
+
+	private ConcurrentMap<String, AtomicInteger> dsSeq = new ConcurrentHashMap<String, AtomicInteger>();
+
+	private ReadWriteLock lock = new ReentrantReadWriteLock();
+
+	private Lock wLock = lock.writeLock();
+
+	private Lock rLock = lock.readLock();
 
 	public C3P0GroupDataSourceManager(DataSourceConfigManager groupConfigManager) {
 		this.groupConfigManager = groupConfigManager;
@@ -57,8 +72,13 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 	public void destory() throws SQLException {
 		closed = true;
 
-		for (DataSource dataSource : this.dataSources.values()) {
-			this.toBeCloseDataSource.offer(dataSource);
+		rLock.lock();
+		try {
+			for (DataSource dataSource : this.dataSources.values()) {
+				this.toBeClosedDataSource.offer(dataSource);
+			}
+		} finally {
+			rLock.unlock();
 		}
 	}
 
@@ -68,12 +88,23 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 	}
 
 	public DataSource getDataSource(String id) {
-		return dataSources.get(id);
+		rLock.lock();
+		try {
+			return dataSources.get(id);
+		} finally {
+			rLock.unlock();
+		}
 	}
 
 	private Connection getConnection(String id) throws SQLException {
 		checkClosed();
-		DataSource dataSource = dataSources.get(id);
+		DataSource dataSource = null;
+		rLock.lock();
+		try {
+			dataSource = dataSources.get(id);
+		} finally {
+			rLock.unlock();
+		}
 
 		if (dataSource != null) {
 			return dataSource.getConnection();
@@ -82,29 +113,34 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		}
 	}
 
-	private boolean checkConnection(DataSource dataSource) throws Throwable {
-		Connection connection = null;
+	// private boolean checkConnection(DataSource dataSource) throws Throwable {
+	// Connection connection = null;
+	// try {
+	// connection = dataSource.getConnection();
+	// return connection != null;
+	// } catch (Throwable e) {
+	// throw e;
+	// } finally {
+	// if (connection != null) {
+	// connection.close();
+	// }
+	// }
+	// }
+
+	@Override
+	public Connection getWriteConnection() throws SQLException {
+		rLock.lock();
 		try {
-			connection = dataSource.getConnection();
-			return connection != null;
-		} catch (Throwable e) {
-			throw e;
+			return getConnection(this.writeId);
 		} finally {
-			if (connection != null) {
-				connection.close();
-			}
+			rLock.unlock();
 		}
 	}
 
 	@Override
-	public Connection getWriteConnection() throws SQLException {
-		return getConnection(this.writeId);
-	}
-
-	@Override
 	public void init() {
-		Map<String, DataSourceConfig> available = groupConfigManager.getAvailableDataSources();
-		for (Entry<String, DataSourceConfig> entry : available.entrySet()) {
+		Map<String, DataSourceConfig> availableDataSources = groupConfigManager.getAvailableDataSources();
+		for (Entry<String, DataSourceConfig> entry : availableDataSources.entrySet()) {
 			String key = entry.getKey();
 			DataSourceConfig value = entry.getValue();
 			try {
@@ -113,21 +149,21 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 				}
 
 				DataSource dataSource = initDataSources(value);
-				if (checkConnection(dataSource)) {
-					this.dataSources.put(key, dataSource);
-				}
+				// if (checkConnection(dataSource)) {
+				this.dataSources.put(key, dataSource);
+				// }
 			} catch (Throwable e) {
 				logger.error(String.format("fail to connect the database[%s]", key), e);
 				throw new RuntimeException(e);
 			}
 		}
 
-		this.dataSourceConfigsCache.set(available);
+		this.dataSourceConfigsCache.set(availableDataSources);
 		this.groupConfigManager.addListerner(new ConfigChangedListener());
 
-		Thread thread = new Thread(new CheckOutConnectionTask());
+		Thread thread = new Thread(new CloseDataSourceTask());
 		thread.setDaemon(true);
-		thread.setName("Thread-" + CheckOutConnectionTask.class.getName());
+		thread.setName("Thread-" + CloseDataSourceTask.class.getName());
 
 		thread.start();
 	}
@@ -136,7 +172,11 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 
 		try {
-			dataSource.setIdentityToken(value.getId());
+			dsSeq.putIfAbsent(value.getId(), new AtomicInteger(0));
+
+			String dsId = value.getId() + "-" + dsSeq.get(value.getId()).incrementAndGet();
+
+			dataSource.setIdentityToken(dsId);
 			dataSource.setUser(value.getUser());
 			dataSource.setDriverClass(value.getDriverClass());
 			dataSource.setJdbcUrl(value.getJdbcUrl());
@@ -151,6 +191,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 				// TODO franky wu
 				MethodUtils.invokeMethod(dataSource, "set" + StringUtils.capitalize(any.getName()), any.getValue());
 			}
+			C3P0DataSourceRuntimeMonitor.INSTANCE.initCounter(dsId);
 		} catch (Throwable e) {
 			throw new GroupConfigException(e);
 		}
@@ -164,29 +205,29 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		return true;
 	}
 
-	class CheckOutConnectionTask implements Runnable {
+	class CloseDataSourceTask implements Runnable {
 		@Override
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
-					DataSource dataSource = toBeCloseDataSource.take();
+					DataSource dataSource = toBeClosedDataSource.take();
 
-					if (dataSource != null && dataSource instanceof ComboPooledDataSource) {
+					if (dataSource != null && (dataSource instanceof ComboPooledDataSource)) {
 						ComboPooledDataSource comboDataSource = (ComboPooledDataSource) dataSource;
 						String dsId = comboDataSource.getIdentityToken();
 
 						if (C3P0DataSourceRuntimeMonitor.INSTANCE.getCheckedOutCount(dsId) <= 0) {
 							comboDataSource.close();
-							C3P0DataSourceRuntimeMonitor.INSTANCE.removeCounter(comboDataSource.getIdentityToken());
+							C3P0DataSourceRuntimeMonitor.INSTANCE.removeCounter(dsId);
 						} else {
-							toBeCloseDataSource.offer(comboDataSource);
+							toBeClosedDataSource.offer(comboDataSource);
 						}
 					} else {
 						// Normally not happen
 						logger.warn("fail to close dataSource since dataSource is null or dataSource is not an instance of ComboPooledDataSource.");
 					}
 
-					TimeUnit.SECONDS.sleep(10);
+					TimeUnit.MILLISECONDS.sleep(10);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
@@ -197,9 +238,11 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 	class ConfigChangedListener implements PropertyChangeListener {
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			Map<String, DataSourceConfig> newConfig = groupConfigManager.getAvailableDataSources();
+			Map<String, DataSource> newDataSources = new ConcurrentHashMap<String, DataSource>();
+			List<DataSource> toBeDestoryDataSource = new ArrayList<DataSource>();
 			String wDsId = null;
 
+			Map<String, DataSourceConfig> newConfig = groupConfigManager.getAvailableDataSources();
 			for (Entry<String, DataSourceConfig> entry : newConfig.entrySet()) {
 				String key = entry.getKey();
 				DataSourceConfig value = entry.getValue();
@@ -207,14 +250,13 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					if (dataSourceConfigsCache.get().containsKey(key)) {
 						DataSourceConfig originDataSourceConfig = dataSourceConfigsCache.get().get(key);
 						if (!originDataSourceConfig.toString().equals(value.toString())) {
-							DataSource dataSource = initDataSources(value);
-							DataSource originDataSource = dataSources.get(key);
-							dataSources.put(key, dataSource);
-
-							destoryDataSource(originDataSource);
+							newDataSources.put(key, initDataSources(value));
+							toBeDestoryDataSource.add(dataSources.get(key));
+						} else {
+							newDataSources.put(key, dataSources.get(key));
 						}
 					} else {
-						dataSources.put(key, initDataSources(value));
+						newDataSources.put(key, initDataSources(value));
 					}
 
 					if (!value.isReadonly()) {
@@ -228,17 +270,27 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			for (Entry<String, DataSourceConfig> entry : dataSourceConfigsCache.get().entrySet()) {
 				String key = entry.getKey();
 				if (!newConfig.containsKey(key)) {
-					destoryDataSource(dataSources.get(key));
+					toBeDestoryDataSource.add(dataSources.get(key));
 				}
 			}
 
-			writeId = wDsId;
-			dataSourceConfigsCache.set(newConfig);
+			wLock.lock();
+			try {
+				writeId = wDsId;
+				dataSourceConfigsCache.set(newConfig);
+				dataSources = newDataSources;
+			} finally {
+				wLock.unlock();
+			}
+			
+			for (DataSource ds : toBeDestoryDataSource) {
+				destoryDataSource(ds);
+			}
 		}
 
 		private void destoryDataSource(DataSource dataSource) {
 			if (dataSource != null) {
-				boolean isSuccess = toBeCloseDataSource.offer(dataSource);
+				boolean isSuccess = toBeClosedDataSource.offer(dataSource);
 				if (!isSuccess) {
 					logger.warn("blocking queue for closed datasources is full!");
 				}

@@ -1,4 +1,4 @@
-<group-data-source-config>
+<group-data-source-config router-strategy="roundrobin" transaction-force-write="false">
 	<data-source-config id="db1" weight="2" readonly="false">
 		<jdbc-url>jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1</jdbc-url>
 		<user>sa</user>

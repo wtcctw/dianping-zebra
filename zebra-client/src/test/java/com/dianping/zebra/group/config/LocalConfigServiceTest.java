@@ -18,7 +18,7 @@ import com.dianping.zebra.group.Constants;
 
 public class LocalConfigServiceTest {
 
-	private String resourceId = "zebra.system";
+	private String resourceId = "zebra.v2.system";
 
 	private ConfigService localConfigService;
 
@@ -38,18 +38,19 @@ public class LocalConfigServiceTest {
 		Assert.assertEquals("2", localConfigService.getProperty(getKey(Constants.ELEMENT_RETRY_TIMES)));
 		Assert.assertEquals(".dianping.com", localConfigService.getProperty(getKey(Constants.ELEMENT_COOKIE_DOMAIN)));
 		Assert.assertEquals("zebra", localConfigService.getProperty(getKey(Constants.ELEMENT_COOKIE_NAME)));
-		Assert.assertEquals("xaxd", localConfigService.getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED)));
+		Assert.assertEquals("2123174217368174103", localConfigService.getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED)));
 	}
 
 	@Test
 	public void testChangeKeyAndGet() throws IOException, InterruptedException {
+		TimeUnit.SECONDS.sleep(3);
 		Properties prop = loadProperties(resourceId);
 		prop.setProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL), "5");
 		saveProperties(resourceId, prop);
 
-		//System.in.read();
-		TimeUnit.SECONDS.sleep(20);
-		
+//		 System.in.read();
+		TimeUnit.SECONDS.sleep(5);
+
 		Assert.assertEquals("5", localConfigService.getProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL)));
 	}
 
@@ -78,8 +79,7 @@ public class LocalConfigServiceTest {
 
 	private void saveProperties(String resourceId, Properties properties) throws IOException {
 		URL url = getClass().getClassLoader().getResource(resourceId + ".properties");
-		
-		System.out.println(url.getPath());
+
 		FileWriter writer = null;
 		try {
 			writer = new FileWriter(url.getPath());

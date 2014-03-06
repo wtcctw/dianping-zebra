@@ -10,7 +10,7 @@ public class ConfigManagerTest {
 
 	@Test
 	public void testManager() throws IOException, InterruptedException {
-		SystemConfigManager systemConfigManager = SystemConfigManagerFactory.getConfigManger("local", "zebra.system");
+		SystemConfigManager systemConfigManager = SystemConfigManagerFactory.getConfigManger("local", "zebra.v2.system");
 		
 		System.out.println(systemConfigManager.getSystemConfig());
 		

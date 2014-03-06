@@ -24,7 +24,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private Logger logger = LoggerFactory.getLogger(DefaultDataSourceConfigManager.class);
 
-	private Map<String, DataSourceConfig> dataSourceConfigCache = new HashMap<String, DataSourceConfig>();
+	private GroupDataSourceConfig groupDataSourceConfigCache = new GroupDataSourceConfig();
 
 	private Map<String, DataSourceConfig> availableDsConfig = new HashMap<String, DataSourceConfig>();
 
@@ -45,7 +45,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		listeners.add(listener);
 	}
 
-	private void cleanDataSourceConfigs(String id) {
+	private void clearDataSourceConfigs(String id) {
 		if (availableDsConfig.containsKey(id)) {
 			availableDsConfig.remove(id);
 		}
@@ -54,37 +54,49 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	public Map<String, DataSourceConfig> copyDataSourceConfig(Map<String, DataSourceConfig> config) {
-		Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<String, DataSourceConfig>();
-
-		for (Entry<String, DataSourceConfig> entry : config.entrySet()) {
-			String dsId = entry.getKey();
-			DataSourceConfig newDataSourceConfig = new DataSourceConfig();
-			DataSourceConfig originDataSourceConfig = entry.getValue();
-
-			newDataSourceConfig.setConnectionCustomizeClassName(originDataSourceConfig.getConnectionCustomizeClassName());
-			newDataSourceConfig.setDriverClass(originDataSourceConfig.getDriverClass());
-			newDataSourceConfig.setId(dsId);
-			newDataSourceConfig.setInitialPoolSize(originDataSourceConfig.getInitialPoolSize());
-			newDataSourceConfig.setJdbcUrl(originDataSourceConfig.getJdbcUrl());
-			newDataSourceConfig.setMaxPoolSize(originDataSourceConfig.getMaxPoolSize());
-			newDataSourceConfig.setMinPoolSize(originDataSourceConfig.getMinPoolSize());
-			newDataSourceConfig.setPassword(originDataSourceConfig.getPassword());
-			newDataSourceConfig.setCheckoutTimeout(originDataSourceConfig.getCheckoutTimeout());
-			newDataSourceConfig.setUser(originDataSourceConfig.getUser());
-			newDataSourceConfig.setProperties(originDataSourceConfig.getProperties());
-
-			dataSourceConfigs.put(dsId, newDataSourceConfig);
-		}
-
-		return dataSourceConfigs;
-	}
+	// public GroupDataSourceConfig copyGroupDataSourceConfig(GroupDataSourceConfig config) {
+	// GroupDataSourceConfig groupDataSourceConfig = new GroupDataSourceConfig();
+	// groupDataSourceConfig.mergeAttributes(config);
+	//
+	// Map<String, DataSourceConfig> dataSourceConfigs = copyDataSourceConfigs(config.getDataSourceConfigs());
+	//
+	// groupDataSourceConfig.getDataSourceConfigs().putAll(dataSourceConfigs);
+	//
+	// return groupDataSourceConfig;
+	// }
+	//
+	// private Map<String, DataSourceConfig> copyDataSourceConfigs(Map<String, DataSourceConfig> config) {
+	// Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<String, DataSourceConfig>();
+	//
+	// for (Entry<String, DataSourceConfig> entry : config.entrySet()) {
+	// String dsId = entry.getKey();
+	// DataSourceConfig newDataSourceConfig = new DataSourceConfig();
+	// DataSourceConfig originDataSourceConfig = entry.getValue();
+	//
+	// newDataSourceConfig.setId(dsId);
+	// newDataSourceConfig.setUser(originDataSourceConfig.getUser());
+	// newDataSourceConfig.setPassword(originDataSourceConfig.getPassword());
+	// newDataSourceConfig.setDriverClass(originDataSourceConfig.getDriverClass());
+	// newDataSourceConfig.setJdbcUrl(originDataSourceConfig.getJdbcUrl());
+	// newDataSourceConfig.setInitialPoolSize(originDataSourceConfig.getInitialPoolSize());
+	// newDataSourceConfig.setMaxPoolSize(originDataSourceConfig.getMaxPoolSize());
+	// newDataSourceConfig.setMinPoolSize(originDataSourceConfig.getMinPoolSize());
+	// newDataSourceConfig.setCheckoutTimeout(originDataSourceConfig.getCheckoutTimeout());
+	// newDataSourceConfig.setConnectionCustomizeClassName(originDataSourceConfig.getConnectionCustomizeClassName());
+	// newDataSourceConfig.setProperties(originDataSourceConfig.getProperties());
+	// newDataSourceConfig.mergeAttributes(originDataSourceConfig);
+	//
+	// dataSourceConfigs.put(dsId, newDataSourceConfig);
+	// }
+	//
+	// return dataSourceConfigs;
+	// }
 
 	@Override
 	public Map<String, DataSourceConfig> getAvailableDataSources() {
 		this.rLock.lock();
 		try {
-			return copyDataSourceConfig(this.availableDsConfig);
+			return this.availableDsConfig;
 		} finally {
 			this.rLock.unlock();
 		}
@@ -94,7 +106,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	public Map<String, DataSourceConfig> getDataSourceConfigs() {
 		this.rLock.lock();
 		try {
-			return copyDataSourceConfig(this.dataSourceConfigCache);
+			return this.groupDataSourceConfigCache.getDataSourceConfigs();
 		} finally {
 			this.rLock.unlock();
 		}
@@ -105,7 +117,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		if (key.equals(this.resourceId)) {
 			return key;
 		} else {
-			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_PROPERTY, key);
+			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, key);
 		}
 	}
 
@@ -117,7 +129,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	public Map<String, DataSourceConfig> getUnAvailableDataSources() {
 		this.rLock.lock();
 		try {
-			return copyDataSourceConfig(this.unAvailableDsConfig);
+			return this.unAvailableDsConfig;
 		} finally {
 			this.rLock.unlock();
 		}
@@ -128,8 +140,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		try {
 			this.wLock.lock();
 			try {
-				this.dataSourceConfigCache = initDataSourceConfig().getDataSourceConfigs();
-				this.availableDsConfig.putAll(this.dataSourceConfigCache);
+				this.groupDataSourceConfigCache = initDataSourceConfig();
+				this.availableDsConfig.putAll(this.groupDataSourceConfigCache.getDataSourceConfigs());
 			} finally {
 				this.wLock.unlock();
 			}
@@ -170,12 +182,12 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			dataSourceConfig.setProperties(dataSourceConfig.getProperties());
 		}
 
-		isValidConfig(dataSourceConfigs);
+		validateConfig(dataSourceConfigs);
 
 		return config;
 	}
 
-	private void isValidConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
+	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
 		int readNum = 0, writeNum = 0;
 		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
 			if (entry.getValue().isReadonly()) {
@@ -186,7 +198,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 
 		if (readNum < 1 || writeNum != 1) {
-			throw new GroupConfigException("Not enough read or write dataSources.");
+			throw new GroupConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
+			      readNum, writeNum));
 		}
 	}
 
@@ -194,7 +207,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	public void markDown(String id) {
 		this.wLock.lock();
 		try {
-			Map<String, DataSourceConfig> map = this.dataSourceConfigCache;
+			Map<String, DataSourceConfig> map = this.groupDataSourceConfigCache.getDataSourceConfigs();
 
 			if (map.containsKey(id)) {
 				if (this.availableDsConfig.containsKey(id)) {
@@ -204,7 +217,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 					this.unAvailableDsConfig.put(id, map.get(id));
 				}
 			} else {
-				cleanDataSourceConfigs(id);
+				clearDataSourceConfigs(id);
 			}
 		} finally {
 			this.wLock.unlock();
@@ -215,7 +228,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	public void markUp(String id) {
 		this.wLock.lock();
 		try {
-			Map<String, DataSourceConfig> map = this.dataSourceConfigCache;
+			Map<String, DataSourceConfig> map = this.groupDataSourceConfigCache.getDataSourceConfigs();
 
 			if (map.containsKey(id)) {
 				if (this.unAvailableDsConfig.containsKey(id)) {
@@ -226,7 +239,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 					this.availableDsConfig.put(id, map.get(id));
 				}
 			} else {
-				cleanDataSourceConfigs(id);
+				clearDataSourceConfigs(id);
 			}
 		} finally {
 			this.wLock.unlock();
@@ -237,48 +250,51 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	protected void updateProperties(PropertyChangeEvent evt) {
 		if (evt instanceof AdvancedPropertyChangeEvent) {
 			try {
-				Map<String, DataSourceConfig> config = initDataSourceConfig().getDataSourceConfigs();
-
-				isValidConfig(config);
+				GroupDataSourceConfig newDataSourceConfigCache = initDataSourceConfig();
+				validateConfig(newDataSourceConfigCache.getDataSourceConfigs());
 
 				wLock.lock();
 				try {
-					// update config cache in memory
-					for (Entry<String, DataSourceConfig> entry : config.entrySet()) {
-						String key = entry.getKey();
-						DataSourceConfig dsConfig = entry.getValue();
+					Map<String, DataSourceConfig> newAvailableDsConfig = new HashMap<String, DataSourceConfig>();
+					Map<String, DataSourceConfig> newUnAvailableDsConfig = new HashMap<String, DataSourceConfig>();
 
-						this.dataSourceConfigCache.put(key, dsConfig);
-						this.availableDsConfig.put(key, dsConfig);
-
-						if (this.unAvailableDsConfig.containsKey(key)) {
-							this.unAvailableDsConfig.put(key, dsConfig);
+					for (Entry<String, DataSourceConfig> entry : newDataSourceConfigCache.getDataSourceConfigs().entrySet()) {
+						if (!this.unAvailableDsConfig.containsKey(entry.getKey())) {
+							newAvailableDsConfig.put(entry.getKey(), entry.getValue());
+						} else {
+							newUnAvailableDsConfig.put(entry.getKey(), entry.getValue());
 						}
 					}
 
-					for (String key : this.dataSourceConfigCache.keySet()) {
-						if (!config.containsKey(key)) {
-							this.dataSourceConfigCache.remove(key);
-						}
-					}
-
-					for (String key : this.availableDsConfig.keySet()) {
-						if (!config.containsKey(key)) {
-							this.availableDsConfig.remove(key);
-						}
-					}
-
-					for (String key : this.unAvailableDsConfig.keySet()) {
-						if (!config.containsKey(key)) {
-							this.unAvailableDsConfig.remove(key);
-						}
-					}
+					this.unAvailableDsConfig = newUnAvailableDsConfig;
+					this.availableDsConfig = newAvailableDsConfig;
+					this.groupDataSourceConfigCache = newDataSourceConfigCache;
 				} finally {
 					wLock.unlock();
 				}
 			} catch (Throwable e) {
 				logger.warn("fail to update groupDataSourceConfig.", e);
 			}
+		}
+	}
+
+	@Override
+	public String getRouterStrategy() {
+		rLock.lock();
+		try {
+			return this.groupDataSourceConfigCache.getRouterStrategy();
+		} finally {
+			rLock.unlock();
+		}
+	}
+
+	@Override
+	public boolean isTransactionForceWrite() {
+		rLock.lock();
+		try {
+			return this.groupDataSourceConfigCache.getTransactionForceWrite();
+		} finally {
+			rLock.unlock();
 		}
 	}
 }

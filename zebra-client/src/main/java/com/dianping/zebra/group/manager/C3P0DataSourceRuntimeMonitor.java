@@ -1,46 +1,32 @@
 package com.dianping.zebra.group.manager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public enum C3P0DataSourceRuntimeMonitor {
 	INSTANCE;
 
-	private Map<String, Integer> checkedOutCounter = new HashMap<String, Integer>();
+	private ConcurrentMap<String, AtomicInteger> checkedOutCounter = new ConcurrentHashMap<String, AtomicInteger>();
 
-	public synchronized void incCheckedOutCount(String dsId) {
-		Integer counter = checkedOutCounter.get(dsId);
-
-		if (counter == null) {
-			checkedOutCounter.put(dsId, new Integer(1));
-		} else {
-			checkedOutCounter.put(dsId, counter++);
-		}
+	public void incCheckedOutCount(String dsId) {
+		checkedOutCounter.get(dsId).incrementAndGet();
 	}
 
-	public synchronized void descCheckedOutCount(String dsId) {
-		Integer counter = checkedOutCounter.get(dsId);
-
-		if (counter == null) {
-			checkedOutCounter.put(dsId, new Integer(0));
-		} else {
-			checkedOutCounter.put(dsId, counter--);
-		}
+	public void descCheckedOutCount(String dsId) {
+		checkedOutCounter.get(dsId).decrementAndGet();
 	}
 
-	public synchronized int getCheckedOutCount(String dsId) {
-		Integer counter = checkedOutCounter.get(dsId);
-
-		if (counter == null) {
-			return 0;
-		} else {
-			return counter;
-		}
+	public int getCheckedOutCount(String dsId) {
+		return checkedOutCounter.get(dsId).intValue();
 	}
 
-	public synchronized void removeCounter(String dsId) {
+	public void initCounter(String dsId) {
+		checkedOutCounter.put(dsId, new AtomicInteger(0));
+	}
+
+	public void removeCounter(String dsId) {
 		checkedOutCounter.remove(dsId);
 	}
-	
-	//TODO
+
 }

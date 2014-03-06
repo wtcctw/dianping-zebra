@@ -2,8 +2,8 @@
 	<health-check-interval>10</health-check-interval>
 	<max-error-counter>3</max-error-counter>
 	<retry-times>0</retry-times>
-	<router-strategy>roundrobin</router-strategy>
 	<cookie-domain>.dianping.com</cookie-domain>
 	<cookie-name>zebra</cookie-name>
-	<encrypt-seed>axsdcs</<encrypt-seed>>
+	<encrypt-seed>2123174217368174103</encrypt-seed>
+	<cookie-expired-time>2</cookie-expired-time>
 </system-config>
