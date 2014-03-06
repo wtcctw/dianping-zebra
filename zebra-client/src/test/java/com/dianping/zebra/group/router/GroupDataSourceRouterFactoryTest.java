@@ -9,27 +9,20 @@ import org.junit.Test;
 
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
-import com.dianping.zebra.group.config.SystemConfigManager;
-import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 
 public class GroupDataSourceRouterFactoryTest {
 
 	private DataSourceConfigManager dataSourceConfigManager;
-
-	private SystemConfigManager systemConfigManager;
 
 	private GroupDataSourceRouter dataSourceRouter;
 
 	@Before
 	public void init() {
 		String dataSourceResourceId = "sample.ds";
-		String systemResourceId = "zebra.v2.system";
 		String configManagerType = "local";
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType,
 		      dataSourceResourceId);
-		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType, systemResourceId);
-		this.dataSourceRouter = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager,
-		      systemConfigManager);
+		this.dataSourceRouter = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
 	}
 
 	@Test
