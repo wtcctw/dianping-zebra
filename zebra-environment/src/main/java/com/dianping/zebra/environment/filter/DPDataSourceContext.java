@@ -41,7 +41,8 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 			      new Class[] { trackerContextClass });
 			clearContextMethod = contextHolderClass.getDeclaredMethod("clearContext");
 			getExtensionMethod = trackerContextClass.getDeclaredMethod("getExtension", new Class[] { String.class });
-			addExtensionMethod = trackerContextClass.getDeclaredMethod("addExtension", new Class[] { String.class });
+			addExtensionMethod = trackerContextClass.getDeclaredMethod("addExtension", new Class[] { String.class,
+			      Object.class });
 
 			getContextMethod.setAccessible(true);
 			setContextMethod.setAccessible(true);
@@ -51,12 +52,8 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 
 			trackerContextExist = true;
 
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			logger.warn("No App context, because: " + e.getMessage());
-		} catch (SecurityException e) {
-			throw new RuntimeException(e);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException(e);
 		}
 	}
 
