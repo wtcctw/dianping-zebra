@@ -73,7 +73,7 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 			} else {
 				// trackerContext和不存在dsContext，则构造一个
 				dsContext = new DPDataSourceContext();
-				dsContext.setMasterFlag(context.getMasterFlag());
+				dsContext.setMasterFlag(context.getMasterFlag(), false);
 			}
 
 			// 将DPDataSourceContext放到TrackerContext
