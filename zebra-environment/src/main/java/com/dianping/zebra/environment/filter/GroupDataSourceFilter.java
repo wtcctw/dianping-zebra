@@ -39,7 +39,7 @@ public class GroupDataSourceFilter implements Filter {
 	      ServletException {
 		if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
 			try {
-				DPDataSourceContext context = DPDataSourceContext.getContext();
+				DPDataSourceContext context = DPDataSourceContext.get();
 				HttpServletRequest hRequest = (HttpServletRequest) request;
 				HttpServletResponse hResponse = (HttpServletResponse) response;
 
@@ -72,7 +72,7 @@ public class GroupDataSourceFilter implements Filter {
 					}
 				}
 			} finally {
-				DPDataSourceContext.clearContext();
+				DPDataSourceContext.clear();
 			}
 		}
 	}
