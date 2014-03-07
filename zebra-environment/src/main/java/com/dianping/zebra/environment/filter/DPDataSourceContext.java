@@ -132,7 +132,7 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 		return dsContext;
 	}
 
-	private static void putIntoTrackerContext(DPDataSourceContext _dsContext) {
+	private static void putIntoTrackerContext(DPDataSourceContext dsContext) {
 		if (trackerContextExist) {
 			try {
 				Object trackerContext = getContextMethod.invoke(null);
@@ -142,7 +142,7 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 					setContextMethod.invoke(null, trackerContext);
 				}
 
-				addExtensionMethod.invoke(trackerContext, CONTEXT_NAME);
+				addExtensionMethod.invoke(trackerContext, CONTEXT_NAME, dsContext);
 			} catch (Exception e) {
 				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
 			}
