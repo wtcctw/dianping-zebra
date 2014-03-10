@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
 
 /**
@@ -95,8 +97,9 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 			@Override
 			public Object doInConnection(Connection conn) throws Exception {
 				Assert.assertNotSame("writer", executeSelectSql(conn, "select * from PERSON"));
-				executeUpdateSql(conn, "update PERSON set NAME = 'writer-new'");
-				Assert.assertEquals("writer-new", executeSelectSql(conn, "select * from PERSON"));
+				executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new'");
+				Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+				      executeSelectSql(conn, "select * from PERSON")));
 				return null;
 			}
 		});
@@ -108,8 +111,9 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 
 			@Override
 			public Object doInConnection(Connection conn) throws Exception {
-				executeUpdateSql(conn, "update PERSON set NAME = 'writer-new'");
-				Assert.assertEquals("writer-new", executeSelectSql(conn, "select * from PERSON"));
+				executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new'");
+				Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+				      executeSelectSql(conn, "select * from PERSON")));
 				return null;
 			}
 		});
@@ -133,10 +137,11 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		execute(new ConnectionCallback() {
 			@Override
 			public Object doInConnection(Connection conn) throws Exception {
-				executeUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
-				executeUpdateSql(conn, "update PERSON set NAME = 'writer-new2'");
+				executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
+				executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new2'");
 
-				Assert.assertEquals("writer-new2", executeSelectSql(conn, "select * from PERSON"));
+				Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+				      executeSelectSql(conn, "select * from PERSON")));
 				return null;
 			}
 		});
@@ -180,8 +185,9 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 				execute(new StatementCallback() {
 					@Override
 					public Object doInStatement(Statement stmt) throws Exception {
-						executeUpdateSql(stmt, "update PERSON set NAME = 'writer-new'");
-						Assert.assertEquals("writer-new", executeSelectSql(stmt, "select * from PERSON"));
+						executeOneRowUpdateSql(stmt, "update PERSON set NAME = 'writer-new'");
+						Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+						      executeSelectSql(stmt, "select * from PERSON")));
 						return null;
 					}
 				});
@@ -202,15 +208,18 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		try {
 			conn = getDataSource().getConnection();
 			conn.setAutoCommit(false);
-			Assert.assertEquals("writer", executeSelectSql(conn, "select * from PERSON"));
-			executeUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
-			Assert.assertEquals("writer-new1", executeSelectSql(conn, "select * from PERSON"));
+			Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+			      executeSelectSql(conn, "select * from PERSON")));
+			executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
+			Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+			      executeSelectSql(conn, "select * from PERSON")));
 
 			conn.commit();
 
 			conn1 = getDataSource().getConnection();
 			conn1.setAutoCommit(false);
-			Assert.assertEquals("writer-new1", executeSelectSql(conn1, "select * from PERSON"));
+			Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+			      executeSelectSql(conn, "select * from PERSON")));
 		} finally {
 			if (conn != null) {
 				try {
@@ -236,13 +245,16 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		try {
 			conn = getDataSource().getConnection();
 			conn.setAutoCommit(false);
-			Assert.assertEquals("writer", executeSelectSql(conn, "select * from PERSON"));
-			executeUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
-			Assert.assertEquals("writer-new1", executeSelectSql(conn, "select * from PERSON"));
+			Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+			      executeSelectSql(conn, "select * from PERSON")));
+			executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
+			Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+			      executeSelectSql(conn, "select * from PERSON")));
 
 			conn1 = getDataSource().getConnection();
 			conn1.setAutoCommit(false);
-			Assert.assertEquals("writer", executeSelectSql(conn1, "select * from PERSON"));
+			Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(
+			      executeSelectSql(conn, "select * from PERSON")));
 		} finally {
 			if (conn != null) {
 				try {
@@ -260,23 +272,23 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 			}
 		}
 	}
-	
+
 	@Test
-	public void test_batch() throws Exception{
+	public void test_batch() throws Exception {
 		execute(new StatementCallback() {
-			
+
 			@Override
 			public Object doInStatement(Statement stmt) throws Exception {
-				for(int i = 0 ; i < 100 ; i++){
+				for (int i = 0; i < 100; i++) {
 					stmt.addBatch("update PERSON set NAME = 'writer-new'");
 				}
-				
+
 				int[] executeBatch = stmt.executeBatch();
-				
-				for(int i = 0 ; i < 100 ; i++){
+
+				for (int i = 0; i < 100; i++) {
 					Assert.assertEquals(1, executeBatch[i]);
 				}
-				
+
 				return null;
 			}
 		});
@@ -284,7 +296,7 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 
 	@Override
 	protected String getConfigManagerType() {
-		return "local";
+		return Constants.CONFIG_MANAGER_TYPE_LOCAL;
 	}
 
 	@Override
@@ -312,13 +324,15 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		return entries;
 	}
 
-	public void executeUpdateSql(Connection conn, String sql) throws SQLException {
+	public void executeOneRowUpdateSql(Connection conn, String sql) throws SQLException {
 		Statement stmt = conn.createStatement();
 		stmt.execute(sql);
+		Assert.assertEquals(1, stmt.getUpdateCount());
 	}
 
-	public void executeUpdateSql(Statement stmt, String sql) throws SQLException {
+	public void executeOneRowUpdateSql(Statement stmt, String sql) throws SQLException {
 		stmt.execute(sql);
+		Assert.assertEquals(1, stmt.getUpdateCount());
 	}
 
 	public String executeSelectSql(Connection conn, String sql) throws SQLException {

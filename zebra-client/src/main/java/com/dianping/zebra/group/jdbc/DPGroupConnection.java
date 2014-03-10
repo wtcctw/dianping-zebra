@@ -71,15 +71,17 @@ public class DPGroupConnection implements Connection {
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      SystemConfigManager systemConfigManager, String userName, String password) {
+	      SystemConfigManager systemConfigManager, DataSourceConfigManager dataSourceConfigManager, String userName,
+	      String password) {
 		this.router = router;
 		this.dataSourceManager = dataSourceManager;
 		this.systemConfigManager = systemConfigManager;
+		this.dataSourceConfigManager = dataSourceConfigManager;
 	}
 
 	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
-	      SystemConfigManager systemConfigManager) {
-		this(router, dataSourceManager, systemConfigManager, null, null);
+	      SystemConfigManager systemConfigManager, DataSourceConfigManager dataSourceConfigManager) {
+		this(router, dataSourceManager, systemConfigManager, dataSourceConfigManager, null, null);
 	}
 
 	/**

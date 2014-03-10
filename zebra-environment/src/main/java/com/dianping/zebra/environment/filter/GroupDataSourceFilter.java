@@ -44,7 +44,7 @@ public class GroupDataSourceFilter implements Filter {
 					try {
 						long expireTime = encrypt.decryptTimestamp(zebra.getValue());
 						long now = System.currentTimeMillis();
-						if (expireTime < now) {
+						if (now < expireTime) {
 							DPDataSourceContext.get().setMasterFlag(true, false);
 						}
 					} catch (Exception e) {
