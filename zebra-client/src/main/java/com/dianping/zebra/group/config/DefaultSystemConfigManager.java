@@ -63,19 +63,19 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		synchronized (this.systemConfig) {
 			SystemConfig config = this.systemConfig.get();
 
-			if (key.equals(Constants.ELEMENT_COOKIE_DOMAIN)) {
+			if (key.equals(getKey(Constants.ELEMENT_COOKIE_DOMAIN))) {
 				config.setCookieDomain((String) newValue);
-			} else if (key.equals(Constants.ELEMENT_HEALTH_CHECK_INTERVAL)) {
+			} else if (key.equals(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL))) {
 				config.setHealthCheckInterval(Integer.parseInt((String) newValue));
-			} else if (key.equals(Constants.ELEMENT_MAX_ERROR_COUNTER)) {
+			} else if (key.equals(getKey(Constants.ELEMENT_MAX_ERROR_COUNTER))) {
 				config.setMaxErrorCounter(Integer.parseInt((String) newValue));
-			} else if (key.equals(Constants.ELEMENT_RETRY_TIMES)) {
+			} else if (key.equals(getKey(Constants.ELEMENT_RETRY_TIMES))) {
 				config.setRetryTimes((Integer) newValue);
-			} else if (key.equals(Constants.ELEMENT_COOKIE_NAME)) {
+			} else if (key.equals(getKey(Constants.ELEMENT_COOKIE_NAME))) {
 				config.setCookieName((String) newValue);
-			} else if (key.equals(Constants.ELEMENT_ENCRYPT_SEED)) {
+			} else if (key.equals(getKey(Constants.ELEMENT_ENCRYPT_SEED))) {
 				config.setEncryptSeed((String) newValue);
-			} else if (key.equals(Constants.ELEMENT_COOKIE_EXPIRED_TIME)) {
+			} else if (key.equals(getKey(Constants.ELEMENT_COOKIE_EXPIRED_TIME))) {
 				config.setCookieExpiredTime(Integer.parseInt((String) newValue));
 			}
 		}
