@@ -104,6 +104,10 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 		return dsContext;
 	}
 
+	public static void createTrackerContextIfNotExists() {
+		getContext();
+	}
+
 	public static void clear() {
 		clearTrackerContext();
 	}
