@@ -28,4 +28,10 @@ public class DPDataSourceContext implements Serializable {
 		return shouldSetCookie;
 	}
 
+	public void setShouldSetCookie(boolean shouldSetCookie) {
+   	this.shouldSetCookie = shouldSetCookie;
+   }
+	
+	
+
 }
