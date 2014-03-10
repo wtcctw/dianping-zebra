@@ -45,7 +45,7 @@ public class GroupDataSourceFilter implements Filter {
 						long expireTime = encrypt.decryptTimestamp(zebra.getValue());
 						long now = System.currentTimeMillis();
 						if (now < expireTime) {
-							DPDataSourceContext.get().setMasterFlag(true, false);
+							CustomizedReadWriteStrategyImpl.setForceReadFromMaster(true, false);
 						}
 					} catch (Exception e) {
 					}
@@ -54,7 +54,7 @@ public class GroupDataSourceFilter implements Filter {
 				chain.doFilter(request, response);
 
 				// 从Threadlocal获取forceReadFromMaster值，如果有forceReadFromMaster，set cookie 到 response
-				boolean shouldSetCookie = DPDataSourceContext.get().isShouldSetCookie();
+				boolean shouldSetCookie = CustomizedReadWriteStrategyImpl.isShouldSetCookie();
 				if (shouldSetCookie) {
 					int cookieExpiredTime = configManager.getSystemConfig().getCookieExpiredTime();
 					long expiredTime = System.currentTimeMillis() + cookieExpiredTime * 1000;
@@ -68,7 +68,7 @@ public class GroupDataSourceFilter implements Filter {
 					}
 				}
 			} finally {
-				DPDataSourceContext.clear();
+				CustomizedReadWriteStrategyImpl.clear();
 			}
 		}
 	}

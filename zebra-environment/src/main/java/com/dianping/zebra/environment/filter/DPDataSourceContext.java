@@ -1,106 +1,26 @@
 package com.dianping.zebra.environment.filter;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.dianping.zebra.group.router.GroupDataSourceContext;
-
-public class DPDataSourceContext extends GroupDataSourceContext implements Serializable {
-	private static final String CONTEXT_NAME = "com.dianping.zebra.group.router.GroupDataSourceContext";
+public class DPDataSourceContext implements Serializable {
+	public static final String CONTEXT_NAME = "com.dianping.zebra.group.router.GroupDataSourceContext";
 
 	private static final long serialVersionUID = 6881706441282935789L;
 
-	private static final Logger logger = LoggerFactory.getLogger(DPDataSourceContext.class);
-
-	private static Class<?> trackerContextClass;
-
-	private static Method getContextMethod;
-
-	private static Method setContextMethod;
-
-	private static Method getExtensionMethod;
-
-	private static Method addExtensionMethod;
-
-	private static Method clearContextMethod;
-
-	private static boolean trackerContextExist;
+	private boolean forceReadFromMaster = false;
 
 	private boolean shouldSetCookie = false;
 
-	static {
-		try {
-			Class<?> contextHolderClass = Class.forName("com.dianping.avatar.tracker.ExecutionContextHolder");
-			trackerContextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
-
-			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] {});
-			setContextMethod = contextHolderClass.getDeclaredMethod("setTrackerContext",
-			      new Class[] { trackerContextClass });
-			clearContextMethod = contextHolderClass.getDeclaredMethod("clearContext");
-			getExtensionMethod = trackerContextClass.getDeclaredMethod("getExtension", new Class[] { String.class });
-			addExtensionMethod = trackerContextClass.getDeclaredMethod("addExtension", new Class[] { String.class,
-			      Object.class });
-
-			getContextMethod.setAccessible(true);
-			setContextMethod.setAccessible(true);
-			clearContextMethod.setAccessible(true);
-			getExtensionMethod.setAccessible(true);
-			addExtensionMethod.setAccessible(true);
-
-			trackerContextExist = true;
-
-		} catch (Exception e) {
-			logger.warn("No App context, because: " + e.getMessage());
-		}
+	public boolean getForceReadFromMaster() {
+		return forceReadFromMaster;
 	}
 
-	public static DPDataSourceContext get() {
-		// 如果trackeContext存在dsContext,则优先使用TrackerContext中的dsContext
-		DPDataSourceContext dsContext = getFromTrackerContext();
-		if (dsContext != null) {
-			// 保证GroupDataSourceContext也是使用该dsContext
-			GroupDataSourceContext.set(dsContext);
-		} else {
-			// trackerContext不存在dsContext，则从GroupDataSourceContext获取
-			GroupDataSourceContext context = GroupDataSourceContext.get();
-
-			// 既然使用了DPDataSourceContext的方法，要求DataSourceContext实际的类也是DPDataSourceContext
-			if (context instanceof DPDataSourceContext) {
-				dsContext = (DPDataSourceContext) context;
-			} else {
-				// trackerContext和不存在dsContext，则构造一个
-				dsContext = new DPDataSourceContext();
-				dsContext.setMasterFlag(context.getMasterFlag(), false);
-			}
-
-			// 将DPDataSourceContext放到TrackerContext
-			putIntoTrackerContext(dsContext);
-		}
-
-		return dsContext;
+	public void setForceReadFromMaster(boolean forceReadFromMaster) {
+		this.setForceReadFromMaster(forceReadFromMaster, true);
 	}
 
-	public static void clear() {
-		GroupDataSourceContext.clear();
-
-		clearTrackerContext();
-	}
-
-	@Override
-	public boolean getMasterFlag() {
-		return super.getMasterFlag();
-	}
-
-	@Override
-	public void setMasterFlag(boolean masterFlag) {
-		this.setMasterFlag(masterFlag, true);
-	}
-
-	public void setMasterFlag(boolean masterFlag, boolean shouldSetCookie) {
-		super.setMasterFlag(masterFlag);
+	public void setForceReadFromMaster(boolean forceReadFromMaster, boolean shouldSetCookie) {
+		this.forceReadFromMaster = forceReadFromMaster;
 		this.shouldSetCookie = shouldSetCookie;
 	}
 
@@ -108,58 +28,4 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 		return shouldSetCookie;
 	}
 
-	public DPDataSourceContext() {
-		// 既然使用了DPDataSourceContext，要求GroupDataSourceContext实际的类也是DPDataSourceContext
-		GroupDataSourceContext.set(this);
-	}
-
-	// **************** 以下代码与TrackerContext相关 ***************************
-
-	private static DPDataSourceContext getFromTrackerContext() {
-		DPDataSourceContext dsContext = null;
-
-		if (trackerContextExist) {
-			try {
-				Object trackerContext = getContextMethod.invoke(null);
-
-				if (trackerContext == null) {
-					trackerContext = trackerContextClass.newInstance();
-					setContextMethod.invoke(null, trackerContext);
-				}
-				dsContext = (DPDataSourceContext) getExtensionMethod.invoke(trackerContext, CONTEXT_NAME);
-			} catch (Exception e) {
-				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
-			}
-		}
-
-		return dsContext;
-	}
-
-	private static void putIntoTrackerContext(DPDataSourceContext dsContext) {
-		if (trackerContextExist) {
-			try {
-				Object trackerContext = getContextMethod.invoke(null);
-
-				if (trackerContext == null) {
-					trackerContext = trackerContextClass.newInstance();
-					setContextMethod.invoke(null, trackerContext);
-				}
-
-				addExtensionMethod.invoke(trackerContext, CONTEXT_NAME, dsContext);
-			} catch (Exception e) {
-				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
-			}
-		}
-	}
-
-	private static void clearTrackerContext() {
-		// 如果存在trackerContext，清理之
-		if (trackerContextExist) {
-			try {
-				clearContextMethod.invoke(null);
-			} catch (Exception e) {
-				logger.warn("Error in TrackerContext, ignore clear TrackerContext", e);
-			}
-		}
-	}
 }
