@@ -15,11 +15,10 @@ import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 
 /**
  * @author Leo Liang
- * 
  */
 public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 
-	private static final Logger logger = LoggerFactory.getLogger(DPDataSourceContext.class);
+	private static final Logger logger = LoggerFactory.getLogger(CustomizedReadWriteStrategyImpl.class);
 
 	private static Class<?> trackerContextClass;
 
@@ -34,8 +33,6 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 	private static Method clearContextMethod;
 
 	private static boolean trackerContextExist;
-
-	private boolean shouldSetCookie = false;
 
 	static {
 		try {
@@ -70,12 +67,99 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 	 */
 	@Override
 	public boolean forceReadFromMaster() {
-		// TODO Auto-generated method stub
-		return false;
+		if (!trackerContextExist) {
+			return false;
+		}
+
+		return getContext().getForceReadFromMaster();
 	}
-	
-	public void setForceReadFromMaster(boolean fromMaster){
-		
+
+	public static void setForceReadFromMaster(boolean fromMaster) {
+		setForceReadFromMaster(fromMaster, true);
+	}
+
+	public static void setForceReadFromMaster(boolean fromMaster, boolean shouldSetCookie) {
+		if (!trackerContextExist) {
+			return;
+		}
+
+		getContext().setForceReadFromMaster(fromMaster, shouldSetCookie);
+	}
+
+	public static boolean isShouldSetCookie() {
+		if (!trackerContextExist) {
+			return false;
+		}
+
+		return getContext().isShouldSetCookie();
+	}
+
+	private static DPDataSourceContext getContext() {
+		DPDataSourceContext dsContext = getFromTrackerContext();
+
+		if (dsContext == null) {
+			dsContext = new DPDataSourceContext();
+
+			putIntoTrackerContext(dsContext);
+		}
+
+		return dsContext;
+	}
+
+	public static void clear() {
+		clearTrackerContext();
+	}
+
+	private static DPDataSourceContext getFromTrackerContext() {
+		DPDataSourceContext dsContext = null;
+
+		if (trackerContextExist) {
+			try {
+				Object trackerContext = getContextMethod.invoke(null);
+
+				if (trackerContext == null) {
+					trackerContext = trackerContextClass.newInstance();
+					setContextMethod.invoke(null, trackerContext);
+				}
+				dsContext = (DPDataSourceContext) getExtensionMethod.invoke(trackerContext,
+				      DPDataSourceContext.CONTEXT_NAME);
+			} catch (Exception e) {
+				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
+			}
+		}
+
+		return dsContext;
+	}
+
+	private static void putIntoTrackerContext(DPDataSourceContext dsContext) {
+		if (!trackerContextExist) {
+			return;
+		}
+
+		try {
+			Object trackerContext = getContextMethod.invoke(null);
+
+			if (trackerContext == null) {
+				trackerContext = trackerContextClass.newInstance();
+				setContextMethod.invoke(null, trackerContext);
+			}
+
+			addExtensionMethod.invoke(trackerContext, DPDataSourceContext.CONTEXT_NAME, dsContext);
+		} catch (Exception e) {
+			logger.warn("Error in TrackerContext, ignore TrackerContext", e);
+		}
+	}
+
+	private static void clearTrackerContext() {
+		if (!trackerContextExist) {
+			return;
+		}
+
+		try {
+			clearContextMethod.invoke(null);
+		} catch (Exception e) {
+			logger.warn("Error in TrackerContext, ignore clear TrackerContext", e);
+		}
 	}
 
 }
