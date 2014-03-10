@@ -54,7 +54,7 @@ public class GroupDataSourceFilter implements Filter {
 				chain.doFilter(request, response);
 
 				// 从Threadlocal获取forceReadFromMaster值，如果有forceReadFromMaster，set cookie 到 response
-				boolean shouldSetCookie = CustomizedReadWriteStrategyImpl.isShouldSetCookie();
+				boolean shouldSetCookie = CustomizedReadWriteStrategyImpl.shouldSetCookie();
 				if (shouldSetCookie) {
 					int cookieExpiredTime = configManager.getSystemConfig().getCookieExpiredTime();
 					long expiredTime = System.currentTimeMillis() + cookieExpiredTime * 1000;
