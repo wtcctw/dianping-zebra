@@ -24,7 +24,7 @@ public class DPDataSourceContext implements Serializable {
 		this.shouldSetCookie = shouldSetCookie;
 	}
 
-	public boolean isShouldSetCookie() {
+	public boolean shouldSetCookie() {
 		return shouldSetCookie;
 	}
 
