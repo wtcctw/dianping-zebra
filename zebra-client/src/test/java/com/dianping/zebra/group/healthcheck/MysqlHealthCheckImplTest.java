@@ -35,7 +35,7 @@ public class MysqlHealthCheckImplTest {
 	public void testReadNotifyException() {
 		MysqlHealthCheckImpl mysqlhealthcheckimpl = new MysqlHealthCheckImpl(this.dataSourceConfigManager,
 		      this.systemConfigManager, groupDataSourceManager);
-		GroupDataSourceTarget dsTarget = new GroupDataSourceTarget("db1", 1, true);
+		GroupDataSourceTarget dsTarget = new GroupDataSourceTarget("db1", 1, -1, true);
 		SQLException e = new SQLException();
 		int i = mysqlhealthcheckimpl.getMaxErrorTimes() + 1;
 		while (i > 0) {
@@ -50,7 +50,7 @@ public class MysqlHealthCheckImplTest {
 	public void testWriteNotifyException() {
 		MysqlHealthCheckImpl mysqlhealthcheckimpl = new MysqlHealthCheckImpl(this.dataSourceConfigManager,
 		      this.systemConfigManager, groupDataSourceManager);
-		GroupDataSourceTarget dsTarget = new GroupDataSourceTarget("db1", 1, false);
+		GroupDataSourceTarget dsTarget = new GroupDataSourceTarget("db1", 1, -1, false);
 		SQLException e = new SQLException();
 		int i = mysqlhealthcheckimpl.getMaxErrorTimes() + 1;
 		while (i > 0) {

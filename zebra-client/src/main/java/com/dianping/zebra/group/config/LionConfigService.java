@@ -26,7 +26,13 @@ public class LionConfigService implements ConfigService {
 	public String getProperty(String key) {
 		if (!cache.containsKey(key)) {
 			try {
-				cache.put(key, ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key));
+				String value = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key);
+				
+				if(value != null){
+					cache.put(key, value);
+				}else{
+					return null;
+				}
 			} catch (LionException e) {
 			}
 		}

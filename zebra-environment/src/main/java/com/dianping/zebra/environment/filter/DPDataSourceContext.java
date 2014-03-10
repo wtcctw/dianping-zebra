@@ -39,9 +39,10 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] {});
 			setContextMethod = contextHolderClass.getDeclaredMethod("setTrackerContext",
 			      new Class[] { trackerContextClass });
-			clearContextMethod = contextHolderClass.getDeclaredMethod("clearContext", new Class[] { trackerContextClass });
+			clearContextMethod = contextHolderClass.getDeclaredMethod("clearContext");
 			getExtensionMethod = trackerContextClass.getDeclaredMethod("getExtension", new Class[] { String.class });
-			addExtensionMethod = trackerContextClass.getDeclaredMethod("addExtension", new Class[] { String.class });
+			addExtensionMethod = trackerContextClass.getDeclaredMethod("addExtension", new Class[] { String.class,
+			      Object.class });
 
 			getContextMethod.setAccessible(true);
 			setContextMethod.setAccessible(true);
@@ -50,12 +51,13 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 			addExtensionMethod.setAccessible(true);
 
 			trackerContextExist = true;
+
 		} catch (Exception e) {
-			logger.warn("No App context: " + e.getMessage(), e);
+			logger.warn("No App context, because: " + e.getMessage());
 		}
 	}
 
-	public static DPDataSourceContext getContext() {
+	public static DPDataSourceContext get() {
 		// 如果trackeContext存在dsContext,则优先使用TrackerContext中的dsContext
 		DPDataSourceContext dsContext = getFromTrackerContext();
 		if (dsContext != null) {
@@ -69,9 +71,11 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 			if (context instanceof DPDataSourceContext) {
 				dsContext = (DPDataSourceContext) context;
 			} else {
-				dsContext = new DPDataSourceContext(context);
-				GroupDataSourceContext.set(dsContext);
+				// trackerContext和不存在dsContext，则构造一个
+				dsContext = new DPDataSourceContext();
+				dsContext.setMasterFlag(context.getMasterFlag(), false);
 			}
+
 			// 将DPDataSourceContext放到TrackerContext
 			putIntoTrackerContext(dsContext);
 		}
@@ -79,7 +83,7 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 		return dsContext;
 	}
 
-	public static void clearContext() {
+	public static void clear() {
 		GroupDataSourceContext.clear();
 
 		clearTrackerContext();
@@ -104,8 +108,9 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 		return shouldSetCookie;
 	}
 
-	public DPDataSourceContext(GroupDataSourceContext context) {
-		this.setMasterFlag(context.getMasterFlag());
+	public DPDataSourceContext() {
+		// 既然使用了DPDataSourceContext，要求GroupDataSourceContext实际的类也是DPDataSourceContext
+		GroupDataSourceContext.set(this);
 	}
 
 	// **************** 以下代码与TrackerContext相关 ***************************
@@ -130,7 +135,7 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 		return dsContext;
 	}
 
-	private static void putIntoTrackerContext(DPDataSourceContext _dsContext) {
+	private static void putIntoTrackerContext(DPDataSourceContext dsContext) {
 		if (trackerContextExist) {
 			try {
 				Object trackerContext = getContextMethod.invoke(null);
@@ -140,7 +145,7 @@ public class DPDataSourceContext extends GroupDataSourceContext implements Seria
 					setContextMethod.invoke(null, trackerContext);
 				}
 
-				addExtensionMethod.invoke(trackerContext, CONTEXT_NAME);
+				addExtensionMethod.invoke(trackerContext, CONTEXT_NAME, dsContext);
 			} catch (Exception e) {
 				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
 			}

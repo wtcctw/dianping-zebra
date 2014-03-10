@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.router;
 
-public class GroupDataSourceTarget {
+public class GroupDataSourceTarget implements Comparable<GroupDataSourceTarget> {
 
 	private String id;
 
@@ -8,39 +8,34 @@ public class GroupDataSourceTarget {
 
 	private int weight;
 
+	private int end;
+
 	public GroupDataSourceTarget() {
 		super();
 	}
 
-	public GroupDataSourceTarget(String id, int weight, boolean readOnly) {
+	public GroupDataSourceTarget(String id, int weight, int end, boolean readOnly) {
 		super();
 		this.id = id;
 		this.weight = weight;
 		this.readOnly = readOnly;
+		this.end = end;
 	}
 
 	public String getId() {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	public int getWeight() {
 		return weight;
-	}
-
-	public void setWeight(int weight) {
-		this.weight = weight;
 	}
 
 	public boolean isReadOnly() {
 		return readOnly;
 	}
 
-	public void setReadOnly(boolean readOnly) {
-		this.readOnly = readOnly;
+	public int getEnd() {
+		return end;
 	}
 
 	@Override
@@ -70,7 +65,12 @@ public class GroupDataSourceTarget {
 
 	@Override
 	public String toString() {
-		return String.format("GroupDataSourceTarget [id=%s, readOnly=%s]", id, readOnly);
+		return String.format("GroupDataSourceTarget [id=%s, readOnly=%s, weight=%s, end=%s]", id, readOnly, weight, end);
+	}
+
+	@Override
+	public int compareTo(GroupDataSourceTarget o) {
+		return end - o.end;
 	}
 
 }

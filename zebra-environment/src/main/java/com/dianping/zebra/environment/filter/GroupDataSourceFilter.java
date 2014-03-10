@@ -24,47 +24,43 @@ public class GroupDataSourceFilter implements Filter {
 
 	private SystemConfigManager configManager;
 
-	private String cookieName;
-
-	private String cookieDomain;
-
-	private long encryptSeed;
-
-	private int cookieExpiredTime;
-
-	private SimpleEncrypt encrypt;
+	@Override
+	public void destroy() {
+	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 	      ServletException {
 		if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
 			try {
-				DPDataSourceContext context = DPDataSourceContext.getContext();
 				HttpServletRequest hRequest = (HttpServletRequest) request;
 				HttpServletResponse hResponse = (HttpServletResponse) response;
+				SimpleEncrypt encrypt = getEncrypt();
 
+				String cookieName = configManager.getSystemConfig().getCookieName();
 				// 读取cookie，有且时间未过期的话，设置context中masterFlag为true
-				Cookie zebra = getCookie(hRequest);
+				Cookie zebra = getCookie(cookieName, hRequest);
 				if (zebra != null) {
 					try {
 						long expireTime = encrypt.decryptTimestamp(zebra.getValue());
 						long now = System.currentTimeMillis();
 						if (expireTime < now) {
-							context.setMasterFlag(true, false);
+							DPDataSourceContext.get().setMasterFlag(true, false);
 						}
 					} catch (Exception e) {
 					}
 				}
 
 				chain.doFilter(request, response);
-				
+
 				// 从Threadlocal获取forceReadFromMaster值，如果有forceReadFromMaster，set cookie 到 response
-				boolean shouldSetCookie = context.isShouldSetCookie();
+				boolean shouldSetCookie = DPDataSourceContext.get().isShouldSetCookie();
 				if (shouldSetCookie) {
+					int cookieExpiredTime = configManager.getSystemConfig().getCookieExpiredTime();
 					long expiredTime = System.currentTimeMillis() + cookieExpiredTime * 1000;
 					try {
 						Cookie cookie = new Cookie(cookieName, encrypt.encryptTimestamp(expiredTime));
-						cookie.setDomain(cookieDomain);
+						cookie.setDomain(configManager.getSystemConfig().getCookieDomain());
 						cookie.setMaxAge(cookieExpiredTime);
 
 						hResponse.addCookie(cookie);
@@ -72,19 +68,19 @@ public class GroupDataSourceFilter implements Filter {
 					}
 				}
 			} finally {
-				DPDataSourceContext.clearContext();
+				DPDataSourceContext.clear();
 			}
 		}
 	}
 
-	private Cookie getCookie(HttpServletRequest hRequest) {
+	private Cookie getCookie(String name, HttpServletRequest hRequest) {
 		Cookie[] cookies = hRequest.getCookies();
 
 		if (cookies != null) {
 			Cookie zebraCookie = null;
 			for (Cookie cookie : cookies) {
 				String cookieName = cookie.getName();
-				if (this.cookieName.equalsIgnoreCase(cookieName)) {
+				if (name.equalsIgnoreCase(cookieName)) {
 					zebraCookie = cookie;
 					break;
 				}
@@ -93,6 +89,18 @@ public class GroupDataSourceFilter implements Filter {
 		} else {
 			return null;
 		}
+	}
+
+	private SimpleEncrypt getEncrypt() {
+		String encryptSeedStr = configManager.getSystemConfig().getEncryptSeed();
+		long encryptSeed;
+		try {
+			encryptSeed = Long.parseLong(encryptSeedStr);
+		} catch (RuntimeException e) {
+			throw new IllegalArgumentException("encryptSeed should be numberic", e);
+		}
+
+		return new SimpleEncrypt(encryptSeed);
 	}
 
 	@Override
@@ -107,23 +115,6 @@ public class GroupDataSourceFilter implements Filter {
 		}
 
 		configManager = SystemConfigManagerFactory.getConfigManger(configManagerType, resourceId);
-
-		this.cookieName = configManager.getSystemConfig().getCookieName();
-		this.cookieDomain = configManager.getSystemConfig().getCookieDomain();
-		this.cookieExpiredTime = configManager.getSystemConfig().getCookieExpiredTime();
-
-		String encryptSeedStr = configManager.getSystemConfig().getEncryptSeed();
-		try {
-			this.encryptSeed = Long.parseLong(encryptSeedStr);
-		} catch (RuntimeException e) {
-			throw new IllegalArgumentException("encryptSeed should be numberic", e);
-		}
-
-		this.encrypt = new SimpleEncrypt(encryptSeed);
-	}
-
-	@Override
-	public void destroy() {
 	}
 
 }
