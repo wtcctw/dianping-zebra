@@ -51,6 +51,9 @@ public class GroupDataSourceFilter implements Filter {
 					}
 				}
 
+				// pigeon service需要存在trackerContext才会在调用返回时对trackerContext设值，所以此处事先创建一下
+				CustomizedReadWriteStrategyImpl.createTrackerContextIfNotExists();
+
 				chain.doFilter(request, response);
 
 				// 从Threadlocal获取forceReadFromMaster值，如果有forceReadFromMaster，set cookie 到 response
