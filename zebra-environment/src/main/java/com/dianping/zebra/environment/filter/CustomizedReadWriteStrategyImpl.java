@@ -79,19 +79,17 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 	}
 
 	public static void setForceReadFromMaster(boolean fromMaster, boolean shouldSetCookie) {
-		if (!trackerContextExist) {
-			return;
+		if (trackerContextExist) {
+			getContext().setForceReadFromMaster(fromMaster, shouldSetCookie);
 		}
-
-		getContext().setForceReadFromMaster(fromMaster, shouldSetCookie);
 	}
 
-	public static boolean isShouldSetCookie() {
+	public static boolean shouldSetCookie() {
 		if (!trackerContextExist) {
 			return false;
 		}
 
-		return getContext().isShouldSetCookie();
+		return getContext().shouldSetCookie();
 	}
 
 	private static DPDataSourceContext getContext() {
@@ -132,33 +130,29 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 	}
 
 	private static void putIntoTrackerContext(DPDataSourceContext dsContext) {
-		if (!trackerContextExist) {
-			return;
-		}
+		if (trackerContextExist) {
+			try {
+				Object trackerContext = getContextMethod.invoke(null);
 
-		try {
-			Object trackerContext = getContextMethod.invoke(null);
+				if (trackerContext == null) {
+					trackerContext = trackerContextClass.newInstance();
+					setContextMethod.invoke(null, trackerContext);
+				}
 
-			if (trackerContext == null) {
-				trackerContext = trackerContextClass.newInstance();
-				setContextMethod.invoke(null, trackerContext);
+				addExtensionMethod.invoke(trackerContext, DPDataSourceContext.CONTEXT_NAME, dsContext);
+			} catch (Exception e) {
+				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
 			}
-
-			addExtensionMethod.invoke(trackerContext, DPDataSourceContext.CONTEXT_NAME, dsContext);
-		} catch (Exception e) {
-			logger.warn("Error in TrackerContext, ignore TrackerContext", e);
 		}
 	}
 
 	private static void clearTrackerContext() {
-		if (!trackerContextExist) {
-			return;
-		}
-
-		try {
-			clearContextMethod.invoke(null);
-		} catch (Exception e) {
-			logger.warn("Error in TrackerContext, ignore clear TrackerContext", e);
+		if (trackerContextExist) {
+			try {
+				clearContextMethod.invoke(null);
+			} catch (Exception e) {
+				logger.warn("Error in TrackerContext, ignore clear TrackerContext", e);
+			}
 		}
 	}
 

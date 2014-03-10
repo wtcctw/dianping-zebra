@@ -175,7 +175,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		return new DPGroupConnection(router, dataSourceManager, systemConfigManager);
+		return new DPGroupConnection(router, dataSourceManager, systemConfigManager, dataSourceConfigManager);
 	}
 
 	/*
@@ -185,7 +185,8 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return new DPGroupConnection(router, dataSourceManager, systemConfigManager, username, password);
+		return new DPGroupConnection(router, dataSourceManager, systemConfigManager, dataSourceConfigManager, username,
+		      password);
 	}
 
 }
