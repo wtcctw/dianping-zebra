@@ -21,8 +21,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		listeners.add(listener);
 	}
 
-	@Override
-	protected String getKey(String key) {
+	private String getKey(String key) {
 		return String.format("%s.%s", this.resourceId, key);
 	}
 
@@ -44,14 +43,15 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 	public SystemConfig initSystemConfig() {
 		SystemConfig config = new SystemConfig();
 
-		config.setCookieDomain(getProperty(Constants.ELEMENT_COOKIE_DOMAIN, config.getCookieDomain()));
-		config.setHealthCheckInterval(getProperty(Constants.ELEMENT_HEALTH_CHECK_INTERVAL,
+		config.setCookieDomain(getProperty(getKey(Constants.ELEMENT_COOKIE_DOMAIN), config.getCookieDomain()));
+		config.setHealthCheckInterval(getProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL),
 		      config.getHealthCheckInterval()));
-		config.setMaxErrorCounter(getProperty(Constants.ELEMENT_MAX_ERROR_COUNTER, config.getMaxErrorCounter()));
-		config.setRetryTimes(getProperty(Constants.ELEMENT_RETRY_TIMES, config.getRetryTimes()));
-		config.setCookieName(getProperty(Constants.ELEMENT_COOKIE_NAME, config.getCookieName()));
-		config.setEncryptSeed(getProperty(Constants.ELEMENT_ENCRYPT_SEED, config.getEncryptSeed()));
-		config.setCookieExpiredTime(getProperty(Constants.ELEMENT_COOKIE_EXPIRED_TIME, config.getCookieExpiredTime()));
+		config.setMaxErrorCounter(getProperty(getKey(Constants.ELEMENT_MAX_ERROR_COUNTER), config.getMaxErrorCounter()));
+		config.setRetryTimes(getProperty(getKey(Constants.ELEMENT_RETRY_TIMES), config.getRetryTimes()));
+		config.setCookieName(getProperty(getKey(Constants.ELEMENT_COOKIE_NAME), config.getCookieName()));
+		config.setEncryptSeed(getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED), config.getEncryptSeed()));
+		config.setCookieExpiredTime(getProperty(getKey(Constants.ELEMENT_COOKIE_EXPIRED_TIME),
+		      config.getCookieExpiredTime()));
 
 		return config;
 	}

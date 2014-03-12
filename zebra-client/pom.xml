@@ -106,7 +106,6 @@
                         <configuration>
                             <manifest><![CDATA[,
                         ${basedir}/src/main/resources/META-INF/dal/model/datasource-config-manifest.xml,
-                        ${basedir}/src/main/resources/META-INF/dal/model/databases-manifest.xml,
                         ${basedir}/src/main/resources/META-INF/dal/model/system-config-manifest.xml,
                      ,]]></manifest>
                         </configuration>

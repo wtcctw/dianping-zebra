@@ -25,5 +25,4 @@ public class DataSourceConfigManagerTest {
 			Assert.assertEquals(dataSourceConfig.toString(),entry.toString());
 		}
 	}
-
 }

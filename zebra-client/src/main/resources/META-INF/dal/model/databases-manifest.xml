@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest>
-  <file path="databases-codegen.xml" />
-  <file path="databases-model.xml" />
-</manifest>
-

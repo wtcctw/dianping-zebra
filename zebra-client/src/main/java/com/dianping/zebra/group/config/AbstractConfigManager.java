@@ -15,6 +15,18 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractConfigManager {
 
+	class InnerPropertyChangeListener implements PropertyChangeListener {
+		@Override
+		public void propertyChange(final PropertyChangeEvent evt) {
+			try {
+				updateProperties(evt);
+				notifyListeners(evt);
+			} catch (Throwable e) {
+				logger.warn("Illegal config file, apply old config!", e);
+			}
+		}
+	}
+
 	private Logger logger = LoggerFactory.getLogger(AbstractConfigManager.class);
 
 	protected final String resourceId;
@@ -42,8 +54,22 @@ public abstract class AbstractConfigManager {
 		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
 	}
 
+	public boolean getProperty(String key, boolean defaultValue) {
+		String value = configService.getProperty(key);
+
+		if (StringUtils.isNotBlank(value)) {
+			if (value.equals("true")) {
+				return true;
+			} else if (StringUtils.isNotBlank(value) && value.equals("false")) {
+				return false;
+			}
+		}
+
+		return defaultValue;
+	}
+
 	protected int getProperty(String key, int defaultValue) {
-		String value = configService.getProperty(getKey(key));
+		String value = configService.getProperty(key);
 
 		if (StringUtils.isNotBlank(value)) {
 			return Integer.parseInt(value);
@@ -53,7 +79,7 @@ public abstract class AbstractConfigManager {
 	}
 
 	protected String getProperty(String key, String defaultValue) {
-		String value = configService.getProperty(getKey(key));
+		String value = configService.getProperty(key);
 
 		if (StringUtils.isNotBlank(value)) {
 			return value;
@@ -61,10 +87,6 @@ public abstract class AbstractConfigManager {
 			return defaultValue;
 		}
 	}
-
-	protected abstract String getKey(String key);
-
-	protected abstract void updateProperties(PropertyChangeEvent evt);
 
 	private void notifyListeners(final PropertyChangeEvent evt) {
 		try {
@@ -84,15 +106,5 @@ public abstract class AbstractConfigManager {
 		}
 	}
 
-	class InnerPropertyChangeListener implements PropertyChangeListener {
-		@Override
-		public void propertyChange(final PropertyChangeEvent evt) {
-			try {
-				updateProperties(evt);
-				notifyListeners(evt);
-			} catch (Throwable e) {
-				logger.warn("Illegal config file, apply old config!", e);
-			}
-		}
-	}
+	protected abstract void updateProperties(PropertyChangeEvent evt);
 }

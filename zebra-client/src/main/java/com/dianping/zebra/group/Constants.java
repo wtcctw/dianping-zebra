@@ -40,6 +40,10 @@ public class Constants {
 	public static final String ELEMENT_USER = "user";
 
 	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
+	
+	public static final String ELEMENT_TRANSACTION_FORCE_WREITE = "transactionForceWrite";
+	
+	public static final String ELEMENT_PROPERTIES= "properties";
 
 	// System
 	public static final String ELEMENT_COOKIE_DOMAIN = "cookieDomain";

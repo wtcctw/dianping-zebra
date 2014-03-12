@@ -15,10 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
-import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
 import com.dianping.zebra.group.exception.GroupConfigException;
+import com.dianping.zebra.group.util.Splitters;
 
 public class DefaultDataSourceConfigManager extends AbstractConfigManager implements DataSourceConfigManager {
 
@@ -54,44 +55,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	// public GroupDataSourceConfig copyGroupDataSourceConfig(GroupDataSourceConfig config) {
-	// GroupDataSourceConfig groupDataSourceConfig = new GroupDataSourceConfig();
-	// groupDataSourceConfig.mergeAttributes(config);
-	//
-	// Map<String, DataSourceConfig> dataSourceConfigs = copyDataSourceConfigs(config.getDataSourceConfigs());
-	//
-	// groupDataSourceConfig.getDataSourceConfigs().putAll(dataSourceConfigs);
-	//
-	// return groupDataSourceConfig;
-	// }
-	//
-	// private Map<String, DataSourceConfig> copyDataSourceConfigs(Map<String, DataSourceConfig> config) {
-	// Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<String, DataSourceConfig>();
-	//
-	// for (Entry<String, DataSourceConfig> entry : config.entrySet()) {
-	// String dsId = entry.getKey();
-	// DataSourceConfig newDataSourceConfig = new DataSourceConfig();
-	// DataSourceConfig originDataSourceConfig = entry.getValue();
-	//
-	// newDataSourceConfig.setId(dsId);
-	// newDataSourceConfig.setUser(originDataSourceConfig.getUser());
-	// newDataSourceConfig.setPassword(originDataSourceConfig.getPassword());
-	// newDataSourceConfig.setDriverClass(originDataSourceConfig.getDriverClass());
-	// newDataSourceConfig.setJdbcUrl(originDataSourceConfig.getJdbcUrl());
-	// newDataSourceConfig.setInitialPoolSize(originDataSourceConfig.getInitialPoolSize());
-	// newDataSourceConfig.setMaxPoolSize(originDataSourceConfig.getMaxPoolSize());
-	// newDataSourceConfig.setMinPoolSize(originDataSourceConfig.getMinPoolSize());
-	// newDataSourceConfig.setCheckoutTimeout(originDataSourceConfig.getCheckoutTimeout());
-	// newDataSourceConfig.setConnectionCustomizeClassName(originDataSourceConfig.getConnectionCustomizeClassName());
-	// newDataSourceConfig.setProperties(originDataSourceConfig.getProperties());
-	// newDataSourceConfig.mergeAttributes(originDataSourceConfig);
-	//
-	// dataSourceConfigs.put(dsId, newDataSourceConfig);
-	// }
-	//
-	// return dataSourceConfigs;
-	// }
-
 	@Override
 	public Map<String, DataSourceConfig> getAvailableDataSources() {
 		this.rLock.lock();
@@ -100,6 +63,10 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		} finally {
 			this.rLock.unlock();
 		}
+	}
+
+	private String getCustomizedKey(String key, String dsId) {
+		return String.format("%s.%s.%s", this.resourceId, dsId, key);
 	}
 
 	@Override
@@ -112,17 +79,30 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	@Override
-	protected String getKey(String key) {
+	private String getKey(String key, String dsId) {
 		if (key.equals(this.resourceId)) {
 			return key;
 		} else {
-			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, key);
+			return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, dsId, key);
 		}
 	}
 
-	private String getKey(String key, String dsId) {
-		return String.format("%s.%s", dsId, key);
+	private int getMergedPropertyValue(String key, String dsId, int defaultValue) {
+		return getProperty(getCustomizedKey(key, dsId), getProperty(getKey(key, dsId), defaultValue));
+	}
+
+	private String getMergedPropertyValue(String key, String dsId, String defaultValue) {
+		return getProperty(getCustomizedKey(key, dsId), getProperty(getKey(key, dsId), defaultValue));
+	}
+
+	@Override
+	public String getRouterStrategy() {
+		rLock.lock();
+		try {
+			return this.groupDataSourceConfigCache.getRouterStrategy();
+		} finally {
+			rLock.unlock();
+		}
 	}
 
 	@Override
@@ -133,6 +113,17 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		} finally {
 			this.rLock.unlock();
 		}
+	}
+
+	private int getWeight(String dsValue) {
+		if (dsValue.length() > 1) {
+			try {
+				return Integer.parseInt(dsValue.substring(1));
+			} catch (Exception e) {
+			}
+		}
+
+		return 1;
 	}
 
 	@Override
@@ -153,53 +144,55 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private GroupDataSourceConfig initDataSourceConfig() throws SAXException, IOException {
 		String appConfig = configService.getProperty(this.resourceId);
-		GroupDataSourceConfig config = DefaultSaxParser.parse(appConfig);
-		Map<String, DataSourceConfig> dataSourceConfigs = config.getDataSourceConfigs();
+		Map<String, String> splits = Splitters.by(',', ':').trim().split(appConfig);
+		GroupDataSourceConfig groupDsConfig = new GroupDataSourceConfig();
 
-		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
-			String dsId = entry.getKey();
-			DataSourceConfig dataSourceConfig = entry.getValue();
+		for (Entry<String, String> split : splits.entrySet()) {
+			DataSourceConfig ds = groupDsConfig.findOrCreateDataSourceConfig(split.getKey());
 
-			dataSourceConfig.setConnectionCustomizeClassName(getProperty(
-			      getKey(Constants.ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME, dsId),
-			      dataSourceConfig.getConnectionCustomizeClassName()));
-			dataSourceConfig.setDriverClass(getProperty(getKey(Constants.ELEMENT_DRIVER_CLASS, dsId),
-			      dataSourceConfig.getDriverClass()));
-			dataSourceConfig.setId(dsId);
-			dataSourceConfig.setInitialPoolSize(getProperty(getKey(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId),
-			      dataSourceConfig.getInitialPoolSize()));
-			dataSourceConfig.setJdbcUrl(getProperty(getKey(Constants.ELEMENT_JDBC_URL, dsId),
-			      dataSourceConfig.getJdbcUrl()));
-			dataSourceConfig.setMaxPoolSize(getProperty(getKey(Constants.ELEMENT_MAX_POOL_SIZE, dsId),
-			      dataSourceConfig.getMaxPoolSize()));
-			dataSourceConfig.setMinPoolSize(getProperty(getKey(Constants.ELEMENT_MIN_POOL_SIZE, dsId),
-			      dataSourceConfig.getMinPoolSize()));
-			dataSourceConfig.setPassword(getProperty(getKey(Constants.ELEMENT_PASSWORD, dsId),
-			      dataSourceConfig.getPassword()));
-			dataSourceConfig.setCheckoutTimeout(getProperty(getKey(Constants.ELEMENT_CHECKOUT_TIMEOUT, dsId),
-			      dataSourceConfig.getCheckoutTimeout()));
-			dataSourceConfig.setUser(getProperty(getKey(Constants.ELEMENT_USER, dsId), dataSourceConfig.getUser()));
-			dataSourceConfig.setProperties(dataSourceConfig.getProperties());
+			String dsId = split.getKey();
+			String dsValue = split.getValue().trim();
+			if (dsValue.indexOf('w') == 0) {
+				ds.setReadonly(false);
+			} else {
+				ds.setReadonly(true);
+				ds.setWeight(getWeight(dsValue));
+			}
+
+			ds.setConnectionCustomizeClassName(getMergedPropertyValue(Constants.ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME,
+			      dsId, ds.getConnectionCustomizeClassName()));
+			ds.setDriverClass(getMergedPropertyValue(Constants.ELEMENT_DRIVER_CLASS, dsId, ds.getDriverClass()));
+			ds.setId(dsId);
+			ds.setInitialPoolSize(getMergedPropertyValue(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId,
+			      ds.getInitialPoolSize()));
+			ds.setJdbcUrl(getMergedPropertyValue(Constants.ELEMENT_JDBC_URL, dsId, ds.getJdbcUrl()));
+			ds.setMaxPoolSize(getMergedPropertyValue(Constants.ELEMENT_MAX_POOL_SIZE, dsId, ds.getMaxPoolSize()));
+			ds.setMinPoolSize(getMergedPropertyValue(Constants.ELEMENT_MIN_POOL_SIZE, dsId, ds.getMinPoolSize()));
+			ds.setPassword(getMergedPropertyValue(Constants.ELEMENT_PASSWORD, dsId, ds.getPassword()));
+			ds.setCheckoutTimeout(getMergedPropertyValue(Constants.ELEMENT_CHECKOUT_TIMEOUT, dsId, ds.getCheckoutTimeout()));
+			ds.setUser(getMergedPropertyValue(Constants.ELEMENT_USER, dsId, ds.getUser()));
+
+			processProperties(ds, dsId);
 		}
 
-		validateConfig(dataSourceConfigs);
+		groupDsConfig.setRouterStrategy(getProperty(this.resourceId + "." + Constants.ELEMENT_ROUTER_STRATEGY,
+		      groupDsConfig.getRouterStrategy()));
 
-		return config;
+		groupDsConfig.setTransactionForceWrite(getProperty(this.resourceId + "."
+		      + Constants.ELEMENT_TRANSACTION_FORCE_WREITE, groupDsConfig.getTransactionForceWrite()));
+
+		validateConfig(groupDsConfig.getDataSourceConfigs());
+
+		return groupDsConfig;
 	}
 
-	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
-		int readNum = 0, writeNum = 0;
-		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
-			if (entry.getValue().isReadonly()) {
-				readNum += 1;
-			} else {
-				writeNum += 1;
-			}
-		}
-
-		if (readNum < 1 || writeNum != 1) {
-			throw new GroupConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
-			      readNum, writeNum));
+	@Override
+	public boolean isTransactionForceWrite() {
+		rLock.lock();
+		try {
+			return this.groupDataSourceConfigCache.getTransactionForceWrite();
+		} finally {
+			rLock.unlock();
 		}
 	}
 
@@ -246,6 +239,28 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
+	private void processProperties(DataSourceConfig ds, String dsId) {
+		String systemProperies = getProperty(getKey(Constants.ELEMENT_PROPERTIES, dsId), null);
+		if (systemProperies != null) {
+			String customizedProperies = getProperty(getCustomizedKey(Constants.ELEMENT_PROPERTIES, dsId), "");
+			Map<String, String> sysMap = Splitters.by(',', ':').trim().split(systemProperies);
+			Map<String, String> customizedMap = Splitters.by(',', ':').trim().split(customizedProperies);
+
+			for (Entry<String, String> property : sysMap.entrySet()) {
+				Any any = new Any();
+				String key = property.getKey();
+				any.setName(key);
+				if (customizedMap.containsKey(key)) {
+					any.setValue(customizedMap.get(key));
+				} else {
+					any.setValue(property.getValue());
+				}
+
+				ds.getProperties().add(any);
+			}
+		}
+	}
+
 	@Override
 	protected void updateProperties(PropertyChangeEvent evt) {
 		if (evt instanceof AdvancedPropertyChangeEvent) {
@@ -278,23 +293,19 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	@Override
-	public String getRouterStrategy() {
-		rLock.lock();
-		try {
-			return this.groupDataSourceConfigCache.getRouterStrategy();
-		} finally {
-			rLock.unlock();
+	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
+		int readNum = 0, writeNum = 0;
+		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
+			if (entry.getValue().isReadonly()) {
+				readNum += 1;
+			} else {
+				writeNum += 1;
+			}
 		}
-	}
 
-	@Override
-	public boolean isTransactionForceWrite() {
-		rLock.lock();
-		try {
-			return this.groupDataSourceConfigCache.getTransactionForceWrite();
-		} finally {
-			rLock.unlock();
+		if (readNum < 1 || writeNum != 1) {
+			throw new GroupConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
+			      readNum, writeNum));
 		}
 	}
 }
