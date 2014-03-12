@@ -188,7 +188,6 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			dataSource.setConnectionCustomizerClassName(value.getConnectionCustomizeClassName());
 
 			for (Any any : value.getProperties()) {
-				// TODO franky wu
 				MethodUtils.invokeMethod(dataSource, "set" + StringUtils.capitalize(any.getName()), any.getValue());
 			}
 			C3P0DataSourceRuntimeMonitor.INSTANCE.initCounter(dsId);

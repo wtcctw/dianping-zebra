@@ -42,7 +42,7 @@ public abstract class SingleDatabaseTestCase {
 	}
 
 	@Before
-	protected void createTableAndImportDataSet() throws Exception {
+	public void createTableAndImportDataSet() throws Exception {
 		RunScript.execute(JDBC_URL, USER, PASSWORD, getSchema(), "UTF8", false);
 		cleanlyInsert(JDBC_DRIVER, JDBC_URL, USER, PASSWORD, readDataSet());
 	}

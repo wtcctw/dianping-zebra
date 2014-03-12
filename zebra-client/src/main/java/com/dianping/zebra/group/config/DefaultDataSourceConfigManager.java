@@ -37,6 +37,10 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private Lock wLock = lock.writeLock();
 
+	private char pairSeparator = ',';
+
+	private char keyValueSeparator = ':';
+
 	public DefaultDataSourceConfigManager(String resourceId, ConfigService configService) {
 		super(resourceId, configService);
 	}
@@ -144,7 +148,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private GroupDataSourceConfig initDataSourceConfig() throws SAXException, IOException {
 		String appConfig = configService.getProperty(this.resourceId);
-		Map<String, String> splits = Splitters.by(',', ':').trim().split(appConfig);
+		Map<String, String> splits = Splitters.by(pairSeparator, keyValueSeparator).trim().split(appConfig);
 		GroupDataSourceConfig groupDsConfig = new GroupDataSourceConfig();
 
 		for (Entry<String, String> split : splits.entrySet()) {
@@ -243,8 +247,9 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		String systemProperies = getProperty(getKey(Constants.ELEMENT_PROPERTIES, dsId), null);
 		if (systemProperies != null) {
 			String customizedProperies = getProperty(getCustomizedKey(Constants.ELEMENT_PROPERTIES, dsId), "");
-			Map<String, String> sysMap = Splitters.by(',', ':').trim().split(systemProperies);
-			Map<String, String> customizedMap = Splitters.by(',', ':').trim().split(customizedProperies);
+			Map<String, String> sysMap = Splitters.by(pairSeparator, keyValueSeparator).trim().split(systemProperies);
+			Map<String, String> customizedMap = Splitters.by(pairSeparator, keyValueSeparator).trim()
+			      .split(customizedProperies);
 
 			for (Entry<String, String> property : sysMap.entrySet()) {
 				Any any = new Any();

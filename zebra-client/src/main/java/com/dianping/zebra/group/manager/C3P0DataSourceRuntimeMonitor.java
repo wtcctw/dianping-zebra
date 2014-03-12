@@ -28,5 +28,4 @@ public enum C3P0DataSourceRuntimeMonitor {
 	public void removeCounter(String dsId) {
 		checkedOutCounter.remove(dsId);
 	}
-
 }

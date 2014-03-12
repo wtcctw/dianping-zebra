@@ -13,9 +13,10 @@ import org.junit.Test;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.zebra.group.jdbc.SingleDatabaseTestCase;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-public class C3P0GroupDataSourceManagerTest {
+public class C3P0GroupDataSourceManagerTest extends SingleDatabaseTestCase{
 
 	@Test
 	public void testConnect() throws SQLException, IOException {
@@ -51,8 +52,27 @@ public class C3P0GroupDataSourceManagerTest {
 		System.out.println(c3p0DataSource.getDriverClass());
 		System.out.println(c3p0DataSource.getConnectionCustomizerClassName());
 		connection.close();
-		System.in.read();
 		// dataSourceManager.destory();
 	}
+
+	@Override
+   protected String getConfigManagerType() {
+	   return "local";
+   }
+
+	@Override
+   protected String getDataSets() {
+	   return "datasets.xml";
+   }
+
+	@Override
+   protected String getResourceId() {
+	   return "sample.ds";
+   }
+
+	@Override
+   protected String getSchema() {
+	   return "src/test/resources/schema.sql";
+   }
 
 }
