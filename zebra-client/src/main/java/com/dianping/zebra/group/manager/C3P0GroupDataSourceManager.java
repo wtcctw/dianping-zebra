@@ -5,9 +5,11 @@ import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,6 +24,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,20 +116,6 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 		}
 	}
 
-	// private boolean checkConnection(DataSource dataSource) throws Throwable {
-	// Connection connection = null;
-	// try {
-	// connection = dataSource.getConnection();
-	// return connection != null;
-	// } catch (Throwable e) {
-	// throw e;
-	// } finally {
-	// if (connection != null) {
-	// connection.close();
-	// }
-	// }
-	// }
-
 	@Override
 	public Connection getWriteConnection() throws SQLException {
 		rLock.lock();
@@ -149,9 +138,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 				}
 
 				DataSource dataSource = initDataSources(value);
-				// if (checkConnection(dataSource)) {
 				this.dataSources.put(key, dataSource);
-				// }
 			} catch (Throwable e) {
 				logger.error(String.format("fail to connect the database[%s]", key), e);
 				throw new RuntimeException(e);
@@ -216,8 +203,10 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 						String dsId = comboDataSource.getIdentityToken();
 
 						if (C3P0DataSourceRuntimeMonitor.INSTANCE.getCheckedOutCount(dsId) <= 0) {
-							comboDataSource.close();
+							logger.info("closing the datasource : " + dsId);
 							C3P0DataSourceRuntimeMonitor.INSTANCE.removeCounter(dsId);
+							comboDataSource.close();
+							logger.info("datasource : " + dsId + " closed");
 						} else {
 							toBeClosedDataSource.offer(comboDataSource);
 						}
@@ -229,6 +218,8 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					TimeUnit.MILLISECONDS.sleep(10);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
+				} catch(Throwable e){
+					logger.error("Error occurs while closing ds", e);
 				}
 			}
 		}
@@ -237,6 +228,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 	class ConfigChangedListener implements PropertyChangeListener {
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
+			logger.info("detect dataSourceConfig changed");
 			Map<String, DataSource> newDataSources = new ConcurrentHashMap<String, DataSource>();
 			List<DataSource> toBeDestoryDataSource = new ArrayList<DataSource>();
 			String wDsId = null;
@@ -263,12 +255,19 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					}
 				}
 
+				Set<String> idSets = new HashSet<String>();
 				for (Entry<String, DataSourceConfig> entry : dataSourceConfigsCache.get().entrySet()) {
 					String key = entry.getKey();
 					if (!newConfig.containsKey(key)) {
 						toBeDestoryDataSource.add(dataSources.get(key));
+						idSets.add(((ComboPooledDataSource) dataSources.get(key)).getIdentityToken());
 					}
 				}
+
+				logger.info(String.format("New dataSource config changed from %s to %s",
+				      printDataSourceConfig(dataSourceConfigsCache.get()), printDataSourceConfig(newConfig)));
+
+				logger.info(String.format("To destroy following dataSources: %s", idSets));
 
 				wLock.lock();
 				try {
@@ -285,6 +284,26 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			} catch (Throwable e) {
 				logger.warn("cannot refresh dataSource!", e);
 			}
+		}
+
+		private String printDataSourceConfig(Map<String, DataSourceConfig> config) {
+			StringBuilder sb = new StringBuilder("{");
+			boolean isFirst = true;
+
+			for (Entry<String, DataSourceConfig> entry : config.entrySet()) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					sb.append(",");
+				}
+				sb.append(entry.getKey());
+				sb.append("=");
+				sb.append(ReflectionToStringBuilder.toString(entry.getValue()));
+			}
+
+			sb.append("}");
+
+			return sb.toString();
 		}
 
 		private void destoryDataSource(DataSource dataSource) {
