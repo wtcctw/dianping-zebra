@@ -152,11 +152,11 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		GroupDataSourceConfig groupDsConfig = new GroupDataSourceConfig();
 
 		for (Entry<String, String> split : splits.entrySet()) {
-			DataSourceConfig ds = groupDsConfig.findOrCreateDataSourceConfig(split.getKey());
-
 			String dsId = split.getKey();
+			DataSourceConfig ds = groupDsConfig.findOrCreateDataSourceConfig(dsId);
+
 			String dsValue = split.getValue().trim();
-			if (dsValue.indexOf('w') == 0) {
+			if ("w".equalsIgnoreCase(dsValue)) {
 				ds.setReadonly(false);
 			} else {
 				ds.setReadonly(true);
@@ -251,6 +251,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			Map<String, String> customizedMap = Splitters.by(pairSeparator, keyValueSeparator).trim()
 			      .split(customizedProperies);
 
+			// TODO
 			for (Entry<String, String> property : sysMap.entrySet()) {
 				Any any = new Any();
 				String key = property.getKey();
@@ -263,6 +264,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 				ds.getProperties().add(any);
 			}
+		} else {
+			// TODO
 		}
 	}
 

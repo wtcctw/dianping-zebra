@@ -57,17 +57,15 @@ public abstract class AbstractConfigManager {
 	public boolean getProperty(String key, boolean defaultValue) {
 		String value = configService.getProperty(key);
 
-		if (StringUtils.isNotBlank(value)) {
-			if (value.equals("true")) {
-				return true;
-			} else if (StringUtils.isNotBlank(value) && value.equals("false")) {
-				return false;
-			}
+		if ("true".equalsIgnoreCase(value)) {
+			return true;
+		} else if ("false".equalsIgnoreCase(value)) {
+			return false;
 		}
 
 		return defaultValue;
 	}
-
+	
 	protected int getProperty(String key, int defaultValue) {
 		String value = configService.getProperty(key);
 
