@@ -245,27 +245,32 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private void processProperties(DataSourceConfig ds, String dsId) {
 		String systemProperies = getProperty(getKey(Constants.ELEMENT_PROPERTIES, dsId), null);
+		String customizedProperies = getProperty(getCustomizedKey(Constants.ELEMENT_PROPERTIES, dsId), null);
+		Map<String, String> mergedMap = new HashMap<String, String>();
+
 		if (systemProperies != null) {
-			String customizedProperies = getProperty(getCustomizedKey(Constants.ELEMENT_PROPERTIES, dsId), "");
 			Map<String, String> sysMap = Splitters.by(pairSeparator, keyValueSeparator).trim().split(systemProperies);
+
+			for (Entry<String, String> property : sysMap.entrySet()) {
+				mergedMap.put(property.getKey(), property.getValue());
+			}
+		}
+
+		if (customizedProperies != null) {
 			Map<String, String> customizedMap = Splitters.by(pairSeparator, keyValueSeparator).trim()
 			      .split(customizedProperies);
 
-			// TODO
-			for (Entry<String, String> property : sysMap.entrySet()) {
-				Any any = new Any();
-				String key = property.getKey();
-				any.setName(key);
-				if (customizedMap.containsKey(key)) {
-					any.setValue(customizedMap.get(key));
-				} else {
-					any.setValue(property.getValue());
-				}
-
-				ds.getProperties().add(any);
+			for (Entry<String, String> property : customizedMap.entrySet()) {
+				mergedMap.put(property.getKey(), property.getValue());
 			}
-		} else {
-			// TODO
+		}
+
+		for (Entry<String, String> property : mergedMap.entrySet()) {
+			Any any = new Any();
+			any.setName(property.getKey());
+			any.setValue(property.getValue());
+
+			ds.getProperties().add(any);
 		}
 	}
 
