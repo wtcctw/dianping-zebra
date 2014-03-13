@@ -242,10 +242,10 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			String wDsId = null;
 
 			Map<String, DataSourceConfig> newConfig = groupConfigManager.getAvailableDataSources();
-			for (Entry<String, DataSourceConfig> entry : newConfig.entrySet()) {
-				String key = entry.getKey();
-				DataSourceConfig value = entry.getValue();
-				try {
+			try {
+				for (Entry<String, DataSourceConfig> entry : newConfig.entrySet()) {
+					String key = entry.getKey();
+					DataSourceConfig value = entry.getValue();
 					if (dataSourceConfigsCache.get().containsKey(key)) {
 						DataSourceConfig originDataSourceConfig = dataSourceConfigsCache.get().get(key);
 						if (!originDataSourceConfig.toString().equals(value.toString())) {
@@ -261,29 +261,29 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					if (!value.isReadonly()) {
 						wDsId = value.getId();
 					}
-				} catch (Throwable e) {
-					logger.warn("cannot init new dataSource due to illegal dataSource config!", e);
 				}
-			}
 
-			for (Entry<String, DataSourceConfig> entry : dataSourceConfigsCache.get().entrySet()) {
-				String key = entry.getKey();
-				if (!newConfig.containsKey(key)) {
-					toBeDestoryDataSource.add(dataSources.get(key));
+				for (Entry<String, DataSourceConfig> entry : dataSourceConfigsCache.get().entrySet()) {
+					String key = entry.getKey();
+					if (!newConfig.containsKey(key)) {
+						toBeDestoryDataSource.add(dataSources.get(key));
+					}
 				}
-			}
 
-			wLock.lock();
-			try {
-				writeId = wDsId;
-				dataSourceConfigsCache.set(newConfig);
-				dataSources = newDataSources;
-			} finally {
-				wLock.unlock();
-			}
-			
-			for (DataSource ds : toBeDestoryDataSource) {
-				destoryDataSource(ds);
+				wLock.lock();
+				try {
+					writeId = wDsId;
+					dataSourceConfigsCache.set(newConfig);
+					dataSources = newDataSources;
+				} finally {
+					wLock.unlock();
+				}
+
+				for (DataSource ds : toBeDestoryDataSource) {
+					destoryDataSource(ds);
+				}
+			} catch (Throwable e) {
+				logger.warn("cannot refresh dataSource!", e);
 			}
 		}
 
