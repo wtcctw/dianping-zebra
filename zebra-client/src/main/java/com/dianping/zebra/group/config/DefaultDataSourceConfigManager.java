@@ -153,10 +153,14 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 		for (Entry<String, String> split : splits.entrySet()) {
 			String dsId = split.getKey();
+			String dsValue = split.getValue().trim().toLowerCase();
+			if (dsValue.startsWith("d")) {
+				continue;
+			}
+
 			DataSourceConfig ds = groupDsConfig.findOrCreateDataSourceConfig(dsId);
 
-			String dsValue = split.getValue().trim();
-			if ("w".equalsIgnoreCase(dsValue)) {
+			if ("w".equals(dsValue)) {
 				ds.setReadonly(false);
 			} else {
 				ds.setReadonly(true);
