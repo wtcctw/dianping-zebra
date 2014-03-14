@@ -2,6 +2,8 @@ package com.dianping.zebra.group.manager;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,7 +27,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,14 +176,48 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			dataSource.setConnectionCustomizerClassName(value.getConnectionCustomizeClassName());
 
 			for (Any any : value.getProperties()) {
-				MethodUtils.invokeMethod(dataSource, "set" + StringUtils.capitalize(any.getName()), any.getValue());
+				setProperty(dataSource, any.getName(), any.getValue());
 			}
+
+			logger.info(String.format("dataSource [%s] created. Properties are [%s]", dsId,
+			      ReflectionToStringBuilder.toString(dataSource)));
 			C3P0DataSourceRuntimeMonitor.INSTANCE.initCounter(dsId);
 		} catch (Throwable e) {
 			throw new GroupConfigException(e);
 		}
 
 		return dataSource;
+	}
+
+   private void setProperty(ComboPooledDataSource dataSource, String propertyName, String value)
+	      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		String methodName = "set" + StringUtils.capitalize(propertyName);
+		Method[] methods = dataSource.getClass().getDeclaredMethods();
+		Method method = null;
+		Class<?>[] paramTypes = null;
+
+		for (Method tmpMethod : methods) {
+			Class<?>[] tmpParamTypes = tmpMethod.getParameterTypes();
+			if (tmpMethod.getName().equals(methodName) && tmpParamTypes != null && tmpParamTypes.length == 1) {
+				method = tmpMethod;
+				method.setAccessible(true);
+				paramTypes = tmpParamTypes;
+			}
+		}
+
+		if (method != null && paramTypes != null) {
+			if (String.class.equals(paramTypes[0])) {
+				method.invoke(dataSource, value);
+			} else if (int.class.equals(paramTypes[0])) {
+				method.invoke(dataSource, Integer.parseInt(value));
+			} else if (boolean.class.equals(paramTypes[0])) {
+				method.invoke(dataSource, Boolean.valueOf(value));
+			} else {
+				logger.warn(String.format("Property %s unsupported.", propertyName));
+			}
+		} else {
+			logger.warn(String.format("Property %s unsupported.", propertyName));
+		}
 	}
 
 	@Override
@@ -218,7 +253,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					TimeUnit.MILLISECONDS.sleep(10);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-				} catch(Throwable e){
+				} catch (Throwable e) {
 					logger.error("Error occurs while closing ds", e);
 				}
 			}
