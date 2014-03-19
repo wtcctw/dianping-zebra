@@ -2,11 +2,10 @@ package com.dianping.zebra.group.manager;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,8 @@ import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.GroupConfigException;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.DataSources;
+import com.mchange.v2.c3p0.PoolBackedDataSource;
 
 public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
@@ -157,66 +156,36 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 	}
 
 	private DataSource initDataSources(DataSourceConfig value) {
-		ComboPooledDataSource dataSource = new ComboPooledDataSource();
-
 		try {
-			dsSeq.putIfAbsent(value.getId(), new AtomicInteger(0));
+			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUser(),
+			      value.getPassword());
 
-			String dsId = value.getId() + "-" + dsSeq.get(value.getId()).incrementAndGet();
+			Map<String, Object> props = new HashMap<String, Object>();
 
-			dataSource.setIdentityToken(dsId);
-			dataSource.setUser(value.getUser());
-			dataSource.setDriverClass(value.getDriverClass());
-			dataSource.setJdbcUrl(value.getJdbcUrl());
-			dataSource.setPassword(value.getPassword());
-			dataSource.setInitialPoolSize(value.getInitialPoolSize());
-			dataSource.setMinPoolSize(value.getMinPoolSize());
-			dataSource.setMaxPoolSize(value.getMaxPoolSize());
-			dataSource.setCheckoutTimeout(value.getCheckoutTimeout());
-			dataSource.setConnectionCustomizerClassName(value.getConnectionCustomizeClassName());
+			props.put("driverClass", value.getDriverClass());
+			props.put("initialPoolSize", value.getInitialPoolSize());
+			props.put("minPoolSize", value.getMinPoolSize());
+			props.put("maxPoolSize", value.getMaxPoolSize());
+			props.put("maxPoolSize", value.getMaxPoolSize());
+			props.put("checkoutTimeout", value.getCheckoutTimeout());
+			props.put("connectionCustomizerClassName", value.getConnectionCustomizeClassName());
 
 			for (Any any : value.getProperties()) {
-				setProperty(dataSource, any.getName(), any.getValue());
+				props.put(any.getName(), any.getValue());
 			}
+
+			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
+			      unPooledDataSource, props);
+			dsSeq.putIfAbsent(value.getId(), new AtomicInteger(0));
+			String dsId = value.getId() + "-" + dsSeq.get(value.getId()).incrementAndGet();
+			pooledDataSource.setIdentityToken(dsId);
 
 			logger.info(String.format("dataSource [%s] created. Properties are [%s]", dsId,
-			      ReflectionToStringBuilder.toString(dataSource)));
+			      ReflectionToStringBuilder.toString(pooledDataSource)));
 			C3P0DataSourceRuntimeMonitor.INSTANCE.initCounter(dsId);
+			return pooledDataSource;
 		} catch (Throwable e) {
 			throw new GroupConfigException(e);
-		}
-
-		return dataSource;
-	}
-
-   private void setProperty(ComboPooledDataSource dataSource, String propertyName, String value)
-	      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		String methodName = "set" + StringUtils.capitalize(propertyName);
-		Method[] methods = dataSource.getClass().getDeclaredMethods();
-		Method method = null;
-		Class<?>[] paramTypes = null;
-
-		for (Method tmpMethod : methods) {
-			Class<?>[] tmpParamTypes = tmpMethod.getParameterTypes();
-			if (tmpMethod.getName().equals(methodName) && tmpParamTypes != null && tmpParamTypes.length == 1) {
-				method = tmpMethod;
-				method.setAccessible(true);
-				paramTypes = tmpParamTypes;
-			}
-		}
-
-		if (method != null && paramTypes != null) {
-			if (String.class.equals(paramTypes[0])) {
-				method.invoke(dataSource, value);
-			} else if (int.class.equals(paramTypes[0])) {
-				method.invoke(dataSource, Integer.parseInt(value));
-			} else if (boolean.class.equals(paramTypes[0])) {
-				method.invoke(dataSource, Boolean.valueOf(value));
-			} else {
-				logger.warn(String.format("Property %s unsupported.", propertyName));
-			}
-		} else {
-			logger.warn(String.format("Property %s unsupported.", propertyName));
 		}
 	}
 
@@ -233,8 +202,8 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 				try {
 					DataSource dataSource = toBeClosedDataSource.take();
 
-					if (dataSource != null && (dataSource instanceof ComboPooledDataSource)) {
-						ComboPooledDataSource comboDataSource = (ComboPooledDataSource) dataSource;
+					if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+						PoolBackedDataSource comboDataSource = (PoolBackedDataSource) dataSource;
 						String dsId = comboDataSource.getIdentityToken();
 
 						if (C3P0DataSourceRuntimeMonitor.INSTANCE.getCheckedOutCount(dsId) <= 0) {
@@ -295,7 +264,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					String key = entry.getKey();
 					if (!newConfig.containsKey(key)) {
 						toBeDestoryDataSource.add(dataSources.get(key));
-						idSets.add(((ComboPooledDataSource) dataSources.get(key)).getIdentityToken());
+						idSets.add(((PoolBackedDataSource) dataSources.get(key)).getIdentityToken());
 					}
 				}
 
