@@ -23,8 +23,6 @@ public class Constants {
 	public static final String DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX = "zebra.v2.ds";
 
 	// DataSource
-	public static final String ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME = "connectionCustomizeClassName";
-
 	public static final String ELEMENT_DRIVER_CLASS = "driverClass";
 
 	public static final String ELEMENT_INITIAL_POOL_SIZE = "initialPoolSize";

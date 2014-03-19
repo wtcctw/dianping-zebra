@@ -166,9 +166,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			props.put("initialPoolSize", value.getInitialPoolSize());
 			props.put("minPoolSize", value.getMinPoolSize());
 			props.put("maxPoolSize", value.getMaxPoolSize());
-			props.put("maxPoolSize", value.getMaxPoolSize());
 			props.put("checkoutTimeout", value.getCheckoutTimeout());
-			props.put("connectionCustomizerClassName", value.getConnectionCustomizeClassName());
 
 			for (Any any : value.getProperties()) {
 				props.put(any.getName(), any.getValue());
@@ -182,7 +180,6 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 			logger.info(String.format("dataSource [%s] created. Properties are [%s]", dsId,
 			      ReflectionToStringBuilder.toString(pooledDataSource)));
-			C3P0DataSourceRuntimeMonitor.INSTANCE.initCounter(dsId);
 			return pooledDataSource;
 		} catch (Throwable e) {
 			throw new GroupConfigException(e);
@@ -203,16 +200,15 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					DataSource dataSource = toBeClosedDataSource.take();
 
 					if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-						PoolBackedDataSource comboDataSource = (PoolBackedDataSource) dataSource;
-						String dsId = comboDataSource.getIdentityToken();
+						PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
+						String dsId = poolBackedDataSource.getIdentityToken();
 
-						if (C3P0DataSourceRuntimeMonitor.INSTANCE.getCheckedOutCount(dsId) <= 0) {
+						if (poolBackedDataSource.getNumBusyConnections() == 0) {
 							logger.info("closing the datasource : " + dsId);
-							C3P0DataSourceRuntimeMonitor.INSTANCE.removeCounter(dsId);
-							comboDataSource.close();
+							poolBackedDataSource.close();
 							logger.info("datasource : " + dsId + " closed");
 						} else {
-							toBeClosedDataSource.offer(comboDataSource);
+							toBeClosedDataSource.offer(poolBackedDataSource);
 						}
 					} else {
 						// Normally not happen

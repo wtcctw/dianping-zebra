@@ -8,7 +8,6 @@
 		<max-pool-size>5</max-pool-size>
 		<initial-pool-size>4</initial-pool-size>
 		<checkout-timeout>1000</checkout-timeout>
-		<connection-customize-class-name>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connection-customize-class-name>
 		<a>2</a>
 		<b>3</b>
 	</data-source-config>
@@ -21,7 +20,6 @@
 		<max-pool-size>6</max-pool-size>
 		<initial-pool-size>4</initial-pool-size>
 		<checkout-timeout>1000</checkout-timeout>
-		<connection-customize-class-name>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connection-customize-class-name>
 	</data-source-config>
 	<data-source-config id="db3" weight="2" readonly="true">
 		<jdbc-url>jdbc:h2:mem:test2;MVCC=TRUE;DB_CLOSE_DELAY=-1</jdbc-url>
@@ -32,6 +30,5 @@
 		<max-pool-size>6</max-pool-size>
 		<initial-pool-size>4</initial-pool-size>
 		<checkout-timeout>1000</checkout-timeout>
-		<connection-customize-class-name>com.dianping.zebra.group.manager.DataSourceMonitorCustomizer</connection-customize-class-name>
 	</data-source-config>
 </group-data-source-config>

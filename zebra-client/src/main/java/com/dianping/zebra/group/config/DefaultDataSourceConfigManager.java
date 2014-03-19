@@ -167,8 +167,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 				ds.setWeight(getWeight(dsValue));
 			}
 
-			ds.setConnectionCustomizeClassName(getMergedPropertyValue(Constants.ELEMENT_CONNECTION_CUSTOMIZE_CLASS_NAME,
-			      dsId, ds.getConnectionCustomizeClassName()));
 			ds.setDriverClass(getMergedPropertyValue(Constants.ELEMENT_DRIVER_CLASS, dsId, ds.getDriverClass()));
 			ds.setId(dsId);
 			ds.setInitialPoolSize(getMergedPropertyValue(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId,
