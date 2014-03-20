@@ -74,13 +74,13 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 		return getContext().getForceReadFromMaster();
 	}
 
-	public static void setForceReadFromMaster(boolean fromMaster) {
-		setForceReadFromMaster(fromMaster, true);
+	public static void setForceReadFromMaster() {
+		setForceReadFromMaster(true);
 	}
 
-	public static void setForceReadFromMaster(boolean fromMaster, boolean shouldSetCookie) {
+	public static void setForceReadFromMaster(boolean shouldSetCookie) {
 		if (trackerContextExist) {
-			getContext().setForceReadFromMaster(fromMaster, shouldSetCookie);
+			getContext().setForceReadFromMaster(true, shouldSetCookie);
 		}
 	}
 
