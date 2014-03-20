@@ -27,7 +27,7 @@ public abstract class AbstractConfigManager {
 		}
 	}
 
-	private Logger logger = LoggerFactory.getLogger(AbstractConfigManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractConfigManager.class);
 
 	protected final String resourceId;
 
@@ -65,7 +65,7 @@ public abstract class AbstractConfigManager {
 
 		return defaultValue;
 	}
-	
+
 	protected int getProperty(String key, int defaultValue) {
 		String value = configService.getProperty(key);
 

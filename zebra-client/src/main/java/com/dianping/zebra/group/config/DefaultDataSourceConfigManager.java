@@ -23,7 +23,7 @@ import com.dianping.zebra.group.util.Splitters;
 
 public class DefaultDataSourceConfigManager extends AbstractConfigManager implements DataSourceConfigManager {
 
-	private Logger logger = LoggerFactory.getLogger(DefaultDataSourceConfigManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultDataSourceConfigManager.class);
 
 	private GroupDataSourceConfig groupDataSourceConfigCache = new GroupDataSourceConfig();
 

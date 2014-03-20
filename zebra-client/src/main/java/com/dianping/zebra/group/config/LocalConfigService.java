@@ -24,7 +24,7 @@ import com.dianping.zebra.group.exception.GroupConfigException;
 
 public class LocalConfigService implements ConfigService {
 
-	private Logger logger = LoggerFactory.getLogger(LocalConfigService.class);
+	private static final Logger logger = LoggerFactory.getLogger(LocalConfigService.class);
 
 	private String resourceFileName;
 

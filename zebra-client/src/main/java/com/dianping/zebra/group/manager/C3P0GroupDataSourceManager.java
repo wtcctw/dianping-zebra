@@ -39,7 +39,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 	public static final String ID = "c3p0";
 
-	private Logger logger = LoggerFactory.getLogger(C3P0GroupDataSourceManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(C3P0GroupDataSourceManager.class);
 
 	private AtomicReference<Map<String, DataSourceConfig>> dataSourceConfigsCache = new AtomicReference<Map<String, DataSourceConfig>>();
 
