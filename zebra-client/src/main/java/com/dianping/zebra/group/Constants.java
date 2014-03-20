@@ -11,6 +11,8 @@ package com.dianping.zebra.group;
  * 
  */
 public class Constants {
+	
+	public static final String SQL_FORCE_WRITE_HINT="/*+zebra:w*/";
 
 	public static final String CONNECTION_POOL_TYPE_C3P0 = "c3p0";
 

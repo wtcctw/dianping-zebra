@@ -89,25 +89,11 @@ public class DPGroupConnection implements Connection {
 	 */
 	Connection getRealConnection(String sql, boolean forceWrite) throws SQLException {
 		if (forceWrite) {
-			if (wConnection == null) {
-				wConnection = dataSourceManager.getWriteConnection();
-				if (wConnection.getAutoCommit() != autoCommit) {
-					wConnection.setAutoCommit(autoCommit);
-				}
-			}
-
-			return wConnection;
+			return getWriteConnection();
 		}
 
 		if (!autoCommit && dataSourceConfigManager.isTransactionForceWrite()) {
-			if (wConnection != null) {
-				return wConnection;
-			}
-			wConnection = dataSourceManager.getWriteConnection();
-			if (wConnection.getAutoCommit() != autoCommit) {
-				wConnection.setAutoCommit(autoCommit);
-			}
-			return wConnection;
+			return getWriteConnection();
 		}
 
 		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(sql);
@@ -147,17 +133,21 @@ public class DPGroupConnection implements Connection {
 				}
 			}
 		} else {
-			if (wConnection != null) {
-				return wConnection;
-			}
-			wConnection = dataSourceManager.getWriteConnection();
-			if (wConnection.getAutoCommit() != autoCommit) {
-				wConnection.setAutoCommit(autoCommit);
-			}
-			return wConnection;
+			return getWriteConnection();
 		}
 
 		throw new SQLException("Can not aquire connection");
+	}
+
+	private Connection getWriteConnection() throws SQLException {
+		if (wConnection != null) {
+			return wConnection;
+		}
+		wConnection = dataSourceManager.getWriteConnection();
+		if (wConnection.getAutoCommit() != autoCommit) {
+			wConnection.setAutoCommit(autoCommit);
+		}
+		return wConnection;
 	}
 
 	/*

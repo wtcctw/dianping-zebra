@@ -95,6 +95,23 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 			}
 		});
 	}
+	
+	@Test
+	public void test_create_single_read_statement_on_same_connection_with_force_write_hint() throws Exception {
+		execute(new StatementCallback() {
+
+			@Override
+			public Object doInStatement(Statement stmt) throws Exception {
+				boolean result = stmt.execute("/*+zebra:w*/select * from PERSON");
+
+				assertTrue(result);
+				ResultSet rsSet = stmt.getResultSet();
+				rsSet.next();
+				Assert.assertEquals("writer", rsSet.getString(2));
+				return null;
+			}
+		});
+	}
 
 	@Test
 	public void test_create_single_write_statement_on_same_connection() throws Exception {
