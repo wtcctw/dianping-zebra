@@ -235,6 +235,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 
 			Map<String, DataSourceConfig> newConfig = groupConfigManager.getAvailableDataSources();
 			try {
+				Set<String> idSets = new HashSet<String>();
 				for (Entry<String, DataSourceConfig> entry : newConfig.entrySet()) {
 					String key = entry.getKey();
 					DataSourceConfig value = entry.getValue();
@@ -243,6 +244,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 						if (!originDataSourceConfig.toString().equals(value.toString())) {
 							newDataSources.put(key, initDataSources(value));
 							toBeDestoryDataSource.add(dataSources.get(key));
+							idSets.add(((PoolBackedDataSource) dataSources.get(key)).getIdentityToken());
 						} else {
 							newDataSources.put(key, dataSources.get(key));
 						}
@@ -255,7 +257,6 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 					}
 				}
 
-				Set<String> idSets = new HashSet<String>();
 				for (Entry<String, DataSourceConfig> entry : dataSourceConfigsCache.get().entrySet()) {
 					String key = entry.getKey();
 					if (!newConfig.containsKey(key)) {
