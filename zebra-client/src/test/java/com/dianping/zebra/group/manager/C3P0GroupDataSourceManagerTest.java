@@ -14,7 +14,7 @@ import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.jdbc.SingleDatabaseTestCase;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.PoolBackedDataSource;
 
 public class C3P0GroupDataSourceManagerTest extends SingleDatabaseTestCase{
 
@@ -43,14 +43,8 @@ public class C3P0GroupDataSourceManagerTest extends SingleDatabaseTestCase{
 
 		C3P0GroupDataSourceManager c3p0 = (C3P0GroupDataSourceManager) dataSourceManager;
 
-		ComboPooledDataSource c3p0DataSource = (ComboPooledDataSource) c3p0.getDataSource("db1");
+		PoolBackedDataSource c3p0DataSource = (PoolBackedDataSource) c3p0.getDataSource("db1");
 
-		System.out.println(c3p0DataSource.getUser());
-		System.out.println(c3p0DataSource.getPassword());
-		System.out.println(c3p0DataSource.getInitialPoolSize());
-		System.out.println(c3p0DataSource.getMaxPoolSize());
-		System.out.println(c3p0DataSource.getDriverClass());
-		System.out.println(c3p0DataSource.getConnectionCustomizerClassName());
 		connection.close();
 		// dataSourceManager.destory();
 	}
