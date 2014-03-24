@@ -133,7 +133,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 			String key = entry.getKey();
 			DataSourceConfig value = entry.getValue();
 			try {
-				if (!value.isReadonly()) {
+				if (value.getCanWrite()) {
 					this.writeId = key;
 				}
 
@@ -250,7 +250,7 @@ public class C3P0GroupDataSourceManager implements GroupDataSourceManager {
 						newDataSources.put(key, initDataSources(value));
 					}
 
-					if (!value.isReadonly()) {
+					if (value.getCanWrite()) {
 						wDsId = value.getId();
 					}
 				}

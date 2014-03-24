@@ -119,12 +119,11 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	private int getWeight(String dsValue) {
-		if (dsValue.length() > 1) {
-			try {
-				return Integer.parseInt(dsValue.substring(1));
-			} catch (Exception e) {
-			}
+	private int getReadWeight(String dsValue, int indexOfR, int indexOfW) {
+		if (dsValue.length() > 1 && (indexOfW < indexOfR)) {
+			return Integer.parseInt(dsValue.substring(indexOfR + 1));
+		} else if (dsValue.length() > 1 && (indexOfW > indexOfR)) {
+			return Integer.parseInt(dsValue.substring(indexOfR + 1, indexOfW));
 		}
 
 		return 1;
@@ -160,12 +159,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 			DataSourceConfig ds = groupDsConfig.findOrCreateDataSourceConfig(dsId);
 
-			if ("w".equals(dsValue)) {
-				ds.setReadonly(false);
-			} else {
-				ds.setReadonly(true);
-				ds.setWeight(getWeight(dsValue));
-			}
+			setUpReadOnlyAndWeight(ds, dsValue);
 
 			ds.setDriverClass(getMergedPropertyValue(Constants.ELEMENT_DRIVER_CLASS, dsId, ds.getDriverClass()));
 			ds.setId(dsId);
@@ -190,6 +184,20 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		validateConfig(groupDsConfig.getDataSourceConfigs());
 
 		return groupDsConfig;
+	}
+
+	private void setUpReadOnlyAndWeight(DataSourceConfig ds, String value) {
+		int indexOfW = value.indexOf('w');
+		int indexOfR = value.indexOf('r');
+
+		if (indexOfW != -1) {
+			ds.setCanWrite(true);
+		}
+
+		if (indexOfR != -1) {
+			ds.setCanRead(true);
+			ds.setWeight(getReadWeight(value, indexOfR, indexOfW));
+		}
 	}
 
 	@Override
@@ -311,9 +319,10 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
 		int readNum = 0, writeNum = 0;
 		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
-			if (entry.getValue().isReadonly()) {
+			if (entry.getValue().getCanRead()) {
 				readNum += 1;
-			} else {
+			}
+			if (entry.getValue().getCanWrite()) {
 				writeNum += 1;
 			}
 		}

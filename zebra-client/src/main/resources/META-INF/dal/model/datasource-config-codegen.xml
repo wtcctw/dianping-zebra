@@ -8,7 +8,8 @@
   <entity name="data-source-config">
     <attribute name="id" value-type="String" />
     <attribute name="weight" value-type="int" />
-    <attribute name="readonly" value-type="boolean" />
+    <attribute name="canRead" value-type="boolean" />
+    <attribute name="canWrite" value-type="boolean" />
     <element name="jdbc-url" value-type="String" />
     <element name="user" value-type="String" />
     <element name="driver-class" value-type="String" />
@@ -17,8 +18,6 @@
     <element name="max-pool-size" value-type="int" />
     <element name="initial-pool-size" value-type="int" />
     <element name="checkout-timeout" value-type="int" />
-    <element name="a" value-type="int" />
-    <element name="b" value-type="int" />
   </entity>
 </model>
 
