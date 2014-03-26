@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManager;
@@ -769,5 +770,26 @@ public class DPGroupConnection implements Connection {
 	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
 		throw new UnsupportedOperationException("createStruct");
 	}
+
+   public void setSchema(String schema) throws SQLException {
+   	throw new UnsupportedOperationException("setSchema");
+   }
+
+   public String getSchema() throws SQLException {
+   	throw new UnsupportedOperationException("getSchema");
+   }
+
+   public void abort(Executor executor) throws SQLException {
+   	throw new UnsupportedOperationException("abort");
+   }
+
+   public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+   	throw new UnsupportedOperationException("setNetworkTimeout");
+   }
+
+	@Override
+   public int getNetworkTimeout() throws SQLException {
+		throw new UnsupportedOperationException("getNetworkTimeout");
+   }
 
 }

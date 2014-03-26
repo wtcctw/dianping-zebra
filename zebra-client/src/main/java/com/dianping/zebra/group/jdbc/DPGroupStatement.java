@@ -671,4 +671,12 @@ public class DPGroupStatement implements Statement {
 		throw new SQLException("not support exception");
 	}
 
+   public void closeOnCompletion() throws SQLException {
+   	throw new SQLException("not support exception");
+   }
+
+   public boolean isCloseOnCompletion() throws SQLException {
+   	throw new SQLException("not support exception");
+   }
+
 }
