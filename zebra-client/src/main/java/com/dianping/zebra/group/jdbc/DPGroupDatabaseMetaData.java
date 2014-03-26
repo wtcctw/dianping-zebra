@@ -729,4 +729,13 @@ public class DPGroupDatabaseMetaData implements DatabaseMetaData {
 	      String columnNamePattern) throws SQLException {
 		throw new SQLException("not support exception");
 	}
+
+   public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
+         String columnNamePattern) throws SQLException {
+   	throw new SQLException("not support exception");
+   }
+
+   public boolean generatedKeyAlwaysReturned() throws SQLException {
+   	throw new SQLException("not support exception");
+   }
 }
