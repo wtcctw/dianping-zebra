@@ -191,7 +191,6 @@ public class DPGroupDataSource implements DataSource {
 		      password);
 	}
 
-	@Override
    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 	   throw new UnsupportedOperationException("getParentLogger");
    }
