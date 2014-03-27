@@ -787,7 +787,6 @@ public class DPGroupConnection implements Connection {
    	throw new UnsupportedOperationException("setNetworkTimeout");
    }
 
-	@Override
    public int getNetworkTimeout() throws SQLException {
 		throw new UnsupportedOperationException("getNetworkTimeout");
    }
