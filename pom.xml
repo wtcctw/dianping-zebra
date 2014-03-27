@@ -20,7 +20,7 @@
         <repo.internal.releases.url>http://mvn.dianpingoa.com/dianping-releases</repo.internal.releases.url>
         <repo.external.url>http://mvn.dianpingoa.com/third-party</repo.external.url>
         <repo.proxy.url>http://mvn.dianpingoa.com/dprepo</repo.proxy.url>
-        <zebra-all.version>2.0.0</zebra-all.version>
+        <zebra-all.version>2.0.1</zebra-all.version>
         <zebra-client.version>${zebra-all.version}</zebra-client.version>
         <zebra-client.name>zebra-client v${zebra-all.version}</zebra-client.name>
         <zebra-client.aid>zebra-client</zebra-client.aid>
@@ -284,4 +284,3 @@
         </pluginRepository>
     </pluginRepositories>
 </project>
-
