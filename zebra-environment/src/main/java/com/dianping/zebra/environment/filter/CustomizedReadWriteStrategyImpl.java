@@ -7,6 +7,7 @@
 package com.dianping.zebra.environment.filter;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,12 @@ import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 
 	private static final Logger logger = LoggerFactory.getLogger(CustomizedReadWriteStrategyImpl.class);
+
+	private static final String FORCE_READ_FROM_MASTER = "ForceReadFromMaster";
+
+	private static final String SHOULD_SET_COOKIE = "shouldSetCookie";
+
+	public static final String CONTEXT_NAME = "com.dianping.zebra.group.router.GroupDataSourceContext";
 
 	private static Class<?> trackerContextClass;
 
@@ -60,18 +67,13 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.zebra.group.router.CustomizedReadWriteStrategy#forceReadFromMaster()
-	 */
 	@Override
 	public boolean forceReadFromMaster() {
 		if (!trackerContextExist) {
 			return false;
 		}
 
-		return getContext().getForceReadFromMaster();
+		return getBooleanFromContext(FORCE_READ_FROM_MASTER);
 	}
 
 	public static void setForceReadFromMaster() {
@@ -80,7 +82,8 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 
 	public static void setForceReadFromMaster(boolean shouldSetCookie) {
 		if (trackerContextExist) {
-			getContext().setForceReadFromMaster(true, shouldSetCookie);
+			getContext().put(FORCE_READ_FROM_MASTER, true);
+			getContext().put(SHOULD_SET_COOKIE, shouldSetCookie);
 		}
 	}
 
@@ -89,14 +92,23 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 			return false;
 		}
 
-		return getContext().shouldSetCookie();
+		return getBooleanFromContext(SHOULD_SET_COOKIE);
 	}
 
-	private static DPDataSourceContext getContext() {
-		DPDataSourceContext dsContext = getFromTrackerContext();
+	private static boolean getBooleanFromContext(String key) {
+		Boolean value = (Boolean) getContext().get(key);
+
+		if (value != null) {
+			return value.booleanValue();
+		}
+		return false;
+	}
+
+	private static HashMap<String, Object> getContext() {
+		HashMap<String, Object> dsContext = getFromTrackerContext();
 
 		if (dsContext == null) {
-			dsContext = new DPDataSourceContext();
+			dsContext = new HashMap<String, Object>();
 
 			putIntoTrackerContext(dsContext);
 		}
@@ -112,8 +124,9 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 		clearTrackerContext();
 	}
 
-	private static DPDataSourceContext getFromTrackerContext() {
-		DPDataSourceContext dsContext = null;
+	@SuppressWarnings("unchecked")
+	private static HashMap<String, Object> getFromTrackerContext() {
+		HashMap<String, Object> dsContext = null;
 
 		if (trackerContextExist) {
 			try {
@@ -123,8 +136,7 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 					trackerContext = trackerContextClass.newInstance();
 					setContextMethod.invoke(null, trackerContext);
 				}
-				dsContext = (DPDataSourceContext) getExtensionMethod.invoke(trackerContext,
-				      DPDataSourceContext.CONTEXT_NAME);
+				dsContext = (HashMap<String, Object>) getExtensionMethod.invoke(trackerContext, CONTEXT_NAME);
 			} catch (Exception e) {
 				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
 			}
@@ -133,7 +145,7 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 		return dsContext;
 	}
 
-	private static void putIntoTrackerContext(DPDataSourceContext dsContext) {
+	private static void putIntoTrackerContext(HashMap<String, Object> dsContext) {
 		if (trackerContextExist) {
 			try {
 				Object trackerContext = getContextMethod.invoke(null);
@@ -143,7 +155,7 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 					setContextMethod.invoke(null, trackerContext);
 				}
 
-				addExtensionMethod.invoke(trackerContext, DPDataSourceContext.CONTEXT_NAME, dsContext);
+				addExtensionMethod.invoke(trackerContext, CONTEXT_NAME, dsContext);
 			} catch (Exception e) {
 				logger.warn("Error in TrackerContext, ignore TrackerContext", e);
 			}
