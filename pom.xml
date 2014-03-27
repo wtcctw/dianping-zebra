@@ -5,7 +5,7 @@
     <groupId>com.dianping.zebra</groupId>
     <artifactId>zebra-all</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <name>arch-zebra</name>
     <organization>
         <name>dianping</name>
@@ -20,13 +20,6 @@
         <repo.internal.releases.url>http://mvn.dianpingoa.com/dianping-releases</repo.internal.releases.url>
         <repo.external.url>http://mvn.dianpingoa.com/third-party</repo.external.url>
         <repo.proxy.url>http://mvn.dianpingoa.com/dprepo</repo.proxy.url>
-        <zebra-all.version>2.0.1</zebra-all.version>
-        <zebra-client.version>${zebra-all.version}</zebra-client.version>
-        <zebra-client.name>zebra-client v${zebra-all.version}</zebra-client.name>
-        <zebra-client.aid>zebra-client</zebra-client.aid>
-        <zebra-environment.version>${zebra-all.version}</zebra-environment.version>
-        <zebra-environment.name>zebra-environment v${zebra-all.version}</zebra-environment.name>
-        <zebra-environment.aid>zebra-environment</zebra-environment.aid>
     </properties>
     <modules>
         <module>zebra-client</module>
@@ -35,11 +28,6 @@
     <description>zebra</description>
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>${pom.groupId}</groupId>
-                <artifactId>${zebra-client.aid}</artifactId>
-                <version>${zebra-client.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
