@@ -146,7 +146,9 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	private GroupDataSourceConfig initDataSourceConfig() throws SAXException, IOException {
-		String appConfig = configService.getProperty(this.resourceId);
+		String bizConfig = configService.getProperty(this.resourceId);
+		String appConfig = configService.getProperty(String.format("%s.%s", Constants.DEFAULT_DATASOURCE_BIZ_PRFIX,
+		      bizConfig));
 		Map<String, String> splits = Splitters.by(pairSeparator, keyValueSeparator).trim().split(appConfig);
 		GroupDataSourceConfig groupDsConfig = new GroupDataSourceConfig();
 
@@ -175,11 +177,12 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			processProperties(ds, dsId);
 		}
 
-		groupDsConfig.setRouterStrategy(getProperty(this.resourceId + "." + Constants.ELEMENT_ROUTER_STRATEGY,
-		      groupDsConfig.getRouterStrategy()));
+		groupDsConfig.setRouterStrategy(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_BIZ_PRFIX,
+		      this.resourceId, Constants.ELEMENT_ROUTER_STRATEGY), groupDsConfig.getRouterStrategy()));
 
-		groupDsConfig.setTransactionForceWrite(getProperty(this.resourceId + "."
-		      + Constants.ELEMENT_TRANSACTION_FORCE_WREITE, groupDsConfig.getTransactionForceWrite()));
+		groupDsConfig.setTransactionForceWrite(getProperty(String.format("%s.%s.%s",
+		      Constants.DEFAULT_DATASOURCE_BIZ_PRFIX, this.resourceId, Constants.ELEMENT_TRANSACTION_FORCE_WREITE),
+		      groupDsConfig.getTransactionForceWrite()));
 
 		validateConfig(groupDsConfig.getDataSourceConfigs());
 

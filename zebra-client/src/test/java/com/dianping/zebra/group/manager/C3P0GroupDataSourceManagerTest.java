@@ -43,7 +43,8 @@ public class C3P0GroupDataSourceManagerTest extends SingleDatabaseTestCase{
 
 		C3P0GroupDataSourceManager c3p0 = (C3P0GroupDataSourceManager) dataSourceManager;
 
-		PoolBackedDataSource c3p0DataSource = (PoolBackedDataSource) c3p0.getDataSource("db1");
+		@SuppressWarnings("unused")
+      PoolBackedDataSource c3p0DataSource = (PoolBackedDataSource) c3p0.getDataSource("db1");
 
 		connection.close();
 		// dataSourceManager.destory();
