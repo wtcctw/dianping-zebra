@@ -2,18 +2,18 @@ package com.dianping.zebra.group.datasources;
 
 public class GroupDataSourceManagerFactory {
 	
-	private static GroupDataSourceManager dataSourcePool;
+	private static GroupDataSourceManager dataSourceManager;
 	
-	public static GroupDataSourceManager getDataSourcePool(){
-		if(dataSourcePool == null){
+	public static GroupDataSourceManager getDataSourceManager(){
+		if(dataSourceManager == null){
 			synchronized (GroupDataSourceManagerFactory.class) {
-				if(dataSourcePool == null){
-					dataSourcePool = new DefaultGroupDataSourceManager();
-					dataSourcePool.init();
+				if(dataSourceManager == null){
+					dataSourceManager = new DefaultGroupDataSourceManager();
+					dataSourceManager.init();
 				}
          }
 		}
 		
-		return dataSourcePool;
+		return dataSourceManager;
 	}
 }

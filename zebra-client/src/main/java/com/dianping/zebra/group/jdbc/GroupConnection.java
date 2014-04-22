@@ -147,6 +147,9 @@ public class GroupConnection implements Connection {
 
 		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(null, true);
 		GroupDataSourceTarget target = router.select(routerInfo);
+		if (target == null) {
+			throw new SQLException("No available dataSource");
+		}
 		wConnection = dataSourceManager.getConnection(target.getId());
 		if (wConnection.getAutoCommit() != autoCommit) {
 			wConnection.setAutoCommit(autoCommit);
@@ -593,8 +596,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
 	      int resultSetHoldability) throws SQLException {
-		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType,
-		      resultSetConcurrency);
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType, resultSetConcurrency);
 		pstmt.setResultSetHoldability(resultSetHoldability);
 		return pstmt;
 	}

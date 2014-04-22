@@ -41,7 +41,7 @@ public class GroupDataSource implements DataSource {
 
 	private String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
-	private GroupDataSourceManager dataSourcePool;
+	private GroupDataSourceManager dataSourceManager;
 
 	private GroupDataSourceRouter router;
 
@@ -66,7 +66,7 @@ public class GroupDataSource implements DataSource {
 			throw new GroupDataSourceException("configManagerType must not be blank");
 		}
 
-		this.dataSourcePool = GroupDataSourceManagerFactory.getDataSourcePool();
+		this.dataSourceManager = GroupDataSourceManagerFactory.getDataSourceManager();
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, name);
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
 		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
@@ -165,7 +165,7 @@ public class GroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		return new GroupConnection(dataSourcePool, router, systemConfigManager, dataSourceConfigManager);
+		return new GroupConnection(dataSourceManager, router, systemConfigManager, dataSourceConfigManager);
 	}
 
 	/*
@@ -175,7 +175,7 @@ public class GroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return new GroupConnection(dataSourcePool, router, systemConfigManager, dataSourceConfigManager, username,
+		return new GroupConnection(dataSourceManager, router, systemConfigManager, dataSourceConfigManager, username,
 		      password);
 	}
 

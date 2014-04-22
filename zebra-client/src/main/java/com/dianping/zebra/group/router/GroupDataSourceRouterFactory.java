@@ -9,7 +9,7 @@ public class GroupDataSourceRouterFactory {
 	public static GroupDataSourceRouter getDataSourceRouter(DataSourceConfigManager dataSourceConfigManager) {
 		if (Constants.ROUTER_STRATEGY_ROUNDROBIN.equalsIgnoreCase(dataSourceConfigManager.getRouterStrategy())) {
 			GroupReadWriteDataSourceRouter readWriteDataSourceRouter = new GroupReadWriteDataSourceRouter(
-			      dataSourceConfigManager,GroupDataSourceManagerFactory.getDataSourcePool());
+			      dataSourceConfigManager,GroupDataSourceManagerFactory.getDataSourceManager());
 			dataSourceConfigManager.addListerner(readWriteDataSourceRouter);
 
 			return readWriteDataSourceRouter;

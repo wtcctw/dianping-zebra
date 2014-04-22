@@ -3,12 +3,12 @@ package com.dianping.zebra.group.datasources;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,8 +48,9 @@ public class DefaultGroupDataSourceManager implements GroupDataSourceManager {
 			if (config.toString().equals(dataSourceConfigs.get(id).toString())) {
 				dataSourceBizWrapper.addBiz(biz);
 			} else {
-				this.toBeClosedDataSource.offer(dataSourceBizWrapper.getDataSource());
+				DataSource oldDataSource = dataSourceBizWrapper.getDataSource();
 				dataSourceBizWrapper.setDataSource(initDataSources(config));
+				this.toBeClosedDataSource.offer(oldDataSource);
 				dataSourceBizWrapper.addBiz(biz);
 				dataSourceConfigs.put(id, config);
 			}
@@ -149,7 +150,7 @@ public class DefaultGroupDataSourceManager implements GroupDataSourceManager {
 	public class DataSourceBizWrapper {
 		private DataSource dataSource;
 
-		private Set<String> bizMapper = new CopyOnWriteArraySet<String>();
+		private Set<String> bizMapper = new HashSet<String>();
 
 		public DataSourceBizWrapper(DataSource ds, String biz) {
 			dataSource = ds;
@@ -184,6 +185,6 @@ public class DefaultGroupDataSourceManager implements GroupDataSourceManager {
 			return dataSourceBizWrapper.getDataSource().getConnection();
 		}
 
-		throw new SQLException("Cannot find dataSource.");
+		throw new SQLException(String.format("Cannot find dataSource for %s.", dsId));
 	}
 }
