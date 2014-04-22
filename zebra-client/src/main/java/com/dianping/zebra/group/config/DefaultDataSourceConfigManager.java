@@ -69,9 +69,9 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	private String getCustomizedKey(String key, String dsId) {
-		return String.format("%s.%s.%s", this.resourceId, dsId, key);
-	}
+	// private String getCustomizedKey(String key, String dsId) {
+	// return String.format("%s.%s.%s", this.resourceId, dsId, key);
+	// }
 
 	@Override
 	public Map<String, DataSourceConfig> getDataSourceConfigs() {
@@ -84,19 +84,19 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	private String getKey(String key, String dsId) {
-		if (key.equals(this.resourceId)) {
-			return key;
+		if (key.equals(this.name)) {
+			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, this.name);
 		} else {
 			return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, dsId, key);
 		}
 	}
 
 	private int getMergedPropertyValue(String key, String dsId, int defaultValue) {
-		return getProperty(getCustomizedKey(key, dsId), getProperty(getKey(key, dsId), defaultValue));
+		return getProperty(getKey(key, dsId), defaultValue);
 	}
 
 	private String getMergedPropertyValue(String key, String dsId, String defaultValue) {
-		return getProperty(getCustomizedKey(key, dsId), getProperty(getKey(key, dsId), defaultValue));
+		return getProperty(getKey(key, dsId), defaultValue);
 	}
 
 	@Override
@@ -141,14 +141,12 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			}
 		} catch (Throwable e) {
 			throw new GroupConfigException(String.format(
-			      "Fail to initialize DefaultDataSourceConfigManager with config file[%s].", this.resourceId), e);
+			      "Fail to initialize DefaultDataSourceConfigManager with config file[%s].", this.name), e);
 		}
 	}
 
 	private GroupDataSourceConfig initDataSourceConfig() throws SAXException, IOException {
-		String bizConfig = configService.getProperty(this.resourceId);
-		String appConfig = configService.getProperty(String.format("%s.%s", Constants.DEFAULT_DATASOURCE_BIZ_PRFIX,
-		      bizConfig));
+		String appConfig = configService.getProperty(getKey(this.name, null));
 		Map<String, String> splits = Splitters.by(pairSeparator, keyValueSeparator).trim().split(appConfig);
 		GroupDataSourceConfig groupDsConfig = new GroupDataSourceConfig();
 
@@ -177,11 +175,12 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			processProperties(ds, dsId);
 		}
 
-		groupDsConfig.setRouterStrategy(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_BIZ_PRFIX,
-		      this.resourceId, Constants.ELEMENT_ROUTER_STRATEGY), groupDsConfig.getRouterStrategy()));
+		groupDsConfig.setRouterStrategy(getProperty(String.format("%s.%s.%s",
+		      Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, this.name, Constants.ELEMENT_ROUTER_STRATEGY),
+		      groupDsConfig.getRouterStrategy()));
 
 		groupDsConfig.setTransactionForceWrite(getProperty(String.format("%s.%s.%s",
-		      Constants.DEFAULT_DATASOURCE_BIZ_PRFIX, this.resourceId, Constants.ELEMENT_TRANSACTION_FORCE_WREITE),
+		      Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, this.name, Constants.ELEMENT_TRANSACTION_FORCE_WREITE),
 		      groupDsConfig.getTransactionForceWrite()));
 
 		validateConfig(groupDsConfig.getDataSourceConfigs());
@@ -258,37 +257,42 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private void processProperties(DataSourceConfig ds, String dsId) {
 		String systemProperies = getProperty(getKey(Constants.ELEMENT_PROPERTIES, dsId), null);
-		String customizedProperies = getProperty(getCustomizedKey(Constants.ELEMENT_PROPERTIES, dsId), null);
-		Map<String, String> mergedMap = new HashMap<String, String>();
+		//String customizedProperies = getProperty(getCustomizedKey(Constants.ELEMENT_PROPERTIES, dsId), null);
+		//Map<String, String> mergedMap = new HashMap<String, String>();
 
 		if (systemProperies != null) {
 			Map<String, String> sysMap = Splitters.by(pairSeparator, keyValueSeparator).trim().split(systemProperies);
 
 			for (Entry<String, String> property : sysMap.entrySet()) {
-				mergedMap.put(property.getKey(), property.getValue());
+				//mergedMap.put(property.getKey(), property.getValue());
+				Any any = new Any();
+				any.setName(property.getKey());
+				any.setValue(property.getValue());
+
+				ds.getProperties().add(any);
 			}
 		}
 
-		if (customizedProperies != null) {
-			Map<String, String> customizedMap = Splitters.by(pairSeparator, keyValueSeparator).trim()
-			      .split(customizedProperies);
+//		if (customizedProperies != null) {
+//			Map<String, String> customizedMap = Splitters.by(pairSeparator, keyValueSeparator).trim()
+//			      .split(customizedProperies);
+//
+//			for (Entry<String, String> property : customizedMap.entrySet()) {
+//				mergedMap.put(property.getKey(), property.getValue());
+//			}
+//		}
 
-			for (Entry<String, String> property : customizedMap.entrySet()) {
-				mergedMap.put(property.getKey(), property.getValue());
-			}
-		}
-
-		for (Entry<String, String> property : mergedMap.entrySet()) {
-			Any any = new Any();
-			any.setName(property.getKey());
-			any.setValue(property.getValue());
-
-			ds.getProperties().add(any);
-		}
+//		for (Entry<String, String> property : mergedMap.entrySet()) {
+//			Any any = new Any();
+//			any.setName(property.getKey());
+//			any.setValue(property.getValue());
+//
+//			ds.getProperties().add(any);
+//		}
 	}
 
 	@Override
-	protected void updateProperties(PropertyChangeEvent evt) {
+	protected void onPropertiesUpdated(PropertyChangeEvent evt) {
 		if (evt instanceof AdvancedPropertyChangeEvent) {
 			try {
 				GroupDataSourceConfig newDataSourceConfigCache = initDataSourceConfig();

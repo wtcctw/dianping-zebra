@@ -31,7 +31,7 @@ public abstract class SingleDatabaseTestCase {
 
 	private static final String USER = "sa";
 
-	private DPGroupDataSource dataSource;
+	private GroupDataSource dataSource;
 
 	protected void cleanlyInsert(String driver, String jdbcUrl, String user, String password, IDataSet dataSet)
 	      throws Exception {
@@ -96,7 +96,8 @@ public abstract class SingleDatabaseTestCase {
 
 	protected DataSource getDataSource() {
 		if (this.dataSource == null) {
-			this.dataSource = new DPGroupDataSource(getConfigManagerType(), getResourceId());
+			this.dataSource = new GroupDataSource(getResourceId());
+			this.dataSource.setConfigManagerType(getConfigManagerType());
 			this.dataSource.init();
 		}
 

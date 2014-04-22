@@ -13,13 +13,13 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractConfigManager {
+public abstract class AbstractConfigManager{
 
 	class InnerPropertyChangeListener implements PropertyChangeListener {
 		@Override
 		public void propertyChange(final PropertyChangeEvent evt) {
 			try {
-				updateProperties(evt);
+				onPropertiesUpdated(evt);
 				notifyListeners(evt);
 			} catch (Throwable e) {
 				logger.warn("Illegal config file, apply old config!", e);
@@ -29,8 +29,8 @@ public abstract class AbstractConfigManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractConfigManager.class);
 
-	protected final String resourceId;
-
+	protected final String name;
+	
 	protected final ConfigService configService;
 
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
@@ -48,8 +48,8 @@ public abstract class AbstractConfigManager {
 		}
 	});
 
-	public AbstractConfigManager(String resourceId, ConfigService configService) {
-		this.resourceId = resourceId;
+	public AbstractConfigManager(String name, ConfigService configService) {
+		this.name = name;
 		this.configService = configService;
 		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
 	}
@@ -104,5 +104,9 @@ public abstract class AbstractConfigManager {
 		}
 	}
 
-	protected abstract void updateProperties(PropertyChangeEvent evt);
+	protected abstract void onPropertiesUpdated(PropertyChangeEvent evt);
+	
+	public String getBiz() {
+		return name;
+	}
 }

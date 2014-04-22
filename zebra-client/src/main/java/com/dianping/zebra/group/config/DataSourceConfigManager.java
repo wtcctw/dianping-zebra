@@ -24,4 +24,6 @@ public interface DataSourceConfigManager {
 	public Map<String, DataSourceConfig> getAvailableDataSources();
 
 	public Map<String, DataSourceConfig> getUnAvailableDataSources();
+
+	public String getBiz();
 }

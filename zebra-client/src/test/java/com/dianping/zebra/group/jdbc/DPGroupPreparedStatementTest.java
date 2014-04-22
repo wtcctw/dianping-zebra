@@ -81,7 +81,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
 	@Override
 	protected String getResourceId() {
-		return "sample.ds";
+		return "sample.ds.v2";
 	}
 
 	@Override

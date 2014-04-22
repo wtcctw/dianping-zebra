@@ -72,5 +72,4 @@ public class GroupDataSourceTarget implements Comparable<GroupDataSourceTarget> 
 	public int compareTo(GroupDataSourceTarget o) {
 		return end - o.end;
 	}
-
 }

@@ -29,7 +29,8 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 
 	@Test(expected = GroupDataSourceException.class)
 	public void test_sql_connnection_without_config() {
-		DPGroupDataSource dataSource = new DPGroupDataSource("local", "");
+		GroupDataSource dataSource = new GroupDataSource("");
+		dataSource.setConfigManagerType("local");
 		dataSource.init();
 	}
 
@@ -42,20 +43,20 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		conn.setAutoCommit(false);
 		assertFalse(conn.getAutoCommit());
 		assertNull(conn.getWarnings());
-		assertTrue((conn.getMetaData() instanceof DPGroupDatabaseMetaData));
+		assertTrue((conn.getMetaData() instanceof GroupDatabaseMetaData));
 
-		assertTrue((conn.createStatement() instanceof DPGroupStatement));
-		assertTrue((conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE) instanceof DPGroupStatement));
+		assertTrue((conn.createStatement() instanceof GroupStatement));
+		assertTrue((conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE) instanceof GroupStatement));
 		assertTrue((conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE,
-		      ResultSet.HOLD_CURSORS_OVER_COMMIT) instanceof DPGroupStatement));
+		      ResultSet.HOLD_CURSORS_OVER_COMMIT) instanceof GroupStatement));
 
-		assertTrue((conn.prepareStatement("sql") instanceof DPGroupPreparedStatement));
-		assertTrue((conn.prepareStatement("sql", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE) instanceof DPGroupPreparedStatement));
+		assertTrue((conn.prepareStatement("sql") instanceof GroupPreparedStatement));
+		assertTrue((conn.prepareStatement("sql", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE) instanceof GroupPreparedStatement));
 		assertTrue((conn.prepareStatement("sql", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE,
-		      ResultSet.HOLD_CURSORS_OVER_COMMIT) instanceof DPGroupPreparedStatement));
-		assertTrue((conn.prepareStatement("sql", Statement.RETURN_GENERATED_KEYS) instanceof DPGroupPreparedStatement));
-		assertTrue((conn.prepareStatement("sql", new int[0]) instanceof DPGroupPreparedStatement));
-		assertTrue((conn.prepareStatement("sql", new String[0]) instanceof DPGroupPreparedStatement));
+		      ResultSet.HOLD_CURSORS_OVER_COMMIT) instanceof GroupPreparedStatement));
+		assertTrue((conn.prepareStatement("sql", Statement.RETURN_GENERATED_KEYS) instanceof GroupPreparedStatement));
+		assertTrue((conn.prepareStatement("sql", new int[0]) instanceof GroupPreparedStatement));
+		assertTrue((conn.prepareStatement("sql", new String[0]) instanceof GroupPreparedStatement));
 
 	}
 
@@ -448,7 +449,7 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 
 	@Override
 	protected String getResourceId() {
-		return "sample.ds";
+		return "sample.ds.v2";
 	}
 
 	@Override

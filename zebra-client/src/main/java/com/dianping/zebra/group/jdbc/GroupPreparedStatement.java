@@ -66,7 +66,7 @@ import com.dianping.zebra.group.util.SqlUtils;
  * @author Leo Liang
  * 
  */
-public class DPGroupPreparedStatement extends DPGroupStatement implements PreparedStatement {
+public class GroupPreparedStatement extends GroupStatement implements PreparedStatement {
 
 	private String sql;
 
@@ -80,7 +80,7 @@ public class DPGroupPreparedStatement extends DPGroupStatement implements Prepar
 
 	private List<List<ParamContext>> pstBatchedArgs;
 
-	public DPGroupPreparedStatement(DPGroupConnection connection, String sql) {
+	public GroupPreparedStatement(GroupConnection connection, String sql) {
 		super(connection);
 		this.sql = sql;
 	}

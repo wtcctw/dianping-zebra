@@ -24,8 +24,6 @@ public class Constants {
 
 	public static final String DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX = "zebra.v2.ds";
 	
-	public static final String DEFAULT_DATASOURCE_BIZ_PRFIX = "zebra.v2.logicdb";
-
 	// DataSource
 	public static final String ELEMENT_DRIVER_CLASS = "driverClass";
 

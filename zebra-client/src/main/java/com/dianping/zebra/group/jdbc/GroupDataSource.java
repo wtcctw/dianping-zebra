@@ -21,9 +21,9 @@ import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
+import com.dianping.zebra.group.datasources.GroupDataSourceManager;
+import com.dianping.zebra.group.datasources.GroupDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
-import com.dianping.zebra.group.manager.GroupDataSourceManager;
-import com.dianping.zebra.group.manager.GroupDataSourceManagerFactory;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 import com.dianping.zebra.group.router.GroupDataSourceRouterFactory;
 
@@ -32,18 +32,16 @@ import com.dianping.zebra.group.router.GroupDataSourceRouterFactory;
  * 
  * 
  */
-public class DPGroupDataSource implements DataSource {
+public class GroupDataSource implements DataSource {
 	private PrintWriter out = null;
 
 	private int loginTimeout = 0;
 
-	private String resourceId;
+	private String name;
 
 	private String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
-	private String connectionPoolType = Constants.CONNECTION_POOL_TYPE_C3P0;
-
-	private GroupDataSourceManager dataSourceManager;
+	private GroupDataSourceManager dataSourcePool;
 
 	private GroupDataSourceRouter router;
 
@@ -51,38 +49,32 @@ public class DPGroupDataSource implements DataSource {
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
-	public DPGroupDataSource() {
-		this(null, null);
+	public GroupDataSource() {
+		this(null);
 	}
 
-	public DPGroupDataSource(String configManagerType, String resourceId) {
-		this.resourceId = resourceId;
-		this.configManagerType = configManagerType;
+	public GroupDataSource(String name) {
+		this.name = name;
 	}
 
 	public void init() {
-		if (StringUtils.isBlank(resourceId)) {
-			throw new GroupDataSourceException("resourceId must not be blank");
+		if (StringUtils.isBlank(name)) {
+			throw new GroupDataSourceException("name must not be blank");
 		}
 
 		if (StringUtils.isBlank(configManagerType)) {
 			throw new GroupDataSourceException("configManagerType must not be blank");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, resourceId);
+		this.dataSourcePool = GroupDataSourceManagerFactory.getDataSourcePool();
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, name);
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
 		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 		this.router = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
-		this.dataSourceManager = GroupDataSourceManagerFactory.getGroupDataSourceManger(dataSourceConfigManager,
-		      connectionPoolType);
 	}
 
-	public void setConnectionPoolType(String connectionPoolType) {
-		this.connectionPoolType = connectionPoolType;
-	}
-
-	public void setResourceId(String resourceId) {
-		this.resourceId = resourceId;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void setConfigManagerType(String configManagerType) {
@@ -99,10 +91,6 @@ public class DPGroupDataSource implements DataSource {
 
 	public void setRouter(GroupDataSourceRouter router) {
 		this.router = router;
-	}
-
-	public void setDataSourceManager(GroupDataSourceManager dataSourceManager) {
-		this.dataSourceManager = dataSourceManager;
 	}
 
 	/*
@@ -177,7 +165,7 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		return new DPGroupConnection(router, dataSourceManager, systemConfigManager, dataSourceConfigManager);
+		return new GroupConnection(dataSourcePool, router, systemConfigManager, dataSourceConfigManager);
 	}
 
 	/*
@@ -187,12 +175,12 @@ public class DPGroupDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return new DPGroupConnection(router, dataSourceManager, systemConfigManager, dataSourceConfigManager, username,
+		return new GroupConnection(dataSourcePool, router, systemConfigManager, dataSourceConfigManager, username,
 		      password);
 	}
 
-   public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-	   throw new UnsupportedOperationException("getParentLogger");
-   }
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		throw new UnsupportedOperationException("getParentLogger");
+	}
 
 }

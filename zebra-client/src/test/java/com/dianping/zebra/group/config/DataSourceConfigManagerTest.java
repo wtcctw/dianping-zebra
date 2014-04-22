@@ -14,7 +14,7 @@ public class DataSourceConfigManagerTest {
 	
 	@Test
 	public void testConfig() throws SAXException, IOException{
-		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local", "sample.ds");
+		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local", "sample.ds.v2");
 		Map<String, DataSourceConfig> config = dataSourceConfigManager.getDataSourceConfigs();
 	
 		Map<String, DataSourceConfig> dataSourceConfigs = DefaultSaxParser.parse(getClass().getClassLoader().getResourceAsStream("model/datasources.xml")).getDataSourceConfigs();

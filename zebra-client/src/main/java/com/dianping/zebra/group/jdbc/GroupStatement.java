@@ -21,9 +21,9 @@ import com.dianping.zebra.group.util.SqlUtils;
  * @author Leo Liang
  * 
  */
-public class DPGroupStatement implements Statement {
+public class GroupStatement implements Statement {
 
-	protected DPGroupConnection dpGroupConnection;
+	protected GroupConnection dpGroupConnection;
 
 	protected int resultSetType = ResultSet.TYPE_FORWARD_ONLY;;
 
@@ -49,7 +49,7 @@ public class DPGroupStatement implements Statement {
 
 	protected List<String> batchedArgs;
 
-	public DPGroupStatement(DPGroupConnection connection) {
+	public GroupStatement(GroupConnection connection) {
 		this.dpGroupConnection = connection;
 	}
 

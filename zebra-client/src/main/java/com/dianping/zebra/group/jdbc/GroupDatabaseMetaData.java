@@ -16,7 +16,7 @@ import java.sql.SQLException;
  * @author Leo Liang
  * 
  */
-public class DPGroupDatabaseMetaData implements DatabaseMetaData {
+public class GroupDatabaseMetaData implements DatabaseMetaData {
 	public boolean allProceduresAreCallable() throws SQLException {
 		return false;
 	}

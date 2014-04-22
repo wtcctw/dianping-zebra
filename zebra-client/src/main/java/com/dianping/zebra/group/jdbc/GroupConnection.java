@@ -33,7 +33,7 @@ import java.util.concurrent.Executor;
 
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManager;
-import com.dianping.zebra.group.manager.GroupDataSourceManager;
+import com.dianping.zebra.group.datasources.GroupDataSourceManager;
 import com.dianping.zebra.group.router.GroupDataSourceRouter;
 import com.dianping.zebra.group.router.GroupDataSourceRouterInfo;
 import com.dianping.zebra.group.router.GroupDataSourceTarget;
@@ -43,15 +43,13 @@ import com.dianping.zebra.group.util.JDBCExceptionUtils;
  * @author Leo Liang
  * 
  */
-public class DPGroupConnection implements Connection {
+public class GroupConnection implements Connection {
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
 	private SystemConfigManager systemConfigManager;
 
 	private GroupDataSourceRouter router;
-
-	private GroupDataSourceManager dataSourceManager;
 
 	private Connection rConnection;
 
@@ -65,24 +63,26 @@ public class DPGroupConnection implements Connection {
 
 	private Set<Statement> openedStatements = new HashSet<Statement>();
 
+	private GroupDataSourceManager dataSourceManager;
+
 	private void checkClosed() throws SQLException {
 		if (closed) {
 			throw new SQLException("No operations allowed after connection closed.");
 		}
 	}
 
-	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
+	public GroupConnection(GroupDataSourceManager dataSourceManager, GroupDataSourceRouter router,
 	      SystemConfigManager systemConfigManager, DataSourceConfigManager dataSourceConfigManager, String userName,
 	      String password) {
-		this.router = router;
 		this.dataSourceManager = dataSourceManager;
+		this.router = router;
 		this.systemConfigManager = systemConfigManager;
 		this.dataSourceConfigManager = dataSourceConfigManager;
 	}
 
-	public DPGroupConnection(GroupDataSourceRouter router, GroupDataSourceManager dataSourceManager,
+	public GroupConnection(GroupDataSourceManager dataSourcePool, GroupDataSourceRouter router,
 	      SystemConfigManager systemConfigManager, DataSourceConfigManager dataSourceConfigManager) {
-		this(router, dataSourceManager, systemConfigManager, dataSourceConfigManager, null, null);
+		this(dataSourcePool, router, systemConfigManager, dataSourceConfigManager, null, null);
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class DPGroupConnection implements Connection {
 
 				while (retryTimes++ < systemRetryTimes) {
 					try {
-						rConnection = dataSourceManager.getReadConnection(dsTarget.getId());
+						rConnection = dataSourceManager.getConnection(dsTarget.getId());
 						return rConnection;
 					} catch (SQLException e) {
 						exceptions.add(e);
@@ -144,7 +144,10 @@ public class DPGroupConnection implements Connection {
 		if (wConnection != null) {
 			return wConnection;
 		}
-		wConnection = dataSourceManager.getWriteConnection();
+
+		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(null, true);
+		GroupDataSourceTarget target = router.select(routerInfo);
+		wConnection = dataSourceManager.getConnection(target.getId());
 		if (wConnection.getAutoCommit() != autoCommit) {
 			wConnection.setAutoCommit(autoCommit);
 		}
@@ -184,7 +187,7 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
-		Statement stmt = new DPGroupStatement(this);
+		Statement stmt = new GroupStatement(this);
 		openedStatements.add(stmt);
 		return stmt;
 	}
@@ -197,7 +200,7 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
-		PreparedStatement pstmt = new DPGroupPreparedStatement(this, sql);
+		PreparedStatement pstmt = new GroupPreparedStatement(this, sql);
 		openedStatements.add(pstmt);
 		return pstmt;
 	}
@@ -354,7 +357,7 @@ public class DPGroupConnection implements Connection {
 		} else if (wConnection != null) {
 			return wConnection.getMetaData();
 		} else {
-			return new DPGroupDatabaseMetaData();
+			return new GroupDatabaseMetaData();
 		}
 	}
 
@@ -459,7 +462,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-		DPGroupStatement stmt = (DPGroupStatement) createStatement();
+		GroupStatement stmt = (GroupStatement) createStatement();
 		stmt.setResultSetType(resultSetType);
 		stmt.setResultSetConcurrency(resultSetConcurrency);
 		return stmt;
@@ -473,7 +476,7 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
 	      throws SQLException {
-		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql);
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
 		pstmt.setResultSetType(resultSetType);
 		pstmt.setResultSetConcurrency(resultSetConcurrency);
 		return pstmt;
@@ -577,7 +580,7 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
 	      throws SQLException {
-		DPGroupStatement stmt = (DPGroupStatement) createStatement(resultSetType, resultSetConcurrency);
+		GroupStatement stmt = (GroupStatement) createStatement(resultSetType, resultSetConcurrency);
 		stmt.setResultSetHoldability(resultSetHoldability);
 		return stmt;
 	}
@@ -590,7 +593,7 @@ public class DPGroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
 	      int resultSetHoldability) throws SQLException {
-		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql, resultSetType,
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType,
 		      resultSetConcurrency);
 		pstmt.setResultSetHoldability(resultSetHoldability);
 		return pstmt;
@@ -632,7 +635,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql);
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
 		pstmt.setAutoGeneratedKeys(autoGeneratedKeys);
 		return pstmt;
 	}
@@ -644,7 +647,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
-		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql);
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
 		pstmt.setColumnIndexes(columnIndexes);
 		return pstmt;
 	}
@@ -656,7 +659,7 @@ public class DPGroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
-		DPGroupPreparedStatement pstmt = (DPGroupPreparedStatement) prepareStatement(sql);
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
 		pstmt.setColumnNames(columnNames);
 		return pstmt;
 	}
@@ -771,24 +774,24 @@ public class DPGroupConnection implements Connection {
 		throw new UnsupportedOperationException("createStruct");
 	}
 
-   public void setSchema(String schema) throws SQLException {
-   	throw new UnsupportedOperationException("setSchema");
-   }
+	public void setSchema(String schema) throws SQLException {
+		throw new UnsupportedOperationException("setSchema");
+	}
 
-   public String getSchema() throws SQLException {
-   	throw new UnsupportedOperationException("getSchema");
-   }
+	public String getSchema() throws SQLException {
+		throw new UnsupportedOperationException("getSchema");
+	}
 
-   public void abort(Executor executor) throws SQLException {
-   	throw new UnsupportedOperationException("abort");
-   }
+	public void abort(Executor executor) throws SQLException {
+		throw new UnsupportedOperationException("abort");
+	}
 
-   public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-   	throw new UnsupportedOperationException("setNetworkTimeout");
-   }
+	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+		throw new UnsupportedOperationException("setNetworkTimeout");
+	}
 
-   public int getNetworkTimeout() throws SQLException {
+	public int getNetworkTimeout() throws SQLException {
 		throw new UnsupportedOperationException("getNetworkTimeout");
-   }
+	}
 
 }
