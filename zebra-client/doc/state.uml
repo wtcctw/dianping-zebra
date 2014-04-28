@@ -1,0 +1,11 @@
+[*] --> TO_BE_UP: init / lazy-init
+UP ----> TO_BE_DOWN: mark down
+UP ----> TO_BE_DOWN: auto mark down (unreachable)
+UP --> UP: get connection
+TO_BE_DOWN -left-> DOWN: close connections
+DOWN -up-> TO_BE_UP: manually mark up
+DOWN --> UP: auto recovery
+TO_BE_UP -right-> UP: setup connections successfully
+TO_BE_UP -down-> DOWN: setup connections fail
+
+DOWN --> [*]: destroy

@@ -187,4 +187,13 @@ public class DefaultGroupDataSourceManager implements GroupDataSourceManager {
 
 		throw new SQLException(String.format("Cannot find dataSource for %s.", dsId));
 	}
+
+	@Override
+	public synchronized boolean contain(DataSourceConfig config) {
+		if (dataSourceConfigs.containsKey(config.getId())) {
+			return true;
+		}
+
+		return false;
+	}
 }

@@ -9,6 +9,8 @@ public interface GroupDataSourceManager {
 	
 	public void createDataSource(String biz, DataSourceConfig config);
 	
+	public boolean contain(DataSourceConfig config);
+	
 	public Connection getConnection(String dsId) throws SQLException;
 
 	public void destory(String dsId, String biz);
