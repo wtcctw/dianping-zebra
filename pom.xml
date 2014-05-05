@@ -24,6 +24,7 @@
     <modules>
         <module>zebra-client</module>
         <module>zebra-environment</module>
+        <module>zebra-web</module>
     </modules>
     <description>zebra</description>
     <dependencyManagement>

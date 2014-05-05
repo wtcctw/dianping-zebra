@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
@@ -69,10 +70,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	// private String getCustomizedKey(String key, String dsId) {
-	// return String.format("%s.%s.%s", this.resourceId, dsId, key);
-	// }
-
 	@Override
 	public Map<String, DataSourceConfig> getDataSourceConfigs() {
 		this.rLock.lock();
@@ -83,20 +80,22 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
+	private String getKey(String key) {
+		return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, key);
+	}
+
 	private String getKey(String key, String dsId) {
-		if (key.equals(this.name)) {
-			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, this.name);
-		} else {
-			return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, dsId, key);
+		return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, dsId, key);
+	}
+
+	private int getReadWeight(String dsValue, int indexOfR, int indexOfW) {
+		if (dsValue.length() > 1 && (indexOfW < indexOfR)) {
+			return Integer.parseInt(dsValue.substring(indexOfR + 1));
+		} else if (dsValue.length() > 1 && (indexOfW > indexOfR)) {
+			return Integer.parseInt(dsValue.substring(indexOfR + 1, indexOfW));
 		}
-	}
 
-	private int getMergedPropertyValue(String key, String dsId, int defaultValue) {
-		return getProperty(getKey(key, dsId), defaultValue);
-	}
-
-	private String getMergedPropertyValue(String key, String dsId, String defaultValue) {
-		return getProperty(getKey(key, dsId), defaultValue);
+		return 1;
 	}
 
 	@Override
@@ -119,16 +118,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	private int getReadWeight(String dsValue, int indexOfR, int indexOfW) {
-		if (dsValue.length() > 1 && (indexOfW < indexOfR)) {
-			return Integer.parseInt(dsValue.substring(indexOfR + 1));
-		} else if (dsValue.length() > 1 && (indexOfW > indexOfR)) {
-			return Integer.parseInt(dsValue.substring(indexOfR + 1, indexOfW));
-		}
-
-		return 1;
-	}
-
 	@Override
 	public void init() {
 		try {
@@ -146,39 +135,20 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	private GroupDataSourceConfig initDataSourceConfig() throws SAXException, IOException {
-		String appConfig = configService.getProperty(getKey(this.name, null));
-		Map<String, String> splits = Splitters.by(pairSeparator, keyValueSeparator).trim().split(appConfig);
 		GroupDataSourceConfig groupDsConfig = new GroupDataSourceConfig();
+		String config = configService.getProperty(getKey(this.name));
+		List<String> parts = Splitters.by(pairSeparator).trim().split(config);
 
-		for (Entry<String, String> split : splits.entrySet()) {
-			String dsId = split.getKey();
-			String dsValue = split.getValue().trim().toLowerCase();
-			if (dsValue.startsWith("d")) {
-				continue;
-			}
-
-			DataSourceConfig ds = groupDsConfig.findOrCreateDataSourceConfig(dsId);
-
-			setUpReadOnlyAndWeight(ds, dsValue);
-
-			ds.setDriverClass(getMergedPropertyValue(Constants.ELEMENT_DRIVER_CLASS, dsId, ds.getDriverClass()));
-			ds.setId(dsId);
-			ds.setInitialPoolSize(getMergedPropertyValue(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId,
-			      ds.getInitialPoolSize()));
-			ds.setJdbcUrl(getMergedPropertyValue(Constants.ELEMENT_JDBC_URL, dsId, ds.getJdbcUrl()));
-			ds.setMaxPoolSize(getMergedPropertyValue(Constants.ELEMENT_MAX_POOL_SIZE, dsId, ds.getMaxPoolSize()));
-			ds.setMinPoolSize(getMergedPropertyValue(Constants.ELEMENT_MIN_POOL_SIZE, dsId, ds.getMinPoolSize()));
-			ds.setPassword(getMergedPropertyValue(Constants.ELEMENT_PASSWORD, dsId, ds.getPassword()));
-			ds.setCheckoutTimeout(getMergedPropertyValue(Constants.ELEMENT_CHECKOUT_TIMEOUT, dsId, ds.getCheckoutTimeout()));
-			ds.setUser(getMergedPropertyValue(Constants.ELEMENT_USER, dsId, ds.getUser()));
-
-			processProperties(ds, dsId);
+		if (parts.size() != 2) {
+			throw new GroupConfigException("invalid dataSource config : " + config);
 		}
+
+		setUpPartConfig(groupDsConfig, parts.get(0));
+		setUpPartConfig(groupDsConfig, parts.get(1));
 
 		groupDsConfig.setRouterStrategy(getProperty(String.format("%s.%s.%s",
 		      Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, this.name, Constants.ELEMENT_ROUTER_STRATEGY),
 		      groupDsConfig.getRouterStrategy()));
-
 		groupDsConfig.setTransactionForceWrite(getProperty(String.format("%s.%s.%s",
 		      Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, this.name, Constants.ELEMENT_TRANSACTION_FORCE_WREITE),
 		      groupDsConfig.getTransactionForceWrite()));
@@ -186,20 +156,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		validateConfig(groupDsConfig.getDataSourceConfigs());
 
 		return groupDsConfig;
-	}
-
-	private void setUpReadOnlyAndWeight(DataSourceConfig ds, String value) {
-		int indexOfW = value.indexOf('w');
-		int indexOfR = value.indexOf('r');
-
-		if (indexOfW != -1) {
-			ds.setCanWrite(true);
-		}
-
-		if (indexOfR != -1) {
-			ds.setCanRead(true);
-			ds.setWeight(getReadWeight(value, indexOfR, indexOfW));
-		}
 	}
 
 	@Override
@@ -255,42 +211,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	private void processProperties(DataSourceConfig ds, String dsId) {
-		String systemProperies = getProperty(getKey(Constants.ELEMENT_PROPERTIES, dsId), null);
-		//String customizedProperies = getProperty(getCustomizedKey(Constants.ELEMENT_PROPERTIES, dsId), null);
-		//Map<String, String> mergedMap = new HashMap<String, String>();
-
-		if (systemProperies != null) {
-			Map<String, String> sysMap = Splitters.by(pairSeparator, keyValueSeparator).trim().split(systemProperies);
-
-			for (Entry<String, String> property : sysMap.entrySet()) {
-				//mergedMap.put(property.getKey(), property.getValue());
-				Any any = new Any();
-				any.setName(property.getKey());
-				any.setValue(property.getValue());
-
-				ds.getProperties().add(any);
-			}
-		}
-
-//		if (customizedProperies != null) {
-//			Map<String, String> customizedMap = Splitters.by(pairSeparator, keyValueSeparator).trim()
-//			      .split(customizedProperies);
-//
-//			for (Entry<String, String> property : customizedMap.entrySet()) {
-//				mergedMap.put(property.getKey(), property.getValue());
-//			}
-//		}
-
-//		for (Entry<String, String> property : mergedMap.entrySet()) {
-//			Any any = new Any();
-//			any.setName(property.getKey());
-//			any.setValue(property.getValue());
-//
-//			ds.getProperties().add(any);
-//		}
-	}
-
 	@Override
 	protected void onPropertiesUpdated(PropertyChangeEvent evt) {
 		if (evt instanceof AdvancedPropertyChangeEvent) {
@@ -323,6 +243,73 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
+	private void processProperties(DataSourceConfig ds, String dsId) {
+		String systemProperies = getProperty(getKey(Constants.ELEMENT_PROPERTIES, dsId), null);
+
+		if (systemProperies != null) {
+			Map<String, String> sysMap = Splitters.by(pairSeparator, keyValueSeparator).trim().split(systemProperies);
+
+			for (Entry<String, String> property : sysMap.entrySet()) {
+				Any any = new Any();
+				any.setName(property.getKey());
+				any.setValue(property.getValue());
+
+				ds.getProperties().add(any);
+			}
+		}
+	}
+
+	private void setUpPartConfig(GroupDataSourceConfig groupDsConfig, String readOrWriteDataSourceKey) {
+		String readOrWriteDataSourceValue = "";
+		if (readOrWriteDataSourceKey.indexOf('#') != 0) {
+			throw new GroupConfigException("invalid dataSource config : " + readOrWriteDataSourceKey);
+		} else {
+			readOrWriteDataSourceValue = configService.getProperty(getKey(readOrWriteDataSourceKey.substring(1)));
+		}
+
+		Map<String, String> pairs = Splitters.by(pairSeparator, keyValueSeparator).trim()
+		      .split(readOrWriteDataSourceValue);
+
+		for (Entry<String, String> pair : pairs.entrySet()) {
+			String dsId = pair.getKey();
+			DataSourceConfig ds = groupDsConfig.findDataSourceConfig(dsId);
+
+			if (ds == null) {
+				ds = groupDsConfig.findOrCreateDataSourceConfig(dsId);
+
+				ds.setActive(getProperty(getKey(Constants.ELEMENT_ACTIVE, dsId), ds.getActive()));
+				ds.setDriverClass(getProperty(getKey(Constants.ELEMENT_DRIVER_CLASS, dsId), ds.getDriverClass()));
+				ds.setId(dsId);
+				ds.setInitialPoolSize(getProperty(getKey(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId),
+				      ds.getInitialPoolSize()));
+				ds.setJdbcUrl(getProperty(getKey(Constants.ELEMENT_JDBC_URL, dsId), ds.getJdbcUrl()));
+				ds.setMaxPoolSize(getProperty(getKey(Constants.ELEMENT_MAX_POOL_SIZE, dsId), ds.getMaxPoolSize()));
+				ds.setMinPoolSize(getProperty(getKey(Constants.ELEMENT_MIN_POOL_SIZE, dsId), ds.getMinPoolSize()));
+				ds.setPassword(getProperty(getKey(Constants.ELEMENT_PASSWORD, dsId), ds.getPassword()));
+				ds.setCheckoutTimeout(getProperty(getKey(Constants.ELEMENT_CHECKOUT_TIMEOUT, dsId), ds.getCheckoutTimeout()));
+				ds.setUser(getProperty(getKey(Constants.ELEMENT_USER, dsId), ds.getUser()));
+
+				processProperties(ds, dsId);
+			}
+
+			setUpReadOnlyAndWeight(ds, pair.getValue().toLowerCase());
+		}
+	}
+
+	private void setUpReadOnlyAndWeight(DataSourceConfig ds, String value) {
+		int indexOfW = value.indexOf('w');
+		int indexOfR = value.indexOf('r');
+
+		if (indexOfW != -1) {
+			ds.setCanWrite(true);
+		}
+
+		if (indexOfR != -1) {
+			ds.setCanRead(true);
+			ds.setWeight(getReadWeight(value, indexOfR, indexOfW));
+		}
+	}
+
 	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
 		int readNum = 0, writeNum = 0;
 		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
@@ -334,7 +321,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			}
 		}
 
-		if (readNum < 1 || writeNum != 1) {
+		if (readNum < 1 || writeNum < 1) {
 			throw new GroupConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
 			      readNum, writeNum));
 		}

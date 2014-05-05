@@ -10,6 +10,7 @@
 		<attribute name="weight" value-type="int" primitive="true" default-value="1"/>
 		<attribute name="canRead" value-type="boolean"  primitive="true"/>
     	<attribute name="canWrite" value-type="boolean"  primitive="true"/>
+    	<attribute name="active" value-type="boolean"  primitive="true"/>
 		<element name="jdbc-url" value-type="String" primitive="true" default-value=""/>
 		<element name="user" value-type="String" primitive="true" default-value=""/>
 		<element name="driver-class" value-type="String" primitive="true" default-value=""/>
