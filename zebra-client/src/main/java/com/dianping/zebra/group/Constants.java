@@ -19,6 +19,8 @@ public class Constants {
 	public static final String CONFIG_MANAGER_TYPE_REMOTE = "remote";
 
 	public static final String CONFIG_MANAGER_TYPE_LOCAL = "local";
+	
+	public static final String DEFAULT_ZEBRA_PRFIX = "zebra.v2";
 
 	public static final String DEFAULT_SYSTEM_RESOURCE_ID = "zebra.v2.system";
 
