@@ -44,15 +44,16 @@ public class Handler implements PageHandler<Context> {
 		String port = payload.getPort();
 		String user = payload.getUser();
 		String env = payload.getEnv();
+		String database = payload.getDatabase();
 		DalResult result = null;
 
 		if (ip != null && port != null && env != null) {
 			switch (payload.getAction()) {
 			case MARKDOWN:
-				result = m_dalService.markDown(env, ip, port);
+				result = m_dalService.markDown(env, ip, port, database);
 				break;
 			case MARKUP:
-				result = m_dalService.markUp(env, ip, port);
+				result = m_dalService.markUp(env, ip, port, database);
 				break;
 			case REMOVE:
 				// 1. delete all db key 2. update all value refer to this key
@@ -64,7 +65,7 @@ public class Handler implements PageHandler<Context> {
 				ctx.sendJsonResponse("1", "unkown operation", null);
 				break;
 			}
-		}else{
+		} else {
 			ctx.sendJsonResponse("1", "ip or port or env cannot be null", null);
 		}
 

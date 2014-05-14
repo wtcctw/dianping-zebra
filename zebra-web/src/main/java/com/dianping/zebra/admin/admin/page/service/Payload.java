@@ -16,6 +16,9 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 
 	@FieldMeta("port")
 	private String m_port;
+	
+	@FieldMeta("database")
+	private String m_database;
 
 	@FieldMeta("user")
 	private String m_user;
@@ -28,6 +31,14 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 		return m_action;
 	}
 
+	public String getDatabase() {
+		return m_database;
+	}
+
+	public String getEnv(){
+		return m_env;
+	}
+
 	public String getIp() {
 		return m_ip;
 	}
@@ -36,7 +47,7 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	public AdminPage getPage() {
 		return m_page;
 	}
-
+	
 	public String getPort() {
 		return m_port;
 	}
@@ -44,13 +55,17 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	public String getUser() {
 		return m_user;
 	}
-	
-	public String getEnv(){
-		return m_env;
-	}
 
 	public void setAction(String action) {
 		m_action = Action.getByName(action, Action.VIEW);
+	}
+
+	public void setDatabase(String database) {
+		m_database = database;
+	}
+
+	public void setEnv(String env){
+		m_env = env;
 	}
 
 	public void setIp(String ip) {
@@ -68,10 +83,6 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 
 	public void setUser(String user) {
 		m_user = user;
-	}
-
-	public void setEnv(String env){
-		m_env = env;
 	}
 	
 	@Override

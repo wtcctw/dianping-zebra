@@ -19,14 +19,19 @@ public class DalServiceImpl implements DalService {
 	@Inject
 	private LionHttpService m_lionHttpService;
 
-	private Set<String> findDataSources(String ip, String port, HashMap<String, String> keyValues) {
+	private Set<String> findDataSources(String ip, String port, String database, HashMap<String, String> keyValues) {
+		String content = ip + ":" + port;
+		if (database != null) {
+			content = content + "/" + database;
+		}
+
 		Set<String> dataSources = new HashSet<String>();
 
 		for (Entry<String, String> entry : keyValues.entrySet()) {
 			String key = entry.getKey();
 			String value = entry.getValue();
 
-			if (key != null && key.contains(".jdbcUrl") && value != null && value.contains(ip + ":" + port)) {
+			if (key != null && key.contains(".jdbcUrl") && value != null && value.contains(content.trim())) {
 				int begin = "zebra.v2.ds.".length();
 				int end = key.indexOf(".jdbcUrl");
 
@@ -57,7 +62,7 @@ public class DalServiceImpl implements DalService {
 
 		if (unMarkedDataSources.size() > 0) {
 			result.onFail(dataSources, markedDataSource, String.format(
-			      "fail to mark down %s on mysql instance %s:%s because of lion problem.", unMarkedDataSources,
+			      "fail to mark down %s on mysql-instance [%s:%s] because of lion problem.", unMarkedDataSources,
 			      result.getIp(), result.getPort(), markedDataSource));
 		} else {
 			result.onSuccess(dataSources);
@@ -65,8 +70,8 @@ public class DalServiceImpl implements DalService {
 	}
 
 	@Override
-	public DalResult markDown(String env, String ip, String port) {
-		DalResult result = new DalResult(ip, port, env, "markdown");
+	public DalResult markDown(String env, String ip, String port, String database) {
+		DalResult result = new DalResult(ip, port, database, env, "markdown");
 		HashMap<String, String> keyValues = null;
 		try {
 			keyValues = m_lionHttpService.getKeyValuesByPrefix(env, PREFIX);
@@ -77,7 +82,7 @@ public class DalServiceImpl implements DalService {
 		}
 
 		// 找到所有符合ip:port的db
-		Set<String> dataSources = findDataSources(ip, port, keyValues);
+		Set<String> dataSources = findDataSources(ip, port, database, keyValues);
 		Set<String> dataBasesWithoutReadDB = validateDataSources(keyValues, dataSources);
 
 		if (dataBasesWithoutReadDB.size() > 0) {
@@ -93,8 +98,8 @@ public class DalServiceImpl implements DalService {
 	}
 
 	@Override
-	public DalResult markUp(String env, String ip, String port) {
-		DalResult result = new DalResult(ip, port, env, "markup");
+	public DalResult markUp(String env, String ip, String port, String database) {
+		DalResult result = new DalResult(ip, port, database, env, "markup");
 
 		HashMap<String, String> keyValues = null;
 		try {
@@ -105,7 +110,7 @@ public class DalServiceImpl implements DalService {
 			return result;
 		}
 
-		markDBInternal(result, findDataSources(ip, port, keyValues), true);
+		markDBInternal(result, findDataSources(ip, port, database, keyValues), true);
 
 		return result;
 	}
@@ -149,10 +154,4 @@ public class DalServiceImpl implements DalService {
 
 		return dataBasesWithoutReadDB;
 	}
-
-	@Override
-   public DalResult notify(String env, String ip, String port) {
-	   // TODO Auto-generated method stub
-	   return null;
-   }
 }

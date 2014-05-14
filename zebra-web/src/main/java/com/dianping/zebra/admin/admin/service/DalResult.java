@@ -10,6 +10,8 @@ public class DalResult {
 
 	private String m_port;
 
+	private String m_database;
+	
 	private String m_env;
 
 	private String m_user;
@@ -26,10 +28,11 @@ public class DalResult {
 
 	private int m_status = 0; // 0 for success, 1 for failure
 
-	public DalResult(String ip, String port, String env, String action) {
+	public DalResult(String ip, String port, String database,String env, String action) {
 		super();
 		m_ip = ip;
 		m_port = port;
+		m_database = database;
 		m_env = env;
 		m_action = action;
 	}
@@ -40,6 +43,10 @@ public class DalResult {
 
 	public Set<String> getActualOperated() {
 		return m_actualOperated;
+	}
+
+	public String getDatabase() {
+		return m_database;
 	}
 
 	public String getEnv() {
@@ -103,6 +110,10 @@ public class DalResult {
 
 	public void setActualOperated(Set<String> actualOperated) {
 		m_actualOperated = actualOperated;
+	}
+
+	public void setDatabase(String database) {
+		m_database = database;
 	}
 
 	public void setEnv(String env) {
