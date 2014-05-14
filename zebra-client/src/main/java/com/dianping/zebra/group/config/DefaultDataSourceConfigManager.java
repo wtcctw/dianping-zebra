@@ -80,12 +80,16 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	private String getKey(String key) {
-		return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, key);
+	private String getBizKey(String key) {
+		return String.format("%s.%s", Constants.DEFAULT_BUSSINESS_PRFIX, key);
 	}
 
-	private String getKey(String key, String dsId) {
-		return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, dsId, key);
+	private String getGroupKey(String key) {
+		return String.format("%s.%s", Constants.DEFAULT_GROUP_PRFIX, key);
+	}
+
+	private String getDsKey(String key, String dsId) {
+		return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_PRFIX, dsId, key);
 	}
 
 	private int getReadWeight(String dsValue, int indexOfR, int indexOfW) {
@@ -136,22 +140,18 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private GroupDataSourceConfig initDataSourceConfig() throws SAXException, IOException {
 		GroupDataSourceConfig groupDsConfig = new GroupDataSourceConfig();
-		String config = configService.getProperty(getKey(this.name));
+		String config = configService.getProperty(getBizKey(this.name));
 		List<String> parts = Splitters.by(pairSeparator).trim().split(config);
 
-		if (parts.size() != 2) {
-			throw new GroupConfigException("invalid dataSource config : " + config);
+		for (String part : parts) {
+			setUpPartConfig(groupDsConfig, part);
 		}
 
-		setUpPartConfig(groupDsConfig, parts.get(0));
-		setUpPartConfig(groupDsConfig, parts.get(1));
-
-		groupDsConfig.setRouterStrategy(getProperty(String.format("%s.%s.%s",
-		      Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, this.name, Constants.ELEMENT_ROUTER_STRATEGY),
-		      groupDsConfig.getRouterStrategy()));
-		groupDsConfig.setTransactionForceWrite(getProperty(String.format("%s.%s.%s",
-		      Constants.DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX, this.name, Constants.ELEMENT_TRANSACTION_FORCE_WREITE),
-		      groupDsConfig.getTransactionForceWrite()));
+		groupDsConfig
+		      .setRouterStrategy(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_PRFIX, this.name,
+		            Constants.ELEMENT_ROUTER_STRATEGY), groupDsConfig.getRouterStrategy()));
+		groupDsConfig.setTransactionForceWrite(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_PRFIX,
+		      this.name, Constants.ELEMENT_TRANSACTION_FORCE_WREITE), groupDsConfig.getTransactionForceWrite()));
 
 		validateConfig(groupDsConfig.getDataSourceConfigs());
 
@@ -224,9 +224,9 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 					Map<String, DataSourceConfig> newUnAvailableDsConfig = new HashMap<String, DataSourceConfig>();
 
 					for (Entry<String, DataSourceConfig> entry : newDataSourceConfigCache.getDataSourceConfigs().entrySet()) {
-						if (!this.unAvailableDsConfig.containsKey(entry.getKey())) {
+						if(entry.getValue().getActive()){
 							newAvailableDsConfig.put(entry.getKey(), entry.getValue());
-						} else {
+						}else{
 							newUnAvailableDsConfig.put(entry.getKey(), entry.getValue());
 						}
 					}
@@ -244,7 +244,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	private void processProperties(DataSourceConfig ds, String dsId) {
-		String systemProperies = getProperty(getKey(Constants.ELEMENT_PROPERTIES, dsId), null);
+		String systemProperies = getProperty(getDsKey(Constants.ELEMENT_PROPERTIES, dsId), null);
 
 		if (systemProperies != null) {
 			Map<String, String> sysMap = Splitters.by(pairSeparator, keyValueSeparator).trim().split(systemProperies);
@@ -260,13 +260,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	private void setUpPartConfig(GroupDataSourceConfig groupDsConfig, String readOrWriteDataSourceKey) {
-		String readOrWriteDataSourceValue = "";
-		if (readOrWriteDataSourceKey.indexOf('#') != 0) {
-			throw new GroupConfigException("invalid dataSource config : " + readOrWriteDataSourceKey);
-		} else {
-			readOrWriteDataSourceValue = configService.getProperty(getKey(readOrWriteDataSourceKey.substring(1)));
-		}
-
+		String readOrWriteDataSourceValue = configService.getProperty(getGroupKey(readOrWriteDataSourceKey));
 		Map<String, String> pairs = Splitters.by(pairSeparator, keyValueSeparator).trim()
 		      .split(readOrWriteDataSourceValue);
 
@@ -277,17 +271,17 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			if (ds == null) {
 				ds = groupDsConfig.findOrCreateDataSourceConfig(dsId);
 
-				ds.setActive(getProperty(getKey(Constants.ELEMENT_ACTIVE, dsId), ds.getActive()));
-				ds.setDriverClass(getProperty(getKey(Constants.ELEMENT_DRIVER_CLASS, dsId), ds.getDriverClass()));
+				ds.setActive(getProperty(getDsKey(Constants.ELEMENT_ACTIVE, dsId), ds.getActive()));
+				ds.setDriverClass(getProperty(getDsKey(Constants.ELEMENT_DRIVER_CLASS, dsId), ds.getDriverClass()));
 				ds.setId(dsId);
-				ds.setInitialPoolSize(getProperty(getKey(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId),
+				ds.setInitialPoolSize(getProperty(getDsKey(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId),
 				      ds.getInitialPoolSize()));
-				ds.setJdbcUrl(getProperty(getKey(Constants.ELEMENT_JDBC_URL, dsId), ds.getJdbcUrl()));
-				ds.setMaxPoolSize(getProperty(getKey(Constants.ELEMENT_MAX_POOL_SIZE, dsId), ds.getMaxPoolSize()));
-				ds.setMinPoolSize(getProperty(getKey(Constants.ELEMENT_MIN_POOL_SIZE, dsId), ds.getMinPoolSize()));
-				ds.setPassword(getProperty(getKey(Constants.ELEMENT_PASSWORD, dsId), ds.getPassword()));
-				ds.setCheckoutTimeout(getProperty(getKey(Constants.ELEMENT_CHECKOUT_TIMEOUT, dsId), ds.getCheckoutTimeout()));
-				ds.setUser(getProperty(getKey(Constants.ELEMENT_USER, dsId), ds.getUser()));
+				ds.setJdbcUrl(getProperty(getDsKey(Constants.ELEMENT_JDBC_URL, dsId), ds.getJdbcUrl()));
+				ds.setMaxPoolSize(getProperty(getDsKey(Constants.ELEMENT_MAX_POOL_SIZE, dsId), ds.getMaxPoolSize()));
+				ds.setMinPoolSize(getProperty(getDsKey(Constants.ELEMENT_MIN_POOL_SIZE, dsId), ds.getMinPoolSize()));
+				ds.setPassword(getProperty(getDsKey(Constants.ELEMENT_PASSWORD, dsId), ds.getPassword()));
+				ds.setCheckoutTimeout(getProperty(getDsKey(Constants.ELEMENT_CHECKOUT_TIMEOUT, dsId), ds.getCheckoutTimeout()));
+				ds.setUser(getProperty(getDsKey(Constants.ELEMENT_USER, dsId), ds.getUser()));
 
 				processProperties(ds, dsId);
 			}

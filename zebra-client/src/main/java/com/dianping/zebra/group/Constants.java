@@ -11,21 +11,25 @@ package com.dianping.zebra.group;
  * 
  */
 public class Constants {
-	
-	public static final String SQL_FORCE_WRITE_HINT="/*+zebra:w*/";
+
+	public static final String SQL_FORCE_WRITE_HINT = "/*+zebra:w*/";
 
 	public static final String CONNECTION_POOL_TYPE_C3P0 = "c3p0";
 
 	public static final String CONFIG_MANAGER_TYPE_REMOTE = "remote";
 
 	public static final String CONFIG_MANAGER_TYPE_LOCAL = "local";
-	
-	public static final String DEFAULT_ZEBRA_PRFIX = "zebra.v2";
 
 	public static final String DEFAULT_SYSTEM_RESOURCE_ID = "zebra.v2.system";
 
-	public static final String DEFAULT_DATASOURCE_RESOURCE_ID_PRFIX = "zebra.v2.ds";
-	
+	public static final String DEFAULT_ZEBRA_PRFIX = "zebra.v2";
+
+	public static final String DEFAULT_DATASOURCE_PRFIX = "zebra.v2.ds";
+
+	public static final String DEFAULT_BUSSINESS_PRFIX = "zebra.v2.biz";
+
+	public static final String DEFAULT_GROUP_PRFIX = "zebra.v2.group";
+
 	// DataSource
 	public static final String ELEMENT_ACTIVE = "active";
 
@@ -44,10 +48,10 @@ public class Constants {
 	public static final String ELEMENT_USER = "user";
 
 	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
-	
+
 	public static final String ELEMENT_TRANSACTION_FORCE_WREITE = "transactionForceWrite";
-	
-	public static final String ELEMENT_PROPERTIES= "properties";
+
+	public static final String ELEMENT_PROPERTIES = "properties";
 
 	// System
 	public static final String ELEMENT_COOKIE_DOMAIN = "cookieDomain";

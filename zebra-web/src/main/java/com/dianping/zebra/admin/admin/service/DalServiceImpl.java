@@ -1,9 +1,8 @@
 package com.dianping.zebra.admin.admin.service;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -27,7 +26,7 @@ public class DalServiceImpl implements DalService {
 			String key = entry.getKey();
 			String value = entry.getValue();
 
-			if (key != null && key.toLowerCase().contains("jdbcUrl") && value != null && value.contains(ip + ":" + port)) {
+			if (key != null && key.contains(".jdbcUrl") && value != null && value.contains(ip + ":" + port)) {
 				int begin = "zebra.v2.ds.".length();
 				int end = key.indexOf(".jdbcUrl");
 
@@ -38,17 +37,16 @@ public class DalServiceImpl implements DalService {
 		return dataSources;
 	}
 
-	private List<String> markDBInternal(String env, Set<String> dataSources, String ip, String port, boolean isActive)
-	      throws Exception {
+	private void markDBInternal(DalResult result, Set<String> dataSources, boolean isActive) {
 		Set<String> unMarkedDataSources = new HashSet<String>();
-		List<String> markedDataSource = new ArrayList<String>();
+		Set<String> markedDataSource = new HashSet<String>();
 		String value = "false";
 		if (isActive) {
 			value = "true";
 		}
 
 		for (String db : dataSources) {
-			boolean isSuccess = m_lionHttpService.setConfig(env, "zebra", "v2.ds." + db + ".active", value);
+			boolean isSuccess = m_lionHttpService.setConfig(result.getEnv(), "zebra", "v2.ds." + db + ".active", value);
 
 			if (isSuccess) {
 				markedDataSource.add(db);
@@ -58,34 +56,58 @@ public class DalServiceImpl implements DalService {
 		}
 
 		if (unMarkedDataSources.size() > 0) {
-			throw new DalException(String.format("fail to mark down %s on mysql instance %s:%s because of lion problem.",
-			      unMarkedDataSources, ip, port), markedDataSource);
+			result.onFail(dataSources, markedDataSource, String.format(
+			      "fail to mark down %s on mysql instance %s:%s because of lion problem.", unMarkedDataSources,
+			      result.getIp(), result.getPort(), markedDataSource));
+		} else {
+			result.onSuccess(dataSources);
 		}
-
-		return markedDataSource;
 	}
 
 	@Override
-	public List<String> markDown(String env, String ip, String port) throws Exception {
-		HashMap<String, String> keyValues = m_lionHttpService.getKeyValuesByPrefix(env, PREFIX);
+	public DalResult markDown(String env, String ip, String port) {
+		DalResult result = new DalResult(ip, port, env, "markdown");
+		HashMap<String, String> keyValues = null;
+		try {
+			keyValues = m_lionHttpService.getKeyValuesByPrefix(env, PREFIX);
+		} catch (IOException e) {
+			result.onFail(e.getMessage());
+
+			return result;
+		}
 
 		// 找到所有符合ip:port的db
 		Set<String> dataSources = findDataSources(ip, port, keyValues);
 		Set<String> dataBasesWithoutReadDB = validateDataSources(keyValues, dataSources);
 
 		if (dataBasesWithoutReadDB.size() > 0) {
-			throw new Exception(String.format("fail to mark down %s:%s because these %s will have no read database.", ip,
-			      port, dataBasesWithoutReadDB));
+			result.onFail(String.format("fail to mark down %s:%s because %s will have no read databases.", ip, port,
+			      dataBasesWithoutReadDB));
+
+			return result;
 		}
 
-		return markDBInternal(env, dataSources, ip, port, false);
+		markDBInternal(result, dataSources, false);
+
+		return result;
 	}
 
 	@Override
-	public List<String> markUp(String env, String ip, String port) throws Exception {
-		HashMap<String, String> keyValues = m_lionHttpService.getKeyValuesByPrefix(env, PREFIX);
+	public DalResult markUp(String env, String ip, String port) {
+		DalResult result = new DalResult(ip, port, env, "markup");
 
-		return markDBInternal(env, findDataSources(ip, port, keyValues), ip, port, true);
+		HashMap<String, String> keyValues = null;
+		try {
+			keyValues = m_lionHttpService.getKeyValuesByPrefix(env, PREFIX);
+		} catch (IOException e) {
+			result.onFail(e.getMessage());
+
+			return result;
+		}
+
+		markDBInternal(result, findDataSources(ip, port, keyValues), true);
+
+		return result;
 	}
 
 	private Set<String> validateDataSources(HashMap<String, String> keyValues, Set<String> dataSources) {
@@ -96,8 +118,8 @@ public class DalServiceImpl implements DalService {
 				String key = entry.getKey();
 				String value = entry.getValue();
 
-				// 假设所有的读库组的key都是以zebra.v2.ds.zebra-r开头的
-				if (value.contains(db) && key.contains("zebra.v2.ds.zebra-r")) {
+				// 假设所有的读库组的key都是以zebra.v2.group.开头的
+				if (value.contains(db) && key.contains("zebra.v2.group.") && value.contains(":r")) {
 					dataBases.add(key);
 				}
 			}
@@ -115,10 +137,11 @@ public class DalServiceImpl implements DalService {
 
 			// 如果删除读库后，该读库组已经没有任何读库
 			if (splits.size() == 0) {
+				String databaseName = database.substring(database.lastIndexOf('.') + 1);
 				for (Entry<String, String> entry : keyValues.entrySet()) {
 					// 如果有业务用到这个读库组，则记录下来
-					if (entry.getValue().contains("#" + database)) {
-						dataBasesWithoutReadDB.add(database);
+					if (entry.getValue().contains(databaseName)) {
+						dataBasesWithoutReadDB.add(databaseName);
 					}
 				}
 			}
@@ -126,4 +149,10 @@ public class DalServiceImpl implements DalService {
 
 		return dataBasesWithoutReadDB;
 	}
+
+	@Override
+   public DalResult notify(String env, String ip, String port) {
+	   // TODO Auto-generated method stub
+	   return null;
+   }
 }

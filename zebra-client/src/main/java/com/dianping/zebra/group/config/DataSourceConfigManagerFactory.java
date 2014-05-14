@@ -33,7 +33,6 @@ public class DataSourceConfigManagerFactory {
 					dataSourceConfigManager.init();
 					dataSourceConfigManagers.put(resourceId, dataSourceConfigManager);
 				}
-
 			}
 		}
 

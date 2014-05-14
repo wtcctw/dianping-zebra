@@ -1,9 +1,7 @@
 package com.dianping.zebra.admin.admin.page.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -14,7 +12,7 @@ import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.zebra.admin.admin.AdminPage;
-import com.dianping.zebra.admin.admin.service.DalException;
+import com.dianping.zebra.admin.admin.service.DalResult;
 import com.dianping.zebra.admin.admin.service.DalService;
 import com.dianping.zebra.admin.admin.service.LogService;
 
@@ -46,17 +44,15 @@ public class Handler implements PageHandler<Context> {
 		String port = payload.getPort();
 		String user = payload.getUser();
 		String env = payload.getEnv();
-		List<String> markedDataSource = new ArrayList<String>();
+		DalResult result = null;
 
-		try {
+		if (ip != null && port != null && env != null) {
 			switch (payload.getAction()) {
 			case MARKDOWN:
-				markedDataSource = m_dalService.markDown(env, ip, port);
-				ctx.sendJsonResponse("0", String.format("successs markdown %s", markedDataSource), null);
+				result = m_dalService.markDown(env, ip, port);
 				break;
 			case MARKUP:
-				markedDataSource = m_dalService.markUp(env, ip, port);
-				ctx.sendJsonResponse("0", String.format("successs markup %s", markedDataSource), null);
+				result = m_dalService.markUp(env, ip, port);
 				break;
 			case REMOVE:
 				// 1. delete all db key 2. update all value refer to this key
@@ -65,15 +61,19 @@ public class Handler implements PageHandler<Context> {
 				// TODO
 				break;
 			default:
+				ctx.sendJsonResponse("1", "unkown operation", null);
 				break;
 			}
-		} catch (DalException dalException) {
-			markedDataSource = dalException.getMarkedDataSources();
-			ctx.sendJsonResponse("0", String.format("successs to mark %s", markedDataSource), null);
-		} catch (Throwable throwable) {
-			ctx.sendJsonResponse("1", "fail to mark any database", throwable);
-		} finally {
-			m_logService.log(ip, port, user, new Date(), payload.getAction().getName(), markedDataSource);
+		}else{
+			ctx.sendJsonResponse("1", "ip or port or env cannot be null", null);
+		}
+
+		if (result != null) {
+			result.setUser(user);
+			result.setTime(new Date());
+			ctx.sendJsonResponse(String.valueOf(result.getStatus()),
+			      String.format("%s %s", result.getAction(), result.getActualOperated()), result.getMessage());
+			m_logService.log(result);
 		}
 
 		model.setAction(Action.VIEW);

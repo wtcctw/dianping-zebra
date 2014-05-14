@@ -50,7 +50,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 			String result = callLionHttpApi(String.format("%s/setconfig?e=%s&id=%s&p=%s&k=%s&v=%s&ef=1", LION_SERVER, env,
 			      ID, project, key, value));
 
-			if (result != null && result.length() > 4 && result.charAt(0) == '0') {
+			if (result != null && result.charAt(0) == '0') {
 				return true;
 			} else {
 				return false;
@@ -59,14 +59,4 @@ public class LionHttpServiceImpl implements LionHttpService {
 			return false;
 		}
 	}
-
-	// @Override
-	// public void initialize() throws InitializationException {
-	// m_env.add("dev");
-	// m_env.add("alpha");
-	// m_env.add("qa");
-	// m_env.add("prelease");
-	// m_env.add("product");
-	// m_env.add("performance");
-	// }
 }
