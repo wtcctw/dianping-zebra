@@ -4,8 +4,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class ConfigManagerTest {
 
 	@Test
@@ -34,6 +36,6 @@ public class ConfigManagerTest {
 			}
 		});
 	
-		//System.in.read();
+		System.in.read();
 	}
 }
