@@ -33,7 +33,7 @@ public class ConfigManagerTest {
 				System.out.println(String.format("Property %s changed from [%s] to [%s]", evt.getPropertyName(),evt.getOldValue(),evt.getNewValue()));
 			}
 		});
-		
-		System.in.read();
+	
+		//System.in.read();
 	}
 }
