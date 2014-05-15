@@ -200,7 +200,7 @@ org.eclipse.jdt.core.compiler.compliance=1.6]]></content>
 		</plugins>
 	</build>
 	<properties>
-		<env>beta</env>
+		<env>alpha</env>
 		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
 	</properties>
 </project>
