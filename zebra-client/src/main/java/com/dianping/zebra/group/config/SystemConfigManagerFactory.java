@@ -4,34 +4,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.exception.GroupConfigException;
+import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class SystemConfigManagerFactory {
 
 	private static Map<String, SystemConfigManager> systemConfigManagers = new HashMap<String, SystemConfigManager>();
 
-	public static SystemConfigManager getConfigManger(String configManagerType, String resourceId) {
-		SystemConfigManager systemConfigManager = systemConfigManagers.get(resourceId);
+	public static SystemConfigManager getConfigManger(String configManagerType, String name) {
+		SystemConfigManager systemConfigManager = systemConfigManagers.get(name);
 
 		if (systemConfigManager == null) {
 			synchronized (systemConfigManagers) {
-				systemConfigManager = systemConfigManagers.get(resourceId);
+				systemConfigManager = systemConfigManagers.get(name);
 
 				if (systemConfigManager == null) {
 					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
-						LocalConfigService configService = new LocalConfigService(resourceId);
+						LocalConfigService configService = new LocalConfigService(name);
 						configService.init();
-						systemConfigManager = new DefaultSystemConfigManager(resourceId, configService);
+						systemConfigManager = new DefaultSystemConfigManager(name, configService);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
-						LionConfigService configService = new LionConfigService(resourceId);
+						LionConfigService configService = new LionConfigService();
 						configService.init();
-						systemConfigManager = new DefaultSystemConfigManager(resourceId, configService);
+						systemConfigManager = new DefaultSystemConfigManager(name, configService);
 					} else {
-						throw new GroupConfigException(
+						throw new IllegalConfigException(
 						      String.format("illegal systemConfigManagerType[%s]", configManagerType));
 					}
 					systemConfigManager.init();
-					systemConfigManagers.put(resourceId, systemConfigManager);
+					systemConfigManagers.put(name, systemConfigManager);
 				}
 
 			}

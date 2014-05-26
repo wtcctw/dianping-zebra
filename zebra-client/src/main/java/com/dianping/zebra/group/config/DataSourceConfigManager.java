@@ -17,13 +17,5 @@ public interface DataSourceConfigManager {
 	
 	public void addListerner(PropertyChangeListener listener);
 
-	public void markDown(String id);
-
-	public void markUp(String id);
-
-	public Map<String, DataSourceConfig> getAvailableDataSources();
-
-	public Map<String, DataSourceConfig> getUnAvailableDataSources();
-
 	public String getBiz();
 }

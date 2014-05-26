@@ -4,34 +4,34 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.exception.GroupConfigException;
+import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class DataSourceConfigManagerFactory {
 
 	private static Map<String, DataSourceConfigManager> dataSourceConfigManagers = new HashMap<String, DataSourceConfigManager>();
 
-	public static DataSourceConfigManager getConfigManager(String configManagerType, String resourceId) {
-		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(resourceId);
+	public static DataSourceConfigManager getConfigManager(String configManagerType, String name) {
+		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(name);
 
 		if (dataSourceConfigManager == null) {
 			synchronized (dataSourceConfigManagers) {
-				dataSourceConfigManager = dataSourceConfigManagers.get(resourceId);
+				dataSourceConfigManager = dataSourceConfigManagers.get(name);
 
 				if (dataSourceConfigManager == null) {
 					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
-						LocalConfigService configService = new LocalConfigService(resourceId);
+						LocalConfigService configService = new LocalConfigService(name);
 						configService.init();
-						dataSourceConfigManager = new DefaultDataSourceConfigManager(resourceId, configService);
+						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
-						LionConfigService configService = new LionConfigService(resourceId);
+						LionConfigService configService = new LionConfigService();
 						configService.init();
-						dataSourceConfigManager = new DefaultDataSourceConfigManager(resourceId, configService);
+						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
 					} else {
-						throw new GroupConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
+						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
 						      configManagerType));
 					}
 					dataSourceConfigManager.init();
-					dataSourceConfigManagers.put(resourceId, dataSourceConfigManager);
+					dataSourceConfigManagers.put(name, dataSourceConfigManager);
 				}
 			}
 		}

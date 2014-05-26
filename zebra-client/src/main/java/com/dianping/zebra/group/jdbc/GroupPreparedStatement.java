@@ -31,6 +31,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import com.dianping.zebra.group.SqlType;
+import com.dianping.zebra.group.datasources.SingleDataSource;
 import com.dianping.zebra.group.jdbc.param.ArrayParamContext;
 import com.dianping.zebra.group.jdbc.param.AsciiParamContext;
 import com.dianping.zebra.group.jdbc.param.BigDecimalParamContext;
@@ -96,7 +97,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	public void setColumnNames(String[] columnNames) {
 		this.columnNames = columnNames;
 	}
-	
+
 	protected ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 		setParams(pstmt);
@@ -165,7 +166,16 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		closeCurrentResultSet();
 
 		Connection conn = this.dpGroupConnection.getRealConnection(sql, true);
-		this.updateCount = executeUpdateOnConnection(conn);
+		try {
+			this.updateCount = executeUpdateOnConnection(conn);
+		} catch (SQLException e) {
+			if (conn instanceof SingleDataSource) {
+				((SingleDataSource) conn).getPunisher().punish(e);
+
+				throw e;
+			}
+		}
+
 		return this.updateCount;
 	}
 

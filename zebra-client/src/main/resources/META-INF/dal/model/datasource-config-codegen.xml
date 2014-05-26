@@ -11,6 +11,7 @@
     <attribute name="canRead" value-type="boolean" />
     <attribute name="canWrite" value-type="boolean" />
     <attribute name="active" value-type="boolean" />
+    <element name="test-read-only-sql" value-type="String" />
     <element name="jdbc-url" value-type="String" />
     <element name="user" value-type="String" />
     <element name="driver-class" value-type="String" />
