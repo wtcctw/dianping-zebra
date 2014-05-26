@@ -32,6 +32,8 @@ public class Constants {
 
 	// DataSource
 	public static final String ELEMENT_ACTIVE = "active";
+	
+	public static final String ELEMENT_TEST_READONLY_SQL = "testReadOnlySql";
 
 	public static final String ELEMENT_DRIVER_CLASS = "driverClass";
 

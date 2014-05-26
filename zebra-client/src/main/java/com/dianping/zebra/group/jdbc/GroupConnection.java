@@ -1,9 +1,3 @@
-/**
- * Project: zebra-client
- * 
- * File Created at Feb 19, 2014
- * 
- */
 package com.dianping.zebra.group.jdbc;
 
 import java.sql.Array;
@@ -22,7 +16,6 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,25 +24,21 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config.SystemConfigManager;
-import com.dianping.zebra.group.datasources.GroupDataSourceManager;
-import com.dianping.zebra.group.router.GroupDataSourceRouter;
-import com.dianping.zebra.group.router.GroupDataSourceRouterInfo;
-import com.dianping.zebra.group.router.GroupDataSourceTarget;
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import javax.sql.DataSource;
 
-/**
- * @author Leo Liang
- * 
- */
+import org.apache.commons.lang.StringUtils;
+
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.SqlType;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.group.util.SqlUtils;
+
 public class GroupConnection implements Connection {
 
-	private DataSourceConfigManager dataSourceConfigManager;
+	private DataSource readDataSource;
 
-	private SystemConfigManager systemConfigManager;
-
-	private GroupDataSourceRouter router;
+	private DataSource writeDataSource;
 
 	private Connection rConnection;
 
@@ -63,7 +52,15 @@ public class GroupConnection implements Connection {
 
 	private Set<Statement> openedStatements = new HashSet<Statement>();
 
-	private GroupDataSourceManager dataSourceManager;
+	private DataSourceConfigManager dataSourceConfigManager;
+
+	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
+	      DataSourceConfigManager dataSourceConfigManager) {
+		super();
+		this.dataSourceConfigManager = dataSourceConfigManager;
+		this.readDataSource = readDataSource;
+		this.writeDataSource = writeDataSource;
+	}
 
 	private void checkClosed() throws SQLException {
 		if (closed) {
@@ -71,25 +68,19 @@ public class GroupConnection implements Connection {
 		}
 	}
 
-	public GroupConnection(GroupDataSourceManager dataSourceManager, GroupDataSourceRouter router,
-	      SystemConfigManager systemConfigManager, DataSourceConfigManager dataSourceConfigManager, String userName,
-	      String password) {
-		this.dataSourceManager = dataSourceManager;
-		this.router = router;
-		this.systemConfigManager = systemConfigManager;
-		this.dataSourceConfigManager = dataSourceConfigManager;
+	private Connection getWriteConnection() throws SQLException {
+		if (wConnection == null) {
+			wConnection = writeDataSource.getConnection();
+		}
+
+		if (wConnection.getAutoCommit() != autoCommit) {
+			wConnection.setAutoCommit(autoCommit);
+		}
+		return wConnection;
 	}
 
-	public GroupConnection(GroupDataSourceManager dataSourcePool, GroupDataSourceRouter router,
-	      SystemConfigManager systemConfigManager, DataSourceConfigManager dataSourceConfigManager) {
-		this(dataSourcePool, router, systemConfigManager, dataSourceConfigManager, null, null);
-	}
-
-	/**
-	 * 永远不会返回null，如果没有可用connection，则抛出SQLException
-	 */
-	Connection getRealConnection(String sql, boolean forceWrite) throws SQLException {
-		if (forceWrite) {
+	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
+		if (forceWriter) {
 			return getWriteConnection();
 		}
 
@@ -97,64 +88,19 @@ public class GroupConnection implements Connection {
 			return getWriteConnection();
 		}
 
-		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(sql);
-		GroupDataSourceTarget dsTarget = router.select(routerInfo);
-
-		if (dsTarget == null) {
-			throw new SQLException("No available dataSource");
-		}
-
-		if (dsTarget.isReadOnly()) {
-			if (rConnection != null) {
-				return rConnection;
-			} else {
-				int retryTimes = -1;
-				Set<GroupDataSourceTarget> excludeTargets = new HashSet<GroupDataSourceTarget>();
-				List<SQLException> exceptions = new ArrayList<SQLException>();
-				int systemRetryTimes = systemConfigManager.getSystemConfig().getRetryTimes();
-
-				while (retryTimes++ < systemRetryTimes) {
-					try {
-						rConnection = dataSourceManager.getConnection(dsTarget.getId());
-						return rConnection;
-					} catch (SQLException e) {
-						exceptions.add(e);
-						excludeTargets.add(dsTarget);
-						dsTarget = router.select(routerInfo, excludeTargets);
-						if (dsTarget == null) {
-							break;
-						}
-					}
-				}
-
-				if (!exceptions.isEmpty()) {
-					JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
-				} else {
-					throw new SQLException("Can not aquire connection");
-				}
-			}
-		} else {
+		if (StringUtils.trimToEmpty(sql).startsWith(Constants.SQL_FORCE_WRITE_HINT)) {
 			return getWriteConnection();
 		}
 
-		throw new SQLException("Can not aquire connection");
-	}
-
-	private Connection getWriteConnection() throws SQLException {
-		if (wConnection != null) {
-			return wConnection;
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		if (sqlType.isRead()) {
+			if (rConnection == null) {
+				rConnection = readDataSource.getConnection();
+			}
+			return rConnection;
+		} else {
+			return getWriteConnection();
 		}
-
-		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(null, true);
-		GroupDataSourceTarget target = router.select(routerInfo);
-		if (target == null) {
-			throw new SQLException("No available dataSource");
-		}
-		wConnection = dataSourceManager.getConnection(target.getId());
-		if (wConnection.getAutoCommit() != autoCommit) {
-			wConnection.setAutoCommit(autoCommit);
-		}
-		return wConnection;
 	}
 
 	/*

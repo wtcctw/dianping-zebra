@@ -1,24 +1,22 @@
 package com.dianping.zebra.group.router;
 
-public class GroupDataSourceTarget implements Comparable<GroupDataSourceTarget> {
+public class RounterTarget implements Comparable<RounterTarget> {
 
 	private String id;
-
-	private boolean readOnly;
 
 	private int weight;
 
 	private int end;
 
-	public GroupDataSourceTarget() {
+	public RounterTarget(String dsId) {
 		super();
+		this.id = dsId;
 	}
 
-	public GroupDataSourceTarget(String id, int weight, int end, boolean readOnly) {
+	public RounterTarget(String id, int weight, int end) {
 		super();
 		this.id = id;
 		this.weight = weight;
-		this.readOnly = readOnly;
 		this.end = end;
 	}
 
@@ -28,10 +26,6 @@ public class GroupDataSourceTarget implements Comparable<GroupDataSourceTarget> 
 
 	public int getWeight() {
 		return weight;
-	}
-
-	public boolean isReadOnly() {
-		return readOnly;
 	}
 
 	public int getEnd() {
@@ -54,7 +48,7 @@ public class GroupDataSourceTarget implements Comparable<GroupDataSourceTarget> 
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		GroupDataSourceTarget other = (GroupDataSourceTarget) obj;
+		RounterTarget other = (RounterTarget) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -65,11 +59,11 @@ public class GroupDataSourceTarget implements Comparable<GroupDataSourceTarget> 
 
 	@Override
 	public String toString() {
-		return String.format("GroupDataSourceTarget [id=%s, readOnly=%s, weight=%s, end=%s]", id, readOnly, weight, end);
+		return String.format("GroupDataSourceTarget [id=%s, weight=%s, end=%s]", id, weight, end);
 	}
 
 	@Override
-	public int compareTo(GroupDataSourceTarget o) {
+	public int compareTo(RounterTarget o) {
 		return end - o.end;
 	}
 }

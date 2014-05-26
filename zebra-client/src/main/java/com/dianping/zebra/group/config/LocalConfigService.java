@@ -20,7 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.zebra.group.exception.GroupConfigException;
+import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class LocalConfigService implements ConfigService {
 
@@ -51,7 +51,7 @@ public class LocalConfigService implements ConfigService {
 		if (propUrl != null) {
 			return FileUtils.toFile(propUrl);
 		} else {
-			throw new GroupConfigException(String.format("config file[%s] doesn't exist.", this.resourceFileName));
+			throw new IllegalConfigException(String.format("config file[%s] doesn't exist.", this.resourceFileName));
 		}
 	}
 
@@ -81,7 +81,7 @@ public class LocalConfigService implements ConfigService {
 			updateTask.setName("Thread-" + ConfigPeroidCheckerTask.class.getName());
 			updateTask.start();
 		} catch (Throwable e) {
-			throw new GroupConfigException(e);
+			throw new IllegalConfigException(e);
 		}
 	}
 
@@ -92,7 +92,7 @@ public class LocalConfigService implements ConfigService {
 			inputStream = new FileInputStream(this.resourceFile);
 			prop.load(inputStream);
 		} catch (Throwable e) {
-			throw new GroupConfigException(String.format("fail to read properties file[%s]", this.resourceFileName), e);
+			throw new IllegalConfigException(String.format("fail to read properties file[%s]", this.resourceFileName), e);
 		} finally {
 			IOUtils.closeQuietly(inputStream);
 		}

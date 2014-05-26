@@ -23,13 +23,13 @@ public abstract class SingleDatabaseTestCase {
 		public Object doInStatement(Statement stmt) throws Exception;
 	}
 
-	private static final String JDBC_DRIVER = org.h2.Driver.class.getName();
+	protected static final String JDBC_DRIVER = org.h2.Driver.class.getName();
 
-	private static final String JDBC_URL = "jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1";
+	protected static final String JDBC_URL = "jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1";
 
-	private static final String PASSWORD = "";
+	protected static final String PASSWORD = "";
 
-	private static final String USER = "sa";
+	protected static final String USER = "sa";
 
 	private GroupDataSource dataSource;
 

@@ -14,7 +14,7 @@ public class GroupDataSourceRouterFactoryTest {
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
-	private GroupDataSourceRouter dataSourceRouter;
+	private DataSourceRouter dataSourceRouter;
 
 	@Before
 	public void init() {
@@ -22,50 +22,49 @@ public class GroupDataSourceRouterFactoryTest {
 		String configManagerType = "local";
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType,
 		      dataSourceResourceId);
-		this.dataSourceRouter = GroupDataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
+		this.dataSourceRouter = DataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
 	}
 
 	@Test
 	public void testReadSelect() {
 		String readSql = "select * from a";
-		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(readSql);
-		GroupDataSourceTarget target = dataSourceRouter.select(routerInfo);
+		RouterContext routerInfo = new RouterContext(readSql);
+		RounterTarget target = dataSourceRouter.select(routerInfo);
 
-		isRead(target);
+		isInRead(target);
 	}
 
 	@Test
 	public void testWriteSelect() {
 		String writeSql = "update a set xx=xx";
-		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(writeSql);
-		GroupDataSourceTarget target = dataSourceRouter.select(routerInfo);
+		RouterContext routerInfo = new RouterContext(writeSql);
+		RounterTarget target = dataSourceRouter.select(routerInfo);
 
-		isWrite(target);
+		isInWrite(target);
 	}
 
 	@Test
 	public void testExcludeSelect() {
 		String writeSql = "update a set xx=xx";
-		GroupDataSourceRouterInfo routerInfo = new GroupDataSourceRouterInfo(writeSql);
-		GroupDataSourceTarget target = dataSourceRouter.select(routerInfo);
-		isWrite(target);
+		RouterContext routerInfo = new RouterContext(writeSql);
+		RounterTarget target = dataSourceRouter.select(routerInfo);
+		isInWrite(target);
 
-		Set<GroupDataSourceTarget> excludeTarget = new HashSet<GroupDataSourceTarget>();
+		Set<RounterTarget> excludeTarget = new HashSet<RounterTarget>();
 		excludeTarget.add(target);
-		Assert.assertNull(dataSourceRouter.select(routerInfo, excludeTarget));
+		routerInfo = new RouterContext(excludeTarget);
+		Assert.assertNotNull(dataSourceRouter.select(routerInfo));
 
 	}
 
-	private void isRead(GroupDataSourceTarget target) {
+	private void isInRead(RounterTarget target) {
 		System.out.println(target);
 		Assert.assertNotSame("db1", target.getId());
-		Assert.assertEquals(true, target.isReadOnly());
 	}
 
-	private void isWrite(GroupDataSourceTarget target) {
+	private void isInWrite(RounterTarget target) {
 		System.out.println(target);
 		Assert.assertEquals("db1", target.getId());
-		Assert.assertEquals(false, target.isReadOnly());
 	}
 
 }

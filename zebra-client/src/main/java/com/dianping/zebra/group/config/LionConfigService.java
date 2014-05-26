@@ -11,7 +11,7 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
-import com.dianping.zebra.group.exception.GroupConfigException;
+import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class LionConfigService implements ConfigService {
 
@@ -19,7 +19,7 @@ public class LionConfigService implements ConfigService {
 
 	private final ConcurrentMap<String, String> cache = new ConcurrentHashMap<String, String>();
 
-	public LionConfigService(String resourceId) {
+	public LionConfigService() {
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class LionConfigService implements ConfigService {
 				}
 			});
 		} catch (LionException e) {
-			throw new GroupConfigException(e);
+			throw new IllegalConfigException(e);
 		}
 	}
 }

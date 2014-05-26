@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
-import com.dianping.zebra.group.exception.GroupConfigException;
+import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class DefaultSystemConfigManager extends AbstractConfigManager implements SystemConfigManager {
 
@@ -35,7 +35,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		try {
 			this.systemConfig.set(initSystemConfig());
 		} catch (Throwable e) {
-			throw new GroupConfigException(String.format(
+			throw new IllegalConfigException(String.format(
 			      "Fail to initialize DefaultSystemConfigManager with config file[%s].", this.name), e);
 		}
 	}
