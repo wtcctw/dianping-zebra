@@ -86,7 +86,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
 	@Override
 	protected String getSchema() {
-		return "src/test/resources/schema.sql";
+        return  getClass().getResource("/schema.sql").getPath();
 	}
 
 	@Override
