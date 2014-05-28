@@ -43,9 +43,6 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	@Override
 	public void close() throws SQLException {
-		for (SingleDataSource dataSource : dataSources.values()) {
-			singleDataSourceManager.destoryDataSource(dataSource.getId(), name);
-		}
 	}
 
 	@Override

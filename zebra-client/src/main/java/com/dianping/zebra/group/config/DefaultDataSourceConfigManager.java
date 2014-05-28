@@ -161,6 +161,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 				ds.setActive(getProperty(getDsKey(Constants.ELEMENT_ACTIVE, dsId), ds.getActive()));
 				ds.setTestReadOnlySql(getProperty(getDsKey(Constants.ELEMENT_TEST_READONLY_SQL, dsId),
 				      ds.getTestReadOnlySql()));
+				ds.setPunishLimit(getProperty(getDsKey(Constants.ELEMENT_PUNISH_LIMIT, dsId), ds.getPunishLimit()));
+				ds.setTimeWindow(getProperty(getDsKey(Constants.ELEMENT_TIME_WINDOW, dsId), ds.getTimeWindow()));
 				ds.setDriverClass(getProperty(getDsKey(Constants.ELEMENT_DRIVER_CLASS, dsId), ds.getDriverClass()));
 				ds.setId(dsId);
 				ds.setInitialPoolSize(getProperty(getDsKey(Constants.ELEMENT_INITIAL_POOL_SIZE, dsId),

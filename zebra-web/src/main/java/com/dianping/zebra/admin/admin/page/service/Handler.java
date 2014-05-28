@@ -45,28 +45,32 @@ public class Handler implements PageHandler<Context> {
 		String user = payload.getUser();
 		String env = payload.getEnv();
 		String database = payload.getDatabase();
+		String[] ips = payload.getIps();
 		DalResult result = null;
 
-		if (ip != null && port != null && env != null) {
-			switch (payload.getAction()) {
-			case MARKDOWN:
+		switch (payload.getAction()) {
+		case MARKDOWN:
+			if (ip != null && port != null && env != null) {
 				result = m_dalService.markDown(env, ip, port, database);
-				break;
-			case MARKUP:
-				result = m_dalService.markUp(env, ip, port, database);
-				break;
-			case REMOVE:
-				// 1. delete all db key 2. update all value refer to this key
-				break;
-			case GETCONFIG:
-				// TODO
-				break;
-			default:
-				ctx.sendJsonResponse("1", "unkown operation", null);
-				break;
+			} else {
+				ctx.sendJsonResponse("1", "ip or port or env cannot be null", null);
 			}
-		} else {
-			ctx.sendJsonResponse("1", "ip or port or env cannot be null", null);
+			break;
+		case MARKUP:
+			if (ip != null && port != null && env != null) {
+				result = m_dalService.markUp(env, ip, port, database);
+			} else {
+				ctx.sendJsonResponse("1", "ip or port or env cannot be null", null);
+			}
+			break;
+		case NOTIFY_IP:
+			if(ips != null){
+				m_logService.logNotify(ips);
+			}
+			break;
+		default:
+			ctx.sendJsonResponse("1", "unkown operation", null);
+			break;
 		}
 
 		if (result != null) {

@@ -11,7 +11,7 @@ public class DalResult {
 	private String m_port;
 
 	private String m_database;
-	
+
 	private String m_env;
 
 	private String m_user;
@@ -28,7 +28,7 @@ public class DalResult {
 
 	private int m_status = 0; // 0 for success, 1 for failure
 
-	public DalResult(String ip, String port, String database,String env, String action) {
+	public DalResult(String ip, String port, String database, String env, String action) {
 		super();
 		m_ip = ip;
 		m_port = port;
@@ -146,5 +146,12 @@ public class DalResult {
 
 	public void setUser(String user) {
 		m_user = user;
+	}
+
+	@Override
+	public String toString() {
+		return "DalResult [ip=" + m_ip + ", port=" + m_port + ", database=" + m_database + ", env=" + m_env + ", user="
+		      + m_user + ", time=" + m_time + ", action=" + m_action + ", planOperated=" + m_planOperated
+		      + ", actualOperated=" + m_actualOperated + ", message=" + m_message + ", status=" + m_status + "]";
 	}
 }

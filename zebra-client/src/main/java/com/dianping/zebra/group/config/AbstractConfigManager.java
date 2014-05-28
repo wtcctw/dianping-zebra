@@ -15,24 +15,12 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractConfigManager{
 
-	class InnerPropertyChangeListener implements PropertyChangeListener {
-		@Override
-		public void propertyChange(final PropertyChangeEvent evt) {
-			try {
-				onPropertiesUpdated(evt);
-				notifyListeners(evt);
-			} catch (Throwable e) {
-				logger.warn("Illegal config file, apply old config!", e);
-			}
-		}
-	}
-
 	private static final Logger logger = LoggerFactory.getLogger(AbstractConfigManager.class);
 
 	protected final String name;
-	
-	protected final ConfigService configService;
 
+	protected final ConfigService configService;
+	
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
 	private ExecutorService listenerNotifyThreadPool = Executors.newFixedThreadPool(5, new ThreadFactory() {
@@ -76,6 +64,16 @@ public abstract class AbstractConfigManager{
 		}
 	}
 
+	protected long getProperty(String key, long defaultValue) {
+		String value = configService.getProperty(key);
+
+		if (StringUtils.isNotBlank(value)) {
+			return Long.parseLong(value);
+		} else {
+			return defaultValue;
+		}
+	}
+	
 	protected String getProperty(String key, String defaultValue) {
 		String value = configService.getProperty(key);
 
@@ -85,6 +83,7 @@ public abstract class AbstractConfigManager{
 			return defaultValue;
 		}
 	}
+
 
 	private void notifyListeners(final PropertyChangeEvent evt) {
 		try {
@@ -106,7 +105,15 @@ public abstract class AbstractConfigManager{
 
 	protected abstract void onPropertiesUpdated(PropertyChangeEvent evt);
 	
-	public String getBiz() {
-		return name;
+	class InnerPropertyChangeListener implements PropertyChangeListener {
+		@Override
+		public void propertyChange(final PropertyChangeEvent evt) {
+			try {
+				onPropertiesUpdated(evt);
+				notifyListeners(evt);
+			} catch (Throwable e) {
+				logger.warn("Illegal config file, apply old config!", e);
+			}
+		}
 	}
 }

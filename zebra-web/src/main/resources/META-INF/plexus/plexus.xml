@@ -1,0 +1,15 @@
+<plexus>
+	<components>
+		<component>
+			<role>org.codehaus.plexus.logging.LoggerManager</role>
+			<implementation>org.unidal.lookup.logger.TimedConsoleLoggerManager</implementation>
+			<configuration>
+				<dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
+				<showClass>true</showClass>
+				<logFilePattern>zebra_{0,date,yyyyMMdd}.log</logFilePattern>
+				<baseDirRef>ZEBRA_HOME</baseDirRef>
+				<defaultBaseDir>/data/applogs/zebra</defaultBaseDir>
+			</configuration>
+		</component>
+	</components>
+</plexus>

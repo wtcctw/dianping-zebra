@@ -26,6 +26,9 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	@FieldMeta("env")
 	private String m_env;
 
+	@FieldMeta("ips")
+	private String[] m_ips;
+	
 	@Override
 	public Action getAction() {
 		return m_action;
@@ -70,6 +73,14 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 
 	public void setIp(String ip) {
 		m_ip = ip;
+	}
+
+	public String[] getIps() {
+		return m_ips;
+	}
+
+	public void setIps(String[] ips) {
+		m_ips = ips;
 	}
 
 	@Override

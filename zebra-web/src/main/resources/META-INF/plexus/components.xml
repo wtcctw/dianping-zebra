@@ -6,7 +6,7 @@
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.service.LogService</role>
-			<implementation>com.dianping.zebra.admin.admin.service.LogServiceImpl</implementation>
+			<implementation>com.dianping.zebra.admin.admin.service.LocalLogService</implementation>
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.service.DalService</role>

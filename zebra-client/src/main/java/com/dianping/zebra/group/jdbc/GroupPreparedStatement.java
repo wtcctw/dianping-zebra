@@ -30,8 +30,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import com.dianping.zebra.group.SqlType;
-import com.dianping.zebra.group.datasources.SingleDataSource;
+import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.jdbc.param.ArrayParamContext;
 import com.dianping.zebra.group.jdbc.param.AsciiParamContext;
 import com.dianping.zebra.group.jdbc.param.BigDecimalParamContext;
@@ -61,6 +60,7 @@ import com.dianping.zebra.group.jdbc.param.StringParamContext;
 import com.dianping.zebra.group.jdbc.param.TimeParamContext;
 import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
+import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
 
 /**
@@ -169,8 +169,8 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		try {
 			this.updateCount = executeUpdateOnConnection(conn);
 		} catch (SQLException e) {
-			if (conn instanceof SingleDataSource) {
-				((SingleDataSource) conn).getPunisher().punish(e);
+			if (conn instanceof SingleConnection) {
+				((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
 
 				throw e;
 			}

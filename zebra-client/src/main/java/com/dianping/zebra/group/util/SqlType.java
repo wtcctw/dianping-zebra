@@ -1,4 +1,4 @@
-package com.dianping.zebra.group;
+package com.dianping.zebra.group.util;
 
 /**
  * @author kezhu.wu

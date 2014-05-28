@@ -29,9 +29,10 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.SqlType;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
 
 public class GroupConnection implements Connection {
@@ -54,12 +55,15 @@ public class GroupConnection implements Connection {
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
+	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
+
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
-	      DataSourceConfigManager dataSourceConfigManager) {
+	      DataSourceConfigManager dataSourceConfigManager, CustomizedReadWriteStrategy customizedReadWriteStrategy) {
 		super();
 		this.dataSourceConfigManager = dataSourceConfigManager;
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
+		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
 	}
 
 	private void checkClosed() throws SQLException {
@@ -82,13 +86,11 @@ public class GroupConnection implements Connection {
 	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
 		if (forceWriter) {
 			return getWriteConnection();
-		}
-
-		if (!autoCommit && dataSourceConfigManager.isTransactionForceWrite()) {
+		} else if (!autoCommit && dataSourceConfigManager.isTransactionForceWrite()) {
 			return getWriteConnection();
-		}
-
-		if (StringUtils.trimToEmpty(sql).startsWith(Constants.SQL_FORCE_WRITE_HINT)) {
+		} else if (StringUtils.trimToEmpty(sql).startsWith(Constants.SQL_FORCE_WRITE_HINT)) {
+			return getWriteConnection();
+		} else if (customizedReadWriteStrategy != null && customizedReadWriteStrategy.forceReadFromMaster()) {
 			return getWriteConnection();
 		}
 
@@ -741,5 +743,4 @@ public class GroupConnection implements Connection {
 	public int getNetworkTimeout() throws SQLException {
 		throw new UnsupportedOperationException("getNetworkTimeout");
 	}
-
 }

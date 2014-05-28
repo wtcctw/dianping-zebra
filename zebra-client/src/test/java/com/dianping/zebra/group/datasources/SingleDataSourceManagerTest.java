@@ -14,7 +14,7 @@ import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.SingleDatabaseTestCase;
 
-public class ManagedDataSourceManagerTest extends SingleDatabaseTestCase {
+public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 
 	private static SingleDataSourceManager manager;
 
@@ -43,8 +43,6 @@ public class ManagedDataSourceManagerTest extends SingleDatabaseTestCase {
 		
 		TimeUnit.SECONDS.sleep(1);
 		Assert.assertEquals(DataSourceState.CLOSED, dataSource.getState());
-		
-		
 	}
 
 	public DataSourceConfig getDataSourceConfig() {

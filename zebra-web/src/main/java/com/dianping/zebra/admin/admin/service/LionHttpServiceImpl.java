@@ -15,8 +15,6 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	private final String LION_SERVER = "http://lionapi.dp:8080";
 
-	// private Set<String> m_env = new HashSet<String>();
-
 	private String callLionHttpApi(String url) throws IOException {
 		InputStream inputStream = Urls.forIO().connectTimeout(100).readTimeout(100).openStream(url);
 
