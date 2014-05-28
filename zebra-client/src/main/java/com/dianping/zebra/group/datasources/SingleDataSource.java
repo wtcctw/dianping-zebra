@@ -17,7 +17,6 @@ import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
-import com.dianping.zebra.group.jdbc.CountPunisher;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
 
@@ -40,14 +39,76 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	public SingleDataSource(DataSourceConfig config) {
 		this.dsId = config.getId();
 		this.config = config;
-		this.punisher = new CountPunisher(this, 1000L, 1000L);
+		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());
 		this.dataSource = initDataSources(config);
 	}
 
-	public CountPunisher getPunisher(){
+	private void checkState() throws SQLException {
+		if (state == DataSourceState.CLOSED || state == DataSourceState.DOWN) {
+			throw new SQLException(String.format("dataSource is not avaiable, current state is [%s]", state));
+		}
+	}
+
+	@Override
+	public void close() throws SQLException {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
+			if (poolBackedDataSource.getNumBusyConnections() == 0) {
+				logger.info("closing the datasource [" + this.dsId + "]");
+				poolBackedDataSource.close();
+				logger.info("datasource [" + this.dsId + "] closed");
+				this.state = DataSourceState.CLOSED;
+			} else {
+				throw new SQLException(String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
+			}
+		} else {
+			// Normally not happen
+			logger.warn("fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
+		}
+	}
+
+	public synchronized DataSourceConfig getConfig() {
+		return this.config;
+	}
+
+	@Override
+	public Connection getConnection() throws SQLException {
+		checkState();
+		return getConnection(null, null);
+	}
+
+	@Override
+	public Connection getConnection(String username, String password) throws SQLException {
+		checkState();
+		Connection conn = null;
+		try {
+			conn = this.dataSource.getConnection();
+		} catch (SQLException e) {
+			punisher.countAndPunish(e);
+
+			throw e;
+		}
+
+		if (state == DataSourceState.INITIAL) {
+			state = DataSourceState.UP;
+		}
+
+		return new SingleConnection(this, conn);
+	}
+
+	public String getId() {
+		return this.dsId;
+	}
+
+	public CountPunisher getPunisher() {
 		return this.punisher;
 	}
-	
+
+	@Override
+	public DataSourceState getState() {
+		return this.state;
+	}
+
 	public synchronized Set<String> getUsers() {
 		return this.users;
 	}
@@ -71,9 +132,8 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
 			      unPooledDataSource, props);
-			pooledDataSource.setIdentityToken(value.getId());
 
-			logger.info(String.format("dataSource [%s] created. Properties are [%s]", value.getId(),
+			logger.info(String.format("SingleDataSource [%s] created. Properties are [%s]", value.getId(),
 			      ReflectionToStringBuilder.toString(pooledDataSource)));
 
 			return pooledDataSource;
@@ -82,60 +142,16 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		}
 	}
 
-	private void checkState() throws SQLException {
-		if (state == DataSourceState.CLOSED || state == DataSourceState.DOWN) {
-			throw new SQLException(String.format("dataSource is not avaiable, current state is [%s]", state));
-		}
-	}
-
-	@Override
-	public Connection getConnection() throws SQLException {
-		checkState();
-		return getConnection(null, null);
-	}
-
 	public boolean isAvailable() {
 		return this.state == DataSourceState.INITIAL || this.state == DataSourceState.UP;
-	}
-
-	public boolean isDown() {
-		return this.state == DataSourceState.DOWN;
 	}
 
 	public boolean isClosed() {
 		return this.state == DataSourceState.CLOSED;
 	}
 
-	@Override
-	public Connection getConnection(String username, String password) throws SQLException {
-		checkState();
-		Connection conn = null;
-		try {
-			conn = this.dataSource.getConnection();
-		} catch (SQLException e) {
-			punisher.punish(e);
-
-			throw e;
-		}
-
-		if (state == DataSourceState.INITIAL) {
-			state = DataSourceState.UP;
-		}
-
-		return new SingleConnection(this.dsId, conn);
-	}
-
-	public String getId() {
-		return this.dsId;
-	}
-
-	@Override
-	public DataSourceState getState() {
-		return this.state;
-	}
-
-	public synchronized DataSourceConfig getConfig() {
-		return this.config;
+	public boolean isDown() {
+		return this.state == DataSourceState.DOWN;
 	}
 
 	@Override
@@ -151,25 +167,5 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	@Override
 	public void markUp() {
 		this.state = DataSourceState.INITIAL;
-	}
-
-	@Override
-	public void close() throws SQLException {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
-			String dsId = poolBackedDataSource.getIdentityToken();
-
-			if (this.users.isEmpty() && poolBackedDataSource.getNumBusyConnections() == 0) {
-				logger.info("closing the datasource : " + dsId);
-				poolBackedDataSource.close();
-				logger.info("datasource : " + dsId + " closed");
-				this.state = DataSourceState.CLOSED;
-			} else {
-				throw new SQLException("Cannot close dataSource since there are busy connections.");
-			}
-		} else {
-			// Normally not happen
-			logger.warn("fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
-		}
 	}
 }

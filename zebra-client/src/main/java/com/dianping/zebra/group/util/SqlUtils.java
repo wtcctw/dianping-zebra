@@ -3,8 +3,6 @@ package com.dianping.zebra.group.util;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
-import com.dianping.zebra.group.SqlType;
-
 public class SqlUtils {
 
 	/**

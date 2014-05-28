@@ -11,7 +11,7 @@ import com.dianping.zebra.admin.admin.service.DalServiceImpl;
 import com.dianping.zebra.admin.admin.service.LionHttpService;
 import com.dianping.zebra.admin.admin.service.LionHttpServiceImpl;
 import com.dianping.zebra.admin.admin.service.LogService;
-import com.dianping.zebra.admin.admin.service.LogServiceImpl;
+import com.dianping.zebra.admin.admin.service.LocalLogService;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	@Override
@@ -19,7 +19,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		List<Component> all = new ArrayList<Component>();
 
 		all.add(C(LionHttpService.class, LionHttpServiceImpl.class));
-		all.add(C(LogService.class,LogServiceImpl.class));
+		all.add(C(LogService.class,LocalLogService.class));
 		all.add(C(DalService.class, DalServiceImpl.class).req(LionHttpService.class));
 
 		// Please keep it as last

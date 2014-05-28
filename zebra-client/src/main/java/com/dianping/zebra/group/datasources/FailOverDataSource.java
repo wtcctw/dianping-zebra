@@ -9,11 +9,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 
 public class FailOverDataSource extends AbstractDataSource {
+
+	private static final Logger logger = LoggerFactory.getLogger(FailOverDataSource.class);
 
 	private volatile SingleDataSource activeDs;
 
@@ -67,9 +72,9 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public void close() throws SQLException {
-		for (SingleDataSource dataSource : standbyDataSources.values()) {
-			singleDataSourceManager.destoryDataSource(dataSource.getId(), name);
-		}
+		// for (SingleDataSource dataSource : standbyDataSources.values()) {
+		// singleDataSourceManager.destoryDataSource(dataSource.getId(), name);
+		// }
 
 		if (this.switchMonitorThread != null) {
 			switchMonitorThread.interrupt();
@@ -85,58 +90,60 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		@Override
 		public void run() {
+			logger.info("failover dataSources switch monitor start...");
+
 			try {
 				Class.forName("com.mysql.jdbc.Driver");
 			} catch (ClassNotFoundException ex) {
 				throw new RuntimeException(ex);
 			}
 
-			while (!Thread.currentThread().isInterrupted()) {
-				if (activeDs == null || (activeDs != null && activeDs.isDown())) {
-					for (SingleDataSource ds : standbyDataSources.values()) {
-						Connection conn = null;
-						Statement stmt = null;
-						try {
-							conn = getConnection(ds.getConfig());
-							stmt = conn.createStatement();
-							ResultSet resultSet = stmt.executeQuery(ds.getConfig().getTestReadOnlySql());
+			while (!Thread.interrupted()) {
+				for (SingleDataSource ds : standbyDataSources.values()) {
+					Connection conn = null;
+					Statement stmt = null;
+					try {
+						conn = getConnection(ds.getConfig());
+						stmt = conn.createStatement();
+						ResultSet resultSet = stmt.executeQuery(ds.getConfig().getTestReadOnlySql());
 
-							boolean hasSwitched = false;
-							while (resultSet.next()) {
-								// switch database
-								if (resultSet.getInt(1) == 0) {
-									activeDs = ds;
-									hasSwitched = true;
-									break;
-								}
-							}
-
-							if (hasSwitched) {
+						boolean hasSwitched = false;
+						while (resultSet.next()) {
+							// switch database
+							if (resultSet.getInt(1) == 0) {
+								activeDs = ds;
+								hasSwitched = true;
 								break;
 							}
-						} catch (SQLException ignore) {
-							// do nothing
-						} finally {
-							try {
-								if (stmt != null) {
-									stmt.close();
-								}
+						}
 
-								if (conn != null) {
-									conn.close();
-								}
-							} catch (SQLException ignore) {
+						if (hasSwitched) {
+							break;
+						}
+					} catch (SQLException ignore) {
+						// do nothing
+					} finally {
+						try {
+							if (stmt != null) {
+								stmt.close();
 							}
+
+							if (conn != null) {
+								conn.close();
+							}
+						} catch (SQLException ignore) {
 						}
 					}
 				}
 
 				try {
 					TimeUnit.MILLISECONDS.sleep(10);
-				} catch (InterruptedException ignore) {
-					// do nothing
+				} catch (InterruptedException e) {
+					break;
 				}
 			}
+
+			logger.info("failover dataSources switch monitor stopped.");
 		}
 	}
 }

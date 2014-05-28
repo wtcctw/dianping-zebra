@@ -41,6 +41,8 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 				newDataSource.getUsers().add(user);
 				this.dataSources.put(id, newDataSource);
 				dataSourceConfigs.put(id, config);
+				
+				return newDataSource;
 			}
 		}
 
@@ -85,7 +87,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 						toBeClosedDataSource.offer(dataSource);
 					}
 
-					logger.error("Error occurs while closing ds", e);
+					logger.error(e.getMessage(), e);
 				}
 			}
 		}

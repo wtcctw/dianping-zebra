@@ -17,20 +17,21 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 public class SingleConnection implements Connection {
 
-	private String dsId;
+	private SingleDataSource dataSource;
 	
 	private Connection conn;
 
-	public SingleConnection(String dsId, Connection conn) {
-		this.dsId = dsId;
+	public SingleConnection(SingleDataSource dataSource, Connection conn) {
+		this.dataSource = dataSource;
 		this.conn = conn;
 	}
 
-	public String getDataSourceId() {
-		return dsId;
+	public SingleDataSource getDataSource() {
+		return dataSource;
 	}
 
 	@Override
@@ -280,5 +281,25 @@ public class SingleConnection implements Connection {
 	@Override
 	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
 		return conn.createStruct(typeName, attributes);
+	}
+	
+	public void setSchema(String schema) throws SQLException {
+		throw new UnsupportedOperationException("setSchema");
+	}
+
+	public String getSchema() throws SQLException {
+		throw new UnsupportedOperationException("getSchema");
+	}
+
+	public void abort(Executor executor) throws SQLException {
+		throw new UnsupportedOperationException("abort");
+	}
+
+	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+		throw new UnsupportedOperationException("setNetworkTimeout");
+	}
+
+	public int getNetworkTimeout() throws SQLException {
+		throw new UnsupportedOperationException("getNetworkTimeout");
 	}
 }
