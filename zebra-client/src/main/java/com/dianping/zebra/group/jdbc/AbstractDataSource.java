@@ -35,7 +35,7 @@ public abstract class AbstractDataSource implements DataSource {
 	protected void init() {
 	}
 
-	public void close() throws SQLException {
+	protected void close() throws SQLException {
 	}
 
 	@Override
@@ -59,6 +59,10 @@ public abstract class AbstractDataSource implements DataSource {
 	@Override
 	public void setLogWriter(PrintWriter out) throws SQLException {
 		this.out = out;
+	}
+	
+	public void setName(String name){
+		this.name = name;
 	}
 
 	@Override

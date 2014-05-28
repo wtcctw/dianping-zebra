@@ -42,10 +42,6 @@ public abstract class AbstractConfigManager{
 		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
 	}
 
-	public String getBiz() {
-		return name;
-	}
-
 	public boolean getProperty(String key, boolean defaultValue) {
 		String value = configService.getProperty(key);
 
@@ -68,21 +64,21 @@ public abstract class AbstractConfigManager{
 		}
 	}
 
-	protected String getProperty(String key, String defaultValue) {
-		String value = configService.getProperty(key);
-
-		if (StringUtils.isNotBlank(value)) {
-			return value;
-		} else {
-			return defaultValue;
-		}
-	}
-	
 	protected long getProperty(String key, long defaultValue) {
 		String value = configService.getProperty(key);
 
 		if (StringUtils.isNotBlank(value)) {
 			return Long.parseLong(value);
+		} else {
+			return defaultValue;
+		}
+	}
+	
+	protected String getProperty(String key, String defaultValue) {
+		String value = configService.getProperty(key);
+
+		if (StringUtils.isNotBlank(value)) {
+			return value;
 		} else {
 			return defaultValue;
 		}

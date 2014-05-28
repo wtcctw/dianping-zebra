@@ -84,6 +84,7 @@ public class CountPunisher {
 		if (e.getErrorCode() == 1290 && e.getMessage().contains("read-only")) {
 			count();
 		} else {
+			//TODO getConnnetion loss exception 
 			System.out.println(e.getErrorCode() + "  " + e.getMessage());
 		}
 	}

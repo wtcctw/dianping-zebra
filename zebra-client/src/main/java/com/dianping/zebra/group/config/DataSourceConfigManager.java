@@ -16,6 +16,4 @@ public interface DataSourceConfigManager {
 	public boolean isTransactionForceWrite();
 	
 	public void addListerner(PropertyChangeListener listener);
-
-	public String getBiz();
 }

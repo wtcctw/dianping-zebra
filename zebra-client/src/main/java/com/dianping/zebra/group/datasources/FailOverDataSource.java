@@ -72,10 +72,6 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public void close() throws SQLException {
-		// for (SingleDataSource dataSource : standbyDataSources.values()) {
-		// singleDataSourceManager.destoryDataSource(dataSource.getId(), name);
-		// }
-
 		if (this.switchMonitorThread != null) {
 			switchMonitorThread.interrupt();
 		}
