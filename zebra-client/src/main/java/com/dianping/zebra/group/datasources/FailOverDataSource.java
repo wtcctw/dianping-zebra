@@ -7,13 +7,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 
 public class FailOverDataSource extends AbstractDataSource {
@@ -28,14 +29,14 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private Thread switchMonitorThread;
 
-	public FailOverDataSource(String name, Map<String, DataSourceConfig> dataSourceConfigs,
+	private DataSourceConfigManager dataSourceConfigManager;
+
+	public FailOverDataSource(String name, DataSourceConfigManager dataSourceConfigManager,
 	      SingleDataSourceManager manager) {
 		this.name = name;
 		this.singleDataSourceManager = manager;
+		this.dataSourceConfigManager = dataSourceConfigManager;
 
-		for (DataSourceConfig config : dataSourceConfigs.values()) {
-			this.standbyDataSources.put(config.getId(), singleDataSourceManager.createDataSource(name, config));
-		}
 	}
 
 	@Override
@@ -48,12 +49,22 @@ public class FailOverDataSource extends AbstractDataSource {
 		if (activeDs != null && activeDs.isAvailable()) {
 			return activeDs.getConnection();
 		} else {
-			throw new SQLException("No dataSource avaiable.");
+			throw new SQLException("No avaiable write dataSource.");
 		}
 	}
 
 	@Override
 	public void init() {
+		for (Entry<String, DataSourceConfig> entry : dataSourceConfigManager.getDataSourceConfigs().entrySet()) {
+			DataSourceConfig config = entry.getValue();
+
+			if (config.isActive()) {
+				if (config.isCanWrite()) {
+					this.standbyDataSources.put(config.getId(), singleDataSourceManager.createDataSource(name, config));
+				}
+			}
+		}
+		
 		switchMonitorThread = new Thread(new WriterSwitchMonitor());
 		switchMonitorThread.setDaemon(true);
 		switchMonitorThread.setName("Thread-" + WriterSwitchMonitor.class.getName());
@@ -61,12 +72,8 @@ public class FailOverDataSource extends AbstractDataSource {
 		switchMonitorThread.start();
 
 		try {
-			TimeUnit.SECONDS.sleep(1);
+			TimeUnit.MILLISECONDS.sleep(100);
 		} catch (InterruptedException e) {
-		}
-
-		if (activeDs == null) {
-			throw new IllegalConfigException("Cannot connect to any write datasources.");
 		}
 	}
 
@@ -138,7 +145,7 @@ public class FailOverDataSource extends AbstractDataSource {
 					break;
 				}
 			}
-
+			
 			logger.info("failover dataSources switch monitor stopped.");
 		}
 	}

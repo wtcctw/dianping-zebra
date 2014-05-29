@@ -8,7 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
+import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
@@ -26,19 +28,37 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private Map<String, SingleDataSource> dataSources;
 
-	private SingleDataSourceManager singleDataSourceManager;
+	private DataSourceConfigManager dataSourceConfigManager;
 
-	public LoadBalancedDataSource(String name, Map<String, DataSourceConfig> configs,
-	      SystemConfigManager systemConfigManager, SingleDataSourceManager manager) {
+	public LoadBalancedDataSource(String name, DataSourceConfigManager dataSourceConfigManager,
+	      SystemConfigManager systemConfigManager) {
 		this.name = name;
 		this.systemConfigManager = systemConfigManager;
-		this.singleDataSourceManager = manager;
+		this.dataSourceConfigManager = dataSourceConfigManager;
 		this.dataSources = new HashMap<String, SingleDataSource>();
-		for (DataSourceConfig config : configs.values()) {
-			this.dataSources.put(config.getId(), singleDataSourceManager.createDataSource(name, config));
+
+	}
+
+	public void init() {
+		Map<String, DataSourceConfig> loadBalancedConfigMap = new HashMap<String, DataSourceConfig>();
+
+		for (Entry<String, DataSourceConfig> entry : dataSourceConfigManager.getDataSourceConfigs().entrySet()) {
+			String key = entry.getKey();
+			DataSourceConfig config = entry.getValue();
+
+			if (config.isActive()) {
+				if (config.isCanRead()) {
+					loadBalancedConfigMap.put(key, config);
+				}
+			}
 		}
-		this.router = new WeightDataSourceRouter(configs);
-		this.singleDataSourceManager = manager;
+
+		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
+			this.dataSources.put(config.getId(),
+			      SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(name, config));
+		}
+
+		this.router = new WeightDataSourceRouter(loadBalancedConfigMap);
 	}
 
 	@Override
