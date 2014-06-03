@@ -5,10 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.ServiceLoader;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,7 +17,6 @@ import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManager;
@@ -114,30 +110,9 @@ public class GroupDataSource extends AbstractDataSource {
 
 	private void initDataSources() {
 		try {
-			Map<String, DataSourceConfig> loadBalancedConfigMap = new HashMap<String, DataSourceConfig>();
-			Map<String, DataSourceConfig> failOverConfigMap = new HashMap<String, DataSourceConfig>();
-
-			for (Entry<String, DataSourceConfig> entry : dataSourceConfigManager.getDataSourceConfigs().entrySet()) {
-				String key = entry.getKey();
-				DataSourceConfig config = entry.getValue();
-
-				if (config.isActive()) {
-					if (config.isCanRead()) {
-						loadBalancedConfigMap.put(key, config);
-					}
-
-					if (config.isCanWrite()) {
-						failOverConfigMap.put(key, config);
-					}
-				} else {
-					this.singleDataSourceManager.destoryDataSource(config.getId(), name);
-				}
-			}
-
-			this.readDataSource = new LoadBalancedDataSource(name, loadBalancedConfigMap, systemConfigManager,
-			      singleDataSourceManager);
+			this.readDataSource = new LoadBalancedDataSource(name, dataSourceConfigManager, systemConfigManager);
 			this.readDataSource.init();
-			this.writeDataSource = new FailOverDataSource(name, failOverConfigMap, singleDataSourceManager);
+			this.writeDataSource = new FailOverDataSource(name, dataSourceConfigManager, singleDataSourceManager);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -150,34 +125,13 @@ public class GroupDataSource extends AbstractDataSource {
 	}
 
 	private void refresh() {
-		Map<String, DataSourceConfig> loadBalancedConfigMap = new HashMap<String, DataSourceConfig>();
-		Map<String, DataSourceConfig> failOverConfigMap = new HashMap<String, DataSourceConfig>();
-
-		for (Entry<String, DataSourceConfig> entry : dataSourceConfigManager.getDataSourceConfigs().entrySet()) {
-			String key = entry.getKey();
-			DataSourceConfig config = entry.getValue();
-
-			if (config.isActive()) {
-				if (config.isCanRead()) {
-					loadBalancedConfigMap.put(key, config);
-				}
-
-				if (config.isCanWrite()) {
-					failOverConfigMap.put(key, config);
-				}
-			} else {
-				this.singleDataSourceManager.destoryDataSource(config.getId(), name);
-			}
-		}
-
 		LoadBalancedDataSource readDataSource = null;
 		FailOverDataSource writeDataSource = null;
 		boolean preparedSwitch = false;
 		try {
-			readDataSource = new LoadBalancedDataSource(name, loadBalancedConfigMap, systemConfigManager,
-			      singleDataSourceManager);
+			readDataSource = new LoadBalancedDataSource(name, dataSourceConfigManager, systemConfigManager);
 			readDataSource.init();
-			writeDataSource = new FailOverDataSource(name, failOverConfigMap, singleDataSourceManager);
+			writeDataSource = new FailOverDataSource(name, dataSourceConfigManager, singleDataSourceManager);
 			writeDataSource.init();
 
 			preparedSwitch = true;
