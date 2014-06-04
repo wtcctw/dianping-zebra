@@ -38,4 +38,12 @@ public class JDBCExceptionUtils {
 		}
 
 	}
+
+	public static void throwWrappedSQLException(SQLException e) throws SQLException {
+		if (e.getErrorCode() == 1290 && e.getMessage().contains("read-only")) {
+			throw new SQLException("Write dataSource is currently in the maintaining stage. ", e);
+		} else {
+			throw e;
+		}
+	}
 }

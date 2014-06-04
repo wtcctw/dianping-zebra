@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dianping.zebra.group.datasources.SingleConnection;
+import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
 
@@ -190,9 +191,9 @@ public class GroupStatement implements Statement {
 		} catch (SQLException e) {
 			if (conn instanceof SingleConnection) {
 				((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
-
-				throw e;
 			}
+			
+			JDBCExceptionUtils.throwWrappedSQLException(e);
 		}
 
 		return this.updateCount;

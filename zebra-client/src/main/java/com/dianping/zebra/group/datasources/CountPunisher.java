@@ -85,7 +85,6 @@ public class CountPunisher {
 			count();
 		} else {
 			//TODO getConnnetion loss exception 
-			System.out.println(e.getErrorCode() + "  " + e.getMessage());
 		}
 	}
 }

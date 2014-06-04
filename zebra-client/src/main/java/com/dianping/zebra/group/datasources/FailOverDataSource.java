@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,7 +54,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		if (activeDs != null && activeDs.isAvailable()) {
 			return activeDs.getConnection();
 		} else {
-			throw new SQLException("No avaiable write dataSource.");
+			throw new SQLException("Write dataSource is currently in the maintaining stage. ");
 		}
 	}
 
@@ -78,8 +79,26 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	class WriterSwitchMonitor implements Runnable {
+		private Map<String, Connection> connections = new HashMap<String, Connection>();
+
+		private void close() {
+			for (Connection conn : connections.values()) {
+				try {
+					conn.close();
+				} catch (SQLException ignore) {
+				}
+			}
+
+			logger.info("failover dataSources switch monitor stopped.");
+		}
+
 		public Connection getConnection(DataSourceConfig config) throws SQLException {
-			Connection conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword());
+			Connection conn = connections.get(config.getId());
+
+			if (conn == null) {
+				conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword());
+				connections.put(config.getId(), conn);
+			}
 
 			return conn;
 		}
@@ -123,23 +142,19 @@ public class FailOverDataSource extends AbstractDataSource {
 							if (stmt != null) {
 								stmt.close();
 							}
-
-							if (conn != null) {
-								conn.close();
-							}
 						} catch (SQLException ignore) {
 						}
 					}
 				}
 
 				try {
-					TimeUnit.MILLISECONDS.sleep(10);
+					TimeUnit.SECONDS.sleep(60);
 				} catch (InterruptedException e) {
 					break;
 				}
 			}
 
-			logger.info("failover dataSources switch monitor stopped.");
+			close();
 		}
 	}
 }

@@ -60,6 +60,7 @@ import com.dianping.zebra.group.jdbc.param.StringParamContext;
 import com.dianping.zebra.group.jdbc.param.TimeParamContext;
 import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
+import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
 
@@ -171,9 +172,9 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		} catch (SQLException e) {
 			if (conn instanceof SingleConnection) {
 				((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
-
-				throw e;
 			}
+			
+			JDBCExceptionUtils.throwWrappedSQLException(e);
 		}
 
 		return this.updateCount;
