@@ -84,7 +84,6 @@ public abstract class AbstractConfigManager{
 		}
 	}
 
-
 	private void notifyListeners(final PropertyChangeEvent evt) {
 		try {
 			for (final PropertyChangeListener listener : listeners) {

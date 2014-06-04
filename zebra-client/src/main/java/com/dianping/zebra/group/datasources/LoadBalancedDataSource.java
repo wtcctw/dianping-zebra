@@ -8,10 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
-import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.router.DataSourceRouter;
@@ -22,49 +19,27 @@ import com.dianping.zebra.group.util.JDBCExceptionUtils;
 
 public class LoadBalancedDataSource extends AbstractDataSource {
 
+	private int retryTimes;
+	
+	private Map<String, DataSourceConfig> loadBalancedConfigMap;
+
 	private DataSourceRouter router;
 
-	private SystemConfigManager systemConfigManager;
-
 	private Map<String, SingleDataSource> dataSources;
-
-	private DataSourceConfigManager dataSourceConfigManager;
-
-	public LoadBalancedDataSource(String name, DataSourceConfigManager dataSourceConfigManager,
-	      SystemConfigManager systemConfigManager) {
-		this.name = name;
-		this.systemConfigManager = systemConfigManager;
-		this.dataSourceConfigManager = dataSourceConfigManager;
+	
+	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
+			int retryTimes) {
 		this.dataSources = new HashMap<String, SingleDataSource>();
-
+		this.loadBalancedConfigMap = loadBalancedConfigMap;
+		this.retryTimes = retryTimes;
 	}
-
-	public void init() {
-		Map<String, DataSourceConfig> loadBalancedConfigMap = new HashMap<String, DataSourceConfig>();
-
-		for (Entry<String, DataSourceConfig> entry : dataSourceConfigManager.getDataSourceConfigs().entrySet()) {
-			String key = entry.getKey();
-			DataSourceConfig config = entry.getValue();
-
-			if (config.isActive()) {
-				if (config.isCanRead()) {
-					loadBalancedConfigMap.put(key, config);
-				}
-			}
-		}
-
-		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			this.dataSources.put(config.getId(),
-			      SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(name, config));
-		}
-
-		this.router = new WeightDataSourceRouter(loadBalancedConfigMap);
+	
+	public void close() throws SQLException{
+		for(String dsId : dataSources.keySet()){
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(dsId, this);
+		}	
 	}
-
-	@Override
-	public void close() throws SQLException {
-	}
-
+	
 	@Override
 	public Connection getConnection() throws SQLException {
 		return getConnection(null, null);
@@ -88,9 +63,8 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 			int retryTimes = -1;
 			Set<RounterTarget> excludeTargets = new HashSet<RounterTarget>();
 			List<SQLException> exceptions = new ArrayList<SQLException>();
-			int systemRetryTimes = systemConfigManager.getSystemConfig().getRetryTimes();
 
-			while (retryTimes++ < systemRetryTimes) {
+			while (retryTimes++ < this.retryTimes) {
 				try {
 					conn = this.dataSources.get(target.getId()).getConnection();
 					return conn;
@@ -113,5 +87,14 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		}
 
 		throw new SQLException("Can not aquire connection");
+	}
+
+	public void init() {
+		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
+			this.dataSources.put(config.getId(),
+			      SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(this, config));
+		}
+
+		this.router = new WeightDataSourceRouter(loadBalancedConfigMap);
 	}
 }

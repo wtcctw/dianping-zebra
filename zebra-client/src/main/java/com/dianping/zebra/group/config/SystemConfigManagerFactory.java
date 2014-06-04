@@ -9,6 +9,8 @@ import com.dianping.zebra.group.exception.IllegalConfigException;
 public class SystemConfigManagerFactory {
 
 	private static Map<String, SystemConfigManager> systemConfigManagers = new HashMap<String, SystemConfigManager>();
+	
+	private SystemConfigManagerFactory(){}
 
 	public static SystemConfigManager getConfigManger(String configManagerType, String name) {
 		SystemConfigManager systemConfigManager = systemConfigManagers.get(name);

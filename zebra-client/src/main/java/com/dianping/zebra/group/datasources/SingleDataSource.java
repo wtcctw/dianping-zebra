@@ -32,7 +32,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private DataSource dataSource;
 
-	private Set<String> users = new HashSet<String>(); // 存储有多少业务方共享了这个dataSource
+	private Set<Object> references = new HashSet<Object>(); // 存储有多少业务方共享引用了这个dataSource
 
 	private CountPunisher punisher;
 
@@ -51,7 +51,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	@Override
 	public void close() throws SQLException {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource) && references.isEmpty()) {
 			PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
 			if (poolBackedDataSource.getNumBusyConnections() == 0) {
 				logger.info("closing the datasource [" + this.dsId + "]");
@@ -109,8 +109,8 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		return this.state;
 	}
 
-	public synchronized Set<String> getUsers() {
-		return this.users;
+	public synchronized Set<Object> getReferences() {
+		return this.references;
 	}
 
 	private DataSource initDataSources(DataSourceConfig value) {

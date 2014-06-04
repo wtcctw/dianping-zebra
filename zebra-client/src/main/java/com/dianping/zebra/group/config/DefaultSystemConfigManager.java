@@ -47,7 +47,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		config.setHealthCheckInterval(getProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL),
 		      config.getHealthCheckInterval()));
 		config.setMaxErrorCounter(getProperty(getKey(Constants.ELEMENT_MAX_ERROR_COUNTER), config.getMaxErrorCounter()));
-		config.setRetryTimes(getProperty(getKey(Constants.ELEMENT_RETRY_TIMES), config.getRetryTimes()));
+		config.setRetryTimes(getProperty(getKey(Constants.ELEMENT_RETRY_TIMES), config.getMaxErrorCounter()));
 		config.setCookieName(getProperty(getKey(Constants.ELEMENT_COOKIE_NAME), config.getCookieName()));
 		config.setEncryptSeed(getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED), config.getEncryptSeed()));
 		config.setCookieExpiredTime(getProperty(getKey(Constants.ELEMENT_COOKIE_EXPIRED_TIME),
@@ -67,10 +67,10 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 				config.setCookieDomain((String) newValue);
 			} else if (key.equals(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL))) {
 				config.setHealthCheckInterval(Integer.parseInt((String) newValue));
+			} else if (key.equals(getKey(Constants.ELEMENT_RETRY_TIMES))) {
+				config.setRetryTimes(getProperty(getKey(Constants.ELEMENT_RETRY_TIMES), config.getMaxErrorCounter()));
 			} else if (key.equals(getKey(Constants.ELEMENT_MAX_ERROR_COUNTER))) {
 				config.setMaxErrorCounter(Integer.parseInt((String) newValue));
-			} else if (key.equals(getKey(Constants.ELEMENT_RETRY_TIMES))) {
-				config.setRetryTimes((Integer) newValue);
 			} else if (key.equals(getKey(Constants.ELEMENT_COOKIE_NAME))) {
 				config.setCookieName((String) newValue);
 			} else if (key.equals(getKey(Constants.ELEMENT_ENCRYPT_SEED))) {

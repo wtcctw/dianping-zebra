@@ -38,6 +38,8 @@ public class Constants {
 	public static final String ELEMENT_PUNISH_LIMIT= "punishLimit";
 
 	public static final String ELEMENT_TIME_WINDOW= "timeWindow";
+	
+	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
 
 	public static final String ELEMENT_DRIVER_CLASS = "driverClass";
 
@@ -65,8 +67,6 @@ public class Constants {
 	public static final String ELEMENT_HEALTH_CHECK_INTERVAL = "healthCheckInterval";
 
 	public static final String ELEMENT_MAX_ERROR_COUNTER = "maxErrorCounter";
-
-	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
 
 	public static final String ELEMENT_COOKIE_NAME = "cookieName";
 

@@ -17,7 +17,7 @@ import com.dianping.zebra.group.jdbc.SingleDatabaseTestCase;
 public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 
 	private static SingleDataSourceManager manager;
-
+	
 	@BeforeClass
 	public static void setup() {
 		manager = SingleDataSourceManagerFactory.getDataSourceManager();
@@ -39,7 +39,7 @@ public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 			}
 		});
 		
-		manager.destoryDataSource(getDataSourceConfig().getId(), "test");
+		manager.destoryDataSource(getDataSourceConfig().getId(), null);
 		
 		TimeUnit.SECONDS.sleep(1);
 		Assert.assertEquals(DataSourceState.CLOSED, dataSource.getState());
@@ -62,7 +62,7 @@ public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 	}
 
 	protected DataSource getDataSource() {
-		return manager.createDataSource("test", getDataSourceConfig());
+		return manager.createDataSource(null, getDataSourceConfig());
 	}
 
 	@Override

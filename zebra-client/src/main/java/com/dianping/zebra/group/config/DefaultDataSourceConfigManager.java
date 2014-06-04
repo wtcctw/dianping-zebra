@@ -51,6 +51,10 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_PRFIX, dsId, key);
 	}
 
+	public GroupDataSourceConfig getGroupDataSourceConfig(){
+		return this.groupDataSourceConfigCache;
+	}
+
 	private String getGroupKey(String key) {
 		return String.format("%s.%s", Constants.DEFAULT_GROUP_PRFIX, key);
 	}
@@ -195,7 +199,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			ds.setWeight(getReadWeight(value, indexOfR, indexOfW));
 		}
 	}
-
+	
 	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
 		int readNum = 0, writeNum = 0;
 		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {

@@ -20,8 +20,6 @@ public abstract class AbstractDataSource implements DataSource {
 
 	private int loginTimeout = 0;
 
-	protected String name;
-
 	@Override
 	public int getLoginTimeout() throws SQLException {
 		return this.loginTimeout;
@@ -61,10 +59,6 @@ public abstract class AbstractDataSource implements DataSource {
 		this.out = out;
 	}
 	
-	public void setName(String name){
-		this.name = name;
-	}
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T unwrap(Class<T> iface) throws SQLException {

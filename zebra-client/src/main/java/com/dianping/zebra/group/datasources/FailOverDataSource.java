@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 
@@ -25,18 +24,23 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private Map<String, SingleDataSource> standbyDataSources = new LinkedHashMap<String, SingleDataSource>();
 
-	private SingleDataSourceManager singleDataSourceManager;
+	private Map<String, DataSourceConfig> configs;
 
 	private Thread switchMonitorThread;
 
-	private DataSourceConfigManager dataSourceConfigManager;
+	public FailOverDataSource(Map<String, DataSourceConfig> configs) {
+		this.configs = configs;
+	}
 
-	public FailOverDataSource(String name, DataSourceConfigManager dataSourceConfigManager,
-	      SingleDataSourceManager manager) {
-		this.name = name;
-		this.singleDataSourceManager = manager;
-		this.dataSourceConfigManager = dataSourceConfigManager;
+	@Override
+	public void close() throws SQLException {
+		if (this.switchMonitorThread != null) {
+			switchMonitorThread.interrupt();
+		}
 
+		for (String dsId : standbyDataSources.keySet()) {
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(dsId, this);
+		}
 	}
 
 	@Override
@@ -55,16 +59,12 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public void init() {
-		for (Entry<String, DataSourceConfig> entry : dataSourceConfigManager.getDataSourceConfigs().entrySet()) {
+		for (Entry<String, DataSourceConfig> entry : configs.entrySet()) {
 			DataSourceConfig config = entry.getValue();
-
-			if (config.isActive()) {
-				if (config.isCanWrite()) {
-					this.standbyDataSources.put(config.getId(), singleDataSourceManager.createDataSource(name, config));
-				}
-			}
+			this.standbyDataSources.put(config.getId(), SingleDataSourceManagerFactory.getDataSourceManager()
+			      .createDataSource(this, config));
 		}
-		
+
 		switchMonitorThread = new Thread(new WriterSwitchMonitor());
 		switchMonitorThread.setDaemon(true);
 		switchMonitorThread.setName("Thread-" + WriterSwitchMonitor.class.getName());
@@ -74,13 +74,6 @@ public class FailOverDataSource extends AbstractDataSource {
 		try {
 			TimeUnit.MILLISECONDS.sleep(100);
 		} catch (InterruptedException e) {
-		}
-	}
-
-	@Override
-	public void close() throws SQLException {
-		if (this.switchMonitorThread != null) {
-			switchMonitorThread.interrupt();
 		}
 	}
 
@@ -145,7 +138,7 @@ public class FailOverDataSource extends AbstractDataSource {
 					break;
 				}
 			}
-			
+
 			logger.info("failover dataSources switch monitor stopped.");
 		}
 	}

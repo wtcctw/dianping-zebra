@@ -5,7 +5,10 @@ import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ServiceLoader;
 
 import org.apache.commons.lang.StringUtils;
@@ -17,9 +20,10 @@ import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
-import com.dianping.zebra.group.datasources.SingleDataSourceManager;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
@@ -33,13 +37,15 @@ public class GroupDataSource extends AbstractDataSource {
 
 	private FailOverDataSource writeDataSource;
 
-	private SingleDataSourceManager singleDataSourceManager;
-
 	private DataSourceConfigManager dataSourceConfigManager;
 
 	private SystemConfigManager systemConfigManager;
 
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
+
+	private GroupDataSourceConfig groupConfigCache;
+
+	private String name;
 
 	public GroupDataSource(String name) {
 		this.name = name;
@@ -81,18 +87,68 @@ public class GroupDataSource extends AbstractDataSource {
 		return new GroupConnection(readDataSource, writeDataSource, dataSourceConfigManager, customizedReadWriteStrategy);
 	}
 
+	private Map<String, DataSourceConfig> getFailoverConfig() {
+		Map<String, DataSourceConfig> failoverConfigMap = new HashMap<String, DataSourceConfig>();
+
+		for (Entry<String, DataSourceConfig> entry : dataSourceConfigManager.getDataSourceConfigs().entrySet()) {
+			String key = entry.getKey();
+			DataSourceConfig config = entry.getValue();
+
+			if (config.isActive() && config.isCanWrite()) {
+				failoverConfigMap.put(key, config);
+			}
+		}
+
+		return failoverConfigMap;
+	}
+
+	private Map<String, DataSourceConfig> getLoadBalancedConfig() {
+		Map<String, DataSourceConfig> loadBalancedConfigMap = new HashMap<String, DataSourceConfig>();
+
+		for (Entry<String, DataSourceConfig> entry : dataSourceConfigManager.getDataSourceConfigs().entrySet()) {
+			String key = entry.getKey();
+			DataSourceConfig config = entry.getValue();
+
+			if (config.isActive() && config.isCanRead()) {
+				loadBalancedConfigMap.put(key, config);
+			}
+		}
+
+		return loadBalancedConfigMap;
+	}
+
 	public void init() {
 		if (StringUtils.isBlank(name)) {
 			throw new GroupDataSourceException("name must not be blank");
 		}
 
-		this.singleDataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, name);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
+		this.groupConfigCache = this.dataSourceConfigManager.getGroupDataSourceConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
 		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+		
+		SingleDataSourceManagerFactory.getDataSourceManager().init();
+		
 		this.initDataSources();
 		this.loadCustomizedReadWriteStrategy();
+	}
+
+	private void initDataSources() {
+		try {
+			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(), systemConfigManager
+			      .getSystemConfig().getRetryTimes());
+			this.readDataSource.init();
+			this.writeDataSource = new FailOverDataSource(getFailoverConfig());
+			this.writeDataSource.init();
+		} catch (RuntimeException e) {
+			try {
+				this.close(this.readDataSource, this.writeDataSource);
+			} catch (SQLException e1) {
+			}
+
+			throw e;
+		}
 	}
 
 	private void loadCustomizedReadWriteStrategy() {
@@ -108,30 +164,24 @@ public class GroupDataSource extends AbstractDataSource {
 		}
 	}
 
-	private void initDataSources() {
-		try {
-			this.readDataSource = new LoadBalancedDataSource(name, dataSourceConfigManager, systemConfigManager);
-			this.readDataSource.init();
-			this.writeDataSource = new FailOverDataSource(name, dataSourceConfigManager, singleDataSourceManager);
-			this.writeDataSource.init();
-		} catch (RuntimeException e) {
-			try {
-				this.close(this.readDataSource, this.writeDataSource);
-			} catch (SQLException e1) {
-			}
-
-			throw e;
-		}
-	}
-
 	private void refresh() {
+		GroupDataSourceConfig groupConfigTmp = this.dataSourceConfigManager.getGroupDataSourceConfig();
+		if (groupConfigCache.toString().equals(groupConfigTmp.toString())) {
+			return;
+		} else {
+			groupConfigCache = groupConfigTmp;
+		}
+
+		logger.info("start to refresh the dataSources...");
+
 		LoadBalancedDataSource readDataSource = null;
 		FailOverDataSource writeDataSource = null;
 		boolean preparedSwitch = false;
 		try {
-			readDataSource = new LoadBalancedDataSource(name, dataSourceConfigManager, systemConfigManager);
+			readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(), systemConfigManager.getSystemConfig()
+			      .getRetryTimes());
 			readDataSource.init();
-			writeDataSource = new FailOverDataSource(name, dataSourceConfigManager, singleDataSourceManager);
+			writeDataSource = new FailOverDataSource(getFailoverConfig());
 			writeDataSource.init();
 
 			preparedSwitch = true;
@@ -151,7 +201,6 @@ public class GroupDataSource extends AbstractDataSource {
 			// switch
 			this.readDataSource = readDataSource;
 			this.writeDataSource = writeDataSource;
-			logger.info("refresh the dataSources successfully!");
 
 			// destroy old dataSources
 			try {
@@ -159,7 +208,13 @@ public class GroupDataSource extends AbstractDataSource {
 			} catch (Throwable e) {
 				logger.error("error when destroy old dataSources", e);
 			}
+
+			logger.info("refresh the dataSources successfully!");
 		}
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	class GroupDataSourceConfigChangedListener implements PropertyChangeListener {

@@ -8,5 +8,7 @@ public enum DataSourceState {
 	
 	DOWN,
 	
+	//TO_BE_DOWN,
+	
 	CLOSED,
 }

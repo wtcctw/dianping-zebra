@@ -10,6 +10,9 @@ public class DataSourceConfigManagerFactory {
 
 	private static Map<String, DataSourceConfigManager> dataSourceConfigManagers = new HashMap<String, DataSourceConfigManager>();
 
+	private DataSourceConfigManagerFactory(){
+	}
+	
 	public static DataSourceConfigManager getConfigManager(String configManagerType, String name) {
 		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(name);
 

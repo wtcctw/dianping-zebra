@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.jdbc.AbstractDataSource;
 
 public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
@@ -22,23 +23,23 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 	private BlockingQueue<SingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<SingleDataSource>();
 
 	@Override
-	public synchronized SingleDataSource createDataSource(String user, DataSourceConfig config) {
+	public synchronized SingleDataSource createDataSource(AbstractDataSource reference, DataSourceConfig config) {
 		String id = config.getId();
 		SingleDataSource dataSource = dataSources.get(id);
 
 		if (dataSource == null) {
 			dataSource = new SingleDataSource(config);
-			dataSource.getUsers().add(user);
+			dataSource.getReferences().add(reference);
 			dataSources.put(id, dataSource);
 			dataSourceConfigs.put(id, config);
 		} else {
 			if (config.toString().equals(dataSourceConfigs.get(id).toString())) {
-				dataSource.getUsers().add(user);
+				dataSource.getReferences().add(reference);
 			} else {
 				SingleDataSource newDataSource = new SingleDataSource(config);
-				newDataSource.getUsers().addAll(dataSource.getUsers());
+				newDataSource.getReferences().addAll(dataSource.getReferences());
 				this.toBeClosedDataSource.offer(dataSource);
-				newDataSource.getUsers().add(user);
+				newDataSource.getReferences().add(reference);
 				this.dataSources.put(id, newDataSource);
 				dataSourceConfigs.put(id, config);
 				
@@ -50,13 +51,13 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 	}
 
 	@Override
-	public synchronized void destoryDataSource(String dsId, String user) {
+	public synchronized void destoryDataSource(String dsId, AbstractDataSource reference) {
 		SingleDataSource dataSource = dataSources.get(dsId);
 
 		if (dataSource != null) {
-			dataSource.getUsers().remove(user);
+			dataSource.getReferences().remove(reference);
 
-			if (dataSource.getUsers().isEmpty()) {
+			if (dataSource.getReferences().isEmpty()) {
 				this.toBeClosedDataSource.offer(dataSources.remove(dsId));
 			}
 		}
