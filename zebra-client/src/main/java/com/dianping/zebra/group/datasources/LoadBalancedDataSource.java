@@ -20,26 +20,25 @@ import com.dianping.zebra.group.util.JDBCExceptionUtils;
 public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private int retryTimes;
-	
+
 	private Map<String, DataSourceConfig> loadBalancedConfigMap;
 
 	private DataSourceRouter router;
 
 	private Map<String, SingleDataSource> dataSources;
-	
-	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
-			int retryTimes) {
+
+	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap, int retryTimes) {
 		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.retryTimes = retryTimes;
 	}
-	
-	public void close() throws SQLException{
-		for(String dsId : dataSources.keySet()){
+
+	public void close() throws SQLException {
+		for (String dsId : dataSources.keySet()) {
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(dsId, this);
-		}	
+		}
 	}
-	
+
 	@Override
 	public Connection getConnection() throws SQLException {
 		return getConnection(null, null);

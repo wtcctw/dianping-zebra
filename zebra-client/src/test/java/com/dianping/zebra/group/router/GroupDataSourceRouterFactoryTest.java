@@ -1,9 +1,9 @@
 package com.dianping.zebra.group.router;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,6 +16,7 @@ public class GroupDataSourceRouterFactoryTest {
 
 	private DataSourceRouter dataSourceRouter;
 
+	private Map<String,Integer> counter = new HashMap<String,Integer>();
 	@Before
 	public void init() {
 		String dataSourceResourceId = "sample.ds.v2";
@@ -27,44 +28,23 @@ public class GroupDataSourceRouterFactoryTest {
 
 	@Test
 	public void testReadSelect() {
-		String readSql = "select * from a";
-		RouterContext routerInfo = new RouterContext(readSql);
-		RounterTarget target = dataSourceRouter.select(routerInfo);
-
-		isInRead(target);
+		for(int i = 0 ; i < 1000 ; i++){
+			String readSql = "select * from a";
+			RouterContext routerInfo = new RouterContext(readSql);
+			RounterTarget target = dataSourceRouter.select(routerInfo);
+			
+			Integer integer = counter.get(target.getId());
+			if(integer == null){
+				integer = 1;
+			}else{
+				integer++;
+			}
+			
+			counter.put(target.getId(), integer);
+		}
+		
+		for(Entry<String,Integer> entry: counter.entrySet()){
+			System.out.println(entry.getKey() + ":" + entry.getValue());
+		}
 	}
-
-	@Test
-	public void testWriteSelect() {
-		String writeSql = "update a set xx=xx";
-		RouterContext routerInfo = new RouterContext(writeSql);
-		RounterTarget target = dataSourceRouter.select(routerInfo);
-
-		isInWrite(target);
-	}
-
-	@Test
-	public void testExcludeSelect() {
-		String writeSql = "update a set xx=xx";
-		RouterContext routerInfo = new RouterContext(writeSql);
-		RounterTarget target = dataSourceRouter.select(routerInfo);
-		isInWrite(target);
-
-		Set<RounterTarget> excludeTarget = new HashSet<RounterTarget>();
-		excludeTarget.add(target);
-		routerInfo = new RouterContext(excludeTarget);
-		Assert.assertNotNull(dataSourceRouter.select(routerInfo));
-
-	}
-
-	private void isInRead(RounterTarget target) {
-		System.out.println(target);
-		Assert.assertNotSame("db1", target.getId());
-	}
-
-	private void isInWrite(RounterTarget target) {
-		System.out.println(target);
-		Assert.assertEquals("db1", target.getId());
-	}
-
 }

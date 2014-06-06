@@ -132,7 +132,6 @@ public class GroupConnection implements Connection {
 			openedStatements.clear();
 			rConnection = null;
 			wConnection = null;
-
 		}
 
 		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
