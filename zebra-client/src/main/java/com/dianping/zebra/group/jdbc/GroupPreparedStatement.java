@@ -30,10 +30,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.MessageProducer;
-import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.jdbc.param.ArrayParamContext;
 import com.dianping.zebra.group.jdbc.param.AsciiParamContext;
@@ -86,8 +82,6 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	private List<List<ParamContext>> pstBatchedArgs;
 
-	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
-
 	public GroupPreparedStatement(GroupConnection connection, String sql) {
 		super(connection);
 		this.sql = sql;
@@ -109,18 +103,6 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		params.clear();
 
 		pstBatchedArgs.add(newArgs);
-	}
-
-	protected void beforeExecuteWithCat(String sql) {
-		String isLoged = ExecutionContextHolder.getContext().get(CAT_LOGED);
-		if (isLoged == null) {
-			String stateName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
-			MessageProducer cat = Cat.getProducer();
-			Transaction t = cat.newTransaction("SQL", stateName);
-			t.addData(sql);
-		}
-
-		Cat.getProducer().logEvent("SQL.Connection", "Checkout");
 	}
 
 	/*
@@ -186,8 +168,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				return new int[0];
 			}
 
-			beforeExecuteWithCat(sql);
-			final Connection conn = this.dpGroupConnection.getRealConnection(sql, true);
+			final Connection conn = getConnectionWithCat(sql, true);
 
 			return executeWithCat(new JDBCOperationCallback<int[]>() {
 
@@ -195,7 +176,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				public int[] doAction() throws SQLException {
 					return executeBatchOnConnection(conn);
 				}
-			}, sql, pstBatchedArgs);
+			}, sql, pstBatchedArgs, conn.getMetaData().getURL());
 
 		} finally {
 			if (pstBatchedArgs != null)
@@ -224,8 +205,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		beforeExecuteWithCat(sql);
-		final Connection conn = this.dpGroupConnection.getRealConnection(sql, false);
+		final Connection conn = getConnectionWithCat(sql, false);
 
 		return executeWithCat(new JDBCOperationCallback<ResultSet>() {
 
@@ -233,7 +213,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 			public ResultSet doAction() throws SQLException {
 				return executeQueryOnConnection(conn, sql);
 			}
-		}, sql, params);
+		}, sql, params, conn.getMetaData().getURL());
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
@@ -253,8 +233,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		beforeExecuteWithCat(sql);
-		final Connection conn = this.dpGroupConnection.getRealConnection(sql, true);
+		final Connection conn = getConnectionWithCat(sql, true);
 
 		return executeWithCat(new JDBCOperationCallback<Integer>() {
 
@@ -273,7 +252,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				return updateCount;
 			}
 
-		}, sql, params);
+		}, sql, params, conn.getMetaData().getURL());
 	}
 
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {
