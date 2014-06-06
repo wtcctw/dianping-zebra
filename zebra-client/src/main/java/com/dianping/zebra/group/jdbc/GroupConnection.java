@@ -56,7 +56,7 @@ public class GroupConnection implements Connection {
 	private DataSourceConfigManager dataSourceConfigManager;
 
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
-
+	
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
 	      DataSourceConfigManager dataSourceConfigManager, CustomizedReadWriteStrategy customizedReadWriteStrategy) {
 		super();
@@ -66,176 +66,29 @@ public class GroupConnection implements Connection {
 		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
 	}
 
+	public void abort(Executor executor) throws SQLException {
+		throw new UnsupportedOperationException("abort");
+	}
+
 	private void checkClosed() throws SQLException {
 		if (closed) {
 			throw new SQLException("No operations allowed after connection closed.");
 		}
 	}
 
-	private Connection getWriteConnection() throws SQLException {
-		if (wConnection == null) {
-			wConnection = writeDataSource.getConnection();
-		}
-
-		if (wConnection.getAutoCommit() != autoCommit) {
-			wConnection.setAutoCommit(autoCommit);
-		}
-		return wConnection;
-	}
-
-	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
-		if (forceWriter) {
-			return getWriteConnection();
-		} else if (!autoCommit && dataSourceConfigManager.isTransactionForceWrite()) {
-			return getWriteConnection();
-		} else if (StringUtils.trimToEmpty(sql).startsWith(Constants.SQL_FORCE_WRITE_HINT)) {
-			return getWriteConnection();
-		} else if (customizedReadWriteStrategy != null && customizedReadWriteStrategy.forceReadFromMaster()) {
-			return getWriteConnection();
-		}
-
-		SqlType sqlType = SqlUtils.getSqlType(sql);
-		if (sqlType.isRead()) {
-			if (rConnection == null) {
-				rConnection = readDataSource.getConnection();
-			}
-			return rConnection;
-		} else {
-			return getWriteConnection();
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Wrapper#unwrap(java.lang.Class)
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T unwrap(Class<T> iface) throws SQLException {
-		try {
-			return (T) this;
-		} catch (Exception e) {
-			throw new SQLException(e);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
+	 * @see java.sql.Connection#clearWarnings()
 	 */
 	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		return this.getClass().isAssignableFrom(iface);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createStatement()
-	 */
-	@Override
-	public Statement createStatement() throws SQLException {
+	public void clearWarnings() throws SQLException {
 		checkClosed();
-		Statement stmt = new GroupStatement(this);
-		openedStatements.add(stmt);
-		return stmt;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String)
-	 */
-	@Override
-	public PreparedStatement prepareStatement(String sql) throws SQLException {
-		checkClosed();
-		PreparedStatement pstmt = new GroupPreparedStatement(this, sql);
-		openedStatements.add(pstmt);
-		return pstmt;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareCall(java.lang.String)
-	 */
-	@Override
-	public CallableStatement prepareCall(String sql) throws SQLException {
-		return prepareCall(sql, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#nativeSQL(java.lang.String)
-	 */
-	@Override
-	public String nativeSQL(String sql) throws SQLException {
-		throw new UnsupportedOperationException("nativeSQL");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setAutoCommit(boolean)
-	 */
-	@Override
-	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		checkClosed();
-		if (this.autoCommit == autoCommit) {
-			return;
+		if (rConnection != null) {
+			rConnection.clearWarnings();
 		}
-		this.autoCommit = autoCommit;
-		if (this.wConnection != null) {
-			this.wConnection.setAutoCommit(autoCommit);
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getAutoCommit()
-	 */
-	@Override
-	public boolean getAutoCommit() throws SQLException {
-		checkClosed();
-		return this.autoCommit;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#commit()
-	 */
-	@Override
-	public void commit() throws SQLException {
-		checkClosed();
-		if (autoCommit) {
-			return;
-		}
-
 		if (wConnection != null) {
-			wConnection.commit();
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#rollback()
-	 */
-	@Override
-	public void rollback() throws SQLException {
-		checkClosed();
-		if (autoCommit) {
-			return;
-		}
-
-		if (wConnection != null) {
-			wConnection.rollback();
+			wConnection.clearWarnings();
 		}
 	}
 
@@ -288,11 +141,179 @@ public class GroupConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#isClosed()
+	 * @see java.sql.Connection#commit()
 	 */
 	@Override
-	public boolean isClosed() throws SQLException {
-		return closed;
+	public void commit() throws SQLException {
+		checkClosed();
+		if (autoCommit) {
+			return;
+		}
+
+		if (wConnection != null) {
+			wConnection.commit();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createArrayOf(java.lang.String, java.lang.Object[])
+	 */
+	@Override
+	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+		throw new UnsupportedOperationException("createArrayOf");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createBlob()
+	 */
+	@Override
+	public Blob createBlob() throws SQLException {
+		throw new UnsupportedOperationException("createBlob");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createClob()
+	 */
+	@Override
+	public Clob createClob() throws SQLException {
+		throw new UnsupportedOperationException("createClob");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createNClob()
+	 */
+	@Override
+	public NClob createNClob() throws SQLException {
+		throw new UnsupportedOperationException("createNClob");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createSQLXML()
+	 */
+	@Override
+	public SQLXML createSQLXML() throws SQLException {
+		throw new UnsupportedOperationException("createSQLXML");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createStatement()
+	 */
+	@Override
+	public Statement createStatement() throws SQLException {
+		checkClosed();
+		Statement stmt = new GroupStatement(this);
+		openedStatements.add(stmt);
+		return stmt;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createStatement(int, int)
+	 */
+	@Override
+	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+		GroupStatement stmt = (GroupStatement) createStatement();
+		stmt.setResultSetType(resultSetType);
+		stmt.setResultSetConcurrency(resultSetConcurrency);
+		return stmt;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createStatement(int, int, int)
+	 */
+	@Override
+	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+	      throws SQLException {
+		GroupStatement stmt = (GroupStatement) createStatement(resultSetType, resultSetConcurrency);
+		stmt.setResultSetHoldability(resultSetHoldability);
+		return stmt;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#createStruct(java.lang.String, java.lang.Object[])
+	 */
+	@Override
+	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+		throw new UnsupportedOperationException("createStruct");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#getAutoCommit()
+	 */
+	@Override
+	public boolean getAutoCommit() throws SQLException {
+		checkClosed();
+		return this.autoCommit;
+	}
+
+	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
+	      int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		if (resultSetType == Integer.MIN_VALUE) {
+			return conn.prepareCall(sql);
+		} else if (resultSetHoldability == Integer.MIN_VALUE) {
+			return conn.prepareCall(sql, resultSetType, resultSetConcurrency);
+		} else {
+			return conn.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#getCatalog()
+	 */
+	@Override
+	public String getCatalog() throws SQLException {
+		throw new UnsupportedOperationException("getCatalog");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#getClientInfo()
+	 */
+	@Override
+	public Properties getClientInfo() throws SQLException {
+		throw new UnsupportedOperationException("getClientInfo");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#getClientInfo(java.lang.String)
+	 */
+	@Override
+	public String getClientInfo(String name) throws SQLException {
+		throw new UnsupportedOperationException("getClientInfo");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#getHoldability()
+	 */
+	@Override
+	public int getHoldability() throws SQLException {
+		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
 	}
 
 	/*
@@ -312,55 +333,39 @@ public class GroupConnection implements Connection {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setReadOnly(boolean)
-	 */
-	@Override
-	public void setReadOnly(boolean readOnly) throws SQLException {
-		// do nothing
+	public int getNetworkTimeout() throws SQLException {
+		throw new UnsupportedOperationException("getNetworkTimeout");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#isReadOnly()
-	 */
-	@Override
-	public boolean isReadOnly() throws SQLException {
-		return false;
+	private Connection getReadConnection() throws SQLException {
+		if (rConnection == null) {
+			rConnection = readDataSource.getConnection();
+		}
+
+		return rConnection;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setCatalog(java.lang.String)
-	 */
-	@Override
-	public void setCatalog(String catalog) throws SQLException {
-		throw new UnsupportedOperationException("setCatalog");
+	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
+		if (forceWriter) {
+			return getWriteConnection();
+		} else if (!autoCommit && dataSourceConfigManager.isTransactionForceWrite()) {
+			return getWriteConnection();
+		} else if (StringUtils.trimToEmpty(sql).startsWith(Constants.SQL_FORCE_WRITE_HINT)) {
+			return getWriteConnection();
+		} else if (customizedReadWriteStrategy != null && customizedReadWriteStrategy.forceReadFromMaster()) {
+			return getWriteConnection();
+		}
+
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		if (sqlType.isRead()) {
+			return getReadConnection();
+		} else {
+			return getWriteConnection();
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getCatalog()
-	 */
-	@Override
-	public String getCatalog() throws SQLException {
-		throw new UnsupportedOperationException("getCatalog");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setTransactionIsolation(int)
-	 */
-	@Override
-	public void setTransactionIsolation(int level) throws SQLException {
-		checkClosed();
-		this.transactionIsolation = level;
+	public String getSchema() throws SQLException {
+		throw new UnsupportedOperationException("getSchema");
 	}
 
 	/*
@@ -371,6 +376,16 @@ public class GroupConnection implements Connection {
 	@Override
 	public int getTransactionIsolation() throws SQLException {
 		return this.transactionIsolation;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#getTypeMap()
+	 */
+	@Override
+	public Map<String, Class<?>> getTypeMap() throws SQLException {
+		throw new UnsupportedOperationException("getTypeMap");
 	}
 
 	/*
@@ -390,47 +405,75 @@ public class GroupConnection implements Connection {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#clearWarnings()
-	 */
-	@Override
-	public void clearWarnings() throws SQLException {
-		checkClosed();
-		if (rConnection != null) {
-			rConnection.clearWarnings();
+	private Connection getWriteConnection() throws SQLException {
+		if (wConnection == null) {
+			wConnection = writeDataSource.getConnection();
 		}
-		if (wConnection != null) {
-			wConnection.clearWarnings();
+
+		if (wConnection.getAutoCommit() != autoCommit) {
+			wConnection.setAutoCommit(autoCommit);
 		}
+		return wConnection;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createStatement(int, int)
+	 * @see java.sql.Connection#isClosed()
 	 */
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-		GroupStatement stmt = (GroupStatement) createStatement();
-		stmt.setResultSetType(resultSetType);
-		stmt.setResultSetConcurrency(resultSetConcurrency);
-		return stmt;
+	public boolean isClosed() throws SQLException {
+		return closed;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
+	 * @see java.sql.Connection#isReadOnly()
 	 */
 	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-	      throws SQLException {
-		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
-		pstmt.setResultSetType(resultSetType);
-		pstmt.setResultSetConcurrency(resultSetConcurrency);
-		return pstmt;
+	public boolean isReadOnly() throws SQLException {
+		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#isValid(int)
+	 */
+	@Override
+	public boolean isValid(int timeout) throws SQLException {
+		throw new UnsupportedOperationException("isValid");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
+	 */
+	@Override
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+		return this.getClass().isAssignableFrom(iface);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#nativeSQL(java.lang.String)
+	 */
+	@Override
+	public String nativeSQL(String sql) throws SQLException {
+		throw new UnsupportedOperationException("nativeSQL");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#prepareCall(java.lang.String)
+	 */
+	@Override
+	public CallableStatement prepareCall(String sql) throws SQLException {
+		return prepareCall(sql, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
 	}
 
 	/*
@@ -441,112 +484,6 @@ public class GroupConnection implements Connection {
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
 		return prepareCall(sql, resultSetType, resultSetConcurrency, Integer.MIN_VALUE);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getTypeMap()
-	 */
-	@Override
-	public Map<String, Class<?>> getTypeMap() throws SQLException {
-		throw new UnsupportedOperationException("getTypeMap");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setTypeMap(java.util.Map)
-	 */
-	@Override
-	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-		throw new UnsupportedOperationException("setTypeMap");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setHoldability(int)
-	 */
-	@Override
-	public void setHoldability(int holdability) throws SQLException {
-		throw new UnsupportedOperationException("setHoldability");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getHoldability()
-	 */
-	@Override
-	public int getHoldability() throws SQLException {
-		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setSavepoint()
-	 */
-	@Override
-	public Savepoint setSavepoint() throws SQLException {
-		throw new UnsupportedOperationException("setSavepoint");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setSavepoint(java.lang.String)
-	 */
-	@Override
-	public Savepoint setSavepoint(String name) throws SQLException {
-		throw new UnsupportedOperationException("setSavepoint");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#rollback(java.sql.Savepoint)
-	 */
-	@Override
-	public void rollback(Savepoint savepoint) throws SQLException {
-		throw new UnsupportedOperationException("rollback with savepoint");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint)
-	 */
-	@Override
-	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		throw new UnsupportedOperationException("releaseSavepoint");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createStatement(int, int, int)
-	 */
-	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-	      throws SQLException {
-		GroupStatement stmt = (GroupStatement) createStatement(resultSetType, resultSetConcurrency);
-		stmt.setResultSetHoldability(resultSetHoldability);
-		return stmt;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
-	 */
-	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-	      int resultSetHoldability) throws SQLException {
-		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType, resultSetConcurrency);
-		pstmt.setResultSetHoldability(resultSetHoldability);
-		return pstmt;
 	}
 
 	/*
@@ -567,15 +504,17 @@ public class GroupConnection implements Connection {
 		return cstmt;
 	}
 
-	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
-	      int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		if (resultSetType == Integer.MIN_VALUE) {
-			return conn.prepareCall(sql);
-		} else if (resultSetHoldability == Integer.MIN_VALUE) {
-			return conn.prepareCall(sql, resultSetType, resultSetConcurrency);
-		} else {
-			return conn.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
-		}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#prepareStatement(java.lang.String)
+	 */
+	@Override
+	public PreparedStatement prepareStatement(String sql) throws SQLException {
+		checkClosed();
+		PreparedStatement pstmt = new GroupPreparedStatement(this, sql);
+		openedStatements.add(pstmt);
+		return pstmt;
 	}
 
 	/*
@@ -587,6 +526,33 @@ public class GroupConnection implements Connection {
 	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
 		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
 		pstmt.setAutoGeneratedKeys(autoGeneratedKeys);
+		return pstmt;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
+	 */
+	@Override
+	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+	      throws SQLException {
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
+		pstmt.setResultSetType(resultSetType);
+		pstmt.setResultSetConcurrency(resultSetConcurrency);
+		return pstmt;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
+	 */
+	@Override
+	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
+	      int resultSetHoldability) throws SQLException {
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType, resultSetConcurrency);
+		pstmt.setResultSetHoldability(resultSetHoldability);
 		return pstmt;
 	}
 
@@ -617,61 +583,66 @@ public class GroupConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createClob()
+	 * @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint)
 	 */
 	@Override
-	public Clob createClob() throws SQLException {
-		throw new UnsupportedOperationException("createClob");
+	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+		throw new UnsupportedOperationException("releaseSavepoint");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createBlob()
+	 * @see java.sql.Connection#rollback()
 	 */
 	@Override
-	public Blob createBlob() throws SQLException {
-		throw new UnsupportedOperationException("createBlob");
+	public void rollback() throws SQLException {
+		checkClosed();
+		if (autoCommit) {
+			return;
+		}
+
+		if (wConnection != null) {
+			wConnection.rollback();
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createNClob()
+	 * @see java.sql.Connection#rollback(java.sql.Savepoint)
 	 */
 	@Override
-	public NClob createNClob() throws SQLException {
-		throw new UnsupportedOperationException("createNClob");
+	public void rollback(Savepoint savepoint) throws SQLException {
+		throw new UnsupportedOperationException("rollback with savepoint");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createSQLXML()
+	 * @see java.sql.Connection#setAutoCommit(boolean)
 	 */
 	@Override
-	public SQLXML createSQLXML() throws SQLException {
-		throw new UnsupportedOperationException("createSQLXML");
+	public void setAutoCommit(boolean autoCommit) throws SQLException {
+		checkClosed();
+		if (this.autoCommit == autoCommit) {
+			return;
+		}
+		this.autoCommit = autoCommit;
+		if (this.wConnection != null) {
+			this.wConnection.setAutoCommit(autoCommit);
+		}
+
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#isValid(int)
+	 * @see java.sql.Connection#setCatalog(java.lang.String)
 	 */
 	@Override
-	public boolean isValid(int timeout) throws SQLException {
-		throw new UnsupportedOperationException("isValid");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setClientInfo(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void setClientInfo(String name, String value) throws SQLClientInfoException {
-		throw new UnsupportedOperationException("setClientInfo");
+	public void setCatalog(String catalog) throws SQLException {
+		throw new UnsupportedOperationException("setCatalog");
 	}
 
 	/*
@@ -687,60 +658,94 @@ public class GroupConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#getClientInfo(java.lang.String)
+	 * @see java.sql.Connection#setClientInfo(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String getClientInfo(String name) throws SQLException {
-		throw new UnsupportedOperationException("getClientInfo");
+	public void setClientInfo(String name, String value) throws SQLClientInfoException {
+		throw new UnsupportedOperationException("setClientInfo");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#getClientInfo()
+	 * @see java.sql.Connection#setHoldability(int)
 	 */
 	@Override
-	public Properties getClientInfo() throws SQLException {
-		throw new UnsupportedOperationException("getClientInfo");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createArrayOf(java.lang.String, java.lang.Object[])
-	 */
-	@Override
-	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-		throw new UnsupportedOperationException("createArrayOf");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createStruct(java.lang.String, java.lang.Object[])
-	 */
-	@Override
-	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-		throw new UnsupportedOperationException("createStruct");
-	}
-
-	public void setSchema(String schema) throws SQLException {
-		throw new UnsupportedOperationException("setSchema");
-	}
-
-	public String getSchema() throws SQLException {
-		throw new UnsupportedOperationException("getSchema");
-	}
-
-	public void abort(Executor executor) throws SQLException {
-		throw new UnsupportedOperationException("abort");
+	public void setHoldability(int holdability) throws SQLException {
+		throw new UnsupportedOperationException("setHoldability");
 	}
 
 	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
 		throw new UnsupportedOperationException("setNetworkTimeout");
 	}
 
-	public int getNetworkTimeout() throws SQLException {
-		throw new UnsupportedOperationException("getNetworkTimeout");
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#setReadOnly(boolean)
+	 */
+	@Override
+	public void setReadOnly(boolean readOnly) throws SQLException {
+		// do nothing
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#setSavepoint()
+	 */
+	@Override
+	public Savepoint setSavepoint() throws SQLException {
+		throw new UnsupportedOperationException("setSavepoint");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#setSavepoint(java.lang.String)
+	 */
+	@Override
+	public Savepoint setSavepoint(String name) throws SQLException {
+		throw new UnsupportedOperationException("setSavepoint");
+	}
+
+	public void setSchema(String schema) throws SQLException {
+		throw new UnsupportedOperationException("setSchema");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#setTransactionIsolation(int)
+	 */
+	@Override
+	public void setTransactionIsolation(int level) throws SQLException {
+		checkClosed();
+		this.transactionIsolation = level;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#setTypeMap(java.util.Map)
+	 */
+	@Override
+	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
+		throw new UnsupportedOperationException("setTypeMap");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Wrapper#unwrap(java.lang.Class)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T unwrap(Class<T> iface) throws SQLException {
+		try {
+			return (T) this;
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
 	}
 }

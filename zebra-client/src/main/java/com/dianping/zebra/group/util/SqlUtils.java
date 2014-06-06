@@ -52,4 +52,25 @@ public class SqlUtils {
 		return sqlType;
 	}
 
+	public static String buildSqlType(String sql) {
+		try {
+			char c = sql.trim().charAt(0);
+			if (c == 's' || c == 'S') {
+				return "Select";
+			} else if (c == 'u' || c == 'U') {
+				return "Update";
+			} else if (c == 'i' || c == 'I') {
+				return "Insert";
+			} else if (c == 'd' || c == 'D') {
+				return "Delete";
+			} else if (c == 'c' || c == 'C') {
+				return "Call";
+			} else if (c == 'b' || c == 'B') {
+				return "Batch";
+			}
+		} catch (Exception e) {
+		}
+		return "Execute";
+	}
+
 }
