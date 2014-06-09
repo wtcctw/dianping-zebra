@@ -417,7 +417,6 @@ public class GroupStatement implements Statement {
 			try {
 				Cat.getProducer().logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS,
 				      Stringizers.forJson().compact().from(params, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
-				Cat.getProducer().logEvent("SQL.Database", dbUrl, Event.SUCCESS, "");
 				t.setStatus(Transaction.SUCCESS);
 				ExecutionContextHolder.getContext().add(CAT_LOGED, "Loged");
 				return callback.doAction();
@@ -469,6 +468,13 @@ public class GroupStatement implements Statement {
 
 		Cat.getProducer().logEvent("SQL.Connection", "Checkout", Event.SUCCESS,
 		      String.format("%dms", endTime - beginTime));
+
+		if (conn instanceof SingleConnection) {
+			Cat.getProducer().logEvent("SQL.Database", ((SingleConnection) conn).getDataSource().getId(), Event.SUCCESS,
+			      conn.getMetaData().getURL());
+		} else {
+			Cat.getProducer().logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, "");
+		}
 
 		return conn;
 	}
