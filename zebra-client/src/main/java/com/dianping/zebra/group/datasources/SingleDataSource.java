@@ -54,9 +54,9 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		if (dataSource != null && (dataSource instanceof PoolBackedDataSource) && references.isEmpty()) {
 			PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
 			if (poolBackedDataSource.getNumBusyConnections() == 0) {
-				logger.info("closing the datasource [" + this.dsId + "]");
+				logger.info("closing old datasource [" + this.dsId + "]");
 				poolBackedDataSource.close();
-				logger.info("datasource [" + this.dsId + "] closed");
+				logger.info("old datasource [" + this.dsId + "] closed");
 				this.state = DataSourceState.CLOSED;
 			} else {
 				throw new SQLException(String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
@@ -133,7 +133,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
 			      unPooledDataSource, props);
 
-			logger.info(String.format("SingleDataSource [%s] created. Properties are [%s]", value.getId(),
+			logger.info(String.format("New dataSource [%s] created. Properties are [%s]", value.getId(),
 			      ReflectionToStringBuilder.toString(pooledDataSource)));
 
 			return pooledDataSource;

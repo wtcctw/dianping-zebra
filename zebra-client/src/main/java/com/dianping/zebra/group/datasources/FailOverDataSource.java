@@ -89,7 +89,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				}
 			}
 
-			logger.info("failover dataSources switch monitor stopped.");
+			logger.info("old failover dataSources switch monitor stopped.");
 		}
 
 		public Connection getConnection(DataSourceConfig config) throws SQLException {

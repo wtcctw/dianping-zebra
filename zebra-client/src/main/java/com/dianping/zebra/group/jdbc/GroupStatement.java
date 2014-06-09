@@ -14,8 +14,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -449,8 +447,11 @@ public class GroupStatement implements Statement {
 	protected Connection getConnectionWithCat(String sql, boolean forceWriter) throws SQLException {
 		String isLoged = ExecutionContextHolder.getContext().get(CAT_LOGED);
 		if (isLoged == null) {
-			String stateName = StringUtils.defaultIfBlank(
-			      (String) ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME), sql);
+			String stateName = (String) ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
+
+			if (stateName == null || stateName.trim().length() == 0) {
+				stateName = sql;
+			}
 			MessageProducer cat = Cat.getProducer();
 
 			if (stateName != null) {
