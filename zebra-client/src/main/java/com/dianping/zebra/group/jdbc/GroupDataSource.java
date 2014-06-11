@@ -15,6 +15,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.cat.status.StatusExtension;
+import com.dianping.cat.status.StatusExtensionRegister;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
@@ -26,10 +28,13 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
+import com.dianping.zebra.group.monitor.DalStatusExtension;
+import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
+import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 
-public class GroupDataSource extends AbstractDataSource {
+public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(GroupDataSource.class);
 
@@ -44,6 +49,8 @@ public class GroupDataSource extends AbstractDataSource {
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
 	private GroupDataSourceConfig groupConfigCache;
+
+	private DalStatusExtension statusExtension;
 
 	private String name;
 
@@ -75,6 +82,11 @@ public class GroupDataSource extends AbstractDataSource {
 		}
 
 		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
+	}
+
+	@Override
+	public GroupDataSourceConfig getConfig() {
+		return groupConfigCache;
 	}
 
 	@Override
@@ -116,6 +128,20 @@ public class GroupDataSource extends AbstractDataSource {
 
 		return loadBalancedConfigMap;
 	}
+	
+	@Override
+	public Map<String, SingleDataSourceMBean> getReaderSingleDataSourceMBean() {
+		return this.readDataSource.getCurrentDataSourceMBean();
+	}
+
+	public StatusExtension getStatusExtension(){
+		return this.statusExtension;
+	}
+
+	@Override
+	public SingleDataSourceMBean getWriteSingleDataSourceMBean() {
+		return this.writeDataSource.getCurrentDataSourceMBean();
+	}
 
 	public void init() {
 		if (StringUtils.isBlank(name)) {
@@ -127,11 +153,13 @@ public class GroupDataSource extends AbstractDataSource {
 		this.groupConfigCache = this.dataSourceConfigManager.getGroupDataSourceConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
 		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
-		
+
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
-		
+
 		this.initDataSources();
 		this.loadCustomizedReadWriteStrategy();
+		this.statusExtension = new DalStatusExtension(this);
+		StatusExtensionRegister.getInstance().register(this.statusExtension);
 	}
 
 	private void initDataSources() {
@@ -144,7 +172,7 @@ public class GroupDataSource extends AbstractDataSource {
 		} catch (RuntimeException e) {
 			try {
 				this.close(this.readDataSource, this.writeDataSource);
-			} catch (SQLException e1) {
+			} catch (SQLException ignore) {
 			}
 
 			throw e;

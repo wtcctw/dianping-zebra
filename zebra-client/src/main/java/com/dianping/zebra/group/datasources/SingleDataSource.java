@@ -17,10 +17,11 @@ import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
+import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
 
-public class SingleDataSource extends AbstractDataSource implements MarkableDataSource {
+public class SingleDataSource extends AbstractDataSource implements MarkableDataSource, SingleDataSourceMBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(SingleDataSource.class);
 
@@ -96,12 +97,87 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		return new SingleConnection(this, conn);
 	}
 
+	@Override
+	public String getCurrentState() {
+		return state.toString();
+	}
+
 	public String getId() {
 		return this.dsId;
 	}
 
+	@Override
+	public int getNumBusyConnection() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getNumBusyConnections();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int getNumConnections() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getNumConnections();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public long getNumFailedCheckins() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getNumFailedCheckinsDefaultUser();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public long getNumFailedCheckouts() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getNumFailedCheckoutsDefaultUser();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int getNumIdleConnection() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getNumIdleConnections();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int getNumUnClosedOrphanedConnections() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getNumUnclosedOrphanedConnections();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
 	public CountPunisher getPunisher() {
 		return this.punisher;
+	}
+
+	public synchronized Set<Object> getReferences() {
+		return this.references;
 	}
 
 	@Override
@@ -109,8 +185,48 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		return this.state;
 	}
 
-	public synchronized Set<Object> getReferences() {
-		return this.references;
+	@Override
+	public int getThreadPoolNumActiveThreads() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getThreadPoolNumActiveThreads();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int getThreadPoolNumIdleThreads() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getThreadPoolNumIdleThreads();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int getThreadPoolNumTasksPending() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getThreadPoolNumTasksPending();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int getThreadPoolSize() {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+			try {
+				return ((PoolBackedDataSource) dataSource).getThreadPoolSize();
+			} catch (SQLException e) {
+			}
+		}
+		return 0;
 	}
 
 	private DataSource initDataSources(DataSourceConfig value) {
