@@ -1,14 +1,11 @@
 package com.dianping.zebra.group.datasources;
 
+import com.dianping.zebra.group.util.JDBCExceptionUtils;
+
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CountPunisher {
-	//ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
-    private final int READ_ONLY_ERROR_CODE = 1290;
-
-    private final String READ_ONLY_ERROR_MESSAGE = "read-only";
-
 	private final MarkableDataSource dataSource;
 
 	private final long timeWindow; // ms; 值为0表示关闭这个功能，无任何限制
@@ -85,7 +82,7 @@ public class CountPunisher {
 	}
 
 	public void countAndPunish(SQLException e) {
-		if (e.getErrorCode() == READ_ONLY_ERROR_CODE && e.getMessage().contains(READ_ONLY_ERROR_MESSAGE)) {
+		if (JDBCExceptionUtils.isReadOnlyException(e)) {
 			count();
 		} else {
 			//TODO getConnnetion loss exception 
