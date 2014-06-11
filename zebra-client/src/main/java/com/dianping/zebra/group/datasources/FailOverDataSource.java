@@ -148,7 +148,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				}
 
 				try {
-					TimeUnit.SECONDS.sleep(60);
+					TimeUnit.SECONDS.sleep(1); //TODO: temperary
 				} catch (InterruptedException e) {
 					break;
 				}
