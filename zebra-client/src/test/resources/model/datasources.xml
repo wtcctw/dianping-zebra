@@ -1,6 +1,9 @@
 <group-data-source-config router-strategy="roundrobin" transaction-force-write="false">
 	<data-source-config id="db1" weight="1" canRead="false" canWrite="true" active="true">
-		<jdbc-url>jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1</jdbc-url>
+		<test-read-only-sql>call readonly()</test-read-only-sql>
+		<time-window>1000</time-window>
+		<punish-limit>100</punish-limit>
+		<jdbc-url>jdbc:h2:mem:test;MVCC=TRUE</jdbc-url>
 		<user>sa</user>
 		<driver-class>org.h2.Driver</driver-class>
 		<password></password>
@@ -10,7 +13,10 @@
 		<checkout-timeout>1000</checkout-timeout>
 	</data-source-config>
 	<data-source-config id="db2" weight="1" canRead="true" canWrite="true" active="true">
-		<jdbc-url>jdbc:h2:mem:test1;MVCC=TRUE;DB_CLOSE_DELAY=-1</jdbc-url>
+		<test-read-only-sql>call readonly()</test-read-only-sql>
+		<time-window>0</time-window>
+		<punish-limit>0</punish-limit>
+		<jdbc-url>jdbc:h2:mem:test1;MVCC=TRUE</jdbc-url>
 		<user>sa</user>
 		<driver-class>org.h2.Driver</driver-class>
 		<password></password>
@@ -19,8 +25,11 @@
 		<initial-pool-size>4</initial-pool-size>
 		<checkout-timeout>1000</checkout-timeout>
 	</data-source-config>
-	<data-source-config id="db3" weight="2" canRead="true" canWrite="true" active="true">
-		<jdbc-url>jdbc:h2:mem:test2;MVCC=TRUE;DB_CLOSE_DELAY=-1</jdbc-url>
+	<data-source-config id="db3" weight="1" canRead="true" canWrite="true" active="true">
+		<test-read-only-sql>call readonly()</test-read-only-sql>
+		<time-window>0</time-window>
+		<punish-limit>0</punish-limit>
+		<jdbc-url>jdbc:h2:mem:test2;MVCC=TRUE</jdbc-url>
 		<user>sa</user>
 		<driver-class>org.h2.Driver</driver-class>
 		<password></password>
