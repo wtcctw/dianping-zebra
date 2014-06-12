@@ -16,6 +16,10 @@ import java.util.List;
  * 
  */
 public class JDBCExceptionUtils {
+    //ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
+    private final static int READ_ONLY_ERROR_CODE = 1290;
+
+    private final static String READ_ONLY_ERROR_MESSAGE = "read-only";
 
 	public static void throwSQLExceptionIfNeeded(List<SQLException> exceptions) throws SQLException {
 
@@ -40,10 +44,14 @@ public class JDBCExceptionUtils {
 	}
 
 	public static void throwWrappedSQLException(SQLException e) throws SQLException {
-		if (e.getErrorCode() == 1290 && e.getMessage().contains("read-only")) {
+        if (isReadOnlyException(e)) {
 			throw new SQLException("Write dataSource is currently in the maintaining stage. ", e);
 		} else {
 			throw e;
 		}
 	}
+
+    public static boolean isReadOnlyException(SQLException e) {
+        return e.getErrorCode() == READ_ONLY_ERROR_CODE && e.getMessage().contains(READ_ONLY_ERROR_MESSAGE);
+    }
 }

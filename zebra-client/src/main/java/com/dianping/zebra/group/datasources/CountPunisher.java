@@ -1,10 +1,11 @@
 package com.dianping.zebra.group.datasources;
 
+import com.dianping.zebra.group.util.JDBCExceptionUtils;
+
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CountPunisher {
-
 	private final MarkableDataSource dataSource;
 
 	private final long timeWindow; // ms; 值为0表示关闭这个功能，无任何限制
@@ -81,7 +82,7 @@ public class CountPunisher {
 	}
 
 	public void countAndPunish(SQLException e) {
-		if (e.getErrorCode() == 1290 && e.getMessage().contains("read-only")) {
+		if (JDBCExceptionUtils.isReadOnlyException(e)) {
 			count();
 		} else {
 			//TODO getConnnetion loss exception 
