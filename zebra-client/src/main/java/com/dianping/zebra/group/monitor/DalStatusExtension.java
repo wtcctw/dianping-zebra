@@ -19,26 +19,26 @@ public class DalStatusExtension implements StatusExtension {
 	public String getDescription() {
 		StringBuilder sb = new StringBuilder(1024 * 3);
 
-		sb.append("version:" + Constants.VERSION + "<br>");
+		sb.append("\nversion:" + Constants.VERSION + "\n");
 		SingleDataSourceMBean writeBean = groupDataSourceBean.getWriteSingleDataSourceMBean();
 		if (writeBean != null) {
-			sb.append("currentWriter:" + writeBean.getId() + " running at state[" + writeBean.getCurrentState() + "]<br>");
+			sb.append("currentWriter:" + writeBean.getId() + " running at state:" + writeBean.getCurrentState()
+			      + "\n");
 		} else {
-			sb.append("currentWriter: No available writer<br>");
+			sb.append("currentWriter: No available writer\n");
 		}
 		Map<String, SingleDataSourceMBean> readerBeans = groupDataSourceBean.getReaderSingleDataSourceMBean();
 
 		if (readerBeans != null) {
-			sb.append("currentReader:<br>");
+			sb.append("currentReader:");
 			for (SingleDataSourceMBean bean : readerBeans.values()) {
-				sb.append("&nbsp;&nbsp;&nbsp;&nbsp;" + bean.getId() + " running at state[" + bean.getCurrentState()
-				      + "]<br>");
+				sb.append(bean.getId() + " running at state:" + bean.getCurrentState() + "\n");
 			}
 		} else {
 			sb.append("currentReader: No available readers<br>");
 		}
 
-		sb.append("dataSourceConfig:<br>");
+		sb.append("\ndataSourceConfig:\n");
 		sb.append(groupDataSourceBean.getConfig());
 
 		return sb.toString();

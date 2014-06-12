@@ -31,7 +31,7 @@ public class DalStatusExtensionTest extends MultiDatabaseTestCase {
 			}
 		});
 		
-		//System.in.read();
+		System.in.read();
 	}
 
 	@Override
