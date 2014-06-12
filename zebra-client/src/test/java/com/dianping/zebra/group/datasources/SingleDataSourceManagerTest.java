@@ -1,6 +1,8 @@
 package com.dianping.zebra.group.datasources;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
@@ -45,6 +47,25 @@ public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 		Assert.assertEquals(DataSourceState.CLOSED, dataSource.getState());
 	}
 
+	@Test
+	public void test_call_readonly() throws Exception{
+		execute(new ConnectionCallback() {
+			
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				Statement stmt = conn.createStatement();
+				
+				 ResultSet resultSet = stmt.executeQuery("call readonly()");
+				 
+				 while (resultSet.next()) {
+						// switch database
+					 System.out.println(resultSet.getBoolean(1));
+				 }
+				return null;
+			}
+		});
+	}
+	
 	public DataSourceConfig getDataSourceConfig() {
 		DataSourceConfig config = new DataSourceConfig();
 
