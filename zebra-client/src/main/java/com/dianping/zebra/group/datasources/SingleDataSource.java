@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.group.exception.SingleDataSourceException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
@@ -59,7 +60,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 				logger.info("old datasource [" + this.dsId + "] closed");
 				this.state = DataSourceState.CLOSED;
 			} else {
-				throw new SQLException(String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
+				throw new SingleDataSourceException(String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
 			}
 		} else {
 			// Normally not happen

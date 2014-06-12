@@ -13,7 +13,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public abstract class MultiDatabaseTestCase extends SingleDatabaseTestCase {
 
-	static class DataSourceEntry {
+	public static class DataSourceEntry {
 		private String dataSets;
 
 		private String jdbcUrl;

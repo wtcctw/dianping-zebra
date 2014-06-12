@@ -45,9 +45,11 @@ public class SqlUtils {
 			sqlType = SqlType.LOAD;
 		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "merge")) {
 			sqlType = SqlType.MERGE;
+		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "call")) {
+			sqlType = SqlType.CALL;
 		} else {
 			throw new SQLException(
-			      "only select, insert, update, delete,replace,truncate,create,drop,load,merge sql is supported");
+			      "only select, insert, update, delete,replace,truncate,create,drop,load,merge,call sql is supported");
 		}
 		return sqlType;
 	}

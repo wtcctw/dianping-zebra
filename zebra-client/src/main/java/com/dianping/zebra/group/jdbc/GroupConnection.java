@@ -432,7 +432,7 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public boolean isReadOnly() throws SQLException {
-		return false;
+		throw new UnsupportedOperationException("isReadOnly");
 	}
 
 	/*

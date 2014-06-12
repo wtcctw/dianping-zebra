@@ -6,15 +6,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.exception.SingleDataSourceException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 
 public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
-
-	private static final Logger logger = LoggerFactory.getLogger(DefaultSingleDataSourceManager.class);
 
 	private Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<String, DataSourceConfig>();
 
@@ -42,7 +38,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 				newDataSource.getReferences().add(reference);
 				this.dataSources.put(id, newDataSource);
 				dataSourceConfigs.put(id, config);
-				
+
 				return newDataSource;
 			}
 		}
@@ -83,12 +79,11 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 					TimeUnit.MILLISECONDS.sleep(10);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-				} catch (Throwable e) {
+				} catch (SingleDataSourceException e) {
 					if (dataSource != null) {
 						toBeClosedDataSource.offer(dataSource);
 					}
-
-					logger.error(e.getMessage(), e);
+				} catch (Throwable ignore) {
 				}
 			}
 		}
