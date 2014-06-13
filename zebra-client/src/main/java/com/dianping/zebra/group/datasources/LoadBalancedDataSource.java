@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
+import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.DataSourceRouter;
 import com.dianping.zebra.group.router.RounterTarget;
 import com.dianping.zebra.group.router.RouterContext;
@@ -88,10 +89,18 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		throw new SQLException("Can not aquire connection");
 	}
 
+	public Map<String, SingleDataSourceMBean> getCurrentDataSourceMBean() {
+		Map<String, SingleDataSourceMBean> beans = new HashMap<String, SingleDataSourceMBean>();
+		beans.putAll(dataSources);
+
+		return beans;
+	}
+
 	public void init() {
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			this.dataSources.put(config.getId(),
-			      SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(this, config));
+			SingleDataSource dataSource = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(this,
+			      config);
+			this.dataSources.put(config.getId(), dataSource);
 		}
 
 		this.router = new WeightDataSourceRouter(loadBalancedConfigMap);

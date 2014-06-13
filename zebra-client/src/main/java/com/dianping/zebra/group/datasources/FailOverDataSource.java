@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
+import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 
 public class FailOverDataSource extends AbstractDataSource {
 
@@ -56,6 +57,10 @@ public class FailOverDataSource extends AbstractDataSource {
 		} else {
 			throw new SQLException("Write dataSource is currently in the maintaining stage. ");
 		}
+	}
+
+	public SingleDataSourceMBean getCurrentDataSourceMBean() {
+		return activeDs;
 	}
 
 	@Override
@@ -124,7 +129,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 						boolean hasSwitched = false;
 						while (resultSet.next()) {
-							// switch database
+							// switch database, 0 for write dataSource, 1 for read dataSource.
 							if (resultSet.getInt(1) == 0) {
 								activeDs = ds;
 								hasSwitched = true;
