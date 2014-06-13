@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.monitor;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -51,7 +51,7 @@ public class DalStatusExtension implements StatusExtension {
 
 	@Override
 	public Map<String, String> getProperties() {
-		Map<String, String> status = new HashMap<String, String>();
+		Map<String, String> status = new LinkedHashMap<String, String>();
 
 		Map<String, SingleDataSourceMBean> beans = groupDataSourceBean.getReaderSingleDataSourceMBean();
 		if (beans != null) {

@@ -17,21 +17,23 @@ public class DalStatusExtensionTest extends MultiDatabaseTestCase {
 	@Test
 	public void testPreparedStatementQuery() throws Exception {
 		ExecutionContextHolder.getContext().add(SQL_STATEMENT_NAME, "testPreparedStatementQuery");
-		execute(new ConnectionCallback() {
-
-			@Override
-			public Object doInConnection(Connection conn) throws Exception {
-				PreparedStatement stmt = conn.prepareStatement("SELECT ID,NAME,AGE from PERSON where AGE = ?");
-				stmt.setInt(1, 18);
-				stmt.execute();
+		while(true){
+			execute(new ConnectionCallback() {
 				
-				System.out.println(((GroupDataSource)getDataSource()).getStatusExtension().getDescription());
-				System.out.println(((GroupDataSource)getDataSource()).getStatusExtension().getProperties());
-				return null;
-			}
-		});
-		
-		System.in.read();
+				@Override
+				public Object doInConnection(Connection conn) throws Exception {
+					PreparedStatement stmt = conn.prepareStatement("SELECT ID,NAME,AGE from PERSON where AGE = ?");
+					stmt.setInt(1, 18);
+					stmt.execute();
+					
+					//System.out.println(((GroupDataSource)getDataSource()).getStatusExtension().getDescription());
+					//System.out.println(((GroupDataSource)getDataSource()).getStatusExtension().getProperties());
+					return null;
+				}
+			});
+			
+			Thread.sleep(100);
+		}
 	}
 
 	@Override
