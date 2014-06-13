@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
 
 public class DalStatusExtensionTest extends MultiDatabaseTestCase {
