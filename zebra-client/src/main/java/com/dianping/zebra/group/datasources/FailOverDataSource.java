@@ -122,15 +122,16 @@ public class FailOverDataSource extends AbstractDataSource {
 				for (SingleDataSource ds : standbyDataSources.values()) {
 					Connection conn = null;
 					Statement stmt = null;
+					ResultSet rs = null;
 					try {
 						conn = getConnection(ds.getConfig());
 						stmt = conn.createStatement();
-						ResultSet resultSet = stmt.executeQuery(ds.getConfig().getTestReadOnlySql());
+						rs = stmt.executeQuery(ds.getConfig().getTestReadOnlySql());
 
 						boolean hasSwitched = false;
-						while (resultSet.next()) {
+						while (rs.next()) {
 							// switch database, 0 for write dataSource, 1 for read dataSource.
-							if (resultSet.getInt(1) == 0) {
+							if (rs.getInt(1) == 0) {
 								activeDs = ds;
 								hasSwitched = true;
 								break;
@@ -143,17 +144,23 @@ public class FailOverDataSource extends AbstractDataSource {
 					} catch (SQLException ignore) {
 						// do nothing
 					} finally {
-						try {
-							if (stmt != null) {
-								stmt.close();
+						if (rs != null) {
+							try {
+								rs.close();
+							} catch (SQLException ignore) {
 							}
-						} catch (SQLException ignore) {
+						}
+						if (stmt != null) {
+							try {
+								stmt.close();
+							} catch (SQLException ignore) {
+							}
 						}
 					}
 				}
 
 				try {
-					TimeUnit.SECONDS.sleep(1); //TODO: temperary
+					TimeUnit.SECONDS.sleep(1); // TODO: temperary
 				} catch (InterruptedException e) {
 					break;
 				}

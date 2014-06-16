@@ -3,12 +3,14 @@ package com.dianping.zebra.group.monitor;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
 
+@Ignore
 public class DalStatusExtensionTest extends MultiDatabaseTestCase {
 	
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
@@ -24,9 +26,6 @@ public class DalStatusExtensionTest extends MultiDatabaseTestCase {
 					PreparedStatement stmt = conn.prepareStatement("SELECT ID,NAME,AGE from PERSON where AGE = ?");
 					stmt.setInt(1, 18);
 					stmt.execute();
-					
-					//System.out.println(((GroupDataSource)getDataSource()).getStatusExtension().getDescription());
-					//System.out.println(((GroupDataSource)getDataSource()).getStatusExtension().getProperties());
 					return null;
 				}
 			});

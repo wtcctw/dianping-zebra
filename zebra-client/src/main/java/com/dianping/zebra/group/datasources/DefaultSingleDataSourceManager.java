@@ -76,7 +76,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 				try {
 					dataSource = toBeClosedDataSource.take();
 					dataSource.close();
-					TimeUnit.MILLISECONDS.sleep(10);
+					TimeUnit.MILLISECONDS.sleep(100);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				} catch (SingleDataSourceException e) {

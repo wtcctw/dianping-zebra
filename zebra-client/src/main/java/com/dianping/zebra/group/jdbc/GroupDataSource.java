@@ -128,13 +128,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		return loadBalancedConfigMap;
 	}
-	
+
 	@Override
 	public Map<String, SingleDataSourceMBean> getReaderSingleDataSourceMBean() {
 		return this.readDataSource.getCurrentDataSourceMBean();
 	}
 
-	public StatusExtension getStatusExtension(){
+	public StatusExtension getStatusExtension() {
 		return this.statusExtension;
 	}
 

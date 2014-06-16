@@ -71,15 +71,13 @@ public class DalStatusExtension implements StatusExtension {
 
 	private void putProperty(Map<String, String> status, SingleDataSourceMBean bean) {
 		String id = bean.getId();
-		status.put(id + "-Connections", Integer.toString(bean.getNumConnections()));
 		status.put(id + "-BusyConnection", Integer.toString(bean.getNumBusyConnection()));
 		status.put(id + "-IdleConnection", Integer.toString(bean.getNumIdleConnection()));
-		status.put(id + "-UnClosedOrphanedConnections", Integer.toString(bean.getNumUnClosedOrphanedConnections()));
-		status.put(id + "-FailedCheckins", Long.toString(bean.getNumFailedCheckins()));
+//		status.put(id + "-FailedCheckins", Long.toString(bean.getNumFailedCheckins()));
 		status.put(id + "-FailedCheckouts", Long.toString(bean.getNumFailedCheckouts()));
-		status.put(id + "-ThreadPoolSize", Integer.toString(bean.getThreadPoolSize()));
-		status.put(id + "-ThreadPoolNumActiveThreads", Integer.toString(bean.getThreadPoolNumActiveThreads()));
-		status.put(id + "-ThreadPoolNumIdleThreads", Integer.toString(bean.getThreadPoolNumIdleThreads()));
-		status.put(id + "-ThreadPoolNumTasksPending", Integer.toString(bean.getThreadPoolNumTasksPending()));
+//		status.put(id + "-ThreadPoolSize", Integer.toString(bean.getThreadPoolSize()));
+//		status.put(id + "-ThreadPoolNumActiveThreads", Integer.toString(bean.getThreadPoolNumActiveThreads()));
+//		status.put(id + "-ThreadPoolNumIdleThreads", Integer.toString(bean.getThreadPoolNumIdleThreads()));
+//		status.put(id + "-ThreadPoolNumTasksPending", Integer.toString(bean.getThreadPoolNumTasksPending()));
 	}
 }
