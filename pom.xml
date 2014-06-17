@@ -22,7 +22,7 @@
         <repo.proxy.url>http://mvn.dianpingoa.com/dprepo</repo.proxy.url>
     </properties>
     <modules>
-        <module>zebra-client</module>
+        <module>zebra-api</module>
         <module>zebra-environment</module>
         <module>zebra-web</module>
     </modules>

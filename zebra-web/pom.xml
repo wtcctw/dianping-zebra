@@ -19,7 +19,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.dianping.zebra</groupId>
-			<artifactId>zebra-client</artifactId>
+			<artifactId>zebra-api</artifactId>
 			<version>2.3.1</version>
 		</dependency>
 		<dependency>
