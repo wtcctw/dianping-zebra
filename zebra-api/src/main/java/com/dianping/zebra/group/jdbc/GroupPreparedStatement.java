@@ -168,15 +168,13 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				return new int[0];
 			}
 
-			final Connection conn = getConnectionWithCat(sql, true);
-
 			return executeWithCat(new JDBCOperationCallback<int[]>() {
 
 				@Override
-				public int[] doAction() throws SQLException {
+				public int[] doAction(Connection conn) throws SQLException {
 					return executeBatchOnConnection(conn);
 				}
-			}, sql, pstBatchedArgs, conn.getMetaData().getURL());
+			}, sql, pstBatchedArgs, true);
 
 		} finally {
 			if (pstBatchedArgs != null)
@@ -205,15 +203,13 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		final Connection conn = getConnectionWithCat(sql, false);
-
 		return executeWithCat(new JDBCOperationCallback<ResultSet>() {
 
 			@Override
-			public ResultSet doAction() throws SQLException {
+			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
 			}
-		}, sql, params, conn.getMetaData().getURL());
+		}, sql, params, false);
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
@@ -233,12 +229,10 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		final Connection conn = getConnectionWithCat(sql, true);
-
 		return executeWithCat(new JDBCOperationCallback<Integer>() {
 
 			@Override
-			public Integer doAction() throws SQLException {
+			public Integer doAction(Connection conn) throws SQLException {
 				try {
 					updateCount = executeUpdateOnConnection(conn);
 				} catch (SQLException e) {
@@ -252,7 +246,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				return updateCount;
 			}
 
-		}, sql, params, conn.getMetaData().getURL());
+		}, sql, params, true);
 	}
 
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {
