@@ -5,10 +5,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +18,6 @@ import com.dianping.cat.Cat;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
 
 public class FailOverDataSource extends AbstractDataSource {
 
@@ -116,7 +113,6 @@ public class FailOverDataSource extends AbstractDataSource {
 		public void run() {
 			logger.info("failover dataSources switch monitor start...");
 
-			List<SQLException> exceptions = new ArrayList<SQLException>();
 			boolean firstLoop = true;
 
 			while (!Thread.interrupted()) {
@@ -143,8 +139,14 @@ public class FailOverDataSource extends AbstractDataSource {
 							break;
 						}
 					} catch (SQLException e) {
-						if (firstLoop) {
-							exceptions.add(e);
+						boolean shouldCat =
+						// if could not find write database in the first for-loop,
+						firstLoop ||
+						// or communication link fail,then print the error message to cat
+						      (activeDs != null && activeDs.getId().equals(ds.getId()));
+
+						if (shouldCat) {
+							Cat.logError(ds.getId(), e);
 						}
 
 						try {
@@ -170,14 +172,7 @@ public class FailOverDataSource extends AbstractDataSource {
 					}
 				}
 
-				// if we could not find write database in the first for-loop, then print the error message to cat.
-				if (firstLoop) {
-					if(activeDs == null){
-						Cat.logError(JDBCExceptionUtils.getSQLExceptionIfNeeded(exceptions));
-					}
-
-					firstLoop = false;
-				}
+				firstLoop = false;
 
 				try {
 					TimeUnit.SECONDS.sleep(1); // TODO: temperary

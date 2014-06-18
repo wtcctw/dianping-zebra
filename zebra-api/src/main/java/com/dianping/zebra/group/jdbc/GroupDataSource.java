@@ -205,7 +205,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		logger.info("start to refresh the dataSources...");
 
-		Transaction tran = Cat.newTransaction("DAL", "Refresh");
+		Transaction tran = Cat.newTransaction("DAL", "DataSource-Refresh");
 
 		LoadBalancedDataSource readDataSource = null;
 		FailOverDataSource writeDataSource = null;

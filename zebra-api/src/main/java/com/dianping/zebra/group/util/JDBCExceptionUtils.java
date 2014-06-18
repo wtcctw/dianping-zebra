@@ -23,26 +23,22 @@ public class JDBCExceptionUtils {
 
 	public static void throwSQLExceptionIfNeeded(List<SQLException> exceptions) throws SQLException {
 		if (exceptions != null && !exceptions.isEmpty()) {
-			throw getSQLExceptionIfNeeded(exceptions);
-		}
-	}
+			StringWriter buffer = new StringWriter();
+			PrintWriter out = null;
+			try {
+				out = new PrintWriter(buffer);
 
-	public static SQLException getSQLExceptionIfNeeded(List<SQLException> exceptions) {
-		StringWriter buffer = new StringWriter();
-		PrintWriter out = null;
-		try {
-			out = new PrintWriter(buffer);
-
-			for (SQLException exception : exceptions) {
-				exception.printStackTrace(out);
+				for (SQLException exception : exceptions) {
+					exception.printStackTrace(out);
+				}
+			} finally {
+				if (out != null) {
+					out.close();
+				}
 			}
-		} finally {
-			if (out != null) {
-				out.close();
-			}
-		}
 
-		return new SQLException(buffer.toString());
+			throw new SQLException(buffer.toString());
+		}
 	}
 
 	public static void throwWrappedSQLException(SQLException e) throws SQLException {
