@@ -16,42 +16,44 @@ import java.util.List;
  * 
  */
 public class JDBCExceptionUtils {
-    //ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
-    private final static int READ_ONLY_ERROR_CODE = 1290;
+	// ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
+	private final static int READ_ONLY_ERROR_CODE = 1290;
 
-    private final static String READ_ONLY_ERROR_MESSAGE = "read-only";
+	private final static String READ_ONLY_ERROR_MESSAGE = "read-only";
 
 	public static void throwSQLExceptionIfNeeded(List<SQLException> exceptions) throws SQLException {
-
 		if (exceptions != null && !exceptions.isEmpty()) {
-			StringWriter buffer = new StringWriter();
-			PrintWriter out = null;
-			try {
-				out = new PrintWriter(buffer);
+			throw getSQLExceptionIfNeeded(exceptions);
+		}
+	}
 
-				for (SQLException exception : exceptions) {
-					exception.printStackTrace(out);
-				}
-			} finally {
-				if (out != null) {
-					out.close();
-				}
+	public static SQLException getSQLExceptionIfNeeded(List<SQLException> exceptions) {
+		StringWriter buffer = new StringWriter();
+		PrintWriter out = null;
+		try {
+			out = new PrintWriter(buffer);
+
+			for (SQLException exception : exceptions) {
+				exception.printStackTrace(out);
 			}
-
-			throw new SQLException(buffer.toString());
+		} finally {
+			if (out != null) {
+				out.close();
+			}
 		}
 
+		return new SQLException(buffer.toString());
 	}
 
 	public static void throwWrappedSQLException(SQLException e) throws SQLException {
-        if (isReadOnlyException(e)) {
+		if (isReadOnlyException(e)) {
 			throw new SQLException("Write dataSource is currently in the maintaining stage. ", e);
 		} else {
 			throw e;
 		}
 	}
 
-    public static boolean isReadOnlyException(SQLException e) {
-        return e.getErrorCode() == READ_ONLY_ERROR_CODE && e.getMessage().contains(READ_ONLY_ERROR_MESSAGE);
-    }
+	public static boolean isReadOnlyException(SQLException e) {
+		return e.getErrorCode() == READ_ONLY_ERROR_CODE && e.getMessage().contains(READ_ONLY_ERROR_MESSAGE);
+	}
 }

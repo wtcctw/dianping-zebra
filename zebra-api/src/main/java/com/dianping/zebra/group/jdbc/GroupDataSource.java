@@ -15,6 +15,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import com.dianping.cat.status.StatusExtension;
 import com.dianping.cat.status.StatusExtensionRegister;
 import com.dianping.zebra.group.Constants;
@@ -202,6 +205,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		logger.info("start to refresh the dataSources...");
 
+		Transaction tran = Cat.newTransaction("DAL", "Refresh");
+
 		LoadBalancedDataSource readDataSource = null;
 		FailOverDataSource writeDataSource = null;
 		boolean preparedSwitch = false;
@@ -214,8 +219,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 			preparedSwitch = true;
 		} catch (Throwable e) {
-			logger.error("error when create new dataSources", e);
-
+			Cat.logError("error when create new dataSources", e);
 			try {
 				close(readDataSource, writeDataSource);
 			} catch (Throwable ignore) {
@@ -234,11 +238,17 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			try {
 				this.close(tmpReadDataSource, tmpWriteDataSource);
 			} catch (Throwable e) {
-				logger.error("error when destroy old dataSources", e);
+				Cat.logError("error when destroy old dataSources", e);
 			}
 
+			tran.setStatus(Message.SUCCESS);
 			logger.info("refresh the dataSources successfully!");
+		} else {
+			tran.setStatus("Fail");
+			logger.warn("fail to refresh the dataSource");
 		}
+		
+		tran.complete();
 	}
 
 	public void setName(String name) {
