@@ -16,8 +16,72 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
 	private String updateSql = "update PERSON p set p.Name = ? where p.NAME = ?";
 
+	private String insertSql = "insert into PERSON(NAME,LAST_NAME,AGE) values('damon.zhu','zhu',28)";
+
 	private void assertResultInReadDs(String res) {
 		Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(res));
+	}
+
+	@Test
+	public void test_preparedStatement_api_support() throws Exception {
+
+		execute(new ConnectionCallback() {
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				PreparedStatement stmt = conn.prepareStatement(insertSql);
+				// Statement.execute如果第一个结果为 ResultSet 对象，则返回 true；如果其为更新计数或者不存在任何结果，则返回 false
+				Assert.assertFalse(stmt.execute());
+				stmt.close();
+				
+				stmt = conn.prepareStatement(selectSql);
+				stmt.setInt(1, 28);
+				Assert.assertTrue(stmt.execute());
+				stmt.close();
+
+				stmt = conn.prepareStatement(selectSql);
+				stmt.setInt(1, 28);
+				Assert.assertFalse(stmt.executeQuery().next());
+				stmt.close();
+
+				stmt = conn.prepareStatement(updateSql);
+				stmt.setString(1, "writer-new");
+				stmt.setString(2, "writer");
+				Assert.assertFalse(stmt.execute());
+				stmt.close();
+
+				stmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+				Assert.assertFalse(stmt.execute());
+				stmt.close();
+
+				stmt = conn.prepareStatement(insertSql, new int[] { 1 });
+				Assert.assertFalse(stmt.execute());
+				stmt.close();
+
+				stmt = conn.prepareStatement(insertSql, new String[] { "col" });
+				Assert.assertFalse(stmt.execute());
+
+				Assert.assertEquals(stmt.executeUpdate(), 1);
+				stmt.close();
+
+				// 测试批量更新
+				stmt = conn.prepareStatement("insert into PERSON(NAME,LAST_NAME,AGE) values(?,?,?)");
+				stmt.setString(1, "zhuhao");
+				stmt.setString(2, "zhuhao");
+				stmt.setInt(3, 2);
+				stmt.addBatch();
+
+				stmt.setString(1, "damon");
+				stmt.setString(2, "zhuhao");
+				stmt.setInt(3, 12);
+				stmt.addBatch();
+
+				int[] updateCounts = stmt.executeBatch();
+				Assert.assertEquals(updateCounts.length, 2);
+				stmt.close();
+
+				return null;
+			}
+		});
 	}
 
 	@Test
@@ -86,7 +150,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
 	@Override
 	protected String getSchema() {
-        return  getClass().getResource("/schema.sql").getPath();
+		return getClass().getResource("/schema.sql").getPath();
 	}
 
 	@Override
@@ -99,5 +163,4 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
 		return entries;
 	}
-
 }
