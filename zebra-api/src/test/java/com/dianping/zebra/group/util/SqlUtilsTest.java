@@ -30,5 +30,29 @@ public class SqlUtilsTest {
 		Assert.assertEquals(SqlType.UPDATE, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());
 	}
+	
+	@Test
+	public void testInsert() throws SQLException {
+		String sql = "INSERT into table select from table2";
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		Assert.assertEquals(SqlType.INSERT, sqlType);
+		Assert.assertEquals(false, sqlType.isRead());
+	}
+
+	@Test
+	public void testDelete() throws SQLException {
+		String sql = "delete from table where id = 1";
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		Assert.assertEquals(SqlType.DELETE, sqlType);
+		Assert.assertEquals(false, sqlType.isRead());
+	}
+	
+	@Test
+	public void testExecute() throws SQLException {
+		String sql = "{call sp_proc}";
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		Assert.assertEquals(SqlType.EXECUTE, sqlType);
+		Assert.assertEquals(false, sqlType.isRead());
+	}
 
 }

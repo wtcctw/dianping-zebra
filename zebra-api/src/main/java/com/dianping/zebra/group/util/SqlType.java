@@ -16,7 +16,7 @@ public enum SqlType {
 	LOAD(false, 9), //
 	MERGE(false, 10), //
 	SHOW(true, 11), //
-	CALL(true, 12), //
+	EXECUTE(false, 12), //
 	DEFAULT_SQL_TYPE(false, -100), //
 	;
 
