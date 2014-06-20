@@ -432,8 +432,8 @@ public class GroupStatement implements Statement {
 			long endTime = System.currentTimeMillis();
 
 			Cat.logEvent("SQL.Connection", "Checkout", Event.SUCCESS, String.format("%dms", endTime - beginTime));
-			Cat.logEvent("SQL.Database", ((SingleConnection) conn).getDataSource().getId(), Event.SUCCESS, conn
-			      .getMetaData().getURL());
+			Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, ((SingleConnection) conn)
+			      .getDataSource().getId());
 			Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, Stringizers.forJson().compact()
 			      .from(params, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
 			t.setStatus(Transaction.SUCCESS);
