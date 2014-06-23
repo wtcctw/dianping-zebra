@@ -113,6 +113,12 @@ public class FailOverDataSource extends AbstractDataSource {
 		public void run() {
 			logger.info("failover dataSources switch monitor start...");
 
+			try {
+				Class.forName("com.mysql.jdbc.Driver");
+			} catch (ClassNotFoundException ex) {
+				throw new RuntimeException(ex);
+			}
+
 			boolean firstLoop = true;
 
 			while (!Thread.interrupted()) {
