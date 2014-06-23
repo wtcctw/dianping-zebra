@@ -57,7 +57,7 @@ public class GroupStatement implements Statement {
 
 	protected List<String> batchedSqls;
 
-	private static final String CAT_LOGGED = "cat_log";
+	private static final String CAT_LOGGED = "is_cat_logged";
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
