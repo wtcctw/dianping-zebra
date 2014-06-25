@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,14 +53,19 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	@Override
 	public void close() throws SQLException {
 		if (dataSource != null && (dataSource instanceof PoolBackedDataSource) && references.isEmpty()) {
-			PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
-			if (poolBackedDataSource.getNumBusyConnections() == 0) {
-				logger.info("closing old datasource [" + this.dsId + "]");
-				poolBackedDataSource.close();
-				logger.info("old datasource [" + this.dsId + "] closed");
-				this.state = DataSourceState.CLOSED;
+			if (this.state == DataSourceState.UP) {
+				PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
+				if (poolBackedDataSource.getNumBusyConnections() == 0) {
+					logger.info("closing old datasource [" + this.dsId + "]");
+					poolBackedDataSource.close();
+					logger.info("old datasource [" + this.dsId + "] closed");
+					this.state = DataSourceState.CLOSED;
+				} else {
+					throw new SingleDataSourceException(String.format(
+					      "Cannot close dataSource[%s] since there are busy connections.", dsId));
+				}
 			} else {
-				throw new SingleDataSourceException(String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
+				this.state = DataSourceState.CLOSED;
 			}
 		} else {
 			// Normally not happen
@@ -250,8 +254,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
 			      unPooledDataSource, props);
 
-			logger.info(String.format("New dataSource [%s] created. Properties are [%s]", value.getId(),
-			      ReflectionToStringBuilder.toString(pooledDataSource)));
+			logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
 			return pooledDataSource;
 		} catch (Throwable e) {
