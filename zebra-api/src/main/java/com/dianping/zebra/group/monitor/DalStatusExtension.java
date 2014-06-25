@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import com.dianping.cat.status.StatusExtension;
 import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.datasources.DataSourceState;
 
 public class DalStatusExtension implements StatusExtension {
 
@@ -70,14 +71,16 @@ public class DalStatusExtension implements StatusExtension {
 	}
 
 	private void putProperty(Map<String, String> status, SingleDataSourceMBean bean) {
-		String id = bean.getId();
-		status.put(id + "-BusyConnection", Integer.toString(bean.getNumBusyConnection()));
-		status.put(id + "-IdleConnection", Integer.toString(bean.getNumIdleConnection()));
+		if(bean.getState() != DataSourceState.INITIAL){
+			String id = bean.getId();
+			status.put(id + "-BusyConnection", Integer.toString(bean.getNumBusyConnection()));
+			status.put(id + "-IdleConnection", Integer.toString(bean.getNumIdleConnection()));
 //		status.put(id + "-FailedCheckins", Long.toString(bean.getNumFailedCheckins()));
-		status.put(id + "-FailedCheckouts", Long.toString(bean.getNumFailedCheckouts()));
+			status.put(id + "-FailedCheckouts", Long.toString(bean.getNumFailedCheckouts()));
 //		status.put(id + "-ThreadPoolSize", Integer.toString(bean.getThreadPoolSize()));
 //		status.put(id + "-ThreadPoolNumActiveThreads", Integer.toString(bean.getThreadPoolNumActiveThreads()));
 //		status.put(id + "-ThreadPoolNumIdleThreads", Integer.toString(bean.getThreadPoolNumIdleThreads()));
 //		status.put(id + "-ThreadPoolNumTasksPending", Integer.toString(bean.getThreadPoolNumTasksPending()));
+		}
 	}
 }

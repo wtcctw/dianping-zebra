@@ -14,7 +14,11 @@ import com.dianping.zebra.group.exception.GroupDataSourceException;
 
 public abstract class AbstractDataSource implements DataSource {
 
-	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+	public static final String LOCAL = Constants.CONFIG_MANAGER_TYPE_LOCAL;
+
+	public static final String REMOTE = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+
+	protected String configManagerType = REMOTE;
 
 	private PrintWriter out = null;
 
@@ -58,7 +62,7 @@ public abstract class AbstractDataSource implements DataSource {
 	public void setLogWriter(PrintWriter out) throws SQLException {
 		this.out = out;
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T unwrap(Class<T> iface) throws SQLException {

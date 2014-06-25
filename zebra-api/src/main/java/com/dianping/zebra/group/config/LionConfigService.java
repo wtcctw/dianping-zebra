@@ -7,6 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
@@ -14,6 +17,7 @@ import com.dianping.lion.client.LionException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class LionConfigService implements ConfigService {
+	private static final Logger logger = LoggerFactory.getLogger(LionConfigService.class);
 
 	private List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
@@ -59,6 +63,7 @@ public class LionConfigService implements ConfigService {
 				}
 			});
 		} catch (LionException e) {
+			logger.error("fail to initilize Remote Config Manager for DAL", e);
 			throw new IllegalConfigException(e);
 		}
 	}

@@ -25,14 +25,14 @@ public class SqlUtils {
 			} else {
 				sqlType = SqlType.SELECT;
 			}
-		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "show")) {
-			sqlType = SqlType.SHOW;
 		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "insert")) {
 			sqlType = SqlType.INSERT;
 		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "update")) {
 			sqlType = SqlType.UPDATE;
 		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "delete")) {
 			sqlType = SqlType.DELETE;
+		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "show")) {
+			sqlType = SqlType.SHOW;
 		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "replace")) {
 			sqlType = SqlType.REPLACE;
 		} else if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "truncate")) {

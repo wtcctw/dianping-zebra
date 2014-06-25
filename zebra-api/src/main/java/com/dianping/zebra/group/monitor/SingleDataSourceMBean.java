@@ -1,10 +1,13 @@
 package com.dianping.zebra.group.monitor;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.datasources.DataSourceState;
 
 public interface SingleDataSourceMBean {
 
 	public String getId();
+	
+	public DataSourceState getState();
 
 	public DataSourceConfig getConfig();
 

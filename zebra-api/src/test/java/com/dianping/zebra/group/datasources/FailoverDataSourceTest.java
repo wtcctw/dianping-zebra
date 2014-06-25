@@ -130,10 +130,10 @@ public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 		file2.setReadOnly();
 
 		try {
-			getDataSource().getConnection();
-		} catch (SQLException e) {
-			Assert.assertTrue(e.getMessage().contains("Write dataSource is currently in the maintaining stage"));
-		}
+			getDataSource();
+		} catch (RuntimeException e) {
+			Assert.assertTrue(e.getMessage().contains("[DAL]Cannot find any write dataSource."));
+      }
 
 		file.setWritable(true);
 		file1.setWritable(true);

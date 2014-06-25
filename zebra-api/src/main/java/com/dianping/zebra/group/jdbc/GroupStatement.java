@@ -57,7 +57,7 @@ public class GroupStatement implements Statement {
 
 	protected List<String> batchedSqls;
 
-	private static final String CAT_LOGGED = "is_cat_logged";
+	private static final String CAT_LOGGED = "cat_log";
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
@@ -431,7 +431,7 @@ public class GroupStatement implements Statement {
 				long endTime = System.currentTimeMillis();
 
 				Cat.logEvent("SQL.Conn", "Checkout", Event.SUCCESS, String.format("%dms", endTime - beginTime));
-				Cat.logEvent("SQL.DB", conn.getMetaData().getURL(), Event.SUCCESS, ((SingleConnection) conn)
+				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, ((SingleConnection) conn)
 				      .getDataSource().getId());
 				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, Stringizers.forJson().compact()
 				      .from(params, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
@@ -448,7 +448,13 @@ public class GroupStatement implements Statement {
 				ExecutionContextHolder.getContext().clear(CAT_LOGGED);
 			}
 		} else {
-			return callback.doAction(this.dpGroupConnection.getRealConnection(sql, forceWriter));
+			long beginTime = System.currentTimeMillis();
+			Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
+			long endTime = System.currentTimeMillis();
+
+			Cat.logEvent("SQL.Conn", "Checkout", Event.SUCCESS, String.format("%dms", endTime - beginTime));
+
+			return callback.doAction(conn);
 		}
 	}
 

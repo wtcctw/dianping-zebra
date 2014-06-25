@@ -81,6 +81,7 @@ public class LocalConfigService implements ConfigService {
 			updateTask.setName("Thread-" + ConfigPeroidCheckerTask.class.getName());
 			updateTask.start();
 		} catch (Throwable e) {
+			logger.error("fail to initilize Local Config Manager for DAL",e);
 			throw new IllegalConfigException(e);
 		}
 	}

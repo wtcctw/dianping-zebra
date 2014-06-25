@@ -133,7 +133,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	@Override
-	public Map<String, SingleDataSourceMBean> getReaderSingleDataSourceMBean() {
+	public synchronized Map<String, SingleDataSourceMBean> getReaderSingleDataSourceMBean() {
 		return this.readDataSource.getCurrentDataSourceMBean();
 	}
 
@@ -142,7 +142,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	@Override
-	public SingleDataSourceMBean getWriteSingleDataSourceMBean() {
+	public synchronized SingleDataSourceMBean getWriteSingleDataSourceMBean() {
 		return this.writeDataSource.getCurrentDataSourceMBean();
 	}
 
@@ -163,6 +163,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.loadCustomizedReadWriteStrategy();
 		this.statusExtension = new DalStatusExtension(this);
 		StatusExtensionRegister.getInstance().register(this.statusExtension);
+		
+		logger.info("GroupDataSource successfully initialized.");
 	}
 
 	private void initDataSources() {
@@ -230,9 +232,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			LoadBalancedDataSource tmpReadDataSource = this.readDataSource;
 			FailOverDataSource tmpWriteDataSource = this.writeDataSource;
 
-			// switch
-			this.readDataSource = readDataSource;
-			this.writeDataSource = writeDataSource;
+			synchronized (this) {
+				// switch
+				this.readDataSource = readDataSource;
+				this.writeDataSource = writeDataSource;
+         }
 
 			// destroy old dataSources
 			try {
