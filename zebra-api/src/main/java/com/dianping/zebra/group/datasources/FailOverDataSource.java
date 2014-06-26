@@ -80,9 +80,11 @@ public class FailOverDataSource extends AbstractDataSource {
 			} catch (SQLException e) {
 				// communication link fail,then print the error message to cat
 				if (writeDs != null && writeDs.getId().equals(config.getId())) {
-					Cat.logError(String.format("the ping connection for %s was killed by mysql server", writeDs.getId()), e);
+					SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
+					writeDs = null;
 				}
 
+				Cat.logError(String.format("the ping connection for %s was killed by mysql server", writeDs.getId()), e);
 				try {
 					connections.remove(config.getId());
 					if (conn != null) {
@@ -130,7 +132,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		if (writeDs != null && writeDs.isAvailable()) {
 			return writeDs.getConnection();
 		} else {
-			throw new SQLException("[DAL]Write dataSource is currently in the maintaining stage.");
+			throw new SQLException("Write dataSource is currently in the maintaining stage.");
 		}
 	}
 
