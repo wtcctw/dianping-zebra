@@ -9,13 +9,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.cat.Cat;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.WriteDataSourceNotFoundException;
-import com.dianping.zebra.group.exception.ZebraRuntimeException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 
@@ -23,12 +19,8 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
  * features: 1. auto-detect write database by select @@read_only</br> 2. if ping connection was killed by MySQL server, it can
  * reconnect.</br> 3. if cannot find any write database in the initial phase, fail fast.</br>
  * 
- * @author damonzhu
- * 
  */
 public class FailOverDataSource extends AbstractDataSource {
-
-	private static final Logger logger = LoggerFactory.getLogger(FailOverDataSource.class);
 
 	private static final String ERROR_MESSAGE = "[DAL]Cannot find any write dataSource.";
 
@@ -156,32 +148,19 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public void init() {
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException ex) {
-			String errorMsg = "Cannot find mysql driver class[com.mysql.jdbc.Driver]";
-			logger.error(errorMsg);
-			throw new ZebraRuntimeException(errorMsg, ex);
-		}
-
-		boolean isFind = false;
-
-		try {
-			isFind = findWriteDataSource();
-		} catch (RuntimeException e) {
-			throw new ZebraRuntimeException(e);
-		}
-
-		if (!isFind) {
-			logger.error(ERROR_MESSAGE);
-			throw new WriteDataSourceNotFoundException(ERROR_MESSAGE);
-		}
-
 		writeDataSourceMonitorThread = new Thread(new WriterDataSourceMonitor());
 		writeDataSourceMonitorThread.setDaemon(true);
 		writeDataSourceMonitorThread.setName("FailOverDataSource");
 
 		writeDataSourceMonitorThread.start();
+	}
+
+	public void initFailFast() {
+		if (!findWriteDataSource()) {
+			throw new WriteDataSourceNotFoundException(ERROR_MESSAGE);
+		}
+
+		init();
 	}
 
 	class WriterDataSourceMonitor implements Runnable {

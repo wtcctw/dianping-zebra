@@ -20,10 +20,11 @@ import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.exception.WriteDataSourceNotFoundException;
 import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
 
 public class FailoverDataSourceTest extends MultiDatabaseTestCase {
-
+	
 	@BeforeClass
 	public static void setup() {
 		new File("/tmp/test.h2.db").setWritable(true);
@@ -62,7 +63,7 @@ public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 		}
 
 		ds = new FailOverDataSource(failoverConfigMap);
-		ds.init();
+		ds.initFailFast();
 
 		return ds;
 	}
@@ -120,8 +121,8 @@ public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 		file1.setWritable(true);
 	}
 
-	@Test
-	public void test_no_write_database_at_first_loop() {
+	@Test(expected=WriteDataSourceNotFoundException.class)
+	public void test_no_write_database_at_init() {
 		File file = new File("/tmp/test.h2.db");
 		File file1 = new File("/tmp/test1.h2.db");
 		File file2 = new File("/tmp/test2.h2.db");
@@ -131,13 +132,11 @@ public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 
 		try {
 			getDataSource();
-		} catch (RuntimeException e) {
-			Assert.assertTrue(e.getMessage().contains("[DAL]Cannot find any write dataSource."));
+		} finally{
+      	file.setWritable(true);
+      	file1.setWritable(true);
+      	file2.setWritable(true);
       }
-
-		file.setWritable(true);
-		file1.setWritable(true);
-		file2.setWritable(true);
 	}
 
 	public void test_read_only(String targetDb) throws Exception {

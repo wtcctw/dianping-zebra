@@ -16,7 +16,7 @@ public class ZebraBaseCase implements Runnable {
 	protected DataSource dataSource;
 
 	private AtomicInteger i = new AtomicInteger(1);
-
+	
 	public ZebraBaseCase(String path) throws Exception {
 		ApplicationContext appContext = new ClassPathXmlApplicationContext(path);
 		dataSource = (DataSource) appContext.getBean("dataSource");

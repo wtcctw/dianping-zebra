@@ -1,25 +1,22 @@
 package com.dianping.zebra.group.performance;
 
-import org.junit.Test;
 
 public class ZebraCase extends ZebraBaseCase {
 
 	public ZebraCase() throws Exception {
 		super("performance/appcontext-aop-core.xml");
 	}
-	
 
-	@Test
-	public void testZebra() throws Exception {
-		//ZebraCase zebraCase = new ZebraCase();
-		Thread.sleep(10000);// 构建链接池的时间
+	public static void main(String args[]) throws Exception {
+		ZebraCase zebraCase = new ZebraCase();
+		Thread.sleep(20000);// 构建链接池的时间
 
 		// 单线程，写库1个，5连接池，读库4个，每个5连接池，10000次，1108670ms，每次110ms，9qps
 		// 单线程，写库1个，45连接池，读库4个，每个50连接池，10000次，400655ms
 		// 无干扰： 单线程，写库1个，100连接池，读库4个，每个50连接池，1000次，36526ms,
 		// 无干扰： 单线程，写库1个，100连接池，读库4个，每个50连接池，1000次，36595ms
 		// 无干扰： 单线程，写库1个，100连接池，读库4个，每个50连接池，1000次，36992ms
-		//TestRunner runner = new TestRunner(1000, 1, zebraCase);
+		TestRunner runner = new TestRunner(1000, 1, zebraCase);
 		 
 		// 无干扰： 单线程，写库1个，100连接池，读库4个，每个50连接池，2000次，70833ms
 		//72273
@@ -50,9 +47,7 @@ public class ZebraCase extends ZebraBaseCase {
 		// 100线程，写库1个，100连接池，读库4个，每个50连接池，100000次，103783ms，970qps
 		// TestRunner runner = new TestRunner(100000, 100, zebraCase);
 
-		//runner.start();
-		
-		System.in.read();
+		runner.start();
 	}
 
 }

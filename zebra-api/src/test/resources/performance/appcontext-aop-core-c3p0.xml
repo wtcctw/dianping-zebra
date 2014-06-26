@@ -15,7 +15,7 @@
             <value>com.mysql.jdbc.Driver</value>
         </property>
         <property name="jdbcUrl">
-            <value>jdbc:mysql://10.128.38.147:3306/test</value>
+            <value>jdbc:mysql://127.0.0.1:3306/test</value>
         </property>
         <property name="user">
             <value>root</value>
@@ -24,13 +24,13 @@
             <value>123456</value>
         </property>
         <property name="maxPoolSize">
-            <value>80</value>
+            <value>20</value>
         </property>
         <property name="minPoolSize">
-            <value>80</value>
+            <value>20</value>
         </property>
         <property name="initialPoolSize">
-            <value>80</value>
+            <value>20</value>
         </property>
         <property name="checkoutTimeout">
             <value>1000</value>

@@ -1,6 +1,5 @@
 package com.dianping.zebra.group.performance;
 
-import org.junit.Test;
 
 public class C3p0Case extends ZebraBaseCase {
 
@@ -8,8 +7,7 @@ public class C3p0Case extends ZebraBaseCase {
 	   super("performance/appcontext-aop-core-c3p0.xml");
    }
 
-	@Test
-	public void testC3P0() throws Exception {
+	public static void main(String args[]) throws Exception {
 		C3p0Case zebraCase = new C3p0Case();
 		Thread.sleep(10000);// 构建链接池的时间
 

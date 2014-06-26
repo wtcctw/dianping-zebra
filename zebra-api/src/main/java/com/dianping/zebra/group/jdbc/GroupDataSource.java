@@ -31,6 +31,7 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.GroupDataSourceException;
+import com.dianping.zebra.group.exception.ZebraRuntimeException;
 import com.dianping.zebra.group.monitor.DalStatusExtension;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -56,6 +57,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private DalStatusExtension statusExtension;
 
 	private String name;
+
+	public GroupDataSource() {
+	}
 
 	public GroupDataSource(String name) {
 		this.name = name;
@@ -163,24 +167,30 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.loadCustomizedReadWriteStrategy();
 		this.statusExtension = new DalStatusExtension(this);
 		StatusExtensionRegister.getInstance().register(this.statusExtension);
-		
+
 		logger.info("GroupDataSource successfully initialized.");
 	}
 
 	private void initDataSources() {
 		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException ex) {
+			throw new ZebraRuntimeException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
+		}
+
+		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(), systemConfigManager
 			      .getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig());
-			this.writeDataSource.init();
+			this.writeDataSource.initFailFast();
 		} catch (RuntimeException e) {
 			try {
 				this.close(this.readDataSource, this.writeDataSource);
 			} catch (SQLException ignore) {
 			}
 
-			throw e;
+			throw new ZebraRuntimeException("fail to initialize group dataSource", e);
 		}
 	}
 
@@ -205,7 +215,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			groupConfigCache = groupConfigTmp;
 		}
 
-		logger.info("start to refresh the dataSources...");
+		logger.info("[DAL]start to refresh the dataSources...");
 
 		Transaction tran = Cat.newTransaction("DAL", "DataSource-Refresh");
 
@@ -236,7 +246,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				// switch
 				this.readDataSource = readDataSource;
 				this.writeDataSource = writeDataSource;
-         }
+			}
 
 			// destroy old dataSources
 			try {
@@ -248,10 +258,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			tran.setStatus(Message.SUCCESS);
 			logger.info("refresh the dataSources successfully!");
 		} else {
-			tran.setStatus("Fail");
+			tran.setStatus("fail to refresh the dataSource");
 			logger.warn("fail to refresh the dataSource");
 		}
-		
+
 		tran.complete();
 	}
 
