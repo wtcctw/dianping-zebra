@@ -7,7 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.SingleDataSourceException;
+import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 
 public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
@@ -79,7 +79,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 					TimeUnit.MILLISECONDS.sleep(100);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-				} catch (SingleDataSourceException e) {
+				} catch (DalException e) {
 					if (dataSource != null) {
 						toBeClosedDataSource.offer(dataSource);
 					}

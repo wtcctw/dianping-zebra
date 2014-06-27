@@ -26,14 +26,13 @@ import java.util.concurrent.Executor;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
+import com.dianping.zebra.group.util.StringUtils;
 
 public class GroupConnection implements Connection {
 

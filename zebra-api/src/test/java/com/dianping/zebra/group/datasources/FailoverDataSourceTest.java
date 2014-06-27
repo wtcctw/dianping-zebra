@@ -20,7 +20,7 @@ import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.WriteDataSourceNotFoundException;
+import com.dianping.zebra.group.exception.WriteDsNotFoundException;
 import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
 
 public class FailoverDataSourceTest extends MultiDatabaseTestCase {
@@ -121,7 +121,7 @@ public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 		file1.setWritable(true);
 	}
 
-	@Test(expected=WriteDataSourceNotFoundException.class)
+	@Test(expected=WriteDsNotFoundException.class)
 	public void test_no_write_database_at_init() {
 		File file = new File("/tmp/test.h2.db");
 		File file1 = new File("/tmp/test1.h2.db");

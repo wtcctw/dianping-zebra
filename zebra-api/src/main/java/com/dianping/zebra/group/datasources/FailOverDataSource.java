@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.WriteDataSourceNotFoundException;
+import com.dianping.zebra.group.exception.WriteDsNotFoundException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 
@@ -159,7 +159,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	public void initFailFast() {
 		if (!findWriteDataSource()) {
-			throw new WriteDataSourceNotFoundException(ERROR_MESSAGE);
+			throw new WriteDsNotFoundException(ERROR_MESSAGE);
 		}
 
 		init();
@@ -178,7 +178,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				try {
 					if (!findWriteDataSource()) {
 						if (perMinite()) {
-							Cat.logError(new WriteDataSourceNotFoundException(ERROR_MESSAGE));
+							Cat.logError(new WriteDsNotFoundException(ERROR_MESSAGE));
 						}
 					}
 				} catch (Throwable e) {

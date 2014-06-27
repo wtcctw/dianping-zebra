@@ -14,13 +14,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.group.util.FileUtils;
+import com.dianping.zebra.group.util.StringUtils;
 
 public class LocalConfigService implements ConfigService {
 
@@ -95,7 +94,7 @@ public class LocalConfigService implements ConfigService {
 		} catch (Throwable e) {
 			throw new IllegalConfigException(String.format("fail to read properties file[%s]", this.resourceFileName), e);
 		} finally {
-			IOUtils.closeQuietly(inputStream);
+			FileUtils.closeQuietly(inputStream);
 		}
 
 		return prop;
