@@ -214,7 +214,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			groupConfigCache = groupConfigTmp;
 		}
 
-		logger.info("[DAL]start to refresh the dataSources...");
+		logger.info("start to refresh the dataSources...");
 
 		Transaction tran = Cat.newTransaction("DAL", "DataSource-Refresh");
 
