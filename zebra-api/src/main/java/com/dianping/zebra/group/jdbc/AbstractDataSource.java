@@ -7,10 +7,9 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.exception.GroupDataSourceException;
+import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.util.StringUtils;
 
 public abstract class AbstractDataSource implements DataSource {
 
@@ -47,7 +46,7 @@ public abstract class AbstractDataSource implements DataSource {
 
 	public void setConfigManagerType(String configManagerType) {
 		if (StringUtils.isBlank(configManagerType)) {
-			throw new GroupDataSourceException("configManagerType must not be blank");
+			throw new DalException("configManagerType must not be blank");
 		}
 
 		this.configManagerType = configManagerType;

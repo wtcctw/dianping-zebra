@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.exception;
 
-public class IllegalConfigException extends RuntimeException {
+public class IllegalConfigException extends DalException {
 
 	private static final long serialVersionUID = -7049590514431591540L;
 

@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ServiceLoader;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,17 +29,21 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
-import com.dianping.zebra.group.exception.GroupDataSourceException;
-import com.dianping.zebra.group.exception.ZebraRuntimeException;
+import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.monitor.DalStatusExtension;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.group.util.StringUtils;
 
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(GroupDataSource.class);
+
+	private String name;
+
+	private GroupDataSourceConfig groupConfigCache;
 
 	private LoadBalancedDataSource readDataSource;
 
@@ -52,11 +55,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
-	private GroupDataSourceConfig groupConfigCache;
-
 	private DalStatusExtension statusExtension;
-
-	private String name;
 
 	public GroupDataSource() {
 	}
@@ -152,7 +151,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public void init() {
 		if (StringUtils.isBlank(name)) {
-			throw new GroupDataSourceException("name must not be blank");
+			throw new DalException("name cannot be blank");
 		}
 
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, name);
@@ -175,7 +174,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 		} catch (ClassNotFoundException ex) {
-			throw new ZebraRuntimeException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
+			throw new DalException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
 		}
 
 		try {
@@ -190,7 +189,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			} catch (SQLException ignore) {
 			}
 
-			throw new ZebraRuntimeException("fail to initialize group dataSource", e);
+			throw new DalException("fail to initialize group dataSource", e);
 		}
 	}
 
@@ -215,7 +214,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			groupConfigCache = groupConfigTmp;
 		}
 
-		logger.info("[DAL]start to refresh the dataSources...");
+		logger.info("start to refresh the dataSources...");
 
 		Transaction tran = Cat.newTransaction("DAL", "DataSource-Refresh");
 

@@ -18,6 +18,141 @@ public class StringUtils {
 		return s.toLowerCase().trim().endsWith(suffix.toLowerCase());
 	}
 
+	public static boolean equals(String str1, String str2) {
+		return str1 == null ? str2 == null : str1.equals(str2);
+	}
+
+	public static boolean isBlank(String str) {
+		int strLen;
+		if (str == null || (strLen = str.length()) == 0) {
+			return true;
+		}
+		for (int i = 0; i < strLen; i++) {
+			if ((Character.isWhitespace(str.charAt(i)) == false)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean isEmpty(String str) {
+		return str == null || str.length() == 0;
+	}
+
+	public static boolean isNotBlank(String str) {
+		return !StringUtils.isBlank(str);
+	}
+
+	public static boolean isNumeric(String str) {
+		if (str == null) {
+			return false;
+		}
+		int sz = str.length();
+		for (int i = 0; i < sz; i++) {
+			if (Character.isDigit(str.charAt(i)) == false) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static String leftPad(String str, int size, char padChar) {
+		if (str == null) {
+			return null;
+		}
+		int pads = size - str.length();
+		if (pads <= 0) {
+			return str; // returns original String when possible
+		}
+		if (pads > PAD_LIMIT) {
+			return leftPad(str, size, String.valueOf(padChar));
+		}
+		return padding(pads, padChar).concat(str);
+	}
+
+	public static String leftPad(String str, int size, String padStr) {
+		if (str == null) {
+			return null;
+		}
+		if (isEmpty(padStr)) {
+			padStr = " ";
+		}
+		int padLen = padStr.length();
+		int strLen = str.length();
+		int pads = size - strLen;
+		if (pads <= 0) {
+			return str; // returns original String when possible
+		}
+		if (padLen == 1 && pads <= PAD_LIMIT) {
+			return leftPad(str, size, padStr.charAt(0));
+		}
+
+		if (pads == padLen) {
+			return padStr.concat(str);
+		} else if (pads < padLen) {
+			return padStr.substring(0, pads).concat(str);
+		} else {
+			char[] padding = new char[pads];
+			char[] padChars = padStr.toCharArray();
+			for (int i = 0; i < pads; i++) {
+				padding[i] = padChars[i % padLen];
+			}
+			return new String(padding).concat(str);
+		}
+	}
+
+	private static String padding(int repeat, char padChar) throws IndexOutOfBoundsException {
+		if (repeat < 0) {
+			throw new IndexOutOfBoundsException("Cannot pad a negative amount: " + repeat);
+		}
+		final char[] buf = new char[repeat];
+		for (int i = 0; i < buf.length; i++) {
+			buf[i] = padChar;
+		}
+		return new String(buf);
+	}
+
+	/**
+	 * <pre>
+	 * Determines whether or not the string 'searchIn' contains the string
+	 * 'searchFor', dis-regarding case starting at 'startAt' Shorthand for a
+	 * String.regionMatch(...)
+	 * 
+	 * From mysql connector-j
+	 * </pre>
+	 * 
+	 * @param searchIn
+	 *           the string to search in
+	 * @param startAt
+	 *           the position to start at
+	 * @param searchFor
+	 *           the string to search for
+	 * 
+	 * @return whether searchIn starts with searchFor, ignoring case
+	 */
+	public static boolean startsWithIgnoreCase(String searchIn, int startAt, String searchFor) {
+		return searchIn.regionMatches(true, startAt, searchFor, 0, searchFor.length());
+	}
+
+	/**
+	 * <pre>
+	 * Determines whether or not the string 'searchIn' contains the string
+	 * 'searchFor', dis-regarding case. Shorthand for a String.regionMatch(...)
+	 * 
+	 * From mysql connector-j
+	 * </pre>
+	 * 
+	 * @param searchIn
+	 *           the string to search in
+	 * @param searchFor
+	 *           the string to search for
+	 * 
+	 * @return whether searchIn starts with searchFor, ignoring case
+	 */
+	public static boolean startsWithIgnoreCase(String searchIn, String searchFor) {
+		return startsWithIgnoreCase(searchIn, 0, searchFor);
+	}
+
 	/**
 	 * <pre>
 	 * Determines whether or not the sting 'searchIn' contains the string
@@ -69,47 +204,6 @@ public class StringUtils {
 		}
 
 		return startsWithIgnoreCase(searchIn, beginPos, searchFor);
-	}
-
-	/**
-	 * <pre>
-	 * Determines whether or not the string 'searchIn' contains the string
-	 * 'searchFor', dis-regarding case starting at 'startAt' Shorthand for a
-	 * String.regionMatch(...)
-	 * 
-	 * From mysql connector-j
-	 * </pre>
-	 * 
-	 * @param searchIn
-	 *           the string to search in
-	 * @param startAt
-	 *           the position to start at
-	 * @param searchFor
-	 *           the string to search for
-	 * 
-	 * @return whether searchIn starts with searchFor, ignoring case
-	 */
-	public static boolean startsWithIgnoreCase(String searchIn, int startAt, String searchFor) {
-		return searchIn.regionMatches(true, startAt, searchFor, 0, searchFor.length());
-	}
-
-	/**
-	 * <pre>
-	 * Determines whether or not the string 'searchIn' contains the string
-	 * 'searchFor', dis-regarding case. Shorthand for a String.regionMatch(...)
-	 * 
-	 * From mysql connector-j
-	 * </pre>
-	 * 
-	 * @param searchIn
-	 *           the string to search in
-	 * @param searchFor
-	 *           the string to search for
-	 * 
-	 * @return whether searchIn starts with searchFor, ignoring case
-	 */
-	public static boolean startsWithIgnoreCase(String searchIn, String searchFor) {
-		return startsWithIgnoreCase(searchIn, 0, searchFor);
 	}
 
 	/**
@@ -232,86 +326,6 @@ public class StringUtils {
 		return buf.toString();
 	}
 
-	public static String substringBefore(String str, String separator) {
-		if (isEmpty(str) || separator == null) {
-			return str;
-		}
-		if (separator.length() == 0) {
-			return EMPTY;
-		}
-		int pos = str.indexOf(separator);
-		if (pos == -1) {
-			return str;
-		}
-		return str.substring(0, pos);
-	}
-
-	public static String substringAfter(String str, String separator) {
-		if (isEmpty(str)) {
-			return str;
-		}
-		if (separator == null) {
-			return EMPTY;
-		}
-		int pos = str.indexOf(separator);
-		if (pos == -1) {
-			return EMPTY;
-		}
-		return str.substring(pos + separator.length());
-	}
-
-	public static String substringBetween(String str, String open, String close) {
-		if (str == null || open == null || close == null) {
-			return null;
-		}
-		int start = str.indexOf(open);
-		if (start != -1) {
-			int end = str.indexOf(close, start + open.length());
-			if (end != -1) {
-				return str.substring(start + open.length(), end);
-			}
-		}
-		return null;
-	}
-
-	public static String substringAfterLast(String str, String separator) {
-		if (isEmpty(str)) {
-			return str;
-		}
-		if (isEmpty(separator)) {
-			return EMPTY;
-		}
-		int pos = str.lastIndexOf(separator);
-		if (pos == -1 || pos == (str.length() - separator.length())) {
-			return EMPTY;
-		}
-		return str.substring(pos + separator.length());
-	}
-
-	public static String substringBeforeLast(String str, String separator) {
-		if (isEmpty(str) || isEmpty(separator)) {
-			return str;
-		}
-		int pos = str.lastIndexOf(separator);
-		if (pos == -1) {
-			return str;
-		}
-		return str.substring(0, pos);
-	}
-
-	public static boolean isNumeric(String str) {
-		if (str == null) {
-			return false;
-		}
-		int sz = str.length();
-		for (int i = 0; i < sz; i++) {
-			if (Character.isDigit(str.charAt(i)) == false) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	public static String substring(String str, int start) {
 		if (str == null) {
 			return null;
@@ -332,69 +346,74 @@ public class StringUtils {
 		return str.substring(start);
 	}
 
-	public static String leftPad(String str, int size, char padChar) {
-		if (str == null) {
-			return null;
+	public static String substringAfter(String str, String separator) {
+		if (isEmpty(str)) {
+			return str;
 		}
-		int pads = size - str.length();
-		if (pads <= 0) {
-			return str; // returns original String when possible
+		if (separator == null) {
+			return EMPTY;
 		}
-		if (pads > PAD_LIMIT) {
-			return leftPad(str, size, String.valueOf(padChar));
+		int pos = str.indexOf(separator);
+		if (pos == -1) {
+			return EMPTY;
 		}
-		return padding(pads, padChar).concat(str);
+		return str.substring(pos + separator.length());
 	}
 
-	public static String leftPad(String str, int size, String padStr) {
-		if (str == null) {
+	public static String substringAfterLast(String str, String separator) {
+		if (isEmpty(str)) {
+			return str;
+		}
+		if (isEmpty(separator)) {
+			return EMPTY;
+		}
+		int pos = str.lastIndexOf(separator);
+		if (pos == -1 || pos == (str.length() - separator.length())) {
+			return EMPTY;
+		}
+		return str.substring(pos + separator.length());
+	}
+
+	public static String substringBefore(String str, String separator) {
+		if (isEmpty(str) || separator == null) {
+			return str;
+		}
+		if (separator.length() == 0) {
+			return EMPTY;
+		}
+		int pos = str.indexOf(separator);
+		if (pos == -1) {
+			return str;
+		}
+		return str.substring(0, pos);
+	}
+
+	public static String substringBeforeLast(String str, String separator) {
+		if (isEmpty(str) || isEmpty(separator)) {
+			return str;
+		}
+		int pos = str.lastIndexOf(separator);
+		if (pos == -1) {
+			return str;
+		}
+		return str.substring(0, pos);
+	}
+
+	public static String substringBetween(String str, String open, String close) {
+		if (str == null || open == null || close == null) {
 			return null;
 		}
-		if (isEmpty(padStr)) {
-			padStr = " ";
-		}
-		int padLen = padStr.length();
-		int strLen = str.length();
-		int pads = size - strLen;
-		if (pads <= 0) {
-			return str; // returns original String when possible
-		}
-		if (padLen == 1 && pads <= PAD_LIMIT) {
-			return leftPad(str, size, padStr.charAt(0));
-		}
-
-		if (pads == padLen) {
-			return padStr.concat(str);
-		} else if (pads < padLen) {
-			return padStr.substring(0, pads).concat(str);
-		} else {
-			char[] padding = new char[pads];
-			char[] padChars = padStr.toCharArray();
-			for (int i = 0; i < pads; i++) {
-				padding[i] = padChars[i % padLen];
+		int start = str.indexOf(open);
+		if (start != -1) {
+			int end = str.indexOf(close, start + open.length());
+			if (end != -1) {
+				return str.substring(start + open.length(), end);
 			}
-			return new String(padding).concat(str);
 		}
+		return null;
 	}
 
-	private static String padding(int repeat, char padChar) throws IndexOutOfBoundsException {
-		if (repeat < 0) {
-			throw new IndexOutOfBoundsException("Cannot pad a negative amount: " + repeat);
-		}
-		final char[] buf = new char[repeat];
-		for (int i = 0; i < buf.length; i++) {
-			buf[i] = padChar;
-		}
-		return new String(buf);
+	public static String trimToEmpty(String str) {
+		return str == null ? EMPTY : str.trim();
 	}
-
-	public static boolean isEmpty(String str) {
-		return str == null || str.length() == 0;
-	}
-
-	public static void main(String[] args) {
-		String sql = "select * from \rTorder \nwhere a = b \r\nand c = 1";
-		System.out.println(StringUtils.stripComments(sql, "'\"", "'\"", true, false, true, true).trim());
-	}
-
 }

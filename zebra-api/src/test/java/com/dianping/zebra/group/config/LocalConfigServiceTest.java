@@ -9,12 +9,12 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Assert;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.util.FileUtils;
 
 public class LocalConfigServiceTest {
 
@@ -48,7 +48,7 @@ public class LocalConfigServiceTest {
 		prop.setProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL), "5");
 		saveProperties(resourceId, prop);
 
-//		 System.in.read();
+		// System.in.read();
 		TimeUnit.SECONDS.sleep(5);
 
 		Assert.assertEquals("5", localConfigService.getProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL)));
@@ -71,7 +71,7 @@ public class LocalConfigServiceTest {
 			inputStream = getClass().getClassLoader().getResourceAsStream(resourceFileName);
 			prop.load(inputStream);
 		} finally {
-			IOUtils.closeQuietly(inputStream);
+			FileUtils.closeQuietly(inputStream);
 		}
 
 		return prop;
@@ -85,7 +85,10 @@ public class LocalConfigServiceTest {
 			writer = new FileWriter(url.getPath());
 			properties.store(writer, "New Properties");
 		} finally {
-			IOUtils.closeQuietly(writer);
+			try {
+				writer.close();
+			} catch (IOException ignore) {
+			}
 		}
 	}
 }
