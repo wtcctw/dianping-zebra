@@ -1,6 +1,5 @@
 package com.dianping.zebra.group.datasources;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +11,6 @@ import javax.sql.DataSource;
 import junit.framework.Assert;
 
 import org.junit.After;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,14 +23,9 @@ import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
 
 public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 	
-	@BeforeClass
-	public static void setup() {
-		new File("/tmp/test.h2.db").setWritable(true);
-		new File("/tmp/test1.h2.db").setWritable(true);
-		new File("/tmp/test2.h2.db").setWritable(true);
-	}
-
 	private FailOverDataSource ds;
+	
+	private Map<String,Boolean> readOnlyMap = new HashMap<String,Boolean>();
 
 	@After
 	public void closeDs() throws SQLException {
@@ -56,7 +49,7 @@ public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 		for (Entry<String, DataSourceConfig> entry : configManager.getDataSourceConfigs().entrySet()) {
 			String key = entry.getKey();
 			DataSourceConfig config = entry.getValue();
-
+			setReadOnly(config);
 			if (config.isActive() && config.isCanWrite()) {
 				failoverConfigMap.put(key, config);
 			}
@@ -66,6 +59,14 @@ public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 		ds.initFailFast();
 
 		return ds;
+	}
+	
+	private void setReadOnly(DataSourceConfig config){
+		if(readOnlyMap.containsKey(config.getId()) &&
+				readOnlyMap.get(config.getId())!= null &&
+				readOnlyMap.get(config.getId()).booleanValue()){
+			config.setJdbcUrl(config.getJdbcUrl() + ";ACCESS_MODE_DATA=r");
+		}
 	}
 
 	@Override
@@ -100,43 +101,24 @@ public class FailoverDataSourceTest extends MultiDatabaseTestCase {
 
 	@Test
 	public void test_db2_for_write() throws Exception {
-		File file = new File("/tmp/test.h2.db");
-		file.setReadOnly();
-
+		readOnlyMap.put("db1",true);
 		test_read_only("db2");
-
-		file.setWritable(true);
 	}
 
 	@Ignore
 	public void test_db3_for_write() throws Exception {
-		File file = new File("/tmp/test.h2.db");
-		file.setReadOnly();
-		File file1 = new File("/tmp/test1.h2.db");
-		file1.setReadOnly();
-
+		readOnlyMap.put("db1",true);
+		readOnlyMap.put("db2",true);
 		test_read_only("db3");
-
-		file.setWritable(true);
-		file1.setWritable(true);
 	}
 
 	@Test(expected=WriteDataSourceNotFoundException.class)
 	public void test_no_write_database_at_init() {
-		File file = new File("/tmp/test.h2.db");
-		File file1 = new File("/tmp/test1.h2.db");
-		File file2 = new File("/tmp/test2.h2.db");
-		file.setReadOnly();
-		file1.setReadOnly();
-		file2.setReadOnly();
-
-		try {
-			getDataSource();
-		} finally{
-      	file.setWritable(true);
-      	file1.setWritable(true);
-      	file2.setWritable(true);
-      }
+		readOnlyMap.put("db1",true);
+		readOnlyMap.put("db2",true);
+		readOnlyMap.put("db3",true);
+		getDataSource();
+		
 	}
 
 	public void test_read_only(String targetDb) throws Exception {
