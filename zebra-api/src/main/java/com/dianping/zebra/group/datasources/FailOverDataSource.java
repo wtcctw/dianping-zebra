@@ -167,6 +167,7 @@ public class FailOverDataSource extends AbstractDataSource {
         init();
     }
 
+
     class FindWriteDataSourceResult {
         private boolean writeDbExist;
         private boolean changedWrteDb;
@@ -194,7 +195,7 @@ public class FailOverDataSource extends AbstractDataSource {
     }
 
     protected Transaction getSwitchWriteDbTransaction() {
-        return Cat.getProducer().newTransaction("Zebra", "SwitchWriteDB");//todo: the name?
+        return Cat.getProducer().newTransaction("SQL.Conn", "SwitchWriteDB");//todo: the name?
     }
 
     class WriterDataSourceMonitor implements Runnable {
