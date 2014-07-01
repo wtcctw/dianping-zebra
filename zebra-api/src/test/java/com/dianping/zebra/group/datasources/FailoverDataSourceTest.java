@@ -135,6 +135,19 @@ public class FailoverDataSourceTest {
         TimeUnit.SECONDS.sleep(1);
         //did change because the writeBs is the same
         verify(t, times(1)).complete();
+
+        mockedDs.setConnectionProvider(new ConnectionProvider() {
+            @Override
+            public Connection getConnection(DataSourceConfig config) {
+                if (config.getId().equals("db1")) {
+                    return readOnlyCoon;
+                }
+                return coon;
+            }
+        });
+        TimeUnit.SECONDS.sleep(1);
+        //changed the writeBs and fire the transaction again
+        verify(t, times(2)).complete();
     }
 
     interface ConnectionProvider {
