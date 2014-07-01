@@ -1,134 +1,177 @@
 package com.dianping.zebra.group.datasources;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
-
-import junit.framework.Assert;
-
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.WriteDsNotFoundException;
-import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
+import junit.framework.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-public class FailoverDataSourceTest extends MultiDatabaseTestCase {
-	
-	private FailOverDataSource ds;
-	
-	private Map<String,Boolean> readOnlyMap = new HashMap<String,Boolean>();
+import static org.mockito.Mockito.*;
 
-	@After
-	public void closeDs() throws SQLException {
-		if (ds != null) {
-			ds.close();
-		}
-	}
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-	@Override
-	protected String getConfigManagerType() {
-		return Constants.CONFIG_MANAGER_TYPE_LOCAL;
-	}
+public class FailoverDataSourceTest {
+    Map<String, DataSourceConfig> configs;
+    Statement state = mock(Statement.class);
+    Statement readonlyState = mock(Statement.class);
+    ResultSet result = mock(ResultSet.class);
+    ResultSet readOnlyResult = mock(ResultSet.class);
+    Connection coon = mock(Connection.class);
+    Connection readOnlyCoon = mock(Connection.class);
 
-	@Override
-	protected DataSource getDataSource() {
-		DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager(getConfigManagerType(),
-		      getResourceId());
+    @Before
+    public void init() throws SQLException {
+        configs = new HashMap<String, DataSourceConfig>();
+        DataSourceConfig write1 = new DataSourceConfig();
+        write1.setId("db1");
+        configs.put("db1", write1);
+        DataSourceConfig write2 = new DataSourceConfig();
+        write2.setId("db2");
+        configs.put("db2", write2);
 
-		Map<String, DataSourceConfig> failoverConfigMap = new HashMap<String, DataSourceConfig>();
+        when(result.next()).thenReturn(true);
+        when(result.getInt(1)).thenReturn(0);
+        when(readOnlyResult.next()).thenReturn(true);
+        when(readOnlyResult.getInt(1)).thenReturn(1);
 
-		for (Entry<String, DataSourceConfig> entry : configManager.getDataSourceConfigs().entrySet()) {
-			String key = entry.getKey();
-			DataSourceConfig config = entry.getValue();
-			setReadOnly(config);
-			if (config.isActive() && config.isCanWrite()) {
-				failoverConfigMap.put(key, config);
-			}
-		}
+        when(state.executeQuery(anyString())).thenReturn(result);
+        when(readonlyState.executeQuery(anyString())).thenReturn(readOnlyResult);
 
-		ds = new FailOverDataSource(failoverConfigMap);
-		ds.initFailFast();
+        when(coon.createStatement()).thenReturn(state);
+        when(readOnlyCoon.createStatement()).thenReturn(readonlyState);
+    }
 
-		return ds;
-	}
-	
-	private void setReadOnly(DataSourceConfig config){
-		if(readOnlyMap.containsKey(config.getId()) &&
-				readOnlyMap.get(config.getId())!= null &&
-				readOnlyMap.get(config.getId()).booleanValue()){
-			config.setJdbcUrl(config.getJdbcUrl() + ";ACCESS_MODE_DATA=r");
-		}
-	}
+    @Test(expected = WriteDsNotFoundException.class)
+    public void test_no_writer_exception_when_init() {
+        FailOverDataSource ds = new FailOverDataSource(null);
+        ds.initFailFast();
+    }
 
-	@Override
-	protected DataSourceEntry[] getDataSourceEntryArray() {
-		DataSourceEntry[] entries = new DataSourceEntry[3];
+    @Test
+    public void test_use_auto_find_write_db() throws InterruptedException, SQLException {
+        FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);
 
-		DataSourceEntry entry1 = new DataSourceEntry("jdbc:h2:file:/tmp/test;MVCC=TRUE", "datasets.xml", true);
-		DataSourceEntry entry2 = new DataSourceEntry("jdbc:h2:file:/tmp/test1;MVCC=TRUE", "datasets1.xml", false);
-		DataSourceEntry entry3 = new DataSourceEntry("jdbc:h2:file:/tmp/test2;MVCC=TRUE", "datasets2.xml", false);
+        mockedDs.setConnectionProvider(new ConnectionProvider() {
+            @Override
+            public Connection getConnection(DataSourceConfig config) {
+                return coon;
+            }
+        });
 
-		entries[0] = entry1;
-		entries[1] = entry2;
-		entries[2] = entry3;
+        mockedDs.init();
+        TimeUnit.SECONDS.sleep(1);
+        Assert.assertEquals("db1", mockedDs.getWriteDb().getId());
 
-		return entries;
-	}
+        mockedDs.setConnectionProvider(new ConnectionProvider() {
+            @Override
+            public Connection getConnection(DataSourceConfig config) {
+                if (config.getId().equals("db1")) {
+                    return readOnlyCoon;
+                }
+                return coon;
+            }
+        });
+        TimeUnit.SECONDS.sleep(1);
+        Assert.assertEquals("db2", mockedDs.getWriteDb().getId());
+    }
 
-	@Override
-	protected String getResourceId() {
-		return "sample.ds.v3";
-	}
 
-	@Override
-	protected String getSchema() {
-		return getClass().getResource("/schema.sql").getPath();
-	}
+    @Test(expected = WriteDsNotFoundException.class)
+    public void test_use_no_write_db() throws InterruptedException, SQLException {
+        FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);
+        mockedDs.setConnectionProvider(new ConnectionProvider() {
+            @Override
+            public Connection getConnection(DataSourceConfig config) {
+                return readOnlyCoon;
+            }
+        });
+        mockedDs.initFailFast();
+    }
 
-	@Test
-	public void test_db1_for_write() throws Exception {
-		test_read_only("db1");
-	}
 
-	@Test
-	public void test_db2_for_write() throws Exception {
-		readOnlyMap.put("db1",true);
-		test_read_only("db2");
-	}
+    @Test
+    public void test_use_default_write_db() throws InterruptedException, SQLException {
+        FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);
+        mockedDs.setConnectionProvider(new ConnectionProvider() {
+            @Override
+            public Connection getConnection(DataSourceConfig config) {
+                return coon;
+            }
+        });
 
-	@Ignore
-	public void test_db3_for_write() throws Exception {
-		readOnlyMap.put("db1",true);
-		readOnlyMap.put("db2",true);
-		test_read_only("db3");
-	}
+        mockedDs.init();
+        TimeUnit.SECONDS.sleep(1);
+        Assert.assertEquals("db1", mockedDs.getWriteDb().getId());
+    }
 
-	@Test(expected=WriteDsNotFoundException.class)
-	public void test_no_write_database_at_init() {
-		readOnlyMap.put("db1",true);
-		readOnlyMap.put("db2",true);
-		readOnlyMap.put("db3",true);
-		getDataSource();
-		
-	}
 
-	public void test_read_only(String targetDb) throws Exception {
-		getDataSource();
-		
-		TimeUnit.SECONDS.sleep(1);
-		SingleConnection conn = (SingleConnection) ds.getConnection();
+    /**
+     * just commit the transaction when write database changed
+     */
+    @Test
+    public void test_switch_write_db_on_cat_transaction() throws InterruptedException, SQLException {
+        Transaction t = mock(Transaction.class);
+        FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);
+        mockedDs.setMockedTransaction(t);
+        mockedDs.setConnectionProvider(new ConnectionProvider() {
+            @Override
+            public Connection getConnection(DataSourceConfig config) {
+                return coon;
+            }
+        });
 
-		Assert.assertEquals(targetDb, conn.getDataSource().getId());
+        mockedDs.init();
+        TimeUnit.SECONDS.sleep(1);
+        //changed because the writeBs is null
+        verify(t, times(1)).complete();
 
-		conn.close();
-	}
+        TimeUnit.SECONDS.sleep(1);
+        //did change because the writeBs is the same
+        verify(t, times(1)).complete();
+    }
+
+    interface ConnectionProvider {
+        Connection getConnection(DataSourceConfig config);
+    }
+
+    class FailOverDataSourceForTestCat extends FailOverDataSource {
+        private Transaction mockedTransaction;
+        private ConnectionProvider connectionProvider;
+
+        public FailOverDataSourceForTestCat(Map<String, DataSourceConfig> configs) {
+            super(configs);
+        }
+
+        @Override
+        protected Transaction getSwitchWriteDbTransaction() {
+            if (mockedTransaction == null) {
+                return super.getSwitchWriteDbTransaction();
+            }
+            return mockedTransaction;
+        }
+
+        public void setMockedTransaction(Transaction mockedTransaction) {
+            this.mockedTransaction = mockedTransaction;
+        }
+
+        @Override
+        public Connection getConnection(DataSourceConfig config) throws SQLException {
+            return connectionProvider.getConnection(config);
+        }
+
+        public void setConnectionProvider(ConnectionProvider connectionProvider) {
+            this.connectionProvider = connectionProvider;
+        }
+
+        public SingleDataSource getWriteDb() {
+            return super.writeDs;
+        }
+    }
 }

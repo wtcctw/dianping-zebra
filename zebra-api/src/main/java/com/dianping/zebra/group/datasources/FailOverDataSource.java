@@ -24,7 +24,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
     private static final String ERROR_MESSAGE = "[DAL]Cannot find any write dataSource.";
 
-    private volatile SingleDataSource writeDs;
+    protected volatile SingleDataSource writeDs;
 
     private Map<String, DataSourceConfig> configs;
 
@@ -55,8 +55,11 @@ public class FailOverDataSource extends AbstractDataSource {
     }
 
     private FindWriteDataSourceResult findWriteDataSource() {
-        boolean isWriteDBExist = false;
-        boolean chanedWriteDB = false;
+        FindWriteDataSourceResult result = new FindWriteDataSourceResult();
+
+        if (configs == null) {
+            return result;
+        }
 
         for (DataSourceConfig config : configs.values()) {
             Connection conn = null;
@@ -72,10 +75,9 @@ public class FailOverDataSource extends AbstractDataSource {
                     if (rs.getInt(1) == 0) {
                         if (writeDs == null || !writeDs.getId().equals(config.getId())) {
                             writeDs = getDataSource(config);
-                            chanedWriteDB = true;
+                            result.setChangedWrteDb(true);
                         }
-
-                        isWriteDBExist = true;
+                        result.setWriteDbExist(true);
                         break;
                     }
                 }
@@ -110,7 +112,7 @@ public class FailOverDataSource extends AbstractDataSource {
             }
         }
 
-        return new FindWriteDataSourceResult(isWriteDBExist, chanedWriteDB);
+        return result;
     }
 
     @Override
@@ -171,11 +173,6 @@ public class FailOverDataSource extends AbstractDataSource {
     class FindWriteDataSourceResult {
         private boolean writeDbExist;
         private boolean changedWrteDb;
-
-        public FindWriteDataSourceResult(boolean writeDbExist, boolean changedWrteDb) {
-            this.writeDbExist = writeDbExist;
-            this.changedWrteDb = changedWrteDb;
-        }
 
         public boolean isWriteDbExist() {
             return writeDbExist;
