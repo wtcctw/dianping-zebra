@@ -60,6 +60,8 @@ public class Constants {
 	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
 
 	public static final String ELEMENT_TRANSACTION_FORCE_WREITE = "transactionForceWrite";
+	
+	public static final String ELEMENT_WRITE_FIRST = "writeFirst";
 
 	public static final String ELEMENT_PROPERTIES = "properties";
 

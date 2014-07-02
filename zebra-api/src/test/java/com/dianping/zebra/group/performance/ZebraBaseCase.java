@@ -89,7 +89,7 @@ public class ZebraBaseCase implements Runnable {
 			prepareStatement.execute();
 			
 			stmt = conn.createStatement();
-			ResultSet executeQuery = stmt.executeQuery("/*+zebra:w*/select @@identity");
+			ResultSet executeQuery = stmt.executeQuery("select @@identity");
 			while(executeQuery.next()){
 				System.out.println(executeQuery.getInt(1));
 			}

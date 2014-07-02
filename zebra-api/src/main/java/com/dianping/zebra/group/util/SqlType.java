@@ -17,6 +17,7 @@ public enum SqlType {
 	MERGE(false, 10), //
 	SHOW(true, 11), //
 	EXECUTE(false, 12), //
+	SELECT_FOR_IDENTITY(false, 13), //
 	DEFAULT_SQL_TYPE(false, -100), //
 	;
 

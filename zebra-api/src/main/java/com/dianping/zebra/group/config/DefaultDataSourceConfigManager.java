@@ -94,10 +94,12 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 
 		groupDsConfig
-		      .setRouterStrategy(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_PRFIX, this.name,
+		      .setRouterStrategy(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_BUSSINESS_PRFIX, this.name,
 		            Constants.ELEMENT_ROUTER_STRATEGY), groupDsConfig.getRouterStrategy()));
-		groupDsConfig.setTransactionForceWrite(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_PRFIX,
+		groupDsConfig.setTransactionForceWrite(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_BUSSINESS_PRFIX,
 		      this.name, Constants.ELEMENT_TRANSACTION_FORCE_WREITE), groupDsConfig.getTransactionForceWrite()));
+		groupDsConfig.setWriteFirst(getProperty(String.format("%s.%s.%s", Constants.DEFAULT_BUSSINESS_PRFIX,
+		      this.name, Constants.ELEMENT_WRITE_FIRST), groupDsConfig.getWriteFirst()));
 
 		validateConfig(groupDsConfig.getDataSourceConfigs());
 

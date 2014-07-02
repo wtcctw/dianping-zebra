@@ -24,5 +24,7 @@ public class DataSourceConfigManagerTest {
 			
 			Assert.assertEquals(dataSourceConfig.toString(),entry.toString());
 		}
+		
+		System.out.println(dataSourceConfigManager.getGroupDataSourceConfig());
 	}
 }

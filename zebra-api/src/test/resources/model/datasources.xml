@@ -1,4 +1,4 @@
-<group-data-source-config router-strategy="roundrobin" transaction-force-write="false">
+<group-data-source-config router-strategy="roundrobin" transaction-force-write="false" write-first="true">
 	<data-source-config id="db1" weight="1" canRead="false" canWrite="true" active="true">
 		<test-read-only-sql>call readonly()</test-read-only-sql>
 		<time-window>1000</time-window>

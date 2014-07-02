@@ -3,6 +3,7 @@
   <entity name="group-data-source-config" root="true">
     <attribute name="router-strategy" value-type="String" />
     <attribute name="transaction-force-write" value-type="boolean" />
+    <attribute name="write-first" value-type="boolean" />
     <entity-ref name="data-source-config" type="list" names="data-source-configs" />
   </entity>
   <entity name="data-source-config">

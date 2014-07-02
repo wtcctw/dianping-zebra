@@ -344,6 +344,12 @@ public class GroupConnection implements Connection {
 	}
 
 	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
+		if(dataSourceConfigManager.getGroupDataSourceConfig().isWriteFirst()){
+			if(wConnection != null){
+				return wConnection;
+			}
+		}
+		
 		if (forceWriter) {
 			return getWriteConnection();
 		} else if (!autoCommit && dataSourceConfigManager.isTransactionForceWrite()) {
