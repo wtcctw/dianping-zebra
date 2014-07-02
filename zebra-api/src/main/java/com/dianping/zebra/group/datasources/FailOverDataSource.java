@@ -24,7 +24,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
     private static final String ERROR_MESSAGE = "[DAL]Cannot find any write dataSource.";
 
-    protected volatile SingleDataSource writeDs;
+    private volatile SingleDataSource writeDs;
 
     private Map<String, DataSourceConfig> configs;
 
@@ -56,10 +56,6 @@ public class FailOverDataSource extends AbstractDataSource {
 
     private FindWriteDataSourceResult findWriteDataSource() {
         FindWriteDataSourceResult result = new FindWriteDataSourceResult();
-
-        if (configs == null) {
-            return result;
-        }
 
         for (DataSourceConfig config : configs.values()) {
             Connection conn = null;
