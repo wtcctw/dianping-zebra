@@ -5,6 +5,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.WriteDsNotFoundException;
 import junit.framework.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.mockito.Mockito.*;
@@ -110,6 +111,7 @@ public class FailoverDataSourceTest {
      * just commit the transaction when write database changed
      */
     @Test
+    @Ignore
     public void test_switch_write_db_on_cat_transaction() throws InterruptedException, SQLException {
         Transaction t = mock(Transaction.class);
         FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);

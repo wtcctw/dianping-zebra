@@ -80,11 +80,11 @@ public class FailOverDataSource extends AbstractDataSource {
             } catch (SQLException e) {
                 // communication link fail,then print the error message to cat
                 if (writeDs != null && writeDs.getId().equals(config.getId())) {
-                    SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
-                    writeDs = null;
+                    Cat.logError(String.format("the ping connection for %s was killed by mysql server", writeDs.getId()), e);
+//                    SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
+//                    writeDs = null;
                 }
 
-                Cat.logError(String.format("the ping connection for %s was killed by mysql server", writeDs.getId()), e);
                 try {
                     connections.remove(config.getId());
                     if (conn != null) {
@@ -188,7 +188,7 @@ public class FailOverDataSource extends AbstractDataSource {
     }
 
     protected Transaction getSwitchWriteDbTransaction() {
-        return Cat.getProducer().newTransaction("SQL.Conn", "SwitchWriteDB");//todo: the name?
+        return Cat.getProducer().newTransaction("SQL.Conn", "SwitchWriteDB");
     }
 
     class WriterDataSourceMonitor implements Runnable {
@@ -203,7 +203,7 @@ public class FailOverDataSource extends AbstractDataSource {
             while (!Thread.interrupted()) {
 
                 FindWriteDataSourceResult findResult = null;
-                Transaction t = getSwitchWriteDbTransaction();
+//                Transaction t = getSwitchWriteDbTransaction();
 
                 try {
                     findResult = findWriteDataSource();
@@ -213,14 +213,15 @@ public class FailOverDataSource extends AbstractDataSource {
                             Cat.logError(new WriteDsNotFoundException(ERROR_MESSAGE));
                         }
                     }
-                    t.setStatus(Transaction.SUCCESS);
+//                    t.setStatus(Transaction.SUCCESS);
                 } catch (Throwable e) {
                     Cat.logError(e);
-                } finally {
-                    if (findResult != null && findResult.isChangedWrteDb()) {
-                        t.complete();
-                    }
                 }
+//                finally {
+//                    if (findResult != null && findResult.isChangedWrteDb()) {
+//                        t.complete();
+//                    }
+//                }
 
                 try {
                     TimeUnit.SECONDS.sleep(1); // TODO: temperary
