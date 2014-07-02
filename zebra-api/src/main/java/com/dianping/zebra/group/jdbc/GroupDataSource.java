@@ -226,7 +226,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			      .getRetryTimes());
 			readDataSource.init();
 			writeDataSource = new FailOverDataSource(getFailoverConfig());
-			writeDataSource.init();
+			writeDataSource.initFailFast();
 
 			preparedSwitch = true;
 		} catch (Throwable e) {
