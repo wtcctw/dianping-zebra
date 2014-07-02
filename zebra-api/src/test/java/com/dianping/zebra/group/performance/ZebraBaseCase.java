@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.performance;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,13 +30,13 @@ public class ZebraBaseCase implements Runnable {
 			int id = i.getAndIncrement();
 
 			conn = dataSource.getConnection();
-			conn.setAutoCommit(false);
+			conn.setAutoCommit(true);
 			insert(conn, id);
-			update(conn, id);
-			select(conn);
-			delete(conn, id);
+			//update(conn, id);
+			//select(conn);
+			//delete(conn, id);
 
-			conn.commit();
+			//conn.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -77,8 +78,21 @@ public class ZebraBaseCase implements Runnable {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
+			//stmt = conn.createStatement();
+			//stmt.execute(sql);
+			
+			PreparedStatement prepareStatement = conn.prepareStatement("insert into PERSON(NAME,LAST_NAME,AGE) values(?,?,?)");
+			prepareStatement.setString(1, "zhuhao");
+			prepareStatement.setString(2, "zhuhao");
+			prepareStatement.setInt(3, 2);
+			
+			prepareStatement.execute();
+			
 			stmt = conn.createStatement();
-			stmt.execute(sql);
+			ResultSet executeQuery = stmt.executeQuery("/*+zebra:w*/select @@identity");
+			while(executeQuery.next()){
+				System.out.println(executeQuery.getInt(1));
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {

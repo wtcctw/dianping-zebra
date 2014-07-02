@@ -10,6 +10,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.zebra.group.jdbc.SingleDatabaseTestCase.ConnectionCallback;
+
 public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
 	private String selectSql = "select * from PERSON p where p.AGE = ?";
@@ -74,8 +76,16 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 				stmt.setString(2, "zhuhao");
 				stmt.setInt(3, 12);
 				stmt.addBatch();
-
+				
 				int[] updateCounts = stmt.executeBatch();
+				
+				Statement createStatement = conn.createStatement();
+				ResultSet executeQuery = createStatement.executeQuery("select @@identity");
+				
+				while(executeQuery.next()){
+					System.out.println(executeQuery.getInt(1));
+				}
+
 				Assert.assertEquals(updateCounts.length, 2);
 				stmt.close();
 
@@ -137,7 +147,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 			}
 		});
 	}
-
+	
 	@Override
 	protected String getConfigManagerType() {
 		return "local";
