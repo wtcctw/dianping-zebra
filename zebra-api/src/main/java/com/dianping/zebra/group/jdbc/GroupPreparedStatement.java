@@ -146,16 +146,12 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	@Override
 	public boolean execute() throws SQLException {
 		SqlType sqlType = SqlUtils.getSqlType(sql);
-		if (sqlType == SqlType.SELECT || sqlType == SqlType.SELECT_FOR_UPDATE || sqlType == SqlType.SHOW) {
+		if (sqlType.isRead()) {
 			executeQuery();
 			return true;
-		} else if (sqlType == SqlType.INSERT || sqlType == SqlType.UPDATE || sqlType == SqlType.DELETE
-		      || sqlType == SqlType.REPLACE || sqlType == SqlType.TRUNCATE || sqlType == SqlType.CREATE
-		      || sqlType == SqlType.DROP || sqlType == SqlType.LOAD || sqlType == SqlType.MERGE) {
+		} else {
 			this.updateCount = executeUpdate();
 			return false;
-		} else {
-			throw new SQLException("only select, insert, update, delete,truncate,create,drop,load,merge sql is supported");
 		}
 	}
 
