@@ -53,6 +53,7 @@ public class SqlUtils {
 			throw new SQLException(
 			      "only select, insert, update, delete,replace,truncate,create,drop,load,merge,call sql is supported");
 		}
+
 		return sqlType;
 	}
 

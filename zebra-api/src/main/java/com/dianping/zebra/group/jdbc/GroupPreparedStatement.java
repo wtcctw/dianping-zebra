@@ -146,7 +146,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	@Override
 	public boolean execute() throws SQLException {
 		SqlType sqlType = SqlUtils.getSqlType(sql);
-		if (sqlType.isRead()) {
+		if (sqlType.isQuery()) {
 			executeQuery();
 			return true;
 		} else {
