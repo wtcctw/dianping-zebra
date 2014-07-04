@@ -76,18 +76,22 @@ public class FailoverDataSourceTest {
 
         new Thread(monitor).start();
 
-        TimeUnit.MILLISECONDS.sleep(1900);
+        while (monitor.getSleepTimes() < 2) {
+            Thread.sleep(100);
+        }
         Assert.assertEquals("db1", ds.getCurrentDataSourceMBean().getId());
 
-        verify(coon, only()).createStatement();
+        verify(coon, atLeastOnce()).createStatement();
         verify(readOnlyCoon, never()).createStatement();
 
         //fail over db1
         connectionAnswer.setCoon(readOnlyCoon);
 
-        TimeUnit.MILLISECONDS.sleep(3500);
+        while (monitor.getSleepTimes() < 5) {
+            Thread.sleep(100);
+        }
         Assert.assertEquals("db2", ds.getCurrentDataSourceMBean().getId());
-        verify(coon, times(3)).createStatement();
+        verify(coon, atLeast(3)).createStatement();
         verify(readOnlyCoon, times(2)).createStatement();
     }
 

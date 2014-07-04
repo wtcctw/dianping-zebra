@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
@@ -124,6 +125,11 @@ public class FailOverDataSource extends AbstractDataSource {
 
     class WriterDataSourceMonitor implements Runnable {
         private volatile int sleepSecond = 1;
+        private AtomicInteger atomicSleepTimes = new AtomicInteger(0);
+
+        public int getSleepTimes() {
+            return atomicSleepTimes.get();
+        }
 
         public int getSleepSecond() {
             return sleepSecond;
@@ -218,6 +224,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
                     while (!Thread.interrupted()) {
                         sleep();
+
                         CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
 
                         if (checkWriteResult == CheckWriteDataSourceResult.OK) {
@@ -245,6 +252,12 @@ public class FailOverDataSource extends AbstractDataSource {
         private void sleep() {
             try {
                 TimeUnit.SECONDS.sleep(sleepSecond);
+
+                //just for test
+                atomicSleepTimes.incrementAndGet();
+                if (atomicSleepTimes.get() > 100) {
+                    atomicSleepTimes.set(0);
+                }
             } catch (InterruptedException e) {
             }
         }
