@@ -187,10 +187,6 @@ public class FailOverDataSource extends AbstractDataSource {
         }
     }
 
-    protected Transaction getSwitchWriteDbTransaction() {
-        return Cat.getProducer().newTransaction("SQL.Conn", "SwitchWriteDB");
-    }
-
     class WriterDataSourceMonitor implements Runnable {
         private long counter = 0L;
 
@@ -201,27 +197,21 @@ public class FailOverDataSource extends AbstractDataSource {
         @Override
         public void run() {
             while (!Thread.interrupted()) {
-
-                FindWriteDataSourceResult findResult = null;
-//                Transaction t = getSwitchWriteDbTransaction();
+                Transaction t = Cat.newTransaction("SQL.Conn", "CheckWriteDB");
 
                 try {
-                    findResult = findWriteDataSource();
-
-                    if (!findResult.isWriteDbExist()) {
+                    if (!findWriteDataSource().isWriteDbExist()) {
                         if (perMinite()) {
                             Cat.logError(new WriteDsNotFoundException(ERROR_MESSAGE));
                         }
                     }
-//                    t.setStatus(Transaction.SUCCESS);
+                    t.setStatus(Transaction.SUCCESS);
                 } catch (Throwable e) {
                     Cat.logError(e);
+                    t.setStatus(e);
+                } finally {
+                    t.complete();
                 }
-//                finally {
-//                    if (findResult != null && findResult.isChangedWrteDb()) {
-//                        t.complete();
-//                    }
-//                }
 
                 try {
                     TimeUnit.SECONDS.sleep(1); // TODO: temperary
