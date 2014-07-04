@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.WriteDsNotFoundException;
@@ -28,8 +29,6 @@ public class FailOverDataSource extends AbstractDataSource {
 
     private Map<String, DataSourceConfig> configs;
 
-    private Map<String, Connection> connections = new ConcurrentHashMap<String, Connection>(); // cache ping connections
-
     private Thread writeDataSourceMonitorThread;
 
     public FailOverDataSource(Map<String, DataSourceConfig> configs) {
@@ -41,90 +40,25 @@ public class FailOverDataSource extends AbstractDataSource {
         if (this.writeDataSourceMonitorThread != null) {
             writeDataSourceMonitorThread.interrupt();
         }
-
-        for (Connection conn : connections.values()) {
-            try {
-                conn.close();
-            } catch (SQLException ignore) {
-            }
-        }
-
         if (writeDs != null) {
             SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
         }
     }
 
-    private FindWriteDataSourceResult findWriteDataSource() {
-        FindWriteDataSourceResult result = new FindWriteDataSourceResult();
+    enum CheckWriteDataSourceResult {
+        OK(1), READ_ONLY(2), ERROR(3);
 
-        for (DataSourceConfig config : configs.values()) {
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rs = null;
-            try {
-                conn = getConnection(config);
-                stmt = conn.createStatement();
-                rs = stmt.executeQuery(config.getTestReadOnlySql());
+        private int status;
 
-                if (rs.next()) {
-                    // switch database, 0 for write dataSource, 1 for read dataSource.
-                    if (rs.getInt(1) == 0) {
-                        if (writeDs == null || !writeDs.getId().equals(config.getId())) {
-                            writeDs = getDataSource(config);
-                            result.setChangedWrteDb(true);
-                        }
-                        result.setWriteDbExist(true);
-                        break;
-                    }
-                }
-            } catch (SQLException e) {
-                // communication link fail,then print the error message to cat
-                if (writeDs != null && writeDs.getId().equals(config.getId())) {
-                    Cat.logError(String.format("the ping connection for %s was killed by mysql server", writeDs.getId()), e);
-//                    SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
-//                    writeDs = null;
-                }
-
-                try {
-                    connections.remove(config.getId());
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (SQLException ignore) {
-                }
-            } finally {
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (SQLException ignore) {
-                    }
-                }
-                if (stmt != null) {
-                    try {
-                        stmt.close();
-                    } catch (SQLException ignore) {
-                    }
-                }
-            }
+        private CheckWriteDataSourceResult(int status) {
+            this.status = status;
         }
-
-        return result;
     }
+
 
     @Override
     public Connection getConnection() throws SQLException {
         return getConnection(null, null);
-    }
-
-    public Connection getConnection(DataSourceConfig config) throws SQLException {
-        Connection conn = connections.get(config.getId());
-
-        if (conn == null) {
-            conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword());
-            connections.put(config.getId(), conn);
-        }
-
-        return conn;
     }
 
     @Override
@@ -150,19 +84,20 @@ public class FailOverDataSource extends AbstractDataSource {
 
     @Override
     public void init() {
-        writeDataSourceMonitorThread = new Thread(new WriterDataSourceMonitor());
-        writeDataSourceMonitorThread.setDaemon(true);
-        writeDataSourceMonitorThread.setName("FailOverDataSource");
-
-        writeDataSourceMonitorThread.start();
+        init(true);
     }
 
-    public void initFailFast() {
-        if (!findWriteDataSource().isWriteDbExist()) {
+    public void init(boolean forceCheckWrite) {
+        WriterDataSourceMonitor runner = new WriterDataSourceMonitor();
+
+        if (forceCheckWrite && !runner.findWriteDataSource().isWriteDbExist()) {
             throw new WriteDsNotFoundException(ERROR_MESSAGE);
         }
 
-        init();
+        writeDataSourceMonitorThread = new Thread(runner);
+        writeDataSourceMonitorThread.setDaemon(true);
+        writeDataSourceMonitorThread.setName("FailOverDataSource");
+        writeDataSourceMonitorThread.start();
     }
 
 
@@ -188,36 +123,129 @@ public class FailOverDataSource extends AbstractDataSource {
     }
 
     class WriterDataSourceMonitor implements Runnable {
-        private long counter = 0L;
+        private volatile int sleepSecond = 1;
 
-        private boolean perMinite() {
-            return (counter++ % 60) == 0;
+        public int getSleepSecond() {
+            return sleepSecond;
+        }
+
+        public void setSleepSecond(int sleepSecond) {
+            this.sleepSecond = sleepSecond;
+        }
+
+        private Map<String, Connection> cachedPingConnections = new ConcurrentHashMap<String, Connection>();
+
+        protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
+            Statement stmt = null;
+            ResultSet rs = null;
+
+            try {
+                Connection conn = getConnection(config);
+                stmt = conn.createStatement();
+                rs = stmt.executeQuery(config.getTestReadOnlySql());
+
+                if (rs.next()) {
+                    // switch database, 0 for write dataSource, 1 for read dataSource.
+                    if (rs.getInt(1) == 0) {
+                        return CheckWriteDataSourceResult.OK;
+                    }
+                }
+            } catch (SQLException e) {
+                return CheckWriteDataSourceResult.ERROR;
+            } finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                    } catch (SQLException ignore) {
+                    }
+                }
+                if (stmt != null) {
+                    try {
+                        stmt.close();
+                    } catch (SQLException ignore) {
+                    }
+                }
+            }
+            return CheckWriteDataSourceResult.READ_ONLY;
+        }
+
+        public FindWriteDataSourceResult findWriteDataSource() {
+            FindWriteDataSourceResult result = new FindWriteDataSourceResult();
+
+            for (DataSourceConfig config : configs.values()) {
+                CheckWriteDataSourceResult checkResult = checkWriteDataSource(config);
+                if (checkResult == CheckWriteDataSourceResult.OK) {
+                    if (writeDs == null || !writeDs.getId().equals(config.getId())) {
+                        writeDs = getDataSource(config);
+                        result.setChangedWrteDb(true);
+                    }
+                    result.setWriteDbExist(true);
+                    break;
+                } else if (checkResult == CheckWriteDataSourceResult.ERROR) {
+                    //todo: 清除链接
+                }
+            }
+            return result;
+        }
+
+        public Connection getConnection(DataSourceConfig config) throws SQLException {
+            Connection conn = cachedPingConnections.get(config.getId());
+
+            if (conn == null) {
+                conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword());
+                cachedPingConnections.put(config.getId(), conn);
+            }
+
+            return conn;
         }
 
         @Override
         public void run() {
-            while (!Thread.interrupted()) {
-                Transaction t = Cat.newTransaction("SQL.Conn", "CheckWriteDB");
+            Transaction switchTransaction = null;
 
+            while (!Thread.interrupted()) {
                 try {
-                    if (!findWriteDataSource().isWriteDbExist()) {
-                        if (perMinite()) {
-                            Cat.logError(new WriteDsNotFoundException(ERROR_MESSAGE));
-                        }
+                    sleep();
+
+                    FindWriteDataSourceResult findResult = findWriteDataSource();
+                    if (!findResult.isWriteDbExist()) {
+                        continue;
+                    } else if (findResult.isChangedWrteDb() && switchTransaction != null) {
+                        switchTransaction.setStatus(Message.SUCCESS);
+                        switchTransaction.complete();
+                        switchTransaction = null;
                     }
-                    t.setStatus(Transaction.SUCCESS);
+
+                    while (!Thread.interrupted()) {
+                        sleep();
+                        CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
+
+                        if (checkWriteResult == CheckWriteDataSourceResult.OK) {
+                            continue;
+                        } else {
+                            switchTransaction = Cat.newTransaction("SQL.Coon", "SwitchWriteDb");
+                        }
+
+                        //todo:清楚缓存链接
+                        break;
+                    }
                 } catch (Throwable e) {
                     Cat.logError(e);
-                    t.setStatus(e);
-                } finally {
-                    t.complete();
                 }
+            }
 
-                try {
-                    TimeUnit.SECONDS.sleep(1); // TODO: temperary
-                } catch (InterruptedException e) {
-                    break;
-                }
+            if (switchTransaction != null && !switchTransaction.isCompleted()) {
+                switchTransaction.setStatus("Thread interrupted");
+                switchTransaction.complete();
+            }
+
+            //todo:清楚缓存链接
+        }
+
+        private void sleep() {
+            try {
+                TimeUnit.SECONDS.sleep(sleepSecond);
+            } catch (InterruptedException e) {
             }
         }
     }
