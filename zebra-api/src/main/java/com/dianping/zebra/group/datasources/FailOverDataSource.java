@@ -5,8 +5,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -139,7 +139,7 @@ public class FailOverDataSource extends AbstractDataSource {
             this.sleepSecond = sleepSecond;
         }
 
-        private Map<String, Connection> cachedPingConnections = new ConcurrentHashMap<String, Connection>();
+        private Map<String, Connection> cachedPingConnections = new HashMap<String, Connection>();
 
         protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
             Statement stmt = null;
@@ -194,7 +194,7 @@ public class FailOverDataSource extends AbstractDataSource {
             return result;
         }
 
-        public Connection getConnection(DataSourceConfig config) throws SQLException {
+        protected Connection getConnection(DataSourceConfig config) throws SQLException {
             Connection conn = cachedPingConnections.get(config.getId());
 
             if (conn == null) {
