@@ -101,6 +101,13 @@ public class FailOverDataSource extends AbstractDataSource {
         writeDataSourceMonitorThread.start();
     }
 
+    private boolean setWriteDb(DataSourceConfig config) {
+        if (writeDs == null || !writeDs.getId().equals(config.getId())) {
+            writeDs = getDataSource(config);
+            return true;
+        }
+        return false;
+    }
 
     class FindWriteDataSourceResult {
         private boolean writeDbExist;
@@ -181,10 +188,7 @@ public class FailOverDataSource extends AbstractDataSource {
             for (DataSourceConfig config : configs.values()) {
                 CheckWriteDataSourceResult checkResult = checkWriteDataSource(config);
                 if (checkResult == CheckWriteDataSourceResult.OK) {
-                    if (writeDs == null || !writeDs.getId().equals(config.getId())) {
-                        writeDs = getDataSource(config);
-                        result.setChangedWrteDb(true);
-                    }
+                    result.setChangedWrteDb(setWriteDb(config));
                     result.setWriteDbExist(true);
                     break;
                 } else if (checkResult == CheckWriteDataSourceResult.ERROR) {
