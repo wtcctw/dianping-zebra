@@ -147,10 +147,10 @@ public class FailOverDataSource extends AbstractDataSource {
         protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
             Statement stmt = null;
             ResultSet rs = null;
-            Connection coon = null;
+            Connection conn = null;
 
             try {
-                Connection conn = getConnection(config);
+                conn = getConnection(config);
                 stmt = conn.createStatement();
                 rs = stmt.executeQuery(config.getTestReadOnlySql());
 
@@ -172,6 +172,12 @@ public class FailOverDataSource extends AbstractDataSource {
                 if (stmt != null) {
                     try {
                         stmt.close();
+                    } catch (SQLException ignore) {
+                    }
+                }
+                if(conn != null){
+                    try {
+                        conn.close();
                     } catch (SQLException ignore) {
                     }
                 }
