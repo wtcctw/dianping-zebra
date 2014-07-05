@@ -199,6 +199,9 @@ public class FailOverDataSource extends AbstractDataSource {
             while (!Thread.interrupted()) {
                 try {
                     sleep(1);
+                    if (Thread.interrupted()) {
+                        break;
+                    }
 
                     FindWriteDataSourceResult findResult = findWriteDataSource();
                     if (!findResult.isWriteDbExist()) {
@@ -211,6 +214,9 @@ public class FailOverDataSource extends AbstractDataSource {
 
                     while (!Thread.interrupted()) {
                         sleep(5);
+                        if (Thread.interrupted()) {
+                            break;
+                        }
 
                         CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
 
