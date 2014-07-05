@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,8 +18,10 @@ import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 
 /**
- * features: 1. auto-detect write database by select @@read_only</br> 2. if ping connection was killed by MySQL server, it can
- * reconnect.</br> 3. if cannot find any write database in the initial phase, fail fast.</br>
+ * features:
+ * 1. auto-detect write database by select @@read_only</br>
+ * 2. auto check the write database.</br>
+ * 3. if cannot find any write database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
 
@@ -44,18 +45,8 @@ public class FailOverDataSource extends AbstractDataSource {
         if (writeDs != null) {
             SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
         }
+        super.close();
     }
-
-    enum CheckWriteDataSourceResult {
-        OK(1), READ_ONLY(2), ERROR(3);
-
-        private int status;
-
-        private CheckWriteDataSourceResult(int status) {
-            this.status = status;
-        }
-    }
-
 
     @Override
     public Connection getConnection() throws SQLException {
@@ -99,6 +90,8 @@ public class FailOverDataSource extends AbstractDataSource {
         writeDataSourceMonitorThread.setDaemon(true);
         writeDataSourceMonitorThread.setName("FailOverDataSource");
         writeDataSourceMonitorThread.start();
+
+        super.init();
     }
 
     private boolean setWriteDb(DataSourceConfig config) {
@@ -127,6 +120,16 @@ public class FailOverDataSource extends AbstractDataSource {
 
         public void setChangedWrteDb(boolean changedWrteDb) {
             this.changedWrteDb = changedWrteDb;
+        }
+    }
+
+    enum CheckWriteDataSourceResult {
+        OK(1), READ_ONLY(2), ERROR(3);
+
+        private int status;
+
+        private CheckWriteDataSourceResult(int status) {
+            this.status = status;
         }
     }
 
