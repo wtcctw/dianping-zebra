@@ -131,26 +131,16 @@ public class FailOverDataSource extends AbstractDataSource {
     }
 
     class WriterDataSourceMonitor implements Runnable {
-        private volatile int sleepSecond = 1;
         private AtomicInteger atomicSleepTimes = new AtomicInteger(0);
 
         public int getSleepTimes() {
             return atomicSleepTimes.get();
         }
 
-        public int getSleepSecond() {
-            return sleepSecond;
-        }
-
-        public void setSleepSecond(int sleepSecond) {
-            this.sleepSecond = sleepSecond;
-        }
-
-        private Map<String, Connection> cachedPingConnections = new HashMap<String, Connection>();
-
         protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
             Statement stmt = null;
             ResultSet rs = null;
+            Connection coon = null;
 
             try {
                 Connection conn = getConnection(config);
@@ -192,21 +182,14 @@ public class FailOverDataSource extends AbstractDataSource {
                     result.setWriteDbExist(true);
                     break;
                 } else if (checkResult == CheckWriteDataSourceResult.ERROR) {
-                    //todo: 清除链接
+
                 }
             }
             return result;
         }
 
         protected Connection getConnection(DataSourceConfig config) throws SQLException {
-            Connection conn = cachedPingConnections.get(config.getId());
-
-            if (conn == null) {
-                conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword());
-                cachedPingConnections.put(config.getId(), conn);
-            }
-
-            return conn;
+            return DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword());
         }
 
         @Override
@@ -215,7 +198,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
             while (!Thread.interrupted()) {
                 try {
-                    sleep();
+                    sleep(1);
 
                     FindWriteDataSourceResult findResult = findWriteDataSource();
                     if (!findResult.isWriteDbExist()) {
@@ -227,7 +210,7 @@ public class FailOverDataSource extends AbstractDataSource {
                     }
 
                     while (!Thread.interrupted()) {
-                        sleep();
+                        sleep(5);
 
                         CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
 
@@ -236,8 +219,6 @@ public class FailOverDataSource extends AbstractDataSource {
                         } else {
                             switchTransaction = Cat.newTransaction("SQL.Coon", "SwitchWriteDb");
                         }
-
-                        //todo:清楚缓存链接
                         break;
                     }
                 } catch (Throwable e) {
@@ -249,19 +230,16 @@ public class FailOverDataSource extends AbstractDataSource {
                 switchTransaction.setStatus("Thread interrupted");
                 switchTransaction.complete();
             }
-
-            //todo:清楚缓存链接
         }
 
-        private void sleep() {
+        private void sleep(long seconds) {
             try {
-                TimeUnit.SECONDS.sleep(sleepSecond);
-
-                //just for test
                 atomicSleepTimes.incrementAndGet();
                 if (atomicSleepTimes.get() > 100) {
                     atomicSleepTimes.set(0);
                 }
+
+                TimeUnit.SECONDS.sleep(seconds);
             } catch (InterruptedException e) {
             }
         }

@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.*;
 
@@ -62,7 +61,7 @@ public class FailoverDataSourceTest {
         }
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void test_how_switch() throws SQLException, InterruptedException {
         FailOverDataSource ds = new FailOverDataSource(configs);
         FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
@@ -87,11 +86,11 @@ public class FailoverDataSourceTest {
         //fail over db1
         connectionAnswer.setCoon(readOnlyCoon);
 
-        while (monitor.getSleepTimes() < 5) {
+        while (monitor.getSleepTimes() < 4) {
             Thread.sleep(100);
         }
         Assert.assertEquals("db2", ds.getCurrentDataSourceMBean().getId());
-        verify(coon, atLeast(3)).createStatement();
+        verify(coon, atLeast(2)).createStatement();
         verify(readOnlyCoon, times(2)).createStatement();
     }
 
