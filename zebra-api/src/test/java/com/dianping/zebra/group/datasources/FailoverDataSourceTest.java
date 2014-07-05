@@ -104,7 +104,7 @@ public class FailoverDataSourceTest {
         monitor.findWriteDataSource();
 
         Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db1");
-        verify(coon, only()).createStatement();
+        verify(coon, atLeastOnce()).createStatement();
     }
 
     @Test
@@ -119,8 +119,8 @@ public class FailoverDataSourceTest {
 
         Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db2");
 
-        verify(coon, only()).createStatement();
-        verify(readOnlyCoon, only()).createStatement();
+        verify(coon, atLeastOnce()).createStatement();
+        verify(readOnlyCoon, atLeastOnce()).createStatement();
     }
 
     @Test
@@ -130,7 +130,7 @@ public class FailoverDataSourceTest {
 
         doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
         Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.OK);
-        verify(coon, only()).createStatement();
+        verify(coon, atLeastOnce()).createStatement();
     }
 
     @Test
@@ -140,7 +140,7 @@ public class FailoverDataSourceTest {
 
         doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
         Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.READ_ONLY);
-        verify(readOnlyCoon, only()).createStatement();
+        verify(readOnlyCoon, atLeastOnce()).createStatement();
     }
 
     @Test
@@ -153,7 +153,7 @@ public class FailoverDataSourceTest {
 
         doReturn(errorCoon).when(monitor).getConnection(any(DataSourceConfig.class));
         Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.ERROR);
-        verify(errorCoon, only()).createStatement();
+        verify(errorCoon, atLeastOnce()).createStatement();
     }
 
 }
