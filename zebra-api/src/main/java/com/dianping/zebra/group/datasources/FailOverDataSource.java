@@ -250,24 +250,22 @@ public class FailOverDataSource extends AbstractDataSource {
                     }
 
                     closeConnections();
-                    try {
-                        while (!Thread.interrupted()) {
-                            sleep(5);
+                    while (!Thread.interrupted()) {
+                        sleep(5);
 
-                            CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
+                        CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
 
-                            if (checkWriteResult == CheckWriteDataSourceResult.OK) {
-                                continue;
-                            } else {
-                                switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
-                            }
-
-                            closeConnections();
-                            break;
+                        if (checkWriteResult == CheckWriteDataSourceResult.OK) {
+                            continue;
+                        } else {
+                            switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
                         }
-                    } catch (InterruptedException ignore) {
+
+                        closeConnections();
+                        break;
                     }
                 } catch (InterruptedException ignore) {
+                    break;
                 } catch (Throwable e) {
                     Cat.logError(e);
                 }
