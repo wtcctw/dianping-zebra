@@ -22,7 +22,7 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
  * 1. auto-detect write database by select @@read_only</br>
  * 2. auto check the write database.</br>
  * 3. if cannot find any write database in the initial phase, fail fast.</br>
- *
+ * <p/>
  * todo:
  * 1. write database is alive,but has network error or timeout exception.</br>
  * 2. the dba is changing the write database, it will be too many exceptions.<br/>
@@ -175,7 +175,7 @@ public class FailOverDataSource extends AbstractDataSource {
                     } catch (SQLException ignore) {
                     }
                 }
-                if(conn != null){
+                if (conn != null) {
                     try {
                         conn.close();
                     } catch (SQLException ignore) {
@@ -236,7 +236,7 @@ public class FailOverDataSource extends AbstractDataSource {
                         if (checkWriteResult == CheckWriteDataSourceResult.OK) {
                             continue;
                         } else {
-                            switchTransaction = Cat.newTransaction("SQL.Coon", "SwitchWriteDb");
+                            switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
                         }
                         break;
                     }
@@ -246,6 +246,7 @@ public class FailOverDataSource extends AbstractDataSource {
             }
 
             if (switchTransaction != null && !switchTransaction.isCompleted()) {
+                Cat.logEvent("DAL", "WriterDataSourceMonitorInterrupted");
                 switchTransaction.setStatus("Thread interrupted");
                 switchTransaction.complete();
             }
