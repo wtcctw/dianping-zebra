@@ -237,9 +237,11 @@ public class FailOverDataSource extends AbstractDataSource {
 
                     FindWriteDataSourceResult findResult = findWriteDataSource();
                     if (!findResult.isWriteDbExist()) {
+                        Cat.logEvent("DAL", "FindWriteDbFailed");
                         continue;
                     }
 
+                    Cat.logEvent("DAL", "FindWriteDbSuccess");
                     if (findResult.isChangedWrteDb() && switchTransaction != null) {
                         switchTransaction.setStatus(Message.SUCCESS);
                         switchTransaction.complete();
@@ -264,13 +266,14 @@ public class FailOverDataSource extends AbstractDataSource {
                         }
                     } catch (InterruptedException ignore) {
                     }
+                } catch (InterruptedException ignore) {
                 } catch (Throwable e) {
                     Cat.logError(e);
                 }
             }
 
+            Cat.logEvent("DAL", "WriterDataSourceMonitorInterrupted");
             if (switchTransaction != null && !switchTransaction.isCompleted()) {
-                Cat.logEvent("DAL", "WriterDataSourceMonitorInterrupted");
                 switchTransaction.setStatus("Thread interrupted");
                 switchTransaction.complete();
             }
