@@ -219,7 +219,9 @@ public class FailOverDataSource extends AbstractDataSource {
                     FindWriteDataSourceResult findResult = findWriteDataSource();
                     if (!findResult.isWriteDbExist()) {
                         continue;
-                    } else if (findResult.isChangedWrteDb() && switchTransaction != null) {
+                    }
+
+                    if (findResult.isChangedWrteDb() && switchTransaction != null) {
                         switchTransaction.setStatus(Message.SUCCESS);
                         switchTransaction.complete();
                         switchTransaction = null;
