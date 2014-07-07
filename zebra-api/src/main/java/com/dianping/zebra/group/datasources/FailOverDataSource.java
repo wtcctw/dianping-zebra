@@ -23,10 +23,6 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
  * 1. auto-detect write database by select @@read_only</br>
  * 2. auto check the write database.</br>
  * 3. if cannot find any write database in the initial phase, fail fast.</br>
- * <p/>
- * todo:
- * 1. write database is alive,but has network error or timeout exception.</br>
- * 2. the dba is changing the write database, it will be too many exceptions.<br/>
  */
 public class FailOverDataSource extends AbstractDataSource {
 
@@ -130,11 +126,9 @@ public class FailOverDataSource extends AbstractDataSource {
 
     enum CheckWriteDataSourceResult {
         OK(1), READ_ONLY(2), ERROR(3);
-
-        private int status;
-
-        private CheckWriteDataSourceResult(int status) {
-            this.status = status;
+        private int value;
+        private CheckWriteDataSourceResult(int value) {
+            this.value = value;
         }
     }
 
@@ -156,8 +150,7 @@ public class FailOverDataSource extends AbstractDataSource {
                 rs = stmt.executeQuery(config.getTestReadOnlySql());
 
                 if (rs.next()) {
-                    // switch database, 0 for write dataSource, 1 for read dataSource.
-                    if (rs.getInt(1) == 0) {
+                    if (isWritable(rs)) {
                         return CheckWriteDataSourceResult.OK;
                     }
                 }
@@ -191,8 +184,6 @@ public class FailOverDataSource extends AbstractDataSource {
                     result.setChangedWrteDb(setWriteDb(config));
                     result.setWriteDbExist(true);
                     break;
-                } else if (checkResult == CheckWriteDataSourceResult.ERROR) {
-
                 }
             }
             return result;
@@ -228,10 +219,12 @@ public class FailOverDataSource extends AbstractDataSource {
             }
         }
 
+        Transaction switchTransaction = null;
+        private int switchTransactionTryTimes = 0;
+        private final int maxSwitchTransactionTtyTimes = 3600;
+
         @Override
         public void run() {
-            Transaction switchTransaction = null;
-
             while (!Thread.interrupted()) {
                 try {
                     sleep(1);
@@ -239,28 +232,23 @@ public class FailOverDataSource extends AbstractDataSource {
                     FindWriteDataSourceResult findResult = findWriteDataSource();
                     if (!findResult.isWriteDbExist()) {
                         Cat.logEvent("DAL", "FindWriteDbFailed");
+                        checkMaxSwitchTransactionTryTimes();
                         continue;
                     }
 
                     Cat.logEvent("DAL", "FindWriteDbSuccess");
-                    if (findResult.isChangedWrteDb() && switchTransaction != null) {
-                        switchTransaction.setStatus(Message.SUCCESS);
-                        switchTransaction.complete();
-                        switchTransaction = null;
-                    }
+                    sendSwitchTransaction(findResult);
 
                     closeConnections();
                     while (!Thread.interrupted()) {
                         sleep(5);
 
                         CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
-
                         if (checkWriteResult == CheckWriteDataSourceResult.OK) {
                             continue;
-                        } else {
-                            switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
                         }
 
+                        createSwitchTransaction();
                         closeConnections();
                         break;
                     }
@@ -272,11 +260,39 @@ public class FailOverDataSource extends AbstractDataSource {
             }
 
             Cat.logEvent("DAL", "WriterDataSourceMonitorInterrupted");
+            interruptedTransaction();
+            closeConnections();
+        }
+
+        private void createSwitchTransaction() {
+            switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
+        }
+
+        private void interruptedTransaction() {
             if (switchTransaction != null && !switchTransaction.isCompleted()) {
                 switchTransaction.setStatus("Thread interrupted");
                 switchTransaction.complete();
             }
-            closeConnections();
+        }
+
+        private void sendSwitchTransaction(FindWriteDataSourceResult findResult) {
+            if (findResult.isChangedWrteDb() && switchTransaction != null) {
+                switchTransaction.setStatus(Message.SUCCESS);
+                switchTransaction.complete();
+                switchTransaction = null;
+            }
+        }
+
+        private void checkMaxSwitchTransactionTryTimes() {
+            switchTransactionTryTimes++;
+            if(switchTransactionTryTimes >= maxSwitchTransactionTtyTimes){
+                switchTransactionTryTimes = 0;
+                if(switchTransaction != null){
+                    switchTransaction.setStatus("Find write data source failed");
+                    switchTransaction.complete();
+                    switchTransaction = null;
+                }
+            }
         }
 
         private void sleep(long seconds) throws InterruptedException {
@@ -284,8 +300,13 @@ public class FailOverDataSource extends AbstractDataSource {
             if (atomicSleepTimes.get() > 100) {
                 atomicSleepTimes.set(0);
             }
-
             TimeUnit.SECONDS.sleep(seconds);
         }
+
+        private boolean isWritable(ResultSet rs) throws SQLException {
+            return rs.getInt(1) == 0;
+        }
     }
+
+
 }
