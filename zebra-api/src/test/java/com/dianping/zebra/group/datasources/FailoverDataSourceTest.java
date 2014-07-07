@@ -61,7 +61,7 @@ public class FailoverDataSourceTest {
         }
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 30000)
     public void test_hot_switch() throws SQLException, InterruptedException {
         FailOverDataSource ds = new FailOverDataSource(configs);
         FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
@@ -76,7 +76,7 @@ public class FailoverDataSourceTest {
         new Thread(monitor).start();
 
         while (monitor.getSleepTimes() < 2) {
-            Thread.sleep(100);
+            Thread.sleep(10);
         }
         Assert.assertEquals("db1", ds.getCurrentDataSourceMBean().getId());
 
@@ -87,7 +87,7 @@ public class FailoverDataSourceTest {
         connectionAnswer.setCoon(readOnlyCoon);
 
         while (monitor.getSleepTimes() < 4) {
-            Thread.sleep(100);
+            Thread.sleep(10);
         }
         Assert.assertEquals("db2", ds.getCurrentDataSourceMBean().getId());
         verify(coon, atLeast(2)).createStatement();
