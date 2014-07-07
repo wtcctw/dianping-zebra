@@ -62,7 +62,7 @@ public class FailoverDataSourceTest {
     }
 
     @Test(timeout = 10000)
-    public void test_how_switch() throws SQLException, InterruptedException {
+    public void test_hot_switch() throws SQLException, InterruptedException {
         FailOverDataSource ds = new FailOverDataSource(configs);
         FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
 

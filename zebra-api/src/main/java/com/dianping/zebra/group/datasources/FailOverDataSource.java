@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -139,6 +140,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
     class WriterDataSourceMonitor implements Runnable {
         private AtomicInteger atomicSleepTimes = new AtomicInteger(0);
+        private Map<String, Connection> cachedConnection = new HashMap<String, Connection>();
 
         public int getSleepTimes() {
             return atomicSleepTimes.get();
@@ -147,10 +149,9 @@ public class FailOverDataSource extends AbstractDataSource {
         protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
             Statement stmt = null;
             ResultSet rs = null;
-            Connection conn = null;
 
             try {
-                conn = getConnection(config);
+                Connection conn = getConnection(config);
                 stmt = conn.createStatement();
                 rs = stmt.executeQuery(config.getTestReadOnlySql());
 
@@ -161,6 +162,7 @@ public class FailOverDataSource extends AbstractDataSource {
                     }
                 }
             } catch (SQLException e) {
+                closeConnection(config.getId());
                 return CheckWriteDataSourceResult.ERROR;
             } finally {
                 if (rs != null) {
@@ -172,12 +174,6 @@ public class FailOverDataSource extends AbstractDataSource {
                 if (stmt != null) {
                     try {
                         stmt.close();
-                    } catch (SQLException ignore) {
-                    }
-                }
-                if (conn != null) {
-                    try {
-                        conn.close();
                     } catch (SQLException ignore) {
                     }
                 }
@@ -202,7 +198,33 @@ public class FailOverDataSource extends AbstractDataSource {
         }
 
         protected Connection getConnection(DataSourceConfig config) throws SQLException {
-            return DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword());
+            if (!cachedConnection.containsKey(config.getId())) {
+                cachedConnection.put(config.getId(), DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword()));
+            }
+            return cachedConnection.get(config.getId());
+        }
+
+        protected void closeConnections() {
+            for (Map.Entry<String, Connection> entity : cachedConnection.entrySet()) {
+                try {
+                    entity.getValue().close();
+                } catch (SQLException ignore) {
+
+                }
+            }
+            cachedConnection.clear();
+        }
+
+        protected void closeConnection(String id) {
+            if (!cachedConnection.containsKey(id)) {
+                return;
+            }
+            try {
+                cachedConnection.get(id).close();
+            } catch (SQLException ignore) {
+            } finally {
+                cachedConnection.remove(id);
+            }
         }
 
         @Override
@@ -212,9 +234,6 @@ public class FailOverDataSource extends AbstractDataSource {
             while (!Thread.interrupted()) {
                 try {
                     sleep(1);
-                    if (Thread.interrupted()) {
-                        break;
-                    }
 
                     FindWriteDataSourceResult findResult = findWriteDataSource();
                     if (!findResult.isWriteDbExist()) {
@@ -227,20 +246,23 @@ public class FailOverDataSource extends AbstractDataSource {
                         switchTransaction = null;
                     }
 
-                    while (!Thread.interrupted()) {
-                        sleep(5);
-                        if (Thread.interrupted()) {
+                    closeConnections();
+                    try {
+                        while (!Thread.interrupted()) {
+                            sleep(5);
+
+                            CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
+
+                            if (checkWriteResult == CheckWriteDataSourceResult.OK) {
+                                continue;
+                            } else {
+                                switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
+                            }
+
+                            closeConnections();
                             break;
                         }
-
-                        CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
-
-                        if (checkWriteResult == CheckWriteDataSourceResult.OK) {
-                            continue;
-                        } else {
-                            switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
-                        }
-                        break;
+                    } catch (InterruptedException ignore) {
                     }
                 } catch (Throwable e) {
                     Cat.logError(e);
@@ -252,18 +274,16 @@ public class FailOverDataSource extends AbstractDataSource {
                 switchTransaction.setStatus("Thread interrupted");
                 switchTransaction.complete();
             }
+            closeConnections();
         }
 
-        private void sleep(long seconds) {
-            try {
-                atomicSleepTimes.incrementAndGet();
-                if (atomicSleepTimes.get() > 100) {
-                    atomicSleepTimes.set(0);
-                }
-
-                TimeUnit.SECONDS.sleep(seconds);
-            } catch (InterruptedException e) {
+        private void sleep(long seconds) throws InterruptedException {
+            atomicSleepTimes.incrementAndGet();
+            if (atomicSleepTimes.get() > 100) {
+                atomicSleepTimes.set(0);
             }
+
+            TimeUnit.SECONDS.sleep(seconds);
         }
     }
 }
