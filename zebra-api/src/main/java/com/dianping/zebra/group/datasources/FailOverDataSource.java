@@ -162,6 +162,7 @@ public class FailOverDataSource extends AbstractDataSource {
                     }
                 }
             } catch (SQLException e) {
+                Cat.logError(e);
                 closeConnection(config.getId());
                 return CheckWriteDataSourceResult.ERROR;
             } finally {
