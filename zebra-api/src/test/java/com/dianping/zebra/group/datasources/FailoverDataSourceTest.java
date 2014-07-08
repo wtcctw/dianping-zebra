@@ -129,7 +129,7 @@ public class FailoverDataSourceTest {
         FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
 
         doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
-        Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.OK);
+        Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.WRITABLE);
         verify(coon, atLeastOnce()).createStatement();
     }
 
