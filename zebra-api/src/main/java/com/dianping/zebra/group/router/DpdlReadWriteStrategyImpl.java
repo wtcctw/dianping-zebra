@@ -34,8 +34,15 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 			try {
 				Object context = getContextMethod.invoke(null, defObjs);
 				if (context != null) {
+					Cat.logEvent("DAL", "GetAuthenticatedContextSuccess");
+
 					Boolean result = (Boolean) this.isAuthenticatedMethod.invoke(context, defObjs);
-					Cat.logEvent("DAL", "UseForceWriteByAuthenticated");
+
+					if (result != null && result.booleanValue()) {
+						Cat.logEvent("DAL", "ReadAuthenticatedTrue");
+					} else {
+						Cat.logEvent("DAL", "ReadAuthenticatedFalse");
+					}
 					return result;
 				}
 			} catch (Exception ignore) {
