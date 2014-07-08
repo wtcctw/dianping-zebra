@@ -90,23 +90,6 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 	}
 
 	@Test
-	public void test_tracker_context_set_authenticated() throws Exception {
-		TrackerContext trackerContext = new TrackerContext();
-		trackerContext.setAuthenticated(true);
-		trackerContext.setExtension(new HashMap<String, Object>());
-		ExecutionContextHolder.setTrackerContext(trackerContext);
-
-		execute(new ConnectionCallback() {
-			@Override
-			public Object doInConnection(Connection conn) throws Exception {
-				PreparedStatement stmt = conn.prepareStatement("select * from PERSON");
-				stmt.executeQuery();
-				return null;
-			}
-		});
-	}
-
-	@Test
 	public void test_read_and_write_perpared_statement() throws Exception {
 		execute(new ConnectionCallback() {
 			@Override
