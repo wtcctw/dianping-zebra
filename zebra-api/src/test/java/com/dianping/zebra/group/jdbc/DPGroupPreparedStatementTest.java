@@ -5,10 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
+
+import com.dianping.avatar.tracker.ExecutionContextHolder;
+import com.dianping.avatar.tracker.TrackerContext;
 
 public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
@@ -32,7 +36,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 				// Statement.execute如果第一个结果为 ResultSet 对象，则返回 true；如果其为更新计数或者不存在任何结果，则返回 false
 				Assert.assertFalse(stmt.execute());
 				stmt.close();
-				
+
 				stmt = conn.prepareStatement(selectSql);
 				stmt.setInt(1, 28);
 				Assert.assertTrue(stmt.execute());
@@ -74,12 +78,29 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 				stmt.setString(2, "zhuhao");
 				stmt.setInt(3, 12);
 				stmt.addBatch();
-				
+
 				int[] updateCounts = stmt.executeBatch();
-				
+
 				Assert.assertEquals(updateCounts.length, 2);
 				stmt.close();
 
+				return null;
+			}
+		});
+	}
+
+	@Test
+	public void test_tracker_context_set_authenticated() throws Exception {
+		TrackerContext trackerContext = new TrackerContext();
+		trackerContext.setAuthenticated(true);
+		trackerContext.setExtension(new HashMap<String, Object>());
+		ExecutionContextHolder.setTrackerContext(trackerContext);
+
+		execute(new ConnectionCallback() {
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				PreparedStatement stmt = conn.prepareStatement("select * from PERSON");
+				stmt.executeQuery();
 				return null;
 			}
 		});
@@ -138,7 +159,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 			}
 		});
 	}
-	
+
 	@Override
 	protected String getConfigManagerType() {
 		return "local";
