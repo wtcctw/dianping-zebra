@@ -312,4 +312,5 @@ public class FailOverDataSource extends AbstractDataSource {
 			TimeUnit.SECONDS.sleep(seconds);
 		}
 	}
+
 }
