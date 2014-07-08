@@ -19,301 +19,298 @@ import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 
 /**
- * features:
- * 1. auto-detect write database by select @@read_only</br>
- * 2. auto check the write database.</br>
- * 3. if cannot find any write database in the initial phase, fail fast.</br>
+ * features: 1. auto-detect write database by select @@read_only</br> 2. auto check the write database.</br> 3. if cannot find any
+ * write database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
 
-	 private static final String ERROR_MESSAGE = "[DAL]Cannot find any write dataSource.";
+	private static final String ERROR_MESSAGE = "[DAL]Cannot find any write dataSource.";
 
-	 private volatile SingleDataSource writeDs;
+	private volatile SingleDataSource writeDs;
 
-	 private Map<String, DataSourceConfig> configs;
+	private Map<String, DataSourceConfig> configs;
 
-	 private Thread writeDataSourceMonitorThread;
+	private Thread writeDataSourceMonitorThread;
 
-	 public FailOverDataSource(Map<String, DataSourceConfig> configs) {
-		  this.configs = configs;
-	 }
+	public FailOverDataSource(Map<String, DataSourceConfig> configs) {
+		this.configs = configs;
+	}
 
-	 @Override
-	 public void close() throws SQLException {
-		  if (this.writeDataSourceMonitorThread != null) {
-				writeDataSourceMonitorThread.interrupt();
-		  }
-		  if (writeDs != null) {
-				SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
-		  }
-		  super.close();
-	 }
+	@Override
+	public void close() throws SQLException {
+		if (this.writeDataSourceMonitorThread != null) {
+			writeDataSourceMonitorThread.interrupt();
+		}
+		if (writeDs != null) {
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
+		}
+		super.close();
+	}
 
-	 @Override
-	 public Connection getConnection() throws SQLException {
-		  return getConnection(null, null);
-	 }
+	@Override
+	public Connection getConnection() throws SQLException {
+		return getConnection(null, null);
+	}
 
-	 @Override
-	 public Connection getConnection(String username, String password) throws SQLException {
-		  if (writeDs != null && writeDs.isAvailable()) {
-				return writeDs.getConnection();
-		  } else {
-				throw new SQLException("Write dataSource is currently in the maintaining stage.");
-		  }
-	 }
+	@Override
+	public Connection getConnection(String username, String password) throws SQLException {
+		if (writeDs != null && writeDs.isAvailable()) {
+			return writeDs.getConnection();
+		} else {
+			throw new SQLException("Write dataSource is currently in the maintaining stage.");
+		}
+	}
 
-	 public SingleDataSourceMBean getCurrentDataSourceMBean() {
-		  return writeDs;
-	 }
+	public SingleDataSourceMBean getCurrentDataSourceMBean() {
+		return writeDs;
+	}
 
-	 private SingleDataSource getDataSource(DataSourceConfig config) {
-		  if (writeDs != null) {
-				SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
-		  }
+	private SingleDataSource getDataSource(DataSourceConfig config) {
+		if (writeDs != null) {
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
+		}
 
-		  return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(this, config);
-	 }
+		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(this, config);
+	}
 
-	 @Override
-	 public void init() {
-		  init(true);
-	 }
+	@Override
+	public void init() {
+		init(true);
+	}
 
-	 public void init(boolean forceCheckWrite) {
-		  WriterDataSourceMonitor runner = new WriterDataSourceMonitor();
+	public void init(boolean forceCheckWrite) {
+		WriterDataSourceMonitor runner = new WriterDataSourceMonitor();
 
-		  if (forceCheckWrite && !runner.findWriteDataSource().isWriteDbExist()) {
-				throw new WriteDsNotFoundException(ERROR_MESSAGE);
-		  }
+		if (forceCheckWrite && !runner.findWriteDataSource().isWriteDbExist()) {
+			throw new WriteDsNotFoundException(ERROR_MESSAGE);
+		}
 
-		  writeDataSourceMonitorThread = new Thread(runner);
-		  writeDataSourceMonitorThread.setDaemon(true);
-		  writeDataSourceMonitorThread.setName("FailOverDataSource");
-		  writeDataSourceMonitorThread.start();
+		writeDataSourceMonitorThread = new Thread(runner);
+		writeDataSourceMonitorThread.setDaemon(true);
+		writeDataSourceMonitorThread.setName("FailOverDataSource");
+		writeDataSourceMonitorThread.start();
 
-		  super.init();
-	 }
+		super.init();
+	}
 
-	 private boolean setWriteDb(DataSourceConfig config) {
-		  if (writeDs == null || !writeDs.getId().equals(config.getId())) {
-				writeDs = getDataSource(config);
-				return true;
-		  }
-		  return false;
-	 }
+	private boolean setWriteDb(DataSourceConfig config) {
+		if (writeDs == null || !writeDs.getId().equals(config.getId())) {
+			writeDs = getDataSource(config);
+			return true;
+		}
+		return false;
+	}
 
-	 class FindWriteDataSourceResult {
-		  private boolean writeDbExist;
+	class FindWriteDataSourceResult {
+		private boolean writeDbExist;
 
-		  private boolean changedWrteDb;
+		private boolean changedWrteDb;
 
-		  public boolean isWriteDbExist() {
-				return writeDbExist;
-		  }
+		public boolean isWriteDbExist() {
+			return writeDbExist;
+		}
 
-		  public void setWriteDbExist(boolean writeDbExist) {
-				this.writeDbExist = writeDbExist;
-		  }
+		public void setWriteDbExist(boolean writeDbExist) {
+			this.writeDbExist = writeDbExist;
+		}
 
-		  public boolean isChangedWrteDb() {
-				return changedWrteDb;
-		  }
+		public boolean isChangedWrteDb() {
+			return changedWrteDb;
+		}
 
-		  public void setChangedWrteDb(boolean changedWrteDb) {
-				this.changedWrteDb = changedWrteDb;
-		  }
-	 }
+		public void setChangedWrteDb(boolean changedWrteDb) {
+			this.changedWrteDb = changedWrteDb;
+		}
+	}
 
-	 enum CheckWriteDataSourceResult {
-		  OK(1), READ_ONLY(2), ERROR(3);
+	enum CheckWriteDataSourceResult {
+		OK(1), READ_ONLY(2), ERROR(3);
 
-		  private int value;
+		private int value;
 
-		  private CheckWriteDataSourceResult(int value) {
-				this.value = value;
-		  }
-	 }
+		private CheckWriteDataSourceResult(int value) {
+			this.value = value;
+		}
+	}
 
-	 class WriterDataSourceMonitor implements Runnable {
-		  private AtomicInteger atomicSleepTimes = new AtomicInteger(0);
+	class WriterDataSourceMonitor implements Runnable {
+		private AtomicInteger atomicSleepTimes = new AtomicInteger(0);
 
-		  private Map<String, Connection> cachedConnection = new HashMap<String, Connection>();
+		private Map<String, Connection> cachedConnection = new HashMap<String, Connection>();
 
-		  public int getSleepTimes() {
-				return atomicSleepTimes.get();
-		  }
+		public int getSleepTimes() {
+			return atomicSleepTimes.get();
+		}
 
-		  protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
-				Statement stmt = null;
-				ResultSet rs = null;
+		protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
+			Statement stmt = null;
+			ResultSet rs = null;
 
+			try {
+				Connection conn = getConnection(config);
+				stmt = conn.createStatement();
+				rs = stmt.executeQuery(config.getTestReadOnlySql());
+
+				if (rs.next()) {
+					if (isWritable(rs)) {
+						return CheckWriteDataSourceResult.OK;
+					}
+				}
+			} catch (SQLException e) {
+				Cat.logError(e);
+				closeConnection(config.getId());
+				return CheckWriteDataSourceResult.ERROR;
+			} finally {
+				if (rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException ignore) {
+					}
+				}
+				if (stmt != null) {
+					try {
+						stmt.close();
+					} catch (SQLException ignore) {
+					}
+				}
+			}
+			return CheckWriteDataSourceResult.READ_ONLY;
+		}
+
+		public FindWriteDataSourceResult findWriteDataSource() {
+			FindWriteDataSourceResult result = new FindWriteDataSourceResult();
+
+			for (DataSourceConfig config : configs.values()) {
+				CheckWriteDataSourceResult checkResult = checkWriteDataSource(config);
+				if (checkResult == CheckWriteDataSourceResult.OK) {
+					result.setChangedWrteDb(setWriteDb(config));
+					result.setWriteDbExist(true);
+					break;
+				}
+			}
+			return result;
+		}
+
+		protected Connection getConnection(DataSourceConfig config) throws SQLException {
+			if (!cachedConnection.containsKey(config.getId())) {
+				cachedConnection.put(config.getId(),
+				      DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword()));
+			}
+			return cachedConnection.get(config.getId());
+		}
+
+		protected void closeConnections() {
+			for (Map.Entry<String, Connection> entity : cachedConnection.entrySet()) {
 				try {
-					 Connection conn = getConnection(config);
-					 stmt = conn.createStatement();
-					 rs = stmt.executeQuery(config.getTestReadOnlySql());
-
-					 if (rs.next()) {
-						  if (isWritable(rs)) {
-								return CheckWriteDataSourceResult.OK;
-						  }
-					 }
-				} catch (SQLException e) {
-					 Cat.logError(e);
-					 closeConnection(config.getId());
-					 return CheckWriteDataSourceResult.ERROR;
-				} finally {
-					 if (rs != null) {
-						  try {
-								rs.close();
-						  } catch (SQLException ignore) {
-						  }
-					 }
-					 if (stmt != null) {
-						  try {
-								stmt.close();
-						  } catch (SQLException ignore) {
-						  }
-					 }
-				}
-				return CheckWriteDataSourceResult.READ_ONLY;
-		  }
-
-		  public FindWriteDataSourceResult findWriteDataSource() {
-				FindWriteDataSourceResult result = new FindWriteDataSourceResult();
-
-				for (DataSourceConfig config : configs.values()) {
-					 CheckWriteDataSourceResult checkResult = checkWriteDataSource(config);
-					 if (checkResult == CheckWriteDataSourceResult.OK) {
-						  result.setChangedWrteDb(setWriteDb(config));
-						  result.setWriteDbExist(true);
-						  break;
-					 }
-				}
-				return result;
-		  }
-
-		  protected Connection getConnection(DataSourceConfig config) throws SQLException {
-				if (!cachedConnection.containsKey(config.getId())) {
-					 cachedConnection.put(config.getId(),
-							 DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword()));
-				}
-				return cachedConnection.get(config.getId());
-		  }
-
-		  protected void closeConnections() {
-				for (Map.Entry<String, Connection> entity : cachedConnection.entrySet()) {
-					 try {
-						  entity.getValue().close();
-					 } catch (SQLException ignore) {
-
-					 }
-				}
-				cachedConnection.clear();
-		  }
-
-		  protected void closeConnection(String id) {
-				if (!cachedConnection.containsKey(id)) {
-					 return;
-				}
-				try {
-					 cachedConnection.get(id).close();
+					entity.getValue().close();
 				} catch (SQLException ignore) {
-				} finally {
-					 cachedConnection.remove(id);
+
 				}
-		  }
+			}
+			cachedConnection.clear();
+		}
 
-		  Transaction switchTransaction = null;
+		protected void closeConnection(String id) {
+			if (!cachedConnection.containsKey(id)) {
+				return;
+			}
+			try {
+				cachedConnection.get(id).close();
+			} catch (SQLException ignore) {
+			} finally {
+				cachedConnection.remove(id);
+			}
+		}
 
-		  private int switchTransactionTryTimes = 0;
+		Transaction switchTransaction = null;
 
-		  private final int maxSwitchTransactionTtyTimes = 3600;
+		private int switchTransactionTryTimes = 0;
 
-		  @Override
-		  public void run() {
-				while (!Thread.interrupted()) {
-					 try {
-						  sleep(1);
+		private final int maxSwitchTransactionTtyTimes = 3600;
 
-						  FindWriteDataSourceResult findResult = findWriteDataSource();
-						  if (!findResult.isWriteDbExist()) {
-								Cat.logEvent("DAL", "FindWriteDbFailed");
-								checkMaxSwitchTransactionTryTimes();
-								continue;
-						  }
+		@Override
+		public void run() {
+			while (!Thread.interrupted()) {
+				try {
+					sleep(1);
 
-						  Cat.logEvent("DAL", "FindWriteDbSuccess");
-						  sendSwitchTransaction(findResult);
+					FindWriteDataSourceResult findResult = findWriteDataSource();
+					if (!findResult.isWriteDbExist()) {
+						Cat.logEvent("DAL", "FindWriteDbFailed");
+						checkMaxSwitchTransactionTryTimes();
+						continue;
+					}
 
-						  closeConnections();
-						  while (!Thread.interrupted()) {
-								sleep(5);
+					Cat.logEvent("DAL", "FindWriteDbSuccess");
+					sendSwitchTransaction(findResult);
 
-								CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(
-										configs.get(writeDs.getId()));
-								if (checkWriteResult == CheckWriteDataSourceResult.OK) {
-									 continue;
-								}
+					closeConnections();
+					while (!Thread.interrupted()) {
+						sleep(5);
 
-								createSwitchTransaction();
-								closeConnections();
-								break;
-						  }
-					 } catch (InterruptedException ignore) {
-						  break;
-					 } catch (Throwable e) {
-						  Cat.logError(e);
-					 }
+						CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
+						if (checkWriteResult == CheckWriteDataSourceResult.OK) {
+							continue;
+						}
+
+						createSwitchTransaction();
+						closeConnections();
+						break;
+					}
+				} catch (InterruptedException ignore) {
+					break;
+				} catch (Throwable e) {
+					Cat.logError(e);
 				}
+			}
 
-				Cat.logEvent("DAL", "WriterDataSourceMonitorInterrupted");
-				interruptedTransaction();
-				closeConnections();
-		  }
+			Cat.logEvent("DAL", "WriterDataSourceMonitorInterrupted");
+			interruptedTransaction();
+			closeConnections();
+		}
 
-		  private void createSwitchTransaction() {
-				switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
-		  }
+		private void createSwitchTransaction() {
+			switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
+		}
 
-		  private void interruptedTransaction() {
-				if (switchTransaction != null && !switchTransaction.isCompleted()) {
-					 switchTransaction.setStatus("Thread interrupted");
-					 switchTransaction.complete();
+		private void interruptedTransaction() {
+			if (switchTransaction != null && !switchTransaction.isCompleted()) {
+				switchTransaction.setStatus("Thread interrupted");
+				switchTransaction.complete();
+			}
+		}
+
+		private void sendSwitchTransaction(FindWriteDataSourceResult findResult) {
+			if (findResult.isChangedWrteDb() && switchTransaction != null) {
+				switchTransaction.setStatus(Message.SUCCESS);
+				switchTransaction.complete();
+				switchTransaction = null;
+			}
+		}
+
+		private void checkMaxSwitchTransactionTryTimes() {
+			switchTransactionTryTimes++;
+			if (switchTransactionTryTimes >= maxSwitchTransactionTtyTimes) {
+				switchTransactionTryTimes = 0;
+				if (switchTransaction != null) {
+					switchTransaction.setStatus("Find write data source failed");
+					switchTransaction.complete();
+					switchTransaction = null;
 				}
-		  }
+			}
+		}
 
-		  private void sendSwitchTransaction(FindWriteDataSourceResult findResult) {
-				if (findResult.isChangedWrteDb() && switchTransaction != null) {
-					 switchTransaction.setStatus(Message.SUCCESS);
-					 switchTransaction.complete();
-					 switchTransaction = null;
-				}
-		  }
+		private void sleep(long seconds) throws InterruptedException {
+			atomicSleepTimes.incrementAndGet();
+			if (atomicSleepTimes.get() > 100) {
+				atomicSleepTimes.set(0);
+			}
+			TimeUnit.SECONDS.sleep(seconds);
+		}
 
-		  private void checkMaxSwitchTransactionTryTimes() {
-				switchTransactionTryTimes++;
-				if (switchTransactionTryTimes >= maxSwitchTransactionTtyTimes) {
-					 switchTransactionTryTimes = 0;
-					 if (switchTransaction != null) {
-						  switchTransaction.setStatus("Find write data source failed");
-						  switchTransaction.complete();
-						  switchTransaction = null;
-					 }
-				}
-		  }
-
-		  private void sleep(long seconds) throws InterruptedException {
-				atomicSleepTimes.incrementAndGet();
-				if (atomicSleepTimes.get() > 100) {
-					 atomicSleepTimes.set(0);
-				}
-				TimeUnit.SECONDS.sleep(seconds);
-		  }
-
-		  private boolean isWritable(ResultSet rs) throws SQLException {
-				return rs.getInt(1) == 0;
-		  }
-	 }
+		private boolean isWritable(ResultSet rs) throws SQLException {
+			return rs.getInt(1) == 0;
+		}
+	}
 
 }
