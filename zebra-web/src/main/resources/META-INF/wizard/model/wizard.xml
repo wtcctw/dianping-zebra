@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wizard package="com.dianping.zebra.admin">
+   <model package="com.dianping.zebra.admin.query" name="query">
+      <sample-model>src/test/resources/query.xml</sample-model>
+   </model>
+   <model package="com.dianping.zebra.admin.sqlMap" name="sqlMap">
+      <sample-model>src/test/resources/sqlMap.xml</sample-model>
+   </model>
+</wizard>

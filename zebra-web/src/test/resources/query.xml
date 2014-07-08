@@ -1,0 +1,18 @@
+<query>
+	<total>5262</total>
+	<max_score>1.0</max_score>
+	<hits>
+		<_index>git_2</_index>
+		<_type>file</_type>
+		<_id>f253fd2b718d5d98ac070f6e08648a407267264a</_id>
+		<_score>1.0</_score>
+		<fields>
+			<path>tuangou-event-biz/src/main/resources/config/sqlmap/event/</path>
+			<language>xml</language>
+			<code>xx</code>
+			<project_id>1664</project_id>
+			<name>EventTopic.xml</name>
+		</fields>
+	</hits>
+	<hits></hits>
+</query>

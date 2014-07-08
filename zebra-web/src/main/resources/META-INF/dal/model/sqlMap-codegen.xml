@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+  <entity name="sqlMap" root="true">
+    <element name="select" value-type="String" type="list" names="selects" />
+    <element name="insert" value-type="String" type="list" names="inserts" />
+    <element name="update" value-type="String" type="list" names="updates" />
+    <element name="delete" value-type="String" type="list" names="deletes" />
+  </entity>
+</model>
+

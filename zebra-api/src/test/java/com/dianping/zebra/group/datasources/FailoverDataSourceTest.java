@@ -1,14 +1,11 @@
 package com.dianping.zebra.group.datasources;
 
-import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.WriteDsNotFoundException;
 import junit.framework.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.mockito.Mockito.*;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -16,7 +13,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Mockito.*;
 
 public class FailoverDataSourceTest {
     Map<String, DataSourceConfig> configs;
@@ -49,134 +47,113 @@ public class FailoverDataSourceTest {
         when(readOnlyCoon.createStatement()).thenReturn(readonlyState);
     }
 
-    @Test
-    public void test_use_auto_find_write_db() throws InterruptedException, SQLException {
-        FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);
 
-        mockedDs.setConnectionProvider(new ConnectionProvider() {
-            @Override
-            public Connection getConnection(DataSourceConfig config) {
-                return coon;
-            }
-        });
-
-        mockedDs.init();
-        TimeUnit.MILLISECONDS.sleep(1200);
-        Assert.assertEquals("db1", mockedDs.getCurrentDataSourceMBean().getId());
-
-        mockedDs.setConnectionProvider(new ConnectionProvider() {
-            @Override
-            public Connection getConnection(DataSourceConfig config) {
-                if (config.getId().equals("db1")) {
-                    return readOnlyCoon;
-                }
-                return coon;
-            }
-        });
-        TimeUnit.MILLISECONDS.sleep(1200);
-        Assert.assertEquals("db2", mockedDs.getCurrentDataSourceMBean().getId());
-    }
-
-
-    @Test(expected = WriteDsNotFoundException.class)
-    public void test_use_no_write_db() throws InterruptedException, SQLException {
-        FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);
-        mockedDs.setConnectionProvider(new ConnectionProvider() {
-            @Override
-            public Connection getConnection(DataSourceConfig config) {
-                return readOnlyCoon;
-            }
-        });
-        mockedDs.initFailFast();
-    }
-
-
-    @Test
-    public void test_use_default_write_db() throws InterruptedException, SQLException {
-        FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);
-        mockedDs.setConnectionProvider(new ConnectionProvider() {
-            @Override
-            public Connection getConnection(DataSourceConfig config) {
-                return coon;
-            }
-        });
-
-        mockedDs.init();
-        TimeUnit.SECONDS.sleep(1);
-        Assert.assertEquals("db1", mockedDs.getCurrentDataSourceMBean().getId());
-    }
-
-
-    /**
-     * just commit the transaction when write database changed
-     */
-    @Test
-    @Ignore
-    public void test_switch_write_db_on_cat_transaction() throws InterruptedException, SQLException {
-        Transaction t = mock(Transaction.class);
-        FailOverDataSourceForTestCat mockedDs = new FailOverDataSourceForTestCat(configs);
-        mockedDs.setMockedTransaction(t);
-        mockedDs.setConnectionProvider(new ConnectionProvider() {
-            @Override
-            public Connection getConnection(DataSourceConfig config) {
-                return coon;
-            }
-        });
-
-        mockedDs.init();
-        TimeUnit.SECONDS.sleep(1);
-        //changed because the writeBs is null
-        TimeUnit.MILLISECONDS.sleep(1200);
-
-        TimeUnit.SECONDS.sleep(1);
-        //did change because the writeBs is the same
-        TimeUnit.MILLISECONDS.sleep(1200);
-
-        mockedDs.setConnectionProvider(new ConnectionProvider() {
-            @Override
-            public Connection getConnection(DataSourceConfig config) {
-                if (config.getId().equals("db1")) {
-                    return readOnlyCoon;
-                }
-                return coon;
-            }
-        });
-        TimeUnit.MILLISECONDS.sleep(1200);
-        //changed the writeBs and fire the transaction again
-        verify(t, times(2)).complete();
-    }
-
-    interface ConnectionProvider {
-        Connection getConnection(DataSourceConfig config);
-    }
-
-    class FailOverDataSourceForTestCat extends FailOverDataSource {
-        private Transaction mockedTransaction;
-        private ConnectionProvider connectionProvider;
-
-        public FailOverDataSourceForTestCat(Map<String, DataSourceConfig> configs) {
-            super(configs);
-        }
+    class ConnectionAnswer implements Answer<Connection> {
+        private Connection coon;
 
         @Override
-        protected Transaction getSwitchWriteDbTransaction() {
-            if (mockedTransaction == null) {
-                return super.getSwitchWriteDbTransaction();
-            }
-            return mockedTransaction;
+        public Connection answer(InvocationOnMock invocation) throws Throwable {
+            return coon;
         }
 
-        public void setMockedTransaction(Transaction mockedTransaction) {
-            this.mockedTransaction = mockedTransaction;
-        }
-
-        @Override
-        public Connection getConnection(DataSourceConfig config) throws SQLException {
-            return connectionProvider.getConnection(config);
-        }
-
-        public void setConnectionProvider(ConnectionProvider connectionProvider) {
-            this.connectionProvider = connectionProvider;
+        public void setCoon(Connection coon) {
+            this.coon = coon;
         }
     }
+
+    @Test(timeout = 30000)
+    public void test_hot_switch() throws SQLException, InterruptedException {
+        FailOverDataSource ds = new FailOverDataSource(configs);
+        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+
+        ConnectionAnswer connectionAnswer = new ConnectionAnswer();
+        connectionAnswer.setCoon(coon);
+
+        //use the db1
+        doAnswer(connectionAnswer).when(monitor).getConnection(configs.get("db1"));
+        doReturn(coon).when(monitor).getConnection(configs.get("db2"));
+
+        new Thread(monitor).start();
+
+        while (monitor.getSleepTimes() < 2) {
+            Thread.sleep(10);
+        }
+        Assert.assertEquals("db1", ds.getCurrentDataSourceMBean().getId());
+
+        verify(coon, atLeastOnce()).createStatement();
+        verify(readOnlyCoon, never()).createStatement();
+
+        //fail over db1
+        connectionAnswer.setCoon(readOnlyCoon);
+
+        while (monitor.getSleepTimes() < 4) {
+            Thread.sleep(10);
+        }
+        Assert.assertEquals("db2", ds.getCurrentDataSourceMBean().getId());
+        verify(coon, atLeast(2)).createStatement();
+        verify(readOnlyCoon, times(2)).createStatement();
+    }
+
+    @Test
+    public void test_find_write_data_source1() throws Exception {
+        FailOverDataSource ds = new FailOverDataSource(configs);
+        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+
+        doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
+
+        monitor.findWriteDataSource();
+
+        Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db1");
+        verify(coon, atLeastOnce()).createStatement();
+    }
+
+    @Test
+    public void test_find_write_data_source2() throws Exception {
+        FailOverDataSource ds = new FailOverDataSource(configs);
+        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+
+        doReturn(readOnlyCoon).when(monitor).getConnection(configs.get("db1"));
+        doReturn(coon).when(monitor).getConnection(configs.get("db2"));
+
+        monitor.findWriteDataSource();
+
+        Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db2");
+
+        verify(coon, atLeastOnce()).createStatement();
+        verify(readOnlyCoon, atLeastOnce()).createStatement();
+    }
+
+    @Test
+    public void test_check_write_data_source_result_ok() throws Exception {
+        FailOverDataSource ds = new FailOverDataSource(configs);
+        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+
+        doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
+        Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.OK);
+        verify(coon, atLeastOnce()).createStatement();
+    }
+
+    @Test
+    public void test_check_write_data_source_result_readonly() throws Exception {
+        FailOverDataSource ds = new FailOverDataSource(configs);
+        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+
+        doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
+        Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.READ_ONLY);
+        verify(readOnlyCoon, atLeastOnce()).createStatement();
+    }
+
+    @Test
+    public void test_check_write_data_source_result_error() throws Exception {
+        FailOverDataSource ds = new FailOverDataSource(configs);
+        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+
+        Connection errorCoon = mock(Connection.class);
+        when(errorCoon.createStatement()).thenThrow(new SQLException());
+
+        doReturn(errorCoon).when(monitor).getConnection(any(DataSourceConfig.class));
+        Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.ERROR);
+        verify(errorCoon, atLeastOnce()).createStatement();
+    }
+
 }
