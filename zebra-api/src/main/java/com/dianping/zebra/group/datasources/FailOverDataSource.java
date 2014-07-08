@@ -5,11 +5,13 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.WriteDsNotFoundException;
@@ -17,8 +19,10 @@ import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 
 /**
- * features: 1. auto-detect write database by select @@read_only</br> 2. if ping connection was killed by MySQL server, it can
- * reconnect.</br> 3. if cannot find any write database in the initial phase, fail fast.</br>
+ * features:
+ * 1. auto-detect write database by select @@read_only</br>
+ * 2. auto check the write database.</br>
+ * 3. if cannot find any write database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
 
@@ -27,8 +31,6 @@ public class FailOverDataSource extends AbstractDataSource {
     private volatile SingleDataSource writeDs;
 
     private Map<String, DataSourceConfig> configs;
-
-    private Map<String, Connection> connections = new ConcurrentHashMap<String, Connection>(); // cache ping connections
 
     private Thread writeDataSourceMonitorThread;
 
@@ -41,90 +43,15 @@ public class FailOverDataSource extends AbstractDataSource {
         if (this.writeDataSourceMonitorThread != null) {
             writeDataSourceMonitorThread.interrupt();
         }
-
-        for (Connection conn : connections.values()) {
-            try {
-                conn.close();
-            } catch (SQLException ignore) {
-            }
-        }
-
         if (writeDs != null) {
             SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
         }
-    }
-
-    private FindWriteDataSourceResult findWriteDataSource() {
-        FindWriteDataSourceResult result = new FindWriteDataSourceResult();
-
-        for (DataSourceConfig config : configs.values()) {
-            Connection conn = null;
-            Statement stmt = null;
-            ResultSet rs = null;
-            try {
-                conn = getConnection(config);
-                stmt = conn.createStatement();
-                rs = stmt.executeQuery(config.getTestReadOnlySql());
-
-                if (rs.next()) {
-                    // switch database, 0 for write dataSource, 1 for read dataSource.
-                    if (rs.getInt(1) == 0) {
-                        if (writeDs == null || !writeDs.getId().equals(config.getId())) {
-                            writeDs = getDataSource(config);
-                            result.setChangedWrteDb(true);
-                        }
-                        result.setWriteDbExist(true);
-                        break;
-                    }
-                }
-            } catch (SQLException e) {
-                // communication link fail,then print the error message to cat
-                if (writeDs != null && writeDs.getId().equals(config.getId())) {
-                    Cat.logError(String.format("the ping connection for %s was killed by mysql server", writeDs.getId()), e);
-//                    SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
-//                    writeDs = null;
-                }
-
-                try {
-                    connections.remove(config.getId());
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (SQLException ignore) {
-                }
-            } finally {
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (SQLException ignore) {
-                    }
-                }
-                if (stmt != null) {
-                    try {
-                        stmt.close();
-                    } catch (SQLException ignore) {
-                    }
-                }
-            }
-        }
-
-        return result;
+        super.close();
     }
 
     @Override
     public Connection getConnection() throws SQLException {
         return getConnection(null, null);
-    }
-
-    public Connection getConnection(DataSourceConfig config) throws SQLException {
-        Connection conn = connections.get(config.getId());
-
-        if (conn == null) {
-            conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword());
-            connections.put(config.getId(), conn);
-        }
-
-        return conn;
     }
 
     @Override
@@ -150,21 +77,31 @@ public class FailOverDataSource extends AbstractDataSource {
 
     @Override
     public void init() {
-        writeDataSourceMonitorThread = new Thread(new WriterDataSourceMonitor());
-        writeDataSourceMonitorThread.setDaemon(true);
-        writeDataSourceMonitorThread.setName("FailOverDataSource");
-
-        writeDataSourceMonitorThread.start();
+        init(true);
     }
 
-    public void initFailFast() {
-        if (!findWriteDataSource().isWriteDbExist()) {
+    public void init(boolean forceCheckWrite) {
+        WriterDataSourceMonitor runner = new WriterDataSourceMonitor();
+
+        if (forceCheckWrite && !runner.findWriteDataSource().isWriteDbExist()) {
             throw new WriteDsNotFoundException(ERROR_MESSAGE);
         }
 
-        init();
+        writeDataSourceMonitorThread = new Thread(runner);
+        writeDataSourceMonitorThread.setDaemon(true);
+        writeDataSourceMonitorThread.setName("FailOverDataSource");
+        writeDataSourceMonitorThread.start();
+
+        super.init();
     }
 
+    private boolean setWriteDb(DataSourceConfig config) {
+        if (writeDs == null || !writeDs.getId().equals(config.getId())) {
+            writeDs = getDataSource(config);
+            return true;
+        }
+        return false;
+    }
 
     class FindWriteDataSourceResult {
         private boolean writeDbExist;
@@ -187,48 +124,189 @@ public class FailOverDataSource extends AbstractDataSource {
         }
     }
 
-    protected Transaction getSwitchWriteDbTransaction() {
-        return Cat.getProducer().newTransaction("SQL.Conn", "SwitchWriteDB");
+    enum CheckWriteDataSourceResult {
+        OK(1), READ_ONLY(2), ERROR(3);
+        private int value;
+        private CheckWriteDataSourceResult(int value) {
+            this.value = value;
+        }
     }
 
     class WriterDataSourceMonitor implements Runnable {
-        private long counter = 0L;
+        private AtomicInteger atomicSleepTimes = new AtomicInteger(0);
+        private Map<String, Connection> cachedConnection = new HashMap<String, Connection>();
 
-        private boolean perMinite() {
-            return (counter++ % 60) == 0;
+        public int getSleepTimes() {
+            return atomicSleepTimes.get();
         }
+
+        protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
+            Statement stmt = null;
+            ResultSet rs = null;
+
+            try {
+                Connection conn = getConnection(config);
+                stmt = conn.createStatement();
+                rs = stmt.executeQuery(config.getTestReadOnlySql());
+
+                if (rs.next()) {
+                    if (isWritable(rs)) {
+                        return CheckWriteDataSourceResult.OK;
+                    }
+                }
+            } catch (SQLException e) {
+                Cat.logError(e);
+                closeConnection(config.getId());
+                return CheckWriteDataSourceResult.ERROR;
+            } finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                    } catch (SQLException ignore) {
+                    }
+                }
+                if (stmt != null) {
+                    try {
+                        stmt.close();
+                    } catch (SQLException ignore) {
+                    }
+                }
+            }
+            return CheckWriteDataSourceResult.READ_ONLY;
+        }
+
+        public FindWriteDataSourceResult findWriteDataSource() {
+            FindWriteDataSourceResult result = new FindWriteDataSourceResult();
+
+            for (DataSourceConfig config : configs.values()) {
+                CheckWriteDataSourceResult checkResult = checkWriteDataSource(config);
+                if (checkResult == CheckWriteDataSourceResult.OK) {
+                    result.setChangedWrteDb(setWriteDb(config));
+                    result.setWriteDbExist(true);
+                    break;
+                }
+            }
+            return result;
+        }
+
+        protected Connection getConnection(DataSourceConfig config) throws SQLException {
+            if (!cachedConnection.containsKey(config.getId())) {
+                cachedConnection.put(config.getId(), DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword()));
+            }
+            return cachedConnection.get(config.getId());
+        }
+
+        protected void closeConnections() {
+            for (Map.Entry<String, Connection> entity : cachedConnection.entrySet()) {
+                try {
+                    entity.getValue().close();
+                } catch (SQLException ignore) {
+
+                }
+            }
+            cachedConnection.clear();
+        }
+
+        protected void closeConnection(String id) {
+            if (!cachedConnection.containsKey(id)) {
+                return;
+            }
+            try {
+                cachedConnection.get(id).close();
+            } catch (SQLException ignore) {
+            } finally {
+                cachedConnection.remove(id);
+            }
+        }
+
+        Transaction switchTransaction = null;
+        private int switchTransactionTryTimes = 0;
+        private final int maxSwitchTransactionTtyTimes = 3600;
 
         @Override
         public void run() {
             while (!Thread.interrupted()) {
-
-                FindWriteDataSourceResult findResult = null;
-//                Transaction t = getSwitchWriteDbTransaction();
-
                 try {
-                    findResult = findWriteDataSource();
+                    sleep(1);
 
+                    FindWriteDataSourceResult findResult = findWriteDataSource();
                     if (!findResult.isWriteDbExist()) {
-                        if (perMinite()) {
-                            Cat.logError(new WriteDsNotFoundException(ERROR_MESSAGE));
-                        }
+                        Cat.logEvent("DAL", "FindWriteDbFailed");
+                        checkMaxSwitchTransactionTryTimes();
+                        continue;
                     }
-//                    t.setStatus(Transaction.SUCCESS);
+
+                    Cat.logEvent("DAL", "FindWriteDbSuccess");
+                    sendSwitchTransaction(findResult);
+
+                    closeConnections();
+                    while (!Thread.interrupted()) {
+                        sleep(5);
+
+                        CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
+                        if (checkWriteResult == CheckWriteDataSourceResult.OK) {
+                            continue;
+                        }
+
+                        createSwitchTransaction();
+                        closeConnections();
+                        break;
+                    }
+                } catch (InterruptedException ignore) {
+                    break;
                 } catch (Throwable e) {
                     Cat.logError(e);
                 }
-//                finally {
-//                    if (findResult != null && findResult.isChangedWrteDb()) {
-//                        t.complete();
-//                    }
-//                }
+            }
 
-                try {
-                    TimeUnit.SECONDS.sleep(1); // TODO: temperary
-                } catch (InterruptedException e) {
-                    break;
+            Cat.logEvent("DAL", "WriterDataSourceMonitorInterrupted");
+            interruptedTransaction();
+            closeConnections();
+        }
+
+        private void createSwitchTransaction() {
+            switchTransaction = Cat.newTransaction("DAL", "SwitchWriteDb");
+        }
+
+        private void interruptedTransaction() {
+            if (switchTransaction != null && !switchTransaction.isCompleted()) {
+                switchTransaction.setStatus("Thread interrupted");
+                switchTransaction.complete();
+            }
+        }
+
+        private void sendSwitchTransaction(FindWriteDataSourceResult findResult) {
+            if (findResult.isChangedWrteDb() && switchTransaction != null) {
+                switchTransaction.setStatus(Message.SUCCESS);
+                switchTransaction.complete();
+                switchTransaction = null;
+            }
+        }
+
+        private void checkMaxSwitchTransactionTryTimes() {
+            switchTransactionTryTimes++;
+            if(switchTransactionTryTimes >= maxSwitchTransactionTtyTimes){
+                switchTransactionTryTimes = 0;
+                if(switchTransaction != null){
+                    switchTransaction.setStatus("Find write data source failed");
+                    switchTransaction.complete();
+                    switchTransaction = null;
                 }
             }
         }
+
+        private void sleep(long seconds) throws InterruptedException {
+            atomicSleepTimes.incrementAndGet();
+            if (atomicSleepTimes.get() > 100) {
+                atomicSleepTimes.set(0);
+            }
+            TimeUnit.SECONDS.sleep(seconds);
+        }
+
+        private boolean isWritable(ResultSet rs) throws SQLException {
+            return rs.getInt(1) == 0;
+        }
     }
+
+
 }
