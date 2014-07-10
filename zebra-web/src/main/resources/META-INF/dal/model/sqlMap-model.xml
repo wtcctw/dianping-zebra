@@ -5,7 +5,7 @@
 		<any name="dynamic-elements" />
 	</entity>
 	<entity name="insert">
-		<element name="value" value-type="String" text="true"/>
+		<any name="any-elements" />
 	</entity>
 </model>
 

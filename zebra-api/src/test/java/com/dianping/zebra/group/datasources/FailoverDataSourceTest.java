@@ -64,7 +64,7 @@ public class FailoverDataSourceTest {
     @Test(timeout = 30000)
     public void test_hot_switch() throws SQLException, InterruptedException {
         FailOverDataSource ds = new FailOverDataSource(configs);
-        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+        FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
 
         ConnectionAnswer connectionAnswer = new ConnectionAnswer();
         connectionAnswer.setCoon(coon);
@@ -97,11 +97,11 @@ public class FailoverDataSourceTest {
     @Test
     public void test_find_write_data_source1() throws Exception {
         FailOverDataSource ds = new FailOverDataSource(configs);
-        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+        FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
 
         doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
 
-        monitor.findWriteDataSource();
+        monitor.findMasterDataSource();
 
         Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db1");
         verify(coon, atLeastOnce()).createStatement();
@@ -110,12 +110,12 @@ public class FailoverDataSourceTest {
     @Test
     public void test_find_write_data_source2() throws Exception {
         FailOverDataSource ds = new FailOverDataSource(configs);
-        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+        FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
 
         doReturn(readOnlyCoon).when(monitor).getConnection(configs.get("db1"));
         doReturn(coon).when(monitor).getConnection(configs.get("db2"));
 
-        monitor.findWriteDataSource();
+        monitor.findMasterDataSource();
 
         Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db2");
 
@@ -126,33 +126,33 @@ public class FailoverDataSourceTest {
     @Test
     public void test_check_write_data_source_result_ok() throws Exception {
         FailOverDataSource ds = new FailOverDataSource(configs);
-        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+        FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
 
         doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
-        Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.WRITABLE);
+        Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
         verify(coon, atLeastOnce()).createStatement();
     }
 
     @Test
     public void test_check_write_data_source_result_readonly() throws Exception {
         FailOverDataSource ds = new FailOverDataSource(configs);
-        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+        FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
 
         doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
-        Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.READ_ONLY);
+        Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
         verify(readOnlyCoon, atLeastOnce()).createStatement();
     }
 
     @Test
     public void test_check_write_data_source_result_error() throws Exception {
         FailOverDataSource ds = new FailOverDataSource(configs);
-        FailOverDataSource.WriterDataSourceMonitor monitor = spy(ds.new WriterDataSourceMonitor());
+        FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
 
         Connection errorCoon = mock(Connection.class);
         when(errorCoon.createStatement()).thenThrow(new SQLException());
 
         doReturn(errorCoon).when(monitor).getConnection(any(DataSourceConfig.class));
-        Assert.assertEquals(monitor.checkWriteDataSource(configs.get("db1")), FailOverDataSource.CheckWriteDataSourceResult.ERROR);
+        Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.ERROR);
         verify(errorCoon, atLeastOnce()).createStatement();
     }
 
