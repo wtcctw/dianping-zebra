@@ -7,24 +7,22 @@ import com.dianping.cat.Cat;
 public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 	private static Method getContextMethod = null;
 
-	private static Object[] defObjs = new Object[] {};
-
 	private static Method isAuthenticatedMethod = null;
 
 	private static boolean serviceFlag = false;
 
 	static {
 		try {
-			Class contextHolderClass = Class.forName("com.dianping.avatar.tracker.ExecutionContextHolder");
+			Class<?> contextHolderClass = Class.forName("com.dianping.avatar.tracker.ExecutionContextHolder");
 			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] {});
 			getContextMethod.setAccessible(true);
 
-			Class contextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
+			Class<?> contextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
 			isAuthenticatedMethod = contextClass.getDeclaredMethod("isAuthenticated", new Class[] {});
 			isAuthenticatedMethod.setAccessible(true);
 
 			serviceFlag = true;
-		} catch (Exception ignore) {
+		} catch (Throwable ignore) {
 		}
 	}
 
@@ -32,23 +30,15 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 	public boolean forceReadFromMaster() {
 		if (serviceFlag) {
 			try {
-				Object context = getContextMethod.invoke(null, defObjs);
+				Object context = getContextMethod.invoke(null);
 				if (context != null) {
-					Cat.logEvent("DAL", "GetAuthenticatedContextSuccess");
-
-					Boolean result = (Boolean) this.isAuthenticatedMethod.invoke(context, defObjs);
-
-					if (result != null && result.booleanValue()) {
-						Cat.logEvent("DAL", "ReadAuthenticatedTrue");
-					} else {
-						Cat.logEvent("DAL", "ReadAuthenticatedFalse");
-					}
-					return result;
+					return (Boolean) isAuthenticatedMethod.invoke(context);
 				}
-			} catch (Exception ignore) {
+			} catch (Throwable throwable) {
+				Cat.logError(throwable);
 			}
 		}
+
 		return false;
 	}
-
 }

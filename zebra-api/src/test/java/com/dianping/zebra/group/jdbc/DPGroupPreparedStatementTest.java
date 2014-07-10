@@ -5,14 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
-
-import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.avatar.tracker.TrackerContext;
 
 public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
