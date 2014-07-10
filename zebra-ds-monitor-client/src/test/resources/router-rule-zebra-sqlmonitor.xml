@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<router-rule>
+	<table-shard-rule table="person" generatedPK="id">
+		<shard-dimension dbRule="(#name#.hashCode().abs() % 8).intdiv(2)" 
+			dbIndexes="person_0,person_1,person_2,person_3" 
+			tbRule="#name#.hashCode().abs() % 2" 
+			tbSuffix="alldb:[_0,_7]"
+			isMaster="true">
+		</shard-dimension>
+		
+		<shard-dimension dbRule="(#height#.intValue() % 8).intdiv(2)" 
+			dbIndexes="person_4,person_5,person_6,person_7" 
+			tbRule="#height#.intValue() % 2" 
+			tbSuffix="alldb:[_height_0,_height_7]" 
+			isMaster="false">
+		</shard-dimension>
+	</table-shard-rule>
+	
+</router-rule>
+

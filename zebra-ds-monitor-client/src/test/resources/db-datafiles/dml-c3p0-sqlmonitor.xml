@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="gb2312"?>
+<database>
+	<tables>
+		<table name="PERSON">
+	    <![CDATA[
+	    CREATE TABLE IF NOT EXISTS PERSON (
+	    	id 		IDENTITY,
+	    	name 	VARCHAR(255),
+	    	age   	INT,
+	    	gender 	VARCHAR(20),
+	    	height 	INT
+	    )
+	    ]]>
+		</table>
+	</tables>
+	<aliases>
+		<alias name="QUERY">
+			CREATE ALIAS QUERY AS $$
+			ResultSet query(Connection conn, String sql) throws SQLException {
+			    return conn.createStatement().executeQuery(sql);
+			} $$;
+		</alias>
+	</aliases>
+</database>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+	
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:sql-monitor-db;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	
+	<bean id="monitorableDataSource" class="com.dianping.zebra.monitor.sql.MonitorableDataSource">
+		<constructor-arg ref="dataSource"/>
+	</bean>
+	
+	<!-- The introduce interceptor for all Dao  -->
+	<bean id="daoAutoRealizer" class="com.dianping.avatar.dao.DAOAutoRealizer" />
+
+	<!-- The advisor for inject interceptor
+	<bean id="daoAutoRealizerAdvisor" class="org.springframework.aop.aspectj.AspectJExpressionPointcutAdvisor">
+		<property name="advice" ref="daoAutoRealizer" />
+		<property name="expression" value="execution(* com.dianping..dao..*.*(..)) and !execution(* com.dianping.avatar..dao..*.*(..))" />
+	</bean>
+	 -->
+	
+	<bean id="sqlMapClient" class="com.dianping.avatar.dao.ibatis.spring.LimitSqlMapClientFactoryBean">
+		<property name="dataSource" ref="monitorableDataSource" />
+		<property name="configLocation" value="classpath:/config/sqlmap/sqlmap-config.xml" />
+		<!-- 
+		<property name="sqlConvert" ref="mysqlConverter" />
+		 -->
+	</bean>
+
+	<!-- The DAO default implementation for avatar -->
+	<bean id="daoRealizeTarget" class="com.dianping.avatar.dao.ibatis.IBatisGenericDaoImpl" abstract="true">
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="personDao" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="interceptorNames">
+			<list>
+				<value>daoAutoRealizer</value>
+			</list>
+		</property>
+		<property name="proxyInterfaces" value="com.dianping.zebra.monitor.sql.PersonDao" />
+		<property name="target">
+			<bean parent="daoRealizeTarget">
+				<constructor-arg value="Person" />
+			</bean>
+		</property>
+	</bean>
+
+</beans>
+	

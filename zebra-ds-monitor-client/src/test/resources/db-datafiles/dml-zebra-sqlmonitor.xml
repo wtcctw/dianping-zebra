@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databases>
+	<database name="person0">
+		<tables>
+			<table name="PERSON_0">
+		    <![CDATA[
+		    CREATE TABLE IF NOT EXISTS PERSON_0 (
+		    	id 		IDENTITY,
+		    	name 	VARCHAR(255),
+		    	age   	INT,
+		    	gender 	VARCHAR(20),
+		    	height 	INT
+		    )
+		    ]]>
+			</table>
+			<table name="PERSON_1">
+		    <![CDATA[
+		    CREATE TABLE IF NOT EXISTS PERSON_1 (
+		    	id 		IDENTITY,
+		    	name 	VARCHAR(255),
+		    	age   	INT,
+		    	gender 	VARCHAR(20),
+		    	height 	INT
+		    )
+		    ]]>
+			</table>
+		</tables>
+	</database>
+	<database name="person1">
+		<tables>
+			<table name="PERSON_2">
+		    <![CDATA[
+		    CREATE TABLE IF NOT EXISTS PERSON_2 (
+		    	id 		IDENTITY,
+		    	name 	VARCHAR(255),
+		    	age   	INT,
+		    	gender 	VARCHAR(20),
+		    	height 	INT
+		    )
+		    ]]>
+			</table>
+			<table name="PERSON_3">
+		    <![CDATA[
+		    CREATE TABLE IF NOT EXISTS PERSON_3 (
+		    	id 		IDENTITY,
+		    	name 	VARCHAR(255),
+		    	age   	INT,
+		    	gender 	VARCHAR(20),
+		    	height 	INT
+		    )
+		    ]]>
+			</table>
+		</tables>
+	</database>
+	<database name="person2">
+		<tables>
+			<table name="PERSON_4">
+		    <![CDATA[
+		    CREATE TABLE IF NOT EXISTS PERSON_4 (
+		    	id 		IDENTITY,
+		    	name 	VARCHAR(255),
+		    	age   	INT,
+		    	gender 	VARCHAR(20),
+		    	height 	INT
+		    )
+		    ]]>
+			</table>
+			<table name="PERSON_5">
+		    <![CDATA[
+		    CREATE TABLE IF NOT EXISTS PERSON_5 (
+		    	id 		IDENTITY,
+		    	name 	VARCHAR(255),
+		    	age   	INT,
+		    	gender 	VARCHAR(20),
+		    	height 	INT
+		    )
+		    ]]>
+			</table>
+		</tables>
+	</database>
+	<database name="person3">
+		<tables>
+			<table name="PERSON_6">
+		    <![CDATA[
+		    CREATE TABLE IF NOT EXISTS PERSON_6 (
+		    	id 		IDENTITY,
+		    	name 	VARCHAR(255),
+		    	age   	INT,
+		    	gender 	VARCHAR(20),
+		    	height 	INT
+		    )
+		    ]]>
+			</table>
+			<table name="PERSON_7">
+		    <![CDATA[
+		    CREATE TABLE IF NOT EXISTS PERSON_7 (
+		    	id 		IDENTITY,
+		    	name 	VARCHAR(255),
+		    	age   	INT,
+		    	gender 	VARCHAR(20),
+		    	height 	INT
+		    )
+		    ]]>
+			</table>
+		</tables>
+	</database>
+</databases>

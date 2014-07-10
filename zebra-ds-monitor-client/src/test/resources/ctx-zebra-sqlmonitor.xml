@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+	
+	<bean id="person_0" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:person0;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	<bean id="person_1" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:person1;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	<bean id="person_2" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:person2;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	<bean id="person_3" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:person3;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	
+	<bean id="person_4" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:person_a;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	<bean id="person_5" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:person_b;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	<bean id="person_6" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:person_c;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	<!-- 
+	<bean id="person_7" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="jdbcUrl" value="jdbc:h2:mem:person_d;DB_CLOSE_DELAY=-1"/>
+		<property name="driverClass" value="org.h2.Driver"/>
+		<property name="minPoolSize" value="2"/>
+		<property name="maxPoolSize" value="4"/>
+		<property name="initialPoolSize" value="2"/>
+	</bean>
+	 -->
+	
+	<bean id="zebraDS" class="com.dianping.zebra.jdbc.DPDataSource" init-method="init">
+		<property name="dataSourcePool">
+			<map>
+				<entry key="person_0" value-ref="person_0"/>
+				<entry key="person_1" value-ref="person_1"/>
+				<entry key="person_2" value-ref="person_2"/>
+				<entry key="person_3" value-ref="person_3"/>
+				<entry key="person_4" value-ref="person_4"/>
+				<entry key="person_5" value-ref="person_5"/>
+				<entry key="person_6" value-ref="person_6"/>
+				<entry key="person_7">
+					<bean class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+						<property name="jdbcUrl" value="jdbc:h2:mem:person_d;DB_CLOSE_DELAY=-1"/>
+						<property name="driverClass" value="org.h2.Driver"/>
+						<property name="minPoolSize" value="2"/>
+						<property name="maxPoolSize" value="4"/>
+						<property name="initialPoolSize" value="2"/>
+					</bean>
+				</entry>
+			</map>	
+		</property>
+		<property name="syncEventNotifier">
+			<bean class="com.dianping.zebra.monitor.sql.EchoEventNotifier">
+			</bean>
+		</property>
+		<property name="routerFactory">
+			<bean class="com.dianping.zebra.router.ClassPathXmlDataSourceRouterFactory">
+				<constructor-arg value="router-rule-zebra-sqlmonitor.xml"/>
+			</bean>
+		</property>
+	</bean>
+
+	<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>
+
+</beans>
+	
