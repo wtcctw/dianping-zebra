@@ -129,7 +129,7 @@ public class FailoverDataSourceTest {
         FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
 
         doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
-        Assert.assertEquals(monitor.checkMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
+        Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
         verify(coon, atLeastOnce()).createStatement();
     }
 
@@ -139,7 +139,7 @@ public class FailoverDataSourceTest {
         FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
 
         doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
-        Assert.assertEquals(monitor.checkMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
+        Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
         verify(readOnlyCoon, atLeastOnce()).createStatement();
     }
 
@@ -152,7 +152,7 @@ public class FailoverDataSourceTest {
         when(errorCoon.createStatement()).thenThrow(new SQLException());
 
         doReturn(errorCoon).when(monitor).getConnection(any(DataSourceConfig.class));
-        Assert.assertEquals(monitor.checkMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.ERROR);
+        Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")), FailOverDataSource.CheckMasterDataSourceResult.ERROR);
         verify(errorCoon, atLeastOnce()).createStatement();
     }
 

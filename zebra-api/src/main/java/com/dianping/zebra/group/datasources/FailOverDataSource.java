@@ -148,40 +148,6 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		private final int maxTransactionTryLimits = 60 * 10; // 10 minute
 
-		protected CheckMasterDataSourceResult checkMasterDataSource(DataSourceConfig config) {
-			Statement stmt = null;
-			ResultSet rs = null;
-
-			try {
-				stmt = getConnection(config).createStatement();
-				rs = stmt.executeQuery(config.getTestReadOnlySql());
-
-				if (isWritable(rs)) {
-					return CheckMasterDataSourceResult.READ_WRITE;
-				}
-			} catch (SQLException e) {
-				Cat.logError(e);
-				closeConnection(config.getId());
-
-				return CheckMasterDataSourceResult.ERROR;
-			} finally {
-				if (rs != null) {
-					try {
-						rs.close();
-					} catch (SQLException ignore) {
-					}
-				}
-				if (stmt != null) {
-					try {
-						stmt.close();
-					} catch (SQLException ignore) {
-					}
-				}
-			}
-
-			return CheckMasterDataSourceResult.READ_ONLY;
-		}
-
 		protected void closeConnection(String id) {
 			if (!cachedConnection.containsKey(id)) {
 				return;
@@ -223,7 +189,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			FindMasterDataSourceResult result = new FindMasterDataSourceResult();
 
 			for (DataSourceConfig config : configs.values()) {
-				CheckMasterDataSourceResult checkResult = checkMasterDataSource(config);
+				CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
 				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
 					result.setChangedMaster(setMasterDb(config));
 					result.setMasterExist(true);
@@ -261,11 +227,45 @@ public class FailOverDataSource extends AbstractDataSource {
 			}
 		}
 
-		private boolean isWritable(ResultSet rs) throws SQLException {
+		private boolean isMaster(ResultSet rs) throws SQLException {
 			if (rs.next()) {
 				return rs.getInt(1) == 0;
 			} else {
 				return false;
+			}
+		}
+
+		protected CheckMasterDataSourceResult isMasterDataSource(DataSourceConfig config) {
+			Statement stmt = null;
+			ResultSet rs = null;
+
+			try {
+				stmt = getConnection(config).createStatement();
+				rs = stmt.executeQuery(config.getTestReadOnlySql());
+
+				if (isMaster(rs)) {
+					return CheckMasterDataSourceResult.READ_WRITE;
+				} else {
+					return CheckMasterDataSourceResult.READ_ONLY;
+				}
+			} catch (SQLException e) {
+				Cat.logError(e);
+				closeConnection(config.getId());
+
+				return CheckMasterDataSourceResult.ERROR;
+			} finally {
+				if (rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException ignore) {
+					}
+				}
+				if (stmt != null) {
+					try {
+						stmt.close();
+					} catch (SQLException ignore) {
+					}
+				}
 			}
 		}
 
@@ -285,8 +285,7 @@ public class FailOverDataSource extends AbstractDataSource {
 						while (!Thread.interrupted()) {
 							sleepForSeconds(5);
 
-							CheckMasterDataSourceResult checkMasterResult = checkMasterDataSource(configs.get(master.getId()));
-							if (checkMasterResult != CheckMasterDataSourceResult.READ_WRITE) {
+							if (isMasterDataSource(configs.get(master.getId())) != CheckMasterDataSourceResult.READ_WRITE) {
 								createSwitchTransaction();
 								closeConnections();
 								break;
