@@ -196,21 +196,17 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void loadCustomizedReadWriteStrategy() {
 		ServiceLoader<CustomizedReadWriteStrategy> strategies = ServiceLoader.load(CustomizedReadWriteStrategy.class);
-		CustomizedReadWriteStrategyWrapper wraper = null;
+		CustomizedReadWriteStrategyWrapper wraper = new CustomizedReadWriteStrategyWrapper();
 
 		if (strategies != null) {
 			for (CustomizedReadWriteStrategy strategy : strategies) {
-				if (strategy == null) {
-					continue;
+				if (strategy != null) {
+					wraper.addStrategy(strategy);
 				}
-				if(wraper == null){
-					wraper = new CustomizedReadWriteStrategyWrapper();
-				}
-				wraper.addStrategy(strategy);
 			}
 		}
-		
-		if(wraper != null){
+
+		if (wraper != null) {
 			customizedReadWriteStrategy = wraper;
 		}
 	}
