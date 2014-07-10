@@ -32,6 +32,7 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 /**
  * 对于实际<code>Connection</code>的包装，提供monitor功能
@@ -294,5 +295,30 @@ public class MonitorableConnection implements Connection {
 	public Connection getInnerConnection() {
 		return innerConnection;
 	}
+
+	@Override
+   public void setSchema(String schema) throws SQLException {
+		innerConnection.setSchema(schema);
+   }
+
+	@Override
+   public String getSchema() throws SQLException {
+		return innerConnection.getSchema();
+   }
+
+	@Override
+   public void abort(Executor executor) throws SQLException {
+		innerConnection.abort(executor);
+   }
+
+	@Override
+   public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+		innerConnection.setNetworkTimeout(executor, milliseconds);	   
+   }
+
+	@Override
+   public int getNetworkTimeout() throws SQLException {
+		return innerConnection.getNetworkTimeout();
+   }
 
 }

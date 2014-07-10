@@ -22,7 +22,8 @@ public class SqlUtils {
 			if (noCommentsSql.toLowerCase().contains(" for ")
 			      && SELECT_FOR_UPDATE_PATTERN.matcher(noCommentsSql).matches()) {
 				sqlType = SqlType.SELECT_FOR_UPDATE;
-			} else if (noCommentsSql.toLowerCase().contains("@@identity")) {
+			} else if (noCommentsSql.toLowerCase().contains("@@identity")
+			      || noCommentsSql.toLowerCase().contains("last_insert_id()")) {
 				sqlType = SqlType.SELECT_FOR_IDENTITY;
 			} else {
 				sqlType = SqlType.SELECT;

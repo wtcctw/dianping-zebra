@@ -54,5 +54,18 @@ public class SqlUtilsTest {
 		Assert.assertEquals(SqlType.EXECUTE, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());
 	}
+	
+	@Test
+	public void testSelectIdentity() throws SQLException {
+		String sql = "select @@identity";
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		Assert.assertEquals(SqlType.SELECT_FOR_IDENTITY, sqlType);
+		Assert.assertEquals(false, sqlType.isRead());
+		
+		String sql2 = "select last_insert_id()";
+		SqlType sqlType2 = SqlUtils.getSqlType(sql2);
+		Assert.assertEquals(SqlType.SELECT_FOR_IDENTITY, sqlType2);
+		Assert.assertEquals(false, sqlType.isRead());
+	}
 
 }

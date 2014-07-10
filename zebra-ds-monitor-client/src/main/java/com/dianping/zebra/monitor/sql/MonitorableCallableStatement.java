@@ -42,7 +42,8 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 
 	private final CallableStatement prepareCall;
 
-	public MonitorableCallableStatement(CallableStatement prepareCall, String sql, MonitorableConnection monitorableConnection) {
+	public MonitorableCallableStatement(CallableStatement prepareCall, String sql,
+	      MonitorableConnection monitorableConnection) {
 		super(prepareCall, sql, monitorableConnection);
 		this.prepareCall = prepareCall;
 	}
@@ -56,7 +57,7 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	public void registerOutParameter(int parameterIndex, int sqlType, int scale) throws SQLException {
 		prepareCall.registerOutParameter(parameterIndex, sqlType, scale);
 	}
-	
+
 	@Override
 	public void registerOutParameter(int parameterIndex, int sqlType, String typeName) throws SQLException {
 		prepareCall.registerOutParameter(parameterIndex, sqlType, typeName);
@@ -76,7 +77,7 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	public void registerOutParameter(String parameterName, int sqlType, String typeName) throws SQLException {
 		prepareCall.registerOutParameter(parameterName, sqlType, typeName);
 	}
-	
+
 	@Override
 	public boolean wasNull() throws SQLException {
 		return prepareCall.wasNull();
@@ -289,14 +290,12 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	@Override
-	public void setObject(String parameterName, Object x, int targetSqlType,
-			int scale) throws SQLException {
+	public void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SQLException {
 		prepareCall.setObject(parameterName, x, targetSqlType, scale);
 	}
 
 	@Override
-	public void setObject(String parameterName, Object x, int targetSqlType)
-			throws SQLException {
+	public void setObject(String parameterName, Object x, int targetSqlType) throws SQLException {
 		prepareCall.setObject(parameterName, x, targetSqlType);
 	}
 
@@ -306,32 +305,27 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	@Override
-	public void setCharacterStream(String parameterName, Reader reader,
-			int length) throws SQLException {
+	public void setCharacterStream(String parameterName, Reader reader, int length) throws SQLException {
 		prepareCall.setCharacterStream(parameterName, reader, length);
 	}
 
 	@Override
-	public void setDate(String parameterName, Date x, Calendar cal)
-			throws SQLException {
+	public void setDate(String parameterName, Date x, Calendar cal) throws SQLException {
 		prepareCall.setDate(parameterName, x, cal);
 	}
 
 	@Override
-	public void setTime(String parameterName, Time x, Calendar cal)
-			throws SQLException {
+	public void setTime(String parameterName, Time x, Calendar cal) throws SQLException {
 		prepareCall.setTime(parameterName, x, cal);
 	}
 
 	@Override
-	public void setTimestamp(String parameterName, Timestamp x, Calendar cal)
-			throws SQLException {
+	public void setTimestamp(String parameterName, Timestamp x, Calendar cal) throws SQLException {
 		prepareCall.setTimestamp(parameterName, x, cal);
 	}
 
 	@Override
-	public void setNull(String parameterName, int sqlType, String typeName)
-			throws SQLException {
+	public void setNull(String parameterName, int sqlType, String typeName) throws SQLException {
 		prepareCall.setNull(parameterName, sqlType, typeName);
 	}
 
@@ -406,8 +400,7 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	@Override
-	public Object getObject(String parameterName, Map<String, Class<?>> map)
-			throws SQLException {
+	public Object getObject(String parameterName, Map<String, Class<?>> map) throws SQLException {
 		return prepareCall.getObject(parameterName, map);
 	}
 
@@ -442,8 +435,7 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	@Override
-	public Timestamp getTimestamp(String parameterName, Calendar cal)
-			throws SQLException {
+	public Timestamp getTimestamp(String parameterName, Calendar cal) throws SQLException {
 		return prepareCall.getTimestamp(parameterName, cal);
 	}
 
@@ -468,14 +460,12 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	@Override
-	public void setNString(String parameterName, String value)
-			throws SQLException {
+	public void setNString(String parameterName, String value) throws SQLException {
 		prepareCall.setNString(parameterName, value);
 	}
 
 	@Override
-	public void setNCharacterStream(String parameterName, Reader value,
-			long length) throws SQLException {
+	public void setNCharacterStream(String parameterName, Reader value, long length) throws SQLException {
 		prepareCall.setNCharacterStream(parameterName, value, length);
 	}
 
@@ -485,20 +475,17 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	@Override
-	public void setClob(String parameterName, Reader reader, long length)
-			throws SQLException {
+	public void setClob(String parameterName, Reader reader, long length) throws SQLException {
 		prepareCall.setClob(parameterName, reader, length);
 	}
 
 	@Override
-	public void setBlob(String parameterName, InputStream inputStream,
-			long length) throws SQLException {
+	public void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException {
 		prepareCall.setBlob(parameterName, inputStream, length);
 	}
 
 	@Override
-	public void setNClob(String parameterName, Reader reader, long length)
-			throws SQLException {
+	public void setNClob(String parameterName, Reader reader, long length) throws SQLException {
 		prepareCall.setNClob(parameterName, reader, length);
 	}
 
@@ -513,8 +500,7 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	@Override
-	public void setSQLXML(String parameterName, SQLXML xmlObject)
-			throws SQLException {
+	public void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {
 		prepareCall.setSQLXML(parameterName, xmlObject);
 	}
 
@@ -569,63 +555,72 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	@Override
-	public void setAsciiStream(String parameterName, InputStream x, long length)
-			throws SQLException {
+	public void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
 		prepareCall.setAsciiStream(parameterName, x, length);
 	}
 
 	@Override
-	public void setBinaryStream(String parameterName, InputStream x, long length)
-			throws SQLException {
+	public void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException {
 		prepareCall.setBinaryStream(parameterName, x, length);
 	}
 
 	@Override
-	public void setCharacterStream(String parameterName, Reader reader,
-			long length) throws SQLException {
+	public void setCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
 		prepareCall.setCharacterStream(parameterName, reader, length);
 	}
 
 	@Override
-	public void setAsciiStream(String parameterName, InputStream x)
-			throws SQLException {
+	public void setAsciiStream(String parameterName, InputStream x) throws SQLException {
 		prepareCall.setAsciiStream(parameterName, x);
 	}
 
 	@Override
-	public void setBinaryStream(String parameterName, InputStream x)
-			throws SQLException {
+	public void setBinaryStream(String parameterName, InputStream x) throws SQLException {
 		prepareCall.setBinaryStream(parameterName, x);
 	}
 
 	@Override
-	public void setCharacterStream(String parameterName, Reader reader)
-			throws SQLException {
+	public void setCharacterStream(String parameterName, Reader reader) throws SQLException {
 		prepareCall.setCharacterStream(parameterName, reader);
 	}
 
 	@Override
-	public void setNCharacterStream(String parameterName, Reader value)
-			throws SQLException {
+	public void setNCharacterStream(String parameterName, Reader value) throws SQLException {
 		prepareCall.setNCharacterStream(parameterName, value);
 	}
 
 	@Override
-	public void setClob(String parameterName, Reader reader)
-			throws SQLException {
+	public void setClob(String parameterName, Reader reader) throws SQLException {
 		prepareCall.setClob(parameterName, reader);
 	}
 
 	@Override
-	public void setBlob(String parameterName, InputStream inputStream)
-			throws SQLException {
+	public void setBlob(String parameterName, InputStream inputStream) throws SQLException {
 		prepareCall.setBlob(parameterName, inputStream);
 	}
 
 	@Override
-	public void setNClob(String parameterName, Reader reader)
-			throws SQLException {
+	public void setNClob(String parameterName, Reader reader) throws SQLException {
 		prepareCall.setNClob(parameterName, reader);
 	}
 
+	@Override
+	public void closeOnCompletion() throws SQLException {
+		prepareCall.closeOnCompletion();
+	}
+
+	@Override
+	public boolean isCloseOnCompletion() throws SQLException {
+		return prepareCall.isCloseOnCompletion();
+	}
+
+	@Override
+	public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
+		return prepareCall.getObject(parameterIndex, type);
+	}
+
+	@Override
+	public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
+		return prepareCall.getObject(parameterName, type);
+	}
 }

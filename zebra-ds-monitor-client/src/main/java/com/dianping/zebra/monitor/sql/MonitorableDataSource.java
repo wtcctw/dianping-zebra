@@ -18,19 +18,23 @@ package com.dianping.zebra.monitor.sql;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
 /**
  * 该<code>DataSource</code>用于收集各底层DataSource的执行信息，包括sql, sql params, sql destination, 执行耗时等信息
+ * 
  * @author danson.liu
  *
  */
 public class MonitorableDataSource implements DataSource {
-	
-	/**被监控的DataSource*/
-	private DataSource 			innerDataSource;
-	private MonitorOptions		monitorOptions		= MonitorOptions.getInstance();
+
+	/** 被监控的DataSource */
+	private DataSource innerDataSource;
+
+	private MonitorOptions monitorOptions = MonitorOptions.getInstance();
 
 	public MonitorableDataSource(DataSource innerDataSource) {
 		this.innerDataSource = getInnerDataSource(innerDataSource);
@@ -89,6 +93,11 @@ public class MonitorableDataSource implements DataSource {
 			return getInnerDataSource(((MonitorableDataSource) innerDataSource).innerDataSource);
 		}
 		return innerDataSource;
+	}
+
+	@Override
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		return innerDataSource.getParentLogger();
 	}
 
 }
