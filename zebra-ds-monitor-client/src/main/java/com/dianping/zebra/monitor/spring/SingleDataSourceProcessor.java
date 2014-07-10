@@ -5,9 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
@@ -18,12 +23,16 @@ public class SingleDataSourceProcessor implements BeanPostProcessor {
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (ComboPooledDataSource.class.isInstance(bean.getClass())) {
+			Transaction t = Cat.newTransaction("DAL", "ProxySingleDataSource");
+
 			ComboPooledDataSource c3p0Ds = (ComboPooledDataSource) bean;
 
 			Map<String, String> properties = new HashMap<String, String>();
 			try {
 				BeansUtils.extractAccessiblePropertiesToMap(properties, c3p0Ds);
 			} catch (IntrospectionException e) {
+				t.setStatus(e);
+				t.complete();
 				throw new BeansException("get properties from C3P0 DataSource failed!", e) {
 					private static final long serialVersionUID = -7778035191097930206L;
 				};
@@ -44,8 +53,12 @@ public class SingleDataSourceProcessor implements BeanPostProcessor {
 				any.setValue(entity.getValue());
 				config.getProperties().add(any);
 			}
+			
+			DataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
 
-			return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
+			t.setStatus(Message.SUCCESS);
+			t.complete();
+			return ds;
 		}
 		return bean;
 	}
