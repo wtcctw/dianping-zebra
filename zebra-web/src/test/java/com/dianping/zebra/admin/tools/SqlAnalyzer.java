@@ -1,85 +1,65 @@
 package com.dianping.zebra.admin.tools;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-
-import org.junit.Ignore;
 import org.junit.Test;
 import org.unidal.webres.helper.Files;
-import org.xml.sax.SAXException;
 
 import com.dianping.zebra.admin.query.entity.Hits;
 import com.dianping.zebra.admin.query.entity.Query;
-import com.dianping.zebra.admin.query.transform.DefaultJsonBuilder;
 import com.dianping.zebra.admin.query.transform.DefaultJsonParser;
-import com.dianping.zebra.admin.query.transform.DefaultSaxParser;
 import com.dianping.zebra.admin.sqlMap.entity.Insert;
 import com.dianping.zebra.admin.sqlMap.entity.SqlMap;
 
 public class SqlAnalyzer {
 
 	@Test
-	public void analyzer() throws IOException, SAXException {
-		Query parse = DefaultSaxParser.parse(getClass().getClassLoader().getResourceAsStream("query.xml"));
-
-		System.out.println(parse);
-
-		DefaultJsonBuilder jb = new DefaultJsonBuilder();
-
-		System.out.println(jb.build(parse));
-	}
-
-	@Test
-	public void test() throws Exception {
+	public void analyzer() throws Exception {
 		InputStream is = getClass().getClassLoader().getResourceAsStream("query.result");
 		Query query = DefaultJsonParser.parse(Query.class, is);
-		
 
-//		int index = 3;
-		//String code = query.getHits().get(8).getFields().getCode();
-		//System.out.println(code);
-		
-		//SqlMap parse = com.dianping.zebra.admin.sqlMap.transform.DefaultSaxParser.parse(is);
+		File insertFile = new File("src/test/resources/com/dianping/zebra/admin/tools/insert.sql");
+		File updateFile = new File("src/test/resources/com/dianping/zebra/admin/tools/update.sql");
+		File deleteFile = new File("src/test/resources/com/dianping/zebra/admin/tools/delete.sql");
+		File selectFile = new File("src/test/resources/com/dianping/zebra/admin/tools/select.sql");
 
-		//System.out.println(parse);
-//		int index = 0;
+		StringBuilder insertSb = new StringBuilder(1024 * 10);
+		StringBuilder updateSb = new StringBuilder(1024 * 10);
+		StringBuilder deleteSb = new StringBuilder(1024 * 10);
+		StringBuilder selectSb = new StringBuilder(1024 * 10);
 		for (Hits hits : query.getHits()) {
 			String code = hits.getFields().getCode();
 
 			if (!code.contains("sqlMapConfig")) {
-				try{
+				try {
 					SqlMap parse = com.dianping.zebra.admin.sqlMap.transform.DefaultSaxParser.parse(code);
-					
-					
-					for(Insert insert : parse.getInserts()){
-						if(insert.getSelectKey() != null){
-							System.out.println(insert);
+
+					for (Insert insert : parse.getInserts()) {
+						if (insert.getDynamicElements().size() > 1) {
+							insertSb.append(insert);
 						}
 					}
-				}catch(Throwable e){
-					System.out.println(code);
-					return;
+
+					for (String update : parse.getUpdates()) {
+						updateSb.append(update);
+					}
+
+					for (String delete : parse.getDeletes()) {
+						deleteSb.append(delete);
+					}
+
+					for (String select : parse.getSelects()) {
+						selectSb.append(select);
+					}
+				} catch (Throwable e) {
 				}
 			}
 		}
 
-	}
-
-	@Test
-	@Ignore
-	public void analyzer2() throws Exception {
-		InputStream is = getClass().getClassLoader().getResourceAsStream("query.result");
-		String json = Files.forIO().readFrom(is, "utf-8");
-
-		ScriptEngineManager mgr = new ScriptEngineManager();
-		ScriptEngine engine = mgr.getEngineByExtension("js");
-		String script = String.format(
-		      "var o=%s; var codes=[]; for (var i in o.hits) { codes.push(o.hits[i].fields.code) }; codes;", json);
-		Object result = engine.eval(script);
-
-		System.out.println(result);
+		Files.forIO().writeTo(insertFile, insertSb.toString());
+		Files.forIO().writeTo(updateFile, updateSb.toString());
+		Files.forIO().writeTo(deleteFile, deleteSb.toString());
+		Files.forIO().writeTo(selectFile, selectSb.toString());
 	}
 }

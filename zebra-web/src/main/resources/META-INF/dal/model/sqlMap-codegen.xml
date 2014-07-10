@@ -7,11 +7,6 @@
     <entity-ref name="insert" type="list" names="inserts" />
   </entity>
   <entity name="insert">
-    <entity-ref name="selectKey" />
-  </entity>
-  <entity name="selectKey">
-    <attribute name="resultClass" value-type="String" />
-    <element name="text" value-type="String" text="true" />
   </entity>
 </model>
 

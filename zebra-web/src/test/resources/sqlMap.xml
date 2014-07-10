@@ -2,10 +2,6 @@
 	<select></select>
 	<select></select>
 	<insert>
-		SQL HERE
-		<selectKey resultClass="int">
-			SELECT LAST_INSERT_ID()
-		</selectKey>
 	</insert>
 	<insert></insert>
 	<update></update>
