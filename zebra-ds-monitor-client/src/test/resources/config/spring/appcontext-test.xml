@@ -6,26 +6,17 @@
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor" />
+	<!--<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor" 
+		/> -->
 
 	<bean id="masterDs" class="com.mchange.v2.c3p0.ComboPooledDataSource"
 		destroy-method="close">
-		<property name="jdbcUrl" value="jdbc:mysql://" />
-		<property name="user" value="test" />
-		<property name="password" value="test" />
-		<property name="driverClass" value="org.mysql" />
-		<property name="minPoolSize" value="1" />
-		<property name="maxPoolSize" value="1" />
-		<property name="initialPoolSize" value="1" />
-		<property name="maxIdleTime" value="1800" />
-		<property name="idleConnectionTestPeriod" value="60" />
-		<property name="acquireRetryAttempts" value="3" />
-		<property name="acquireRetryDelay" value="300" />
-		<property name="maxStatements" value="0" />
-		<property name="maxStatementsPerConnection" value="100" />
-		<property name="numHelperThreads" value="6" />
-		<property name="maxAdministrativeTaskTime" value="5" />
-		<property name="preferredTestQuery" value="SELECT 1" />
+		<property name="jdbcUrl" value="jdbc:mysql://127.0.0.1:3306/lecheng-dev" />
+		<property name="user" value="dozer47528" />
+		<property name="password" value="dozer36937" />
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="minPoolSize" value="5" />
+		<property name="maxPoolSize" value="25" />
 	</bean>
 
 </beans>
