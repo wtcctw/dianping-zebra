@@ -14,23 +14,23 @@ import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.WriteDsNotFoundException;
+import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 
 /**
- * features: 1. auto-detect write database by select @@read_only</br> 2. auto check the write database.</br> 3. if cannot find any
- * write database in the initial phase, fail fast.</br>
+ * features: 1. auto-detect master database by select @@read_only</br> 2. auto check the master database.</br> 3. if cannot find any
+ * master database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
 
-	private static final String ERROR_MESSAGE = "Cannot find any write dataSource.";
+	private static final String ERROR_MESSAGE = "Cannot find any master dataSource.";
 
-	private volatile SingleDataSource writeDs;
+	private volatile SingleDataSource master;
 
 	private Map<String, DataSourceConfig> configs;
 
-	private Thread writeDataSourceMonitorThread;
+	private Thread masterDataSourceMonitorThread;
 
 	public FailOverDataSource(Map<String, DataSourceConfig> configs) {
 		this.configs = configs;
@@ -38,11 +38,11 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public void close() throws SQLException {
-		if (this.writeDataSourceMonitorThread != null) {
-			writeDataSourceMonitorThread.interrupt();
+		if (this.masterDataSourceMonitorThread != null) {
+			masterDataSourceMonitorThread.interrupt();
 		}
-		if (writeDs != null) {
-			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
+		if (master != null) {
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master.getId(), this);
 		}
 		super.close();
 	}
@@ -54,20 +54,20 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		if (writeDs != null && writeDs.isAvailable()) {
-			return writeDs.getConnection();
+		if (master != null && master.isAvailable()) {
+			return master.getConnection();
 		} else {
-			throw new SQLException("Write dataSource is currently in the maintaining stage.");
+			throw new SQLException("Master database is currently in the maintaining stage.");
 		}
 	}
 
 	public SingleDataSourceMBean getCurrentDataSourceMBean() {
-		return writeDs;
+		return master;
 	}
 
 	private SingleDataSource getDataSource(DataSourceConfig config) {
-		if (writeDs != null) {
-			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(writeDs.getId(), this);
+		if (master != null) {
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master.getId(), this);
 		}
 
 		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(this, config);
@@ -78,35 +78,35 @@ public class FailOverDataSource extends AbstractDataSource {
 		init(true);
 	}
 
-	public void init(boolean forceCheckWrite) {
-		WriterDataSourceMonitor monitor = new WriterDataSourceMonitor();
+	public void init(boolean forceCheckMaster) {
+		MasterDataSourceMonitor monitor = new MasterDataSourceMonitor();
 
-		if (forceCheckWrite && !monitor.findWriteDataSource().isWriteDbExist()) {
-			throw new WriteDsNotFoundException(ERROR_MESSAGE);
+		if (forceCheckMaster && !monitor.findMasterDataSource().isMasterExist()) {
+			throw new MasterDsNotFoundException(ERROR_MESSAGE);
 		}
 
-		writeDataSourceMonitorThread = new Thread(monitor);
-		writeDataSourceMonitorThread.setDaemon(true);
-		writeDataSourceMonitorThread.setName("FailOverDataSource");
-		writeDataSourceMonitorThread.start();
+		masterDataSourceMonitorThread = new Thread(monitor);
+		masterDataSourceMonitorThread.setDaemon(true);
+		masterDataSourceMonitorThread.setName("FailOverDataSource");
+		masterDataSourceMonitorThread.start();
 
 		super.init();
 	}
 
-	private boolean setWriteDb(DataSourceConfig config) {
-		if (writeDs == null || !writeDs.getId().equals(config.getId())) {
-			writeDs = getDataSource(config);
+	private boolean setMasterDb(DataSourceConfig config) {
+		if (master == null || !master.getId().equals(config.getId())) {
+			master = getDataSource(config);
 			return true;
 		}
 		return false;
 	}
 
-	enum CheckWriteDataSourceResult {
-		WRITABLE(1), READ_ONLY(2), ERROR(3);
+	enum CheckMasterDataSourceResult {
+		READ_WRITE(1), READ_ONLY(2), ERROR(3);
 
 		private int value;
 
-		private CheckWriteDataSourceResult(int value) {
+		private CheckMasterDataSourceResult(int value) {
 			this.value = value;
 		}
 
@@ -115,54 +115,40 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 	}
 
-	class FindWriteDataSourceResult {
-		private boolean writeDbExist;
+	class FindMasterDataSourceResult {
+		private boolean masterExist;
 
-		private boolean changedWriteDb;
+		private boolean changedMaster;
 
-		public boolean isChangedWriteDb() {
-			return changedWriteDb;
+		public boolean isChangedMaster() {
+			return changedMaster;
 		}
 
-		public boolean isWriteDbExist() {
-			return writeDbExist;
+		public boolean isMasterExist() {
+			return masterExist;
 		}
 
-		public void setChangedWriteDb(boolean changedWriteDb) {
-			this.changedWriteDb = changedWriteDb;
+		public void setChangedMaster(boolean changedMaster) {
+			this.changedMaster = changedMaster;
 		}
 
-		public void setWriteDbExist(boolean writeDbExist) {
-			this.writeDbExist = writeDbExist;
+		public void setMasterExist(boolean masterExist) {
+			this.masterExist = masterExist;
 		}
 	}
 
-	class WriterDataSourceMonitor implements Runnable {
+	class MasterDataSourceMonitor implements Runnable {
 		private AtomicInteger atomicSleepTimes = new AtomicInteger(0);
 
 		private Map<String, Connection> cachedConnection = new HashMap<String, Connection>();
 
-		Transaction transaction = null;
+		private Transaction transaction = null;
 
 		private int transactionTryLimits = 0;
 
 		private final int maxTransactionTryLimits = 60 * 10; // 10 minute
 
-		private void increaseTransactionTryTimes() {
-			transactionTryLimits++;
-			if (transactionTryLimits >= maxTransactionTryLimits) {
-				transactionTryLimits = 0;
-
-				if (transaction != null) {
-					Cat.logEvent("DAL", "FindWriteDbFailed");
-					transaction.setStatus("Fail to find write dataSource");
-					transaction.complete();
-					transaction = null;
-				}
-			}
-		}
-
-		protected CheckWriteDataSourceResult checkWriteDataSource(DataSourceConfig config) {
+		protected CheckMasterDataSourceResult checkMasterDataSource(DataSourceConfig config) {
 			Statement stmt = null;
 			ResultSet rs = null;
 
@@ -171,13 +157,13 @@ public class FailOverDataSource extends AbstractDataSource {
 				rs = stmt.executeQuery(config.getTestReadOnlySql());
 
 				if (isWritable(rs)) {
-					return CheckWriteDataSourceResult.WRITABLE;
+					return CheckMasterDataSourceResult.READ_WRITE;
 				}
 			} catch (SQLException e) {
 				Cat.logError(e);
 				closeConnection(config.getId());
 
-				return CheckWriteDataSourceResult.ERROR;
+				return CheckMasterDataSourceResult.ERROR;
 			} finally {
 				if (rs != null) {
 					try {
@@ -193,13 +179,14 @@ public class FailOverDataSource extends AbstractDataSource {
 				}
 			}
 
-			return CheckWriteDataSourceResult.READ_ONLY;
+			return CheckMasterDataSourceResult.READ_ONLY;
 		}
 
 		protected void closeConnection(String id) {
 			if (!cachedConnection.containsKey(id)) {
 				return;
 			}
+
 			try {
 				cachedConnection.get(id).close();
 			} catch (SQLException ignore) {
@@ -213,24 +200,33 @@ public class FailOverDataSource extends AbstractDataSource {
 				try {
 					entity.getValue().close();
 				} catch (SQLException ignore) {
-
 				}
 			}
+
 			cachedConnection.clear();
 		}
 
-		private void createSwitchTransaction() {
-			transaction = Cat.newTransaction("DAL", "SwitchWriteDb");
+		private void completeSwitchTransaction(FindMasterDataSourceResult result) {
+			if (result.isChangedMaster() && transaction != null) {
+				Cat.logEvent("DAL", "SwitchToNewMaster");
+				transaction.setStatus(Message.SUCCESS);
+				transaction.complete();
+				transaction = null;
+			}
 		}
 
-		public FindWriteDataSourceResult findWriteDataSource() {
-			FindWriteDataSourceResult result = new FindWriteDataSourceResult();
+		private void createSwitchTransaction() {
+			transaction = Cat.newTransaction("DAL", "SwitchMaster");
+		}
+
+		public FindMasterDataSourceResult findMasterDataSource() {
+			FindMasterDataSourceResult result = new FindMasterDataSourceResult();
 
 			for (DataSourceConfig config : configs.values()) {
-				CheckWriteDataSourceResult checkResult = checkWriteDataSource(config);
-				if (checkResult == CheckWriteDataSourceResult.WRITABLE) {
-					result.setChangedWriteDb(setWriteDb(config));
-					result.setWriteDbExist(true);
+				CheckMasterDataSourceResult checkResult = checkMasterDataSource(config);
+				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
+					result.setChangedMaster(setMasterDb(config));
+					result.setMasterExist(true);
 					break;
 				}
 			}
@@ -251,6 +247,20 @@ public class FailOverDataSource extends AbstractDataSource {
 			return atomicSleepTimes.get();
 		}
 
+		private void increaseTransactionTryTimes() {
+			transactionTryLimits++;
+			if (transactionTryLimits >= maxTransactionTryLimits) {
+				transactionTryLimits = 0;
+
+				if (transaction != null) {
+					Cat.logEvent("DAL", "SwitchToNewMaster-Failed");
+					transaction.setStatus("Fail to find any master database");
+					transaction.complete();
+					transaction = null;
+				}
+			}
+		}
+
 		private boolean isWritable(ResultSet rs) throws SQLException {
 			if (rs.next()) {
 				return rs.getInt(1) == 0;
@@ -265,18 +275,18 @@ public class FailOverDataSource extends AbstractDataSource {
 				try {
 					sleepForSeconds(1);
 
-					FindWriteDataSourceResult findResult = findWriteDataSource();
-					if (!findResult.isWriteDbExist()) {
+					FindMasterDataSourceResult result = findMasterDataSource();
+					if (!result.isMasterExist()) {
 						increaseTransactionTryTimes();
 					} else {
-						completeSwitchTransaction(findResult);
+						completeSwitchTransaction(result);
 
 						closeConnections();
 						while (!Thread.interrupted()) {
 							sleepForSeconds(5);
 
-							CheckWriteDataSourceResult checkWriteResult = checkWriteDataSource(configs.get(writeDs.getId()));
-							if (checkWriteResult != CheckWriteDataSourceResult.WRITABLE) {
+							CheckMasterDataSourceResult checkMasterResult = checkMasterDataSource(configs.get(master.getId()));
+							if (checkMasterResult != CheckMasterDataSourceResult.READ_WRITE) {
 								createSwitchTransaction();
 								closeConnections();
 								break;
@@ -294,15 +304,6 @@ public class FailOverDataSource extends AbstractDataSource {
 			closeConnections();
 		}
 
-		private void completeSwitchTransaction(FindWriteDataSourceResult findResult) {
-			if (findResult.isChangedWriteDb() && transaction != null) {
-				Cat.logEvent("DAL", "FindWriteDbSuccess");
-				transaction.setStatus(Message.SUCCESS);
-				transaction.complete();
-				transaction = null;
-			}
-		}
-
 		private void sleepForSeconds(long seconds) throws InterruptedException {
 			atomicSleepTimes.incrementAndGet();
 			if (atomicSleepTimes.get() > 100) {
@@ -312,5 +313,4 @@ public class FailOverDataSource extends AbstractDataSource {
 			TimeUnit.SECONDS.sleep(seconds);
 		}
 	}
-
 }
