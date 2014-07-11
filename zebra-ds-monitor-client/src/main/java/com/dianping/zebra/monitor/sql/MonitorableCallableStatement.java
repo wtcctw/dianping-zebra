@@ -603,24 +603,4 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	public void setNClob(String parameterName, Reader reader) throws SQLException {
 		prepareCall.setNClob(parameterName, reader);
 	}
-
-	@Override
-	public void closeOnCompletion() throws SQLException {
-		prepareCall.closeOnCompletion();
-	}
-
-	@Override
-	public boolean isCloseOnCompletion() throws SQLException {
-		return prepareCall.isCloseOnCompletion();
-	}
-
-	@Override
-	public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
-		return prepareCall.getObject(parameterIndex, type);
-	}
-
-	@Override
-	public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
-		return prepareCall.getObject(parameterName, type);
-	}
 }

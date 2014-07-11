@@ -85,16 +85,6 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	}
 
 	@Override
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		try {
-			return getInnerDs().getParentLogger();
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	@Override
 	public boolean isWrapperFor(Class<?> arg0) throws SQLException {
 		return getInnerDs().isWrapperFor(arg0);
 	}

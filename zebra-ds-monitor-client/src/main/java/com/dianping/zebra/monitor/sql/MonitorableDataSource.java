@@ -94,10 +94,4 @@ public class MonitorableDataSource implements DataSource {
 		}
 		return innerDataSource;
 	}
-
-	@Override
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		return innerDataSource.getParentLogger();
-	}
-
 }

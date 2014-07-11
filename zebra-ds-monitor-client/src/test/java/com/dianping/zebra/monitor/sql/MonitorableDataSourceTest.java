@@ -116,11 +116,6 @@ public class MonitorableDataSourceTest {
 		public Connection getConnection(String username, String password) throws SQLException {
 			return null;
 		}
-		@Override
-      public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-	      return null;
-      }
-		
 	}
 
 }

@@ -342,15 +342,4 @@ public class MonitorableStatement implements Statement {
 	public void setSqlMonitor(SqlMonitor sqlMonitor) {
 		this.sqlMonitor = sqlMonitor;
 	}
-
-	@Override
-	public void closeOnCompletion() throws SQLException {
-		innerStatement.closeOnCompletion();
-	}
-
-	@Override
-	public boolean isCloseOnCompletion() throws SQLException {
-		return innerStatement.isCloseOnCompletion();
-	}
-
 }
