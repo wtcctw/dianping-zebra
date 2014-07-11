@@ -10,6 +10,9 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.mchange.v2.c3p0.DataSources;
@@ -47,28 +50,49 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		return getInnerDs().getConnection(username, password);
 	}
 
-	private DataSource getInnerDs() throws SQLException {
+	private DataSource getInnerDs() {
 		if (innerDs == null) {
 			if (shouldReplace()) {
-				innerDs = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
-			} else {
-				DataSource unPooledDataSource;
-				unPooledDataSource = DataSources.unpooledDataSource(config.getJdbcUrl(), config.getUser(),
-				      config.getPassword());
-
-				Map<String, Object> props = new HashMap<String, Object>();
-
-				props.put("driverClass", config.getDriverClass());
-				props.put("initialPoolSize", config.getInitialPoolSize());
-				props.put("minPoolSize", config.getMinPoolSize());
-				props.put("maxPoolSize", config.getMaxPoolSize());
-				props.put("checkoutTimeout", config.getCheckoutTimeout());
-
-				for (Any any : config.getProperties()) {
-					props.put(any.getName(), any.getValue());
+				Transaction t = Cat.newTransaction("DAL", "Adapter-InitSingleDataSource");
+				try {
+					innerDs = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
+					Cat.logEvent("DAL.DataSource", "Adapter-SingleDataSourceInitialized");
+					t.setStatus(Message.SUCCESS);
+				} catch (Exception e) {
+					Cat.logError(e);
+					t.setStatus(e);
+				} finally {
+					t.complete();
 				}
 
-				innerDs = DataSources.pooledDataSource(unPooledDataSource, props);
+			} else {
+				Transaction t = Cat.newTransaction("DAL", "Adapter-InitC3P0DataSource");
+				try {
+					DataSource unPooledDataSource;
+					unPooledDataSource = DataSources.unpooledDataSource(config.getJdbcUrl(), config.getUser(),
+					      config.getPassword());
+
+					Map<String, Object> props = new HashMap<String, Object>();
+
+					props.put("driverClass", config.getDriverClass());
+					props.put("initialPoolSize", config.getInitialPoolSize());
+					props.put("minPoolSize", config.getMinPoolSize());
+					props.put("maxPoolSize", config.getMaxPoolSize());
+					props.put("checkoutTimeout", config.getCheckoutTimeout());
+
+					for (Any any : config.getProperties()) {
+						props.put(any.getName(), any.getValue());
+					}
+
+					innerDs = DataSources.pooledDataSource(unPooledDataSource, props);
+					Cat.logEvent("DAL.DataSource", "Adapter-C3P0DataSourceInitialized");
+					t.setStatus(Message.SUCCESS);
+				} catch (Exception e) {
+					Cat.logError(e);
+					t.setStatus(e);
+				} finally {
+					t.complete();
+				}
 			}
 		}
 
