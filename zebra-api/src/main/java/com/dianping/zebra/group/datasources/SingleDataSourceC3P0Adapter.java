@@ -26,6 +26,8 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	public SingleDataSourceC3P0Adapter(String id) {
 		config.setId(id);
 		config.setActive(true);
+		config.setCanRead(true);
+		config.setCanRead(true);
 	}
 
 	private void addProperty(String key, String value) {
