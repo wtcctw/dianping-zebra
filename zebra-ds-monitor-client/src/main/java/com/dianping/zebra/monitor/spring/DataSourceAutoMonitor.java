@@ -33,6 +33,8 @@ import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
@@ -43,7 +45,7 @@ import com.dianping.zebra.monitor.sql.MonitorableDataSource;
  * @author danson.liu
  *
  */
-public class DataSourceAutoMonitor implements BeanFactoryPostProcessor {
+public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, PriorityOrdered {
 
 	private static final Log logger = LogFactory.getLog(DataSourceAutoMonitor.class);
 
@@ -110,6 +112,11 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor {
 
 	private boolean isZebraDataSource(Class<?> dataSourceClazz) {
 		return ZEBRA_DATA_SOURCE_NAME.equals(dataSourceClazz.getName());
+	}
+
+	@Override
+	public int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE - 1;
 	}
 
 }
