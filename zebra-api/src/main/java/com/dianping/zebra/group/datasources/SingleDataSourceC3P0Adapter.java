@@ -3,12 +3,10 @@ package com.dianping.zebra.group.datasources;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map.Entry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -27,6 +25,7 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 
 	public SingleDataSourceC3P0Adapter(String id) {
 		config.setId(id);
+		config.setActive(true);
 	}
 
 	private void addProperty(String key, String value) {
