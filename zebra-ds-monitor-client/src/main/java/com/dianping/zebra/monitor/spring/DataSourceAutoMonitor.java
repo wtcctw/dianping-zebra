@@ -35,6 +35,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.util.ClassUtils;
 
+import com.dianping.cat.Cat;
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceC3P0Adapter;
 
@@ -105,13 +106,14 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor {
 	}
 
 	private GenericBeanDefinition createMonitorableBeanDefinition(BeanDefinition dataSourceDefinition) {
-		
-		if(dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)){
+
+		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			dataSourceDefinition.setBeanClassName(SingleDataSourceC3P0Adapter.class.getName());
-		}else{
-			//todo:
+			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0Success");
+		} else {
+			Cat.logEvent("DAL.BeanProcessor", "NotC3P0DataSource-" + dataSourceDefinition.getBeanClassName());
 		}
-		
+
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
 		monitorableDataSourceDefinition.setBeanClass(MonitorableDataSource.class);
 		monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(dataSourceDefinition);
