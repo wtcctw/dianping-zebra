@@ -6,8 +6,7 @@
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<!--<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor" 
-		/> -->
+	<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor" />
 
 	<bean id="masterDs" class="com.mchange.v2.c3p0.ComboPooledDataSource"
 		destroy-method="close">

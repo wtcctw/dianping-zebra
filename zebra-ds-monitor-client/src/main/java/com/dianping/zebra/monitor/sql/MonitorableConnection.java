@@ -32,7 +32,6 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Executor;
 
 /**
  * 对于实际<code>Connection</code>的包装，提供monitor功能

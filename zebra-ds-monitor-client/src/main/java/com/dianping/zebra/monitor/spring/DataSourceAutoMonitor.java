@@ -35,9 +35,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.util.ClassUtils;
 
-import com.dianping.cat.Cat;
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
-import com.dianping.zebra.group.datasources.SingleDataSourceC3P0Adapter;
 
 /**
  * 自动为spring容器中的所有DataSource添加monitor功能，配置在spring配置文件中即可，如下 <bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>
@@ -50,8 +48,6 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor {
 	private static final Log logger = LogFactory.getLog(DataSourceAutoMonitor.class);
 
 	private static final String ZEBRA_DATA_SOURCE_NAME = "com.dianping.zebra.jdbc.DPDataSource";
-
-	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -106,14 +102,6 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor {
 	}
 
 	private GenericBeanDefinition createMonitorableBeanDefinition(BeanDefinition dataSourceDefinition) {
-
-		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
-			dataSourceDefinition.setBeanClassName(SingleDataSourceC3P0Adapter.class.getName());
-			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0Success");
-		} else {
-			Cat.logEvent("DAL.BeanProcessor", "NotC3P0DataSource-" + dataSourceDefinition.getBeanClassName());
-		}
-
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
 		monitorableDataSourceDefinition.setBeanClass(MonitorableDataSource.class);
 		monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(dataSourceDefinition);
