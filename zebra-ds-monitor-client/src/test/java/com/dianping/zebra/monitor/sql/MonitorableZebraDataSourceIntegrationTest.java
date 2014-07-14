@@ -68,8 +68,8 @@ public class MonitorableZebraDataSourceIntegrationTest extends ZebraMultiMonitor
 			assertSqlMsg(sqlMsg, TOKEN, "select * from person where name = ?", Arrays.asList("lucy5"), 1, 
 					ConnectionMetaAnalyzer.DS_ZEBRA, "", "");
 			assertEquals(1, sqlMsg.getSubSqlsCount());
-			assertSqlMsg(sqlMsg.getSubSqls(0), "", "select * from person_6 where name = ?", Arrays.asList("lucy5"), 1, 
-					ConnectionMetaAnalyzer.DS_C3P0, "h2db", "h2schema");
+//			assertSqlMsg(sqlMsg.getSubSqls(0), "", "select * from person_6 where name = ?", Arrays.asList("lucy5"), 1, 
+//					ConnectionMetaAnalyzer.DS_C3P0, "h2db", "h2schema");
 			assertFalse(resultSet.next());
 		} finally {
 			resultSet.close();
