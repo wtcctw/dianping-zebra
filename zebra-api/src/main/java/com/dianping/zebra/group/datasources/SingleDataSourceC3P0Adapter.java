@@ -21,9 +21,9 @@ import com.dianping.zebra.group.util.SmoothReload;
  *         2.实现了帐号密码原子修改，只改帐号或者密码不会触发重新加载流程，只有两个同时修改后，才会一次性触发重新加载。
  */
 public class SingleDataSourceC3P0Adapter implements DataSource {
-	private DataSourceConfig config = new DataSourceConfig();
-
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
+
+	private DataSourceConfig config = new DataSourceConfig();
 
 	private volatile DataSource innerDs;
 
@@ -36,36 +36,9 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		config.setActive(true);
 	}
 
-	private void setProperty(String name, String value) {
-		Any any = null;
-		for (Any a : config.getProperties()) {
-			if (a.getName().equals(name)) {
-				any = a;
-				break;
-			}
-		}
-
-		if (any == null) {
-			any = new Any();
-			config.getProperties().add(any);
-		}
-
-		any.setName(name);
-		any.setValue(value);
-
-		refresh();
-	}
-
-	private void refresh() {
-		Transaction t = Cat.newTransaction("DAL.Adapter", "Refresh");
-
-		if (innerDs == null) {
-			return;
-		}
-
-		innerDs = initInnerDs();
-		destoryInnerDs();
-
+	private void destoryInnerDs() {
+		Transaction t = Cat.newTransaction("DAL.Adapter", "Destory");
+		SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(config.getId(), null);
 		t.setStatus(Message.SUCCESS);
 		t.complete();
 	}
@@ -78,28 +51,6 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return getInnerDs().getConnection(username, password);
-	}
-
-	private void destoryInnerDs() {
-		Transaction t = Cat.newTransaction("DAL.Adapter", "Destory");
-		SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(config.getId(), null);
-		t.setStatus(Message.SUCCESS);
-		t.complete();
-	}
-
-	private DataSource initInnerDs() {
-		Transaction t = Cat.newTransaction("DAL.Adapter", "Init");
-		try {
-			DataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
-			t.setStatus(Message.SUCCESS);
-			return ds;
-		} catch (Exception e) {
-			Cat.logError(e);
-			t.setStatus(e);
-			return null;
-		} finally {
-			t.complete();
-		}
 	}
 
 	private DataSource getInnerDs() {
@@ -119,9 +70,53 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		return getInnerDs().getLogWriter();
 	}
 
+	private DataSource initInnerDs() {
+		Transaction t = Cat.newTransaction("DAL.Adapter", "Init");
+		try {
+			DataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
+			t.setStatus(Message.SUCCESS);
+			return ds;
+		} catch (Exception e) {
+			Cat.logError(e);
+			t.setStatus(e);
+			return null;
+		} finally {
+			t.complete();
+		}
+	}
+
 	@Override
 	public boolean isWrapperFor(Class<?> arg0) throws SQLException {
 		return getInnerDs().isWrapperFor(arg0);
+	}
+
+	private void refresh() {
+		Transaction t = Cat.newTransaction("DAL.Adapter", "Refresh");
+
+		if (innerDs == null) {
+			return;
+		}
+
+		innerDs = initInnerDs();
+		destoryInnerDs();
+
+		t.setStatus(Message.SUCCESS);
+		t.complete();
+	}
+
+	private void refreshUserAndPassword() {
+		Transaction t = Cat.newTransaction("DAL", "Adapter-SingleDataSource-RefreshUser");
+		config.setUser(atomicRefresh.getNewUser());
+		config.setPassword(atomicRefresh.getNewPassword());
+		atomicRefresh.reset();
+
+		// todo:平滑切换
+		SmoothReload sr = new SmoothReload();
+		sr.waitForReload();
+
+		refresh();
+		t.setStatus(Message.SUCCESS);
+		t.complete();
 	}
 
 	public void setAcquireIncrement(int acquireIncrement) {
@@ -159,6 +154,10 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 
 	public void setConnectionTesterClassName(String connectionTesterClassName) {
 		setProperty("connectionTesterClassName", connectionTesterClassName);
+	}
+
+	public void setDataSourceName(String dataSourceName) {
+		setProperty("dataSourceName", dataSourceName);
 	}
 
 	public void setDebugUnreturnedConnectionStackTraces(boolean debugUnreturnedConnectionStackTraces) {
@@ -240,6 +239,10 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		refresh();
 	}
 
+	public void setNumHelperThreads(int numHelperThreads) {
+		setProperty("numHelperThreads", String.valueOf(numHelperThreads));
+	}
+
 	public void setOverrideDefaultPassword(String overrideDefaultPassword) {
 		setProperty("overrideDefaultPassword", overrideDefaultPassword);
 	}
@@ -264,6 +267,26 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		}
 	}
 
+	private void setProperty(String name, String value) {
+		Any any = null;
+		for (Any a : config.getProperties()) {
+			if (a.getName().equals(name)) {
+				any = a;
+				break;
+			}
+		}
+
+		if (any == null) {
+			any = new Any();
+			config.getProperties().add(any);
+		}
+
+		any.setName(name);
+		any.setValue(value);
+
+		refresh();
+	}
+
 	public void setPropertyCycle(int propertyCycle) {
 		setProperty("propertyCycle", String.valueOf(propertyCycle));
 	}
@@ -286,21 +309,6 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		}
 	}
 
-	private void refreshUserAndPassword() {
-		Transaction t = Cat.newTransaction("DAL", "Adapter-SingleDataSource-RefreshUser");
-		config.setUser(atomicRefresh.getNewUser());
-		config.setPassword(atomicRefresh.getNewPassword());
-		atomicRefresh.reset();
-
-		// todo:平滑切换
-		SmoothReload sr = new SmoothReload();
-		sr.waitForReload();
-
-		refresh();
-		t.setStatus(Message.SUCCESS);
-		t.complete();
-	}
-
 	public void setUserOverridesAsString(String userOverridesAsString) {
 		setProperty("userOverridesAsString", userOverridesAsString);
 	}
@@ -309,40 +317,26 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
 	}
 
-	public void setNumHelperThreads(int numHelperThreads) {
-		setProperty("numHelperThreads", String.valueOf(numHelperThreads));
-	}
-
 	@Override
 	public <T> T unwrap(Class<T> arg0) throws SQLException {
 		return getInnerDs().unwrap(arg0);
 	}
 
 	public static class AtomicRefresh {
-		private String oldUser;
-
-		private String oldPassword;
+		private String newPassword;
 
 		private String newUser;
 
-		private String newPassword;
+		private String oldPassword;
 
-		private boolean setUser(String user) {
-			this.newUser = user;
-			return needToRefresh();
-		}
+		private String oldUser;
 
-		private boolean setPassword(String password) {
-			this.newPassword = password;
-			return needToRefresh();
+		public String getNewPassword() {
+			return newPassword;
 		}
 
 		public String getNewUser() {
 			return newUser;
-		}
-
-		public String getNewPassword() {
-			return newPassword;
 		}
 
 		private boolean needToRefresh() {
@@ -353,6 +347,16 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		public void reset() {
 			oldPassword = newPassword;
 			oldUser = newUser;
+		}
+
+		private boolean setPassword(String password) {
+			this.newPassword = password;
+			return needToRefresh();
+		}
+
+		private boolean setUser(String user) {
+			this.newUser = user;
+			return needToRefresh();
 		}
 	}
 }
