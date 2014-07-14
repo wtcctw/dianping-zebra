@@ -37,11 +37,23 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private CountPunisher punisher;
 
+	public SingleDataSource(DataSource dataSource) {
+		DataSourceConfig config = new DataSourceConfig();
+		config.setId("defaultDataSource");
+		config.setActive(true);
+		init(config, dataSource);
+	}
+
 	public SingleDataSource(DataSourceConfig config) {
+		DataSource dataSource = initDataSources(config);
+		init(config, dataSource);
+	}
+
+	private void init(DataSourceConfig config, DataSource dataSource) {
 		this.dsId = config.getId();
 		this.config = config;
 		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());
-		this.dataSource = initDataSources(config);
+		this.dataSource = dataSource;
 	}
 
 	private void checkState() throws SQLException {
@@ -253,7 +265,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
 			      unPooledDataSource, props);
-
+			
 			logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
 			return pooledDataSource;
