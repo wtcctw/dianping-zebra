@@ -14,6 +14,7 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.util.SmoothReload;
+import com.dianping.zebra.group.util.StringUtils;
 
 /**
  * @author Dozer <br/>
@@ -341,7 +342,7 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 
 		private boolean needToRefresh() {
 			// 帐号和密码都改了，就需要 refresh
-			return (!newUser.equals(oldUser)) && (!newPassword.equals(oldPassword));
+			return (!StringUtils.equals(newUser, oldUser)) && (!StringUtils.equals(newPassword, oldPassword));
 		}
 
 		public void reset() {
@@ -349,12 +350,12 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 			oldUser = newUser;
 		}
 
-		private boolean setPassword(String password) {
+		public boolean setPassword(String password) {
 			this.newPassword = password;
 			return needToRefresh();
 		}
 
-		private boolean setUser(String user) {
+		public boolean setUser(String user) {
 			this.newUser = user;
 			return needToRefresh();
 		}
