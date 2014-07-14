@@ -13,6 +13,7 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.util.SmoothReload;
 
 /**
  * @author Dozer <br/>
@@ -21,6 +22,8 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
  */
 public class SingleDataSourceC3P0Adapter implements DataSource {
 	private DataSourceConfig config = new DataSourceConfig();
+
+	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 
 	private volatile DataSource innerDs;
 
@@ -54,7 +57,7 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	}
 
 	private void refresh() {
-		Transaction t = Cat.newTransaction("DAL", "Adapter-SingleDataSource-Refresh");
+		Transaction t = Cat.newTransaction("DAL.Adapter", "Refresh");
 
 		if (innerDs == null) {
 			return;
@@ -78,17 +81,16 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	}
 
 	private void destoryInnerDs() {
-		Transaction t = Cat.newTransaction("DAL", "Adapter-SingleDataSource-Destory");
+		Transaction t = Cat.newTransaction("DAL.Adapter", "Destory");
 		SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(config.getId(), null);
 		t.setStatus(Message.SUCCESS);
 		t.complete();
 	}
 
 	private DataSource initInnerDs() {
-		Transaction t = Cat.newTransaction("DAL", "Adapter-SingleDataSource-Init");
+		Transaction t = Cat.newTransaction("DAL.Adapter", "Init");
 		try {
 			DataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
-			Cat.logEvent("DAL.DataSource", "Adapter-SingleDataSourceInitialized");
 			t.setStatus(Message.SUCCESS);
 			return ds;
 		} catch (Exception e) {
@@ -246,9 +248,10 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		setProperty("overrideDefaultUser", overrideDefaultUser);
 	}
 
-	public void setPassword(String password) {
-		config.setPassword(password);
-		refresh();
+	public synchronized void setPassword(String password) {
+		if (atomicRefresh.setPassword(password)) {
+			refreshUserAndPassword();
+		}
 	}
 
 	public void setPreferredTestQuery(String preferredTestQuery) {
@@ -277,9 +280,25 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		setProperty("unreturnedConnectionTimeout", String.valueOf(unreturnedConnectionTimeout));
 	}
 
-	public void setUser(String user) {
-		config.setUser(user);// todo 连接池封包和用户名密码原子替换
+	public synchronized void setUser(String user) {
+		if (atomicRefresh.setUser(user)) {
+			refreshUserAndPassword();
+		}
+	}
+
+	private void refreshUserAndPassword() {
+		Transaction t = Cat.newTransaction("DAL", "Adapter-SingleDataSource-RefreshUser");
+		config.setUser(atomicRefresh.getNewUser());
+		config.setPassword(atomicRefresh.getNewPassword());
+		atomicRefresh.reset();
+
+		// todo:平滑切换
+		SmoothReload sr = new SmoothReload();
+		sr.waitForReload();
+
 		refresh();
+		t.setStatus(Message.SUCCESS);
+		t.complete();
 	}
 
 	public void setUserOverridesAsString(String userOverridesAsString) {
@@ -297,5 +316,43 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	@Override
 	public <T> T unwrap(Class<T> arg0) throws SQLException {
 		return getInnerDs().unwrap(arg0);
+	}
+
+	public static class AtomicRefresh {
+		private String oldUser;
+
+		private String oldPassword;
+
+		private String newUser;
+
+		private String newPassword;
+
+		private boolean setUser(String user) {
+			this.newUser = user;
+			return needToRefresh();
+		}
+
+		private boolean setPassword(String password) {
+			this.newPassword = password;
+			return needToRefresh();
+		}
+
+		public String getNewUser() {
+			return newUser;
+		}
+
+		public String getNewPassword() {
+			return newPassword;
+		}
+
+		private boolean needToRefresh() {
+			// 帐号和密码都改了，就需要 refresh
+			return (!newUser.equals(oldUser)) && (!newPassword.equals(oldPassword));
+		}
+
+		public void reset() {
+			oldPassword = newPassword;
+			oldUser = newUser;
+		}
 	}
 }
