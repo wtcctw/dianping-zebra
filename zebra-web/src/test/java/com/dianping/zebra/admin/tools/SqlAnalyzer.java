@@ -28,6 +28,7 @@ public class SqlAnalyzer {
 		StringBuilder updateSb = new StringBuilder(1024 * 10);
 		StringBuilder deleteSb = new StringBuilder(1024 * 10);
 		StringBuilder selectSb = new StringBuilder(1024 * 10);
+		
 		for (Hits hits : query.getHits()) {
 			String code = hits.getFields().getCode();
 

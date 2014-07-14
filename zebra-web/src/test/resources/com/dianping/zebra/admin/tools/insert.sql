@@ -23,8 +23,10 @@
 			#data.hippoId#,
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -62,8 +64,10 @@
         NOW(),
         NOW()
         )
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -71,8 +75,10 @@
 		    DP_AdItem(KID, CityID, PlaceID, ContentID, TimeRange, Status, AddTime)
 		VALUES 
 			(#kid#, #cityId#, #placeId#, #contentId#, #timeRange#, #status#, now())
-		   <selectKey keyProperty="id" resultClass="Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="Integer">     
+            SELECT @@IDENTITY AS id   
+        </selectKey>	
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -87,8 +93,16 @@
         AddTime,
         UpdateTime)
         VALUES
-           <iterate conjunction="," property="blackLists"/>
-
+        <iterate conjunction="," property="blackLists">
+            (#blackLists[].userId#,
+            #blackLists[].blackListType#,
+            #blackLists[].beginTime#,
+            #blackLists[].endTime#,
+            #blackLists[].validDays#,
+            #blackLists[].adminId#,
+            #blackLists[].addTime#,
+            #blackLists[].updateTime#)
+        </iterate>
         ON DUPLICATE KEY UPDATE
         BeginTime=VALUES(BeginTime),
         EndTime=VALUES(EndTime),
@@ -106,8 +120,10 @@
         (#pushId#,
         now(),
         now())
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -139,8 +155,10 @@
 			Now()
 			);
 			
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -150,8 +168,10 @@
 		VALUES
 		(#roleAuthority.roleId#, #roleAuthority.authorityId#, #roleAuthority.status#, now())
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -160,8 +180,12 @@
 		(roleId, authorityId, status, addTime)
 		VALUES
 		
-		   <iterate conjunction="," property="roleAuthorityList"/>
-</insert>
+		<iterate conjunction="," property="roleAuthorityList">
+			
+			(#roleAuthorityList[].roleId#, #roleAuthorityList[].authorityId#, #roleAuthorityList[].status#, now())
+			
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -179,8 +203,10 @@
             NOW(),
             NOW()
             )
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -198,8 +224,10 @@
    			1,
    			NOW(),
    			NOW())
-   		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -207,8 +235,10 @@
 			UserPower,MediaSource,UserSource,UserCity,UserIP,EmailVerifyStatus) 
 		VALUES (#userEmail# ,#userNickname# ,#password# ,CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP ,
 			1 ,252 ,252 ,#cityID# ,#userIP# ,0)
-		   <selectKey keyProperty="UserID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UserID" resultClass="int">
+			SELECT @@IDENTITY AS UserID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -230,8 +260,10 @@
 		#extractVO.applyEndTime#,
 		NOW(),
 		NOW())
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -249,16 +281,31 @@
         #followNote.toUserId#,
         #followNote.title#,
         #followNote.status#)
-           <selectKey keyProperty="followNoteId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="followNoteId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS followNoteId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO
         GPA_OfflineActivityPush(CityID,OfflineActivityID,Title,TYPE,PHASE,PushUrl,PushTime,STATUS,ADDTIME,UpdateTime)
         VALUES
-           <iterate conjunction="," property="activityPushVOs"/>
-</insert>
+        <iterate conjunction="," property="activityPushVOs">
+            (
+            #activityPushVOs[].cityId#,
+            #activityPushVOs[].offlineActivityId#,
+            #activityPushVOs[].title#,
+            #activityPushVOs[].type#,
+            #activityPushVOs[].phase#,
+            #activityPushVOs[].pushUrl#,
+            #activityPushVOs[].pushTime#,
+            0,
+            now(),
+            now()
+            )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -277,8 +324,10 @@
             now(),
             now()
          )
-            <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+         <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -290,8 +339,11 @@
 		#memo#,
 		NOW()
 		)
-		   <selectKey keyProperty="BatchID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="BatchID" resultClass="int">
+			SELECT @@IDENTITY
+			AS BatchID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -299,8 +351,10 @@
 			INSERT INTO MC_MemberCard(MemberCardType, Source, Status, BgImageID, LogoID ,AuthAdminID,AuthAdminName, AddTime, Title, SubTitle)
 			VALUES(#cardType#, #source#, #status#,0,0,#authAdminId#, #authAdminName#, #addTime#, #shopName#, #branchName#)
 			
-		   <selectKey keyProperty="MemberCardID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardID" resultClass="int">     
+			SELECT @@IDENTITY AS MemberCardID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -308,8 +362,10 @@
 			INSERT INTO MC_MemberCardBgImage(IsCustom, Name, PicPath, PicType, AddTime)
 			VALUES(#isCustom#, #name#, #picPath#, #picType#, #addTime#)
 			
-		   <selectKey keyProperty="BgImageID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="BgImageID" resultClass="int">     
+			SELECT @@IDENTITY AS BgImageID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -317,8 +373,10 @@
 			INSERT INTO MC_MemberCardLiteralRecom(Title, Url, Status, AddTime, BeginDate, EndDate,RecomType,PicPath,RecomOrder,EventDesc)
 			VALUES(#mcl.title#, #mcl.url#, #mcl.status#, #mcl.addTime#, #mcl.beginDate#, #mcl.endDate#,#mcl.recomType#,#mcl.picPath#,#mcl.recomOrder#,#mcl.eventDesc#)
 			
-		   <selectKey keyProperty="RecomID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="RecomID" resultClass="int">     
+			SELECT @@IDENTITY AS RecomID   
+	  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -326,14 +384,20 @@
 			INSERT INTO MC_MemberCardLiteralRecomCity(RecomID, CityID)
 			VALUES(#recomID#, #cityID#)
 			
-		   <selectKey keyProperty="RecomCityID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="RecomCityID" resultClass="int">     
+			SELECT @@IDENTITY AS RecomCityID   
+	  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 			INSERT INTO MC_MemberCardLiteralRecomCity(RecomID, CityID) VALUES
- 		   <iterate conjunction="," property="cityList"/>
-</insert>
+ 		<iterate conjunction="," property="cityList">
+ 		
+			(#recomID#, #cityList[]#)
+			
+ 		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -341,8 +405,10 @@
 			INSERT INTO MC_MemberCardScoreLog(MemberCardID, LogType, Score, Comment, ReferLogID, Status, IsActive, AddTime, AdminID, AdminName)
 			VALUES(#memberCardId#, #logType#, #score#, #comment#, #referLogId#, #status#, #isActive#, #addTime#, #adminId#, #adminName#)
 			
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+			SELECT @@IDENTITY AS LogID   
+	  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -360,8 +426,10 @@
 			 #createTime#,
 			 #authAdminID#,
 			 #authAdminName#)
-		   <selectKey keyProperty="companyConfirmInfoID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="companyConfirmInfoID" resultClass="int">     
+			SELECT @@IDENTITY AS companyConfirmInfoID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -381,8 +449,10 @@
 			 #createTime#,
 			 #authAdminID#,
 			 #authAdminName#)
-		   <selectKey keyProperty="shopConfirmInfoID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="shopConfirmInfoID" resultClass="int">     
+			SELECT @@IDENTITY AS shopConfirmInfoID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -390,8 +460,10 @@
 			(Content)
 		VALUES 
 			(#content#)
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">     
+	     	SELECT @@IDENTITY AS id  
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -409,8 +481,10 @@
         #lastLoginRecord.lastLoginTime#
         )
 
-           <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="Id" resultClass="int">
+        SELECT LAST_INSERT_ID() as id;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -421,8 +495,10 @@
         WHERE
         NOT EXISTS( SELECT authorityId FROM MAT_Authority WHERE code = #authority.code#)
         
-           <selectKey keyProperty="authorityID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="authorityID" resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -430,8 +506,10 @@
 			DP_AdItemContent(Creative, Content, AddTime, UpdateTime)
 		VALUES 
 			(#creative#, #content#, Now(), Now())
-		   <selectKey keyProperty="id" resultClass="Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="Integer">     
+            SELECT @@IDENTITY AS id   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -439,8 +517,10 @@
     	(UserID, ShopID, Lng, Lat, PostionRange, Shared, FeedShared, CheckInType, Star, Tips, UserIP, ClientID, UserAgent,PicCenterUrl,PicID, photos, DeviceId, CityID, ShopType, Status, LocalFilter)
         VALUES 
         (#userId#, #shopId#, #lng#, #lat#, #postionRange#, #shared#, #feedShared#, #checkInType#, #star#, #tips#, #userIp#, #clientId#, #userAgent#, #picCenterUrl#, #picId#, #photoUrls#, #deviceId#, #cityId#, #shopType#, #status#, #localFilter#);
-    	   <selectKey keyProperty="CheckInID" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="CheckInID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -450,8 +530,11 @@
 		(InviteUserID, UserID, LastTime, UserIP, Memo)
 		VALUES 
 		(#InviteUserID#, #UserID#, CURRENT_TIMESTAMP, #UserIP#, #Memo#)		
-		   <selectKey keyProperty="InviteUserID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="InviteUserID" resultClass="int">
+			SELECT @@IDENTITY AS InviteUserID
+		</selectKey>	
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -461,8 +544,11 @@
 		(UserID, Lat, Lng, PostionRange) 
 		VALUES 
 		(#UserID#, #Lat#, #Lng#, #PostionRange#)
-    	   <selectKey keyProperty="ShakeID" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="ShakeID" resultClass="int">
+			SELECT @@IDENTITY AS ShakeID
+		</selectKey>	
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -471,8 +557,10 @@
 			(Type,Email,CityID,ADDTIME,UpdateTime,UserType)
 		VALUES
 		(#subcribe.type#,#subcribe.email#,#subcribe.cityId#,NOW(),NOW(),#subcribe.userType#)
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -486,16 +574,20 @@
         0,
         NOW(),
         NOW())
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_QQFriendShip
 		(OpenID, FriendID, FriendDPUid, FriendFace, FriendNickName, ADDDATE)
 		VALUES
-		   <iterate conjunction="," property="friendList"/>
-</insert>
+		<iterate conjunction="," property="friendList">
+			(#friendList[].openId#,#friendList[].friendId#,#friendList[].friendDPUid#,#friendList[].friendFace#,#friendList[].friendNickName#,NOW())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -503,8 +595,10 @@
 			INSERT INTO MC_MemberCardShop(MemberCardID,ShopID,CityID,ShopName,BranchName,Status, AddTime, ShopGroupId, CardGroupID, SecondCatgory, Region, Lat, Lng, POWER)
 			VALUES(#memberCardId#, #shopId#, #cityId#, #shopName#, #branchName#, #status#, #addTime#, #shopGroupId#, #cardGroupId#,#category#,#region#,#lat#,#lng#,#power#)
 			
-		   <selectKey keyProperty="MemberCardShopID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardShopID" resultClass="int">     
+			SELECT @@IDENTITY AS MemberCardShopID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -539,8 +633,11 @@
 				Now(),
 				0);
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT
+			@@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -569,8 +666,10 @@
 			false,
 			NOW(),
 			NOW())
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id 
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -580,8 +679,10 @@
 		VALUES
 		(#user.externalId#, #user.userType#, #user.description#,#user.status#,NOW())
 		
-		   <selectKey keyProperty="UserId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UserId" resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -599,8 +700,10 @@
    			1,
    			NOW(),
    			NOW())
-   		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -608,8 +711,10 @@
 		    DP_AdItemExt(KID, ShopType, Level, CateogryID, AddTime)
 		VALUES 
 			(#kid#, #shopType#, #level#, #categoryId#, now())
-		   <selectKey keyProperty="id" resultClass="Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="Integer">     
+            SELECT @@IDENTITY AS id   
+        </selectKey>			
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -617,8 +722,10 @@
 			INSERT INTO DPAdwords.DP_AdwordsTemplate(TemplateTitle, TemplateContent, AddDate)
 			VALUES (#templateTitle#, #templateContent#, Now())
 			
-		   <selectKey keyProperty="templateId" resultClass="Integer"/>
-</insert>
+		<selectKey keyProperty="templateId" resultClass="Integer">     
+            SELECT @@IDENTITY AS templateId   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -626,8 +733,10 @@
 			(UserID, ReplyToUserID, ReplyToCommentID, RootCheckInID, Content, UserIP)
 		VALUES 
 			(#userID#, #replyToUserID#, #replyToCommentID#, #rootCheckInID#, #content#, #userIP#)
-		   <selectKey keyProperty="CommentID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="CommentID" resultClass="int">
+			SELECT @@IDENTITY AS CommentID
+		</selectKey>		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -635,8 +744,10 @@
 			(UserID, ReplyToUserID, ReplyToCommentID, RootCheckInID, Content, UserIP)
 		VALUES 
 			(#userID#, #replyToUserID#, 0, #rootCheckInID#, #content#, #userIP#)
-		   <selectKey keyProperty="CommentID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="CommentID" resultClass="int">
+			SELECT @@IDENTITY AS CommentID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -673,8 +784,10 @@
         0,
         #offlineActivityTicket.ticketType#,
         #offlineActivityTicket.rewardId#)
-           <selectKey keyProperty="ticketId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ticketId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS ticketId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -692,8 +805,10 @@
    			1,
    			NOW(),
    			NOW())
-   		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -722,8 +837,10 @@
 			false,
 			NOW(),
 			NOW())
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id 
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -741,8 +858,10 @@
    			1,
    			NOW(),
    			NOW())
-   		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -750,8 +869,10 @@
 			(MobileNo, Message, Rank) 
 		VALUES 
 			(#MobileNo#, #Message#, 255)	
-		   <selectKey keyProperty="MsgID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MsgID" resultClass="int">
+			SELECT @@IDENTITY AS MsgID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -761,8 +882,10 @@
 		VALUES
 			(#serialId#, #userId#, #uuid#, #totalPrice#, #pickUpPlace#, #orderDate#, #policyName#, #enableCancel#, #status#,
 				#shopId#, #count#, #travelDate#, #guest#, #otherGuest#, #notices#, #servicePhoneNo#, #clientType#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -775,8 +898,10 @@
         #log.operatePlatform#,
         #log.operaterID#,
         now())
-           <selectKey keyProperty="logId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="logId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS offlineActivityId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -806,8 +931,10 @@
 		#log.operaterId#,
 		NOW(),
 		NOW())
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -832,8 +959,10 @@
         NOW(),
         NOW(),
         #apply.year#)
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -858,15 +987,19 @@
         NOW(),
         NOW(),
         #apply.year#)
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         insert into GP_VIPWeekStar(CityID,MemberID,Description,ShowStartTime,AddTime,UpdateTime)
         VALUES
-           <iterate conjunction="," property="vipWeekStarVOs"/>
-</insert>
+        <iterate conjunction="," property="vipWeekStarVOs">
+            (#vipWeekStarVOs[].cityId#,#vipWeekStarVOs[].memberId#,#vipWeekStarVOs[].description#,#vipWeekStarVOs[].showStartTime#,now(),now())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -874,8 +1007,10 @@
         INSERT INTO MC_MemberCardBossAccountInfo(CrmID,CompanyName,CompanyManager,CompanyManagerTel,CompanyManagerPosition,CompanyManagerMail,BossAccountCreateStatus,BossAccountCreateAuditInfo,BossAccountCreateTime,BossAccountUpdateTime,AuthAdminID,AuthAdminName) 
         VALUES(#bossData.crmID#,#bossData.companyName#,#bossData.companyManagerName#,#bossData.companyManagerTel#,#bossData.companyManagerPosition#,#bossData.companyManagerMail#,#bossData.bossAccountCreateStatus#,#bossData.bossAccountCreateAuditInfo#,#bossData.bossAccountCreateTime#,#bossData.bossAccountUpdateTime#,#bossData.authAdminId#,#bossData.authAdminName#)
          
-           <selectKey keyProperty="companyInfoID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="companyInfoID" resultClass="int">     
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -903,8 +1038,10 @@
 			 #addTime#,
 			 #productDraftId#,
 			 #crmId#)
-		   <selectKey keyProperty="ProductID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -914,8 +1051,10 @@
 		VALUES 
 			(#productId#, 
 			 #discount#)
-		   <selectKey keyProperty="ProductDiscountID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductDiscountID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductDiscountID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -931,8 +1070,10 @@
 			 #memberCardId#,
 			 #status#,
 			 #addTime#)
-		   <selectKey keyProperty="ProductShopID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductShopID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductShopID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -946,8 +1087,10 @@
 			 #promoTitle#,
 			 #promoDesc#,
 			 #tel#)
-		   <selectKey keyProperty="PromoId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="PromoId" resultClass="int">     
+			SELECT @@IDENTITY AS PromoId
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -967,8 +1110,10 @@
 			 #promoTitle#,
 			 #promoDesc#,
 			 #tel#)
-		   <selectKey keyProperty="promoId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="promoId" resultClass="int">     
+			SELECT @@IDENTITY AS promoId
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1000,8 +1145,10 @@
 			 #status#,
 			 #addTime#,
 			 #crmId#)
-		   <selectKey keyProperty="ProductDraftID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductDraftID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductDraftID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1017,8 +1164,10 @@
 			 #memberCardID#, 
 			 #status.value#, 
 			 #addTime#)
-		   <selectKey keyProperty="ProductShopID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductShopID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductShopID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1028,8 +1177,10 @@
 		VALUES 
 			(#productDraftId#, 
 			 #discountRate#)
-		   <selectKey keyProperty="ProductDiscountID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductDiscountID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductDiscountID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1042,8 +1193,10 @@
 			#cv.dpVerifyTips#, #cv.hlVerifyStatus#, #cv.hlVerifyTips#, #cv.hlVerifyTime#, 
 			#cv.needAdmin#, #cv.sysVerifyTime#, #cv.manVerifyResult#, #cv.adminId#, #cv.reverifyResult#, #cv.reverifyAdminId#, #cv.contentCreateTime#,
 			#cv.bizId#, #cv.referId#)
-		   <selectKey keyProperty="contentVerifyId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="contentVerifyId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS contentVerifyId  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1053,8 +1206,10 @@
 		VALUES
 		(#userRole.userId#, #userRole.roleId#, #userRole.status#, now())
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1063,8 +1218,12 @@
 		(userId, roleId, status, addTime)
 		VALUES
 		
-		   <iterate conjunction="," property="userRoleList"/>
-</insert>
+		<iterate conjunction="," property="userRoleList">
+			
+			(#userRoleList[].userId#, #userRoleList[].roleId#, #userRoleList[].status#, now())
+			
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1072,76 +1231,160 @@
         INSERT INTO MAT_Role(description, type, status, addtime)
         VALUES (#role.description#, #role.type#, #role.status#, now())
         
-           <selectKey keyProperty="roleID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="roleID" resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO
         GPA_OfflineActivity(
-           <isNotEmpty property="title"/>
-   <isNotEmpty prepend="," property="beginTime"/>
-   <isNotEmpty prepend="," property="endTime"/>
-   <isNotEmpty prepend="," property="applyBeginTime"/>
-   <isNotEmpty prepend="," property="applyEndTime"/>
-   <isNotEqual compareValue="0" prepend="," property="cityId"/>
-
+        <isNotEmpty property="title">
+            Title
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="beginTime">
+            BeginTime
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="endTime">
+            EndTime
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyBeginTime">
+            ApplyBeginTime
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyEndTime">
+            ApplyEndTime
+        </isNotEmpty>
+        <isNotEqual compareValue="0" prepend="," property="cityId">
+            CityID
+        </isNotEqual>
         ,RegionID
-           <isNotEmpty prepend="," property="address"/>
-   <isNotEqual compareValue="0" prepend="," property="createUserId"/>
-   <isNotEqual compareValue="0" prepend="," property="createAdminId"/>
-   <isNotEqual compareValue="0" prepend="," property="property"/>
-   <isNotEqual compareValue="0" prepend="," property="type"/>
-   <isNotEqual compareValue="0" prepend="," property="mode"/>
-
+        <isNotEmpty prepend="," property="address">
+            Address
+        </isNotEmpty>
+        <isNotEqual compareValue="0" prepend="," property="createUserId">
+            CreateUserID
+        </isNotEqual>
+        <isNotEqual compareValue="0" prepend="," property="createAdminId">
+            CreateAdminID
+        </isNotEqual>
+        <isNotEqual compareValue="0" prepend="," property="property">
+            Property
+        </isNotEqual>
+        <isNotEqual compareValue="0" prepend="," property="type">
+            Type
+        </isNotEqual>
+        <isNotEqual compareValue="0" prepend="," property="mode">
+            Mode
+        </isNotEqual>
         ,Body,`Desc`
-           <isNotEqual compareValue="0" prepend="," property="cost"/>
-   <isNotEmpty prepend="," property="costMemo"/>
-   <isNotEqual compareValue="0" prepend="," property="joinCount"/>
-   <isNotEmpty prepend="," property="poster"/>
-   <isNotEmpty prepend="," property="extraLimit"/>
-   <isNotEmpty prepend="," property="applyExtendInfo1"/>
-   <isNotEmpty prepend="," property="applyExtendInfo2"/>
-   <isNotEmpty prepend="," property="applyExtendInfo3"/>
-
+        <isNotEqual compareValue="0" prepend="," property="cost">
+            Cost
+        </isNotEqual>
+        <isNotEmpty prepend="," property="costMemo">
+            CostMemo
+        </isNotEmpty>
+        <isNotEqual compareValue="0" prepend="," property="joinCount">
+            JoinCount
+        </isNotEqual>
+        <isNotEmpty prepend="," property="poster">
+            Poster
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="extraLimit">
+            ExtraLimit
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyExtendInfo1">
+            ApplyExtendInfo1
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyExtendInfo2">
+            ApplyExtendInfo2
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyExtendInfo3">
+            ApplyExtendInfo3
+        </isNotEmpty>
         ,AddTime,UpdateTime,IsShowInGroup
-           <isNotEmpty prepend="," property="scheduledReleaseTime"/>
-   <isNotEmpty prepend="," property="saleEmails"/>
-
+        <isNotEmpty prepend="," property="scheduledReleaseTime">
+            ScheduledReleaseTime
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="saleEmails">
+            SaleEmails
+        </isNotEmpty>
         )
         VALUES(
-           <isNotEmpty property="title"/>
-   <isNotEmpty prepend="," property="beginTime"/>
-   <isNotEmpty prepend="," property="endTime"/>
-   <isNotEmpty prepend="," property="applyBeginTime"/>
-   <isNotEmpty prepend="," property="applyEndTime"/>
-   <isNotEqual compareValue="0" prepend="," property="cityId"/>
-
+        <isNotEmpty property="title">
+            #title#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="beginTime">
+            #beginTime#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="endTime">
+            #endTime#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyBeginTime">
+            #applyBeginTime#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyEndTime">
+            #applyEndTime#
+        </isNotEmpty>
+        <isNotEqual compareValue="0" prepend="," property="cityId">
+            #cityId#
+        </isNotEqual>
         ,#regionId#
-           <isNotEmpty prepend="," property="address"/>
-   <isNotEqual compareValue="0" prepend="," property="createUserId"/>
-   <isNotEqual compareValue="0" prepend="," property="createAdminId"/>
-   <isNotEqual compareValue="0" prepend="," property="property"/>
-   <isNotEqual compareValue="0" prepend="," property="type"/>
-   <isNotEqual compareValue="0" prepend="," property="mode"/>
-
+        <isNotEmpty prepend="," property="address">
+            #address#
+        </isNotEmpty>
+        <isNotEqual compareValue="0" prepend="," property="createUserId">
+            #createUserId#
+        </isNotEqual>
+        <isNotEqual compareValue="0" prepend="," property="createAdminId">
+            #createAdminId#
+        </isNotEqual>
+        <isNotEqual compareValue="0" prepend="," property="property">
+            #property#
+        </isNotEqual>
+        <isNotEqual compareValue="0" prepend="," property="type">
+            #type#
+        </isNotEqual>
+        <isNotEqual compareValue="0" prepend="," property="mode">
+            #mode#
+        </isNotEqual>
         ,#body#,#desc#
-           <isNotEqual compareValue="0" prepend="," property="cost"/>
-   <isNotEmpty prepend="," property="costMemo"/>
-   <isNotEqual compareValue="0" prepend="," property="joinCount"/>
-   <isNotEmpty prepend="," property="poster"/>
-   <isNotEmpty prepend="," property="extraLimit"/>
-   <isNotEmpty prepend="," property="applyExtendInfo1"/>
-   <isNotEmpty prepend="," property="applyExtendInfo2"/>
-   <isNotEmpty prepend="," property="applyExtendInfo3"/>
-
+        <isNotEqual compareValue="0" prepend="," property="cost">
+            #cost#
+        </isNotEqual>
+        <isNotEmpty prepend="," property="costMemo">
+            #costMemo#
+        </isNotEmpty>
+        <isNotEqual compareValue="0" prepend="," property="joinCount">
+            #joinCount#
+        </isNotEqual>
+        <isNotEmpty prepend="," property="poster">
+            #poster#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="extraLimit">
+            #extraLimit#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyExtendInfo1">
+            #applyExtendInfo1#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyExtendInfo2">
+            #applyExtendInfo2#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="applyExtendInfo3">
+            #applyExtendInfo3#
+        </isNotEmpty>
         ,now(),now(),1
-           <isNotEmpty prepend="," property="scheduledReleaseTime"/>
-   <isNotEmpty prepend="," property="saleEmails"/>
-
+        <isNotEmpty prepend="," property="scheduledReleaseTime">
+            #scheduledReleaseTime#
+        </isNotEmpty>
+        <isNotEmpty prepend="," property="saleEmails">
+            #saleEmails#
+        </isNotEmpty>
         )
-           <selectKey keyProperty="offlineActivityId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="offlineActivityId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS offlineActivityId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1183,8 +1426,10 @@
 			#lastUpdateTime#
 			);
 		
-           <selectKey keyProperty="dealId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="dealId" resultClass="java.lang.Integer">
+            select @@identity as id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1205,8 +1450,12 @@
 			        #aTRecordData.aTType#
 			       );
  		
-           <selectKey keyProperty="ATRecordID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ATRecordID" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1225,8 +1474,12 @@
 			        #aTRecordDetailData.amount#
 			       );
  		
-           <selectKey keyProperty="ATRecordDetailID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ATRecordDetailID" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1235,8 +1488,10 @@
 		(#entity.dealGroupId#,#entity.isAdmissionRequired#,#entity.amount#,#entity.statusId#,#entity.createTime#,#entity.lastUpdateTime#,#entity.creatorId#,#entity.lastUpdatorId#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1262,8 +1517,10 @@
               #entity.versionId#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1274,8 +1531,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.configurableBlock.id#,#entity.templateId#,'ImageTextComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1304,8 +1563,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1331,8 +1592,10 @@
 		)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1361,8 +1624,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1389,8 +1654,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1401,8 +1668,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.visualComponent.id#,#entity.sequence#,#entity.content#,#entity.isReadOnly#,#entity.templateId#,'TextItem')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1423,8 +1692,10 @@
 			#entity.statementTemplateId#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1452,8 +1723,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1481,8 +1754,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1503,8 +1778,10 @@
 			#entity.categoryId#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1526,8 +1803,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1538,8 +1817,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.typeId#,#entity.visualView.id#,#entity.title#,#entity.templateId#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1561,8 +1842,10 @@
 		)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1590,8 +1873,10 @@
 				#cscCaseHistory.memo#
 			)
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1620,8 +1905,10 @@
 		)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1669,8 +1956,10 @@
 		)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1712,8 +2001,10 @@
 				)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1732,8 +2023,10 @@
         #cardType#,
         now()
         );
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1762,8 +2055,12 @@
 			         #shopFundAccountFlowData.addLoginId#
 		            );
  		
-           <selectKey keyProperty="fundAccountFlowId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="fundAccountFlowId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1777,8 +2074,10 @@
         #exceptionData.exceptionType#,
         #exceptionData.addDate#,
         #exceptionData.status#)
-           <selectKey keyProperty="ExceptionID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ExceptionID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1790,8 +2089,10 @@
         #todoData.ppId#,
         #todoData.addDate#,
         #todoData.status#)
-           <selectKey keyProperty="todoId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="todoId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1814,8 +2115,12 @@
 			        now()
 			        );
  		
-           <selectKey keyProperty="balanceId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="balanceId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1852,8 +2157,10 @@
         BPID = LAST_INSERT_ID(BPID),
         PlanAmount = PlanAmount + #pcBillingPayableData.planAmount#,
         LastUpdateDate = NOW();
-           <selectKey keyProperty="bpId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="bpId" resultClass="java.lang.Integer">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1918,8 +2225,12 @@
 		            #pcActivityData.revenueStatus#,
 		            #pcActivityData.costStatus#);
  		
-           <selectKey keyProperty="voucherId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="voucherId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -1974,8 +2285,10 @@
         LastUpdateDate = #tgBillingReceivableData.addDate#,
         LastUpdateLoginId = #tgBillingReceivableData.lastUpdateLoginId#,
         ReceivableType = #tgBillingReceivableData.receivableType#;
-           <selectKey keyProperty="brId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="brId" resultClass="java.lang.Integer">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2018,8 +2331,10 @@
         LastUpdateDate = #tgPurchaseAccumulateData.addDate#,
         AddLoginID = #tgPurchaseAccumulateData.addLoginId#,
         LastUpdateLoginID = #tgPurchaseAccumulateData.lastUpdateLoginId#;
-           <selectKey keyProperty="paId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="paId" resultClass="java.lang.Integer">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2064,8 +2379,12 @@
 			        #tgPurchaseDetailData.calParameters#
 			        );
  		
-           <selectKey keyProperty="pdId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="pdId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2107,8 +2426,12 @@
             NOW(),
             #receiptAccumulateData.dayId#);
  		
-           <selectKey keyProperty="AccumulateID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="AccumulateID" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2133,8 +2456,10 @@
         )
 
         
-           <selectKey keyProperty="notificationId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="notificationId" resultClass="int">
+            SELECT LAST_INSERT_ID() as notificationId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2166,8 +2491,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2199,8 +2526,10 @@
 			)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2231,8 +2560,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2253,8 +2584,10 @@
         )
 
         
-           <selectKey keyProperty="limitationId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="limitationId" resultClass="int">
+            SELECT LAST_INSERT_ID() as limitationId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2271,8 +2604,10 @@
         )
 
         
-           <selectKey keyProperty="roleId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="roleId" resultClass="int">
+            SELECT LAST_INSERT_ID() as roleId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2330,8 +2665,10 @@
             #partnerDataId#
             );
         
-           <selectKey keyProperty="dealGroupId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="dealGroupId" resultClass="java.lang.Integer">
+            select @@identity as id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2354,8 +2691,10 @@
                 #lastUpdateTime#,
                 #status#);
 		
-           <selectKey keyProperty="dealGroupId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="dealGroupId" resultClass="java.lang.Integer">
+            select @@identity as id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2363,43 +2702,55 @@
         INSERT INTO TG_MobileVerifyRecord (MobileNO,VerifyNum,ShopAccountID,LoginAccountID,DealID,DealGroupID,ConsumeDate,VerifyWay)
         VALUES (#mobileNo#, #verifyNum#,#shopAccountId#,#loginAccountId#,#dealId#,#dealGroupId#,#consumeDate#,#verifyWay#)
         
-           <selectKey keyProperty="RecordID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="RecordID" resultClass="int">
+            SELECT @@IDENTITY as RecordID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_ReceiptMobileVerifyCode (VerifyCode,MobileNO,ShopAccountID,AddTime)
 		VALUES(#verifyCode#,#mobileNO#,#shopAccountID#,Now())
-		   <selectKey keyProperty="verifyCodeID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="verifyCodeID" resultClass="int">
+		SELECT @@IDENTITY as verifyCodeID;
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_BusinessCenterValidateCode (ValidateCode,MobileNO,ShopAccountID,AddTime,ValidateType)
 		VALUES(#validateCode#,#mobileNO#,#shopAccountID#,Now(),#validateType#)
-		   <selectKey keyProperty="validateCode" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="validateCode" resultClass="int">
+		SELECT @@IDENTITY as verifyCodeID;
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_DealReceiptOriginalEndDate (DealGroupID, DealID, EndDate, AddTime)
 		VALUES(#dealGroupId#, #dealId#, #endDate#, NOW())
-		   <selectKey keyProperty="DealReceiptOriginalEndDateID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DealReceiptOriginalEndDateID" resultClass="int">
+		SELECT @@IDENTITY as DealReceiptOriginalEndDateID;
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_DealGroupDelayApply (DealGroupID, Memo, ShopAccountID, Status, AddTime, UpdateTime)
 		VALUES(#dealGroupId#, "", #shopAccountId#, #status#, NOW(), NOW())
-		   <selectKey keyProperty="DealGroupDelayApplyID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DealGroupDelayApplyID" resultClass="int">
+		SELECT @@IDENTITY as DealGroupDelayApplyID;
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_DealDelayApply (DealGroupDelayApplyID, DealGroupID, DealID, EndDate, OldEndDate, Memo, AddTime)
 		VALUES(#dealGroupDelayApplyId#, #dealGroupId#, #dealId#, #endDate#, #oldEndDate#, "", NOW())
-		   <selectKey keyProperty="DealDelayApplyID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DealDelayApplyID" resultClass="int">
+		SELECT @@IDENTITY as DealDelayApplyID;
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2421,8 +2772,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2446,8 +2799,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2461,8 +2816,10 @@
 		,#entity.contactMP#,#entity.contactEmail#,#entity.isSended#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2489,8 +2846,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2520,8 +2879,10 @@
             #entity.lastUpdateTime#);
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2547,8 +2908,10 @@
 		)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2563,8 +2926,10 @@
          VALUES (#entity.creatorId#,#entity.lastUpdatorId#,#entity.createTime#,#entity.lastUpdateTime#,#entity.versionId#)
 		
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2595,8 +2960,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2607,8 +2974,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.configurableBlock.id#,#entity.content#,#entity.templateId#,'RichTextComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2635,8 +3004,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2654,8 +3025,10 @@
          #entity.cityId#,#entity.sequence#,#entity.visualView.id#)
 		
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2666,8 +3039,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.configurableBlock.id#,#entity.templateId#,'TextListComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2733,8 +3108,10 @@
 	              #cscCase.fourthTypeCode#)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2753,8 +3130,10 @@
 			#cscDealGroupAnnounce.addLoginId#
 		)
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2766,8 +3145,10 @@
 			now(),
 			#onlineDate#,
 			#onlineCaseCount#)
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT  LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2806,8 +3187,10 @@
 			#cscTGOrder.caseId#
 		)
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2829,7 +3212,46 @@
 	            )
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+	<selectKey keyProperty="ID" resultClass="java.lang.Integer">
+	
+		
+		insert into BA_Sms_Queue (
+		GUID,
+		MobileNo,
+		Message,
+		AddDate,
+		UpdateDate,
+		Status,
+		TryTimes,
+		Remark,
+		SMSChannel,
+		AllTime,
+		SMSTypeID
+		)
+		values (
+		#smsInfo.gridId#,
+		#smsInfo.mobileNo#,
+		#smsInfo.message#,
+		#smsInfo.addDate#,
+		#smsInfo.updateDate#,
+		#smsInfo.status#,
+		#smsInfo.tryTimes#,
+		#smsInfo.remark#,
+		#smsInfo.smsChannel#,
+		#smsInfo.allTime#,
+		#smsInfo.smsTypeID#
+		)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		
+		</selectKey>
 </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -2854,8 +3276,10 @@
              #qq#,
              #status.status#,
              #addTime#)
-           <selectKey keyProperty="ApplyID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ApplyID" resultClass="int">     
+            SELECT @@IDENTITY AS ApplyID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2879,8 +3303,10 @@
              #endDate#,
              #status.status#,
              #addTime#)
-           <selectKey keyProperty="ProductID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ProductID" resultClass="int">     
+            SELECT @@IDENTITY AS ProductID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2889,8 +3315,10 @@
             VALUES(#cardType#, #source#, 1,0,0,#authAdminId#, #authAdminName#, #addTime#)
          
 
-           <selectKey keyProperty="MemberCardID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="MemberCardID" resultClass="int">     
+            SELECT @@IDENTITY AS MemberCardID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2920,8 +3348,10 @@
              #reason#,
              #status.status#,
              #addTime#)
-           <selectKey keyProperty="ProductDraftID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ProductDraftID" resultClass="int">     
+            SELECT @@IDENTITY AS ProductDraftID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2937,8 +3367,10 @@
              #memberCardID#, 
              #status.status#, 
              #addTime#)
-           <selectKey keyProperty="ProductShopID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ProductShopID" resultClass="int">     
+            SELECT @@IDENTITY AS ProductShopID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2954,8 +3386,10 @@
              #memberCardID#, 
              #status.status#, 
              #addTime#)
-           <selectKey keyProperty="ProductShopID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ProductShopID" resultClass="int">     
+            SELECT @@IDENTITY AS ProductShopID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2965,8 +3399,10 @@
         VALUES 
             (#productID#, 
              #discountRate#)
-           <selectKey keyProperty="ProductDiscountID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ProductDiscountID" resultClass="int">     
+            SELECT @@IDENTITY AS ProductDiscountID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2976,8 +3412,10 @@
         VALUES 
             (#productDraftId#, 
              #discountRate#)
-           <selectKey keyProperty="ProductDiscountID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ProductDiscountID" resultClass="int">     
+            SELECT @@IDENTITY AS ProductDiscountID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -2999,8 +3437,10 @@
              #consumePrice#,
              #consumeDate#,
              #addTime#)
-           <selectKey keyProperty="MemberCardConsumeID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="MemberCardConsumeID" resultClass="int">     
+            SELECT @@IDENTITY AS MemberCardConsumeID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3014,8 +3454,10 @@
              #promoTitle#,
              #promoDesc#,
              #tel#)
-           <selectKey keyProperty="promoId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="promoId" resultClass="int">     
+            SELECT @@IDENTITY AS promoId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3029,8 +3471,10 @@
              #promoTitle#,
              #promoDesc#,
              #tel#)
-           <selectKey keyProperty="promoDraftId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="promoDraftId" resultClass="int">     
+            SELECT @@IDENTITY AS promoDraftId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3050,8 +3494,10 @@
              #promoTitle#,
              #promoDesc#,
              #tel#)
-           <selectKey keyProperty="promoId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="promoId" resultClass="int">     
+            SELECT @@IDENTITY AS promoId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3071,8 +3517,10 @@
              #promoTitle#,
              #promoDesc#,
              #tel#)
-           <selectKey keyProperty="promoDraftId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="promoDraftId" resultClass="int">     
+            SELECT @@IDENTITY AS promoDraftId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3106,8 +3554,10 @@
              #totalLikeNum#,
              #addTime#,
              #updateTime#)
-           <selectKey keyProperty="feedID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="feedID" resultClass="int">     
+            SELECT @@IDENTITY AS feedID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3128,8 +3578,10 @@
                 #status#, 
                 Now(), 
                 Now());
-           <selectKey keyProperty="applyID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="applyID" resultClass="int">     
+            SELECT @@IDENTITY AS applyID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3153,8 +3605,10 @@
                 Now(), 
                 Now()
                 );
-           <selectKey keyProperty="ApplyID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ApplyID" resultClass="int">     
+            SELECT @@IDENTITY AS ApplyID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
   
@@ -3162,8 +3616,13 @@
             INSERT INTO MC_MemberCardFeedApplyShop(FeedID, ShopID, AddTime) VALUES 
           
 
-           <iterate conjunction="," property="feedShopList"/>
-</insert>
+        <iterate conjunction="," property="feedShopList">  
+             
+                (#feedShopList[].feedId#, #feedShopList[].shopId#, NOW())
+              
+
+        </iterate>  
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3194,8 +3653,12 @@
 			         #shopFundAccountData.addLoginId#
 		            );
  		
-           <selectKey keyProperty="fundAccountId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="fundAccountId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3231,8 +3694,12 @@
 			#accountReceivableBean.memo#
 			);
  		
-		   <selectKey keyProperty="ARID" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="ARID" resultClass="java.lang.Integer">
+		 
+			SELECT @@IDENTITY AS id  
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3260,16 +3727,22 @@
 			#arForWeddingBean.updateLoginId#
 			);
  		
-		   <selectKey keyProperty="ARWeddingID" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="ARWeddingID" resultClass="java.lang.Integer">
+		 
+			SELECT @@IDENTITY AS id  
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO FS_MonitorTime
         (MonitorTime)
         VALUES (#monitorTimeData.monitorTime#)
-           <selectKey keyProperty="MonitorID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="MonitorID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3286,8 +3759,10 @@
         #monitorTodoData.monitorId#,
         #monitorTodoData.addDate#,
         #monitorTodoData.status#)
-           <selectKey keyProperty="TodoID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="TodoID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3332,8 +3807,12 @@
 			        #tgRefundDetailData.calParameters#
 			        );
  		
-           <selectKey keyProperty="rdId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="rdId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3371,8 +3850,12 @@
             #dealData.contractId#
             );
  		
-		   <selectKey keyProperty="DealID" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="DealID" resultClass="java.lang.Integer">
+		 
+			SELECT @@IDENTITY AS id  
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3388,8 +3871,9 @@
         #microblogAndTopicRelation.updateTime#
 
         
-           <selectKey keyProperty="relationId" resultClass="int"/>
-
+        <selectKey keyProperty="relationId" resultClass="int">
+            SELECT LAST_INSERT_ID() as relationId;
+        </selectKey>
         )
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -3401,8 +3885,12 @@
           VALUES
           (#test.id#,#test.name#);
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3412,8 +3900,12 @@
           VALUES
           (#test.id#,#test.name#);
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3449,8 +3941,12 @@
 			#payPlanData.addLoginID#
 			);
  		
-           <selectKey keyProperty="ppId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ppId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3470,8 +3966,12 @@
 			#payPlanLogData.memo#
 			);
  		
-           <selectKey keyProperty="ppId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ppId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3563,8 +4063,10 @@
 				)
 		
 
-           <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3583,8 +4085,10 @@
         )
 
         
-           <selectKey keyProperty="permissionId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="permissionId" resultClass="int">
+            SELECT LAST_INSERT_ID() as permissionId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3610,14 +4114,18 @@
 			#maxPerDay#
 			);
 		
-	       <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+	    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            select @@identity as id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TGHT_DeliverExpressBatchDetail (BatchID,OrderID,ExpressNO,Status,AddDate,UpdateDate) VALUES
-		   <iterate open="" conjunction="," property="delivers" close=""/>
-</insert>
+		<iterate open="" conjunction="," property="delivers" close="">
+            ( #batchID# , #delivers[].orderID#,#delivers[].deliverSerialNO#,0 ,NOW(),NOW())
+        </iterate>		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3625,8 +4133,10 @@
 		(FileName,OperatorID,CompanyID,STATUS,OrderNum,SuccessNum,TryTimes,AddDate,UpdateDate)
 		values
 		(#fileName#,#operatorID#,#companyID#,0,#orderNum#,0,0,Now(),Now());
-		   <selectKey keyProperty="batchId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="batchId" resultClass="int">
+		SELECT @@IDENTITY as batchId;
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3634,8 +4144,10 @@
 		(PhoneNumber,DealId,ShopAccountID,NumberType)
 		VALUES
 		(#PhoneNumber#,#DealId#,#ShopAccountID#,#NumberType#)
-		   <selectKey keyProperty="PhoneId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="PhoneId" resultClass="int">
+		SELECT @@IDENTITY as PhoneId;
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3663,8 +4175,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3683,8 +4197,10 @@
          #entity.name#,#entity.description#,#entity.isExpanded#,#entity.visualView.id#)
 		
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3695,8 +4211,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.cityId#,#entity.dealGroup.id#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3708,8 +4226,10 @@
 		#entity.createTime#,#entity.lastUpdateTime#,#entity.ipAddress#,#entity.serverIp#,#entity.data#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3734,8 +4254,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3756,8 +4278,10 @@
 		'SerialNumberImportLog')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3787,8 +4311,10 @@
          )
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3799,8 +4325,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.url#,#entity.visualView.id#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3824,8 +4352,10 @@
                 #entity.templateName#
             );
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3855,7 +4385,51 @@
 			)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+	<selectKey keyProperty="ID" resultClass="java.lang.Integer">
+	
+		
+		
+		insert into BA_Mail_Queue 
+		(
+			GUID,
+			Email,
+			EmailTitle,
+			EmailBody,
+			AddDate,
+			UpdateDate,
+			Status,
+			TryTimes,
+			FromEmail,
+			FromName,
+			ReEmail,
+			EmailTypeID
+		) 
+		values
+		(
+			#emailInfo.gridID#,
+			#emailInfo.email#,
+			#emailInfo.emailTitle#,
+			#emailInfo.emailBody#,
+			#emailInfo.addDate#,
+			#emailInfo.updateDate#,
+			#emailInfo.status#,
+			#emailInfo.tryTimes#,
+			#emailInfo.fromEmail#,
+			#emailInfo.fromName#,
+			#emailInfo.reEmail#,
+			#emailInfo.emailTypeID#
+		)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		
+		</selectKey>
 </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -3864,8 +4438,10 @@
 			INSERT INTO MC_MemberCardShop(MemberCardID,ShopID,CityID,ShopName,BranchName,Status, AddTime, ShopGroupId, CardGroupID, SecondCatgory, Region, Lat, Lng, POWER)
 			VALUES(#memberCardId#, #shopId#, #cityId#, #shopName#, #branchName#, #status#, #addTime#, #shopGroupId#, #cardGroupId#,#category#,#region#,#lat#,#lng#,#power#)
 			
-		   <selectKey keyProperty="MemberCardShopID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardShopID" resultClass="int">     
+			SELECT @@IDENTITY AS MemberCardShopID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3887,8 +4463,12 @@
 			NOW()
 			);
  		
-           <selectKey keyProperty="balanceId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="balanceId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3907,16 +4487,20 @@
         #monitorExceptionData.addDate#,
         #monitorExceptionData.monitorId#,
         #monitorExceptionData.status#)
-           <selectKey keyProperty="ExceptionID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ExceptionID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO PC_MonitorTime
         (LastMonitorTime)
         VALUES (#lastMonitorTime#)
-           <selectKey keyProperty="MonitorID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="MonitorID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -3959,8 +4543,12 @@
 			        #tgAccountPayableData.calParameters#
 			        );
  		
-           <selectKey keyProperty="apId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="apId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4005,8 +4593,10 @@
         #tgBillingPayableData.addLoginId#,
         #tgBillingPayableData.lastUpdateLoginId#
         );
-           <selectKey keyProperty="bpId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="bpId" resultClass="java.lang.Integer">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4057,8 +4647,10 @@
         LastUpdateDate = #tgBillingPayableData.addDate#,
         LastUpdateLoginId = #tgBillingPayableData.lastUpdateLoginId#,
         PayType = #tgBillingPayableData.payType#;
-           <selectKey keyProperty="bpId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="bpId" resultClass="java.lang.Integer">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4123,8 +4715,12 @@
 		            #tgActivityData.revenueStatus#,
 		            #tgActivityData.costStatus#);
  		
-           <selectKey keyProperty="voucherId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="voucherId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4145,8 +4741,10 @@
         #tgBalanceRelationData.status#,
         #tgBalanceRelationData.addDate#
         )
-           <selectKey keyProperty="balanceId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="balanceId" resultClass="java.lang.Integer">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4190,8 +4788,10 @@
         RAAmount = RAAmount + #tgRefundAccumulateData.raAmount#,
         LastUpdateDate = #tgRefundAccumulateData.addDate#,
         LastUpdateLoginID = #tgRefundAccumulateData.lastUpdateLoginId#;
-           <selectKey keyProperty="raId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="raId" resultClass="java.lang.Integer">
+            SELECT LAST_INSERT_ID() AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4212,8 +4812,12 @@
                          #payFlowData.updateTime#,
                          #payFlowData.memo#);
  		
-           <selectKey keyProperty="flowId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="flowId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4251,8 +4855,12 @@
 			#receiveOrderBean.memo#
 			);
  		
-		   <selectKey keyProperty="ReceiveOrderID" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="ReceiveOrderID" resultClass="java.lang.Integer">
+		 
+			SELECT @@IDENTITY AS id  
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4284,8 +4892,12 @@
 			#receiveAuditBean.bizId#
 			);
  		
-		   <selectKey keyProperty="ReceiveAuditID" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="ReceiveAuditID" resultClass="java.lang.Integer">
+		 
+			SELECT @@IDENTITY AS id  
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4341,8 +4953,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4383,8 +4997,10 @@
 		#entity.isAutoDelay#, #entity.refundReason#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4408,8 +5024,10 @@
 			#exceptionMessage#
 			);
 		
-	       <selectKey keyProperty="partnerDataId" resultClass="java.lang.Integer"/>
-</insert>
+	    <selectKey keyProperty="partnerDataId" resultClass="java.lang.Integer">
+            select @@identity as id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4441,8 +5059,10 @@
             );
     
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4450,8 +5070,10 @@
 			INSERT INTO BC_AccountOperationLog(ShopAccountID, LoginName, UserIP, LogInfo, AddDate, Comment)
 			VALUES(#shopAccountId#, #accountName# ,#userIP#, #logInfo#, Now(), #comment#)
 			
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+            SELECT @@IDENTITY AS LogID   
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4463,8 +5085,10 @@
 		(#entity.dealGroupId#,#entity.processInstanceId#,#entity.operationId#,#entity.creatorId#,#entity.lastUpdatorId#,#entity.createTime#,#entity.lastUpdateTime#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4475,8 +5099,10 @@
 		(#entity.dealId#,#entity.roomType#,#entity.creatorId#,#entity.lastUpdatorId#,#entity.createTime#,#entity.lastUpdateTime#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4504,8 +5130,10 @@
                 #entity.lastUpdateTime#);
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4529,8 +5157,10 @@
 		)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4541,8 +5171,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.visualComponent.id#,#entity.sequence#,#entity.pictureUrl#,#entity.templateId#,'ImageTextItem')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4569,8 +5201,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4582,8 +5216,10 @@
 		#entity.createTime#,#entity.lastUpdateTime#,#entity.versionId#,#entity.aePhone#,#entity.aeEmail#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4594,8 +5230,10 @@
 			(#entity.dealGroup.id#,#entity.categoryId#,#entity.createTime#,#entity.lastUpdateTime#,#entity.creatorId#,#entity.lastUpdatorId#,#entity.isDefault#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4609,8 +5247,10 @@
 		,#entity.dealGroupContent#,#entity.documentBuilderContent#,#entity.visualViewContent#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4627,8 +5267,10 @@
 			#cscAdminLogin.realName#,
 			#cscAdminLogin.agentId#)
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT  LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4653,8 +5295,10 @@
 			#cscTgProductProblem.consultationPeriod#
 		)
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4678,8 +5322,10 @@
 			#cscWeiXinComplainHistory.xmlData#,
 			#cscWeiXinComplainHistory.memo#
 		)
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4709,16 +5355,20 @@
 			#cscWeiXinComplainRecord.dpUserId#,
 			#cscWeiXinComplainRecord.dpOrderId#
 		)
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO FS_MonitorTime
         (MonitorTime)
         VALUES (#monitorTimeData.monitorTime#)
-           <selectKey keyProperty="MonitorID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="MonitorID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4757,8 +5407,12 @@
 		            #pcInvoiceData.fsInvoiceId#,
 		            #pcInvoiceData.voucherId#);
  		
-           <selectKey keyProperty="invoiceId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="invoiceId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4794,8 +5448,12 @@
             NOW()
             );
  		
-		   <selectKey keyProperty="ReceiptID" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="ReceiptID" resultClass="java.lang.Integer">
+		 
+			SELECT @@IDENTITY AS id  
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4818,8 +5476,10 @@
         )
 
         
-           <selectKey keyProperty="interactionId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="interactionId" resultClass="int">
+            SELECT LAST_INSERT_ID() as interactionId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4840,8 +5500,10 @@
         )
 
         
-           <selectKey keyProperty="tempLoginId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="tempLoginId" resultClass="int">
+            SELECT LAST_INSERT_ID() as tempLoginId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4856,8 +5518,10 @@
         )
 
         
-           <selectKey keyProperty="topicId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="topicId" resultClass="int">
+            SELECT LAST_INSERT_ID() as topicId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4890,8 +5554,12 @@
                      NOW(),
                      #payRequestData.memo#);
         
-           <selectKey keyProperty="requestId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="requestId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4918,8 +5586,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4940,8 +5610,10 @@
         )
 
         
-           <selectKey keyProperty="rolePermissionId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="rolePermissionId" resultClass="int">
+            SELECT LAST_INSERT_ID() as rolePermissionId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -4962,8 +5634,10 @@
         )
 
         
-           <selectKey keyProperty="userRoleId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="userRoleId" resultClass="int">
+            SELECT LAST_INSERT_ID() as userRoleId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5014,8 +5688,10 @@
             #cscHotelOrder.isDelete#
 		)
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5038,8 +5714,10 @@
 		#entity.shopIdType#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5064,8 +5742,10 @@
             );
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5085,8 +5765,10 @@
             #entity.lastUpdateTime#);
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5097,8 +5779,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.imageTextItem.id#,#entity.sequence#,#entity.content#,#entity.isTitle#,#entity.templateId#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5109,8 +5793,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.visualComponent.id#,#entity.sequence#,#entity.content#,#entity.quantity#,#entity.specification#,#entity.unit#,#entity.templateId#,'ProductItem')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5143,8 +5829,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5161,8 +5849,10 @@
 		'SerialNumberExportLog')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5173,8 +5863,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.configurableBlock.id#,#entity.templateId#,#entity.areaTypeId#,'TextAreaListComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5200,8 +5892,10 @@
 		)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5220,8 +5914,10 @@
 		#entity.shortDescription#,#entity.comments#,#entity.parentVisualViewId#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5245,8 +5941,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5274,8 +5972,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5316,8 +6016,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5346,8 +6048,10 @@
             );
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5406,8 +6110,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5429,8 +6135,10 @@
 		'DealComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5458,8 +6166,10 @@
 		)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5483,8 +6193,10 @@
 				)
 		
 
-           <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5502,8 +6214,10 @@
 				#groupAdminLogin.groupId#
 			)
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5557,8 +6271,10 @@
 				)
 		
 
-           <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5582,8 +6298,10 @@
 				)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5605,8 +6323,10 @@
 		)
 		
 
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5655,8 +6375,10 @@
         #dev#,
         #needRecord#
         );
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5683,8 +6405,10 @@
         #input#,
         #callbackData#
         );
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5698,8 +6422,10 @@
         #exceptionData.exceptionType#,
         #exceptionData.addDate#,
         #exceptionData.status#)
-           <selectKey keyProperty="ExceptionID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ExceptionID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5711,8 +6437,10 @@
         #todoData.eoId#,
         #todoData.addDate#,
         #todoData.status#)
-           <selectKey keyProperty="todoId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="todoId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5741,8 +6469,12 @@
 			        NOW(),
 			        #invoiceApplyBean.loginID#);
  		
-           <selectKey keyProperty="InvoiceID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="InvoiceID" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id  
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5761,8 +6493,12 @@
 			        NOW(),
 			        #invoiceApplyBean.loginID#);
  		
-           <selectKey keyProperty="InvoiceBookingID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="InvoiceBookingID" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id  
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5805,8 +6541,12 @@
 			        #PCAccountPayableData.calParamters#
 			        );
  		
-           <selectKey keyProperty="apId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="apId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5841,8 +6581,12 @@
 			        #pcRevenueData.voucherId#
 		            );
  		
-           <selectKey keyProperty="RevenueID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="RevenueID" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5859,8 +6603,10 @@
         )
 
         
-           <selectKey keyProperty="involvedId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="involvedId" resultClass="int">
+            SELECT LAST_INSERT_ID() as involvedId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5884,8 +6630,9 @@
         #microblog.updateTime#
 
         
-           <selectKey keyProperty="microblogId" resultClass="int"/>
-
+        <selectKey keyProperty="microblogId" resultClass="int">
+            SELECT LAST_INSERT_ID() as microblogId;
+        </selectKey>
         )
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -5920,8 +6667,12 @@
 			         #exchangeOrderData.addLoginId#
 			        );
  		
-           <selectKey keyProperty="exchangeOrderId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="exchangeOrderId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5973,8 +6724,12 @@
 			#payOrderData.updateLoginId#
 			);
  		
-           <selectKey keyProperty="poId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="poId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -5991,8 +6746,12 @@
 			NOW()
 			);
  		
-           <selectKey keyProperty="FundAccountID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="FundAccountID" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6012,8 +6771,12 @@
 			#shopFundAccountAuditBean.resourceId#
 			);
  		
-           <selectKey keyProperty="AccountAuditID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="AccountAuditID" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6053,8 +6816,12 @@
 			#paymentPlanData.addLoginId#
 			);
  		
-           <selectKey keyProperty="ppId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ppId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6072,8 +6839,12 @@
 			#paymentPlanAuditLogData.addLoginId#
 			);
  		
-           <selectKey keyProperty="auditLogId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="auditLogId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6099,8 +6870,10 @@
 				)
 		
 
-           <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6121,14 +6894,17 @@
         )
 
         
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT LAST_INSERT_ID() as id;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_AttachmentMetaData
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6180,20 +6956,24 @@
         #attachmentMetaData.specialApprovalBy#,
         #attachmentMetaData.specialApprovalValidTo#
         )
-           <selectKey keyProperty="AttachID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="AttachID" resultClass="int">
+            SELECT @@IDENTITY AS AttachID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_AttachmentMetaDataHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_Contact
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6251,20 +7031,24 @@
         #contact.contactComment#,
         #contact.ccContactID#
         )
-           <selectKey keyProperty="ContactID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ContactID" resultClass="int">
+            SELECT @@IDENTITY AS ContactID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_ContactHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerInvoiceTitle
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6312,14 +7096,17 @@
         NOW(),
         #customerInvoiceTitle.lastModifiedBy#
         )
-           <selectKey keyProperty="InvoiceTitleID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="InvoiceTitleID" resultClass="int">
+            SELECT @@IDENTITY AS InvoiceTitleID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerInvoiceTitleHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6351,8 +7138,10 @@
         #userShopTerritory.approveStatus#,
         #userShopTerritory.approveComment#
         );
-           <selectKey keyProperty="UserShopTerritoryID" resultClass="long"/>
-</insert>
+        <selectKey keyProperty="UserShopTerritoryID" resultClass="long">
+            SELECT @@IDENTITY AS UserShopTerritoryID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6410,8 +7199,10 @@
         SpecialApprovalBy=#hygienicLicense.specialApprovalBy#,
         SpecialApprovalValidTo=#hygienicLicense.specialApprovalValidTo#,
         1 )
-           <selectKey keyProperty="TradingLicenseID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="TradingLicenseID" resultClass="int">
+            SELECT @@IDENTITY AS TradingLicenseID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6471,8 +7262,10 @@
         SpecialApprovalBy=#hygienicLicense.specialApprovalBy#,
         SpecialApprovalValidTo=#hygienicLicense.specialApprovalValidTo#,
         1 )
-           <selectKey keyProperty="TradingLicenseID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="TradingLicenseID" resultClass="int">
+            SELECT @@IDENTITY AS TradingLicenseID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6532,8 +7325,10 @@
         SpecialApprovalBy=#hygienicLicense.specialApprovalBy#,
         SpecialApprovalValidTo=#hygienicLicense.specialApprovalValidTo#,
         1 )
-           <selectKey keyProperty="TradingLicenseID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="TradingLicenseID" resultClass="int">
+            SELECT @@IDENTITY AS TradingLicenseID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6587,15 +7382,20 @@
         #contract.ccContractID#,
         #contract.processID#
         )
-           <selectKey keyProperty="ContractID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ContractID" resultClass="int">
+            SELECT @@IDENTITY AS ContractID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO CT_ContractHistory
-           <include refid="key-value"/>
-   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <include refid="key-value"/>
+
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6610,8 +7410,26 @@
 		RegionFull__c,RegionSearch__c,MainCategory__c,MainRegion__c,BranchTotal
 		)
 		Values
-		   <iterate conjunction="," property="list"/>
-
+		<iterate conjunction="," property="list">
+			(#list[].shopId#,#list[].shopType#,#list[].shopName#,#list[].branchName#,
+			#list[].address#,#list[].crossRoad#,#list[].phoneNo#,#list[].phoneNo2#,
+			#list[].cityId#,#list[].power#,#list[].shopGroupId#,#list[].groupFlag#,
+			#list[].altName#,#list[].searchName#,#list[].hits#,#list[].weeklyHits#,
+			#list[].district#,#list[].addDate#,#list[].lastDate#,#list[].score#,
+			#list[].score1#,#list[].score2#,#list[].score3#,#list[].score4#,
+			#list[].shopTags#,#list[].primaryTag#,#list[].searchKeyWord#,
+			#list[].prevWeeklyHits#,#list[].webSite#,#list[].todayHits#,
+			#list[].monthlyHits#,#list[].popularity#,#list[].glat#,#list[].glng#,
+			#list[].shopPower#,#list[].nearByTags#,#list[].businessHours#,
+			#list[].clientType#,#list[].City__c#,#list[].Category__c#,
+			#list[].CategorySearch__c#, #list[].StartScore__c#,
+			#list[].ShopType__c#,
+			#list[].Tag__c#, #list[].ShopHyperLink__c#, #list[].ShopStatus__c#,
+			#list[].District__c#,#list[].CategoryFull__c#,#list[].RegionFull__c#,
+			#list[].RegionSearch__c#,#list[].MainCategory__c#,#list[].MainRegion__c#,
+			#list[].branchTotal#
+			)
+		</iterate>
 		ON DUPLICATE KEY UPDATE isDeleted = 0, BranchTotal = VALUES(BranchTotal)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -6620,20 +7438,24 @@
 		Insert into Ods_ShopIdToRetryCategoryRegionFlat
 		(shopId, addDate)
 		Values
-		   <iterate conjunction="," property="list"/>
-</insert>
+		<iterate conjunction="," property="list">
+			(#list[].shopId#,#list[].addDate#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_Bank
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO CT_AttachmentMetaData
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6685,20 +7507,24 @@
         #attachmentMetaData.specialApprovalBy#,
         #attachmentMetaData.specialApprovalValidTo#
         )
-           <selectKey keyProperty="AttachID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="AttachID" resultClass="int">
+            SELECT @@IDENTITY AS AttachID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO CT_AttachmentMetaDataHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_Shop
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6726,20 +7552,24 @@
         #apolloShop.approveStatus#,
         #apolloShop.approveComment#
         )
-           <selectKey keyProperty="NewShopID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="NewShopID" resultClass="int">
+            SELECT @@IDENTITY AS NewShopID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_ShopHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerUser
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6775,14 +7605,17 @@
         #customerUser.approveStatus#,
         #customerUser.approveComment#
         )
-           <selectKey keyProperty="CustomerUserID" resultClass="long"/>
-</insert>
+        <selectKey keyProperty="CustomerUserID" resultClass="long">
+            SELECT @@IDENTITY AS CustomerUserID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerUserHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6816,8 +7649,10 @@
         #territory.approveStatus#,
         #territory.approveComment#
         );
-           <selectKey keyProperty="TerritoryID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="TerritoryID" resultClass="int">
+            SELECT @@IDENTITY AS TerritoryID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6856,8 +7691,10 @@
         #shopTerritory.approveStatus#,
         #shopTerritory.approveComment#
         );
-           <selectKey keyProperty="ShopTerritoryID" resultClass="long"/>
-</insert>
+        <selectKey keyProperty="ShopTerritoryID" resultClass="long">
+            SELECT @@IDENTITY AS ShopTerritoryID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6910,8 +7747,10 @@
         #hygienicLicense.specialApprovalValidTo#,
         1
         )
-           <selectKey keyProperty="HygienicLicenseID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="HygienicLicenseID" resultClass="int">
+            SELECT @@IDENTITY AS HygienicLicenseID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6925,15 +7764,19 @@
                  #markEntity.memo#,
                  NOW());
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO CT_ShopFAQ(UserID, ShopID, Question, Answer, AnswerDate, Status, IsTop, AddDate)
 		VALUES(#userId#, #shopId#, #question#, #answer#, #answerDate#, #status#, #isTop#, #addDate#)
-		   <selectKey keyProperty="faqId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="faqId" resultClass="int">
+            SELECT @@IDENTITY AS faqId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6953,8 +7796,11 @@
 			now(),
 			now(),
 			#cityId#)
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int">
+				SELECT @@IDENTITY
+				AS ID
+			</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -6968,14 +7814,17 @@
 			#certificate.createTime#,
 			#certificate.type#,
 			#certificate.comments#)
-		    <selectKey type="post" keyProperty="id" resultClass="int"/>
-</insert>
+		 <selectKey type="post" keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_Customer
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7025,14 +7874,17 @@
         #customer.eventID#,
         #customer.customerClass#
         )
-           <selectKey keyProperty="CustomerID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="CustomerID" resultClass="int">
+            SELECT @@IDENTITY AS CustomerID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7062,14 +7914,17 @@
         #orgTerritory.approveStatus#,
         #orgTerritory.approveComment#
         )
-           <selectKey keyProperty="OrgTerritoryID" resultClass="long"/>
-</insert>
+        <selectKey keyProperty="OrgTerritoryID" resultClass="long">
+            SELECT @@IDENTITY AS OrgTerritoryID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO ShopNewShop
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7105,20 +7960,24 @@
         #shopNewShop.approveStatus#,
         #shopNewShop.approveComment#
         )
-           <selectKey keyProperty="ShopNewShopID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ShopNewShopID" resultClass="int">
+            SELECT @@IDENTITY AS NewShopID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO ShopNewShopHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerShop
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7164,20 +8023,24 @@
         #customerShop.shopName#,
         #customerShop.comment#
         )
-           <selectKey keyProperty="CustomerShopID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="CustomerShopID" resultClass="int">
+            SELECT @@IDENTITY AS CustomerShopID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerShopHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerBankAccount
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7231,14 +8094,17 @@
         #customerBankAccount.ccBankAccountID#,
         #customerBankAccount.paymentStatus#
         )
-           <selectKey keyProperty="AccountID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="AccountID" resultClass="int">
+            SELECT @@IDENTITY AS AccountID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_CustomerBankAccountHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7298,8 +8164,10 @@
         #idCard.status#,
         #idCard.contactID#
         )
-           <selectKey keyProperty="IDCardID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="IDCardID" resultClass="int">
+            SELECT @@IDENTITY AS IDCardID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7340,14 +8208,18 @@
 		now(),
 		#currencyTransInfo.cityId#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_License
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7413,14 +8285,17 @@
         #license.specialApprovalBy#,
         #license.specialApprovalValidTo#
         )
-           <selectKey keyProperty="LicenseID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="LicenseID" resultClass="int">
+            SELECT @@IDENTITY AS LicenseID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MR_LicenseHistory
-           <include refid="key-value"/>
-</insert>
+        <include refid="key-value"/>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7446,8 +8321,10 @@
 		 #productCity.status# 
 		);
 	
-	   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+	<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		select  @@IDENTITY as ID from AD_ProductCity limit 1
+	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7464,9 +8341,24 @@
 		)
 		VALUES
 	
-	   <iterate conjunction="," property="productCityList"/>
-   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+	<iterate conjunction="," property="productCityList">  
+         
+       (
+		 #productCityList[].productId#, 
+		 #productCityList[].cityId#, 
+		 #productCityList[].addTime#,
+		 #productCityList[].addUser#,
+		 #productCityList[].updateTime#,
+		 #productCityList[].updateUser#,
+		 #productCityList[].status# 
+		) 
+          
+    </iterate> 
+	
+	<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		select  @@IDENTITY as ID from AD_ProductCity limit 1
+	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7517,15 +8409,119 @@
 		  #productEntity.salableBeginDate#
 		);
 	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			select @@IDENTITY as ID from AD_Product limit 1
+		</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		
+		INSERT INTO [Sales].[CS_ContractItemRelation]
+	           ([ContractItemID]
+	           ,[OrderItemID]
+	           ,[OpportunityID]
+	           ,[AddDate]
+	           ,[UpdateDate]
+	           ,[Status])
+	     VALUES
+	           (#contractItemRelation.contractItemId#
+	           ,#contractItemRelation.orderItemId#
+	           ,#contractItemRelation.opportunityId#
+	           ,#contractItemRelation.addDate#
+	           ,#contractItemRelation.updateDate#
+	           ,#contractItemRelation.status#)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		
+		INSERT INTO [Sales].[CS_Customer]
+	           ([CustomerName]
+	           ,[CityID]
+	           ,[ShopID]
+	           ,[ShopGroupID]
+	           ,[Distribution]
+	           ,[Address]
+	           ,[ZipCode]
+	           ,[Phone1]
+	           ,[Phone2]
+	           ,[FreePhone]
+	           ,[Fax]
+	           ,[Email]
+	           ,[Website]
+	           ,[InvCompany]
+	           ,[InvBankName]
+	           ,[InvBankAccount]
+	           ,[Memo]
+	           ,[AdminID]
+	           ,[AddTime]
+	           ,[DemoSendType]
+	           ,[DemoSendTypeComment]
+	           ,[HasEBizRight]
+	           ,[EBizPassword]
+	           ,[SFID]
+	           ,[DepartmentID]
+	           ,[OwnerLoginID]
+	           ,[CreatorLoginID]
+	           ,[InvType]
+	           ,[InvIdentifier]
+	           ,[InvAccountBank]
+	           ,[InvAccountName]
+	           ,[InvAccountNo]
+	           ,[CustomerGlobalID])
+	     VALUES
+	           (#customer.customerName#
+	           ,#customer.cityId#
+	           ,#customer.shopId#
+	           ,#customer.shopGroupId#
+	           ,#customer.distribution#
+	           ,#customer.address#
+	           ,#customer.zipCode#
+	           ,#customer.phone1#
+	           ,#customer.phone2#
+	           ,#customer.freePhone#
+	           ,#customer.fax#
+	           ,#customer.email#
+	           ,#customer.website#
+	           ,#customer.invCompany#
+	           ,#customer.invBankName#
+	           ,#customer.invBankAccount#
+	           ,#customer.memo#
+	           ,#customer.adminId#
+	           ,#customer.addTime#
+	           ,#customer.demoSendType#
+	           ,#customer.demoSendTypeComment#
+	           ,#customer.hasEBizRight#
+	           ,#customer.eBizPassword#
+	           ,#customer.sfid#
+	           ,#customer.departmentId#
+	           ,#customer.ownerLoginId#
+	           ,#customer.creatorLoginId#
+	           ,#customer.invType#
+	           ,#customer.invIdentifier#
+	           ,#customer.invAccountBank#
+	           ,#customer.invAccountName#
+	           ,#customer.invAccountNo#
+	           ,#customer.customerGlobalId#)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_NaviDealTag (DealGroupID, TagID, ItemID)
         VALUES
-           <iterate conjunction=","/>
-</insert>
+        <iterate conjunction=",">
+                (#naviDealTags[].dealGroupId#,#naviDealTags[].tagId#,#naviDealTags[].itemId#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7533,8 +8529,11 @@
 		VALUES (
 		#id#, #itemId#, #name#, #value#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7546,8 +8545,10 @@
         (
         #topicType#,#topicId#,#userId#,#openId#,NOW(),NOW()
         );
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7558,23 +8559,29 @@
         (
         #feedId#,#userId#,1,Now(),Now()
         );
-           <selectKey keyProperty="likeId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="likeId" resultClass="int">
+            SELECT @@IDENTITY AS likeId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_NaviDealTag (DealGroupID, TagID, ItemID)
         VALUES
-           <iterate conjunction=","/>
-</insert>
+        <iterate conjunction=",">
+                (#naviDealTags[].dealGroupId#,#naviDealTags[].tagId#,#naviDealTags[].itemId#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_DealGroupCity
         ( DealGroupID, CityID )
         VALUES
-           <iterate conjunction="," property="dealGroupCities"/>
-</insert>
+        <iterate conjunction="," property="dealGroupCities">
+        	( #dealGroupCities[].dealGroupId#, #dealGroupCities[].cityId# )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7604,15 +8611,19 @@
 			#dealGroupExtend.sourceId#,
 			#dealGroupExtend.isBlockStock#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		REPLACE INTO TG_ShopRegion (ShopID, DistrictID, RegionID) 
 		VALUES 
-		   <iterate conjunction="," property="shopRegions"/>
-</insert>
+		<iterate conjunction="," property="shopRegions">
+		(#shopRegions[].shopID#, #shopRegions[].districtID#, #shopRegions[].regionID#) 
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7623,8 +8634,10 @@
 		(#entity.id#,#entity.content#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7632,8 +8645,9 @@
         (`Id`,`Name`,`DisplayName`,`NeedIndex`,`IsMapping`,`Status`)
         VALUES
         (#attribute.id#,#attribute.name#,#attribute.displayName#,#attribute.needIndex#,#attribute.isMapping#,#attribute.status#)
-           <selectKey keyProperty="Id" resultClass="int"/>
-;
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT @@IDENTITY AS Id
+        </selectKey>;
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -7642,8 +8656,9 @@
         (`ID`,`Name`,`AttributeValue`,`Status`)
         VALUES
         (#naviCategory.id#,#naviCategory.name#,#naviCategory.attributeValue#,#naviCategory.status#)
-           <selectKey keyProperty="ID" resultClass="int"/>
-;
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>;
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -7652,8 +8667,9 @@
         (`ID`,`TagID`,`Name`,`AttributeValue`,`Status`)
         VALUES
         (#naviItem.id#,#naviItem.tagID#,#naviItem.name#,#naviItem.attributeValue#,#naviItem.status#)
-           <selectKey keyProperty="ID" resultClass="int"/>
-;
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>;
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -7662,8 +8678,9 @@
         (`ID`,`Name`,`AttributeKey`,`Type`,`Status`)
         VALUES
         (#naviTag.id#,#naviTag.name#,#naviTag.attributeKey#,#naviTag.type#,#naviTag.status#)
-           <selectKey keyProperty="ID" resultClass="int"/>
-;
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>;
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -7671,8 +8688,10 @@
         INSERT INTO TPD_DealGroupAttribute
         (DealGroupId, AttrName, AttrValue, Status, AddTime, UpdateTime)
         VALUES
-           <iterate conjunction="," property="attrList"/>
-</insert>
+        <iterate conjunction="," property="attrList">
+            (#attrList[].dealGroupId#, #attrList[].attrName#, #attrList[].attrValue#, #attrList[].status#, NOW(), NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7691,8 +8710,10 @@
 		NOW(),
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -7724,8 +8745,10 @@
 			#itemKeyword.status#
 			);
 		  
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			select @@identity as id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -7760,8 +8783,10 @@
 		)
 		
 
-		   <selectKey keyProperty="orderId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="orderId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -7789,8 +8814,10 @@
 		1
 		)
 		  
-		   <selectKey keyProperty="orderItemDurationId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="orderItemDurationId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7822,8 +8849,65 @@
 		
 		);
 	
-	   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+	<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		select  @@IDENTITY as ID from AD_ProductDisplayTemplate limit 1
+	</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		
+		INSERT INTO [ASPNet_zSurvey].[DP_AWDetail]
+	           ([MasterID]
+	           ,[CityID]
+	           ,[ShopType]
+	           ,[FromDate]
+	           ,[EndDate]
+	           ,[AWTitle]
+	           ,[AWText]
+	           ,[AWText2]
+	           ,[AWLink]
+	           ,[AWShowLink]
+	           ,[AWMemo]
+	           ,[Power]
+	           ,[ShopID]
+	           ,[Priority]
+	           ,[AWStyle]
+	           ,[AWImageLink]
+	           ,[AWImageLink2]
+	           ,[ItemID]
+	           ,[OldItemID]
+	           ,[AwContent]
+	           ,[note]
+	           ,[BigImageLink])
+	     VALUES
+	           (#awDetail.masterId#
+	           ,#awDetail.cityId#
+	           ,#awDetail.shopType#
+	           ,#awDetail.fromDate#
+	           ,#awDetail.endDate#
+	           ,#awDetail.awTitle#
+	           ,#awDetail.awText#
+	           ,#awDetail.awText2#
+	           ,#awDetail.awLink#
+	           ,#awDetail.awShowLink#
+	           ,#awDetail.awMemo#
+	           ,#awDetail.power#
+	           ,#awDetail.shopId#
+	           ,#awDetail.priority#
+	           ,#awDetail.awStyle#
+	           ,#awDetail.awImageLink#
+	           ,#awDetail.awImageLink2#
+	           ,#awDetail.itemId#
+	           ,#awDetail.oldItemId#
+	           ,#awDetail.awContent#
+	           ,#awDetail.note#
+	           ,#awDetail.bigImageLink#)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7831,8 +8915,11 @@
 			(UserID, AppID, Content, AddDate, UpdateDate)
 		VALUES 
 			(#userId#, #appId#, #content#, NOW(), NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7840,24 +8927,30 @@
 			UC_DairyText (Content)
 		VALUES
             (#content#)
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DP_dpQzoneFollowNote
         (
         MainNoteID,FromUserID,NoteBody,AddDate,UpdateDate,UserIP,ToUserID,OriginalUserID,GrandpaID,MainNoteTitle,VerifyStatus
-           <isNotEmpty prepend="," property="userType"/>
-
+        <isNotEmpty prepend="," property="userType">
+            UserType
+        </isNotEmpty>
         ) VALUES
         (
         #feedId#,#fromUserID#,#noteBody#,Now(),Now(),#userIP#,#toUserID#,#originalUserID#,#grandpaID#,#mainNoteTitle#,#verifyStatus#
-           <isNotEmpty prepend="," property="userType"/>
-
+        <isNotEmpty prepend="," property="userType">
+            #"userType"#
+        </isNotEmpty>
         );
-           <selectKey keyProperty="followNoteId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="followNoteId" resultClass="int">
+            SELECT @@IDENTITY AS followNoteId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7866,8 +8959,10 @@
         VALUES
         ( #verify.verifyID#, #verify.dealID#, #verify.dealGroupID#, NOW(), NOW(), #verify.status#,
           #verify.thirdPartyDealID#, #verify.thirdPartyId#, #verify.num#, #verify.isspID# )
-           <selectKey keyProperty="VerifyID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="VerifyID" resultClass="int">
+            SELECT @@IDENTITY AS VerifyID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7889,8 +8984,10 @@
 		NOW(),
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7901,8 +8998,10 @@
 		(#entity.order.id#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7910,16 +9009,19 @@
         (`ID`,`TagID`,`Name`,`AttributeValue`,`CityID`,`ParentID`,`Priority`,`Status`)
         VALUES
         (#naviRegion.id#,#naviRegion.tagID#,#naviRegion.name#,#naviRegion.attributeValue#,#naviRegion.cityID#,#naviRegion.parentID#,#naviRegion.priority#,#naviRegion.status#)
-           <selectKey keyProperty="ID" resultClass="int"/>
-;
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>;
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPD_DealGroupVersion (`DealGroupID`,`PublishVersion`, AddTime, UpdateTime)
         VALUES ( #dealGroupId# , #version# , NOW(), NOW())
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -7927,8 +9029,9 @@
         (`Id`,`Detail`,`Status`, AddTime)
         VALUES
         (#transferJob.id#,#transferJob.detail#,#transferJob.status#, NOW())
-           <selectKey keyProperty="Id" resultClass="int"/>
-;
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT @@IDENTITY AS Id
+        </selectKey>;
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -7960,8 +9063,10 @@
 		  #priceLevel.updateTime# 
 		  ); 
 		  
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -7976,8 +9081,65 @@
 		  #categoryId# 
 		  ); 
 		  
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		
+		INSERT INTO [Sales].[CS_Contract_Extend]
+	           ([ContractID]
+	           ,[InvType]
+	           ,[InvIdentifier]
+	           ,[InvAccountBank]
+	           ,[InvAccountName]
+	           ,[InvAccountNo])
+	     VALUES
+	           (#contractExtend.contractId#
+	           ,#contractExtend.invType#
+	           ,#contractExtend.invIdentifier#
+	           ,#contractExtend.invAccountBank#
+	           ,#contractExtend.invAccountName#
+	           ,#contractExtend.invAccountNo#)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		
+		INSERT INTO [Sales].[CS_ContractItems]
+           ([ContractID]
+           ,[ProductType]
+           ,[Amount]
+           ,[BeginDate]
+           ,[EndDate]
+           ,[UpdateCount]
+           ,[Status]
+           ,[AdminID]
+           ,[UpdateDate]
+           ,[Memo])
+     VALUES
+	     	(#contractItem.contractId#	     	
+	     	,#contractItem.productType#	     	
+	     	,#contractItem.amount#	     	
+	     	,#contractItem.beginDate#	     	
+	     	,#contractItem.endDate#	     	
+	     	,#contractItem.updateCount#	     	
+	     	,#contractItem.status#	     	
+	     	,#contractItem.adminId#	     	
+	     	,#contractItem.updateDate#	     	
+	     	,#contractItem.memo#
+	     	)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8015,8 +9177,10 @@
 			#feedGroupId#,
 			#causeType#,
 			#clientType#)
-		   <selectKey keyProperty="feedId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="feedId" resultClass="int">
+			SELECT @@IDENTITY AS feedId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8024,15 +9188,21 @@
 			VALUES (
 				#tagId#, #itemName#, #itemEnName#, 1, #priority#
 			)
-		   <selectKey keyProperty="itemId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="itemId" resultClass="int">
+			SELECT @@IDENTITY
+			AS itemId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT IGNORE INTO TG_NaviTagItem (ItemID, TagID, ItemName, ItemEnName, Status, Priority)
 			VALUES (#itemId#, #tagId#, #itemName#, #itemEnName#, 1, #priority#)
-		   <selectKey keyProperty="itemId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="itemId" resultClass="int">
+			SELECT @@IDENTITY
+			AS itemId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8040,15 +9210,21 @@
 			VALUES (
 				#tagId#, #itemName#, #itemEnName#, 1, #priority#
 			)
-		   <selectKey keyProperty="itemId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="itemId" resultClass="int">
+			SELECT @@IDENTITY
+			AS itemId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT IGNORE INTO TG_NaviTagItem (ItemID, TagID, ItemName, ItemEnName, Status, Priority)
 			VALUES (#itemId#, #tagId#, #itemName#, #itemEnName#, 1, #priority#)
-		   <selectKey keyProperty="itemId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="itemId" resultClass="int">
+			SELECT @@IDENTITY
+			AS itemId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8056,8 +9232,11 @@
 		VALUES (
 		#id#, #itemId#, #name#, #value#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8076,8 +9255,10 @@
 		NOW(),
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -8109,8 +9290,10 @@
 			#itemButton.status#
 		);
 	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			select @@identity as id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8138,8 +9321,10 @@
 		        #keywordEntity.updateTime#, 
 	    		#keywordEntity.status#);
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8155,8 +9340,21 @@
 	    		UpdateTime,
 	    		Status)
 	   		VALUES
-           <iterate conjunction="," property="keywordList"/>
-</insert>
+        <iterate conjunction="," property="keywordList">
+            
+                (#keywordList[].keyword#,
+	    		#keywordList[].cityId#,
+	    		#keywordList[].priceLevel#,
+	    		#keywordList[].topThreeStock#,
+	    		#keywordList[].firstPageStock#,
+	    		#keywordList[].addUser#,
+	    		#keywordList[].updateUser#,
+	    		#keywordList[].addTime#,
+		        #keywordList[].updateTime#,
+	    		#keywordList[].status#)
+            
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -8190,8 +9388,10 @@
 		)
 		  
 
-		   <selectKey keyProperty="orderItemId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="orderItemId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8203,8 +9403,138 @@
           #trafficPriceLevel.addUser#, #trafficPriceLevel.updateUser#
         )
         
-           <selectKey keyProperty="ID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		
+		INSERT INTO [Sales].[CS_Contact]
+	           ([CustomerID]
+	           ,[ContactName]
+	           ,[ContactTitle]
+	           ,[OfficeTel]
+	           ,[MobileNo]
+	           ,[Email]
+	           ,[Address]
+	           ,[ZipCode]
+	           ,[WorkTimeDesc]
+	           ,[ContactType]
+	           ,[Memo]
+	           ,[Power]
+	           ,[AdminID]
+	           ,[AddTime]
+	           ,[Fax])
+	     VALUES
+	           (#contact.customerId#
+	           ,#contact.contactName#
+	           ,#contact.contactTitle#
+	           ,#contact.officeTel#
+	           ,#contact.mobileNo#
+	           ,#contact.email#
+	           ,#contact.address#
+	           ,#contact.zipCode#
+	           ,#contact.workTimeDesc#
+	           ,#contact.contactType#
+	           ,#contact.memo#
+	           ,#contact.power#
+	           ,#contact.adminId#
+	           ,#contact.addTime#
+	           ,#contact.fax#)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		
+		INSERT INTO [Sales].[CS_Contract]
+	           ([ContractNO]
+	           ,[CustomerID]
+	           ,[ContactID]
+	           ,[SMS]
+	           ,[ContactID2]
+	           ,[SMS2]
+	           ,[ContractAddTime]
+	           ,[ContractUpdateTime]
+	           ,[ContractDate]
+	           ,[NeedPay]
+	           ,[SalesID]
+	           ,[IsSeries]
+	           ,[Amount]
+	           ,[InvCompany]
+	           ,[InvText]
+	           ,[PayType]
+	           ,[InvPostAddress]
+	           ,[InvZipCode]
+	           ,[InvContact]
+	           ,[InvPhone]
+	           ,[Status]
+	           ,[AdminID]
+	           ,[CanUpdate]
+	           ,[MayEnd]
+	           ,[OperateID]
+	           ,[CustomerName]
+	           ,[Memo]
+	           ,[CompanyID]
+	           ,[USAccrualAmount]
+	           ,[TAXAccrualAmount]
+	           ,[ParentContractID]
+	           ,[DepartmentID]
+	           ,[OwnerLoginID]
+	           ,[CreatorLoginID]
+	           ,[ContractGlobalID]
+	           ,[AmountFlowType]
+	           ,[SourceType]
+	           ,[CanceledReason])
+	     VALUES
+	           (#contract.contractNo#,
+	           #contract.customerId#,
+	           #contract.contactId#,
+	           #contract.sms#,
+	           #contract.contactId2#,
+	           #contract.sms2#,
+	           #contract.contractAddTime#,
+	           #contract.contractUpdateTime#,
+	           #contract.contractDate#,
+	           #contract.needPay#,
+	           #contract.salesId#,
+	           #contract.isSeries#,
+	           #contract.amount#,
+	           #contract.invCompany#,
+	           #contract.invText#,
+	           #contract.payType#,
+	           #contract.invPostAddress#,
+	           #contract.invZipCode#,
+	           #contract.invContact#,
+	           #contract.invPhone#,
+	           #contract.status#,
+	           #contract.adminId#,
+	           #contract.canUpdate#,
+	           #contract.mayEnd#,
+	           #contract.operateId#,
+	           #contract.customerName#,
+	           #contract.memo#,
+	           #contract.companyId#, 
+	           #contract.usAccrualAmount#,
+	           #contract.taxAccrualAmount#,
+	           #contract.parentContractId#,
+	           #contract.departmentId#,
+	           #contract.ownerLoginId#,
+	           #contract.creatorLoginId#,
+	           #contract.contractGlobalId#,
+	           #contract.amountFlowType#,
+	           #contract.sourceType#,
+	           #contract.canceledReason#)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8230,15 +9560,21 @@
 		#dealGroupRemind.dealGroupId#,
 		#dealGroupRemind.cityId#,
 		#dealGroupRemind.referType#);
-		   <selectKey keyProperty="remindId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="remindId" resultClass="int">
+			SELECT @@IDENTITY
+			AS remindId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_WishList(DealGroupID, UserID, Status, AddDate, LastDate)
 		VALUES(#dealGroupId#, #userId#, 1, NOW(), NOW())
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT @@IDENTITY
+			AS WishListID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8246,8 +9582,10 @@
 			UC_Dairy (UserID,Title,Visit,Type,Status,Flag,Star,AddDate,UpdateDate,CityID)
 		VALUES
             (#userId#, #title#, 0, #type#, #status#, #flag#, #star#, #addDate#, #updateDate#,#cityId#)
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8255,8 +9593,10 @@
 			UC_DairyList (UserID,Title,Visit,Status,AddDate,UpdateDate)
 		VALUES
             (#userId#, #title#, 0, #status#, now(), now())
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8273,8 +9613,19 @@
     		AddDate, 
     		UpdateDate)
 		VALUES
-		   <iterate conjunction="," property="sections"/>
-</insert>
+		<iterate conjunction="," property="sections">  
+            (#sections[].userId#,
+			#sections[].dairyId#,
+			#sections[].sectionIndex#,
+			#sections[].sectionType#,
+			#sections[].flag#,
+			#sections[].bizType#,
+			#sections[].bizId#,
+			#sections[].detail#,
+			#sections[].addDate#,
+			#sections[].updateDate#)
+   	 	</iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8294,8 +9645,10 @@
 			#entity.type#,
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8308,8 +9661,16 @@
 			AddDate
 		)
 		VALUES
-		   <iterate conjunction="," property="entityList"/>
-</insert>
+		<iterate conjunction="," property="entityList">
+			(
+				#entityList[].dealGroupID#,
+				#entityList[].title#,
+				#entityList[].content#,
+				#entityList[].type#,
+				NOW()
+			)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8333,8 +9694,27 @@
 			MainCategoryID
 		) 
 		VALUES 
-		   <iterate conjunction="," property="shopInfos"/>
-</insert>
+		<iterate conjunction="," property="shopInfos">
+			(
+				#shopInfos[].shopID#,
+				#shopInfos[].cityID#, 
+				#shopInfos[].shopGroupID#,
+				#shopInfos[].shopName#,
+				#shopInfos[].branchName#,
+				#shopInfos[].phoneNo#,
+				#shopInfos[].phoneNo2#,
+				#shopInfos[].address#,
+				#shopInfos[].glat#,
+				#shopInfos[].glng#,
+				#shopInfos[].shopPower#,
+				#shopInfos[].score1#,
+				#shopInfos[].score2#,
+				#shopInfos[].score3#,
+				#shopInfos[].businessHours#,
+				#shopInfos[].mainCategoryID#
+			) 
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8342,8 +9722,9 @@
         (`Id`,`JobId`,`Detail`,`Status`,`RetryTimes`, AddTime)
         VALUES
         (#transferTask.id#,#transferTask.jobId#,#transferTask.detail#,#transferTask.status#,#transferTask.retryTimes#, NOW())
-           <selectKey keyProperty="Id" resultClass="int"/>
-;
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT @@IDENTITY AS Id
+        </selectKey>;
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -8369,8 +9750,10 @@
 				);
 			  
 		  
-		    <selectKey keyProperty="crmRelationId" resultClass="java.lang.Integer"/>
-</insert>
+		 <selectKey keyProperty="crmRelationId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -8398,8 +9781,10 @@
 		1
 		)
 		  
-		   <selectKey keyProperty="itemCityToneId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="itemCityToneId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -8439,8 +9824,10 @@
 			#priceEntity.status#
 		);
 	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			select @@identity as id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8468,9 +9855,66 @@
 		
 	
 	
-	   <iterate conjunction="," property="productDisplayTemplateItemList"/>
-   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+	<iterate conjunction="," property="productDisplayTemplateItemList">  
+         
+       (
+		#productDisplayTemplateItemList[].templateId#, 
+		#productDisplayTemplateItemList[].templateItemName#, 
+		#productDisplayTemplateItemList[].templateItemType#,
+		
+		#productDisplayTemplateItemList[].imageHeight#, 
+		#productDisplayTemplateItemList[].imageWidth#, 
+		#productDisplayTemplateItemList[].textLength#, 
+		#productDisplayTemplateItemList[].materialPattern#,
+		
+		#productDisplayTemplateItemList[].addTime#,
+		#productDisplayTemplateItemList[].addUser#,
+	 	#productDisplayTemplateItemList[].updateTime#,
+		#productDisplayTemplateItemList[].updateUser#,
+		#productDisplayTemplateItemList[].status# 
+		) 
+          
+    </iterate> 
+	
+	
+	
+	<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		select  @@IDENTITY as ID from AD_ProductDisplayTemplateItem limit 1
+	</selectKey>
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+		
+		INSERT INTO [ASPNet_zSurvey].[DP_AWKeyword]
+	           ([AWID]
+	           ,[Keyword]
+	           ,[AdType]
+	           ,[Power]
+	           ,[HasNotified]
+	           ,[NotifyDate]
+	           ,[Channel]
+	           ,[Category]
+	           ,[Region]
+	           ,[Priority]
+	           ,[SourceType])
+	     VALUES
+	           (#awKeyword.awid#
+	           ,#awKeyword.keyword#
+	           ,#awKeyword.adType#
+	           ,#awKeyword.power#
+	           ,#awKeyword.hasNotified#
+	           ,#awKeyword.notifyDate#
+	           ,#awKeyword.channel#
+	           ,#awKeyword.category#
+	           ,#awKeyword.region#
+	           ,#awKeyword.priority#
+	           ,#awKeyword.sourceType#)
+		SELECT SCOPE_IDENTITY() AS ID
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8506,8 +9950,10 @@
 			#feedGroupId#,
 			#causeType#,
 			#cityId#)
-		   <selectKey keyProperty="feedId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="feedId" resultClass="int">
+			SELECT @@IDENTITY AS feedId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8515,8 +9961,11 @@
 			(CommentID, Dper, Content)
 		VALUES 
 			(#commentId#, #dper#, #reply#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8527,31 +9976,40 @@
         (
         #feedId#,#userId#,#sourceType#,1,Now(),Now()
         );
-           <selectKey keyProperty="likeId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="likeId" resultClass="int">
+            SELECT @@IDENTITY AS likeId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_WishList(DealGroupID, UserID, Status, AddDate, LastDate)
 		VALUES(#dealGroupId#, #userId#, 1, NOW(), NOW())
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT @@IDENTITY
+			AS WishListID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPD_DealGroupAttribute
         (DealGroupId, AttrName, AttrValue, Status, AddTime, UpdateTime)
         VALUES
-           <iterate conjunction="," property="attrList"/>
-</insert>
+        <iterate conjunction="," property="attrList">
+            (#attrList[].dealGroupId#, #attrList[].attrName#, #attrList[].attrValue#, #attrList[].status#, NOW(), NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPD_DealGroupAttributeText
         (DealGroupId, AttrName, AttrValue, Status, AddTime, UpdateTime)
         VALUES
-           <iterate conjunction="," property="attrList"/>
-</insert>
+        <iterate conjunction="," property="attrList">
+            (#attrList[].dealGroupId#, #attrList[].attrName#, #attrList[].attrValue#, #attrList[].status#, NOW(), NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8581,8 +10039,10 @@
 			#entity.shopID#,
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8599,8 +10059,21 @@
 			ShopID,
 			AddDate
 		)VALUES
-		   <iterate conjunction="," property="entityList"/>
-</insert>
+		<iterate conjunction="," property="entityList">
+			(
+				#entityList[].dealGroupID#,
+				#entityList[].address#,
+				#entityList[].contactPhone#,
+				#entityList[].businessHours#,
+				#entityList[].isStarRateDisplayed#,
+				#entityList[].isAverageConsumeDisplayed#,
+				#entityList[].isReviewDisplayed#,
+				#entityList[].isMapDisplayed#,
+				#entityList[].shopID#,
+				NOW()
+			)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8620,8 +10093,10 @@
 			#dealShopInfo.branchName#,
 			#dealShopInfo.phoneNoAddress#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8641,39 +10116,50 @@
 	        NOW(),
 	        NOW(),
 	        NOW())
-	       <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DP_dpQzoneMessage (FromUserID,ToUserID,FeedID,MsgType,MsgContent,AddTime,UpdateTime)
         VALUES (#fromUserId#,#toUserId#,#feedId#,#msgType#,#msgContent#,NOW(),NOW())
-           <selectKey keyProperty="msgId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="msgId" resultClass="int">
+            SELECT @@IDENTITY AS msgId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPD_DealGroupPublishCategory (`DealGroupID`,`PublishCategoryID`, AddTime, UpdateTime)
         VALUES
         (#dealGroupPublishCategory.dealGroupID#,#dealGroupPublishCategory.publishCategoryID#, NOW(), NOW());
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPD_DealGroupAttributeText
         (DealGroupId, AttrName, AttrValue, Status, AddTime, UpdateTime)
         VALUES
-           <iterate conjunction="," property="attrList"/>
-</insert>
+        <iterate conjunction="," property="attrList">
+            (#attrList[].dealGroupId#, #attrList[].attrName#, #attrList[].attrValue#, #attrList[].status#, NOW(), NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPD_DealGroupPublishCategory (`DealGroupID`,`PublishCategoryID`, AddTime, UpdateTime)
         VALUES
         (#dealGroupPublishCategory.dealGroupId#,#dealGroupPublishCategory.publishCategoryId#, NOW(), NOW());
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8695,8 +10181,11 @@
 			#opLog.opType#,
 			now(),
 			now())		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8721,8 +10210,10 @@
 			#album.description#,
 			#album.addTime#,
 			#album.updateTime#,0);
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID 
+   			</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8752,15 +10243,19 @@
 		#status#,
 		#ipLimit#
 		);
-		   <selectKey keyProperty="groupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="groupId" resultClass="int">
+            SELECT @@IDENTITY AS groupId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_Questionnaire(GroupID,QuestionnaireType,QuestionnaireTitle,QuestionOrder,AddTime,Boundary)
 		VALUES(#groupId#, #questionnaireType#,#questionnaireTitle#,#questionOrder#,NOW(),#boundary#);
-		   <selectKey keyProperty="questionnaireId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="questionnaireId" resultClass="int">
+			SELECT @@IDENTITY AS questionnaireId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8780,15 +10275,19 @@
 		#cityId#,
 		#eventId#
 		);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY AS recordId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_QuestionnaireGroup(EventID,GroupType,LimitType,Memo,ChanceNum,IPLimit,StartTime,EndTime,State)
 		VALUES(#eventId#, #groupType#,#limitType#,#memo#,#chanceNum#,#ipLimit#,#startTime#,#endTime#,#state#);
-		   <selectKey keyProperty="groupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="groupId" resultClass="int">
+			SELECT @@IDENTITY AS groupId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8796,8 +10295,10 @@
 		PrizeType)
 		VALUES (#prizeName#, #msg#, #groupType#, #groupId#,
 		#prizeType#);
-		   <selectKey keyProperty="prizeId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="prizeId" resultClass="int">
+			SELECT @@IdENTITY AS prizeId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8808,8 +10309,12 @@
           (#bookLendRecordData.userId#,#bookLendRecordData.bookOwnerId#,#bookLendRecordData.readingProgress#,#bookLendRecordData.status#,
           now(),#bookLendRecordData.lendDate#,#bookLendRecordData.completeDate#,#bookLendRecordData.returnDate#,NOW());
         
-           <selectKey keyProperty="bookLendId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="bookLendId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8818,8 +10323,12 @@
           VALUES
           (#bookOwnerInfoData.userId#,#bookOwnerInfoData.bookId#,#bookOwnerInfoData.status#,#bookOwnerInfoData.lendCount#,now(),now());
         
-           <selectKey keyProperty="bookOwnerId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="bookOwnerId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8835,8 +10344,49 @@
 	        #eventSMSFailLog.ip#,
 	        #eventSMSFailLog.status#)
 	          
-	           <selectKey keyProperty="logId" resultClass="java.lang.Integer"/>
-</insert>
+	        <selectKey keyProperty="logId" resultClass="java.lang.Integer">
+				    SELECT @@IDENTITY  AS logId
+	        </selectKey>
+         
+	</insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+    <selectKey resultClass="java.lang.Integer">
+        INSERT INTO EP_Leave_Application (
+            `AddTime`,
+            `UpdateTime`,
+            `LoginId`,
+            `LeaveType`,
+            `StartTime`,
+            `EndTime`,
+            `Duration`,
+            `ApplicationStatus`,
+            `ApplyReason`,
+            `RejectReason`,
+            `LeaveBankId`,
+            `ReportTo`,
+            `TaskGuid`,
+            `ApprovalTime`
+        ) VALUES (
+       		#leaveApplication.addTime#,
+        	#leaveApplication.updateTime#,
+        	#leaveApplication.loginId#,
+        	#leaveApplication.leaveType#,
+        	#leaveApplication.startTime#,
+        	#leaveApplication.endTime#,
+        	#leaveApplication.duration#,
+        	#leaveApplication.applicationStatus#,
+        	#leaveApplication.applyReason#,
+        	#leaveApplication.rejectReason#,
+        	#leaveApplication.leaveBankId#,
+        	#leaveApplication.reportTo#,
+        	#leaveApplication.taskGuid#,
+        	#leaveApplication.approvalTime#
+        ) ;
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8861,8 +10411,10 @@
 			#album.description#,
 			#album.addTime#,
 			#album.updateTime#,0);
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID 
+   			</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8872,24 +10424,34 @@
           VALUES
           (#test.id#,#test.name#);
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 		EV_Comment(GroupID,UserID,EventId,CommentText,PicPath,PicType,AddTime,UserIP,VerifyStatus)
 		VALUES(#groupId#,#userId#,#eventId#,#commentText#,#picPath#,#picType#,NOW(),#IP#,0);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 		EV_Comment(GroupID,UserID,EventIdCommentText,AddTime,UserIP,VerifyStatus)
 		VALUES(#groupId#,#userId#,#eventId#,#commentText#,NOW(),#IP#,0);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8920,8 +10482,10 @@
 		#prizeType#,
 		#order#
 		);
-		   <selectKey keyProperty="prizeId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="prizeId" resultClass="int">
+			SELECT @@IDENTITY AS prizeId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8951,16 +10515,20 @@
 		#status#,
 		#ipLimit#
 		);
-		   <selectKey keyProperty="groupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="groupId" resultClass="int">
+            SELECT @@IDENTITY AS groupId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DPEvent.EV_PrizeRecordStatus
 		(UserID,GroupID,EventID,PrizeID,IP,MobileNo,Status)
 		VALUES(#userId#,#groupId#,#eventId#,#prizeId#,#ip#,#mobileNo#,#status#)
-		   <selectKey keyProperty="recordId" resultClass="Integer"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="Integer">
+			SELECT @@IDENTITY AS RecordID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -8972,22 +10540,28 @@
         AND a.GroupID = #groupId#
         AND PrizeId = #prizeId#
         AND a.Status = 0;
-           <selectKey keyProperty="recordId" resultClass="Integer"/>
-</insert>
+        <selectKey keyProperty="recordId" resultClass="Integer">
+            SELECT @@IDENTITY AS RecordID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO EV_BackLottery(EventID,ReferID,UserID,UserNickName,CityID,MobileNo,Email,Score,IP,LotteryType,Status,LogID)
     	VALUES(#eventId#,#referId#,#userId#,#userNickName#,#cityId#,#mobileNo#,#email#,#score#,#ip#,#lotteryType#,#prizeSize#,#logId#)
-    	   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="recordId" resultClass="int">
+		    SELECT @@IDENTITY AS recordId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	    	INSERT INTO EV_PromoType(Remark,AddDate)
 	    	VALUES(#remark#,#currentTime#);
-	       <selectKey keyProperty="promoType" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="promoType" resultClass="int">
+		    SELECT @@IDENTITY AS promoType
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9010,8 +10584,10 @@
          NOW(),
          0
 		);
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9032,8 +10608,10 @@
          NOW(),
          NOW()
 		);
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9060,8 +10638,10 @@
           #introduce#,
           #editJs#
 		);
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9091,8 +10671,10 @@
 		#status#,
 		#ipLimit#
 		);
-		   <selectKey keyProperty="groupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="groupId" resultClass="int">
+            SELECT @@IDENTITY AS groupId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9112,15 +10694,19 @@
 		#cityId#,
 		#eventId#
 		);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY AS recordId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_QuestionnaireOption(QuestionnaireID,Type,Label,Text,Point,AddTime)
 		VALUES(#questionnaireId#, #type#,#label#,#text#,#point#,NOW());
-		   <selectKey keyProperty="optionId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="optionId" resultClass="int">
+			SELECT @@IDENTITY AS optionId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9128,22 +10714,28 @@
 		PrizeType)
 		VALUES (#prizeName#, #msg#, #groupType#, #groupId#,
 		#prizeType#);
-		   <selectKey keyProperty="prizeId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="prizeId" resultClass="int">
+			SELECT @@IdENTITY AS prizeId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DPEvent.EV_SimplePrizeRecord(UserId, UserName, MobileNo, Address, PrizeId, PrizeName, IP, GroupType,GroupId, CityId, EventId, Status)
 		VALUES (#userId#, #userName#, #mobileNo#, #address#, #prizeId#, #prizeName#, #IP#, #groupType#, #groupId#, #cityId#, #eventId#, 1);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+            SELECT @@IdENTITY AS recordId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EVP_WebModule(EventID,BizData,Status,CustomJS,RawHTML)
 		VALUES(#eventId#, #bizData#,#status#,#customJs#,#rawHtml#);
-		   <selectKey keyProperty="prizeId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="prizeId" resultClass="int">
+			SELECT @@IDENTITY AS prizeId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9153,29 +10745,38 @@
 		VALUES
 		(#eventId#, #eventName#, #eventURL#, #eventPic#, #startDate#, #endDate#, 0, 0,
 		#introduce#, 1, #offlineDate#, #cityId#, #adminId#);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO EV_BackLotteryLog(EventID,ReferID,LotteryType,StartTime,LotterySize,LotteryNum,UserID)
         VALUES(#eventId#,#referId#,#lotteryType#,#startTime#,#lotterySize#,#lotteryNum#,#userId#)
-              <selectKey keyProperty="logId" resultClass="int"/>
-</insert>
+           <selectKey keyProperty="logId" resultClass="int">
+			    SELECT @@IDENTITY AS logId
+           </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_QuestionnaireOption(QuestionnaireID,Type,Label,Text,Point,AddTime)
 		VALUES(#questionnaireId#, #type#,#label#,#text#,#point#,NOW());
-		   <selectKey keyProperty="optionId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="optionId" resultClass="int">
+			SELECT @@IDENTITY AS optionId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_QuestionnaireResultRule(GroupID,BeginScore,EndScore,ContainsBegin,ContainsEnd,Text,AddTime)
 		VALUES(#groupId#, #beginScore#,#endScore#,#containsBegin#,#containsEnd#,#text#,NOW());
-		   <selectKey keyProperty="resultId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="resultId" resultClass="int">
+			SELECT @@IDENTITY AS resultId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9185,8 +10786,11 @@
 		VALUES
 		(#eventId#, #eventName#, #eventURL#, #eventPic#, #startDate#, #endDate#, 0, 0,
 		#introduce#, 1, #offlineDate#, #cityId#, #adminId#);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 	
@@ -9206,8 +10810,10 @@
 			#cityId#,
 			#eventId#
 			);	
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+            SELECT @@IDENTITY AS recordId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9215,8 +10821,10 @@
         ()
         VALUES
         ()
-           <selectKey resultClass="long"/>
-</insert>
+        <selectKey resultClass="long">
+            SELECT last_insert_id();
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9228,8 +10836,11 @@
 		GiftPic,AddTime,UpdateTime)
 		VALUES(#gift.giftName#,#gift.giftPrice#,#gift.giftSummary#," ",#gift.giftPic#,now(),now())
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9251,9 +10862,8 @@
 		RemainCount,
 		ExchangePrice,
 		ItemType,
-		   <isNotNull property="itemRule.beginTime"/>
-   <isNotNull property="itemRule.endTime"/>
-
+		<isNotNull property="itemRule.beginTime">BeginTime,</isNotNull>
+		<isNotNull property="itemRule.endTime">EndTime,</isNotNull>
 		GiftTag
 		)
 		VALUES
@@ -9266,9 +10876,8 @@
 		#itemRule.cityName#,
 		#itemRule.exchangeType#,
 		#itemRule.singleMax#,
-		   <isNotNull property="itemRule.exchangeRule"/>
-   <isNull property="itemRule.exchangeRule"/>
-
+		<isNotNull property="itemRule.exchangeRule">#itemRule.exchangeRule#,</isNotNull>
+		<isNull property="itemRule.exchangeRule">"",</isNull>
 		#itemRule.deliverType#,
 		now(),
 		now(),
@@ -9276,13 +10885,15 @@
 		#itemRule.remainCount#,
 		#itemRule.exchangePrice#,
 		#itemRule.itemType#,
-		   <isNotNull property="itemRule.beginTime"/>
-   <isNotNull property="itemRule.endTime"/>
-
+		<isNotNull property="itemRule.beginTime">#itemRule.beginTime#,</isNotNull>
+		<isNotNull property="itemRule.endTime">#itemRule.endTime#,</isNotNull>
 		#itemRule.giftTag#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9293,8 +10904,12 @@
           (#bookData.douBanId#,#bookData.title#,#bookData.author#,#bookData.translator#,#bookData.isbn#,#bookData.publisher#,
           #bookData.publishDate#,#bookData.price#,#bookData.rating#,#bookData.imgUrl#,#bookData.largeImgUrl#,#bookData.addUserId#,now());
         
-           <selectKey keyProperty="bookId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="bookId" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9309,24 +10924,33 @@
             #marketApp.appName#,
             #marketApp.appVisitUrl#)
 
-           <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 		EV_Comment(GroupID,UserID,EventId,CommentText,PicPath,PicType,AddTime,UserIP,VerifyStatus)
 		VALUES(#groupId#,#userId#,#eventId#,#commentText#,#picPath#,#picType#,NOW(),#IP#,0);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 		EV_Comment(GroupID,UserID,EventIdCommentText,AddTime,UserIP,VerifyStatus)
 		VALUES(#groupId#,#userId#,#eventId#,#commentText#,NOW(),#IP#,0);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9357,23 +10981,29 @@
 				#prizeType#,
 				#order#
 			);	
-		   <selectKey keyProperty="prizeId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="prizeId" resultClass="int">
+            SELECT @@IDENTITY AS prizeId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	    	INSERT INTO EV_PromoDownload(PromoID,UserID,EventID,MobileNo,CityID,Score,IP)
 	    	VALUES(#promoId#,#userId#,#eventId#,#mobileNo#,#cityId#,#Score#,#ip#)
-	    	   <selectKey keyProperty="logId" resultClass="int"/>
-</insert>
+	    	<selectKey keyProperty="logId" resultClass="int">
+			    SELECT @@IDENTITY AS logId
+            </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DPEvent.EV_PrizeRecordStatus
         (UserID,GroupID,EventID,PrizeID,IP,MobileNo,Status)
         VALUES(#userId#,#groupId#,#eventId#,#prizeId#,#ip#,#mobileNo#,#status#)
-           <selectKey keyProperty="recordId" resultClass="Integer"/>
-</insert>
+        <selectKey keyProperty="recordId" resultClass="Integer">
+            SELECT @@IDENTITY AS RecordID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9385,27 +11015,35 @@
         AND a.GroupID = #groupId#
         AND PrizeId = #prizeId#
         AND a.Status = 0;
-           <selectKey keyProperty="recordId" resultClass="Integer"/>
-</insert>
+        <selectKey keyProperty="recordId" resultClass="Integer">
+            SELECT @@IDENTITY AS RecordID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_Questionnaire(GroupID,QuestionnaireType,QuestionnaireTitle,QuestionOrder,AddTime,Boundary)
 		VALUES(#groupId#, #questionnaireType#,#questionnaireTitle#,#questionOrder#,NOW(),#boundary#);
-		   <selectKey keyProperty="questionnaireId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="questionnaireId" resultClass="int">
+			SELECT @@IDENTITY AS questionnaireId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DP_EdmDealGroup (dealGroupId, dealGroupDesc, title, dealGroupPrice, marketPrice, pic, addTime) VALUES
-           <iterate conjunction="," property="batchData"/>
-</insert>
+        <iterate conjunction="," property="batchData">
+            (#batchData[].dealGroupId#,#batchData[].dealGroupTitleDesc#,#batchData[].dealGroupShortTitle#,#batchData[].dealGroupPrice#,#batchData[].marketPrice#,#batchData[].dealGroupPic#, NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DP_EdmDealGroupShop (dealGroupId, shopId, addTime ) VALUES
-           <iterate conjunction="," property="batchData"/>
-</insert>
+        <iterate conjunction="," property="batchData">
+            (#batchData[].dealGroupId#,#batchData[].shopId#,NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9454,8 +11092,10 @@
         #ext1#,
         1
         );
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9473,11 +11113,10 @@
 		PhoneNum,
 		Remark,
 		UserName,
-		   <isNotNull property="giftOrder.provinceName"/>
-   <isNotNull property="giftOrder.cityName"/>
-   <isNotNull property="giftOrder.address"/>
-   <isNotNull property="giftOrder.postZip"/>
-
+		<isNotNull property="giftOrder.provinceName">ProvinceName,</isNotNull>
+		<isNotNull property="giftOrder.cityName">CityName,</isNotNull>
+		<isNotNull property="giftOrder.address">Address,</isNotNull>
+		<isNotNull property="giftOrder.postZip">PostZip,</isNotNull>
 		ADDTIME,
 		UpdateTime)
 		VALUES (#giftOrder.itemId#,
@@ -9492,16 +11131,18 @@
 		#giftOrder.phoneNum#,
 		#giftOrder.remark#,
 		#giftOrder.userName#,
-		   <isNotNull property="giftOrder.provinceName"/>
-   <isNotNull property="giftOrder.cityName"/>
-   <isNotNull property="giftOrder.address"/>
-   <isNotNull property="giftOrder.postZip"/>
-		
+		<isNotNull property="giftOrder.provinceName">#giftOrder.provinceName#,</isNotNull>
+		<isNotNull property="giftOrder.cityName">#giftOrder.cityName#,</isNotNull>
+		<isNotNull property="giftOrder.address">#giftOrder.address#,</isNotNull>
+		<isNotNull property="giftOrder.postZip">#giftOrder.postZip#,</isNotNull>		
 		now(),
 		now())
 
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9536,8 +11177,11 @@
 		now(),
 		now())
 
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9570,8 +11214,11 @@
 		now(),
 		now())
 
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9589,29 +11236,50 @@
 		ADDTIME,
 		UpdateTime)
 		VALUES
-		   <iterate conjunction="," property="orderList"/>
-</insert>
+		<iterate conjunction="," property="orderList">  
+        	 
+            (#orderList[].itemID#,
+            0,
+            #orderList[].bussinessID#,
+			#orderList[].giftName#,
+			#orderList[].exChangePrice#,
+			#orderList[].exchangeType#,
+			now(),
+			0,
+			#orderList[].deliverType#,
+			now(),
+			now())
+        	  
+   	 	</iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_QuestionnaireRecord(GroupID,UserID,UserIP,UserAnswer,TotalScore,AddTime)
 		VALUES(#groupId#, #userId#,#userIp#,#userAnswer#,#totalScore#,NOW());
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DPEvent.EV_SimplePrizeRecord(UserId, UserName, MobileNo, Address, PrizeId, PrizeName, IP, GroupType,GroupId, CityId, EventId, Status)
 		VALUES (#userId#, #userName#, #mobileNo#, #address#, #prizeId#, #prizeName#, #IP#, #groupType#, #groupId#, #cityId#, #eventId#, 1);
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+            SELECT @@IdENTITY AS recordId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EVP_WebModule(EventID,BizData,Status,CustomJS,RawHTML)
 		VALUES(#eventId#, #bizData#,#status#,#customJs#,#rawHtml#);
-		   <selectKey keyProperty="prizeId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="prizeId" resultClass="int">
+			SELECT @@IDENTITY AS prizeId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9642,36 +11310,47 @@
 		#prizeType#,
 		#order#
 		);
-		   <selectKey keyProperty="prizeId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="prizeId" resultClass="int">
+			SELECT @@IDENTITY AS prizeId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_QuestionnaireGroup(EventID,GroupType,LimitType,Memo,ChanceNum,IPLimit,StartTime,EndTime,State)
 		VALUES(#eventId#, #groupType#,#limitType#,#memo#,#chanceNum#,#ipLimit#,#startTime#,#endTime#,#state#);
-		   <selectKey keyProperty="groupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="groupId" resultClass="int">
+			SELECT @@IDENTITY AS groupId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_QuestionnaireRecord(GroupID,UserID,UserIP,UserAnswer,TotalScore,AddTime)
 		VALUES(#groupId#, #userId#,#userIp#,#userAnswer#,#totalScore#,NOW());
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO EV_QuestionnaireResultRule(GroupID,BeginScore,EndScore,ContainsBegin,ContainsEnd,Text,AddTime)
 		VALUES(#groupId#, #beginScore#,#endScore#,#containsBegin#,#containsEnd#,#text#,NOW());
-		   <selectKey keyProperty="resultId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="resultId" resultClass="int">
+			SELECT @@IDENTITY AS resultId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	    INSERT INTO EV_Notice(NoticeType,SenderID,ReceiverID,RecordID,SendContext,Data1,Remark,IP,EventID)
         VALUES(#noticeType#,#senderId#,#receiverId#,#recordId#,#sendContext#,#data1#,#remark#,#ip#,#eventId#)
-              <selectKey keyProperty="noticeId" resultClass="int"/>
-</insert>
+           <selectKey keyProperty="noticeId" resultClass="int">
+			    SELECT @@IDENTITY AS noticeId
+           </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9698,8 +11377,10 @@
           NOW(),
           NOW()
          );
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9711,8 +11392,13 @@
             Status = 0,
             AddTime = NOW()
         
-           <selectKey keyProperty="ValidCodeID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="ValidCodeID" resultClass="integer">
+            
+			SELECT @@IDENTITY
+			AS ValidCodeID
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9726,16 +11412,25 @@
             Status          = #dealGroup.status#,
             AddTime         = NOW()
         
-           <selectKey keyProperty="FlashSaleDealGroupID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="FlashSaleDealGroupID" resultClass="int">
+            
+			SELECT @@IDENTITY
+			AS FlashSaleDealGroupID
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
 	        INSERT INTO TO_FlashSaleDealGroupCity(CityID, DealGroupID, Status, AddTime) VALUES
 	    
-           <iterate conjunction="," property="cityIds"/>
-</insert>
+        <iterate conjunction="," property="cityIds">
+            
+	            (#cityIds[]#, #dealGroupId#, 1, NOW())
+	        
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9745,8 +11440,13 @@
         Identification = #identification#,
         AddTime = NOW()
         
-           <selectKey keyProperty="WannaJoinID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="WannaJoinID" resultClass="integer">
+            
+			SELECT @@IDENTITY
+			AS WannaJoinID
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9760,8 +11460,13 @@
             BeginDate   = #beginDate#,
             AddTime   	= NOW()
         
-           <selectKey keyProperty="WannaJoinUserID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="WannaJoinUserID" resultClass="integer">
+            
+			SELECT @@IDENTITY
+			AS WannaJoinUserID
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9772,8 +11477,13 @@
             MobileNO = #mobileNO#,
             AddTime = NOW()
         
-           <selectKey keyProperty="SmsID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="SmsID" resultClass="integer">
+            
+			SELECT @@IDENTITY
+			AS SmsID
+		    
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9821,8 +11531,10 @@
         #note.isTop#,
         #note.verifyStatus#,
         1)
-           <selectKey keyProperty="noteId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="noteId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS noteId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9830,8 +11542,10 @@
 			(UserID, NoteType, NoteID, Score, Comment, AddDate)
 		VALUES
 			(#log.userId#, #log.noteType#, #log.noteId#, #log.score#, #log.comment#, NOW())
-		   <selectKey keyProperty="logId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="logId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS logId  
+       	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9847,16 +11561,22 @@
 			#randomDCashActivity.status#,
 			#randomDCashActivity.addDate#,
 			#randomDCashActivity.updateDate#)
-			   <selectKey keyProperty="activityId" resultClass="java.lang.Integer"/>
-</insert>
+			<selectKey keyProperty="activityId" resultClass="java.lang.Integer">     
+        		SELECT @@IDENTITY AS activityId
+        	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	    
 	        INSERT INTO TO_GiftCardOrderNumber(UserID,PayOrderID,GiftCardOrderID, ReceiverContactID, Type, GiftCardNumber,Amount,Password,Status,AddTime) VALUES
 	    
-		   <iterate conjunction="," property="numberList"/>
-</insert>
+		<iterate conjunction="," property="numberList">
+	        
+	            (#numberList[].userId#,#numberList[].payOrderId#,#numberList[].giftCardOrderId#, #numberList[].receiverContactId#, #numberList[].type#, #numberList[].giftCardNumber#,#numberList[].amount#,#numberList[].password#,0 , NOW())
+	        
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9864,8 +11584,10 @@
 		(NAME, GMT_CREATE)
 		VALUES
 		(#name:VARCHAR#, now())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int"> 
+ 			SELECT LAST_INSERT_ID() 
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9873,8 +11595,10 @@
 			(EventID, UserID, NoteBody, ADDDATE, UpdateDate, IP, OrigUserID, EventTitle, STATUS)
 		VALUES
 			(#eventId#, #userId#, #noteBody#, NOW(), NOW(), #ip#, #origUserId#, #eventTitle#, #status#)
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY AS eventId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9912,8 +11636,10 @@
 			#group.noteTotal#,
 			#group.weeklyNoteCount#,
 			#group.hitsTotal#)
-			   <selectKey keyProperty="groupId" resultClass="java.lang.Integer"/>
-</insert>
+			<selectKey keyProperty="groupId" resultClass="java.lang.Integer">     
+        		SELECT @@IDENTITY AS groupId  
+        	</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9931,8 +11657,10 @@
 			#medal.beginDate#,
 			#medal.endDate#,
 			NOW())
-			   <selectKey keyProperty="medalId" resultClass="java.lang.Integer"/>
-</insert>
+			<selectKey keyProperty="medalId" resultClass="java.lang.Integer">     
+        		SELECT @@IDENTITY AS medalId  
+        	</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9944,8 +11672,10 @@
 			(#noteType.name#,
 			#noteType.groupId#,
 			#noteType.order#)
-		   <selectKey keyProperty="typeId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="typeId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS typeId  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9957,8 +11687,10 @@
 			OrderID
 		)
 		VALUES
-		   <iterate conjunction="," property="noteList"/>
-</insert>
+		<iterate conjunction="," property="noteList">
+			(#noteList[].cityId#, #noteList[].noteId#, #noteList[].noteTitle#, #noteList[].versionId#, #noteList[].orderId#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9977,8 +11709,10 @@
 			#userGoldDetail.detail#,
 			now()
 			)
-			   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -9992,8 +11726,10 @@
 			#groupHonorTitle.beginDate#,
 			#groupHonorTitle.endDate#,
 			#groupHonorTitle.addTime#)
-			   <selectKey keyProperty="titleId" resultClass="java.lang.Integer"/>
-</insert>
+			<selectKey keyProperty="titleId" resultClass="java.lang.Integer">     
+        		SELECT @@IDENTITY AS titleId  
+        	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10003,8 +11739,10 @@
 			RecommendReason
 		)
 		VALUES
-		   <iterate conjunction="," property="groupList"/>
-</insert>
+		<iterate conjunction="," property="groupList">
+		(#groupList[].groupId#, #cityId#, #groupList[].recommendReason#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10025,8 +11763,13 @@
 			AddTime		= NOW(),
 			Type        = #giftCardOrder.type#
 		
-		   <selectKey keyProperty="GiftCardOrderID" resultClass="Long"/>
-</insert>
+		<selectKey keyProperty="GiftCardOrderID" resultClass="Long">
+		
+			SELECT @@IDENTITY
+			AS GiftCardOrderID
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10040,8 +11783,14 @@
 			UserIP = #giftCardReceiveLog.userIp#,
 			AddTime = NOW()
 	
-		   <selectKey keyProperty="GiftCardReceiveLogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="GiftCardReceiveLogID" resultClass="int">
+		
+			SELECT @@IDENTITY
+			AS GiftCardReceiveLogID
+		
+
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10052,8 +11801,10 @@
     		AddUserID,
     		AddTime) 
     	VALUES 
-		   <iterate conjunction="," property="groupLinkList"/>
-</insert>
+		<iterate conjunction="," property="groupLinkList">
+			(#groupLinkList[].groupId#, #groupLinkList[].linkUrl#, #groupLinkList[].linkName#, #groupLinkList[].addUserId#, NOW())
+		</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10070,8 +11821,10 @@
 		#groupPic.status#,
 		NOW(),
 		NOW())
-		   <selectKey keyProperty="picId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="picId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS picId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10089,8 +11842,10 @@
 			NOW(),
 			#apply.applyUserId#,
 			#apply.groupTypeFlag#)
-    	   <selectKey keyProperty="applyId" resultClass="java.lang.Integer"/>
-</insert>
+    	<selectKey keyProperty="applyId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS applyId  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10100,8 +11855,9 @@
 			Recommend	
 		) 
 		VALUES 
-		   <iterate conjunction="," property="ids"/>
-
+		<iterate conjunction="," property="ids">
+			(#ids[]#, 0, #recType#)
+		</iterate>
 		ON DUPLICATE KEY UPDATE Recommend = #recType#
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -10111,8 +11867,10 @@
 			(UserID, NoteType, NoteID, Score, Comment, AddDate)
 		VALUES
 			(#log.userId#, #log.noteType#, #log.noteId#, #log.score#, #log.comment#, NOW())
-		   <selectKey keyProperty="logId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="logId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS logId  
+       	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10122,8 +11880,10 @@
 			NoteID
 		)
 		VALUES
-		   <iterate conjunction="," property="noteList"/>
-</insert>
+		<iterate conjunction="," property="noteList">
+			(#noteList[].cityId#, #noteList[].categoryId#, #noteList[].noteId#)
+		</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10132,8 +11892,13 @@
         task_id,connectprops,parameter_map,type,condition_column
         )
         VALUES
-           <iterate conjunction=","/>
-</insert>
+        <iterate conjunction=",">
+            (
+            #load[].taskId#,#load[].connectProps#,#load[].parameterMapStr#,#load[].type#,
+            #load[].conditionCol#
+            )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10142,8 +11907,12 @@
         task_id,connectprops,parameter_map,type
         )
         VALUES
-           <iterate conjunction=","/>
-</insert>
+        <iterate conjunction=",">
+            (
+            #load[].taskId#,#load[].connectProps#,#load[].parameterMapStr#,#load[].type#
+            )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10154,8 +11923,11 @@
 		(#cityName#,
 		#dataName#, #houseNum#, #type#, #lng#, #lat#, #detailAddress#, NOW(),
 		NOW(), 1)
-		   <selectKey keyProperty="PoiId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="PoiId" resultClass="int">
+			SELECT @@IDENTITY
+			AS PoiId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10164,8 +11936,10 @@
     		GroupID,
     		RecommendReason) 
 		VALUES 
-		   <iterate conjunction="," property="recommendList"/>
-</insert>
+		<iterate conjunction="," property="recommendList">
+			(#recommendList[].cityId#, #recommendList[].groupId#, #recommendList[].recommendReason#)
+		</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10173,8 +11947,10 @@
 		(UserID, DayID, ConfigID, Score, ADDDATE, Remark)
 		VALUES
 		(#userId#, #dayId#, #configId#, #score#, NOW(), #remark#)
-		   <selectKey keyProperty="logId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="logId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS logId  
+       	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10232,8 +12008,10 @@
 		#event.extendOption3#,
 		#event.auditingDate#,
 		#event.recoverDate#)
-		   <selectKey keyProperty="eventId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10241,24 +12019,33 @@
 			DP_GroupNoteLike 
 		VALUES(
 			NULL
-			   <isNotEqual compareValue="0" prepend="," property="userId"/>
-   <isNotEqual compareValue="0" prepend="," property="groupId"/>
-   <isNotEqual compareValue="0" prepend="," property="noteId"/>
-
+			<isNotEqual compareValue="0" prepend="," property="userId">
+			#userId#
+			</isNotEqual>
+			<isNotEqual compareValue="0" prepend="," property="groupId">
+			#groupId#
+			</isNotEqual>
+			<isNotEqual compareValue="0" prepend="," property="noteId">
+			#noteId#
+			</isNotEqual>
 			,NOW()
 			,NOW()
 			,1
 		)
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO DP_GroupOperateLog
     		(OperateType, UserID, UserIP, SystemID, GroupID, NoteType, NoteID, ReferField, LogInfo, Comment, AddDate) 
     	VALUES 
-    	   <iterate conjunction="," property="logList"/>
-</insert>
+    	<iterate conjunction="," property="logList">
+    		(#logList[].operateType#, #logList[].userId#, #logList[].userIP#, #logList[].systemId#, #logList[].groupId#, #logList[].noteType#, #logList[].noteId#, #logList[].referField#, #logList[].logInfo#, #logList[].comment#, NOW())
+    	</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10270,8 +12057,10 @@
 			OrderID
 		)
 		VALUES
-		   <iterate conjunction="," property="noteList"/>
-</insert>
+		<iterate conjunction="," property="noteList">
+			(#cityId#, #noteList[].noteId#, #noteList[].noteTitle#, #noteList[].versionId#, #noteList[].orderId#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10289,8 +12078,11 @@
 			TimeDesc,
 			ADDDATE)
 		VALUES
-		   <iterate conjunction="," property="noteList"/>
-</insert>
+		<iterate conjunction="," property="noteList">
+			(#versionId#, #cityId#, #recType#, #noteList[].url#, #noteList[].noteId#, #noteList[].noteTitle#, #noteList[].groupPermaLink#,
+			#noteList[].picUrl#, #noteList[].summary#, #noteList[].tagType#, #noteList[].timeDesc#, NOW())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10298,12 +12090,17 @@
 		MP_Geocoding(City,DataName,Number,type,GLng,GLat,DetailAddress,AddTime,UpdateTime,CityID)
 		values
 		(#cityName#,#dataName#,#houseNum#,#type#,#lng#,#lat#,#detailAddress#,NOW(),NOW(),1)
-		   <selectKey keyProperty="PoiId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="PoiId" resultClass="int">
+			SELECT @@IDENTITY
+			AS PoiId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="pre" keyProperty="table_id" resultClass="java.lang.Integer"/>
 
+		<selectKey type="pre" keyProperty="table_id" resultClass="java.lang.Integer">
+			SELECT hex(sha1(concat(#schema_name#,#table_name#,#db_name#,#storage_type#)))%(1024*1024*1024-1) as table_id
+		</selectKey>
 		INSERT INTO
 		mc_table_info
 		(table_id,schema_name,table_name,storage_type,db_name,table_owner,table_desc,table_size,refresh_cycle,refresh_type,refresh_datum_date,refresh_offset,add_time,update_time,is_validate)
@@ -10319,24 +12116,32 @@
 		INSERT INTO mc_column_info
 		(column_id,table_id,column_name,column_type,column_desc,column_rn,add_time,update_time,is_partition_column)
 		VALUES
-		   <iterate conjunction=","/>
-</insert>
+		<iterate conjunction=",">
+            (#McColumnInfo[].column_id#,#McColumnInfo[].table_id#,#McColumnInfo[].column_name#,
+            #McColumnInfo[].column_type#,#McColumnInfo[].column_desc#,#McColumnInfo[].column_rn#,
+            CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,#McColumnInfo[].is_partition_column#)
+        </iterate>
+		</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_config (id,key1,key2,key3,key4,exception,duration,max,alarm_time,messageMax,messageAlarmTime,messageEnable) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#exception#,#duration#,#max#,#alarmTime#,#messageMax#,#messageAlarmTime#,#messageEnable#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_record (id,time,alarmTime,content,alarmId,emailState) values
     	(#id#,#time#,#alarmTime#,#content#,#alarmId#,#emailState#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10344,8 +12149,10 @@
     	insert into jrobin_dynamic_key (id,key_name,key_value,datasource_id,value) values
     	(#id#,#keyName#,#keyValue#,#dsID#,#sumValue#)
     	
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10379,8 +12186,10 @@
 			now()
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10401,16 +12210,34 @@
 		)
 		VALUES
 		
-          <iterate conjunction=","/>
-</insert>
+       <iterate conjunction=",">
+       		
+		(
+			#key1Str#,
+			#key2Str#,
+			#key3Str#,
+			#key4Str#,
+			#hostNameStr#,
+			#exception#,
+			#message#,
+			#stack#,
+			#num#,
+			#timeCurrent#,
+			now()
+		)
+		
+        </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value) values
     	(#id#,#keyName#,#keyValue#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10418,48 +12245,60 @@
     
     	insert into loginfo (id,key1,key2,key3,key4,host_name,execution_num,value_min,value_avg,value_max,value_sum,value_last,time_current) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#host_name#,#execution_num#,#value_min#,#value_avg#,#value_max#,#value_sum#,#value_last#,#time_current#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource (id,name,key1,key2,key3,key4,data_type,host_names,step,rrd_path,timespan,is_active,avg_accum_type,projectId,data_choice) values
     	(#id#,#name#,#key1#,#key2#,#key3#,#key4#,#dataType#,#hostNames#,#step#,#rrdPath#,#timespan#,#isActive#,#avgAccumType#,#projectId#,#dataChoice#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_host (id,name,ip,port,user_name,user_password,path,isFetch,projectId,weight,type,port1,env) values
     	(#id#,#name#,#ip#,#port#,#userName#,#userPsw#,#path#,#isFetch#,#projectId#,#weight#,#type#,#port1#,#env#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_rra (id,name,cf,xff,steps,rows,timespan) values
     	(#id#,#name#,#cf#,#xff#,#steps#,#rows#,#timespan#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef_item (id,cdef_id,type,value) values
     	(#id#,#cdefId#,#type#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource_item (id,datasource_type,heart_beat,max_value,min_value,datasource_id,internal_name) values
     	(#id#,#datasourceType#,#heartBeat#,#maxValue#,#minValue#,#datasourceId#,#internalName#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10491,8 +12330,10 @@
 			#modifyTime#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10506,64 +12347,80 @@
 			#createTime#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_config (id,key1,key2,key3,key4,exception,duration,max,alarm_time,messageMax,messageAlarmTime,messageEnable) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#exception#,#duration#,#max#,#alarmTime#,#messageMax#,#messageAlarmTime#,#messageEnable#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_record (id,time,alarmTime,content,alarmId,emailState) values
     	(#id#,#time#,#alarmTime#,#content#,#alarmId#,#emailState#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef (id,name) values
     	(#id#,#name#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef (id,name) values
     	(#id#,#name#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource_item (id,datasource_type,heart_beat,max_value,min_value,datasource_id,internal_name) values
     	(#id#,#datasourceType#,#heartBeat#,#maxValue#,#minValue#,#datasourceId#,#internalName#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph (id,text,name,title,image_format_id,height,width,upper_limit,lower_limit,vertical_label,grid_step,label_factor,projectId) values
     	(#id#,#text#,#name#,#title#,#imageFormateId#,#height#,#width#,#upperLimit#,#lowerLimit#,#verticalLabel#,#gridStep#,#labelFactor#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_host (id,name,ip,port,user_name,user_password,path,isFetch,projectId,weight,type,port1,env) values
     	(#id#,#name#,#ip#,#port#,#userName#,#userPsw#,#path#,#isFetch#,#projectId#,#weight#,#type#,#port1#,#env#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10574,8 +12431,10 @@
 		(#entity.maxInventory#,#entity.soldQuantity#,#entity.couponOfferId#,#entity.createTime#,#entity.lastUpdateTime#,#entity.version#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10585,8 +12444,10 @@
 		VALUES
 		(#entity.metricItemId#,#entity.couponOffer.id#,#entity.redeemStrategyExpression#,#entity.redeemConditionExpression#,#entity.redeemStrategyId#,#entity.createTime#,#entity.lastUpdateTime#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10609,24 +12470,30 @@
         NOW(),
         NOW()
         )
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph (id,text,name,title,image_format_id,height,width,upper_limit,lower_limit,vertical_label,grid_step,label_factor,projectId) values
     	(#id#,#text#,#name#,#title#,#imageFormateId#,#height#,#width#,#upperLimit#,#lowerLimit#,#verticalLabel#,#gridStep#,#labelFactor#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef_item (id,cdef_id,type,value) values
     	(#id#,#cdefId#,#type#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10658,16 +12525,20 @@
 			now()
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource_item (id,datasource_type,heart_beat,max_value,min_value,datasource_id,internal_name) values
     	(#id#,#datasourceType#,#heartBeat#,#maxValue#,#minValue#,#datasourceId#,#internalName#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10675,8 +12546,10 @@
     
     	insert into loginfo (id,key1,key2,key3,key4,host_name,execution_num,value_min,value_avg,value_max,value_sum,value_last,time_current) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#host_name#,#execution_num#,#value_min#,#value_avg#,#value_max#,#value_sum#,#value_last#,#time_current#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10684,16 +12557,20 @@
     
     	insert into loginfo (id,key1,key2,key3,key4,host_name,execution_num,value_min,value_avg,value_max,value_sum,value_last,time_current) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#host_name#,#execution_num#,#value_min#,#value_avg#,#value_max#,#value_sum#,#value_last#,#time_current#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value,des,keyType,projectId) values
     	(#id#,#keyName#,#keyValue#,#des#,#keyType#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10714,32 +12591,55 @@
 		)
 		VALUES
 		
-          <iterate conjunction=","/>
-</insert>
+       <iterate conjunction=",">
+       
+		(
+			#v[].key1#,
+			#v[].key2#,
+			#v[].key3#,
+			#v[].key4#,
+			#v[].hostName#,
+			#v[].valueMax#,
+			#v[].valueMin#,
+			#v[].valueAvg#,
+			#v[].valueLast#,
+			#v[].valueSum#,
+			#v[].timeCurrent#,
+			now()
+		)
+		
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_color (id,hex) values
     	(#id#,#hex#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_config (id,key1,key2,key3,key4,exception,duration,max,alarm_time) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#exception#,#duration#,#max#,#alarmTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_record (id,time,alarmTime,content,alarmId,emailState) values
     	(#id#,#time#,#alarmTime#,#content#,#alarmId#,#emailState#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10747,72 +12647,90 @@
     	insert into jrobin_dynamic_key (id,key_name,key_value,datasource_id,value) values
     	(#id#,#keyName#,#keyValue#,#dsID#,#sumValue#)
     	
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value,des,keyType,projectId) values
     	(#id#,#keyName#,#keyValue#,#des#,#keyType#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_config (id,key1,key2,key3,key4,exception,duration,max,alarm_time) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#exception#,#duration#,#max#,#alarmTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_record (id,time,alarmTime,content,alarmId,emailState) values
     	(#id#,#time#,#alarmTime#,#content#,#alarmId#,#emailState#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef (id,name) values
     	(#id#,#name#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_color (id,hex) values
     	(#id#,#hex#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph_item (id,graph_id,datasource_id,color_id,alpha,graph_item_type,cdef_id,consolidation_id,text_format,sequence,value) values
     	(#id#,#graphId#,#datasourceId#,#colorId#,#alpha#,#graphItemType#,#cdefId#,#consolidationId#,#textFormat#,#sequence#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource (id,name,key1,key2,key3,key4,data_type,host_names,step,rrd_path,timespan,is_active,avg_accum_type,projectId,data_choice) values
     	(#id#,#name#,#key1#,#key2#,#key3#,#key4#,#dataType#,#hostNames#,#step#,#rrdPath#,#timespan#,#isActive#,#avgAccumType#,#projectId#,#dataChoice#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_host (id,name,ip,port,user_name,user_password,path,isFetch,projectId,weight,type,port1,env) values
     	(#id#,#name#,#ip#,#port#,#userName#,#userPsw#,#path#,#isFetch#,#projectId#,#weight#,#type#,#port1#,#env#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10836,8 +12754,30 @@
 		)
 		VALUES
 			
-		          <iterate conjunction=","/>
-</insert>
+		       <iterate conjunction=",">
+                
+
+		(
+			#v[].serviceName#,
+			#v[].methodName#,
+			#v[].providerName#,
+			#v[].consumerName#,
+			#v[].providerIp#,
+			#v[].consumerIp#,
+			#v[].code#,
+			#v[].count#,
+			#v[].valueMax#,
+			#v[].valueMin#,
+			#v[].valueAvg#,
+			#v[].valueLast#,
+			#v[].valueSum#,
+			#v[].timeCurrent#,
+			now()
+		)
+		 		 
+        </iterate>
+		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10869,8 +12809,10 @@
 			#modifyTime#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10904,8 +12846,10 @@
 			now()
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10926,16 +12870,34 @@
 		)
 		VALUES
 		
-          <iterate conjunction=","/>
-</insert>
+       <iterate conjunction=",">
+       		
+		(
+			#key1Str#,
+			#key2Str#,
+			#key3Str#,
+			#key4Str#,
+			#hostNameStr#,
+			#exception#,
+			#message#,
+			#stack#,
+			#num#,
+			#timeCurrent#,
+			now()
+		)
+		
+        </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef_item (id,cdef_id,type,value) values
     	(#id#,#cdefId#,#type#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -10967,56 +12929,70 @@
 			#modifyTime#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_config (id,key1,key2,key3,key4,exception,duration,max,alarm_time) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#exception#,#duration#,#max#,#alarmTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_record (id,time,alarmTime,content,alarmId,emailState) values
     	(#id#,#time#,#alarmTime#,#content#,#alarmId#,#emailState#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph (id,text,name,title,image_format_id,height,width,upper_limit,lower_limit,vertical_label,grid_step,label_factor,projectId) values
     	(#id#,#text#,#name#,#title#,#imageFormateId#,#height#,#width#,#upperLimit#,#lowerLimit#,#verticalLabel#,#gridStep#,#labelFactor#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value,des,keyType,projectId) values
     	(#id#,#keyName#,#keyValue#,#des#,#keyType#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph (id,text,name,title,image_format_id,height,width,upper_limit,lower_limit,vertical_label,grid_step,label_factor,projectId) values
     	(#id#,#text#,#name#,#title#,#imageFormateId#,#height#,#width#,#upperLimit#,#lowerLimit#,#verticalLabel#,#gridStep#,#labelFactor#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph_item (id,graph_id,datasource_id,color_id,alpha,graph_item_type,cdef_id,consolidation_id,text_format,sequence,value) values
     	(#id#,#graphId#,#datasourceId#,#colorId#,#alpha#,#graphItemType#,#cdefId#,#consolidationId#,#textFormat#,#sequence#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11037,32 +13013,55 @@
 		)
 		VALUES
 		
-          <iterate conjunction=","/>
-</insert>
+       <iterate conjunction=",">
+       
+		(
+			#v[].key1#,
+			#v[].key2#,
+			#v[].key3#,
+			#v[].key4#,
+			#v[].hostName#,
+			#v[].valueMax#,
+			#v[].valueMin#,
+			#v[].valueAvg#,
+			#v[].valueLast#,
+			#v[].valueSum#,
+			#v[].timeCurrent#,
+			now()
+		)
+		
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_config (id,key1,key2,key3,key4,exception,duration,max,alarm_time,messageMax,messageAlarmTime,messageEnable) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#exception#,#duration#,#max#,#alarmTime#,#messageMax#,#messageAlarmTime#,#messageEnable#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_record (id,time,alarmTime,content,alarmId,emailState) values
     	(#id#,#time#,#alarmTime#,#content#,#alarmId#,#emailState#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_color (id,hex) values
     	(#id#,#hex#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11070,16 +13069,20 @@
     	insert into jrobin_dynamic_key (id,key_name,key_value,datasource_id,value) values
     	(#id#,#keyName#,#keyValue#,#dsID#,#sumValue#)
     	
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph_item (id,graph_id,datasource_id,color_id,alpha,graph_item_type,cdef_id,consolidation_id,text_format,sequence,value) values
     	(#id#,#graphId#,#datasourceId#,#colorId#,#alpha#,#graphItemType#,#cdefId#,#consolidationId#,#textFormat#,#sequence#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11103,8 +13106,30 @@
 		)
 		VALUES
 			
-		          <iterate conjunction=","/>
-</insert>
+		       <iterate conjunction=",">
+                
+
+		(
+			#v[].serviceName#,
+			#v[].methodName#,
+			#v[].providerName#,
+			#v[].consumerName#,
+			#v[].providerIp#,
+			#v[].consumerIp#,
+			#v[].code#,
+			#v[].count#,
+			#v[].valueMax#,
+			#v[].valueMin#,
+			#v[].valueAvg#,
+			#v[].valueLast#,
+			#v[].valueSum#,
+			#v[].timeCurrent#,
+			now()
+		)
+		 		 
+        </iterate>
+		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11114,24 +13139,30 @@
 		VALUES
 		(#entity.couponOffer.id#,#entity.shopId#,#entity.createTime#,#entity.lastUpdateTime#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_rra (id,name,cf,xff,steps,rows,timespan) values
     	(#id#,#name#,#cf#,#xff#,#steps#,#rows#,#timespan#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value) values
     	(#id#,#keyName#,#keyValue#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11163,16 +13194,20 @@
 			now()
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource_item (id,datasource_type,heart_beat,max_value,min_value,datasource_id,internal_name) values
     	(#id#,#datasourceType#,#heartBeat#,#maxValue#,#minValue#,#datasourceId#,#internalName#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11204,24 +13239,30 @@
 			now()
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource (id,name,key1,key2,key3,key4,data_type,host_names,step,rrd_path,timespan,is_active,avg_accum_type,projectId,data_choice) values
     	(#id#,#name#,#key1#,#key2#,#key3#,#key4#,#dataType#,#hostNames#,#step#,#rrdPath#,#timespan#,#isActive#,#avgAccumType#,#projectId#,#dataChoice#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_rra (id,name,cf,xff,steps,rows,timespan) values
     	(#id#,#name#,#cf#,#xff#,#steps#,#rows#,#timespan#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11255,8 +13296,10 @@
 			now()
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11277,24 +13320,44 @@
 		)
 		VALUES
 		
-          <iterate conjunction=","/>
-</insert>
+       <iterate conjunction=",">
+       		
+		(
+			#key1Str#,
+			#key2Str#,
+			#key3Str#,
+			#key4Str#,
+			#hostNameStr#,
+			#exception#,
+			#message#,
+			#stack#,
+			#num#,
+			#timeCurrent#,
+			now()
+		)
+		
+        </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource_item (id,datasource_type,heart_beat,max_value,min_value,datasource_id,internal_name) values
     	(#id#,#datasourceType#,#heartBeat#,#maxValue#,#minValue#,#datasourceId#,#internalName#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_rra (id,name,cf,xff,steps,rows,timespan) values
     	(#id#,#name#,#cf#,#xff#,#steps#,#rows#,#timespan#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11305,8 +13368,10 @@
 		(#entity.title#,#entity.description#,#entity.effectiveDateExpression#,#entity.createTime#,#entity.lastUpdateTime#,#entity.version#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11390,24 +13455,30 @@
         NeedInvoice = #hotelOrder.needInvoice#,
         InvoiceId = #hotelOrder.invoiceId#
 
-           <selectKey keyProperty="OrderID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="OrderID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS OrderID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_host (id,name,ip,port,user_name,user_password,path,isFetch,projectId,weight,type,port1,env) values
     	(#id#,#name#,#ip#,#port#,#userName#,#userPsw#,#path#,#isFetch#,#projectId#,#weight#,#type#,#port1#,#env#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_host (id,name,ip,port,user_name,user_password,path,isFetch,projectId,weight,type,port1,env) values
     	(#id#,#name#,#ip#,#port#,#userName#,#userPsw#,#path#,#isFetch#,#projectId#,#weight#,#type#,#port1#,#env#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11431,32 +13502,60 @@
 		)
 		VALUES
 			
-		          <iterate conjunction=","/>
-</insert>
+		       <iterate conjunction=",">
+                
+
+		(
+			#v[].serviceName#,
+			#v[].methodName#,
+			#v[].providerName#,
+			#v[].consumerName#,
+			#v[].providerIp#,
+			#v[].consumerIp#,
+			#v[].code#,
+			#v[].count#,
+			#v[].valueMax#,
+			#v[].valueMin#,
+			#v[].valueAvg#,
+			#v[].valueLast#,
+			#v[].valueSum#,
+			#v[].timeCurrent#,
+			now()
+		)
+		 		 
+        </iterate>
+		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource (id,name,key1,key2,key3,key4,data_type,host_names,step,rrd_path,timespan,is_active,avg_accum_type,projectId,data_choice) values
     	(#id#,#name#,#key1#,#key2#,#key3#,#key4#,#dataType#,#hostNames#,#step#,#rrdPath#,#timespan#,#isActive#,#avgAccumType#,#projectId#,#dataChoice#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph_item (id,graph_id,datasource_id,color_id,alpha,graph_item_type,cdef_id,consolidation_id,text_format,sequence,value) values
     	(#id#,#graphId#,#datasourceId#,#colorId#,#alpha#,#graphItemType#,#cdefId#,#consolidationId#,#textFormat#,#sequence#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value) values
     	(#id#,#keyName#,#keyValue#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11470,56 +13569,70 @@
 			#createTime#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef (id,name) values
     	(#id#,#name#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef (id,name) values
     	(#id#,#name#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef_item (id,cdef_id,type,value) values
     	(#id#,#cdefId#,#type#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_color (id,hex) values
     	(#id#,#hex#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph (id,text,name,title,image_format_id,height,width,upper_limit,lower_limit,vertical_label,grid_step,label_factor,projectId) values
     	(#id#,#text#,#name#,#title#,#imageFormateId#,#height#,#width#,#upperLimit#,#lowerLimit#,#verticalLabel#,#gridStep#,#labelFactor#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph_item (id,graph_id,datasource_id,color_id,alpha,graph_item_type,cdef_id,consolidation_id,text_format,sequence,value) values
     	(#id#,#graphId#,#datasourceId#,#colorId#,#alpha#,#graphItemType#,#cdefId#,#consolidationId#,#textFormat#,#sequence#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11527,32 +13640,40 @@
     	insert into jrobin_dynamic_key (id,key_name,key_value,datasource_id,value) values
     	(#id#,#keyName#,#keyValue#,#dsID#,#sumValue#)
     	
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_host (id,name,ip,port,user_name,user_password,path,isFetch,projectId,weight,type,port1,env) values
     	(#id#,#name#,#ip#,#port#,#userName#,#userPsw#,#path#,#isFetch#,#projectId#,#weight#,#type#,#port1#,#env#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef_item (id,cdef_id,type,value) values
     	(#id#,#cdefId#,#type#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_color (id,hex) values
     	(#id#,#hex#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11560,24 +13681,30 @@
     	insert into jrobin_dynamic_key (id,key_name,key_value,datasource_id,value) values
     	(#id#,#keyName#,#keyValue#,#dsID#,#sumValue#)
     	
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value,des,keyType,projectId) values
     	(#id#,#keyName#,#keyValue#,#des#,#keyType#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_rra (id,name,cf,xff,steps,rows,timespan) values
     	(#id#,#name#,#cf#,#xff#,#steps#,#rows#,#timespan#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11591,24 +13718,30 @@
 			#createTime#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource (id,name,key1,key2,key3,key4,data_type,host_names,step,rrd_path,timespan,is_active,avg_accum_type,projectId,data_choice) values
     	(#id#,#name#,#key1#,#key2#,#key3#,#key4#,#dataType#,#hostNames#,#step#,#rrdPath#,#timespan#,#isActive#,#avgAccumType#,#projectId#,#dataChoice#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value,des,keyType,projectId) values
     	(#id#,#keyName#,#keyValue#,#des#,#keyType#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11629,8 +13762,25 @@
 		)
 		VALUES
 		
-          <iterate conjunction=","/>
-</insert>
+       <iterate conjunction=",">
+       
+		(
+			#v[].key1#,
+			#v[].key2#,
+			#v[].key3#,
+			#v[].key4#,
+			#v[].hostName#,
+			#v[].valueMax#,
+			#v[].valueMin#,
+			#v[].valueAvg#,
+			#v[].valueLast#,
+			#v[].valueSum#,
+			#v[].timeCurrent#,
+			now()
+		)
+		
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11648,8 +13798,10 @@
 			 #endDate#,
 			 #isActive#,
 			 #addTime#)
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+			SELECT @@IDENTITY AS LogID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11657,15 +13809,19 @@
 			INSERT INTO MC_MemberCardScoreLog(MemberCardID, LogType, Score, Comment, ReferLogID, Status, IsActive, AddTime, AdminID, AdminName)
 			VALUES(#memberCardId#, #logType#, #score#, #comment#, #referLogId#, #status#, #isActive#, #addTime#, #adminId#, #adminName#)
 			
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+			SELECT @@IDENTITY AS LogID   
+	  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 				
 		INSERT INTO MC_MemberCardUserFeed(UserID,FeedID,STATUS,IsLike,IsUse,ADDTIME,UpdateTime) 
 			SELECT	DISTINCT u.UserID, #feedId#, 1, 0, 0, NOW(), NOW() FROM MC_MemberCardUser u WHERE u.Status=2 AND u.MemberCardID IN
-			   <iterate open="(" conjunction="," property="memberCardIdList" close=")"/>
-</insert>
+			<iterate open="(" conjunction="," property="memberCardIdList" close=")">
+	    			#memberCardIdList[]#
+	    	</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11683,8 +13839,10 @@
 			 #consumeDate#, 
 			 #addTime#, 
 			 #updateTime#)
-		   <selectKey keyProperty="ReportID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ReportID" resultClass="int">     
+			SELECT @@IDENTITY AS ReportID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11693,16 +13851,32 @@
 		RemindMsg, RemindStatus, RemindDate, AddTime)
 		VALUES
 		
-		   <iterate conjunction="," property="messageList"/>
-</insert>
+		<iterate conjunction="," property="messageList">
+		
+			(#messageList[].receiptAccountID#,
+			#messageList[].cardProductID#,
+			#messageList[].userID#,
+			#messageList[].remindType#,
+			#messageList[].expiredDate#,
+			#messageList[].remindMsg#,
+			#messageList[].remindStatus#,
+			#messageList[].remindDate#,
+			#addTime#)
+		
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
   
 	     
 	        INSERT INTO MC_MemberCardNumber(CardNO,Type,AddTime) VALUES 
 	      
-	       <iterate conjunction="," property="cardNOList"/>
-</insert>
+	    <iterate conjunction="," property="cardNOList">  
+	         
+	            (#cardNOList[].cardNO#, #cardNOList[].type#, NOW())
+	          
+	    </iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11713,16 +13887,21 @@
 	ON DUPLICATE KEY UPDATE
 	RecommendCards = VALUES(RecommendCards),
 	UpdateTime = VALUES(UpdateTime)
-	   <selectKey keyProperty="MembercardID" resultClass="int"/>
-</insert>
+	<selectKey keyProperty="MembercardID" resultClass="int">
+		SELECT @@IDENTITY AS MemberCardID
+	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	INSERT INTO MC_MemberCardRecommend
 	(MembercardID, CityID,RecommendCards,AddTime, UpdateTime)
 	VALUES
-	   <iterate conjunction="," property="reportList"/>
-
+	<iterate conjunction="," property="reportList">
+		(#reportList[].membercardId#, #reportList[].cityId#,
+		#reportList[].recommendCards#,
+		NOW(), NOW())
+	</iterate>
 	ON DUPLICATE KEY UPDATE
 	RecommendCards = VALUES(RecommendCards),
 	UpdateTime = VALUES(UpdateTime)
@@ -11734,28 +13913,36 @@
 			DP_Word(Word,WordType,SensitiveType,AddTime,BeginDate,EndDate,AddAdminID,LastTime,LastAdminID,Memo)
 		values
 			(#word#,#wordType#,#sensitiveType#,now(),#beginDate#,#endDate#,#addAdminID#,now(),#lastAdminID#,#memo#)
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO resource(name, code, url)
         VALUES(#name#, #code#, #url#)
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT IGNORE INTO role_privilege(roleId, privilegeId)
     	VALUES
-    	   <iterate conjunction="," property="privilegeIds"/>
-</insert>
+    	<iterate conjunction="," property="privilegeIds">
+    		(#roleId#, #privilegeIds[]#)
+    	</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO role(name, createUserId, createTime, remark, internal) VALUES(#name#, #createUserId#, NOW(), #remark#, #internal#)
-    	   <selectKey resultClass="int"/>
-</insert>
+    	<selectKey resultClass="int">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11788,8 +13975,10 @@
         )
         
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11797,8 +13986,10 @@
     	insert into team(name,createTime,modifyTime,seq) 
     	values(#name#,#createTime#,#modifyTime#,#seq#);
 		
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11806,8 +13997,10 @@
 		insert into user(loginName, name, email, system, createTime, locked, onlineConfigView, password) 
 		values(#loginName#, #name#, #email#, #system#, NOW(), #locked#, #onlineConfigView#, #password#)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11850,8 +14043,10 @@
         )
         
 
-           <selectKey keyProperty="relationId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="relationId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11874,8 +14069,10 @@
         )
         
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11898,8 +14095,10 @@
         )
         
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11907,16 +14106,20 @@
     	insert into environment(name,label,ips, online, createUserId, createTime, modifyUserId, modifyTime,seq) 
     	values(#name#,#label#,#ips#, #online#, #createUserId#, NOW(), #modifyUserId#, NOW(),#seq#);
 		
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	
     	insert into job_exec_time(jobName,switcher,failMail) values(#jobName#,#switcher#,#failMail#);
 		
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11924,8 +14127,10 @@
     	insert into product(name,teamId,productLeaderId,createTime,modifyTime,seq) 
     	values(#name#,#teamId#,#productLeaderId#,#createTime#,#modifyTime#,#seq#);
 		
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11950,8 +14155,10 @@
         )
         
 
-           <selectKey keyProperty="commentId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="commentId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -11984,8 +14191,10 @@
         )
         
 
-           <selectKey keyProperty="detectionId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="detectionId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12026,41 +14235,41 @@
         )
         
 
-           <selectKey keyProperty="launchId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="launchId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO config(`key`, `desc`, type, projectId, createUserId, modifyUserId, createTime, modifyTime, private, seq)
     	VALUES(#key#, #desc#, #type#, #projectId#, #createUserId#, #modifyUserId#, 
-    	   <isNotNull property="createTime"/>
-   <isNull property="createTime"/>
-, 
-    	   <isNotNull property="modifyTime"/>
-   <isNull property="modifyTime"/>
-, #privatee#, #seq#)
-    	   <selectKey resultClass="int"/>
-</insert>
+    	<isNotNull property="createTime">#createTime#</isNotNull><isNull property="createTime">NOW()</isNull>, 
+    	<isNotNull property="modifyTime">#modifyTime#</isNotNull><isNull property="modifyTime">NOW()</isNull>, #privatee#, #seq#)
+    	<selectKey resultClass="int">    
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO config_instance(configId, envId, value, refkey, context, contextmd5, createUserId, modifyUserId, createTime, modifyTime, `desc`, seq)
     	VALUES(#configId#, #envId#, #value#, #refkey#, #context#, #contextmd5#, #createUserId#, #modifyUserId#, 
-    	   <isNotNull property="createTime"/>
-   <isNull property="createTime"/>
-, 
-    	   <isNotNull property="modifyTime"/>
-   <isNull property="modifyTime"/>
-, #desc#, #seq#)
-    	   <selectKey resultClass="int"/>
-</insert>
+    	<isNotNull property="createTime">#createTime#</isNotNull><isNull property="createTime">NOW()</isNull>, 
+    	<isNotNull property="modifyTime">#modifyTime#</isNotNull><isNull property="modifyTime">NOW()</isNull>, #desc#, #seq#)
+    	<selectKey resultClass="int">    
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO config_status(configId, envId, createUserId, createTime, modifyUserId, modifyTime)
     	VALUES(#configId#, #envId#, #createUserId#, NOW(), #modifyUserId#, NOW())
-    	   <selectKey resultClass="int"/>
-</insert>
+    	<selectKey resultClass="int">    
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12117,8 +14326,10 @@
         )
         
 
-           <selectKey keyProperty="materialId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="materialId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12145,8 +14356,10 @@
         )
         
 
-           <selectKey keyProperty="strategyId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="strategyId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12181,36 +14394,48 @@
         )
         
 
-           <selectKey keyProperty="promoPlanId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="promoPlanId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO config_set_task(projectId, envId, feature, `key`, value, context, createTime, `delete`)
 		VALUES(#projectId#, #envId#, #feature#, #key#, #value#, #context#, NOW(), #delete#)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">    
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO config_snapshot_set(projectId, envId, task, createTime, createUserId)
 		VALUES(#projectId#, #envId#, #task#, NOW(), #createUserId#)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO config_snapshot(snapshotSetId, configId, `key`, `desc`, `type`, projectId, createUserId, createTime, modifyUserId, modifyTime, private, seq, valueModifyTime)
 		VALUES
-		   <iterate conjunction=","/>
-</insert>
+		<iterate conjunction=",">
+			(#[].snapshotSetId#, #[].configId#, #[].key#, #[].desc#, #[].type#, #[].projectId#, #[].createUserId#, #[].createTime#, #[].modifyUserId#, #[].modifyTime#, 
+				#[].privatee#, #[].seq#, #[].valueModifyTime#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO config_instance_snapshot(snapshotSetId, configId, envId, `desc`, value, context, contextmd5, createUserId, modifyUserId, createTime, modifyTime, seq)
 		VALUES
-		   <iterate conjunction=","/>
-</insert>
+		<iterate conjunction=",">
+			(#[].snapshotSetId#, #[].configId#, #[].envId#, #[].desc#, #[].value#, #[].context#, #[].contextmd5#, #[].createUserId#, #[].modifyUserId#, #[].createTime#, 
+				#[].modifyTime#, #[].seq#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12231,15 +14456,19 @@
              key6)
 		VALUES(#opType#, #opUserId#, #opUserIp#, #envId# , NOW() , #projectId#, #content#, #key1#, #key2#, #key3#, #key4#, #key5#, #key6#)
 		
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO project(name,  productId,createTime, modifyTime)
     	VALUES(#name#,  #productId#, #createTime#, #modifyTime#)
-    	   <selectKey resultClass="int"/>
-</insert>
+    	<selectKey resultClass="int">    
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12260,8 +14489,10 @@
                     #entity.updateUser#,
                     #entity.updateTime#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12281,8 +14512,10 @@
 	    		#tagEntity.addTime#, 
 		        #tagEntity.updateTime#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12292,8 +14525,11 @@
 		#adUpdateInfo.userId#,
 		#adUpdateInfo.message#,
 		#adUpdateInfo.promoId#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12303,8 +14539,10 @@
 		VALUES
 		(#adId#, #shopId#)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12313,8 +14551,12 @@
 		(adid, sid)
 			VALUES
 		
-		   <iterate conjunction="," property="shopList"/>
-</insert>
+		<iterate conjunction="," property="shopList">
+			
+			(#adId#, #shopList[]#)
+			
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12329,8 +14571,10 @@
 			#userInfo.customerName#,
 			#userInfo.userType.value#)
 		
-		   <selectKey keyProperty="uid" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="uid" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12338,8 +14582,10 @@
 			(promoteId, deviceId, client, phoneNo, dpid, state, AddTime, CreateTime, UpdateTime)
 		VALUES
 			(#promoterId#, #deviceId#, #agent#, #phoneNo#, #dpid#, #state#, now(), now(), now())
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT @@IDENTITY AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12347,49 +14593,61 @@
 			(Source, OldName, FileName, FileSize, Description, Operater, AddTime)
 		VALUES
 			(#source#, #oldName#, #fileName#, #fileSize#, #description#, #operater#, #addTime#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_tree_node (id,parent_id,name) values
     	(#id#,#parentId#,#name#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
-    	insert into serviceReport (   <include refid="ServiceReport.columns"/>
+    	insert into serviceReport (<include refid="ServiceReport.columns"/>
 ) values
     	(#id#,#providerName#,#providerIp#,#consumerName#,#consumerIp#,#serviceName#,#code#,
     	#reportName#,#type#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_datasource_item (id,datasource_type,heart_beat,max_value,min_value,datasource_id,internal_name) values
     	(#id#,#datasourceType#,#heartBeat#,#maxValue#,#minValue#,#datasourceId#,#internalName#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph (id,text,name,title,image_format_id,height,width,upper_limit,lower_limit,vertical_label,grid_step,label_factor,projectId) values
     	(#id#,#text#,#name#,#title#,#imageFormateId#,#height#,#width#,#upperLimit#,#lowerLimit#,#verticalLabel#,#gridStep#,#labelFactor#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_graph_item (id,graph_id,datasource_id,color_id,alpha,graph_item_type,cdef_id,consolidation_id,text_format,sequence,value) values
     	(#id#,#graphId#,#datasourceId#,#colorId#,#alpha#,#graphItemType#,#cdefId#,#consolidationId#,#textFormat#,#sequence#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12399,8 +14657,10 @@
 			MobileNo	= #scoreUser.mobileNo#, 
 			Status		= #scoreUser.status#,
 			AddTime		= NOW()
-		   <selectKey keyProperty="UserMobileID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UserMobileID" resultClass="int">
+			SELECT @@IDENTITY AS UserMobileID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12409,38 +14669,48 @@
 		 VALUE (#data.userId#,#data.productId#,#data.productGroupId#,
 		 #data.memberCardId#,#data.source#,#data.cardGroupId#,#data.consumeNum#,#data.valueChangeAmount#,#data.valueChangeDesc#,#data.logType#,#data.serialNo#,#data.machineId#,#data.orderId#,now());
 		 
-		    <selectKey keyProperty="MemberCardUserValueLog" resultClass="java.lang.Integer"/>
-</insert>
+		 <selectKey keyProperty="MemberCardUserValueLog" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS MemberCardUserValueLog
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	INSERT INTO MC_MemberCardUserValue(ProductID,ProductGroupID,UserId,UserValueUsed,UserValueTotal,ADDTIME,updateTime,ValidDate)
 	 VALUE 
 	 (#data.productId#,#data.productGroupId#,#data.userId#,#data.userValueUsed#,#data.userValueTotal#,now(),now(),#data.validDate#);		 
-		    <selectKey keyProperty="MemberCardUserValueID" resultClass="java.lang.Integer"/>
-</insert>
+		 <selectKey keyProperty="MemberCardUserValueID" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS MemberCardUserValueID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 				
 		INSERT INTO MC_MemberCardUserFeed(UserID,FeedID,Status,IsLike,IsUse,AddTime,UpdateTime) 
 		VALUES(#userFeed.userId#, #userFeed.feedId#, #userFeed.status#, 0, 0, NOW(), NOW())
-		   <selectKey keyProperty="userFeedId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="userFeedId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS userFeedId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 				
 		INSERT INTO MC_MemberCardFeed(FeedType,Category,ShopAccountID,MemberCardID,Title,PicPath,PicType,Content,BeginDate,EndDate,Status,AdminID,AuditInfo,TotalLikeNum,AuditTime,PushTime,AddTime,UpdateTime) 
 		VALUES(#feed.feedType#, #feed.category#, 1, #feed.memberCardId#, #feed.title#, #feed.picPath#, #feed.picType#, #feed.content#, #feed.beginDate#, #feed.endDate#, 4, 1, '', #feed.totalLikeNum#, #feed.auditTime#, #feed.pushTime#, NOW(), NOW())
-		   <selectKey keyProperty="feedId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="feedId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS feedId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 				
 		INSERT INTO 
 			MC_MemberCardUserFeed(UserID,FeedID,Status,IsLike,IsUse,UseTime,AddTime,UpdateTime,IsViewed)
 		VALUES
-		   <iterate conjunction="," property="feedIds"/>
-</insert>
+		<iterate conjunction="," property="feedIds">
+			(#userId#, #feedIds[]#, 1, 0, 0,NOW(),NOW(), NOW(),0)
+		</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12451,8 +14721,10 @@
 		 ADDTIME
 		)
 		VALUES
-		   <iterate conjunction="," property="userIdList"/>
-</insert>
+		<iterate conjunction="," property="userIdList">
+			(#userIdList[]#, #detailId#, 1, #addTime#)
+		 </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12460,16 +14732,22 @@
 			(Text,Link,StartTime,name, trainId,FileName,type)
 		VALUES
 			(#pushTxt#,#url#,#startTime#,#name#,#trainId#,#fileName#,#type#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		 
 			INSERT INTO OP_TaskLog (TaskId, JobId, Start, Offset, Status, AddTime) VALUES
 		
-		   <iterate conjunction="," property="taskLogList"/>
-</insert>
+		<iterate conjunction="," property="taskLogList">  
+        	 
+				(#taskLogList[].taskId#, #taskLogList[].jobId#, #taskLogList[].start#, #taskLogList[].offset#, #taskLogList[].status#, NOW())
+        	
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12477,8 +14755,10 @@
 			(money,userId,createTime)
 		VALUES
 			(#money#, #userId#,NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12488,8 +14768,10 @@
 		VALUES
 			(#serialId#, #userId#, #uuid#, #totalPrice#, #pickUpPlace#, #orderDate#, #policyName#, #enableCancel#, #status#,
 				#shopId#, #count#, #travelDate#, #guest#, #otherGuest#, #notices#, #servicePhoneNo#, #clientType#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12497,16 +14779,20 @@
 			BC_Notice(Title,Content,AddTime,AddAdminID)
 		VALUES
 			(#title#,#content#,NOW(),#addAdminID#)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_ShopAccountUser(ShopAccountId,UserId,AddTime,UpdateTime)
 		VALUES
 		(#shopAccountId#,#userId#,#addTime#,NOW())	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12519,8 +14805,10 @@
 		VALUES
 		(#entity.feedbackId#,#entity.content#,#entity.createTime#,#entity.creatorId#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12535,8 +14823,10 @@
 		VALUES
 		(#entity.uuid#,#entity.osTypeId#,#entity.osDetail#,#entity.deviceModel#,#entity.appVersion#,#entity.createTime#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12550,8 +14840,10 @@
 		#log.operaterId#,
 		NOW(),
 		NOW())
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12559,8 +14851,10 @@
 		(Body, FromUserID, ToUserIDs, TotalCount, SuccessCount,Status, AdminId, AddTime, UpdateTime)
 		VALUES
 		(#body#,#fromUserId#,#toUserIds#,#totalCount#, 0, 0, #adminId#, NOW(), NOW())
-		   <selectKey keyProperty="TaskID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="TaskID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12571,8 +14865,11 @@
 		VALUES
 		(#type#,#title#,#body#,#cityIds#,#toSubscriber#,#additionalCount#,#toUserIds#,#totalCount#,0,
 		0,#fromTaskId#,#adminId#,NOW(), NOW())
-		   <selectKey keyProperty="TaskID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="TaskID" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12584,8 +14881,10 @@
 		(#shopAccountId#,#roleId#)
 
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12605,8 +14904,10 @@
 				#module.remark#
 				);
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12629,8 +14930,10 @@
 		#entity.ip#,#entity.appVersion#,#entity.osDetail#,
 		#entity.context#,#entity.channel#,#entity.platform#,#entity.sourceChannel#,#entity.dpId#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12656,8 +14959,10 @@
 		(#entity.version#,#entity.name#,#entity.type#,#entity.iconUrl#,#entity.selectedIconUrl#,#entity.navigateToUrl#,#entity.privilegeId#,
 		#entity.seq#,#entity.title#,#entity.viewUrl#,#entity.parentId#,#entity.comment#,#entity.controlId#,#entity.isActive#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12669,8 +14974,10 @@
 		VALUES
 		(#entity.componentId#,#entity.dataKey#,#entity.dataValue#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12702,8 +15009,10 @@
             #entity.repeatCount#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12747,8 +15056,10 @@
 		    #entity.lastUpdateTime#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12756,8 +15067,10 @@
 			INSERT INTO MOPay_Settle_Shop_Balance (ShopID, Balance, AddTime, UpdateTime)
 			VALUES (#shopId#, #balance#, NOW(), NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12773,8 +15086,10 @@
 			NOW(),
 			NOW());
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12791,8 +15106,10 @@
 			#shopContactOperationTraceInfo.AccessIP#,
 			NOW());
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12801,8 +15118,18 @@
 			INSERT INTO BC_Shop_Contact_Operation_Trace_Item (TraceID, TraceKey, ValueBefore, ValueAfter)
 			VALUES
 		
-		   <iterate conjunction="," property="shopContactOperationTraceItems"/>
-</insert>
+		<iterate conjunction="," property="shopContactOperationTraceItems">  
+		     
+		        ( 
+		        	#shopContactOperationTraceItems[].traceId#,
+		            #shopContactOperationTraceItems[].traceKey#, 
+		            #shopContactOperationTraceItems[].valueBefore#, 
+		            #shopContactOperationTraceItems[].valueAfter#
+		        ) 
+		    
+		</iterate>
+		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12817,8 +15144,13 @@
         ON DUPLICATE KEY
         UPDATE Name=#Device.deviceName#
         
-           <selectKey keyProperty="id" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="integer">
+            
+			SELECT @@IDENTITY
+			AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12829,8 +15161,10 @@
 		(#entity.id#,#entity.content#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12840,8 +15174,10 @@
 		VALUES
 		(#roleInfo.name#,#roleInfo.canAuthorise#,#roleInfo.ownerId#,#roleInfo.addTime#,#roleInfo.updateTime#,#roleInfo.remark#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12851,8 +15187,10 @@
 		VALUES
 		(#relation.roleId#,#relation.functionId#, #relation.addTime#,#relation.updateTime#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12860,16 +15198,20 @@
         (EventId, DpID, ClientType, Version, EventProperties, MsgOrder, UserAgent)
         VALUES
         (#eventId#, #dpId#, #clientType#, #version#, #eventProperties#, #msgOrder#, #userAgent#);
-           <selectKey type="post" keyProperty="Id" resultClass="int"/>
-</insert>
+        <selectKey type="post" keyProperty="Id" resultClass="int">
+            SELECT LAST_INSERT_ID();
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MOPay_Payment(OrderID,Amount,PayOrderID,Status,RefundStatus,PaymentType,UserIP,AddTime,UpdateTime)
         VALUES (#payment.orderID#, #payment.amount#,
         #payment.payOrderID#,#payment.status#,#payment.refundStatus#,#payment.paymentType#,#payment.userIP#,NOW(),NOW())
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12877,8 +15219,10 @@
 			INSERT INTO MOPay_Settle_Transaction(ShopID, TransactionNumber, Amount, Source, Memo, Balance, AddTime)
 			VALUES (#shopId#, #transactionNumber#, #amount#, #source#, #memo#, #balance#, NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12898,8 +15242,10 @@
 	    		#fileOrderEntity.addTime#, 
 		        #fileOrderEntity.updateTime#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12919,8 +15265,10 @@
 	    		#fileTagEntity.addTime#, 
 		        #fileTagEntity.updateTime#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12958,8 +15306,11 @@
 			NOW(),
 			0)
 		
-		   <selectKey keyProperty="adId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="adId" resultClass="int">
+			SELECT @@IDENTITY
+			AS adId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -12967,8 +15318,10 @@
 			(AppUploadInf, AppUploadFeature, AppDownloadRoute, AppUploadVersion, AppUploadTime)
 		VALUES
 			(#appUploadDO.appUploadInf#, #appUploadDO.appUploadFeature#, #appUploadDO.appDownloadRoute#, #appUploadDO.appUploadVersion#, #appUploadDO.appUploadTime#)
-		   <selectKey keyProperty="AppUploadId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="AppUploadId" resultClass="int">
+			SELECT @@IDENTITY AS AppUploadId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12977,16 +15330,20 @@
 		VALUES
 			(#autoPushDO.pushType#, #autoPushDO.text#, #autoPushDO.link#, #autoPushDO.cityId#, #autoPushDO.platformIds#, 
 			 #autoPushDO.pushDate#, NOW(), NOW(), 0)
-		   <selectKey keyProperty="autoPushId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="autoPushId" resultClass="int">
+			SELECT @@IDENTITY AS autoPushId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO CI_MessageInfo
 		(Type,TrainId,MsgText,ShareBody,ShareUrl,Url,Utm,FileName,CommitName,BizID,MsgStatus,StartTime,CreateTime, DeviceNum, MsgType, UnsubscribeNum)
         VALUES(#type#,#trainId#,#msgText#,#shareBody#,#shareUrl#,#url#,#utm#,#fileName#,#commitName#,#bizId#,#status#,#startTime#,NOW(), #deviceNum#, #msgType#, #unsubscribeNum#)
-           <selectKey keyProperty="msgInfoId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="msgInfoId" resultClass="int">
+            SELECT @@IDENTITY AS msgInfoId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -12994,104 +15351,130 @@
             (Utm, Type, Business, Title, CreateTime, UpdateTime)
         VALUES
             (#utm#, #type#, #business#, #title#, NOW(), NOW())
-           <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="Id" resultClass="int">
+            SELECT @@IDENTITY AS Id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into server (id,name,ip,port,des) values
     	(#id#,#name#,#ip#,#port#,#des#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into configdetail (id,projectId,projectKey,projectValue,aValue,bValue,cValue,dValue,des,des2,creatTime,creatUser,modifyTime) values
     	(#id#,#projectId#,#key#,#value#,#aValue#,#bValue#,#cValue#,#dValue#,#des#,#des2#,#creatTime#,#creatUser#,#modifyTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into configlog (id,operator,user,time,projectkey,projectvalue,environment,project) values
     	(#id#,#operator#,#userId#,#time#,#projectKey#,#projectValue#,#environment#,#projectId#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into config_public (id,publicKeyName,publicKeyValue,des) values
     	(#id#,#publicKeyName#,#publicKeyValue#,#des#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
      
-    	insert into project (   <include refid="Project.columns"/>
+    	insert into project (<include refid="Project.columns"/>
 ) values
     	   
     	(#id#,#name#,#leader#,#opDirector#,#phone#,#email#,#des#,#hawk#,#lion#,#state#,#service#,#parentProject#,#svnAddress#,#DBAEmailAddr#, #isTransited#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into service (id,serviceName,serviceIp,serviceIp1,serviceIp2,serviceIp3,serviceIp4,serviceIp5,des,projectId ) values
     	(#id#,#serviceName#,#serviceIp#,#serviceIp1#,#serviceIp2#,#serviceIp3#,#serviceIp4#,#serviceIp5#,#des#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into user (id,name,email,phone,real_name) values
     	(#id#,#name#,#email#,#phone#,#realName#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into role (id,name) values (#id#,#name#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into resource (id,name,des) values (#id#,#name#,#des#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
      
-    	insert into sqlChangeLog (   <include refid="SqlChangeLog.columns"/>
+    	insert into sqlChangeLog (<include refid="SqlChangeLog.columns"/>
 ) values
     	   
     	(#id#,#project.name#,#project.id#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_color (id,hex) values
     	(#id#,#hex#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_key (id,key_name,key_value,des,keyType,projectId) values
     	(#id#,#keyName#,#keyValue#,#des#,#keyType#,#projectId#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13103,8 +15486,10 @@
 		values
 		(0,#cardGroupId#,#userId#,#id# ,#type#, NOW())
 			
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">     
+			SELECT @@IDENTITY AS ID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13120,8 +15505,11 @@
 		#toUserId#,
 		#fromUserIp#,
 		#addTime#)
-		   <selectKey keyProperty="DetailID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DetailID" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13131,8 +15519,10 @@
 		AddTime,
 		Status)
 		VALUES
-		   <iterate conjunction="," property="userIdList"/>
-</insert>
+		<iterate conjunction="," property="userIdList">
+			(#userIdList[]#,#detailId#,#addTime#,1)
+		 </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13140,8 +15530,10 @@
 			UserPower,MediaSource,UserSource,UserCity,UserIP,EmailVerifyStatus) 
 		VALUES (#userEmail# ,#userNickname# ,#password# ,CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP ,
 			1 ,252 ,252 ,#cityID# ,#userIP# ,0)
-		   <selectKey keyProperty="UserID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UserID" resultClass="int">
+			SELECT @@IDENTITY AS UserID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13149,8 +15541,10 @@
 			(DeviceID, OldDeviceID, PToken)
 		VALUES
 			(#DeviceID#, #OldDeviceID#, #PToken#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13164,8 +15558,10 @@
 		#subject#,
 		#content#
 		)
-		   <selectKey keyProperty="templateId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="templateId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS templateId  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13183,8 +15579,10 @@
 		VALUES
 		(#entity.id#,#entity.shopAccount#,#entity.shopAccountId#,#entity.mobileNo#,#entity.lastRequestTime#,#entity.isReset#,#entity.lastResetTime#,#entity.lastUpdatorId#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13199,8 +15597,10 @@
 		VALUES
 		(#entity.deviceId#,#entity.shopAccountId#,#entity.isLogin#,#entity.createTime#,#entity.lastLoginTime#,#entity.lastLogoutTime#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13208,8 +15608,10 @@
 			UserPower,MediaSource,UserSource,UserCity,UserIP,EmailVerifyStatus) 
 		VALUES (#userEmail# ,#userNickname# ,#password# ,CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP ,
 			1 ,252 ,252 ,#cityID# ,#userIP# ,0)
-		   <selectKey keyProperty="UserID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UserID" resultClass="int">
+			SELECT @@IDENTITY AS UserID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13217,8 +15619,10 @@
 		(Title, Type, Important, Body, FromUserID, ToUserIDs, TotalCount, SuccessCount, Status, AdminId, AddTime, UpdateTime)
 		VALUES
 		(#title#,#type#,#important#,#body#,#fromUserId#,#toUserIds#,#totalCount#, 0, 0, #adminId#, NOW(), NOW())
-		   <selectKey keyProperty="TaskID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="TaskID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13228,8 +15632,10 @@
 			VALUES
 			(#id#, #orderId#, #sendTimes#, #type#, #userId#, now(), now() )
 		
-		   <selectKey resultClass="Integer"/>
-</insert>
+		<selectKey resultClass="Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13237,8 +15643,10 @@
 		insert into MP_Assoc_Account(MasterId, SlaveId, AddTime) values
 		(#masterId#,#slaveId#,now())
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13248,8 +15656,10 @@
 		VALUES
 		(#function.functionName#,#function.moduleId#,#function.isFixed#,#function.addTime#,#function.updateTime#,#function.priority#,#function.isForWeb#,#function.isForApp#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13257,8 +15667,10 @@
 		insert into MP_Module(ModuleName,Remark,AddTime,UpdateTime)
 		 values(#module.name#,#module.remark#,now(),now())
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13266,8 +15678,10 @@
 			BC_Notice(Title,Content,AddTime,AddAdminID)
 		VALUES
 			(#title#,#content#,NOW(),#addAdminID#)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13285,8 +15699,10 @@
 		VALUES
 		(#entity.id#,#entity.shopAccount#,#entity.shopAccountId#,#entity.mobileNo#,#entity.lastRequestTime#,#entity.isReset#,#entity.lastResetTime#,#entity.lastUpdatorId#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13296,8 +15712,10 @@
 		VALUES
 		(#shopAccountId#,#ip#,#addTime#,#staffId#,#url#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13330,15 +15748,19 @@
 			#picChangeEvent.userId#,
 			#picChangeEvent.userName#,
 			#picChangeEvent.createTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID() AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         insert into MOPay_Settle_Lock(LockKey, AddTime, UpdateTime)
         values (#key#, NOW(), NOW())
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13349,8 +15771,13 @@
             pkgName = #pkgName#,
             logName = #logName#
         
-           <selectKey keyProperty="id" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="integer">
+            
+			SELECT @@IDENTITY
+			AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13361,8 +15788,10 @@
 		(#entity.order.id#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13384,8 +15813,10 @@
 			NOW(),
 			#shopContactBasicInfo.appChannel#);
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13393,8 +15824,10 @@
 			(NAME, PowerIDs, UserIDs, Flag, ADDTIME, UpdateTime)
 		VALUES
 			(#powerGroupPO.name#, #powerGroupPO.powerIds#, #powerGroupPO.userIds#, 1, NOW(), NOW())
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13404,8 +15837,10 @@
 		VALUES
 		(#password#,#parentId#,#contactName#,#contactMobileNO#,#addTime#,#updateTime#,#accountType#,1)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13415,8 +15850,10 @@
 		VALUES
 		(#shopAccount#,#password#,#parentId#,#contactName#,#contactMobileNO#,#addTime#,#updateTime#,#accountType#,1)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13424,8 +15861,10 @@
 		insert into MP_ShpAcnt_BindCode_Assn (ShopAccountId,BindCode) values(#shopAccountId#,#bindCode#);
 
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13433,8 +15872,10 @@
 		insert into MP_ShpAcnt_OpenId_Assn(ShopAccountId,OpenId) values(#shopAccountId#,#openId#);
 
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13442,8 +15883,10 @@
 		insert into MP_CloudPrintOrder(ShopId,ShopName,ShopAccountId,ShopAccount,TotalAmount,ActualAmount,WithDiscount,DiscountDetail, SerailNo, AddTime,UpdateTime,TerminalNo) values
 		(#shopId#,#shopName#,#shopAccountId#,#shopAccount#,#totalAmount#,#actualAmount#,#withDiscount#,#discountDetail#,#serialNo#,now(),now(),#terminalNo#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13451,8 +15894,10 @@
 			INSERT INTO MOPay_Order(ShopID, UserID, MobileNO, DPID, UserIP, Amount, Status, AddTime, UpdateTime)
 			VALUES (#shopID#, #userID#, #mobileNo#, #dpid#, #userIP#, #amount#, #status#, NOW(), NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13470,8 +15915,10 @@
 			#versionID#,
 			NOW(),
 			NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13501,8 +15948,10 @@
 	    		#fileEntity.addTime#, 
 		        #fileEntity.updateTime#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13522,8 +15971,10 @@
 	    		#fileAccountEntity.addTime#, 
 		        #fileAccountEntity.updateTime#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13537,9 +15988,22 @@
 	    		UpdateTime) 
 	   		VALUES
 		
-		   <iterate conjunction="," property="fileAccounts"/>
-   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<iterate conjunction="," property="fileAccounts">  
+	         
+	       (
+			 #fileAccounts[].fileId#, 
+			 #fileAccounts[].accountId#, 
+			 #fileAccounts[].addUser#,
+			 #fileAccounts[].updateUser#,
+			 #fileAccounts[].addTime#,
+			 #fileAccounts[].updateTime#
+			) 
+	        
+	    </iterate>
+	    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+			select  @@IDENTITY as ID from MC_FileAccount limit 1
+		</selectKey>	
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13561,8 +16025,10 @@
 	    		#tagGroupEntity.addTime#, 
 		        #tagGroupEntity.updateTime#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13582,8 +16048,11 @@
 			#adConsume.mobileOthersPv#		
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13597,8 +16066,10 @@
 			#userAccountDetail.balance#,
 			#time#)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13607,8 +16078,10 @@
           (ContractID, CancelType, HasNotified, Memo)
           VALUES(#contractId#, 1, 1, #memo#)
         
-           <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="LogID" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13617,8 +16090,10 @@
           (ContractID, CancelType, HasNotified, Memo)
           VALUES(#contractId#, 0, 0, #maxPrePayDate#)
         
-           <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="LogID" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13626,8 +16101,10 @@
 			(NAME, OWNER, Description, EmailReceivers, State, DeployIps, ADDTIME, UpdateTime)
 		VALUES
 			(#NAME#, #OWNER#, #Description#, #EmailReceivers#, 1, '', NOW(), NOW());
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13635,32 +16112,40 @@
 			(name,begTime,endTime,maxNum,title,context,url,createTime)
 		VALUES
 			(#name#,#begTime#,#endTime#,#maxNum#,#title#,#context#,#url#,now())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
-    	insert into exceptionReport (   <include refid="ExceptionReport.columns"/>
+    	insert into exceptionReport (<include refid="ExceptionReport.columns"/>
 ) values
     	(#id#,#key1#,#key2#,#key3#,#key4#,#type#,#reportName#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef (id,name) values
     	(#id#,#name#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_cdef_item (id,cdef_id,type,value) values
     	(#id#,#cdefId#,#type#,#value#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13668,15 +16153,19 @@
     	insert into jrobin_dynamic_key (id,key_name,key_value,datasource_id,value) values
     	(#id#,#keyName#,#keyValue#,#dsID#,#sumValue#)
     	
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO OP_OperateTask (Type, Description, CronExpression, Template, Subs, FilePath, Status, AddTime)
 		VALUES(#task.type#, #task.description#, #task.cronExpression#, #task.template#, #task.subs#, #task.filePath#, 0, NOW())
-		   <selectKey keyProperty="taskId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="taskId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS taskId  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13686,8 +16175,10 @@
 		VALUES
 		(#password#,#parentId#,#contactName#,#contactMobileNO#,#addTime#,#updateTime#,#accountType#,1)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13697,8 +16188,10 @@
 		VALUES
 		(#shopAccount#,#password#,#parentId#,#contactName#,#contactMobileNO#,#addTime#,#updateTime#,#accountType#,1)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13712,10 +16205,10 @@
 			FROM AD_Product p, AD_Price pr
 			WHERE p.ProductId=#colInfo.ProductID.newValue#
 		
-		   <dynamic>
-      <isGreaterThan compareValue="0" prepend="AND" property="colInfo.PriceID.newValue"/>
-   </dynamic>
-</insert>
+		<dynamic><isGreaterThan compareValue="0" prepend="AND" property="colInfo.PriceID.newValue">
+                pr.PriceId=#colInfo.PriceID.newValue#
+            </isGreaterThan></dynamic>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13723,9 +16216,17 @@
 			INSERT INTO AD_ItemKeyword(OrderItemId,ShopId,Keyword,InventoryStatus,DisplayStatus,
 				ADDTIME,AddUser,UpdateTime,UpdateUser,STATUS,NewShopId)			
 		
-		   <isLessEqual compareValue="0" prepend="" property="colInfo.ContentID.newValue"/>
-   <isGreaterThan compareValue="0" prepend="" property="colInfo.ContentID.newValue"/>
-</insert>
+		<isLessEqual compareValue="0" prepend="" property="colInfo.ContentID.newValue">
+			VALUES(#colInfo.ID.newValue#,#colInfo.ShopID.newValue#,'',1,1,NOW(),0,NOW(),0,1,
+				#colInfo.NewShopID.newValue#)
+		</isLessEqual>
+        <isGreaterThan compareValue="0" prepend="" property="colInfo.ContentID.newValue">
+        	SELECT #colInfo.ID.newValue#,#colInfo.ShopID.newValue#,Keyword,1,1,NOW(),0,NOW(),0,1,
+				#colInfo.NewShopID.newValue#	
+			FROM AD_Keyword     
+			WHERE KeywordId = #colInfo.ContentID.newValue#
+        </isGreaterThan>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13733,9 +16234,16 @@
 			INSERT INTO AD_ItemButton (OrderItemId,CategoryLevelId,ShopType,CategoryId,TemplateId,
 				ADDTIME,AddUser,UpdateTime,UpdateUser,STATUS)
 		
-		   <isLessEqual compareValue="0" prepend="" property="colInfo.ContentID.newValue"/>
-   <isGreaterThan compareValue="0" prepend="" property="colInfo.ContentID.newValue"/>
-</insert>
+		<isLessEqual compareValue="0" prepend="" property="colInfo.ContentID.newValue">
+			VALUES(#colInfo.ID.newValue#,0,0,0,#colInfo.DisplayTemplateID.newValue#,NOW(),0,NOW(),0,1)
+		</isLessEqual>
+        <isGreaterThan compareValue="0" prepend="" property="colInfo.ContentID.newValue">
+        	SELECT #colInfo.ID.newValue#,cpl.CategoryLevelId,cpl.ParentCategoryId,cpl.CategoryId,
+				#colInfo.DisplayTemplateID.newValue#,NOW(),0,NOW(),0,1
+			FROM AD_CategoryPriceLevel cpl     
+			WHERE cpl.CategoryLevelId = #colInfo.ContentID.newValue#
+        </isGreaterThan>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13745,8 +16253,10 @@
 		VALUES
 		(#id#,#thirdPartyOrderId#,#thirdPartyId#,#orderId#,#movieShowId#,
 		#status#,#userId#,#mobileNo#,#seatInfo#,#ticketCount#,#ticketId#,#ticketNO#,#thirdPartyPayNo#,now(),now())
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13756,8 +16266,10 @@
 		VALUES
 		(#from#, #to#, #canAssignOthers#, now(), #mark#, 1)
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13767,8 +16279,10 @@
 		VALUES
 		(#from#, #to#, #canAssignOthers#, now(), #mark#, 2)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13778,16 +16292,27 @@
 		VALUES
 		(#sector#,#module#,#type#,#sendTime#,#title#,#summaryMsg#,#updateTime#,#url#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
+<?xml version="1.0" encoding="utf-8"?>
+<insert>
+
+        <dynamic><isNotNull property="shopIdList"><isNotEmpty prepend="INSERT" property="shopIdList"><iterate open="" conjunction="," property="shopIdList" close="">
+                        ( #opContractId#, #shopIdList[]#, NOW())
+                    </iterate></isNotEmpty></isNotNull></dynamic>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_ShopAccountUser(ShopAccountId,UserId,AddTime,UpdateTime)
 		VALUES
 		(#shopAccountId#,#userId#,#addTime#,NOW())	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13795,15 +16320,19 @@
 			INSERT INTO MOPay_Settle_Statistic (StatisticType, StatisticDate, Amount, AddTime)
 			VALUES (#type#, #date#, #amount#, NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         insert into MOPay_Settle_Withdraw_Auto_Lock(LockKey, AddTime, UpdateTime)
         values (#key#, NOW(), NOW())
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13811,8 +16340,10 @@
     	(UserID, ShopID, Lng, Lat, PostionRange, Shared, FeedShared, CheckInType, Star, Tips, UserIP, ClientID, UserAgent,PicCenterUrl,PicID, photos, DeviceId, CityID, ShopType, Status, LocalFilter)
         VALUES 
         (#userId#, #shopId#, #lng#, #lat#, #postionRange#, #shared#, #feedShared#, #checkInType#, #star#, #tips#, #userIp#, #clientId#, #userAgent#, #picCenterUrl#, #picId#, #photoUrls#, #deviceId#, #cityId#, #shopType#, #status#, #localFilter#);
-    	   <selectKey keyProperty="CheckInID" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="CheckInID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13822,8 +16353,10 @@
 		VALUES
 			(#hotAdsPO.title#, #hotAdsPO.subTitle#, #hotAdsPO.picUrl#, #hotAdsPO.link#, #hotAdsPO.type#, #hotAdsPO.priority#, 
 				#hotAdsPO.beginTime#, #hotAdsPO.endTime#, #hotAdsPO.cityFlag#, #hotAdsPO.cityIds#, #hotAdsPO.yidi#, #hotAdsPO.utm#, NOW(), NOW(), 2)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13831,8 +16364,10 @@
 			(HotAdsID, CLIENT, SourceFlag, Sources, MinVersion, MaxVersion, Flag, ADDTIME, UpdateTime)
 		VALUES
 			(#hotAdsClientPO.hotAdsId#, #hotAdsClientPO.client#, #hotAdsClientPO.sourceFlag#, #hotAdsClientPO.sources#, #hotAdsClientPO.minVersion#, #hotAdsClientPO.maxVersion#, 1, NOW(), NOW())
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13841,8 +16376,10 @@
 		VALUES
 			(#customPushDO.targetType#, #customPushDO.pushText#, #customPushDO.link#, #customPushDO.utm#, #customPushDO.beginTime#, #customPushDO.endTime#, 
 			 #customPushDO.platformIds#, #customPushDO.addNotify#, #customPushDO.pushSound#, #customPushDO.operateName#, -1, NOW(), NOW())
-		   <selectKey keyProperty="customPushId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="customPushId" resultClass="int">
+			SELECT @@IDENTITY AS customPushId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13850,8 +16387,10 @@
 			(CustomPushID, ContentType, FileName, TotalNum, SendNum, ArrivalNum)
 		VALUES
 			(#uploadDO.customPushId#, #uploadDO.contentType#, #uploadDO.fileName#, #uploadDO.totalNum#, #uploadDO.sendNum#, #uploadDO.arrivalNum#)
-		   <selectKey keyProperty="customPushId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="customPushId" resultClass="int">
+			SELECT @@IDENTITY AS customPushId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -13860,8 +16399,10 @@
 		VALUES
 			(#mobileAPIDo.apiName#, #mobileAPIDo.apiType#, #mobileAPIDo.apiDesc#, #mobileAPIDo.apiPlatform#, #mobileAPIDo.apiReturnRef#,  #mobileAPIDo.apiStatus#, 
 			 #mobileAPIDo.apiCombinWay#, #mobileAPIDo.apiCreateTime#, #mobileAPIDo.apiUpdateTime#, #mobileAPIDo.apiCreateUser#, #mobileAPIDo.apiBeginVer#, #mobileAPIDo.apiEndVer#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -13886,8 +16427,10 @@
 		        #order.log#,
 		        #order.status#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14023,8 +16566,10 @@
            ,DefaultSmallPicPath
 		FROM ASPNet_zSurvey.DP_Promo
 		WHERE PromoID=#promoid#
-		   <selectKey keyProperty="PromoID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="PromoID" resultClass="int">
+    		select max(PromoID) from ASPNet_zSurvey.DP_Promo
+   		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14036,8 +16581,10 @@
 			#userAccountFeeEntity.frozen#,
 			#userAccountFeeEntity.balance#)
 		
-		   <selectKey keyProperty="uId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="uId" resultClass="int">
+            SELECT @@IDENTITY AS uId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14047,8 +16594,10 @@
 			(#bizPushDO.pushText#, #bizPushDO.link#, #bizPushDO.utm#, #bizPushDO.beginTime#, #bizPushDO.endTime#,
 			 #bizPushDO.platformId#, #bizPushDO.recipientIdType#, #bizPushDO.recipientId#, #bizPushDO.addNotify#, 
 			 #bizPushDO.pushSound#, #bizPushDO.addName#, #bizPushDO.status#, NOW(), NOW())
-		   <selectKey keyProperty="bizPushID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="bizPushID" resultClass="int">
+			SELECT @@IDENTITY AS bizPushID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14056,8 +16605,10 @@
 			(ApplyUser, Utm, Description, ADDTIME, UpdateTime, Flag)
 		VALUES
 			(#bizPushApplyPO.user#, #bizPushApplyPO.utm#, #bizPushApplyPO.desc#, NOW(), NOW(), 1)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14065,8 +16616,10 @@
 			(name,parentId,phoneNo,password,area,school,CreateTime)
 		VALUES
 			(#name#,#parentId#,#phoneNo#,#password#,#area#,#school#,now())
-		   <selectKey keyProperty="promoteId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="promoteId" resultClass="int">
+			SELECT @@IDENTITY AS promoteId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14076,65 +16629,81 @@
 			(#hotModuleDO.title#, #hotModuleDO.subTitle#, #hotModuleDO.picUrl#, #hotModuleDO.moduleUrl#,
 			 #hotModuleDO.cityIds#, #hotModuleDO.platformIds#, #hotModuleDO.versions#,
 			#hotModuleDO.beginTime#, #hotModuleDO.endTime#, 1, NOW(), NOW())
-		   <selectKey keyProperty="moduleId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="moduleId" resultClass="int">
+			SELECT @@IDENTITY AS moduleId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO CI_Notifications 
     	(UserID, Name, Image, Content, ContentStyle, Uri, AddDate, MessageType) 
     	VALUES
-   		   <iterate conjunction="," property="notifyList"/>
-</insert>
+   		<iterate conjunction="," property="notifyList">
+        	(#notifyList[].userId#, #notifyList[].name#, #notifyList[].image#, #notifyList[].content#, #notifyList[].contentStyle#, #notifyList[].uri#, NOW(), #notifyList[].messageType#)
+		</iterate>	
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into environment (id,name,ip) values
     	(#id#,#name#,#ip#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into middlewareTree (id,parent_id,name) values
     	(#id#,#parentId#,#name#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
      
-    	insert into operationLog (   <include refid="OperationLog.columns"/>
+    	insert into operationLog (<include refid="OperationLog.columns"/>
 ) values
     	   
     	(#id#,#type.typeCode#,#operator#,#operation.operationCode#,#content#,#project#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into sqlReview (id,filePath,sqlId,sqlContent,reviewerId,reviewTime) values
     	(#id#,#filePath#,#sqlId#,#sqlContent#,#reviewerId#,#reviewTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		      
     	insert into sqlReview (id,filePath,sqlId,sqlContent,reviewerId,reviewTime,recommendation,state) values
     	(#id#,#filePath#,#sqlId#,#sqlContent#,#reviewerId#,#reviewTime#,#recommendation#,1)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into alarm_record (id,time,alarmTime,content,alarmId,emailState) values
     	(#id#,#time#,#alarmTime#,#content#,#alarmId#,#emailState#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14164,16 +16733,20 @@
 			#timeCurrent#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_host (id,name,ip,port,user_name,user_password,path,isFetch,projectId,weight,type,port1,env) values
     	(#id#,#name#,#ip#,#port#,#userName#,#userPsw#,#path#,#isFetch#,#projectId#,#weight#,#type#,#port1#,#env#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14181,16 +16754,20 @@
     	(TEXT, Link, StartTime, Name, fileName, status, trainId, type)
     	VALUES 
     	(#text#, #url#, #startTime#, #name#, #fileName#, #status#, #trainId#, #type#)
-    	   <selectKey keyProperty="msgId" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="msgId" resultClass="int">
+			SELECT @@IDENTITY AS msgId
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO CI_MsgDeviceId
 			(MsgId, DeviceId)
 		VALUES			
-			   <iterate conjunction="," property="mdList"/>
-</insert>
+			<iterate conjunction="," property="mdList">
+                (#mdList[].msgId#, #mdList[].deviceId#)
+			</iterate>			
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14198,14 +16775,18 @@
 			,PaymentAmount,MobileNo,OrderType,Status,RefundStatus,UserAgent,PayOrderID,UserIP,Source,ADDTIME,SerialNo) 
 		VALUES(#order.userId#,#order.cityId#,#order.cardId#,#order.cardGroupId#,#order.productId#,#order.productGroupId#,#order.quantity#,#order.totalAmount#
 			,#order.paymentAmount#,#order.mobileNo#,#order.orderType#,0,0,#order.userAgent#,#order.payOrderId#,#order.userIp#,#order.source#,NOW(),#order.serialNo#)
-		   <selectKey keyProperty="MemberCardOrderID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardOrderID" resultClass="int">
+			SELECT @@IDENTITY AS MemberCardOrderID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO MC_MemberCardOrderValidCode(CardOrderID,ValidCode,ADDTIME) VALUES (#cardOrderId#,#validCode#,NOW())
-		   <selectKey keyProperty="OrderValidCodeID" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="OrderValidCodeID" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS OrderValidCodeID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14223,8 +16804,10 @@
 			#noticeType#,
 			#important#,
 			#addTime#)
-		   <selectKey keyProperty="DetailID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DetailID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14240,8 +16823,10 @@
 		NOW(),
 		1
 		)
-		   <selectKey keyProperty="taskId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="taskId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS taskId  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14249,8 +16834,10 @@
 			(UserID, ReplyToUserID, ReplyToCommentID, RootCheckInID, Content, UserIP)
 		VALUES 
 			(#userID#, #replyToUserID#, 0, #rootCheckInID#, #content#, #userIP#)
-		   <selectKey keyProperty="CommentID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="CommentID" resultClass="int">
+			SELECT @@IDENTITY AS CommentID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14258,8 +16845,10 @@
 			(UserID, ReplyToUserID, ReplyToCommentID, RootCheckInID, Content, UserIP)
 		VALUES 
 			(#userID#, #replyToUserID#, #ReplyToCommentID#, #rootCheckInID#, #content#, #userIP#)
-		   <selectKey keyProperty="CommentID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="CommentID" resultClass="int">
+			SELECT @@IDENTITY AS CommentID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14272,8 +16861,10 @@
 		VALUES
 		(#entity.deviceId#,#entity.token#,#entity.isValid#,#entity.createTime#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14281,8 +16872,10 @@
 			(UserID, ReplyToUserID, ReplyToCommentID, RootCheckInID, Content, UserIP)
 		VALUES 
 			(#userID#, #replyToUserID#, #replyToCommentID#, #rootCheckInID#, #content#, #userIP#)
-		   <selectKey keyProperty="CommentID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="CommentID" resultClass="int">
+			SELECT @@IDENTITY AS CommentID
+		</selectKey>		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14290,8 +16883,10 @@
 			(UserID, ReplyToUserID, ReplyToCommentID, RootCheckInID, Content, UserIP)
 		VALUES 
 			(#userID#, #replyToUserID#, 0, #rootCheckInID#, #content#, #userIP#)
-		   <selectKey keyProperty="CommentID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="CommentID" resultClass="int">
+			SELECT @@IDENTITY AS CommentID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14304,24 +16899,30 @@
         #holderIDSnapURL#, #operationMode#, #mainType#, #status#, NOW(),
         NOW(), #creator#, #updater#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_Privilege(Module,ParentId,Name,Url,AddDate,Status)
 		VALUES
 		(#module#,#parentId#,#name#,#url#,NOW(),1)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+      	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_Privilege(ID,Module,ParentId,Name,Url,AddDate,Status)
 		VALUES
 		(#id#,#module#,#parentId#,#name#,#url#,NOW(),1)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+      	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14336,8 +16937,10 @@
 		VALUES
 		(#entity.deviceId#,#entity.shopAccountId#,#entity.isLogin#,#entity.createTime#,#entity.lastLoginTime#,#entity.lastLogoutTime#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14353,8 +16956,10 @@
 		VALUES
 		(#entity.uuid#,#entity.osTypeId#,#entity.osDetail#,#entity.deviceModel#,#entity.appVersion#,#entity.createTime#,#entity.isFailReplyNeed#,#entity.isBadReviewNeed#)
 		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14362,15 +16967,19 @@
 			INSERT INTO MOPay_Discount(UserID, ShopID, Amount, OrderID, PaymentID, StrategyID, Status,  AddTime, UpdateTime)
 			VALUES (#userID#, #shopID#, #amount#, #orderID#, #paymentID#, #strategyID#, #status#, NOW(), NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
       INSERT INTO MOPay_Settle_Contract ( ContractID, BankAccountName, BankAccountNumber, BankName, BankProvince, BankCity, FreeStart, FreeEnd, TaxRate, Status, ShopAccountID, AddTime, UpdateTime )
       VALUES ( #contractId#, #bankAccountName#, #bankAccountNumber#, #bankName#, #bankProvince#, #bankCity#, #freeStart#, #freeEnd#, #taxRate#, 1, #shopAccountId#, NOW(), NOW() )
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14382,22 +16991,28 @@
 			(#financeNumber#, #bankAccountName#, #bankAccountNumber#, #bankName#, #bankProvince#, #bankCity#, #currency#,
 			#settleWay#, #payBankName#, #payBankAccountNumber#, #payDate#, #useage#, #amount#, #memo#, #status#, NOW(), NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MOPay_Settle_Finance_Withdraw(FinanceNumber, WithdrawId)
         VALUES (#financeNumber#, #withdrawId#)
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MOPay_Settle_Contract_Shop (ContractID, ShopID, ShopName, AddTime)
         VALUES
-           <iterate conjunction="," property="shopList"/>
-</insert>
+        <iterate conjunction="," property="shopList">
+            (#contractId#, #shopList[].shopId#, #shopList[].shopName#, NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14408,8 +17023,10 @@
             (#dto.eventId#, #dto.source#, #dto.messageContent#, #dto.versionConditions#, #dto.couponGroupId#,
              #dto.invalidCouponGroupId#, #dto.newUserLimit#, #dto.maxCount#, #dto.messageType#, #dto.shouldHasPhoneNumber#,
              #dto.value#, #dto.beginDate#, #dto.endDate#, now())
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14417,8 +17034,10 @@
 			INSERT INTO MOPay_Order_CouponOffer(CouponOfferId, OrderId, OriginAmount, DiscountAmount, DiscountRatio,Title,Description, AddTime, UpdateTime)
 			VALUES (#entity.couponOfferID#, #entity.orderID#, #entity.originAmount#, #entity.discountAmount#, #entity.discountRatio#,#entity.title#,#entity.description#, NOW(), NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14430,8 +17049,10 @@
         FinishTime,
 		Status)
 		VALUES
-		   <iterate conjunction="," property="userIdList"/>
-</insert>
+		<iterate conjunction="," property="userIdList">
+			(#userIdList[]#,#detailId#,#noticeType#,#addTime#,#finishTime#,1)
+		 </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -14440,8 +17061,10 @@
 		VALUES
 			(#dataModelDo.modelName#, #dataModelDo.modelHash#, #dataModelDo.modelStatus#, #dataModelDo.modelCreateTime#, 
 			 #dataModelDo.modelUpdateTime#, #dataModelDo.modelCreator#, #dataModelDo.beginVer#, #dataModelDo.endVer#, #dataModelDo.modelDesc#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14461,8 +17084,10 @@
 			NOW(),
 			NOW(),
 			#versionInfo#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID() as id
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14494,8 +17119,10 @@
 	    		#fileOrderCopy.addTime#, 
 		        #fileOrderCopy.updateTime#);
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14512,8 +17139,10 @@
 			NOW(),
 			#adConsume.pvType#)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14523,8 +17152,10 @@
 			(#commonPushDO.pushText#, #commonPushDO.pushLink#, #commonPushDO.utm#, #commonPushDO.pushAction#, #commonPushDO.pushSound#,
 			 #commonPushDO.pushTimeType#, #commonPushDO.pushTime#, #commonPushDO.operatorId#, #commonPushDO.bizId#, 
 			 0, NOW(), NOW())
-		   <selectKey keyProperty="commonPushId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="commonPushId" resultClass="int">
+			SELECT @@IDENTITY AS commonPushId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14533,8 +17164,10 @@
 		VALUES
 			(#commonPushReDO.commonPushId#, #commonPushReDO.recipientType#, #commonPushReDO.platformIds#, 
 			#commonPushReDO.cityIds#, #commonPushReDO.recipientIdType#, #commonPushReDO.recipientId#)
-		   <selectKey keyProperty="commonPushRecipientId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="commonPushRecipientId" resultClass="int">
+			SELECT @@IDENTITY AS commonPushRecipientId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14542,8 +17175,10 @@
 			(CommonPushID, SendNum, ArrivalNum)
 		VALUES
 			(#commonPushStatDO.commonPushId#, #commonPushStatDO.sendNum#, #commonPushStatDO.arrivalNum#)
-		   <selectKey keyProperty="commonPushStatId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="commonPushStatId" resultClass="int">
+			SELECT @@IDENTITY AS commonPushStatId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14555,12 +17190,14 @@
                 #msgType.bottomDesc#, #msgType.parent#, #msgType.dpuser#,
                 #msgType.benefitCount#, #msgType.benefitName#, #msgType.sort#, NOW(), NOW(), 1
             )
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
-    	insert into reportRecord (   <include refid="Report.columns"/>
+    	insert into reportRecord (<include refid="Report.columns"/>
 ) values
     	(#id#,#reportId#,#email#,#title#,#content#,#state#,now(),#reportType#)
     </insert>
@@ -14570,16 +17207,20 @@
         
     	insert into jrobin_datasource (id,name,key1,key2,key3,key4,data_type,host_names,step,rrd_path,timespan,is_active,avg_accum_type,projectId,data_choice) values
     	(#id#,#name#,#key1#,#key2#,#key3#,#key4#,#dataType#,#hostNames#,#step#,#rrdPath#,#timespan#,#isActive#,#avgAccumType#,#projectId#,#dataChoice#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         
     	insert into jrobin_rra (id,name,cf,xff,steps,rows,timespan) values
     	(#id#,#name#,#cf#,#xff#,#steps#,#rows#,#timespan#)
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+                select last_insert_id() as id  
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14589,8 +17230,10 @@
 		VALUES
 			(#serialId#, #userId#, #uuid#, #totalPrice#, #pickUpPlace#, #orderDate#, #policyName#, #enableCancel#, #status#,
 				#shopId#, #count#, #travelDate#, #guest#, #otherGuest#, #notices#, #servicePhoneNo#, #clientType#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14598,29 +17241,37 @@
 			MC_MemberCardIVRAccount(ShopTel,ShopID,ShopAccountID,Deleted,AddTime)
 		VALUES
 			(#shopTel#,#shopId#,#shopAccountId#,0,CURRENT_TIMESTAMP)
-		   <selectKey keyProperty="ivrAccountID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ivrAccountID" resultClass="int">
+			SELECT @@IDENTITY AS IVRAccountID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO MC_MemberCardUser(MemberCardID, UserID, CardNO,Status, Source, CellPhoneType, UserAgent, ULat, ULng, AddTime)
 		VALUES (#cardId#, #userId#, #cardNo#, #status#, #source#, #cellPhoneType#, #UserAgent#, #lat#, #lng#, NOW())
-		   <selectKey keyProperty="MemberCardUserID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardUserID" resultClass="int">
+			SELECT @@IDENTITY AS MemberCardUserID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO MC_MemberCardUserShop(MemberCardID, UserID, ShopID, Source, CellPhoneType, UserAgent, ULat, ULng, Status, AddTime)
 		VALUES (#cardId#, #userId#, #shopId#, #source#, #cellPhoneType#, #UserAgent#, #lat#, #lng#, 1, NOW())
-		   <selectKey keyProperty="MemberCardUserShopID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardUserShopID" resultClass="int">
+			SELECT @@IDENTITY AS MemberCardUserShopID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO MC_MemberCardNUserInfo(UUID, UserName, UserSex, UserBirthDay,AddTime)
 		VALUES (#uuid#, #userName#, #gender#, #birthday#,NOW())
-		   <selectKey keyProperty="NUserID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="NUserID" resultClass="int">
+			SELECT @@IDENTITY AS NUserID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14628,8 +17279,10 @@
 	    INSERT INTO MC_MemberCardNUserSynLog(MemberCardUserID,NUserID,UserID,CardID,Syn) 
 			SELECT MemberCardUserID,#nUserId#,#userId#,MemberCardID,#syn# FROM MC_MemberCardUser WHERE UserID = #nUserId# AND MemberCardID IN 
 		
-	       <iterate open="(" conjunction="," property="cardIdList" close=")"/>
-</insert>
+	    <iterate open="(" conjunction="," property="cardIdList" close=")">
+    		#cardIdList[]#
+    	</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14654,8 +17307,10 @@
 			   #addTime#,
 			   #serialNo#,
 			   #machineId#)
-		   <selectKey keyProperty="MemberCardConsumeID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardConsumeID" resultClass="int">
+			SELECT @@IDENTITY AS MemberCardConsumeID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14682,21 +17337,27 @@
 			   #machineId#,
 			   #buyQuantity#
 			   )
-		   <selectKey keyProperty="MemberCardConsumeID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardConsumeID" resultClass="int">
+			SELECT @@IDENTITY AS MemberCardConsumeID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO MC_MemberCardUser(MemberCardID, UserID, CardNO,Status, Source, CellPhoneType, UserAgent, ULat, ULng, AddTime)	VALUES 
-		   <iterate conjunction="," property="cardUsers"/>
-</insert>
+		<iterate conjunction="," property="cardUsers">
+			 (#cardUsers[].memberCardId#, #cardUsers[].userId#, #cardUsers[].cardNo#, #status#, #source#, #cellPhoneType#, #userAgent#, #lat#, #lng#, NOW())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO MC_MemberCardUserShop(MemberCardID, UserID, ShopID, Source, CellPhoneType, UserAgent, ULat, ULng, Status, AddTime)
 		VALUES
-		   <iterate conjunction="," property="shops"/>
-</insert>
+		<iterate conjunction="," property="shops">
+			(#shops[].memberCardId#, #userId#, #shops[].shopId#, #source#, #cellPhoneType#, #userAgent#, #lat#, #lng#, 1, NOW())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14714,8 +17375,11 @@
 		#fromUserId#,
 		#subType#,
 		#addTime#)
-		   <selectKey keyProperty="DetailID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DetailID" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14726,8 +17390,11 @@
 		CityID,
 		AddTIME)
 		VALUES
-		   <iterate conjunction="," property="typeList"/>
-</insert>
+		<iterate conjunction="," property="typeList">
+			(#userId#,
+			#typeList[]#, 1, #cityId#, Now())
+		 </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14738,8 +17405,11 @@
 		CityID,
 		AddTIME)
 		VALUES
-		   <iterate conjunction="," property="typeList"/>
-</insert>
+		<iterate conjunction="," property="typeList">
+			(#userId#,
+			#typeList[]#, 0, #cityId#, Now())
+		 </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14752,8 +17422,10 @@
 		AddTIME)
 		VALUES
 		
-		   <iterate conjunction="," property="subTypeList"/>
-</insert>
+		<iterate conjunction="," property="subTypeList">
+			 (#subTypeList[].userId#,#subTypeList[].subType#, 1, #subTypeList[].cityId#, Now())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14772,24 +17444,41 @@
 		XTag
 		)
 		VALUES
-		   <iterate conjunction="," property="emailEntryList"/>
-</insert>
+		<iterate conjunction="," property="emailEntryList">
+			(#emailEntryList[].key#,
+			'',
+			#emailEntryList[].value#,
+			NOW(),
+			NOW(),
+			#rank#,
+			#fromEmail#,
+			#fromName#,
+			#reEmail#,
+			#templateId#,
+			#xtag#
+			)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_Privilege(Module,ParentId,Name,Url,AddDate,Status)
 		VALUES
 		(#module#,#parentId#,#name#,#url#,NOW(),1)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+      	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_Privilege(ID,Module,ParentId,Name,Url,AddDate,Status)
 		VALUES
 		(#id#,#module#,#parentId#,#name#,#url#,NOW(),1)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+      	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14802,8 +17491,10 @@
 		VALUES
 		(#entity.id#,#entity.creatorId#,#entity.createTime#,#entity.expectedFeatures#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 	
@@ -14811,8 +17502,10 @@
 			(Type, trainId, Text, Link, name, StartTime)
 		VALUES
 			(1, 7, '10元团购抵用券免费领(此团购券只限手机客户端使用)', #link#, 'novicegift', #startTime#)
-	       <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>  	
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14822,8 +17515,10 @@
 		VALUES
 			(#serialId#, #userId#, #uuid#, #totalPrice#, #pickUpPlace#, #orderDate#, #policyName#, #enableCancel#, #status#,
 				#shopId#, #count#, #travelDate#, #guest#, #otherGuest#, #notices#, #servicePhoneNo#, #clientType#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14831,8 +17526,10 @@
           MP_Staff_White_Paper(StaffId,serviceType,AddTime)
 		VALUES
 			(#staffId#,#serviceType#,now())
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14845,8 +17542,10 @@
 		VALUES
 		(#entity.feedbackId#,#entity.content#,#entity.createTime#,#entity.creatorId#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14864,8 +17563,10 @@
             #entity.createTime#
 		)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14878,8 +17579,10 @@
 		VALUES
 		(#entity.deviceId#,#entity.token#,#entity.isValid#,#entity.createTime#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14892,8 +17595,10 @@
 		VALUES
 		(#entity.id#,#entity.creatorId#,#entity.createTime#,#entity.expectedFeatures#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14908,8 +17613,10 @@
         #entity.productId#,
         #entity.agreementId#
         ,#entity.isAccepted#);
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14917,8 +17624,10 @@
 			INSERT INTO MOPay_Settle_Withdraw(ShopID, Amount, Status, AddTime, UpdateTime)
 			VALUES (#shopId#, #amount#, #status#, NOW(), NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14926,22 +17635,28 @@
 			INSERT INTO MOPay_Settle_Batch (BatchNumber, AddTime, UpdateTime)
 			VALUES (#batchNumber#, NOW(), NOW())
 		
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MOPay_Settle_Batch_Finance(BatchNumber, FinanceNumber)
         VALUES (#batchNumber#, #financeNumber#)
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO MOPay_Shop (ShopID, Status, AddTime, UpdateTime)
         VALUES
-           <iterate conjunction="," property="shopIdList"/>
-</insert>
+        <iterate conjunction="," property="shopIdList">
+            (#shopIdList[]#, 1, NOW(), NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14954,8 +17669,10 @@
 			NOW(),
 			NOW());
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 	
@@ -14964,8 +17681,10 @@
 		VALUES
 			(#annoucement.title#, #annoucement.pageUrl#, #annoucement.utm#, #annoucement.beginTime#, #annoucement.endTime#, '',
 			 '', #annoucement.cityIdList#, #annoucement.priority#, 0)
-		   <selectKey keyProperty="AnnouncementID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="AnnouncementID" resultClass="int">
+			SELECT @@IDENTITY AS AnnouncementID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14973,8 +17692,10 @@
 			(AnnouncementID, ClientType, PicUrl, VersionList, SourceList, Flag)
 		VALUES
 			(#adaptor.annoucementId#, #adaptor.clientValue#, #adaptor.picUrl#, #adaptor.versionList#, #adaptor.sourceList#, 1)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -14986,16 +17707,36 @@
 		`TicketUseDate`,`ContactName`,
 		`ContactTel`,`OtherGuest`,`Notice`, `ServicePhoneNo`,`ClientType`,`ClientVersion`,
 		`AddTime`,`UpdateTime`) VALUES
-		   <iterate conjunction="," property="orderDetail"/>
-</insert>
+		<iterate conjunction="," property="orderDetail">
+			(#params.otaId#,#orderDetail[].orderId#,#orderDetail[].orderName#,#params.shopId#,#params.scenicSpotId#,#params.dpid#,
+			#orderDetail[].orderStatus#,#orderDetail[].orderBasicInfo.amount#,#params.userId#,
+			#orderDetail[].userInfo.uId#,#orderDetail[].orderBasicInfo.currency#,
+			#orderDetail[].orderBasicInfo.quantity#,CONCAT(#orderDetail[].deliverInfo.getTicketType#,"|",
+			#orderDetail[].deliverInfo.receiverName#,"|",
+			#orderDetail[].deliverInfo.contactTel#,"|",
+			#orderDetail[].deliverInfo.cityName#,"|",
+			#orderDetail[].deliverInfo.address#),
+			#orderDetail[].orderBasicInfo.orderDate#,#params.policyName#,#params.isCancelable#,
+			#orderDetail[].ticketUserDate#,#orderDetail[].contactInfo.contactName#,
+			#orderDetail[].contactInfo.contactTel#,#params.otherGuest#,#params.notice#,
+			#params.servicePhoneNo#,#params.clientType#,#params.clientVersion#,
+			now(),now())
+		</iterate> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DianPingHotel.DP_ScenicSpots 
 		(ShopID,SceneryID,SID,CityID,CityName,SName,Status,AddTime,UpdateTime)
 		VALUES
-		   <iterate conjunction="," property="scenicSpotPOIPo"/>
-</insert>
+		<iterate conjunction="," property="scenicSpotPOIPo">
+			(#scenicSpotPOIPo[].shopId#,#scenicSpotPOIPo[].sceneryId#,
+			#scenicSpotPOIPo[].sId#,#scenicSpotPOIPo[].cityId#,
+			#scenicSpotPOIPo[].cityName#,#scenicSpotPOIPo[].sName#,
+			#scenicSpotPOIPo[].status#,#scenicSpotPOIPo[].addTime#,
+			#scenicSpotPOIPo[].updateTime#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15003,8 +17744,10 @@
         (MovieRemindID,UserID,MobileNo,RemindProductType,RemindProductId,RemindChannel,Status,AddDate,UpdateDate)
         VALUES
         (NULL,#userId#,#mobileNo#,#remindProductType#,#remindProductId#,#remindChannel#,0,now(),now())
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -15013,8 +17756,10 @@
 		VALUES
 			(#mobileAPIParamDo.paramName#, #mobileAPIParamDo.isRequired#, #mobileAPIParamDo.paramDesc#, #mobileAPIParamDo.paramRefApi#,
 			#mobileAPIParamDo.paramCreateTime#, #mobileAPIParamDo.paramUpdateTime#,#mobileAPIParamDo.paramType#, #mobileAPIParamDo.beginVer#, #mobileAPIParamDo.endVer#,#mobileAPIParamDo.paramStatus#) 
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
  
@@ -15023,8 +17768,10 @@
 		VALUES
 			(#modelFieldDo.fieldType#, #modelFieldDo.fieldRef#, #modelFieldDo.modelRef#, #modelFieldDo.fieldName#, #modelFieldDo.fieldDesc#, #modelFieldDo.fieldHash#,
 			 #modelFieldDo.combinWay#, #modelFieldDo.fieldStatus#, #modelFieldDo.fieldCreateTime#, #modelFieldDo.fieldUpdateTime#, #modelFieldDo.createUser#, #modelFieldDo.beginVer#, #modelFieldDo.endVer#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15067,8 +17814,10 @@
 		#regionListData.tmdRange#,
 		#regionListData.address#,
 		#regionListData.shopCount#)
-		   <selectKey keyProperty="regionid" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="regionid" resultClass="int">
+			  SELECT LAST_INSERT_ID() AS RegionID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15076,8 +17825,10 @@
 			(TYPE,  SimpleDesc)
 		VALUES
 			(#Type#,  #SimpleDesc#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>	
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15087,12 +17838,16 @@
 		VALUES
 			(#Title#, #PageUrl#, #BeginTime#, #EndTime#, #ClientIDList#, 
 			 #VersionList#, #CityIDList#, #Priority#)
-		   <selectKey keyProperty="AnnouncementID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="AnnouncementID" resultClass="int">
+			SELECT @@IDENTITY AS AnnouncementID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="orderId" resultClass="int"/>
-  
+
+  <selectKey type="post" keyProperty="orderId" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     insert into TG_Order 
     	(UserID, 
     	 CityID, 
@@ -15128,8 +17883,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+    <selectKey type="post" keyProperty="id" resultClass="int">
+        select @@IDENTITY as value
+    </selectKey>
     insert into TG_OrderTextInfo (
 		OrderID,
 		TextKey,
@@ -15146,8 +17903,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+  <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     INSERT INTO PCT_ProductBatchRefund
     	(ProductID,
 		 ProductCode,
@@ -15190,8 +17949,10 @@
 			#userIP#
 			);
 	    
-	     <selectKey resultClass="int"/>
-</insert>
+	  <selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15204,12 +17965,16 @@
 		#payMethod:TINYINT#,#paymentChannel:TINYINT#,
 		#payPlatform:INTEGER#,
 		#bank:VARCHAR#, #memo:VARCHAR#, now(), now())
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+        <selectKey type="post" keyProperty="id" resultClass="int">
+            select @@IDENTITY as value
+        </selectKey>
         insert into PCT_OrderGroupCoupon
         (OrderGroupID,
         DiscountID,
@@ -15251,8 +18016,10 @@
 			NOW()
 			)
 	    
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15274,12 +18041,16 @@
 			#userIP#
 			);
 	    
-	     <selectKey resultClass="int"/>
-</insert>
+	  <selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="orderItemId" resultClass="int"/>
-  
+
+  <selectKey type="post" keyProperty="orderItemId" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     insert into TG_OrderItem 
     	   (OrderID, 
     	   UserID, 
@@ -15342,8 +18113,10 @@
 				#pushMessageDto.token#,
 				#pushMessageDto.remark#);
         
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15369,8 +18142,10 @@
     	 #emailDate:TIMESTAMP#, 
     	 #phoneDate:TIMESTAMP#,
     	 #statusRank:TINYINT#)
-	     <selectKey resultClass="int"/>
-</insert>
+	  <selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+	  </selectKey>
+  </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15382,12 +18157,16 @@
 		 #infoOperationLogData.addDate#,
 		 #infoOperationLogData.comment#
 		 );
-		    <selectKey keyProperty="operationId" resultClass="int"/>
-</insert>
+		 <selectKey keyProperty="operationId" resultClass="int">
+            SELECT @@IDENTITY AS operationId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" resultClass="int"/>
 
+        <selectKey type="post" resultClass="int">
+            select @@IDENTITY as value
+        </selectKey>
         insert into Mon_UserBlackList
             (UserID,
             AddDate,
@@ -15401,8 +18180,10 @@
     </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="notifyId" resultClass="int"/>
 
+  <selectKey type="post" keyProperty="notifyId" resultClass="int">
+      select @@IDENTITY as value
+  </selectKey>
     insert into PCT_OrderNotify (
 		OutBizID,
 		Type,
@@ -15448,8 +18229,10 @@
 			#album.description#,
 			#album.addTime#,
 			#album.updateTime#,0);
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID 
+   			</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15478,8 +18261,10 @@
 			NOW()
 	    )
 	
-       <selectKey resultClass="int"/>
-</insert>
+    <selectKey resultClass="int">
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15495,12 +18280,25 @@
 			UpdateDate,
             DiscountAmount
 		) VALUES
-           <iterate conjunction=","/>
-</insert>
+        <iterate conjunction=",">
+            (#discountDOList[].userID#,
+            #discountDOList[].discountGroupID#,
+            #discountDOList[].discountCode#,
+            #discountDOList[].status#,
+            #discountDOList[].beginDate#,
+            #discountDOList[].endDate#,
+            #discountDOList[].usedDate#,
+            NOW(),
+            NOW(),
+            #discountDOList[].discountAmount#)
+        </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="deliverAddressId" resultClass="int"/>
 
+    <selectKey type="post" keyProperty="deliverAddressId" resultClass="int">  
+        select @@IDENTITY as value  
+  	</selectKey>
     insert into TG_DeliverAddress (DeliverAddressID, UserID, Consignee, Address, PostCode, PhoneNo,
       IsDefault, Status, AddDate, UpdateDate, Province, City, District, DeliverTime, InvoiceTitle,
       NeedInvoice, Memo)
@@ -15512,8 +18310,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into PCT_WithdrawRefund
 		(ID,
 		WithdrawID,
@@ -15544,8 +18344,10 @@
 		#payMethod:TINYINT#,#paymentChannel:TINYINT#,
 		#payPlatform:INTEGER#,
 		#bank:VARCHAR#, #memo:VARCHAR#, now(), now(),#userType:TINYINT#)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15564,20 +18366,27 @@
 			#productCode#
 			);
 	    
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         insert into PCT_AccountFrozen (account_frozen_id, account_id, amount, status,
         create_time, modified_time,out_biz_id,memo,remain_amount)
         values (#accountFrozenId:VARCHAR#, #accountId:VARCHAR#, #amount:DECIMAL#, #status:TINYINT#, now(), now(),#outBizId:VARCHAR#,#memo:VARCHAR#,#remainAmount:DECIMAL#)
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+    
+      <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
 		insert into PCT_CheckDateJobConfig 
 			(Status,
 			CheckDate, 
@@ -15594,8 +18403,10 @@
 
         INSERT INTO PC_Picture (Url, Title, FlowerCount, FollowCount, Popularity, AddTime, LastTime, UserID, LastIP, Width, Height, ClientType, Status, Secret, StatusCode)
         VALUES (#pic.url#, #pic.title#, 0, 0, 0, NOW(), NOW(), #pic.userId#, #pic.lastIp#, #pic.width#, #pic.height#, #pic.clientType#, #pic.status#, #pic.secret#, #pic.statusCode#)
-           <selectKey keyProperty="PicID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="PicID" resultClass="int">
+            SELECT @@IDENTITY AS PicID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -15632,12 +18443,17 @@
 			#errorCode#
 	    )
 	
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+    
+      <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
 	insert into PCT_AlipayAccountDetail 
 		(TradeNO, 
 		MerchantOutOrderNO,
@@ -15673,8 +18489,11 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+    
+      <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
 		insert into PCT_CheckDateJobConfig 
 			(Status,
 			CheckDate, 
@@ -15688,8 +18507,10 @@
   	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into PCT_SourceData
 		(ID,GroupID,BUSINESS_CATEGORY,BUSINESS_DETAILED_CATEGORY,ALGORITHM,
 		GL_DATE,ACCOUNT_AMOUNT,CREATION_DATE,Data_BeginDate,Data_EndDate
@@ -15712,12 +18533,16 @@
 		#userValue:INTEGER#,
 		now()
 	)
-       <selectKey resultClass="int"/>
-</insert>
+    <selectKey resultClass="int">
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+  </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="notifyId" resultClass="int"/>
 
+  <selectKey type="post" keyProperty="notifyId" resultClass="int">
+      select @@IDENTITY as value
+  </selectKey>
     insert into PCT_OrderNotify (
 		OutBizID,
 		Type,
@@ -15760,19 +18585,25 @@
 		#bank:VARCHAR#,
 		#protocolCode:VARCHAR#, #itemCode:VARCHAR#,
 		now())
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="couponId" resultClass="int"/>
 
+		<selectKey type="post" keyProperty="couponId" resultClass="int">  
+	        select @@IDENTITY as value  
+	  	</selectKey>
 		insert into TG_Coupon (CouponGroupID,UserID,BeginDate,EndDate,AddDate,UsedStatus,Status)
 		values (#couponGroupId#,#userId#,#beginTime#,#endTime#,now(),0,1)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="couponId" resultClass="int"/>
-  
+
+		<selectKey type="post" keyProperty="couponId" resultClass="int">  
+	        select @@IDENTITY as value  
+	  	</selectKey>  
 		insert into TG_Coupon (CouponGroupID,UserID,CouponCode,BeginDate,EndDate,AddDate,UsedStatus,Status)
 		values
 		(#couponGroupId#,0,#batchCode#,#beginTime#,#endTime#,now(),0,1)
@@ -15797,18 +18628,25 @@
 			NOW()
 			);
 	    
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+    	 <selectKey type="post" keyProperty="id" resultClass="int">  
+        		select @@IDENTITY as value  
+  	     </selectKey>
         insert into PCT_PaymentBatch(PaymentBatchID,BatchNO,AddTime,UpdateTime,NotifyTime) values (#paymentBatchId#,#batchNo#, Now(), Now(), #notifyTime#)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+    
+      <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
 	insert into PCT_AlipayAccountDetail 
 		(TradeNO, 
 		MerchantOutOrderNO,
@@ -15865,12 +18703,17 @@
                 #deviceEntity.lastRegisterDate#,
                 #deviceEntity.createdDate#);
         
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+    
+      <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
 		insert into PCT_CheckDateJobConfig 
 			(Status,
 			CheckDate, 
@@ -15895,12 +18738,17 @@
 	         #infoPicData.addDate#
 	         );
 	    
-	       <selectKey keyProperty="infoPicId" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="infoPicId" resultClass="int">
+            SELECT @@IDENTITY AS infoPicId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into PCT_UserAccountAuditLog
 		(ID,
 		Income,
@@ -15916,8 +18764,10 @@
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="deductionID" resultClass="int"/>
 
+  <selectKey type="post" keyProperty="deductionID" resultClass="int">
+        select @@IDENTITY as value
+  </selectKey>
   	INSERT INTO TGHT_RefundDeduction
 		(RefundID,
 		RefundType,
@@ -15949,8 +18799,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="orderGroupId" resultClass="int"/>
-  
+
+  <selectKey type="post" keyProperty="orderGroupId" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     insert into PCT_OrderGroup 
     	(UserID,
     	 TotalAmount,
@@ -15976,8 +18828,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="certificateId" resultClass="int"/>
-  
+
+  <selectKey type="post" keyProperty="certificateId" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     insert into TG_Certificate
     	(OrderID,
     	 OrderItemID,
@@ -15997,8 +18851,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="refundID" resultClass="int"/>
-  
+
+  		<selectKey type="post" keyProperty="refundID" resultClass="int">  
+        	SELECT @@IDENTITY AS value  
+  		</selectKey>  
 	    INSERT INTO TGHT_Refund
 	    	(RefundType,
 			 PayAuditID,
@@ -16063,12 +18919,17 @@
 		#description:VARCHAR#, #payChannel:INTEGER#,#platform:INTEGER#,
 		#bank:VARCHAR#, #protocolCode:VARCHAR#, #itemCode:VARCHAR#,
 		now(),now())
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+    
+      <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
 	insert into PCT_AlipayAccountDetail 
 		(TradeNO, 
 		MerchantOutOrderNO,
@@ -16129,8 +18990,10 @@
 			#infoData.lastUserName#,
 			#infoData.verifyStatus#);
 		
-		   <selectKey keyProperty="infoId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="infoId" resultClass="int">
+            SELECT @@IDENTITY AS infoId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16146,17 +19009,23 @@
 				#verifyStatus#
 			)
 		
-		   <selectKey keyProperty="followNoteId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="followNoteId" resultClass="int">
+			SELECT @@IDENTITY AS followNoteId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO PC_PicBiz
-			(   <include refid="fullColumns"/>
+			(<include refid="fullColumns"/>
 )
 		VALUES
-			   <iterate conjunction="," property="picBizList"/>
-</insert>
+			<iterate conjunction="," property="picBizList">
+				(#picBizList[].picId#, #picBizList[].bizId#,
+				#picBizList[].referId#, #picBizList[].userId#,
+				NOW(), NOW(), #picBizList[].status#, #picBizList[].secret#)
+			</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16189,8 +19058,10 @@
 			#picTransferEvent.userId#,
 			#picTransferEvent.userName#,
 			#picTransferEvent.createTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID() AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16225,8 +19096,10 @@
 			NOW()
 	    )
 	
-       <selectKey resultClass="int"/>
-</insert>
+    <selectKey resultClass="int">
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16255,8 +19128,10 @@
 			NOW()
 	    )
 	
-       <selectKey resultClass="int"/>
-</insert>
+    <selectKey resultClass="int">
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16277,8 +19152,10 @@
 			NOW()
 	    )
 	
-       <selectKey resultClass="int"/>
-</insert>
+    <selectKey resultClass="int">
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16299,12 +19176,17 @@
 			NOW()
 	    )
 	
-       <selectKey resultClass="int"/>
-</insert>
+    <selectKey resultClass="int">
+        SELECT LAST_INSERT_ID()
+    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into PCT_AccountCheckLog
 		(ID,
 		Amount,
@@ -16324,8 +19206,10 @@
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into PCT_Advance
 		(ID,
 		ProductID,
@@ -16349,8 +19233,10 @@
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="orderItemId" resultClass="int"/>
-  
+
+  <selectKey type="post" keyProperty="orderItemId" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     insert into TG_OrderItem 
     	   (OrderID, 
     	   UserID, 
@@ -16388,8 +19274,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+	  <selectKey type="post" keyProperty="id" resultClass="int">
+        select @@IDENTITY as value
+  	  </selectKey>
     	insert into PCT_OrderRefund
     	   	  (ID,
 			   OrderID,
@@ -16459,8 +19347,10 @@
   	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" resultClass="int"/>
-  
+
+  <selectKey type="post" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     insert into Mon_UserBlackList 
     	(UserID, 
     	 AddDate, 
@@ -16474,8 +19364,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+  	<selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  	</selectKey>  
     insert into PCT_ThirdPartOrder (ID, OrderID,ThirdPartyUserID,ThirdPartyUserName,Status, Certificates, Quantity, NotifyStatus, ThirdPartyType,PaymentChannel,
       AddTime, UpdateTime, SuccessTime, ThirdPartyOrderCode, MerchantDpID, TotalAmount,Memo,NotifyUrl,ThirdPartyPlatform)
     values (#id:INTEGER#, #orderId:INTEGER#,#thirdPartyUserId:VARCHAR#,#thirdPartyUserName:VARCHAR#,#status:TINYINT#,
@@ -16484,8 +19376,10 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="auditID" resultClass="int"/>
-  
+
+	  <selectKey type="post" keyProperty="auditID" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
     	insert into TG_UserAccountAudit 
     	   	 (UserID, 
     	   	  ReferID, 
@@ -16513,8 +19407,10 @@
   	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+  <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     INSERT INTO PCT_BatchRefund
     	(BatchNO,
   		 OrderRefundID,
@@ -16541,12 +19437,16 @@
       AddTime, UpdateTime, NotifyStatus,ErrorCode)
     values (#engineControlId:VARCHAR#, #batchNo:VARCHAR#, #outBatchNo:VARCHAR#, #orderString:VARCHAR#, #thirdPartySerialNo:VARCHAR#, #memo:VARCHAR#,
       #addTime:DATETIME#, now(), #notifyStatus:TINYINT#,#errorCode:VARCHAR#)
-	     <selectKey resultClass="int"/>
-</insert>
+	  <selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+  </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="auditID" resultClass="int"/>
-  
+
+	  <selectKey type="post" keyProperty="auditID" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
     	insert into TG_UserAccountAudit 
     	   	 (UserID, 
     	   	  ReferID, 
@@ -16574,8 +19474,10 @@
   	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="notifyId" resultClass="int"/>
 
+  <selectKey type="post" keyProperty="notifyId" resultClass="int">
+      select @@IDENTITY as value
+  </selectKey>
     insert into PCT_OrderNotify (
 		OutBizID,
 		Type,
@@ -16599,8 +19501,11 @@
   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into PCT_AccountCheckLog
 		(ID,
 		Amount,
@@ -16633,8 +19538,11 @@
 			#verifyStatus#);
 		
 
-		   <selectKey keyProperty="followNoteId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="followNoteId" resultClass="int">
+			SELECT @@IDENTITY
+			AS followNoteId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16649,8 +19557,11 @@
 			#logType#);
 		
 
-		   <selectKey keyProperty="logId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="logId" resultClass="int">
+			SELECT @@IDENTITY
+			AS logId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16659,8 +19570,10 @@
 		Value 
 			(#followNote.picId#,#followNote.userId#,#followNote.noteBody#,#followNote.addDate#,
 			#followNote.ip#,#followNote.origUserId#,#followNote.picTitle#,#followNote.status#)
-		   <selectKey keyProperty="followNoteId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="followNoteId" resultClass="int">
+			SELECT @@IDENTITY AS followNoteId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16681,12 +19594,16 @@
 			NOW()
 			);
 	    
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
-  
+
+	  <selectKey type="post" keyProperty="id" resultClass="int">  
+        select @@IDENTITY as value  
+  	  </selectKey>  
     	insert into PCT_ConsumeDetail 
     	   	  (ID, 
 			   Amount, 
@@ -16708,8 +19625,10 @@
   	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into PCT_SourceData
 		(ID,GroupID,BUSINESS_CATEGORY,BUSINESS_DETAILED_CATEGORY,ALGORITHM,
 		GL_DATE,ACCOUNT_AMOUNT,CREATION_DATE,Data_BeginDate,Data_EndDate
@@ -16720,8 +19639,11 @@
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into PCT_UserAccountLog
 		(ID,
 		Balance,
@@ -16740,8 +19662,10 @@
 
         INSERT INTO PC_Picture (Url, Title, FlowerCount, FollowCount, Popularity, AddTime, LastTime, UserID, LastIP, Width, Height, ClientType, Status, Secret, StatusCode)
         VALUES (#pic.url#, #pic.title#, 0, 0, 0, NOW(), NOW(), #pic.userId#, #pic.lastIp#, #pic.width#, #pic.height#, #pic.clientType#, 1, 0, 0)
-           <selectKey keyProperty="picId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="picId" resultClass="int">
+            SELECT @@IDENTITY AS PicID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16754,8 +19678,10 @@
       #bank:VARCHAR#, #amount:DECIMAL#, #status:TINYINT#, now(), #userIP:VARCHAR#,
       #paymentSource:TINYINT#, #isVerified:TINYINT#, #sign:VARCHAR#, #partnerId:VARCHAR#,
       #messageType:TINYINT#)
-	     <selectKey resultClass="int"/>
-</insert>
+	  <selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+  </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16768,8 +19694,10 @@
       #bank:VARCHAR#, #amount:DECIMAL#, #status:TINYINT#, now(), #userIP:VARCHAR#,
       #paymentSource:TINYINT#, #isVerified:TINYINT#, #sign:VARCHAR#, #partnerId:VARCHAR#,
       #messageType:TINYINT#)
-	     <selectKey resultClass="int"/>
-</insert>
+	  <selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+  </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16801,8 +19729,11 @@
 		#currentPhoneNumber#,
 		#dialPreWait#,
 		#dialPostWait#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT
+			last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16832,16 +19763,21 @@
 		YY_RsCalloutEvent
 		where id =
 		#id#
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT
+			last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_ReceiptGroupCode
         (Code,DealID,UserID,Status,AddDate)
         VALUES(#code#,#dealId#,#userId#,1,Now());
-           <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventId" resultClass="int">
+            SELECT @@IDENTITY  AS ReceiptGroupCodeID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16851,8 +19787,11 @@
 		VALUES (
 			#verifySn#
 		)
-		   <selectKey keyProperty="verifyStatusID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="verifyStatusID" resultClass="int">
+			SELECT @@IDENTITY
+			AS verifyStatusID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16874,8 +19813,11 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey keyProperty="stockLockID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="stockLockID" resultClass="int">
+			SELECT @@IDENTITY
+			AS stockLockID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16892,8 +19834,10 @@
         )
         
 
-           <selectKey resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey resultClass="java.lang.Integer">
+            SELECT count(*) from Eim_ContractOverduePayment where opportunityId = #opportunityId# and addDate = #addDate#
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16918,8 +19862,10 @@
         )
         
 
-           <selectKey keyProperty="cityId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="cityId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16939,8 +19885,11 @@
 		#title#,
 		#addDate#
 		)
-		   <selectKey keyProperty="historyID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="historyID" resultClass="int">
+			SELECT @@IDENTITY
+			AS historyID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16972,8 +19921,11 @@
 		NOW(),
 		#memo#
 		)
-		   <selectKey keyProperty="logID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="logID" resultClass="int">
+			SELECT @@IDENTITY
+			AS logID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -16998,8 +19950,10 @@
 		#updateBy#,
 		#updateTime#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17029,8 +19983,10 @@
 		#updateTime#,
 		#remark#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17050,8 +20006,10 @@
         #createTime#,
         #updateBy#,
         #updateTime#)
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT last_insert_id();
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17073,8 +20031,10 @@
 	 		#createTime#,
 	 		#updateBy#,
 	 		#updateTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17102,15 +20062,19 @@
 	 		#createTime#,
 	 		#updateBy#,
 	 		#updateTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         insert into Report_Job_Job (Title, DatasourceName, JobSql, Serie, AddTime, UpdateTime)
         values (#title#, #datasource#, #sql#, #serie#, NOW(), NOW())
-           <selectKey keyProperty="JobID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="JobID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17130,16 +20094,20 @@
 		#createBy#,
 		#createTime#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_ReceiptGroupCode
         (Code,DealID,UserID,Status,AddDate)
         VALUES(#code#,#dealId#,#userId#,1,Now());
-           <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventId" resultClass="int">
+            SELECT @@IDENTITY  AS ReceiptGroupCodeID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17171,16 +20139,22 @@
 		NOW(),
 		#memo#
 		)
-		   <selectKey keyProperty="logID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="logID" resultClass="int">
+			SELECT @@IDENTITY
+			AS logID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into TG_ReceiptRefundDetail (ReceiptID,Status,PayRefundID,ApplyDate,FinishDate)
 		values 
 		(#receiptId#,1,null,now(),null)
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17191,24 +20165,22 @@
         SearchableTags,CTU,Status)
         VALUES
         (#extraReview.userId#,#extraReview.shopId#,#extraReview.score1#,#extraReview.score2#,#extraReview.score3#,#extraReview.score4#,#extraReview.avgPrice#,#extraReview.reviewBody#,#extraReview.transPark#,
-        #extraReview.dishTags#,#extraReview.shopTags#,   <dynamic>
-      <isNull property="extraReview.addTime"/>
-      <isNotNull property="extraReview.addTime"/>
-      <isNull prepend="," property="extraReview.lastTime"/>
-      <isNotNull prepend="," property="extraReview.lastTime"/>
-   </dynamic>
-,#extraReview.lastIP#,#extraReview.cityId#,#extraReview.shopType#,#extraReview.shopGroupId#,
+        #extraReview.dishTags#,#extraReview.shopTags#,<dynamic><isNull property="extraReview.addTime">NOW()</isNull><isNotNull property="extraReview.addTime">#extraReview.addTime#</isNotNull><isNull prepend="," property="extraReview.lastTime">NOW()</isNull><isNotNull prepend="," property="extraReview.lastTime">#extraReview.lastTime#</isNotNull></dynamic>,#extraReview.lastIP#,#extraReview.cityId#,#extraReview.shopType#,#extraReview.shopGroupId#,
         #extraReview.power#,0,#extraReview.qualityScore#, #extraReview.reviewBodyLength#,#extraReview.wordDifference#, #extraReview.star#,
         #extraReview.searchableTags#,#extraReview.ctu#,1)
-           <selectKey keyProperty="reviewId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="reviewId" resultClass="int">
+            SELECT @@IDENTITY AS ReviewID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_ReviewModificationLog(ReviewID, ShopID, UserID, OldStatus, NewStatus, OldContent, NewContent, ActionType, EditorID, EditorName, LogTime, Comment)
 		VALUES(#reviewId#, #shopId#, #userId#, #oldStatus#, #newStatus#, #oldContent#, #newContent#, #actionType#, #editorId#, #editorName#, Now(), #comment#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17225,8 +20197,10 @@
 			#createTime#,
 			#dealStatus#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17242,8 +20216,11 @@
             now(), 
             now()
         );
-           <selectKey keyProperty="DetailId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="DetailId" resultClass="int">
+			SELECT @@IDENTITY
+			AS detailId
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17272,8 +20249,10 @@
         )
         
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17304,8 +20283,10 @@
         )
         
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17335,8 +20316,11 @@
 		#status#,
 		#mobileNo#
 		)
-		   <selectKey keyProperty="receiptAccountID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptAccountID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptAccountID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17366,8 +20350,11 @@
 		#status#,
 		NOW()
 		)
-		   <selectKey keyProperty="receiptVerifyRecordID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptVerifyRecordID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptVerifyRecordID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17385,8 +20372,10 @@
 		#masterStatus#,
 		#operateID#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17415,8 +20404,10 @@
                #updateBy#,
                #updateTime#
             )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT last_insert_id();
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17438,8 +20429,11 @@
 		#refundID#,
 		NOW()
 		)
-		   <selectKey keyProperty="recordID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordID" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17473,8 +20467,11 @@
 		0,
 		now()
 		)
-		   <selectKey keyProperty="applicationId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="applicationId" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17503,8 +20500,11 @@
 		null,
 		#message#,
 		now())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT
+			last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17512,29 +20512,37 @@
         (biz_id, shop_id, status, total_cash, deduct_cash, encash_cash, created_by, created_time, updated_by, updated_time)
         VALUES
         (#bizId#, #shopId#, #status#, #totalCash#, #deductCash#, #encashCash#, #createdBy#, NOW(), #updatedBy#, NOW())
-           <selectKey keyProperty="shopId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="shopId" resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into YY_AuditRecord(type, main_status, sub_status, create_by, create_time, description)
 		values(#type#, #mainStatus#, #subStatus#, #createBy#, #createTime#, #description#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into YY_AuditLog(record_id, status, create_by, create_time, action, description)
 		values(#recordId#, #status#, #createBy#, #createTime#, #action#, #description#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into YY_AuditContent(record_id, `key`, `value`, create_time, create_by)
 		values(#recordId#, #key#, #value#, #createTime#, #createBy#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17554,8 +20562,24 @@
 			update_by,
 			updated_time
 		) VALUES
-		   <iterate conjunction=","/>
-</insert>
+		<iterate conjunction=",">
+	      	
+			(#list[].recordID#,
+			#list[].contentType#,
+			#list[].contentDetailType#,
+			#list[].shortDisplay#,
+			#list[].title#,
+			#list[].description#,
+			#list[].url#,
+			#list[].sourceID#,
+			#list[].cashRebate#,
+			#list[].createBy#,
+			NOW(),
+			#list[].updateBy#,
+			NOW())
+			
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17581,8 +20605,11 @@
 		#vendorShopID#,
 		#dealSalePrice#
 		)
-		   <selectKey keyProperty="receiptID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptID" resultClass="int">
+			SELECT #receiptID#
+			AS receiptID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17607,8 +20634,11 @@
         #vendorShopID#,
         #dealSalePrice#
         )
-           <selectKey keyProperty="receiptID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="receiptID" resultClass="int">
+            SELECT @@IDENTITY
+            AS receiptID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17689,8 +20719,10 @@
 			#openApiKey#,
             #userRemark#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17701,17 +20733,13 @@
 		SearchableTags,CTU)
 		VALUES
 		(#review.userId#,#review.shopId#,#review.score1#,#review.score2#,#review.score3#,#review.score4#,#review.avgPrice#,#review.transPark#,
-		#review.dishTags#,#review.shopTags#,   <dynamic>
-      <isNull property="review.addTime"/>
-      <isNotNull property="review.addTime"/>
-      <isNull prepend="," property="review.lastTime"/>
-      <isNotNull prepend="," property="review.lastTime"/>
-   </dynamic>
-,#review.lastIP#,#review.cityId#,#review.shopType#,#review.shopGroupId#,
+		#review.dishTags#,#review.shopTags#,<dynamic><isNull property="review.addTime">NOW()</isNull><isNotNull property="review.addTime">#review.addTime#</isNotNull><isNull prepend="," property="review.lastTime">NOW()</isNull><isNotNull prepend="," property="review.lastTime">#review.lastTime#</isNotNull></dynamic>,#review.lastIP#,#review.cityId#,#review.shopType#,#review.shopGroupId#,
 		#review.power#,0,#review.qualityScore#, #review.reviewBodyLength#,#review.wordDifference#, #review.star#,
 		#review.searchableTags#,#review.ctu#)
-		   <selectKey keyProperty="reviewId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="reviewId" resultClass="int"> 
+   		SELECT @@IDENTITY AS ReviewID 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17746,8 +20774,10 @@
 			#createBy#,
 			#createTime#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17757,8 +20787,10 @@
 		VALUES
 		('10','10', #amount#, #shopID#, #shopName#, #bizID#, #invoiceTitle#,
 		 'DML', NOW(), 'DML', NOW())
-	       <selectKey keyProperty="invoice_apply_id" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="invoice_apply_id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17766,8 +20798,10 @@
 			()
 		VALUES
 			()
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+				SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17783,8 +20817,10 @@
 			#updateBy#,
 			#updateTime#
 			)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17804,8 +20840,11 @@
 		#title#,
 		#addDate#
 		)
-		   <selectKey keyProperty="historyID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="historyID" resultClass="int">
+			SELECT @@IDENTITY
+			AS historyID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17827,8 +20866,11 @@
 		#refundID#,
 		NOW()
 		)
-		   <selectKey keyProperty="recordID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordID" resultClass="int">
+			SELECT @@IDENTITY
+			AS recordID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17840,15 +20882,20 @@
 		#memo#,
 		NOW()
 		)
-		   <selectKey keyProperty="receiptPoolBatchFetchID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptPoolBatchFetchID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptPoolBatchFetchID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_ReceiptResetBatch
         (AdminID,AddTime) VALUES (#adminId#,Now());
-           <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventId" resultClass="int">
+            SELECT @@IDENTITY AS batchId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17880,8 +20927,11 @@
 		NOW(),
 		#memo#
 		)
-		   <selectKey keyProperty="logID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="logID" resultClass="int">
+			SELECT @@IDENTITY
+			AS logID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17920,8 +20970,10 @@
         )
         
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17948,8 +21000,10 @@
         )
         
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17987,8 +21041,11 @@
 		2,
 		#totalAmount#
 		)
-		   <selectKey keyProperty="voucherID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="voucherID" resultClass="int">
+			SELECT @@IDENTITY
+			AS voucherID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -17998,8 +21055,11 @@
 		VALUES (
 			#verifySn#
 		)
-		   <selectKey keyProperty="verifyStatusID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="verifyStatusID" resultClass="int">
+			SELECT @@IDENTITY
+			AS verifyStatusID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18018,8 +21078,10 @@
 		#expressId#,#bizId#,
 		#createBy#,#createTime#,#updateBy#,#updateTime#
 		)
-		   <selectKey keyProperty="invoiceApplyId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="invoiceApplyId" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18043,8 +21105,10 @@
         #createTime#,
         #updateBy#,
         #updateTime#)
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT last_insert_id();
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18078,8 +21142,10 @@
 			#updateBy#, 
 			#updateTime#,
 			#descriptionInfo#)
-		   <selectKey keyProperty="shopId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="shopId" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18103,8 +21169,10 @@
 			#createTime#, 
 			#updateBy#, 
 			#updateTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18119,8 +21187,10 @@
 			#createBy#,
 			#createTime#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18128,8 +21198,10 @@
 			()
 		VALUES
 			()
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+				SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18161,48 +21233,65 @@
 			#updateBy#,
 			#updateTime#,
 			#replenish#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO YY_BookingReAssignDealPool (
 		record_id, shop_id, created_time )
 		VALUES (#recordId#, #shopId#, NOW())
-		   <selectKey keyProperty="recordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="recordId" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_ReceiptGroupDetail
         (ReceiptGroupCodeID,ReceiptID,AddDate)
         VALUES
-           <iterate open="(" conjunction="," property="receiptIDs" close=")"/>
-</insert>
+        <iterate open="(" conjunction="," property="receiptIDs" close=")">
+            #receiptGroupCodeID#, #receiptIDs[]#, NOW()
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into TG_ReceiptRefundDetail (ReceiptNewID,Status,PayRefundID,ApplyDate,FinishDate)
 		values 
 		(#receiptNewId#,1,null,now(),null)
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into TG_Refund (OrderID,RefundAmount,ApplyDate,Type)
 		values 
 		(#orderId#,#refundAmount#,now(),#type#)
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO YY_ActivityItemInfo (activity_id, item_title,
 		title_bg, content_bg, create_by, created_time, update_by, updated_time)
 		VALUES
-		   <iterate conjunction=","/>
-</insert>
+		<iterate conjunction=",">
+      	
+      		(#list[].actId#, #list[].title#, #list[].bgTitle#, #list[].bgContent#,
+          	#list[].createBy#, NOW(), #list[].updateBy#, NOW())
+      	
+      	</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18219,8 +21308,10 @@
 			#updateBy#,
 			#updateTime#
 			)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18228,8 +21319,10 @@
         ()
         VALUES
         ()
-           <selectKey resultClass="long"/>
-</insert>
+        <selectKey resultClass="long">
+            SELECT last_insert_id();
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18238,8 +21331,10 @@
 		VALUES
 		(#reviewFollowNote.mainNoteId#,#reviewFollowNote.noteType#,#reviewFollowNote.userId#,#reviewFollowNote.noteBody#,#reviewFollowNote.ip#,#reviewFollowNote.origUserId#,
 		#reviewFollowNote.mainNoteTitle#,#reviewFollowNote.addDate#,#reviewFollowNote.addDate#,#reviewFollowNote.grandpaId#,#reviewFollowNote.power#,#reviewFollowNote.verifyStatus#, #reviewFollowNote.userType#)
-		   <selectKey keyProperty="FollowNoteID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="FollowNoteID" resultClass="int">
+            SELECT @@IDENTITY AS FollowNoteID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18286,8 +21381,10 @@
 		#updateBy#,
 		#updateTime#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18304,8 +21401,10 @@
 			#createTime#,
 			#dealStatus#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18353,8 +21452,10 @@
 			#feedBack.isCheck#,
 			#feedBack.causeType.type#,
 			#feedBack.emailType#)
-		   <selectKey keyProperty="feedId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="feedId" resultClass="int">
+			SELECT @@IDENTITY AS feedId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18380,8 +21481,11 @@
 		#receiptBalance#,
 		#lockVersion#
 		)
-		   <selectKey keyProperty="receiptAccountOrderID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptAccountOrderID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptAccountOrderID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18407,8 +21511,11 @@
 		#receiptBalance#,
 		#lockVersion#
 		)
-		   <selectKey keyProperty="receiptAccountOrderID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptAccountOrderID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptAccountOrderID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18429,8 +21536,10 @@
 			#updatedTime#,
 			#createdTime#
 		)
-		   <selectKey keyProperty="awardId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="awardId" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18447,8 +21556,10 @@
 			#updateBy#,
 			#updateTime#
 			)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18462,8 +21573,12 @@
 		city_id
 		)
 		VALUES
-		   <iterate conjunction=","/>
-</insert>
+		<iterate conjunction=",">
+            
+              (#poList[].shopID#, #poList[].year#, #poList[].month#, #poList[].record_count#, #poList[].range#, #poList[].create_time#, #poList[].cityId#)
+            
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18484,8 +21599,10 @@
 			#createTime#
 			)
 	
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18512,8 +21629,10 @@
 			#createBy#,
 			#createTime#
 		)
-		   <selectKey keyProperty="bizId" resultClass="long"/>
-</insert>
+		<selectKey keyProperty="bizId" resultClass="long">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18536,8 +21655,10 @@
 			#source#,
 			#createBy#,
 			#createTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18574,8 +21695,10 @@
             #createBy#,
             #createTime#
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT last_insert_id();
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18605,8 +21728,11 @@
 		#status#,
 		#mobileNo#
 		)
-		   <selectKey keyProperty="receiptAccountID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptAccountID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptAccountID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18634,8 +21760,11 @@
 		#status#,
 		NOW()
 		)
-		   <selectKey keyProperty="receiptVerifyRecordID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptVerifyRecordID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptVerifyRecordID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18649,8 +21778,11 @@
 			#receiptVerifySuccessLog.verifyChannel#,
 			#receiptVerifySuccessLog.deviceId#
 			);		
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18665,8 +21797,11 @@
 		#thirdPartyId#, #dealGroupId#,
 		#dealId#,#dealSnapshotId#, #details#, #quantity#, now(),
 		#referId#, #totalAmount#, 0)
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18693,8 +21828,11 @@
 		#orderItemID#,
 		#reservedString#
 		)
-		   <selectKey keyProperty="receiptNewID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptNewID" resultClass="int">
+			SELECT #receiptID#
+			AS receiptNewID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18724,8 +21862,11 @@
 		NOW(),
 		#userId#
 		)
-		   <selectKey keyProperty="receiptVerifyRecordId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptVerifyRecordId" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptVerifyRecordId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18737,8 +21878,11 @@
 		(#receiptId#, #dealGroupId#, #dealId#, #accountId#,
 		now(), #verifyChannel#, #deviceId#, #shopAccountId#, #companyId#,
 		#serialNumber#)
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18763,8 +21907,10 @@
 		#updateBy#,
 		#updateTime#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18773,8 +21919,10 @@
 		(priority,status,begin_time,end_time,title,page_type,page_url,banner_url,description,create_time,create_by,update_time,update_by)
 		VALUES
 		(#priority#,#status#,#beginTime#,#endTime#,#title#,#pageType#,#pageUrl#,#bannerUrl#,#description#,NOW(),#createBy#,NOW(),#updateBy#)
-		    <selectKey type="post" keyProperty="id" resultClass="int"/>
-</insert>
+		 <selectKey type="post" keyProperty="id" resultClass="int">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18783,8 +21931,10 @@
 		    (JobID, CompeteTime)
 		VALUES
 		    (#jobId#, NOW())
-		   <selectKey keyProperty="competitorId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="competitorId" resultClass="int"> 
+   		    SELECT @@IDENTITY AS CompetitorID 
+   		</selectKey> 
+	 </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18792,8 +21942,10 @@
 		(ReviewID, DishTag, UnknownDishTag, AddTime, LastTime)
 		VALUES
 		(#reviewKeyWord.reviewId#,#reviewKeyWord.dishTag#, #reviewKeyWord.unknownDishTag#, NOW(), NOW())
-		   <selectKey keyProperty="reviewId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="reviewId" resultClass="int"> 
+   			SELECT @@IDENTITY AS ReviewID 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18801,8 +21953,10 @@
 		  (ReviewID,UserID,ShopID,Score1,Score2,Score3,Score4,AvgPrice,TransPark,DishTags,ShopTags,Hits,ADDTIME,LastTime,LastIP,LogTime,LogReason,LogUser,ReviewBodyLength,Star,ReviewBody,ShopGroupID,ShopType)
           SELECT ReviewID,UserID,ShopID,Score1,Score2,Score3,Score4,AvgPrice,TransPark,DishTags,ShopTags,Hits,ADDTIME,LastTime,LastIP,NOW(),#logReason# AS LogReason ,#userId# AS LogUser,ReviewBodyLength,Star,ReviewBody,ShopGroupID,ShopType
           FROM  DP_Review WHERE  ReviewID=#reviewId#
-		   <selectKey keyProperty="reviewLogId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="reviewLogId" resultClass="int"> 
+   		SELECT @@IDENTITY AS ReviewLogID 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18844,8 +21998,10 @@
 			#operator#,
 			#contractGlobalID#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18869,8 +22025,10 @@
 			NOW(),
 			#operator#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18909,8 +22067,10 @@
 			#mailReceivers#,
 			#jarName#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18950,8 +22110,10 @@
 			NOW(),
 			#operator#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -18975,16 +22137,23 @@
 			NOW(),
 			#operator#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO YY_ActivityItemInfo (activity_id, item_title,
 		title_bg, content_bg, create_by, created_time, update_by, updated_time)
 		VALUES
-		   <iterate conjunction=","/>
-</insert>
+		<iterate conjunction=",">
+      	
+      		(#list[].actId#, #list[].title#, #list[].bgTitle#, #list[].bgContent#,
+          	#list[].createBy#, NOW(), #list[].updateBy#, NOW())
+      	
+      	</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19010,8 +22179,11 @@
 		#createBy#,
 		now(),
 		#sameNumber#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT
+			last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19032,8 +22204,11 @@
 		       priority, create_by, created_time, same_number, init_task_id
 		from YY_CC_BookingEvent
 		where id = #id#
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT
+			last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19053,8 +22228,10 @@
 		#operator#,
 		#createBy#,
 		#createTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19092,8 +22269,11 @@
 		#totalAmount#,
         #status#
 		)
-		   <selectKey keyProperty="voucherID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="voucherID" resultClass="int">
+			SELECT @@IDENTITY
+			AS voucherID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19123,16 +22303,21 @@
 		#status#,
 		#mobileNo#
 		)
-		   <selectKey keyProperty="receiptAccountID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptAccountID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptAccountID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_ReceiptGroupDetail
         (ReceiptGroupCodeID,ReceiptID,AddDate)
         VALUES
-           <iterate conjunction="," property="receiptIDs"/>
-</insert>
+        <iterate conjunction="," property="receiptIDs">
+        ( #receiptGroupCodeID#, #receiptIDs[]#, NOW() )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19160,8 +22345,11 @@
 		#status#,
 		NOW()
 		)
-		   <selectKey keyProperty="receiptVerifyRecordID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptVerifyRecordID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptVerifyRecordID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19175,8 +22363,11 @@
 			#receiptVerifySuccessLog.verifyChannel#,
 			#receiptVerifySuccessLog.deviceId#
 			);		
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19214,8 +22405,11 @@
             now(), 
             now()
         );
-           <selectKey keyProperty="refundRecordID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="refundRecordID" resultClass="int">
+			SELECT @@IDENTITY
+			AS refundRecordID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19236,8 +22430,10 @@
 			#createTime#
 			)
 	
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19249,16 +22445,26 @@
         updated_time
         )
         VALUES
-           <iterate conjunction=","/>
-</insert>
+        <iterate conjunction=",">
+            (
+            #poList[].shopId#,
+            #poList[].privilege#,
+            #poList[].description#,
+            #poList[].createdTime#,
+            #poList[].updatedTime#
+            )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_ReceiptGroupCode
         (Code,DealID,UserID,Status,AddDate)
         VALUES(#code#,#dealId#,#userId#,1,Now());
-           <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventId" resultClass="int">
+            SELECT @@IDENTITY  AS ReceiptGroupCodeID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19267,8 +22473,10 @@
         SELECT #receiptGroupCodeId#,ReceiptID,Now()
         FROM TG_Receipt
         WHERE ReceiptID in
-           <iterate open="(" conjunction="," property="receiptIdList" close=")"/>
-</insert>
+        <iterate open="(" conjunction="," property="receiptIdList" close=")">
+            #receiptIdList[]#
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19292,8 +22500,10 @@
 		 		#createTime#,
 		 		#updateBy#,
 		 		#updateTime#)
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int">
+				SELECT last_insert_id();
+			</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19330,8 +22540,10 @@
 			#createBy#,
 			#createTime#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19352,8 +22564,10 @@
 			#callEventType#,
 			#createBy#,
 			#createTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19373,8 +22587,10 @@
 			#createTime#,
 			#updateBy#,
 			#updateTime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19405,8 +22621,10 @@
 		#updateTime#,
 		#createBy#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19422,8 +22640,10 @@
 		    NOW(),
 			"",
 			0)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19439,8 +22659,10 @@
         NOW(),
         #status#,
         0)
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT last_insert_id();
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19458,8 +22680,11 @@
         #createTime#,
         #updateBy#,
         #updateTime#)
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT last_insert_id();
+        </selectKey>
+
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19497,8 +22722,11 @@
 		#totalAmount#,
         #status#
 		)
-		   <selectKey keyProperty="voucherID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="voucherID" resultClass="int">
+			SELECT @@IDENTITY
+			AS voucherID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19518,8 +22746,11 @@
 		#title#,
 		#addDate#
 		)
-		   <selectKey keyProperty="historyID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="historyID" resultClass="int">
+			SELECT @@IDENTITY
+			AS historyID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19545,8 +22776,11 @@
 		#receiptBalance#,
 		#lockVersion#
 		)
-		   <selectKey keyProperty="receiptAccountOrderID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptAccountOrderID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptAccountOrderID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19558,15 +22792,20 @@
 		#memo#,
 		NOW()
 		)
-		   <selectKey keyProperty="receiptPoolBatchFetchID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptPoolBatchFetchID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptPoolBatchFetchID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_ReceiptResetBatch
         (AdminID,AddTime) VALUES (#adminId#,Now());
-           <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventId" resultClass="int">
+            SELECT @@IDENTITY AS batchId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19576,8 +22815,11 @@
 		VALUES (
 			#verifySn#
 		)
-		   <selectKey keyProperty="verifyStatusID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="verifyStatusID" resultClass="int">
+			SELECT @@IDENTITY
+			AS verifyStatusID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19599,8 +22841,11 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey keyProperty="stockLockID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="stockLockID" resultClass="int">
+			SELECT @@IDENTITY
+			AS stockLockID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19625,8 +22870,11 @@
 		#vendorShopID#,
 		#dealSalePrice#
 		)
-		   <selectKey keyProperty="receiptID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="receiptID" resultClass="int">
+			SELECT @@IDENTITY
+			AS receiptID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19640,8 +22888,18 @@
 			update_by,
 			updated_time
 		) VALUES
-		   <iterate conjunction=","/>
-</insert>
+		<iterate conjunction=",">
+	      	
+			(#list[].customID#,
+			#list[].activityID#,
+			#list[].activityType#,
+			#list[].createBy#,
+			NOW(),
+			#list[].updateBy#,
+			NOW())
+			
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19665,8 +22923,11 @@
 				NOW()
 			)
         
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19691,8 +22952,10 @@
 			NOW(),
 			#updateBy#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19741,8 +23004,11 @@
 			#beginUsedTime#,
 			#endUsedTime#,
 			#webRuleShow#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT
+			last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19771,8 +23037,11 @@
 		null,
 		#message#,
 		now())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT
+			last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19802,8 +23071,10 @@
 		#updateBy#,
 		#updateTime#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT last_insert_id();
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19821,8 +23092,10 @@
 			 #endDate#,
 			 #isActive#,
 			 #addTime#)
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+			SELECT @@IDENTITY AS LogID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19830,8 +23103,10 @@
 			INSERT INTO MC_MemberCardScoreLog(MemberCardID, LogType, Score, Comment, ReferLogID, Status, IsActive, AddTime, AdminID, AdminName)
 			VALUES(#memberCardId#, #logType#, #score#, #comment#, #referLogId#, #status#, #isActive#, #addTime#, #adminId#, #adminName#)
 			
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+			SELECT @@IDENTITY AS LogID   
+	  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19848,39 +23123,49 @@
 			#officialOperationLog.logInfo#,
 			#officialOperationLog.comment#,
 			#officialOperationLog.ip#,NOW());
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID 
+   			</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO DP_UserAlbum(ShopID,UserID,PicTotal,DefaultPicUrl,ADDTIME,Popularity,ViewCount)
 			VALUES(#shopId#, #userId#, #picTotal#, #defaultPicUrl#, #addTime#, 0 , 0)
-		    <selectKey resultClass="int"/>
-</insert>
+		 <selectKey resultClass="int">    
+            SELECT LAST_INSERT_ID() AS ID    
+        </selectKey>    
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DP_VoteRankFollowNote
         (
         MainNoteID,FromUserID,NoteBody,AddDate,UpdateDate,UserIP,ToUserID,OriginalUserID,GrandpaID,MainNoteTitle,VerifyStatus
-           <isNotEmpty prepend="," property="userType"/>
-
+        <isNotEmpty prepend="," property="userType">
+            UserType
+        </isNotEmpty>
         ) VALUES
         (
         #mainNoteID#,#fromUserID#,#noteBody#,Now(),Now(),#userIP#,#toUserID#,#originalUserID#,#grandpaID#,#mainNoteTitle#,#verifyStatus#
-           <isNotEmpty prepend="," property="userType"/>
-
+        <isNotEmpty prepend="," property="userType">
+            #"userType"#
+        </isNotEmpty>
         );
-           <selectKey keyProperty="followNoteId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="followNoteId" resultClass="int">
+            SELECT @@IDENTITY AS followNoteId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DianPing.DP_VoteRankTagRecord
         	(TagID, VoteRankID, AddDate)
         VALUES
-           <iterate conjunction="," property="tagList"/>
-</insert>
+        <iterate conjunction="," property="tagList">
+            (#tagList[]#,#voteRankId#, Now())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19898,13 +23183,16 @@
             NOW(),
             NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO WED_ShopProductCategoryList (
-               <include refid="allFieldsInsert"/>
+            <include refid="allFieldsInsert"/>
 
         ) VALUES (
             #categoryList.productCategoryId#,
@@ -19914,8 +23202,10 @@
             #categoryList.shopCategoryId#,
             NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19923,16 +23213,20 @@
 			BC_Notice(Title,Content,AddTime,AddAdminID)
 		VALUES
 			(#title#,#content#,NOW(),#addAdminID#)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_ShopAccountUser(ShopAccountId,UserId,AddTime,UpdateTime)
 		VALUES
 		(#shopAccountId#,#userId#,#addTime#,NOW())	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19945,8 +23239,10 @@
 		VALUES
 		(#entity.feedbackId#,#entity.content#,#entity.createTime#,#entity.creatorId#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19961,8 +23257,10 @@
 		VALUES
 		(#entity.uuid#,#entity.osTypeId#,#entity.osDetail#,#entity.deviceModel#,#entity.appVersion#,#entity.createTime#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -19975,8 +23273,16 @@
         weight
         )
         values
-           <iterate open="" conjunction="," property="eventContentList" close=""/>
-</insert>
+        <iterate open="" conjunction="," property="eventContentList" close="">
+          (
+            #eventContentList[].eventID#,
+            #eventContentList[].platform#,
+            #eventContentList[].contentType#,
+            #eventContentList[].content#,
+            #eventContentList[].weight#
+          )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20026,8 +23332,11 @@
 				#shopVideo.uploadDate#
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20040,8 +23349,16 @@
         status
         )
         values
-           <iterate open="" conjunction="," property="eventList" close=""/>
-</insert>
+        <iterate open="" conjunction="," property="eventList" close="">
+        (
+        #launchList[].adID#,
+        #launchList[].otaID#,
+        #launchList[].cityID#,
+        #launchList[].shopID#,
+        #launchList[].status#
+        )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20060,8 +23377,22 @@
         updateTime
         )
         values
-           <iterate open="" conjunction="," property="eventAdList" close=""/>
-</insert>
+        <iterate open="" conjunction="," property="eventAdList" close="">
+            (
+            #eventAdList[].eventID#,
+            #eventAdList[].srcID#,
+            #eventAdList[].title#,
+            #eventAdList[].imgUrl#,
+            #eventAdList[].landPage#,
+            #eventAdList[].status#,
+            #eventAdList[].weight#,
+            #eventAdList[].startTime#,
+            #eventAdList[].endTime#,
+            NOW(),
+            NOW()
+            )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20092,8 +23423,10 @@
         NOW(),
         NOW()
         )
-           <selectKey keyProperty="adID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="adID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS adID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20111,8 +23444,11 @@
 				#productCategory.cityId#
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20158,8 +23494,11 @@
 				#bizJournalAccount.receiptId#,
                 NOW()
 			)
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int">
+				SELECT @@IDENTITY
+				AS ID
+			</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20183,8 +23522,11 @@
 				NOW()
 			)
         
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20192,8 +23534,10 @@
 			INSERT INTO WED_ShopGuanfangBuluo (ShopId, Url, UpdateTime)
 			VALUES(#buluo.shopId#, #buluo.url#, NOW());
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20217,8 +23561,11 @@
 				NOW()
 			)
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20256,8 +23603,11 @@
 				#specialTopic.updateUser#
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20280,8 +23630,10 @@
 		#wedHotelSmsReplyRecordEntity.swallowCode#
 		)
 		
-	      <selectKey keyProperty="wedHotelSmsReplyRecordEntity.id" resultClass="java.lang.Integer"/>
-</insert>
+	   <selectKey keyProperty="wedHotelSmsReplyRecordEntity.id" resultClass="java.lang.Integer">
+                 SELECT LAST_INSERT_ID()
+       </selectKey>	
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20297,8 +23649,11 @@
             NOW(),
             NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20331,8 +23686,10 @@
 		#wedHotelBookShop.rejectReason#
 		)
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20370,8 +23727,11 @@
 				NOW()
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20389,15 +23749,19 @@
 			 #consumeDate#, 
 			 #addTime#, 
 			 #updateTime#)
-		   <selectKey keyProperty="ReportID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ReportID" resultClass="int">     
+			SELECT @@IDENTITY AS ReportID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 				
 		INSERT INTO MC_MemberCardUserFeed(UserID,FeedID,Status,IsLike,IsUse,AddTime,UpdateTime) 
 		VALUES(#userFeed.userId#, #userFeed.feedId#, #userFeed.status#, 0, 0, NOW(), NOW())
-		   <selectKey keyProperty="userFeedId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="userFeedId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS userFeedId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20419,15 +23783,18 @@
 			#officialAlbum.isMain#,
 			#officialAlbum.description#,
 			NOW(),NOW(),#officialAlbum.albumType#);
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID 
+   			</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_PicTag (PicID, ShopID, TagTypeName, TagName, UserID) 
 		VALUES 
-		   <iterate conjunction="," property="tagList"/>
-
+		<iterate conjunction="," property="tagList"> 
+              (#tagList[].picId#, #tagList[].shopId#, #tagList[].tagTypeName#, #tagList[].tagName#,#tagList[].userId#)
+		</iterate>
 		ON DUPLICATE KEY UPDATE UserID = VALUES(UserID)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -20439,8 +23806,10 @@
         ADDDATE
         )
         VALUES
-           <iterate conjunction="," property="tagList"/>
-</insert>
+        <iterate conjunction="," property="tagList">
+            (#tagList[]#,#listId#, Now())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20470,8 +23839,11 @@
         #shopPhone.phone2#,
         #shopPhone.phone3#
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20482,33 +23854,41 @@
         #shop.phoneNo#,#shop.phoneNo2#,#shop.cityId#,#shop.shopGroupId#,#shop.district#,NOW(),NOW(),#shop.addUser#,
         #shop.lastUser#,#shop.lastIp#,#shop.addUserName#,#shop.lastUserName#,#shop.branchTotal#,#shop.groupFlag#,
         #shop.searchName#,#shop.writeUp#,#shop.searchKeyWord#,#shop.businessHours#,#shop.publicTransit#,#shop.priceInfo#,#shop.clientType#);
-		   <selectKey keyProperty="shopId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="shopId" resultClass="int"> 
+   		SELECT @@IDENTITY AS ShopID 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_MyListFollowNote 
 		(
 		MainNoteID,FromUserID,NoteBody,AddDate,UpdateDate,UserIP,ToUserID,OriginalUserID,GrandpaID,MainNoteTitle,VerifyStatus
-		   <isNotEmpty prepend="," property="userType"/>
-
+		<isNotEmpty prepend="," property="userType">
+			UserType
+		</isNotEmpty>
 		) VALUES 
 		(
 		#mainNoteID#,#fromUserID#,#noteBody#,Now(),Now(),#userIP#,#toUserID#,#originalUserID#,#grandpaID#,#mainNoteTitle#,#verifyStatus#
-		   <isNotEmpty prepend="," property="userType"/>
-
+		<isNotEmpty prepend="," property="userType">
+			#"userType"#
+		</isNotEmpty>
 		);
-		   <selectKey keyProperty="followNoteId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="followNoteId" resultClass="int">     
+        	SELECT @@IDENTITY AS followNoteId  
+        </selectKey>
+		
+		
+		
+		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		 INSERT INTO DP_MyListShop (ListID,ShopID,AddDate,Reason
-		    <isNotEmpty prepend="," property="verifyStatus"/>
-
+		 <isNotEmpty prepend="," property="verifyStatus">VerifyStatus</isNotEmpty>
 		 ,Sort) VALUES
-		 (#listId#,#shopId#,now(),#reason#   <isNotEmpty prepend="," property="verifyStatus"/>
-,#sort#)
+		 (#listId#,#shopId#,now(),#reason#<isNotEmpty prepend="," property="verifyStatus">#verifyStatus#</isNotEmpty>,#sort#)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -20516,20 +23896,24 @@
 		INSERT INTO DP_MyList (UserID, Title,Content,AddDATE, UpdateDate,VerifyStatus,ShopCount)
 		VALUES
 		(#userId#,#title#,#content#,now(),now(),#verifyStatus#,0);
-		   <selectKey keyProperty="listId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="listId" resultClass="int">     
+        	SELECT @@IDENTITY AS listId  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		
 		INSERT INTO HY_ManaPendingList (
 		ActionType, ActionTarget, ADDTIME, STATUS
-		   <isNotEmpty prepend="," property="userId"/>
-
+		<isNotEmpty prepend="," property="userId">
+		ActionInfo
+		</isNotEmpty>
 		) VALUES 
 		(#actionType#, #listId#, NOW(), 0
-		   <isNotEmpty prepend="," property="userId"/>
-
+		<isNotEmpty prepend="," property="userId">
+			#userId#
+		</isNotEmpty>
 		);
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -20538,16 +23922,24 @@
 		INSERT INTO DP_MyListFollowNote 
 		(
 		MainNoteID,FromUserID,NoteBody,AddDate,UpdateDate,UserIP,ToUserID,OriginalUserID,GrandpaID,MainNoteTitle,VerifyStatus
-		   <isNotEmpty prepend="," property="userType"/>
-
+		<isNotEmpty prepend="," property="userType">
+			UserType
+		</isNotEmpty>
 		) VALUES 
 		(
 		#mainNoteID#,#fromUserID#,#noteBody#,Now(),Now(),#userIP#,#toUserID#,#originalUserID#,#grandpaID#,#mainNoteTitle#,#verifyStatus#
-		   <isNotEmpty prepend="," property="userType"/>
-
+		<isNotEmpty prepend="," property="userType">
+			#"userType"#
+		</isNotEmpty>
 		);
-		   <selectKey keyProperty="followNoteId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="followNoteId" resultClass="int">     
+        	SELECT @@IDENTITY AS followNoteId  
+        </selectKey>
+		
+		
+		
+		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20595,8 +23987,11 @@
         NOW(),
         NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20604,8 +23999,10 @@
         INSERT INTO MSD_AlbumTagType(TypeName, ShopType, CreatorId, `Status`, AddTime, UpdateTime)
         VALUES(#albumTagType.typeName#, #albumTagType.shopType#, #albumTagType.creatorId#, #albumTagType.status#, NOW(), NOW());
         
-           <selectKey keyProperty="tagType" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="tagType" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20613,8 +24010,10 @@
         INSERT INTO MSD_AlbumTag(TagType, Tag, CreatorId, `Status`, AddTime, UpdateTime)
         VALUES(#albumTag.tagType#, #albumTag.tag#, #albumTag.creatorId#, #albumTag.status#, NOW(), NOW())
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20632,8 +24031,10 @@
 		VALUES
 		(#entity.id#,#entity.shopAccount#,#entity.shopAccountId#,#entity.mobileNo#,#entity.lastRequestTime#,#entity.isReset#,#entity.lastResetTime#,#entity.lastUpdatorId#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20648,8 +24049,10 @@
 		VALUES
 		(#entity.deviceId#,#entity.shopAccountId#,#entity.isLogin#,#entity.createTime#,#entity.lastLoginTime#,#entity.lastLogoutTime#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20677,14 +24080,17 @@
 				NOW()
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO WED_SearchProductRecommend
         (
-           <include refid="allFieldsInsert"/>
+        <include refid="allFieldsInsert"/>
 
         )
         VALUES
@@ -20702,8 +24108,10 @@
             ProductPicUrl = #reco.productPicUrl#,
             AddTime = NOW()
         
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20723,8 +24131,11 @@
 		#weddingEventPoi.addDate#,
 		#weddingEventPoi.updateDate#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20749,8 +24160,10 @@
 		#wedHotelAbnormalSmsReplyEntity.userName#
 		)
 		
-		   <selectKey keyProperty="wedHotelAbnormalSmsReplyEntity.id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="wedHotelAbnormalSmsReplyEntity.id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20773,8 +24186,10 @@
 		#wedHotelBookUser.userName#
 		)
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20787,15 +24202,18 @@
 			NOW(),
 			NOW());
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_OfficialAlbumTag (AlbumID, ShopID, TagName, TagValue, UserID) 
 		VALUES 
-		   <iterate conjunction="," property="tagList"/>
-
+		<iterate conjunction="," property="tagList">
+			(#tagList[].albumId#, #tagList[].shopId#, #tagList[].tagName#, #tagList[].tagValue#, #tagList[].userId#)
+		</iterate>
 		ON DUPLICATE KEY UPDATE UserID = VALUES(UserID)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -20804,8 +24222,10 @@
 		INSERT INTO DP_OfficialPicTag (PicID, ShopID, tagName, tagValue,
 		UserID)
 		VALUES
-		   <iterate conjunction="," property="tagList"/>
-
+		<iterate conjunction="," property="tagList">
+			(#tagList[].picId#, #tagList[].shopId#, #tagList[].tagName#,
+			#tagList[].tagValue#,#tagList[].userId#)
+		</iterate>
 		ON DUPLICATE KEY UPDATE UserID = VALUES(UserID)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -20813,15 +24233,19 @@
 
 		INSERT INTO DP_PicTagIndex (PicID, ShopID, UserID, Tag, Title, OrderNo, AddTime) 
 		VALUES 
-		   <iterate conjunction="," property="shopPicTagIndexList"/>
-</insert>
+		<iterate conjunction="," property="shopPicTagIndexList"> 
+              (#shopPicTagIndexList[].picId#, #shopPicTagIndexList[].shopId#, #shopPicTagIndexList[].userId#,
+              #shopPicTagIndexList[].tag#, #shopPicTagIndexList[].title#, #shopPicTagIndexList[].orderNo#, NOW())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_UserAlbumTag (AlbumID, ShopID, TagTypeName, TagName, UserID) 
 		VALUES 
-		   <iterate conjunction="," property="tagList"/>
-
+		<iterate conjunction="," property="tagList">
+			(#tagList[].albumId#, #tagList[].shopId#, #tagList[].tagTypeName#, #tagList[].tagName#, #tagList[].userId#)
+		</iterate>
 		ON DUPLICATE KEY UPDATE UserID = VALUES(UserID)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -20829,8 +24253,10 @@
 
         INSERT INTO DP_VoteRank (`CityID`, `UserID`, `Title`, `Description`, `ViewCount`, `AddTime`)
         VALUES (#cityId#, #userId#, #title#, #desc#, 0, NOW())
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20850,8 +24276,11 @@
 				#entity.addTime#,
 				#entity.updateTime#);
     	
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20911,8 +24340,11 @@
             #weddingHotelExtraInfo.placeType#,
             #weddingHotelExtraInfo.percentage#
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20955,8 +24387,10 @@
 		#regionListData.tmdRange#,
 		#regionListData.address#,
 		#regionListData.shopCount#)
-		   <selectKey keyProperty="regionid" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="regionid" resultClass="int">
+			  SELECT LAST_INSERT_ID() AS RegionID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -20995,8 +24429,10 @@
 			#shopModificationLog.comment#,
 			#shopModificationLog.userName#,
 			#shopModificationLog.editorName#)
-			   <selectKey keyProperty="shoplogid" resultClass="long"/>
-</insert>
+			<selectKey keyProperty="shoplogid" resultClass="long">
+			   SELECT LAST_INSERT_ID() AS SHOPLOGID
+			 </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21006,8 +24442,10 @@
 		VALUES
 		(#password#,#parentId#,#contactName#,#contactMobileNO#,#addTime#,#updateTime#,#accountType#,1)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21017,16 +24455,22 @@
 		VALUES
 		(#shopAccount#,#password#,#parentId#,#contactName#,#contactMobileNO#,#addTime#,#updateTime#,#accountType#,1)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	
         	INSERT INTO DP_FeedUserPrivacy(UserID, FeedTypeID, AddDate) VALUES
  		
-		   <iterate conjunction="," property="list"/>
-</insert>
+		<iterate conjunction="," property="list">
+        	
+            	(#list[].userId#, #list[].feedTypeId#, NOW())
+        	
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21036,8 +24480,12 @@
         	 VALUES
         	(#userId#,#feedTypeId#,#content#,#mainId#,1,NOW())
  		
-		   <selectKey keyProperty="FeedID" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="FeedID" resultClass="java.lang.Integer">
+		
+			SELECT @@IDENTITY AS id
+		
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21077,8 +24525,11 @@
         NOW(),
         NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21107,16 +24558,21 @@
 		#whsRecordEntity.swallowCode#
 		)
 		
-           <selectKey keyProperty="whsRecordEntity.id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="whsRecordEntity.id" resultClass="java.lang.Integer">
+                 SELECT LAST_INSERT_ID()
+        </selectKey>
+
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_ShopProductPic (ProductID, PicID, AddTime) 
 		VALUES 
 		(#shopProductPic.productId#, #shopProductPic.picId#, NOW())
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21124,8 +24580,10 @@
     	INSERT INTO WED_WeddingHotelAppointment (ShopId, HallId, Type, StartDate, EndDate, FixedDate, WeekendOnly, RemoveFour, Contactor, PhoneNo, Gender, AddTime, UpdateTime, UserId)
 		VALUES(#appointment.shopId#, #appointment.hallId#, #appointment.type#, #appointment.startDate#, #appointment.endDate#, #appointment.fixedDate#, #appointment.weekendOnly#, #appointment.removeFour#, #appointment.contactor#, #appointment.phoneNo#, #appointment.gender#, NOW(), NOW(), #appointment.userId#)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21189,8 +24647,11 @@
             #weddingHotelExtraInfo.enviromentPicOrAlbum#,
             #weddingHotelExtraInfo.menuPicOrAlbum#
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21226,14 +24687,17 @@
             NOW(),
             #weddingHotelMenu.document#
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO WED_ShopProductTag
         (
-               <include refid="allFieldsInsert"/>
+            <include refid="allFieldsInsert"/>
 
         )
         VALUES
@@ -21249,8 +24713,10 @@
             Now()
 		
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21310,8 +24776,11 @@
 				NOW()
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21341,8 +24810,11 @@
 				NOW()
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21382,8 +24854,11 @@
         NOW(),
         NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21423,8 +24898,11 @@
         NOW(),
         NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21476,8 +24954,12 @@
 				#bookUser.orderStatus#
 			)
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            
+				SELECT @@IDENTITY AS ID
+			
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21503,8 +24985,11 @@
 		#weddingEvent.addUser#,
 		#weddingEvent.updateUser#
 		)
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21519,30 +25004,41 @@
 			NOW(),
 			NOW());
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
   
 	     
 	        INSERT INTO MC_MemberCardNumber(CardNO,Type,AddTime) VALUES 
 	      
-	       <iterate conjunction="," property="cardNOList"/>
-</insert>
+	    <iterate conjunction="," property="cardNOList">  
+	         
+	            (#cardNOList[].cardNO#, #cardNOList[].type#, NOW())
+	          
+	    </iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_ShopPic(PicID, ShopID, UserID, CityID, ShopType, ShopGroupID, PicType, IsTop, OrderNo, Price, PicPrice, PicPower, LastIP, AddTime, LastTime) 
 		VALUES 
-		   <iterate conjunction="," property="shopPics"/>
-</insert>
+		<iterate conjunction="," property="shopPics">
+			(#shopPics[].picId#, #shopPics[].shopId#, #shopPics[].userId#, #shopPics[].cityId#, #shopPics[].shopType#, #shopPics[].shopGroupId#, 
+			#shopPics[].picType#, #shopPics[].isTopValue#, #shopPics[].orderNo#, #shopPics[].price#, #shopPics[].picPrice#, #shopPics[].picPower#, #shopPics[].lastIp#, Now(), Now())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DP_VoteRankShop (`VoteRankId`, `ShopID`, `UserID`, `Reason`, `AddTime`)
         VALUES (#voteRankId#, #shopId#, #userId#, #reason#, NOW())
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21568,8 +25064,11 @@
 				NOW()
 			)
 		
-           <selectKey keyProperty="authorityId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="authorityId" resultClass="int">
+            SELECT @@IDENTITY
+            AS AuthorityID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21595,8 +25094,11 @@
 				NOW()
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21632,22 +25134,29 @@
 				#shopPhone.phoneType#
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO SE_GiftUserGot (GiftId, EventId, ActionId, ActionObjId, UserId, UserIp)
 		VALUES(#giftUserGot.giftId#, #giftUserGot.eventId#, #giftUserGot.actionId#, #giftUserGot.actionObjId#, #giftUserGot.userId#, #giftUserGot.userIp#);
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+	    	SELECT @@IDENTITY AS ID;
+	   </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_SeWordsGiftUserGot(UserId,GiftType,AddTime,WordIds) VALUES 
 		(#seWordsGiftUserGot.userId#,#seWordsGiftUserGot.giftType#,NOW(),#seWordsGiftUserGot.wordIds#);
-		   <selectKey keyProperty="wordsGiftUserGotId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="wordsGiftUserGotId" resultClass="int"> 
+   		SELECT @@IDENTITY AS WordsGiftUserGotId 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21681,8 +25190,11 @@
 				#shopPhone.cityID#
 			)
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21695,8 +25207,10 @@
 		VALUES
 		(#entity.deviceId#,#entity.token#,#entity.isValid#,#entity.createTime#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21769,15 +25283,20 @@
 			#shop.branchTotal#,
 			#shop.writeUp#,
 			#shop.priceInfo#,#shop.clientType#,1,#shop.oldName#)
-			   <selectKey keyProperty="shopid" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="shopid" resultClass="int">
+			   SELECT LAST_INSERT_ID() AS SHOPID
+			 </selectKey>
+
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         insert ignore into DP_ShopAttribute(ShopID, AttributeID, ValueID)
         values
-           <iterate open="" conjunction="," property="dpShopAttributeList" close=""/>
-</insert>
+        <iterate open="" conjunction="," property="dpShopAttributeList" close="">
+            (#dpShopAttributeList[].shopId#, #dpShopAttributeList[].attributeId#, #dpShopAttributeList[].valueId#)
+        </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21797,8 +25316,11 @@
                 NOW()
             )
         
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21832,8 +25354,11 @@
 				#applyLog.verifyTime#
 			)
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21861,8 +25386,11 @@
                 #mobileBanner.shopType#
             )
         
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21888,8 +25416,11 @@
 				NOW()
 			)
         
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21904,8 +25435,11 @@
 		#weddingEventCategory.addDate#,
 		#weddingEventCategory.updateDate#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21922,8 +25456,11 @@
             NOW(),
             NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -21963,8 +25500,11 @@
             #weddingHotelHall.remark#,
             #weddingHotelHall.hallPicOrAlbum#
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22016,13 +25556,15 @@
 				#bookingShop.auditStatus#
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int"> 
+   		SELECT @@IDENTITY AS ID 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO WED_ShopProduct (
-               <include refid="allFieldsInsert"/>
+            <include refid="allFieldsInsert"/>
 
         ) VALUES (
         
@@ -22041,13 +25583,15 @@
             NOW()
         
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO WED_ShopProduct (
-           <include refid="allFieldsInsertSpecifyId"/>
+        <include refid="allFieldsInsertSpecifyId"/>
 
         ) VALUES (
         
@@ -22086,8 +25630,10 @@
 			NOW(),
 			NOW());
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22104,8 +25650,10 @@
 			#shopContactOperationTraceInfo.AccessIP#,
 			NOW());
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22114,16 +25662,30 @@
 			INSERT INTO BC_Shop_Contact_Operation_Trace_Item (TraceID, TraceKey, ValueBefore, ValueAfter)
 			VALUES
 		
-		   <iterate conjunction="," property="shopContactOperationTraceItems"/>
-</insert>
+		<iterate conjunction="," property="shopContactOperationTraceItems">  
+		     
+		        ( 
+		        	#shopContactOperationTraceItems[].traceId#,
+		            #shopContactOperationTraceItems[].traceKey#, 
+		            #shopContactOperationTraceItems[].valueBefore#, 
+		            #shopContactOperationTraceItems[].valueAfter#
+		        ) 
+		    
+		</iterate>
+		
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
   
     	 
         	INSERT INTO SMS_Queue(SmsType, MobileNo, Message, status, Rank, Remark, AddTime, UpdateTime ) VALUES 
  		
-		   <iterate conjunction="," property="batchData"/>
-</insert>
+		<iterate conjunction="," property="batchData">  
+        	 
+            	(#batchData[].smsType#, #batchData[].mobileNo#, #batchData[].message#, #batchData[].status#, #batchData[].rank#, #batchData[].remark#, NOW(), NOW()) 
+        	
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22134,16 +25696,21 @@
 	ON DUPLICATE KEY UPDATE
 	RecommendCards = VALUES(RecommendCards),
 	UpdateTime = VALUES(UpdateTime)
-	   <selectKey keyProperty="MembercardID" resultClass="int"/>
-</insert>
+	<selectKey keyProperty="MembercardID" resultClass="int">
+		SELECT @@IDENTITY AS MemberCardID
+	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	INSERT INTO MC_MemberCardRecommend
 	(MembercardID, CityID,RecommendCards,AddTime, UpdateTime)
 	VALUES
-	   <iterate conjunction="," property="reportList"/>
-
+	<iterate conjunction="," property="reportList">
+		(#reportList[].membercardId#, #reportList[].cityId#,
+		#reportList[].recommendCards#,
+		NOW(), NOW())
+	</iterate>
 	ON DUPLICATE KEY UPDATE
 	RecommendCards = VALUES(RecommendCards),
 	UpdateTime = VALUES(UpdateTime)
@@ -22173,8 +25740,11 @@
 				NOW()
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22182,8 +25752,10 @@
 			INSERT INTO WED_ShopProductRecommend (ShopId, ProductCategoryId, ProductCategoryOrder, ProductId, ProductOrder, STATUS, AddTime, UpdateTime)
 			VALUES(#recommend.shopId#, #recommend.productCategoryId#, #recommend.productCategoryOrder#, #recommend.productId#, #recommend.productOrder#, #recommend.status#, NOW(), NOW())
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22221,8 +25793,11 @@
 				#bizAccount.cityID#
 			)
 		
-		   <selectKey keyProperty="accountId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="accountId" resultClass="int">
+			SELECT @@IDENTITY
+			AS AccountID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22239,17 +25814,18 @@
             NOW(),
             NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		 INSERT INTO DP_MyListShop (ListID,ShopID,AddDate,Reason
-		    <isNotEmpty prepend="," property="verifyStatus"/>
-
+		 <isNotEmpty prepend="," property="verifyStatus">VerifyStatus</isNotEmpty>
 		 ,Sort) VALUES
-		 (#listId#,#shopId#,now(),#reason#   <isNotEmpty prepend="," property="verifyStatus"/>
-,#sort#)
+		 (#listId#,#shopId#,now(),#reason#<isNotEmpty prepend="," property="verifyStatus">#verifyStatus#</isNotEmpty>,#sort#)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -22257,20 +25833,24 @@
 		INSERT INTO DP_MyList (UserID, Title,Content,AddDATE, UpdateDate,VerifyStatus,ShopCount)
 		VALUES
 		(#userId#,#title#,#content#,now(),now(),#verifyStatus#,0);
-		   <selectKey keyProperty="listId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="listId" resultClass="int">     
+        	SELECT @@IDENTITY AS listId  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		
 		INSERT INTO HY_ManaPendingList (
 		ActionType, ActionTarget, ADDTIME, STATUS
-		   <isNotEmpty prepend="," property="userId"/>
-
+		<isNotEmpty prepend="," property="userId">
+		ActionInfo
+		</isNotEmpty>
 		) VALUES 
 		(#actionType#, #listId#, NOW(), 0
-		   <isNotEmpty prepend="," property="userId"/>
-
+		<isNotEmpty prepend="," property="userId">
+			#userId#
+		</isNotEmpty>
 		);
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -22278,15 +25858,19 @@
 
 		INSERT INTO SE_GiftUserGot (GiftId, EventId, ActionId, ActionObjId, UserId, UserIp)
 		VALUES(#giftUserGot.giftId#, #giftUserGot.eventId#, #giftUserGot.actionId#, #giftUserGot.actionObjId#, #giftUserGot.userId#, #giftUserGot.userIp#);
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+	    	SELECT @@IDENTITY AS ID;
+	   </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO DP_SeWordsGiftUserGot(UserId,GiftType,AddTime,WordIds) VALUES 
 		(#seWordsGiftUserGot.userId#,#seWordsGiftUserGot.giftType#,NOW(),#seWordsGiftUserGot.wordIds#);
-		   <selectKey keyProperty="wordsGiftUserGotId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="wordsGiftUserGotId" resultClass="int"> 
+   		SELECT @@IDENTITY AS WordsGiftUserGotId 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22334,8 +25918,12 @@
 				#bookUser.transAmount#
 			)
 		
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            
+				SELECT @@IDENTITY AS ID
+			
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22358,8 +25946,10 @@
 			#shopDoubtLog.submitterId#,
 			#shopDoubtLog.submitterName#,
 			#shopDoubtLog.shopLogId#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+		   SELECT LAST_INSERT_ID() AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22367,8 +25957,10 @@
         INSERT INTO MSD_ShopAuthorityLog(ItemID, ShopID, AccountID, OpType, OpUser, Content, IP, AddTime)
         VALUES(#log.itemId#, #log.shopId#, #log.accountId#, #log.opType#, #log.opUser#, #log.content#, #log.ip#, NOW())
         
-           <selectKey keyProperty="ID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22376,8 +25968,10 @@
         INSERT INTO MSD_LaunchLog(LaunchGroupId, OpType, Content, AccountId, ShopId, IP, AddTime)
         VALUES(#log.launchGroupId#, #log.opType#, #log.content#, #log.accountId#, #log.shopId#, #log.ip#, NOW())
         
-           <selectKey keyProperty="ID" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22385,24 +25979,30 @@
         INSERT INTO MSD_OrderInfo(OrderId, CustomerName, ContractNo, `Status`, AddTime, UpdateTime)
         VALUES (#orderInfo.orderId#, #orderInfo.customerName#, #orderInfo.contractNo#,  #orderInfo.status#, NOW(), NOW())
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_Privilege(Module,ParentId,Name,Url,AddDate,Status)
 		VALUES
 		(#module#,#parentId#,#name#,#url#,NOW(),1)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+      	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_Privilege(ID,Module,ParentId,Name,Url,AddDate,Status)
 		VALUES
 		(#id#,#module#,#parentId#,#name#,#url#,NOW(),1)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+      	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22415,8 +26015,10 @@
 		VALUES
 		(#entity.id#,#entity.creatorId#,#entity.createTime#,#entity.expectedFeatures#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22446,8 +26048,11 @@
 				NOW()
 			)
         
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22458,8 +26063,10 @@
         #shop.phoneNo#,#shop.phoneNo2#,#shop.cityId#,#shop.shopGroupId#,#shop.district#,NOW(),NOW(),#shop.addUser#,
         #shop.lastUser#,#shop.lastIp#,#shop.addUserName#,#shop.lastUserName#,#shop.branchTotal#,#shop.groupFlag#,
         #shop.searchName#,#shop.writeUp#,#shop.searchKeyWord#,#shop.businessHours#,#shop.publicTransit#,#shop.priceInfo#,#shop.clientType#);
-		   <selectKey keyProperty="shopId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="shopId" resultClass="int"> 
+   		SELECT @@IDENTITY AS ShopID 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22489,8 +26096,11 @@
 				Now()
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22514,8 +26124,11 @@
 				Now()
 			)
 		
-		   <selectKey keyProperty="Id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="Id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22561,8 +26174,11 @@
         NOW(),
         NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22571,8 +26187,10 @@
         VALUES(#shopProduct.productName#,#shopProduct.shopId#,#shopProduct.shopName#,#shopProduct.cityId#,#shopProduct.productTemplateId#,#shopProduct.productType#,#shopProduct.promoStartTime#,
         #shopProduct.promoEndTime#,#shopProduct.price#,#shopProduct.originalPrice#,#shopProduct.status#,#shopProduct.addUser#,NOW(),#shopProduct.lastUser#,NOW(),
         #shopProduct.lastIp#);
-    	   <selectKey keyProperty="productId" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="productId" resultClass="int"> 
+   		SELECT @@IDENTITY AS ProductID 
+   		</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22601,8 +26219,11 @@
 		#whsRecordEntity.swallowCode#
 		)
 		
-           <selectKey keyProperty="whsRecordEntity.id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="whsRecordEntity.id" resultClass="java.lang.Integer">
+                 SELECT LAST_INSERT_ID()
+        </selectKey>
+
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22623,8 +26244,11 @@
             NOW()
         )
 
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22650,8 +26274,11 @@
 				NOW()
 			)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22661,8 +26288,10 @@
         ADDDATE
         )
         VALUES
-           <iterate conjunction="," property="tagList"/>
-</insert>
+        <iterate conjunction="," property="tagList">
+            (#tagList[]#,#listId#, Now())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22671,8 +26300,10 @@
         SELECT #receiptGroupCodeId#,ReceiptID,Now()
         FROM TG_Receipt
         WHERE ReceiptID in
-           <iterate open="(" conjunction="," property="receiptIdList" close=")"/>
-</insert>
+        <iterate open="(" conjunction="," property="receiptIdList" close=")">
+            #receiptIdList[]#
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22686,8 +26317,11 @@
 			#receiptVerifySuccessLog.verifyChannel#,
 			#receiptVerifySuccessLog.deviceId#
 			);		
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY
+			AS eventId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22696,12 +26330,16 @@
         VALUES (
         #receiptID#, #thirdPartyOrderID#, #thirdPartyID#, #orderID#, #status#, NOW(), NOW(), #ticketNo#, #userId#, #mobileNo#
         )
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="orderID" resultClass="int"/>
-  
+
+  <selectKey type="post" keyProperty="orderID" resultClass="int">  
+        select @@IDENTITY as value  
+  </selectKey>  
     insert into TG_Order 
     	(OrderID, 
     	 UserID, 
@@ -22748,8 +26386,10 @@
 		(
 			#key#, #scenarioId#, #channelId#, #channelCode#, #trackingCode#, #extraData#, NOW()
 		)
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22758,8 +26398,12 @@
 			CpsKey, ScenarioID, ChannelID, ChannelCode, TrackingCode, ExtraData, AddDate
 		)
 		VALUES
-		   <iterate conjunction="," property="entities"/>
-</insert>
+		<iterate conjunction="," property="entities">
+		(
+			#entities[].key#, #entities[].scenarioId#, #entities[].channelId#, #entities[].channelCode#, #entities[].trackingCode#, #entities[].extraData#, NOW()
+		)
+		</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22779,8 +26423,10 @@
 		#priority#,
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22800,8 +26446,10 @@
 		#entity.type#,
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22812,8 +26460,16 @@
 		Type,
 		AddDate)
 		VALUES
-		   <iterate conjunction="," property="entityList"/>
-</insert>
+		<iterate conjunction="," property="entityList">
+			(
+			#entityList[].dealGroupID#,
+			#entityList[].title#,
+			#entityList[].content#,
+			#entityList[].type#,
+			NOW()
+			)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22843,8 +26499,10 @@
 	#num#,
 	#isspID#
 	)
-	   <selectKey resultClass="int"/>
-</insert>
+	<selectKey resultClass="int">
+		SELECT LAST_INSERT_ID()
+    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22856,10 +26514,8 @@
 		Where A.BizId=#productId# AND A.Subpara1=#cityId# AND A.Status=1 AND B.IsValid=1
 		AND A.Subpara3 = #confreq# 
 		AND NOT EXISTS (Select 1 from EDM_TuanUsers U where U.UserID=B.UserID AND U.AddDate>#today# AND U.cityID=#cityId#)
-		   <dynamic>
-      <isGreaterThan compareValue="1" prepend="AND" property="mod"/>
-   </dynamic>
-</insert>
+		<dynamic><isGreaterThan compareValue="1" prepend="AND" property="mod"> B.EmailId%#mod#=#reminder#</isGreaterThan></dynamic>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22867,8 +26523,10 @@
 			VALUES (#cityId#,#dpId#,#dealgroupIds#,#version#,NOW(),NOW()) 
 			ON DUPLICATE KEY
 			UPDATE DealGroupIDs=#dealgroupIds#, UpdateDate=NOW()
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">     
+			SELECT @@IDENTITY AS ID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22886,8 +26544,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22905,8 +26565,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22922,8 +26584,10 @@
 			#userRestrict.userType#,
 			#userRestrict.cityIDs#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22931,8 +26595,10 @@
         INSERT INTO TE_AdChannel (Name, Owner, Author, Status, AddTime, UpdateTime) VALUES
         (#adChannel.name#, #adChannel.owner#, #adChannel.author#, 1, NOW(), NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22940,8 +26606,10 @@
         INSERT INTO TE_AdContainer (Name, ChannelID, Author, Status, AddTime, UpdateTime) VALUES
         (#adContainer.name#, #adContainer.channelID#, #adContainer.author#, 1, NOW(), NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22949,8 +26617,10 @@
         INSERT INTO TE_AdDetail (Title, SubTitle, Thumb, Link, `Desc`, Type, resourceId, Status, AddTime, UpdateTime) VALUES
         (#adDetail.title#, #adDetail.subTitle#, #adDetail.thumb#, #adDetail.link#, #adDetail.desc#, #adDetail.type#, #adDetail.resourceId#, 1, NOW(), NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22958,8 +26628,10 @@
         INSERT INTO TE_AdDimension (PublishID, CityID, Version, OrderNo, AdvertisementID, Type, Status, AddTime, UpdateTime) VALUES
         (#adDimension.publishID#, #adDimension.cityID#, #adDimension.version#, #adDimension.orderNo#, #adDimension.advertisementID#, #adDimension.type#, 1, NOW(), NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22967,8 +26639,10 @@
         INSERT INTO TE_AdPosition (Title, `Desc`, ChannelID, ContainerID, Width, Height, Type, Status, Author, AddTime, UpdateTime, PublishType) VALUES
         (#adPosition.title#, #adPosition.desc#, #adPosition.channelID#, #adPosition.containerID#, #adPosition.width#, #adPosition.height#, #adPosition.type#, 1, #adPosition.author#, NOW(), NOW(), #adPosition.publishType#)
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -22976,8 +26650,10 @@
         INSERT INTO TE_AdPublish (Position, Title, Status, Author, Auditor, AddTime, BeginDate, EndDate, AuditTime, UpdateTime) VALUES
         (#adPublish.position#, #adPublish.title#, 1, #adPublish.author#, #adPublish.auditor#, NOW(), #adPublish.beginDate#, #adPublish.endDate#, #adPublish.auditTime#, NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23026,8 +26702,10 @@
 		#referEventID#
 		)
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT LAST_INSERT_ID() AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23036,26 +26714,34 @@
 			(EventID, MaxAwardNum, MaxJoinNum, LuckyUserLimits, BigUserRatio,UserThreshold, DefaultPrizeID, CouponPeriod, AddTime)
 		values
 			(#eventId#, #maxAwardNum#, #maxJoinNum#, #luckyUserLimits#, #bigUserRatio#, #userThreshold#, #defaultPrizeId#, #couponPeriod#, NOW())			
-		   <selectKey keyProperty="EventPrizeRuleID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="EventPrizeRuleID" resultClass="int">
+			SELECT LAST_INSERT_ID() AS eventPrizeRuleID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_Event_TopicItemCityDeal(TopicItemID, CityID, DealGroupID, DealGroupShortName, RecommendReason, DisplayOrder, ImgUrl) VALUES
-		   <iterate conjunction="," property="topicDealList"/>
-</insert>
+		<iterate conjunction="," property="topicDealList">
+			(#topicDealList[].topicItemID#,#topicDealList[].cityID#,#topicDealList[].dealGroupID#,#topicDealList[].dealGroupShortName#,#topicDealList[].recommendReason#,#topicDealList[].displayOrder#,#topicDealList[].imgUrl#)
+	    </iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_Event_TopicItem(TopicItemName, TopicID, Priority, DisplayCount, Type, ItemBgColor, ItemLabelColor, ItemButtonColor, ButtonFontColor) VALUES
-		   <iterate conjunction="," property="topicItemList"/>
-</insert>
+		<iterate conjunction="," property="topicItemList">
+			(#topicItemList[].topicItemName#,#topicItemList[].topicID#,#topicItemList[].priority#,#topicItemList[].displayCount#,#topicItemList[].type#,#topicItemList[].itemBgColor#,#topicItemList[].itemLabelColor#,#topicItemList[].itemButtonColor#,#topicItemList[].buttonFontColor#)
+	    </iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_Event_TopicCity(TopicID, CityID, Status, EntryValue) VALUES
-		   <iterate conjunction="," property="topicCityList"/>
-</insert>
+		<iterate conjunction="," property="topicCityList">
+			(#topicCityList[].topicID#,#topicCityList[].cityID#,#topicCityList[].status#,#topicCityList[].entryValue#)
+	    </iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23064,35 +26750,46 @@
         Status=#topicDto.status#,TopicEnName=#topicDto.topicEnName#,Logo=#topicDto.logo#,MobileBannerImage=#topicDto.mobileBannerImage#,
         MStationTemplate=#topicDto.mStationTemplate#,PcTemplate=#topicDto.pcTemplate#,TgTemplate=#topicDto.tgTemplate#,DpTemplate=#topicDto.dpTemplate#,
         DpIpadTemplate=#topicDto.dpIpadTemplate#,TailImage=#topicDto.tailImage#,Type=#topicDto.type#,Author=#topicDto.author#
-           <selectKey keyProperty="topicID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="topicID" resultClass="int">  
+            SELECT @@IDENTITY AS TopicID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_Event_TopicCity 
         SET TopicID=#topicCityDto.topicID#,CityID=#topicCityDto.cityID#,Status=#topicCityDto.status#,EntryValue=#topicCityDto.entryValue#
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_Event_TopicItem (TopicID, TopicItemName, Priority, DisplayCount, TYPE, ItemBgColor, ItemLabelColor, ItemButtonColor, ButtonFontColor) VALUES
-           <iterate conjunction="," property="topicItemList"/>
-</insert>
+        <iterate conjunction="," property="topicItemList">
+            (#topicItemList[].topicID#, #topicItemList[].topicItemName#, #topicItemList[].priority#, #topicItemList[].displayCount#, #topicItemList[].type#, #topicItemList[].itemBgColor#, 
+            #topicItemList[].itemLabelColor#, #topicItemList[].itemButtonColor#, #topicItemList[].buttonFontColor#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_Event_TopicItem
         SET TopicID=#topicItem.topicID#, TopicItemName=#topicItem.topicItemName#, Priority=#topicItem.priority#, DisplayCount=#topicItem.displayCount#, TYPE=#topicItem.type#, ItemBgColor=#topicItem.itemBgColor#, ItemLabelColor=#topicItem.itemLabelColor#, 
         ItemButtonColor=#topicItem.itemButtonColor#, ButtonFontColor=#topicItem.buttonFontColor#
-           <selectKey keyProperty="topicItemID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="topicItemID" resultClass="int">  
+            SELECT @@IDENTITY AS TopicItemID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_Event_TopicItemCityDeal (TopicItemID, CityID, DealGroupID, DealGroupShortName, RecommendReason, DisplayOrder, ImgUrl) VALUES
-           <iterate conjunction="," property="topicDealList"/>
-</insert>
+        <iterate conjunction="," property="topicDealList">
+            (#topicDealList[].topicItemID#, #topicDealList[].cityID#, #topicDealList[].dealGroupID#, #topicDealList[].dealGroupShortName#, #topicDealList[].recommendReason#, #topicDealList[].displayOrder#, #topicDealList[].imgUrl#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23100,8 +26797,10 @@
     	INSERT INTO TG_Event_ShanTuan (DealGroupTitle, BeginDate, EndDate, DealGroupID, IsReplaceTitle, AddDate, UpdateDate, Status, ReplaceImgURL) VALUES
     	(#shantuan.dealGroupTitle#, #shantuan.beginDate#, #shantuan.endDate#, #shantuan.dealGroupID#, #shantuan.isReplaceTitle#, NOW(), NOW(), 1, #shantuan.replaceImgURL#)
     
-    	   <selectKey keyProperty="shanID" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="shanID" resultClass="int">  
+            SELECT @@IDENTITY AS ShanID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23133,16 +26832,20 @@
 			Now()
 			);
 			
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT @@IDENTITY AS ID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DianPing.DP_MyListPush
         (Page, CityID, DP_MyListPush.Order, BizID, BizType, PushTitle, AddDate, UpdateDate)
         VALUES
-           <iterate conjunction="," property="pushList"/>
-</insert>
+        <iterate conjunction="," property="pushList">
+            (#pushList[].page#, #pushList[].cityId#, #pushList[].order#,#pushList[].bizId#, #pushList[].bizType#, #pushList[].pushTitle#, Now(), Now())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23161,8 +26864,22 @@
         AddDate,
         UpdateDate)
         VALUES
-           <iterate conjunction="," property="pushList"/>
-</insert>
+        <iterate conjunction="," property="pushList">
+            (#pushList[].page#,
+            #pushList[].cityId#,
+            #pushList[].power#,
+            #pushList[].order#,
+            #pushList[].bizId#,
+            #pushList[].bizType#,
+            #pushList[].pushTitle#,
+            #pushList[].pushDesc#,
+            #pushList[].pushPicId#,
+            #pushList[].pushPicUrl#,
+            #pushList[].pushUrl#,
+            Now(),
+            Now())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23170,8 +26887,10 @@
 			BC_Notice(Title,Content,AddTime,AddAdminID)
 		VALUES
 			(#title#,#content#,NOW(),#addAdminID#)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23184,8 +26903,10 @@
 		VALUES
 		(#entity.id#,#entity.creatorId#,#entity.createTime#,#entity.expectedFeatures#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23194,8 +26915,10 @@
         	(UserId, CouponId, OrderId, Status, CreateTime)
         values
         	(#userId#, #couponId#, #orderId#, #status#, NOW())
-           <selectKey keyProperty="LogId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="LogId" resultClass="int">  
+            SELECT @@IDENTITY AS LogId
+        </selectKey>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23203,8 +26926,11 @@
 			insert INTO TG_ParternerPromoEvent (EventID, EventType, DiscountAmount, ThirdPartyID, Status, AddDate, UpdateDate) VALUES
 			(#entity.eventId#, #entity.eventType#, #entity.discountAmount#, 8, #entity.status#, now(), now())
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23220,22 +26946,28 @@
             StartTime =#startTime#,
             EndTime= #endTime#,
             ADDTIME = NOW()
-           <selectKey keyProperty="CouponControlID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="CouponControlID" resultClass="int">  
+            SELECT @@IDENTITY AS CouponControlID
+        </selectKey>  
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TGE_CouponSendLog
         SET CouponControlID = #couponInfoId#,UserID = #userId#,Status =#msgStatus#,ConfigID=#configId#,CreateTime=NOW()
-           <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="LogID" resultClass="int">
+           SELECT @@IDENTITY AS LogID
+        </selectKey> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TGE_UserCouponShow 
 		SET UserId=#userId#,ShowTimes=#showTimes#,EventType=#eventType#,AddTime=NOW();
-           <selectKey keyProperty="ShowUserId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ShowUserId" resultClass="int">
+            SELECT @@IDENTITY AS ShowUserId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23243,8 +26975,10 @@
 			UserPower,MediaSource,UserSource,UserCity,UserIP,EmailVerifyStatus) 
 		VALUES (#userEmail# ,#userNickname# ,#password# ,CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP ,
 			1 ,252 ,252 ,#cityID# ,#userIP# ,0)
-		   <selectKey keyProperty="UserID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UserID" resultClass="int">
+			SELECT @@IDENTITY AS UserID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23270,8 +27004,10 @@
           #isVerified#,
           #addDate#
         )
-           <selectKey resultClass="long"/>
-</insert>
+        <selectKey resultClass="long">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23298,8 +27034,10 @@
 			#applyFlow.updateDate#,
 			#applyFlow.ip#)
 			
-		   <selectKey keyProperty="pId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="pId" resultClass="int">
+            SELECT @@IDENTITY AS pId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23308,8 +27046,10 @@
 			(MobileNo, MobileMd5, AddTime)
 		VALUES
 			(#mobileNo#, #mobileMd5#, NOW())
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+           SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23341,8 +27081,10 @@
 			#userSurvey.cost#,
 			#userSurvey.source#,
 			#userSurvey.followUs#)
-		   <selectKey keyProperty="surveyId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="surveyId" resultClass="int">
+            SELECT @@IDENTITY AS surveyId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23372,8 +27114,10 @@
 		NOW(),
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23405,15 +27149,19 @@
 			#memberProfit.memo#,
 			#memberProfit.accountId#,
 			NOW())
-		   <selectKey keyProperty="MemberProfitID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberProfitID" resultClass="int">     
+			SELECT @@IDENTITY AS "MemberProfitID"
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 			insert into MB_Base_trigger(trigger_dt, flag, table_name, update_dt, del_dt)
 			values(#trigger_dt#, #flag#, #table_name#, #update_dt#, #del_dt#)
-		    <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		 <selectKey keyProperty="id" resultClass="int">  
+			SELECT @@IDENTITY AS ID  
+		 </selectKey>  
+		</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23436,8 +27184,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23458,8 +27208,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23480,8 +27232,10 @@
 			#entity.statementTemplateId#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23505,8 +27259,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23534,8 +27290,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23549,8 +27307,10 @@
 		,#entity.dealGroupContent#,#entity.documentBuilderContent#,#entity.visualViewContent#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23575,8 +27335,10 @@
             );
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23607,8 +27369,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23635,8 +27399,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23654,8 +27420,10 @@
          #entity.cityId#,#entity.sequence#,#entity.visualView.id#)
 		
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23685,8 +27453,10 @@
          )
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23710,20 +27480,50 @@
                 #entity.templateName#
             );
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_CinemaSeat(ThirdPartyID, TPHallID, TPSeatID, Name, RowID, ColumnID, LoveFlag, Status, AddDate, RowIndex, ColumnIndex, SeatCode,TPHallCode) VALUES
-           <iterate conjunction="," property="cinemaSeats"/>
-</insert>
+        <iterate conjunction="," property="cinemaSeats">
+           (#thirdPartyId#,
+            #cinemaSeats[].tpHallId#,
+            #cinemaSeats[].tpSeatId#,
+            #cinemaSeats[].name#,
+            #cinemaSeats[].row#,
+            #cinemaSeats[].column#,
+            #cinemaSeats[].loveFlag#,
+            #cinemaSeats[].status#,
+            NOW(),
+            #cinemaSeats[].rowIndex#,
+            #cinemaSeats[].columnIndex#,
+            #cinemaSeats[].seatCode#,
+            #cinemaSeats[].TPHallCode#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_CinemaSeat(ThirdPartyID, TPHallID, TPSeatID, Name, RowID, ColumnID, LoveFlag, Status, AddDate, RowIndex, ColumnIndex, SeatCode, TPHallCode) VALUES
-           <iterate conjunction="," property="cinemaSeats"/>
-</insert>
+        <iterate conjunction="," property="cinemaSeats">
+            (#thirdPartyId#,
+            #tpHallId#,
+            #cinemaSeats[].tpSeatId#,
+            #cinemaSeats[].name#,
+            #cinemaSeats[].row#,
+            #cinemaSeats[].column#,
+            #cinemaSeats[].loveFlag#,
+            #cinemaSeats[].status#,
+            NOW(),
+            #cinemaSeats[].rowIndex#,
+            #cinemaSeats[].columnIndex#,
+            #cinemaSeats[].seatCode#,
+            #cinemaSeats[].TPHallCode#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23739,8 +27539,11 @@
             #stateValue#,
             NOW()
         )
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23762,8 +27565,10 @@
     #entity.createTime#,
     #entity.updateTime#)
     
-       <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+      SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23786,8 +27591,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23806,8 +27613,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23848,8 +27657,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23892,8 +27703,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23912,8 +27725,10 @@
         #entity.createTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23932,8 +27747,10 @@
             SkinID = #topicInfo.skinId#,
             Author =#topicInfo.author#,
             ADDTIME= NOW()
-           <selectKey keyProperty="topicId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="topicId" resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23949,8 +27766,10 @@
             ButtonColor =#topicItem.itemButtonColor#,
             BtnFontColor =#topicItem.buttonFontColor#,
             ADDTIME= NOW()
-           <selectKey keyProperty="topicId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="topicId" resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23962,8 +27781,10 @@
             OrderNo =#topicDeal.orderNo#,
             STATUS =#topicDeal.status#,
             ADDTIME= NOW()
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23973,8 +27794,10 @@
             CityID=#topicCity.cityId#,
             STATUS=#topicCity.status#,
             ADDTIME= NOW()
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -23993,8 +27816,10 @@
             SkinID = #topicInfo.skinId#,
             Author =#topicInfo.author#,
             ADDTIME= NOW()
-           <selectKey keyProperty="topicId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="topicId" resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24010,8 +27835,10 @@
             ButtonColor =#topicItem.itemButtonColor#,
             BtnFontColor =#topicItem.buttonFontColor#,
             ADDTIME= NOW()
-           <selectKey keyProperty="topicId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="topicId" resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24023,8 +27850,10 @@
             OrderNo =#topicDeal.orderNo#,
             STATUS =#topicDeal.status#,
             ADDTIME= NOW()
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24034,20 +27863,26 @@
             CityID=#topicCity.cityId#,
             STATUS=#topicCity.status#,
             ADDTIME= NOW()
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT @@IDENTITY
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 			insert INTO TG_TravelRefundLog(ID,OrderID, ReceiptID,Type, Status, AddDate,UpdateDate) VALUES
-			   <iterate conjunction="," property="entities"/>
-</insert>
+			<iterate conjunction="," property="entities">
+	           	(#entities[].id#,#entities[].orderId#, #entities[].receiptId#, #entities[].type#, #entities[].status#, now(),now())
+	        </iterate>
+		</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 			insert INTO TG_TravelRefundLog(ID,OrderID, ReceiptID,Type, Status, AddDate,UpdateDate) VALUES
-			   <iterate conjunction="," property="entities"/>
-</insert>
+			<iterate conjunction="," property="entities">
+	           	(#entities[].id#,#entities[].orderId#, #entities[].receiptId#, #entities[].type#, #entities[].status#, now(),now())
+	        </iterate>
+		</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24067,32 +27902,36 @@
             #entity.updateTime#);
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into TA_OrderLog(orderid,thirdpartyid, shopid,cityid,shopkey,userkey,ordertime,reachtime,payfee,mobile,
 		shopname,fetchtype,reserve,`interval`,reviewed,reviewdelay,willing,lateststatus,fromstatus,
 		payorderid,paystatus,frompaystatus,commissionrate, isfree,boxfee,deliveryfee,UUID,channel,onlinepayment,orderaddress
-		   <dynamic>
-      <isNotNull property="clientip"/>
-      <isNotNull property="addtime"/>
-   </dynamic>
-
+		<dynamic><isNotNull property="clientip">
+				,clientip
+			</isNotNull><isNotNull property="addtime">
+				,addtime
+			</isNotNull></dynamic>
 		
 		)
 		values(#orderid#,#thirdpartyid#, #shopid#,#cityid#,#shopkey#,#userkey#,#ordertime#,#reachtime#,#payfee#,#mobile#,
 		#shopname#,#fetchtype#,#reserve#,#interval#,#reviewed#,#reviewdelay#,#willing#,#lateststatus#,#fromstatus#,
 		#payorderid#,#paystatus#,#frompaystatus#,#commissionRate#, #isfree#,#boxfee#,#deliveryfee#,#UUID#,#channel#,#onlinePayment#,#orderAddress#
-		   <dynamic>
-      <isNotNull property="clientip"/>
-      <isNotNull property="addtime"/>
-   </dynamic>
-
+		<dynamic><isNotNull property="clientip">
+				,#clientip#
+			</isNotNull><isNotNull property="addtime">
+				,#addtime#
+			</isNotNull></dynamic>
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">     
+			SELECT @@IDENTITY AS id
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24114,8 +27953,10 @@
     #entity.createTime#,
     #entity.updateTime#)
     
-       <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+      SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24142,8 +27983,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24208,8 +28051,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24237,8 +28082,10 @@
             #entity.updateTime#);
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24256,8 +28103,11 @@
             #documentValue#,
             NOW()
         )
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24265,8 +28115,11 @@
 		VALUES (
 		#id#, #itemId#, #name#, #value#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24274,8 +28127,10 @@
 			UserPower,MediaSource,UserSource,UserCity,UserIP,EmailVerifyStatus) 
 		VALUES (#userEmail# ,#userNickname# ,#password# ,CURRENT_TIMESTAMP ,CURRENT_TIMESTAMP ,
 			1 ,252 ,252 ,#cityID# ,#userIP# ,0)
-		   <selectKey keyProperty="UserID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UserID" resultClass="int">
+			SELECT @@IDENTITY AS UserID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24301,8 +28156,10 @@
           #isVerified#,
           #addDate#
         )
-           <selectKey resultClass="long"/>
-</insert>
+        <selectKey resultClass="long">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24344,8 +28201,10 @@
         #userStatus#,
         #refundQuantity#
         )
-           <selectKey resultClass="long"/>
-</insert>
+        <selectKey resultClass="long">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24383,8 +28242,10 @@
 			#bizType#,
 			#orderId#
 		)
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24420,8 +28281,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24451,8 +28314,10 @@
 		#entity.shopID#,
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24469,8 +28334,21 @@
 		ShopID,
 		AddDate
 		)VALUES
-		   <iterate conjunction="," property="entityList"/>
-</insert>
+		<iterate conjunction="," property="entityList">
+			(
+			#entityList[].dealGroupID#,
+			#entityList[].address#,
+			#entityList[].contactPhone#,
+			#entityList[].businessHours#,
+			#entityList[].isStarRateDisplayed#,
+			#entityList[].isAverageConsumeDisplayed#,
+			#entityList[].isReviewDisplayed#,
+			#entityList[].isMapDisplayed#,
+			#entityList[].shopID#,
+			NOW()
+			)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24492,8 +28370,10 @@
 		NOW(),
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24502,10 +28382,8 @@
     	SELECT UserID,ADDTIME,cityID,TID,UserGroupID,#taskGroupType# From Mail_Individual_UserID
         U WHERE U.TaskGroupType =#taskGroupType# AND U.AddTime > #today# 
 		        
-           <dynamic>
-      <isEqual compareValue="2" prepend="and" property="priority"/>
-   </dynamic>
-</insert>
+        <dynamic><isEqual compareValue="2" prepend="and" property="priority"> NOT Exists (Select 1 from EDM_TuanUsers A where A.UserID=U.UserID AND A.CityID=U.CityID AND A.taskGroupType in ($exTaskGroupType$))</isEqual></dynamic>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24513,8 +28391,10 @@
 			VALUES (#dealGroupId#, #dealGroupBytes#, #dealGroupJson#) 
 			ON DUPLICATE KEY
 			UPDATE Json=#dealGroupJson#, Bytes=#dealGroupBytes#
-		   <selectKey keyProperty="DealGroupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DealGroupId" resultClass="int">     
+			SELECT @@IDENTITY AS DealGroupId   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24523,8 +28403,10 @@
 		BeginDate=#promoCodeInfo.beginDate#,EndDate=#promoCodeInfo.endDate#,AddDate=NOW(),UpdateDate=NOW(),
 		Name=#promoCodeInfo.name#,Status=#promoCodeInfo.status#,Author=#promoCodeInfo.author#,Department=#promoCodeInfo.department#,
 		FinancialItem=#promoCodeInfo.financialItem#
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24532,15 +28414,19 @@
         SET PromoID=#promoCond.promoID#, ValidOrderPlatform=#promoCond.validOrderPlatform#, ValidPayPlatform=#promoCond.validPayPlatform#, ValidPaymentChannel=#promoCond.validPaymentChannel#, 
         MaxPerUser=#promoCond.maxPerUser#, MaxPerDeal=#promoCond.maxPerDeal#, LimitOrderAmount=#promoCond.limitOrderAmount#, CategoryList=#promoCond.categoryList#, ShopList=#promoCond.shopList#,
         BuyLimitType=#promoCond.buyLimitType#, UseLimitType=#promoCond.useLimitType#, UserPropertyType=#promoCond.userPropertyType#, CityIds=#promoCond.cityList#
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_OpDepartment
         SET Name=#departInfo.name#,DptDesc=#departInfo.departDesc#,Status=#departInfo.status#,AddTime=NOW(),UpdateTime=NOW()
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24562,8 +28448,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24571,8 +28459,10 @@
 			INSERT INTO MC_MemberCard(MemberCardType, Source, Status, BgImageID, LogoID ,AuthAdminID,AuthAdminName, AddTime, Title, SubTitle)
 			VALUES(#cardType#, #source#, #status#,0,0,#authAdminId#, #authAdminName#, #addTime#, #shopName#, #branchName#)
 			
-		   <selectKey keyProperty="MemberCardID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardID" resultClass="int">     
+			SELECT @@IDENTITY AS MemberCardID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24580,8 +28470,10 @@
 			INSERT INTO MC_MemberCardBgImage(IsCustom, Name, PicPath, PicType, AddTime)
 			VALUES(#isCustom#, #name#, #picPath#, #picType#, #addTime#)
 			
-		   <selectKey keyProperty="BgImageID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="BgImageID" resultClass="int">     
+			SELECT @@IDENTITY AS BgImageID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24589,8 +28481,10 @@
 			INSERT INTO MC_MemberCardLiteralRecom(Title, Url, Status, AddTime, BeginDate, EndDate,RecomType,PicPath,RecomOrder,EventDesc)
 			VALUES(#mcl.title#, #mcl.url#, #mcl.status#, #mcl.addTime#, #mcl.beginDate#, #mcl.endDate#,#mcl.recomType#,#mcl.picPath#,#mcl.recomOrder#,#mcl.eventDesc#)
 			
-		   <selectKey keyProperty="RecomID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="RecomID" resultClass="int">     
+			SELECT @@IDENTITY AS RecomID   
+	  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24598,14 +28492,20 @@
 			INSERT INTO MC_MemberCardLiteralRecomCity(RecomID, CityID)
 			VALUES(#recomID#, #cityID#)
 			
-		   <selectKey keyProperty="RecomCityID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="RecomCityID" resultClass="int">     
+			SELECT @@IDENTITY AS RecomCityID   
+	  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 			INSERT INTO MC_MemberCardLiteralRecomCity(RecomID, CityID) VALUES
- 		   <iterate conjunction="," property="cityList"/>
-</insert>
+ 		<iterate conjunction="," property="cityList">
+ 		
+			(#recomID#, #cityList[]#)
+			
+ 		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24613,8 +28513,10 @@
 			INSERT INTO MC_MemberCardScoreLog(MemberCardID, LogType, Score, Comment, ReferLogID, Status, IsActive, AddTime, AdminID, AdminName)
 			VALUES(#memberCardId#, #logType#, #score#, #comment#, #referLogId#, #status#, #isActive#, #addTime#, #adminId#, #adminName#)
 			
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+			SELECT @@IDENTITY AS LogID   
+	  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24632,8 +28534,10 @@
 			 #createTime#,
 			 #authAdminID#,
 			 #authAdminName#)
-		   <selectKey keyProperty="companyConfirmInfoID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="companyConfirmInfoID" resultClass="int">     
+			SELECT @@IDENTITY AS companyConfirmInfoID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24653,8 +28557,10 @@
 			 #createTime#,
 			 #authAdminID#,
 			 #authAdminName#)
-		   <selectKey keyProperty="shopConfirmInfoID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="shopConfirmInfoID" resultClass="int">     
+			SELECT @@IDENTITY AS shopConfirmInfoID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24681,8 +28587,10 @@
 			#shopSeller.password#,
 			#shopSeller.cityId#
 		)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+          	SELECT @@IDENTITY AS id
+     	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24692,8 +28600,10 @@
 		VALUES
 		(#password#,#parentId#,#contactName#,#contactMobileNO#,#addTime#,#updateTime#,#accountType#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24703,8 +28613,10 @@
 		VALUES
 		(#shopAccount#,#password#,#parentId#,#contactName#,#contactMobileNO#,#addTime#,#updateTime#,#accountType#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24712,8 +28624,10 @@
 			VALUES (#dealGroupId#, #dealGroupBytes#, #dealGroupJson#) 
 			ON DUPLICATE KEY
 			UPDATE Json=#dealGroupJson#, Bytes=#dealGroupBytes#
-		   <selectKey keyProperty="DealGroupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DealGroupId" resultClass="int">     
+			SELECT @@IDENTITY AS DealGroupId   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24735,8 +28649,10 @@
         #data.dealGroupId#,
         #data.mobileNo#
         )
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24744,36 +28660,46 @@
 		(VerifyID,Type,Time,Result,	PostContent,ResponseContent,AddDate,UpdateDate,Status,	ExtensionMessage,ReferID)
 		VALUES
 		(#verifyId#,#type#,#time#,#result#,#postContent#,#responseContent#,Now(),Now(),#status#,#extensionMessage#,#referId#);		
-	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+	<selectKey keyProperty="id" resultClass="int">
+   		SELECT @@IDENTITY AS id
+   	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         insert into TGHT_DeliverImportBatch (LoginID, Status, AddDate)
         values(#loginId#, #status#, Now());
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS BatchID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TGHT_DeliverImportPool (BatchID,OrderID,Express,Status)
         VALUES
-           <iterate conjunction="," property="deliverInfo"/>
-</insert>
+        <iterate conjunction="," property="deliverInfo">
+            (#batchId#,#deliverInfo[].orderId#, #deliverInfo[].expressNumber#, #status#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TGHT_DeliverAdminDeal (LoginID,DealGroupID,AddTime,Status,ExportBatch)
         VALUES(-1,#dealGroupId#, NOW(), 0,0)
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS AdminDealID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_NaviDealTag (DealGroupID, TagID, ItemID)
         VALUES
-	       <iterate conjunction=","/>
-</insert>
+	    <iterate conjunction=",">
+				(#naviDealTags[].dealGroupId#,#naviDealTags[].tagId#,#naviDealTags[].itemId#)
+		</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24785,8 +28711,10 @@
 		(
 			#key#, #scenarioId#, #channelId#, #channelCode#, #trackingCode#, #extraData#, NOW()
 		)
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24795,8 +28723,12 @@
 			CpsKey, ScenarioID, ChannelID, ChannelCode, TrackingCode, ExtraData, AddDate
 		)
 		VALUES
-		   <iterate conjunction="," property="entities"/>
-</insert>
+		<iterate conjunction="," property="entities">
+		(
+			#entities[].key#, #entities[].scenarioId#, #entities[].channelId#, #entities[].channelCode#, #entities[].trackingCode#, #entities[].extraData#, NOW()
+		)
+		</iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24824,8 +28756,10 @@
 			#addTime#,
 			#updateTime#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24847,8 +28781,10 @@
 			#applyReason.status#,
 			#applyReason.addDate#,
 			#applyReason.updateDate#)
-		   <selectKey keyProperty="pId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="pId" resultClass="int">
+            SELECT @@IDENTITY AS pId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24856,16 +28792,20 @@
     	INSERT INTO TG_Event_ShanTuan (DealGroupTitle, BeginDate, EndDate, DealGroupID, IsReplaceTitle, AddDate, UpdateDate, Status) VALUES
     	(#shantuan.dealGroupTitle#, #shantuan.beginDate#, #shantuan.endDate#, #shantuan.dealGroupID#, #shantuan.isReplaceTitle#, #shantuan.addDate#, #shantuan.updateDate#, #shantuan.status#)
     
-    	   <selectKey keyProperty="shanID" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="shanID" resultClass="int">  
+            SELECT @@IDENTITY AS ShanID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 			TG_EventDeal (DealGroupID, EventDealTitle, Status, EventID, CityID, AddDate)
 		VALUES
-		   <iterate conjunction="," property="deals"/>
-</insert>
+		<iterate conjunction="," property="deals">
+			(#deals[].dealGroupId#, #deals[].dealTitle#, #deals[].status#, #deals[].eventId#, #deals[].cityId#, NOW())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24885,8 +28825,10 @@
 			#data.trackGuid#,
 			#data.trackIp#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24910,8 +28852,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24937,8 +28881,10 @@
 			#memberBehaviorMsg.memo#,
 			#memberBehaviorMsg.status#,
 			#memberBehaviorMsg.addTime#)
-		   <selectKey keyProperty="MemberBehaviorMsgID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberBehaviorMsgID" resultClass="int">     
+			SELECT @@IDENTITY AS "MemberBehaviorMsgID"
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24948,8 +28894,11 @@
             LevelConfigID = #memberBaseInfo.levelConfigId#,
             Source = #memberBaseInfo.source#,
             AddTime = NOW()
-           <selectKey keyProperty="GiftCardOrderID" resultClass="Integer"/>
-</insert>
+        <selectKey keyProperty="GiftCardOrderID" resultClass="Integer">
+			SELECT @@IDENTITY
+			AS MemberLevelID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -24979,8 +28928,10 @@
 			#memberProfit.profitType#,
 			#memberProfit.memo#,
 			NOW())
-		   <selectKey keyProperty="MemberProfitID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberProfitID" resultClass="int">     
+			SELECT @@IDENTITY AS "MemberProfitID"
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25003,8 +28954,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25032,8 +28985,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25061,8 +29016,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25074,8 +29031,10 @@
 		#entity.createTime#,#entity.lastUpdateTime#,#entity.versionId#,#entity.aePhone#,#entity.aeEmail#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25089,8 +29048,10 @@
 		,#entity.contactMP#,#entity.contactEmail#,#entity.isSended#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25101,8 +29062,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.configurableBlock.id#,#entity.templateId#,'ImageTextComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25113,8 +29076,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.visualComponent.id#,#entity.sequence#,#entity.pictureUrl#,#entity.templateId#,'ImageTextItem')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25129,8 +29094,10 @@
          VALUES (#entity.creatorId#,#entity.lastUpdatorId#,#entity.createTime#,#entity.lastUpdateTime#,#entity.versionId#)
 		
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25159,8 +29126,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25171,8 +29140,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.configurableBlock.id#,#entity.content#,#entity.templateId#,'RichTextComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25183,8 +29154,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.visualComponent.id#,#entity.sequence#,#entity.content#,#entity.isReadOnly#,#entity.templateId#,'TextItem')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25195,8 +29168,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.configurableBlock.id#,#entity.templateId#,'TextListComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25220,8 +29195,10 @@
     #entity.createTime#,
     #entity.updateTime#)
     
-       <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+      SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25244,8 +29221,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25268,16 +29247,20 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	    INSERT INTO
 	    TA_OperationContract(firstpartytype, companyname, idnumber, contactpeople, contactphone, effectivedate, commission, freeorders, collectiontype, bankaccountname, bankaccount, bankprovince, bankcity, bankhead, bankbranch, addtime)
 	    VALUES(#firstpartytype#, #companyname#, #idnumber#, #contactpeople#, #contactphone#, #effectivedate#, #commission#, #freeorders#, #collectiontype#, #bankaccountname#, #bankaccount#, #bankprovince#, #bankcity#, #bankhead#, #bankbranch#, NOW())
-	       <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25289,15 +29272,23 @@
 			#entity.refReceiptId#, #entity.refReceiptCode#, #entity.thirdPartnerId#, #entity.userId#, 
 			#entity.memo#, #entity.thirdPartnerDealId#, now(), now())
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert INTO TG_TravelReservation(ReceiptID,OrderID, BookName,TravelerName, TourDate, IdentityType, IdentityID, 
 			BookMobileNo,TravelerMobileNo, Status, RefReceiptID, RefReceiptCode, ThirdPartnerID, UserID, Memo, ThirdPartnerDealID, AddDate, UpdateDate) VALUES
-		   <iterate conjunction="," property="entities"/>
-</insert>
+		<iterate conjunction="," property="entities">
+           	(#entities[].receiptId#,#entities[].orderId#, #entities[].bookName#, #entities[].travelerName#, #entities[].tourDate#,
+			#entities[].identityType#, #entities[].identityId#, #entities[].bookMobileNo#,#entities[].travelerMobileNo#, #entities[].status#,
+			#entities[].refReceiptId#, #entities[].refReceiptCode#, #entities[].thirdPartnerId#, #entities[].userId#, 
+			#entities[].memo#, #entities[].thirdPartnerDealId#, now(), now())
+        </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25305,8 +29296,10 @@
         INSERT INTO TE_AdChannel (Name, Owner, Author, Status, AddTime, UpdateTime) VALUES
         (#adChannel.name#, #adChannel.owner#, #adChannel.author#, 1, NOW(), NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25314,8 +29307,10 @@
         INSERT INTO TE_AdContainer (Name, ChannelID, Author, Status, AddTime, UpdateTime) VALUES
         (#adContainer.name#, #adContainer.channelID#, #adContainer.author#, 1, NOW(), NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25323,8 +29318,10 @@
         INSERT INTO TE_AdDetail (Title, SubTitle, Thumb, ExtraContent, Link, `Desc`, Type, resourceId, Status, AddTime, UpdateTime) VALUES
         (#adDetail.title#, #adDetail.subTitle#, #adDetail.thumb#, #adDetail.extraContent#, #adDetail.link#, #adDetail.desc#, #adDetail.type#, #adDetail.resourceId#, 1, NOW(), NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25332,8 +29329,10 @@
         INSERT INTO TE_AdDimension (PublishID, CityID, Version, OrderNo, AdvertisementID, Type, Status, AddTime, UpdateTime) VALUES
         (#adDimension.publishID#, #adDimension.cityID#, #adDimension.version#, #adDimension.orderNo#, #adDimension.advertisementID#, #adDimension.type#, 1, NOW(), NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25341,8 +29340,10 @@
         INSERT INTO TE_AdPublish (Position, Title, Status, Author, Auditor, AddTime, BeginDate, EndDate, AuditTime, UpdateTime) VALUES
         (#adPublish.position#, #adPublish.title#, 1, #adPublish.author#, #adPublish.auditor#, NOW(), #adPublish.beginDate#, #adPublish.endDate#, #adPublish.auditTime#, NOW())
     
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25362,8 +29363,10 @@
             #entity.updateTime#);
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25382,8 +29385,12 @@
 			#cityData.addTime#,
 			#cityData.updateTime#
 		)
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		    
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25407,12 +29414,18 @@
 		            NOW()
 		            );
  		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into TS_TotalPool
 		(	Id,
 			MaxAmount,
@@ -25460,8 +29473,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25475,8 +29490,10 @@
 		#status#, 
 		#mindeliverfee#,
 		#distance#, #picture# , #geojson#, #tips#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25500,8 +29517,10 @@
 			#refundDeliver.addDate#,
 			#refundDeliver.updateDate#,
             #refundDeliver.address#)
-		   <selectKey keyProperty="pId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="pId" resultClass="int">
+            SELECT @@IDENTITY AS pId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25533,22 +29552,29 @@
     #entity.createTime#,
     #entity.updateTime#)
     
-       <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+      SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPA_ProcessHistoryActor (ProcessID, NodeName, UserID, UserType, AddTime)
         VALUES (#processID#, #nodeName#, #userID#, #userType#, NOW())
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_ReceiptResetBatch 
 		(AdminID,AddTime)  VALUES (#adminId#,Now());		
-		   <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventId" resultClass="int">
+			SELECT @@IDENTITY  AS batchId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25556,8 +29582,10 @@
 		(ReceiptID,OldSerialNumber,BatchID,NewSerialNumber,AddTime,Status,UpdateTime)
 		select ReceiptID,SerialNumber,#batchId#,'',NOW(),0,NOW() from TG_Receipt
 		where ReceiptID in 
-		   <iterate open="(" conjunction="," property="receiptIds" close=")"/>
-</insert>
+		<iterate open="(" conjunction="," property="receiptIds" close=")">
+    		#receiptIds[]#
+    	</iterate> 			
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25567,8 +29595,10 @@
 		VALUES
 		(#id#,#thirdPartyOrderId#,#thirdPartyId#,#orderId#,#movieShowId#,
 		#status#,#userId#,#mobileNo#,#seatInfo#,#ticketCount#,#ticketId#,#ticketNO#,now(),now())
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25594,12 +29624,17 @@
 		#dealGroupRemind.dealGroupId#,
 		#dealGroupRemind.cityId#,
 		#dealGroupRemind.referType#);
-		   <selectKey keyProperty="remindId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="remindId" resultClass="int">
+			SELECT @@IDENTITY
+			AS remindId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="deliverAddressID" resultClass="int"/>
 
+    <selectKey type="post" keyProperty="deliverAddressID" resultClass="int">  
+        select @@IDENTITY as value  
+  	</selectKey>
     insert into TG_DeliverAddress (DeliverAddressID, UserID, Consignee, Address, PostCode, PhoneNo,
       IsDefault, Status, AddDate, UpdateDate, Province, City, District, DeliverTime, InvoiceTitle,
       NeedInvoice, Memo)
@@ -25616,8 +29651,10 @@
 			TG_EventPrizeUser(EventID,UserID,UserMobile,CurrentJoin,MaxJoin,Period,EventDeaID,Entrance)
 		VALUES 
 			(#prizeUser.eventId#,#prizeUser.userId#,#prizeUser.mobile#,1,#prizeUser.maxJoin#,#prizeUser.period#,#prizeUser.eventDealId#,#prizeUser.entrance#)
-		   <selectKey keyProperty="UID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UID" resultClass="int">  
+            SELECT @@IDENTITY AS UID
+        </selectKey>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25625,8 +29662,10 @@
 			TG_EventPrizeUserLog(EventID,UserID,UserMobile,UserNickName,PrizeID,PrizeName,Source,Entrance,IP,Memo) 
 		VALUES 
 			(#log.eventId#,#log.userId#,#log.userMobile#,#log.userNickName#,#log.prizeId#,#log.prizeName#,#log.source#,#log.entrance#,#log.ip#,#log.memo#)
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">  
+            SELECT @@IDENTITY AS LogID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25634,8 +29673,10 @@
 			TG_EventUserPrize(UserID,UserMobile,EventID,Amount,Value,PrizedDate)
 		VALUES 
 			(#log.userId#,#log.userMobile#,#log.eventId#,1,#log.prizeValue#,#log.period#)
-		   <selectKey keyProperty="UID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UID" resultClass="int">  
+            SELECT @@IDENTITY AS UID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25643,8 +29684,10 @@
 			TG_EventUserPrizeLog(EventID,UserID,UserMobile,UserNickName,PrizeID,PrizeName,PrizeValue,Source,Entrance,IP,Memo) 
 		VALUES 
 			(#log.eventId#,#log.userId#,#log.userMobile#,#log.userNickName#,#log.prizeId#,#log.prizeName#,#log.prizeValue#,#log.source#,#log.entrance#,#log.ip#,#log.memo#)
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">  
+            SELECT @@IDENTITY AS LogID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25670,8 +29713,10 @@
 			#data.hippoId#,
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25697,8 +29742,10 @@
 			#accountType#,
 			#hasProvidePayPaper#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25717,8 +29764,10 @@
 			#dealPlanStatus#
 
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25740,7 +29789,9 @@
 		#conditionValue#,
 		Now()
 	)
-	   <selectKey resultClass="int"/>
+	<selectKey resultClass="int">
+		SELECT LAST_INSERT_ID()
+    </selectKey>
 </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -25755,15 +29806,19 @@
 		#dealGroupId#,
 		#cityId#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	INSERT INTO TG_PreviewPool
 	(UpdateTime) VALUES (NOW())
-	   <selectKey resultClass="int"/>
-</insert>
+	<selectKey resultClass="int">
+		SELECT LAST_INSERT_ID()
+	</selectKey>
+  </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25771,8 +29826,10 @@
 			(Type,AddNum,NextIndex,Status,AddTime,CreateDate)
     	values
     		(#type#,#addNum#,#nextIndex#,#status#,#addTime#,#createDate#)
-    	   <selectKey keyProperty="sectionId" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="sectionId" resultClass="int">  
+             SELECT LAST_INSERT_ID() AS sectionId  
+        </selectKey> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25780,8 +29837,10 @@
 			VALUES (#cityId#, #moduleType#, #version#,#categoryID#,#districtID#,#dealGroupIDs#,NOW(),NOW()) 
 			ON DUPLICATE KEY
 			UPDATE DealGroupIDs=#dealGroupIDs#, UpdateDate=NOW()
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">     
+			SELECT @@IDENTITY AS ID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25789,16 +29848,22 @@
 			TG_EventDeal(DealGroupID,EventDealTitle,EventDealDesc,Status,AddDate,BeginDate,EndDate,EventID,CityID)
 		VALUES
 			(#deal.dealGroupId#,#deal.title#,#deal.desc#,1,#deal.addDate#,#deal.beginDate#,#deal.endDate#,#deal.eventId#,#deal.cityId#)
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT LAST_INSERT_ID() AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO 
 			TG_EventDeal(DealGroupID,EventDealTitle,EventDealDesc,Status,AddDate,BeginDate,EndDate,EventID,CityID)
-		   <iterate open="(" prepend="VALUES" conjunction="," property="deals" close=")"/>
-   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<iterate open="(" prepend="VALUES" conjunction="," property="deals" close=")">
+			#deals[].dealGroupId#,#deals[].title#,#deals[].desc#,1,#deals[].addDate#,#deals[].beginDate#,#deals[].endDate#,#deals[].eventId#,#deals[].cityId#
+		</iterate>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT LAST_INSERT_ID() AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25822,8 +29887,10 @@
 			#onlineActivity.status#,
 			NOW(),
 			NOW())
-		   <selectKey keyProperty="onlineActivityId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="onlineActivityId" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS onlineActivityId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25831,8 +29898,10 @@
 			INSERT INTO MC_MemberCardShop(MemberCardID,ShopID,CityID,ShopName,BranchName,Status, AddTime, ShopGroupId, CardGroupID, SecondCatgory, Region, Lat, Lng, POWER)
 			VALUES(#memberCardId#, #shopId#, #cityId#, #shopName#, #branchName#, #status#, #addTime#, #shopGroupId#, #cardGroupId#,#category#,#region#,#lat#,#lng#,#power#)
 			
-		   <selectKey keyProperty="MemberCardShopID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberCardShopID" resultClass="int">     
+			SELECT @@IDENTITY AS MemberCardShopID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25867,17 +29936,18 @@
 				Now(),
 				0);
 		
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">
+			SELECT
+			@@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		 INSERT INTO DP_MyListShop (ListID,ShopID,AddDate,Reason
-		    <isNotEmpty prepend="," property="verifyStatus"/>
-
+		 <isNotEmpty prepend="," property="verifyStatus">VerifyStatus</isNotEmpty>
 		 ,Sort) VALUES
-		 (#listId#,#shopId#,now(),#reason#   <isNotEmpty prepend="," property="verifyStatus"/>
-,#sort#)
+		 (#listId#,#shopId#,now(),#reason#<isNotEmpty prepend="," property="verifyStatus">#verifyStatus#</isNotEmpty>,#sort#)
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
@@ -25885,20 +29955,24 @@
 		INSERT INTO DP_MyList (UserID, Title,Content,AddDATE, UpdateDate,VerifyStatus,ShopCount,IsSeo,CreateType)
 		VALUES
 		(#userId#,#title#,#content#,now(),now(),#verifyStatus#,0,#isSeo#,#createType#);
-		   <selectKey keyProperty="listId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="listId" resultClass="int">     
+        	SELECT @@IDENTITY AS listId  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		
 		INSERT INTO HY_ManaPendingList (
 		ActionType, ActionTarget, ADDTIME, STATUS
-		   <isNotEmpty prepend="," property="userId"/>
-
+		<isNotEmpty prepend="," property="userId">
+		ActionInfo
+		</isNotEmpty>
 		) VALUES 
 		(#actionType#, #listId#, NOW(), 0
-		   <isNotEmpty prepend="," property="userId"/>
-
+		<isNotEmpty prepend="," property="userId">
+			#userId#
+		</isNotEmpty>
 		);
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -25932,16 +30006,20 @@
 		#listTags#,
 		#createType#
 		);
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DianPing.DP_VoteRankTagRecord
         	(TagID, VoteRankID, AddDate)
         VALUES
-           <iterate conjunction="," property="tagList"/>
-</insert>
+        <iterate conjunction="," property="tagList">
+            (#tagList[]#,#voteRankId#, Now())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25951,8 +30029,10 @@
         RIGHT JOIN TG_NaviDealTag b
             ON a.DealGroupID=b.DealGroupID AND a.CategoryID=#categoryId#
         WHERE a.DealGroupID IS NULL AND b.ItemID=#itemId#  AND b.TagID=#tagId#
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT ROW_COUNT()
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25962,8 +30042,10 @@
         RIGHT JOIN TG_NaviDealCategory b
             ON a.DealGroupID=b.DealGroupID AND a.CategoryID=#categoryId#
         WHERE a.DealGroupID IS NULL AND b.CategoryID=#byCategoryId# AND b.ChannelID=#byChannelId#
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT ROW_COUNT()
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -25980,8 +30062,10 @@
     	#entity.status#,
     	NOW(),
     	NOW())
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26001,8 +30085,10 @@
         #illegalAction#,
         #description#
         )
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26016,8 +30102,10 @@
         #sourceName#,
         #description#
         )
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26057,8 +30145,10 @@
 			#addDate#,
 			#lowPriceDeal#
 		)
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26100,8 +30190,10 @@
         #userStatus#,
         #refundQuantity#
         )
-           <selectKey resultClass="long"/>
-</insert>
+        <selectKey resultClass="long">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26113,15 +30205,19 @@
             ReferID =#cid#,
             DPID = "",
             CreateTime=now()
-           <selectKey keyProperty="logId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="logId" resultClass="int">
+            SELECT @@IDENTITY AS LogID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TGE_CompanyUserIntegrityLog(UserId,UserIntegrity,MobileNo,ChannelName,RegTime,AddTime)
          VALUES(#userId#,#userIntegrity#,#mobileNo#,#channelName#,#regTime#,#addTime#)
-           <selectKey keyProperty="eventID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventID" resultClass="int">  
+            SELECT @@IDENTITY AS EventID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26130,8 +30226,10 @@
 			(UserID, UserName, UserMobile, Source, Money, DealGroupId, AddTime)
 		VALUES
 			(#userId#, #userName#, #mobile#, #source#, #money#, #dealGroupId#, NOW())
-		   <selectKey keyProperty="DonationID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DonationID" resultClass="int">
+           SELECT @@IDENTITY AS DonationID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26142,8 +30240,10 @@
         #userInfo.wexinNickName#, #userInfo.weixinHeadImg#, #userInfo.weixinSex#,
         #userInfo.weixinCity#, #userInfo.weixinCountry#, #userInfo.weixinProvince#, NOW(), NOW())
         
-           <selectKey keyProperty="weixinGiftUserInfoID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="weixinGiftUserInfoID" resultClass="int">
+            SELECT @@IDENTITY AS WeixinGiftUserInfoID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26153,8 +30253,10 @@
         VALUES (#giftInfo.ownerID#, #giftInfo.giftValue#, #giftInfo.giftSource#, #giftInfo.startTime#, #giftInfo.endTime#,
         #giftInfo.toValidDays#, 0, #giftInfo.stock#,  #giftInfo.stock#, 1, 0, #giftInfo.stock#, 0, NOW(), NOW())
         
-           <selectKey keyProperty="weixinGiftID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="weixinGiftID" resultClass="int">
+            SELECT @@IDENTITY AS WeixinGiftID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26181,8 +30283,10 @@
                #grabLog.mobile#,
                NOW(), NOW())
         
-           <selectKey keyProperty="weixinGiftGrabLogID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="weixinGiftGrabLogID" resultClass="int">
+            SELECT @@IDENTITY AS WeixinGiftGrabLogID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26190,8 +30294,10 @@
         INSERT INTO TGE_WeixinGiftReceiptLog (DealGroupID, DealID, DealGroupTitle, Price, UserID, GiftID, CityID, Status, AddDate, UpdateDate)
         VALUES (#giftReceiptLog.dealGroupID#, #giftReceiptLog.dealID#,#giftReceiptLog.dealGroupTitle#,#giftReceiptLog.price#,#giftReceiptLog.userID#,#giftReceiptLog.giftID#,#giftReceiptLog.cityID#,0,NOW(),NOW())
         
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26207,8 +30313,10 @@
         OpenID=#log.openId#,
         Ip =#log.ip#,
         ADDTIME = NOW()
-           <selectKey keyProperty="logId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="logId" resultClass="int">
+            SELECT @@IDENTITY AS WeixinGiftAddtionLogID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26222,8 +30330,10 @@
         UpdateTime = NOW(),
         StartTime = #channel.startTime#,
         EndTime=#channel.endTime#,
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26235,8 +30345,10 @@
             EmbraveTrigger =#embraveTrigger#,
             ReferID =#referId#,
             ADDTIME= NOW()
-           <selectKey keyProperty="ShareEmbraveLogID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ShareEmbraveLogID" resultClass="int">
+            SELECT @@IDENTITY AS ShareEmbraveLogID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26245,8 +30357,10 @@
 		SET  
 			Name=#moduleInfo.moduleName#, ParentID=#moduleInfo.parentModuleId#,
 			Status=#moduleInfo.status#, OrderNbr=#moduleInfo.orderNbr#, AddTime=#moduleInfo.addTime#, UpdateTime=#moduleInfo.updateTime#
-           <selectKey keyProperty="moduleId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="moduleId" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26255,8 +30369,10 @@
 		SET  
 			Name=#rightInfo.rightName#, Desc=#rightInfo.desc#,
 			Status=#rightInfo.status#, AddTime=#rightInfo.addTime#, UpdateTime=#rightInfo.updateTime#
-           <selectKey keyProperty="rightId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="rightId" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26265,8 +30381,10 @@
 		SET  
 			Name=#actionInfo.name#, ActionURL=#actionInfo.actionURL#, Status=#actionInfo.status#, 
 			AddTime=#actionInfo.addTime#, UpdateTime=#actionInfo.updateTime#, ModuleID=#actionInfo.moduleId#, RightID=#actionInfo.rightId#
-           <selectKey keyProperty="actionId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="actionId" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26288,8 +30406,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26313,8 +30433,10 @@
 			#data.removeMemo#,
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26326,8 +30448,10 @@
 		(
 {valueList}
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26356,30 +30480,38 @@
             );
 		
 
-           <selectKey keyProperty="holiday" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="holiday" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS holiday
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_Event
         SET EventTitle=#promoEvent.eventTitle#, EventType=#promoEvent.eventType#, Status=#promoEvent.status#, BeginDate=#promoEvent.beginDate#, 
         EndDate=#promoEvent.endDate#, Icon=#promoEvent.icon#,EventDesc=#promoEvent.eventDesc#, Notice=#promoEvent.notice#, EventEnName="", Author=#promoEvent.author#, AddDate=NOW();
-           <selectKey keyProperty="eventID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventID" resultClass="int">  
+            SELECT @@IDENTITY AS EventID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_EventCity (EventID, CityID, Status) VALUES
-           <iterate conjunction="," property="eventCities"/>
-</insert>
+        <iterate conjunction="," property="eventCities">
+            (#eventCities[].eventID#, #eventCities[].cityID#, #eventCities[].status#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_EventPromo
         SET EventID=#promoInfo.eventID#, Type=#promoInfo.type#, Quota=#promoInfo.quota#, Stock=#promoInfo.stock#, 
         CouponRuleID=#promoInfo.couponRuleID#, AddDate=NOW(), UpdateDate=NOW(), BeginDate=#promoInfo.beginDate#, EndDate=#promoInfo.endDate#
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26387,14 +30519,18 @@
         SET PromoID=#promoCond.promoID#, ValidOrderPlatform=#promoCond.validOrderPlatform#, ValidPayPlatform=#promoCond.validPayPlatform#, ValidPaymentChannel=#promoCond.validPaymentChannel#, 
         MaxPerUser=#promoCond.maxPerUser#, MaxPerDeal=#promoCond.maxPerDeal#, LimitOrderAmount=#promoCond.limitOrderAmount#, CategoryList=#promoCond.categoryList#, ShopList=#promoCond.shopList#,
         BuyLimitType=#promoCond.buyLimitType#, UseLimitType=#promoCond.useLimitType#, UserPropertyType=#promoCond.userPropertyType#
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_EventDeal (EventID, CityID, DealGroupID, Status, AddDate, BeginDate, EndDate, UpdateDate) VALUES
-           <iterate conjunction="," property="eventDeals"/>
-</insert>
+        <iterate conjunction="," property="eventDeals">
+            (#eventDeals[].eventID#, #eventDeals[].cityID#, #eventDeals[].dealGroupID#, #eventDeals[].status#, NOW(), NOW(), NOW(), NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26404,16 +30540,20 @@
 			EventTitle=#event.eventTitle#, EventEnName=#event.eventName#, EventType=#event.eventType#, Status=#event.status#, EventDesc=#event.eventDesc#,
 			EventHref=#event.eventHref#, Notice=#event.notice#, TagItemEnName=#event.tagEnName#, TagItemChName=#event.tagName#,
 			Author=#event.author#, BeginDate=#event.beginDate#, EndDate=#event.endDate#, AddDate=NOW()
-		   <selectKey keyProperty="eventID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="eventID" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 			TG_EventCity(EventID, CityID, Status)
 		VALUES
-		   <iterate conjunction="," property="cityIds"/>
-</insert>
+		<iterate conjunction="," property="cityIds">
+			(#eventId#,#cityIds[]#,#status#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26433,8 +30573,10 @@
             #uid#,
             #userType#,
             #referId#)
-           <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="LogID" resultClass="int">     
+            SELECT @@IDENTITY AS "LogID"
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26450,8 +30592,10 @@
             #channelName#,
             #userIntegrity#,
             #addTime#)
-           <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="LogID" resultClass="int">     
+            SELECT @@IDENTITY AS "UserIntegrityLogID"
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26476,8 +30620,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26505,8 +30651,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26533,8 +30681,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26575,8 +30725,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26595,8 +30747,10 @@
          #entity.name#,#entity.description#,#entity.isExpanded#,#entity.visualView.id#)
 		
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26619,8 +30773,10 @@
 		#entity.shopIdType#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26648,8 +30804,10 @@
                 #entity.lastUpdateTime#);
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26675,8 +30833,10 @@
 		)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26705,8 +30865,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26739,8 +30901,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26761,8 +30925,10 @@
 		'SerialNumberImportLog')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26788,15 +30954,20 @@
 		)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPA_Process (ProcessType, SubjectID, UserID, UserType, Status, Version, AddTime, UpdateTime)
         VALUES (#processType#, #subjectID#, #userID#, #userType#, #status#, #version#, NOW(), NOW())
-           <selectKey keyProperty="processID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="processID" resultClass="int">
+            SELECT @@IDENTITY
+            AS processID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26821,8 +30992,10 @@
 			)
 		
 
-           <selectKey keyProperty="dealId" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="dealId" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS dealId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26848,8 +31021,10 @@
     #entity.createTime#,
     #entity.updateTime#)
     
-       <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+      SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26859,38 +31034,57 @@
       values ( #newPartnerComboAssoc.thirdpartyId#, #newPartnerComboAssoc.comboId#, #newPartnerComboAssoc.shopId#, #newPartnerComboAssoc.dishId#, #newPartnerComboAssoc.groupId#, #newPartnerComboAssoc.dishOrder#, #newPartnerComboAssoc.isDefault#, 
         #newPartnerComboAssoc.isRequired#, #newPartnerComboAssoc.markupPrice#, #newPartnerComboAssoc.feature1#, #newPartnerComboAssoc.feature2#, #newPartnerComboAssoc.feature3#, #newPartnerComboAssoc.createDate#)
       
-         <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+      <selectKey keyProperty="ID" resultClass="int">
+          	SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
       insert into TA_NewPartnerComboGroup
-         <dynamic prepend="(">
-      <isNotNull prepend="," property="newPartnerComboGroup.thirdpartyId"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.comboId"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.groupId"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.shopId"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.groupName"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.groupOrder"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.multiSupported"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.quantityLimit"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.createDate"/>
-   </dynamic>
-
+      <dynamic prepend="("><isNotNull prepend="," property="newPartnerComboGroup.thirdpartyId">
+          thirdpartyId
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.comboId">
+          comboId
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.groupId">
+          groupId
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.shopId">
+          shopId
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.groupName">
+          groupName
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.groupOrder">
+          groupOrder
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.multiSupported">
+          multiSupported
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.quantityLimit">
+          quantityLimit
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.createDate">
+          createDate
+        </isNotNull></dynamic>
       values
-         <dynamic prepend="(">
-      <isNotNull prepend="," property="newPartnerComboGroup.thirdpartyId"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.comboId"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.groupId"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.shopId"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.groupName"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.groupOrder"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.multiSupported"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.quantityLimit"/>
-      <isNotNull prepend="," property="newPartnerComboGroup.createDate"/>
-   </dynamic>
-   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+      <dynamic prepend="("><isNotNull prepend="," property="newPartnerComboGroup.thirdpartyId">
+           #newPartnerComboGroup.thirdpartyId# 
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.comboId">
+           #newPartnerComboGroup.comboId# 
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.groupId">
+           #newPartnerComboGroup.groupId# 
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.shopId">
+           #newPartnerComboGroup.shopId# 
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.groupName">
+           #newPartnerComboGroup.groupName# 
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.groupOrder">
+           #newPartnerComboGroup.groupOrder# 
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.multiSupported">
+           #newPartnerComboGroup.multiSupported# 
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.quantityLimit">
+           #newPartnerComboGroup.quantityLimit# 
+        </isNotNull><isNotNull prepend="," property="newPartnerComboGroup.createDate">
+           #newPartnerComboGroup.createDate# 
+        </isNotNull></dynamic>
+      <selectKey keyProperty="ID" resultClass="int">
+          	SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26909,24 +31103,32 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 		TA_Dish(ShopKey,DishID,DishName,Category,Price,Box,Comment,Valid,SoldOut,DishSet,Img)
 		VALUES(#shopId#,#dishId#,#dishName#,#category#,#price#,#box#,#comment#,#valid#,#soldout#,#dishSet#,#pictureUrl#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 		TA_RecommendDish(ShopKey,DishID,ShopID,DishName,TagCount,PicUrl,Valid)
 		VALUES(#shopkey#,#dishid#,#shopid#,#dishname#,#tagcount#,#picurl#,1)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26935,8 +31137,10 @@
 		SET  
 			Name=#moduleInfo.moduleName#,ModuleDesc=#moduleInfo.moduleDesc#, ParentID=#moduleInfo.parentModuleId#, RootID=#moduleInfo.rootModuleId#,
 			Status=#moduleInfo.status#, OrderNbr=#moduleInfo.orderNbr#, AddTime=NOW(), UpdateTime=NOW()
-           <selectKey keyProperty="ID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="integer">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26947,8 +31151,10 @@
 			Name=#rightInfo.rightName#, `Desc`=#rightInfo.desc#,
 			Status=#rightInfo.status#, AddTime=NOW(), UpdateTime=NOW()
      
-           <selectKey keyProperty="ID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="integer">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26957,8 +31163,10 @@
 		SET  
 			Name=#actionInfo.name#, ActionDesc=#actionInfo.actionDesc#, ActionURL=#actionInfo.actionURL#, ActionParam=#actionInfo.actionParamExp#, Status=#actionInfo.status#, 
 			AddTime=NOW(), UpdateTime=NOW(), ModuleID=#actionInfo.moduleId#, RightID=#actionInfo.rightId#
-           <selectKey keyProperty="ID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="integer">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26969,22 +31177,28 @@
 			Name=#roleInfo.roleName#, EnName=#roleInfo.roleEnName#, `Desc`=#roleInfo.desc#, Status=#roleInfo.status#, 
 			AddTime=NOW(), UpdateTime=NOW()
 	
-           <selectKey keyProperty="ID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="integer">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_OpRightRole (RightID, RoleID, ModuleID, Status, AddTime, UpdateTime) VALUES
-           <iterate conjunction="," property="roleRights"/>
-</insert>
+        <iterate conjunction="," property="roleRights">
+            (#roleRights[].rightId#, #roleRights[].roleId#, #roleRights[].moduleId#, #roleRights[].status#, NOW(), NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_OpUserRole 
         SET  
         	UserName=#userRole.userName#, AccessSourceID=#userRole.accessSourceId#, RoleID=#userRole.roleId#, CityIDs=#userRole.cityIds#, Status=1, AddTime=NOW(), UpdateTime=NOW(), Type=#userRole.type#
-           <selectKey keyProperty="ID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="integer">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -26997,8 +31211,10 @@
         LogContext    = #logContext#,
         AddTime       = NOW()
 
-           <selectKey keyProperty="AuditLogID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="AuditLogID" resultClass="int">
+            SELECT @@IDENTITY AS AuditLogID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27041,8 +31257,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27061,8 +31279,10 @@
         #entity.createTime#
         );
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27092,22 +31312,28 @@
 			#apply.updateDate#,
 			#apply.userId#,
             #apply.quantity#)
-		   <selectKey keyProperty="pId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="pId" resultClass="int">
+            SELECT @@IDENTITY AS pId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TA_Partner(partnerkey,secret,name,status,createtime)
 		VALUES(#key#,#secret#,#name#,#status#,now())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TA_NewPartnerShop(thirdpartyid,thirdpartyshopid,cityname,thirdpartyshopname,thirdpartyaddress,thirdpartyphone,thirdpartylat,thirdpartylng,coordtype,`interval`,starttime,endtime,minfee,discount,`status`,startresttime,endresttime,servtimejson,mindeliverfee,distance,thirdpartypicture,geojson,`type`,createtime)
 		VALUES(#thirdpartyid#,#thirdpartyshopid#,#cityname#,#thirdpartyshopname#,#thirdpartyaddress#,#thirdpartyphone#,#thirdpartylat#,#thirdpartylng#,#coordtype#,#interval#,#starttime#,#endtime#,#minfee#,#discount#,#status#,#startresttime#,#endresttime#,#servtimejson#,#mindeliverfee#,#distance#,#thirdpartypicture#,#geojson#,#type#,#createtime#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27122,30 +31348,52 @@
 		`comment`,
 		soldout,
 		dishset
-		   <isNotNull prepend="," property="img"/>
-   <isNotNull prepend="," property="dishType"/>
-   <isNotNull prepend="," property="fromDate"/>
-   <isNotNull prepend="," property="toDate"/>
-   <isNotNull prepend="," property="soldSingle"/>
-
+		<isNotNull prepend="," property="img">
+          img 
+        </isNotNull>
+		<isNotNull prepend="," property="dishType">
+          dishType 
+        </isNotNull>
+        <isNotNull prepend="," property="fromDate">
+          fromDate 
+        </isNotNull>
+        <isNotNull prepend="," property="toDate">
+          toDate
+        </isNotNull>
+        <isNotNull prepend="," property="soldSingle">
+          soldSingle 
+        </isNotNull>
         )
 		VALUES(#thirdpartyid#,#thirdpartyshopid#,#dishid#,#dishname#,#category#,#price#,#box#,#comment#,#soldout#,
 		#dishset#
-		   <isNotNull prepend="," property="img"/>
-   <isNotNull prepend="," property="dishType"/>
-   <isNotNull prepend="," property="fromDate"/>
-   <isNotNull prepend="," property="toDate"/>
-   <isNotNull prepend="," property="soldSingle"/>
-
+		<isNotNull prepend="," property="img">
+          #img# 
+        </isNotNull>
+        <isNotNull prepend="," property="dishType">
+		#dishType#
+        </isNotNull>
+        <isNotNull prepend="," property="fromDate">
+		#fromDate#
+        </isNotNull>
+        <isNotNull prepend="," property="toDate">
+		#toDate#
+        </isNotNull>
+        <isNotNull prepend="," property="soldSingle">
+          #soldSingle#
+        </isNotNull>
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TE_TopicSkin (Name,EnName,PcHeadImg,PcTailImg,AppBannerImg,ItemBgColor,ItemLabelColor,ItemButtonColor,ItemBtnFontColor,ThumbNail,BgColor) VALUES (#ts.name#,#ts.enName#,#ts.pcHeadImg#,#ts.pcTailImg#,#ts.appBannerImg#,#ts.itemBgColor#,#ts.itemLabelColor#,#ts.itemButtonColor#,#ts.itemBtnFontColor#,#ts.thumbNail#,#ts.bgColor#)
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27153,16 +31401,20 @@
         INSERT INTO TE_Topic
         SET Title=#topic.title#, SubTitle=#topic.subTitle#, Status=#topic.status#, AuditStatus=#topic.auditStatus#, JoinAllowed=#topic.joinAllowed#, Author=#topic.author#, AuditComment=#topic.auditComment#, DeadLine=#topic.deadLine#, ChannelType=#topic.channelType#, AddTime=NOW(), UpdateTime=NOW()
         
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO
         	TE_TopicItem(Name,TopicID,Type,OrderNo,Status,BgColor,LabelColor,ButtonColor,BtnFontColor,UpdateTime)
         VALUES
-           <iterate conjunction="," property="categories"/>
-</insert>
+        <iterate conjunction="," property="categories">
+       		(#categories[].name#,#categories[].topicID#,#categories[].type#,#categories[].orderNo#,#categories[].status#,#categories[].bgColor#,#categories[].labelColor#,#categories[].buttonColor#,#categories[].btnFontColor#,NOW())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27170,55 +31422,70 @@
         	TE_TopicItem(Name,TopicID,Type,OrderNo,Status,BgColor,LabelColor,ButtonColor,BtnFontColor,UpdateTime)
         VALUES
        		(#category.name#,#category.topicID#,#category.type#,#category.orderNo#,#category.status#,#category.bgColor#,#category.labelColor#,#category.buttonColor#,#category.btnFontColor#,NOW())
-       	   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+       	<selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 			TE_TopicCity(TopicID, CityID, Status, UpdateTime)
 		VALUES
-		   <iterate conjunction="," property="topicCities"/>
-</insert>
+		<iterate conjunction="," property="topicCities">
+			(#topicCities[].topicID#, #topicCities[].cityID#, #topicCities[].status#,NOW())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO 
 			TE_TopicDeal(TopicID,TopicItemID,CityID,DealGroupID,OrderNo,Status,AddTime,UpdateTime)
         VALUES 
-        	   <iterate conjunction="," property="deals"/>
-</insert>
+        	<iterate conjunction="," property="deals">
+        		(#deals[].topicID#,#deals[].topicItemID#,#deals[].cityID#,#deals[].dealGroupID#,#deals[].orderNo#,1,NOW(),NOW())
+        	</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TE_TopicRule
         SET TopicID=#topicRule.topicID#, RuleIdRelationExp=#topicRule.ruleIdRelationExp#, AddTime=NOW(), UpdateTime=NOW()
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TE_DealSearchRule
         SET Name=#searchRule.name#, Type=#searchRule.type#, ValueType=#searchRule.valueType#, LeftValue=#searchRule.leftValue#, 
         	RightValue=#searchRule.rightValue#, AddTime=NOW()
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO	
 			TE_TopicPublish(TopicID, PositionName, PositionTitle, PublishStatus, ChannelType, BannerImg, Author) 
 		VALUES
-		   <iterate conjunction="," property="topicAdList"/>
-</insert>
+		<iterate conjunction="," property="topicAdList">		
+			(#topicAdList[].topicID#, #topicAdList[].positionName#, #topicAdList[].positionTitle#,
+			#topicAdList[].publishStatus#, #topicAdList[].channelType#, #topicAdList[].bannerImg#, #topicAdList[].author#)
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO 
 			TE_TopicPositionBanner(TopicID, PositionName, ChannelType, BannerImg, Type, AddDate)
 		VALUES
-			   <iterate conjunction="," property="list"/>
-</insert>
+			<iterate conjunction="," property="list">
+				(#list[].topicId#, #list[].positionName#, #list[].channelType#, #list[].bannerImg#, #list[].type#, NOW())
+			</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27239,15 +31506,20 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TPA_ProcessActor (ProcessID, NodeName, UserID, UserType, AddTime)
         VALUES (#processID#, #nodeName#, #userID#, #userType#, NOW())
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27260,8 +31532,10 @@
         #data.rateId#,
         #data.shopId#,
         #data.reviewId#)
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27305,8 +31579,10 @@
 			#isDealPriceLargerThanCost#,
             #dealStatus#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27394,8 +31670,10 @@
 		NOW(),
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27417,8 +31695,10 @@
 			#userIP#,
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27438,8 +31718,10 @@
 			#regionId#,
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27479,16 +31761,21 @@
 			#addDate#,
 			#lowPriceDeal#
 		)
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_Feed_Queue
 		(Url, Text, Status, TryTimes, AddDate, UpdateDate, ThirdPartyType, ThirdUserID, OrderID)
 		VALUES (#url#, #text#, 0, 0, NOW(), NOW(), #thirdPartyType#, #thirdUserId#, #orderId#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27510,8 +31797,10 @@
 		#topChannel#,
 		#topTo#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27531,8 +31820,10 @@
 		#branchName#,
 		#phoneNoAddress#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27552,12 +31843,16 @@
 		#isMain#,
 		NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="mailContentId" resultClass="int"/>
-  
+
+    	<selectKey type="post" keyProperty="mailContentId" resultClass="int"> 
+           	select @@IDENTITY 
+        </selectKey>  
         Insert into Mail_Template (Subject,Content,TaskId,TId,AddTime)
     	values (#mailTitle#,#mailContent#,#taskId#,#orderDealId#,NOW())
     </insert>
@@ -27594,8 +31889,10 @@
 			#feedback.userID#,
 			#feedback.feedGroupID#,
 			#feedback.causeType#)
-			   <selectKey keyProperty="feedId" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="feedId" resultClass="int">
+           		SELECT @@IDENTITY AS feedId
+      		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27627,8 +31924,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27637,8 +31936,10 @@
             MaxJoin=#eventDealDto.maxJoin#,MaxPerUser=#eventDealDto.maxPerUser#,Status=#eventDealDto.status#,AddDate=NOW(),
             BeginDate=#eventDealDto.beginDate#,EndDate=#eventDealDto.endDate#,Stage1=#eventDealDto.stage1#,PayOff1=#eventDealDto.payOff1#,Stage2=#eventDealDto.stage2#,
             PayOff2=#eventDealDto.payOff2#,Stage3=#eventDealDto.stage3#,PayOff3=#eventDealDto.payOff3#
-           <selectKey keyProperty="eventDealID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventDealID" resultClass="int">  
+            SELECT @@IDENTITY AS EventDealID
+        </selectKey>            
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27654,8 +31955,10 @@
 			#roleId#,
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27685,16 +31988,20 @@
         #task.referId#
         )
         
-           <selectKey keyProperty="taskId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="taskId" resultClass="int">
+            SELECT LAST_INSERT_ID() as taskId;
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_ShopAccountUser(ShopAccountId,UserId,AddTime,UpdateTime)
 		VALUES
 		(#shopAccountId#,#userId#,#addTime#,NOW())	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27702,8 +32009,10 @@
 			VALUES (#dealGroupId#, #cityId#, #dealGroupCityBytes#, #dealGroupCityJson#) 
 			ON DUPLICATE KEY
 			UPDATE Json=#dealGroupCityJson#, Bytes=#dealGroupCityBytes#
-		   <selectKey keyProperty="DealGroupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DealGroupId" resultClass="int">     
+			SELECT @@IDENTITY AS DealGroupId
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27711,38 +32020,70 @@
 			VALUES (#cityId#, #moduleType#, #version#,#categoryID#,#districtID#,#dealGroupIDs#,NOW(),NOW()) 
 			ON DUPLICATE KEY
 			UPDATE DealGroupIDs=#dealGroupIDs#, UpdateDate=NOW()
-		   <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ID" resultClass="int">     
+			SELECT @@IDENTITY AS ID
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_Privilege(Module,ParentId,Name,Url,AddDate,Status)
 		VALUES
 		(#module#,#parentId#,#name#,#url#,NOW(),1)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+      	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_Privilege(ID,Module,ParentId,Name,Url,AddDate,Status)
 		VALUES
 		(#id#,#module#,#parentId#,#name#,#url#,NOW(),1)	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+      	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_DealPriceReduce 
 		(DealGroupID, DealID, Price, ReducePrice,CostPrice,ReducePriceByPM,DealGroupTitle,MTDealGroupID,MTPrice,MTDealGroupTitle,MainCategoryID,Status,AddTime,UpdateTime,VersionID) VALUES
-           <iterate conjunction="," property="entities"/>
-</insert>
+        <iterate conjunction="," property="entities">
+           (#entities[].dealGroupId#,
+			#entities[].dealId#,
+			#entities[].price#,
+			#entities[].reducePrice#,
+			#entities[].costPrice#,
+			#entities[].reducePriceByPM#,
+			#entities[].dealGroupTitle#,
+			#entities[].mtDealGroupId#,
+			#entities[].mtPrice#,
+			#entities[].mtDealGroupTitle#,
+			60,
+			#entities[].status#,
+			NOW(),
+			NOW(),
+			#entities[].versionId#
+         )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_HotelInventory 
 		(TPID, TPHotelID, RoomType, AccDate,Inventory,AddDate,VersionID) VALUES
-           <iterate conjunction="," property="inventories"/>
-</insert>
+        <iterate conjunction="," property="inventories">
+           (#inventories[].tpId#,
+			#inventories[].tpHotelId#,
+			#inventories[].roomType#,
+			#inventories[].accDate#,
+			#inventories[].inventory#,
+			NOW(),
+			#inventories[].versionId#
+         )
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27780,8 +32121,11 @@
             #createDate#, 
             #updateDate#
         );
-           <selectKey keyProperty="refundRecordID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="refundRecordID" resultClass="int">
+			SELECT @@IDENTITY
+			AS refundRecordID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27797,16 +32141,22 @@
     		#createDate#, 
     		#updateDate#
         );
-           <selectKey keyProperty="detailID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="detailID" resultClass="int">
+			SELECT @@IDENTITY
+			AS detailID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO TG_Feed_Queue
 		(Url, Text, Status, TryTimes, AddDate, UpdateDate, ThirdPartyType, ThirdUserID, OrderID)
 		VALUES (#url#, #text#, 0, 0, NOW(), NOW(), #thirdPartyType#, #thirdUserId#, #orderId#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27825,8 +32175,10 @@
 			#applyPics.addDate#,
 			#applyPics.updateDate#)
 			
-		   <selectKey keyProperty="pId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="pId" resultClass="int">
+            SELECT @@IDENTITY AS pId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27848,8 +32200,10 @@
             #deliverAddress.mobileNo#,
 			#deliverAddress.addDate#,
 			#deliverAddress.updateDate#)
-		   <selectKey keyProperty="pId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="pId" resultClass="int">
+            SELECT @@IDENTITY AS pId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27858,8 +32212,10 @@
         	ContainerID=#adPosition.containerID#, Width=#adPosition.width#, Height=#adPosition.height#, 
         	Type=#adPosition.type#, Status=#adPosition.status#, Author=#adPosition.author#,PublishType=#adPosition.publishType#, AddTime=NOW(), UpdateTime=NOW(),
         	MaxDisplay=#adPosition.maxDisplay#, TitleLen=#adPosition.titleLen#, SubTitleLen=#adPosition.subTitleLen#
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27868,8 +32224,10 @@
     		(UserID,MemberGiftID,NextSendTime,MaxSendTimes,GiftSendTimes,AddTime)
     	VALUES
     		(#userId#,#memberGiftId#,#nextSendTime#,#maxSendTimes#,#giftSendTimes#,NOW())
-    	   <selectKey keyProperty="MemberGiftStatID" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="MemberGiftStatID" resultClass="int">
+           SELECT @@IDENTITY AS MemberGiftStatID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27878,8 +32236,10 @@
         (UserID,MemberGiftID,NextSendTime,MaxSendTimes,GiftSendTimes,AddTime)
         VALUES
         (#userId#,#memberGiftId#,#nextSendTime#,#maxSendTimes#,1,NOW())
-           <selectKey keyProperty="MemberGiftStatID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="MemberGiftStatID" resultClass="int">
+            SELECT @@IDENTITY AS MemberGiftStatID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27887,8 +32247,11 @@
 		VALUES (
 		#id#, #itemId#, #name#, #value#
 		)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27910,8 +32273,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27935,8 +32300,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -27995,8 +32362,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28018,8 +32387,10 @@
 		'DealComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28045,8 +32416,10 @@
               #entity.versionId#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28058,8 +32431,10 @@
 		#entity.createTime#,#entity.lastUpdateTime#,#entity.ipAddress#,#entity.serverIp#,#entity.data#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28086,8 +32461,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28098,8 +32475,10 @@
 		(#entity.dealId#,#entity.roomType#,#entity.creatorId#,#entity.lastUpdatorId#,#entity.createTime#,#entity.lastUpdateTime#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28123,8 +32502,10 @@
 		)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28135,8 +32516,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.imageTextItem.id#,#entity.sequence#,#entity.content#,#entity.isTitle#,#entity.templateId#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28147,8 +32530,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.visualComponent.id#,#entity.sequence#,#entity.content#,#entity.quantity#,#entity.specification#,#entity.unit#,#entity.templateId#,'ProductItem')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28174,8 +32559,10 @@
 		)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28202,8 +32589,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28228,8 +32617,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28246,8 +32637,10 @@
 		'SerialNumberExportLog')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28258,8 +32651,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.configurableBlock.id#,#entity.templateId#,#entity.areaTypeId#,'TextAreaListComponent')
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28280,8 +32675,10 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28299,8 +32696,10 @@
 			#movieInfoEntity.status#, #movieInfoEntity.language#, 
 			#movieInfoEntity.has3D#, #movieInfoEntity.hasImax#, 
 			#movieInfoEntity.minutes#);
-	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+	<selectKey keyProperty="id" resultClass="int">
+   		SELECT @@IDENTITY AS id
+   	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28313,8 +32712,10 @@
         #data.rateId#,
         #data.shopId#,
         #data.reviewId#)
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28326,15 +32727,23 @@
 			#entity.refReceiptId#, #entity.refReceiptCode#, #entity.thirdPartnerId#, #entity.userId#, 
 			#entity.memo#, #entity.thirdPartnerDealId#, now(), now())
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert INTO TG_TravelReservation(ReceiptID,OrderID, BookName,TravelerName, TourDate, IdentityType, IdentityID, 
 			BookMobileNo,TravelerMobileNo, Status, RefReceiptID, RefReceiptCode, ThirdPartnerID, UserID, Memo, ThirdPartnerDealID, AddDate, UpdateDate) VALUES
-		   <iterate conjunction="," property="entities"/>
-</insert>
+		<iterate conjunction="," property="entities">
+           	(#entities[].receiptId#,#entities[].orderId#, #entities[].bookName#, #entities[].travelerName#, #entities[].tourDate#,
+			#entities[].identityType#, #entities[].identityId#, #entities[].bookMobileNo#,#entities[].travelerMobileNo#, #entities[].status#,
+			#entities[].refReceiptId#, #entities[].refReceiptCode#, #entities[].thirdPartnerId#, #entities[].userId#, 
+			#entities[].memo#, #entities[].thirdPartnerDealId#, now(), now())
+        </iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28367,8 +32776,10 @@
         #updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28387,8 +32798,10 @@
 		            #tsWithdrawConfigData.addTime#,
 		            #tsWithdrawConfigData.updateTime#,
 		            #tsWithdrawConfigData.status#);
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28410,8 +32823,12 @@
         	NOW(),
         	NOW()
        	);
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+			
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28439,8 +32856,12 @@
 		            NOW()
 		            );
  		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28461,70 +32882,72 @@
         #entity.updateTime#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into TA_Order(thirdpartyid, shopkey,userkey,reachtime,comment,payfee,mobile,
 		shopname,shopphone,fetchtype,reserve,`interval`,noticetime, clientip
-		   <dynamic>
-      <isNotNull property="uuid"/>
-   </dynamic>
-   <dynamic>
-      <isNotNull property="channel"/>
-   </dynamic>
-   <dynamic>
-      <isNotNull property="paystatus"/>
-   </dynamic>
-   <dynamic>
-      <isNotNull property="dpid"/>
-   </dynamic>
-   <dynamic>
-      <isNotNull property="callid"/>
-   </dynamic>
-
+		<dynamic><isNotNull property="uuid">
+				,uuid
+			</isNotNull></dynamic>
+		<dynamic><isNotNull property="channel">
+				,channel
+			</isNotNull></dynamic>
+		<dynamic><isNotNull property="paystatus">
+				,paystatus
+			</isNotNull></dynamic>
+		<dynamic><isNotNull property="dpid">
+				,dpid
+			</isNotNull></dynamic>
+		<dynamic><isNotNull property="callid">
+		        ,callid
+		    </isNotNull></dynamic>
 		)
 		values(#thirdpartyid#, #shopkey#,#userkey#,#reachtime#,#comment#,#payfee#,#mobile#,
 		#shopname#,#shopphone#,#fetchtype#,#reserve#,#interval#,#noticetime#,#clientip#
-		   <dynamic>
-      <isNotNull property="uuid"/>
-   </dynamic>
-   <dynamic>
-      <isNotNull property="channel"/>
-   </dynamic>
-   <dynamic>
-      <isNotNull property="paystatus"/>
-   </dynamic>
-   <dynamic>
-      <isNotNull property="dpid"/>
-   </dynamic>
-   <dynamic>
-      <isNotNull property="callid"/>
-   </dynamic>
-
+		<dynamic><isNotNull property="uuid">
+				,#uuid#
+			</isNotNull></dynamic>
+		<dynamic><isNotNull property="channel">
+				,#channel#
+			</isNotNull></dynamic>
+		<dynamic><isNotNull property="paystatus">
+				,#paystatus#
+			</isNotNull></dynamic>
+		<dynamic><isNotNull property="dpid">
+				,#dpid#
+			</isNotNull></dynamic>
+		<dynamic><isNotNull property="callid">
+				,#callid#
+			</isNotNull></dynamic>
 		)
-		   <selectKey keyProperty="orderid" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="orderid" resultClass="int">     
+			SELECT @@IDENTITY AS orderid
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into TA_UserContact(userid,address
-		   <dynamic>
-      <isNotNull property="name"/>
-   </dynamic>
-
+		<dynamic><isNotNull property="name">
+				,name
+			</isNotNull></dynamic>
 		,cityid,phone)
 		
 		values(#userid#,#address#
-		   <dynamic>
-      <isNotNull property="name"/>
-   </dynamic>
-
+		<dynamic><isNotNull property="name">
+				,#name#
+			</isNotNull></dynamic>
 		,#cityid#,#phone#)
 		
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">     
+			SELECT @@IDENTITY AS id
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28550,8 +32973,11 @@
             #param#,
             NOW()
         )
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28559,23 +32985,31 @@
 			VALUES (
 				#tagId#, #itemName#, #itemEnName#, 1, #priority#
 			)
-		   <selectKey keyProperty="itemId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="itemId" resultClass="int">
+			SELECT @@IDENTITY
+			AS itemId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT IGNORE INTO TG_NaviTagItem (ItemID, TagID, ItemName, ItemEnName, Status, Priority)
 			VALUES (#itemId#, #tagId#, #itemName#, #itemEnName#, 1, #priority#)
-		   <selectKey keyProperty="itemId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="itemId" resultClass="int">
+			SELECT @@IDENTITY
+			AS itemId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_ReceiptGroupCode
         (Code,DealID,UserID,Status,AddDate)
         VALUES(#code#,#dealId#,#userId#,1,Now());
-           <selectKey keyProperty="eventId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="eventId" resultClass="int">
+            SELECT @@IDENTITY  AS ReceiptGroupCodeID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28610,8 +33044,10 @@
 			#status#,
 			now())
 			
-	   <selectKey type="post" keyProperty="sharedLinkLogId" resultClass="int"/>
-</insert>
+	<selectKey type="post" keyProperty="sharedLinkLogId" resultClass="int">  
+        select @@IDENTITY as value  
+  	</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28637,8 +33073,10 @@
 		 #thirdPartPaymentAuditId:INTEGER#,
        	 #engineControlId:VARCHAR#,
        	 #errorCode:VARCHAR#)
-		    <selectKey resultClass="int"/>
-</insert>
+		 <selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28658,8 +33096,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28679,8 +33119,10 @@
 			NOW(),
 			NOW()
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28692,8 +33134,10 @@
 		(
 			#orderId#
 		)
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28711,8 +33155,10 @@
 			#companyName#,
 			#uid#,
 			#userType#)
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+			SELECT @@IDENTITY AS "LogID"
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28728,8 +33174,10 @@
 			#channelName#,
 			#userIntegrity#,
 			#addTime#)
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">     
+			SELECT @@IDENTITY AS "UserIntegrityLogID"
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28767,8 +33215,10 @@
         NOW(),
         NOW()
         )
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28782,8 +33232,10 @@
 			PayEntrance = #payEntrance#,
 			IP = #ip#,
 			CreateTime = NOW()
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">  
+            SELECT @@IDENTITY AS LogID
+        </selectKey>  
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28809,8 +33261,10 @@
 		#createTime#,
 		#updateTime#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28842,8 +33296,10 @@
 		#sourceId#,
 		#isBlockStock#
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28853,8 +33309,10 @@
 		VALUES
 			(#Title#, #PageUrl#, #BeginTime#, #EndTime#, #ClientIDList#, 
 			 #VersionList#, #CityIDList#, #Priority#)
-		   <selectKey keyProperty="AnnouncementID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="AnnouncementID" resultClass="int">
+			SELECT @@IDENTITY AS AnnouncementID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28862,8 +33320,10 @@
 			VALUES (#dealGroupId#, #cityId#, #dealGroupCityBytes#, #dealGroupCityJson#) 
 			ON DUPLICATE KEY
 			UPDATE Json=#dealGroupCityJson#, Bytes=#dealGroupCityBytes#
-		   <selectKey keyProperty="DealGroupId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="DealGroupId" resultClass="int">     
+			SELECT @@IDENTITY AS DealGroupId
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28876,8 +33336,12 @@
 		)
 		VALUES		 
    
-      <iterate conjunction="," property="userIds"/>
-</insert>
+   <iterate conjunction="," property="userIds">  
+         
+            (#userIds[]#, 1, 1, NOW()) 
+          
+   </iterate>
+   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28885,8 +33349,10 @@
         SET Title=#adPosition.title#, Name=#adPosition.name#, `Desc`=#adPosition.desc#, ChannelID=#adPosition.channelID#,
         	ContainerID=#adPosition.containerID#, Width=#adPosition.width#, Height=#adPosition.height#, 
         	Type=#adPosition.type#, Status=#adPosition.status#, Author=#adPosition.author#,PublishType=#adPosition.publishType#, AddTime=NOW(), UpdateTime=NOW()
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28902,14 +33368,18 @@
             NOW(),
             NOW()
         )
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">  
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_Event_RecomKeyWordCity (CityID, KeyWordID, Priority) VALUES
-           <iterate conjunction="," property="listCities"/>
-</insert>
+        <iterate conjunction="," property="listCities">
+            (#listCities[].cityID#, #listCities[].keyWordID#, #listCities[].priority#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28917,8 +33387,10 @@
         INSERT INTO MC_MemberCardBossAccountInfo(CrmID,CompanyName,CompanyManager,CompanyManagerTel,CompanyManagerPosition,CompanyManagerMail,BossAccountCreateStatus,BossAccountCreateAuditInfo,BossAccountCreateTime,BossAccountUpdateTime,AuthAdminID,AuthAdminName) 
         VALUES(#bossData.crmID#,#bossData.companyName#,#bossData.companyManagerName#,#bossData.companyManagerTel#,#bossData.companyManagerPosition#,#bossData.companyManagerMail#,#bossData.bossAccountCreateStatus#,#bossData.bossAccountCreateAuditInfo#,#bossData.bossAccountCreateTime#,#bossData.bossAccountUpdateTime#,#bossData.authAdminId#,#bossData.authAdminName#)
          
-           <selectKey keyProperty="companyInfoID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="companyInfoID" resultClass="int">     
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28946,8 +33418,10 @@
 			 #addTime#,
 			 #productDraftId#,
 			 #crmId#)
-		   <selectKey keyProperty="ProductID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28957,8 +33431,10 @@
 		VALUES 
 			(#productId#, 
 			 #discount#)
-		   <selectKey keyProperty="ProductDiscountID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductDiscountID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductDiscountID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28974,8 +33450,10 @@
 			 #memberCardId#,
 			 #status#,
 			 #addTime#)
-		   <selectKey keyProperty="ProductShopID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductShopID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductShopID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -28989,8 +33467,10 @@
 			 #promoTitle#,
 			 #promoDesc#,
 			 #tel#)
-		   <selectKey keyProperty="PromoId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="PromoId" resultClass="int">     
+			SELECT @@IDENTITY AS PromoId
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29010,8 +33490,10 @@
 			 #promoTitle#,
 			 #promoDesc#,
 			 #tel#)
-		   <selectKey keyProperty="promoId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="promoId" resultClass="int">     
+			SELECT @@IDENTITY AS promoId
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29043,8 +33525,10 @@
 			 #status#,
 			 #addTime#,
 			 #crmId#)
-		   <selectKey keyProperty="ProductDraftID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductDraftID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductDraftID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29060,8 +33544,10 @@
 			 #memberCardID#, 
 			 #status.value#, 
 			 #addTime#)
-		   <selectKey keyProperty="ProductShopID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductShopID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductShopID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29071,24 +33557,30 @@
 		VALUES 
 			(#productDraftId#, 
 			 #discountRate#)
-		   <selectKey keyProperty="ProductDiscountID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="ProductDiscountID" resultClass="int">     
+			SELECT @@IDENTITY AS ProductDiscountID   
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO DP_MyListTesecaiFavoriteOption
         (`Value`,`Desc`,`Frequency`,`Type`,`AddTime`,`UpdateTime`)
         VALUES (#option.value#,#option.desc#,#option.frequency#,#option.type#,now(),now());
-           <selectKey keyProperty="ID" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="ID" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO BC_ShopAccountUser(ShopAccountId,UserId,AddTime,UpdateTime)
 		VALUES
 		(#shopAccountId#,#userId#,#addTime#,NOW())	
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29101,8 +33593,10 @@
 		VALUES
 		(#entity.feedbackId#,#entity.content#,#entity.createTime#,#entity.creatorId#)
 		
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29114,8 +33608,10 @@
 		(
 {valueList}
 		)
-		   <selectKey resultClass="int"/>
-</insert>
+		<selectKey resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29124,15 +33620,19 @@
         	(UserId, CouponId, OrderId, Status, CreateTime)
         values
         	(#userId#, #couponId#, #orderId#, #status#, NOW())
-           <selectKey keyProperty="LogId" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="LogId" resultClass="int">  
+            SELECT @@IDENTITY AS LogId
+        </selectKey>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into TG_MobileTrigger(trigger_dt, flag, table_name, update_dt, del_dt)
 		values(#trigger_dt#, #flag#, #table_name#, #update_dt#, #del_dt#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29140,8 +33640,10 @@
 			TG_EventPrizeUser(EventID,UserID,UserMobile,CurrentJoin,MaxJoin,Period,EventDeaID,Entrance)
 		VALUES 
 			(#prizeUser.eventId#,#prizeUser.userId#,#prizeUser.mobile#,1,#prizeUser.maxJoin#,#prizeUser.period#,#prizeUser.eventDealId#,#prizeUser.entrance#)
-		   <selectKey keyProperty="UID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UID" resultClass="int">  
+            SELECT @@IDENTITY AS UID
+        </selectKey>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29149,8 +33651,10 @@
 			TG_EventPrizeUserLog(EventID,UserID,UserMobile,UserNickName,PrizeID,PrizeName,Source,Entrance,IP,Memo) 
 		VALUES 
 			(#log.eventId#,#log.userId#,#log.userMobile#,#log.userNickName#,#log.prizeId#,#log.prizeName#,#log.source#,#log.entrance#,#log.ip#,#log.memo#)
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">  
+            SELECT @@IDENTITY AS LogID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29158,8 +33662,10 @@
 			TG_EventUserPrize(UserID,UserMobile,EventID,Amount,Value,PrizedDate)
 		VALUES 
 			(#log.userId#,#log.userMobile#,#log.eventId#,1,#log.prizeValue#,#log.period#)
-		   <selectKey keyProperty="UID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="UID" resultClass="int">  
+            SELECT @@IDENTITY AS UID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29167,8 +33673,10 @@
 			TG_EventUserPrizeLog(EventID,UserID,UserMobile,UserNickName,PrizeID,PrizeName,PrizeValue,Source,Entrance,IP,Memo) 
 		VALUES 
 			(#log.eventId#,#log.userId#,#log.userMobile#,#log.userNickName#,#log.prizeId#,#log.prizeName#,#log.prizeValue#,#log.source#,#log.entrance#,#log.ip#,#log.memo#)
-		   <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="LogID" resultClass="int">  
+            SELECT @@IDENTITY AS LogID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29176,8 +33684,10 @@
 	       TG_EventUserPrizeLog_Extend 
 	   SET 
 	       UserAwardID =#awardId# ,SendStatus =#sendStatus#, AwardDealID=#awardDealId# ,Memo=#memo# , CreateTime = NOW()
-	      <selectKey keyProperty="LogID" resultClass="int"/>
-</insert>
+	   <selectKey keyProperty="LogID" resultClass="int">  
+            SELECT @@IDENTITY AS LogID
+        </selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29215,8 +33725,10 @@
 			#bizType#,
 			#orderId#
 		)
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29228,8 +33740,10 @@
 		(
 			#orderId#
 		)
-		   <selectKey resultClass="long"/>
-</insert>
+		<selectKey resultClass="long">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29255,15 +33769,20 @@
 		#dealGroupRemind.dealGroupId#,
 		#dealGroupRemind.cityId#,
 		#dealGroupRemind.referType#);
-		   <selectKey keyProperty="remindId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="remindId" resultClass="int">
+			SELECT @@IDENTITY
+			AS remindId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO TG_NaviDealTag (DealGroupID, TagID, ItemID)
         VALUES
-           <iterate conjunction=","/>
-</insert>
+        <iterate conjunction=",">
+                (#naviDealTags[].dealGroupId#,#naviDealTags[].tagId#,#naviDealTags[].itemId#)
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29271,15 +33790,21 @@
 			VALUES (
 				#tagId#, #itemName#, #itemEnName#, 1, #priority#
 			)
-		   <selectKey keyProperty="itemId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="itemId" resultClass="int">
+			SELECT @@IDENTITY
+			AS itemId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT IGNORE INTO TG_NaviTagItem (ItemID, TagID, ItemName, ItemEnName, Status, Priority)
 			VALUES (#itemId#, #tagId#, #itemName#, #itemEnName#, 1, #priority#)
-		   <selectKey keyProperty="itemId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="itemId" resultClass="int">
+			SELECT @@IDENTITY
+			AS itemId
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29308,8 +33833,10 @@
             );
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29335,8 +33862,10 @@
 			#memberBehaviorMsg.memo#,
 			#memberBehaviorMsg.status#,
 			#memberBehaviorMsg.addTime#)
-		   <selectKey keyProperty="MemberBehaviorMsgID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberBehaviorMsgID" resultClass="int">     
+			SELECT @@IDENTITY AS "MemberBehaviorMsgID"
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29359,8 +33888,10 @@
 		#entity.updateBy#
         )
         
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29381,8 +33912,10 @@
 			#entity.categoryId#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29404,8 +33937,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29416,8 +33951,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.typeId#,#entity.visualView.id#,#entity.title#,#entity.templateId#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29446,8 +33983,10 @@
             );
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29501,8 +34040,10 @@
 			)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29543,8 +34084,10 @@
 		#entity.isAutoDelay#, #entity.refundReason#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29553,8 +34096,10 @@
 		(#entity.dealGroupId#,#entity.isAdmissionRequired#,#entity.amount#,#entity.statusId#,#entity.createTime#,#entity.lastUpdateTime#,#entity.creatorId#,#entity.lastUpdatorId#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29565,8 +34110,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.cityId#,#entity.dealGroup.id#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29577,8 +34124,10 @@
 			(#entity.dealGroup.id#,#entity.categoryId#,#entity.createTime#,#entity.lastUpdateTime#,#entity.creatorId#,#entity.lastUpdatorId#,#entity.isDefault#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29590,8 +34139,10 @@
 		(#entity.dealGroupId#,#entity.processInstanceId#,#entity.operationId#,#entity.creatorId#,#entity.lastUpdatorId#,#entity.createTime#,#entity.lastUpdateTime#)
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29621,8 +34172,10 @@
             #entity.lastUpdateTime#);
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29642,8 +34195,10 @@
             #entity.lastUpdateTime#);
 		
 
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29654,8 +34209,10 @@
 		(#entity.createTime#,#entity.creatorId#,#entity.lastUpdateTime#,#entity.lastUpdatorId#,#entity.sequence#,#entity.url#,#entity.visualView.id#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29674,8 +34231,10 @@
 		#entity.shortDescription#,#entity.comments#,#entity.parentVisualViewId#)
 		
 
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29693,8 +34252,10 @@
 			#dealGroupId#,
 			#status#,
 			NOW())
-		   <selectKey keyProperty="MemberOrderProfitID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="MemberOrderProfitID" resultClass="int">     
+			SELECT @@IDENTITY AS "MemberOrderProfitID"
+	    </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29702,8 +34263,10 @@
 	values
 	(#feedback.device#,#feedback.userId#,#feedback.content#,
 	#feedback.cityId#,#feedback.email#,#feedback.lat#,#feedback.lng#)
-	       <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="id" resultClass="int">
+     	 	select last_insert_id() as id
+   		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29736,8 +34299,10 @@
         #data.dealGroupId#,
         #data.status#,
         #data.extendBiz#)
-           <selectKey resultClass="int"/>
-</insert>
+        <selectKey resultClass="int">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29765,12 +34330,16 @@
     #entity.createTime#,
     #entity.updateTime#)
     
-       <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+      SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
-   <selectKey type="post" keyProperty="id" resultClass="int"/>
 
+		<selectKey type="post" keyProperty="id" resultClass="int">
+			select @@IDENTITY as value
+		</selectKey>
 		insert into TS_Withdraw
 		(	ID,
 			WithdrawID,
@@ -29820,8 +34389,12 @@
 		            now()
 		            );
  		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29831,8 +34404,12 @@
         VALUES
         (#guaranteeForm.customerId#,#guaranteeForm.bankAccountId#,#guaranteeForm.cityId#,#guaranteeForm.totalAmount#,#guaranteeForm.allowPostpone#,#guaranteeForm.allowReturn#,#guaranteeForm.excludeM#,#guaranteeForm.exclusive#,#guaranteeForm.salesMan#,#guaranteeForm.department#,#guaranteeForm.dealName#,#guaranteeForm.salePrice#,#guaranteeForm.costPrice#,#guaranteeForm.grossMargin#,#guaranteeForm.dealMaxCount#,#guaranteeForm.dealComment#,#guaranteeForm.comment#,#guaranteeForm.effectiveDate#,#guaranteeForm.expireDate#,#guaranteeForm.predictCycleBack#,#guaranteeForm.status#,#guaranteeForm.workflowId#, now(), now());
        
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29858,8 +34435,12 @@
 		            NOW()
 		            );
  		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29867,8 +34448,12 @@
     INSERT INTO TS_GuaranteeSync (ContractGlobalID,ContractCityID,UnDeductionAmount,ADDTIME,UpdateTime)
     VALUES(#guaranteeSyncData.contractGlobalId#,#guaranteeSyncData.contractCityId#,#guaranteeSyncData.unDeductionAmount#,NOW(),NOW());
  		
-           <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="java.lang.Integer">
+            
+			SELECT @@IDENTITY AS id
+		
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29892,8 +34477,10 @@
     #entity.createTime#,
     #entity.updateTime#)
     
-       <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+    <selectKey keyProperty="id" resultClass="java.lang.Integer">
+      SELECT @@IDENTITY AS id
+      </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29923,8 +34510,10 @@
         #module#,
         NOW()
         )
-           <selectKey keyProperty="MappingID" resultClass="integer"/>
-</insert>
+        <selectKey keyProperty="MappingID" resultClass="integer">
+            SELECT @@IDENTITY AS MappingID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29951,8 +34540,10 @@
 				#cardLogStatus#,
 				#lastPerson#,
 				#comments#)				
-		   <selectKey keyProperty="cardLogId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="cardLogId" resultClass="int">
+            SELECT @@IDENTITY AS cardLogId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29977,8 +34568,11 @@
 		now(),
 		now(),
 		now())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29986,8 +34580,10 @@
 			UC_Flower(FromUserID,ToUserID,ActionType,MainBizID,MinorBizID,AddDate,UpdateDate)
 		VALUES
 			(#fromUserId#,#toUserId#,#actionType#,#mainBizId#,#minorBizId#,now(),now());
-		   <selectKey keyProperty="FlowerID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="FlowerID" resultClass="int">
+			SELECT @@IDENTITY AS flowerID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -29997,42 +34593,27 @@
 			(
 				#location.userId#,
 				#location.cityId#,
-				   <isNull property="location.gLat"/>
-   <isNotNull property="location.gLat"/>
-,
-				   <isNull property="location.gLng"/>
-   <isNotNull property="location.gLng"/>
-,
+				<isNull property="location.gLat">null</isNull><isNotNull property="location.gLat">#location.gLat#</isNotNull>,
+				<isNull property="location.gLng">null</isNull><isNotNull property="location.gLng">#location.gLng#</isNotNull>,
 				NOW(),
 				NOW(),
 				#location.locationType#,
-			 	   <isNull property="location.districtId"/>
-   <isNotNull property="location.districtId"/>
-,
-			 	   <isNull property="location.regionId"/>
-   <isNotNull property="location.regionId"/>
-,
-			 	   <isNull property="location.memo"/>
-   <isNotNull property="location.memo"/>
-
+			 	<isNull property="location.districtId">null</isNull><isNotNull property="location.districtId">#location.districtId#</isNotNull>,
+			 	<isNull property="location.regionId">null</isNull><isNotNull property="location.regionId">#location.regionId#</isNotNull>,
+			 	<isNull property="location.memo">null</isNull><isNotNull property="location.memo">#location.memo#</isNotNull>
 			 )
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 			UC_UserBabyInfo(UserID, PregnantState, BabyBirth, BabySex, IsPublic, AddDate, UpdateDate)
 		VALUES
-		   <iterate conjunction="," property="userBabyList">
-      <isNotEmpty property="userBabyList[].babyBirth"/>
-      <isEmpty property="userBabyList[].babyBirth"/>
-      <isNotEmpty property="userBabyList[].babySex"/>
-      <isEmpty property="userBabyList[].babySex"/>
-      <isNotEmpty property="userBabyList[].isPublic"/>
-      <isEmpty property="userBabyList[].isPublic"/>
-   </iterate>
-</insert>
+		<iterate conjunction="," property="userBabyList"><isNotEmpty property="userBabyList[].babyBirth">#userBabyList[].babyBirth#</isNotEmpty><isEmpty property="userBabyList[].babyBirth">'0001-01-01'</isEmpty><isNotEmpty property="userBabyList[].babySex">#userBabyList[].babySex#</isNotEmpty><isEmpty property="userBabyList[].babySex">-1</isEmpty><isNotEmpty property="userBabyList[].isPublic">#userBabyList[].isPublic#</isNotEmpty><isEmpty property="userBabyList[].isPublic">0</isEmpty></iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30042,15 +34623,19 @@
 		ON DUPLICATE KEY UPDATE TagName =
 		VALUES(TagName);
 
-		   <selectKey keyProperty="TagID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="TagID" resultClass="int">
+			select @@identity
+			as TagID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into UC_UserTag(UserID,TagID,AddTime,Updatetime)
 		VALUES
-		   <iterate conjunction="," property="userTagList"/>
-
+		<iterate conjunction="," property="userTagList">
+			(#userTagList[].userId#,#userTagList[].tagID#,now(),now())
+		</iterate>
 		ON DUPLICATE KEY UPDATE TagID = VALUES(TagID);
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -30066,8 +34651,10 @@
 			#userZip#,
 			#type#);
 		
-		   <selectKey keyProperty="makeCardId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="makeCardId" resultClass="int">
+            SELECT @@IDENTITY AS makeCardId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30081,8 +34668,10 @@
 			#userZip#,
 			#type#);
 		
-		   <selectKey keyProperty="makeCardId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="makeCardId" resultClass="int">
+            SELECT @@IDENTITY AS makeCardId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30108,8 +34697,11 @@
 			NOW(),
 			NOW()		
 			)
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS RecordID
+			</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30126,8 +34718,11 @@
 		#entity.chooseIndex#,
 		now(),
 		now())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30149,8 +34744,10 @@
    			#mobileNo#,
    			NOW(),
    			NOW())
-		   <selectKey keyProperty="userId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="userId" resultClass="int">
+        	SELECT @@IDENTITY AS userId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30158,8 +34755,10 @@
 			UC_Dairy (UserID,Title,Visit,Type,Status,Flag,Star,AddDate,UpdateDate,CityID)
 		VALUES
             (#userId#, #title#, 0, #type#, #status#, #flag#, #star#, #addDate#, #updateDate#, #cityId#)
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30167,8 +34766,10 @@
 			UC_DairyTopic (Name,EnName,ShowIndex,Status,Icon,Description,AddDate,UpdateDate)
 		VALUES
             (#name#, #enName#, #showIndex#, 0, #icon#, #description#, NOW(), NOW())
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30182,23 +34783,18 @@
 			 #bid#,
 			 #tid#,
 			 NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO
 			UC_UserBabyInfo(UserID, PregnantState, BabyBirth, BabySex, IsPublic, AddDate, UpdateDate)
 		VALUES
-		   <iterate conjunction="," property="userBabyList">
-      <isNotEmpty property="userBabyList[].babyBirth"/>
-      <isEmpty property="userBabyList[].babyBirth"/>
-      <isNotEmpty property="userBabyList[].babySex"/>
-      <isEmpty property="userBabyList[].babySex"/>
-      <isNotEmpty property="userBabyList[].isPublic"/>
-      <isEmpty property="userBabyList[].isPublic"/>
-   </iterate>
-</insert>
+		<iterate conjunction="," property="userBabyList"><isNotEmpty property="userBabyList[].babyBirth">#userBabyList[].babyBirth#</isNotEmpty><isEmpty property="userBabyList[].babyBirth">'0001-01-01'</isEmpty><isNotEmpty property="userBabyList[].babySex">#userBabyList[].babySex#</isNotEmpty><isEmpty property="userBabyList[].babySex">-1</isEmpty><isNotEmpty property="userBabyList[].isPublic">#userBabyList[].isPublic#</isNotEmpty><isEmpty property="userBabyList[].isPublic">0</isEmpty></iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 		
@@ -30218,8 +34814,10 @@
 				#toUserOprFlag#, 
 				NOW(), 
 				#ip#)
-		   <selectKey keyProperty="msgId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="msgId" resultClass="int">  
+			SELECT @@IDENTITY AS msgId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30227,8 +34825,10 @@
 			UC_UserSignIn(YearMonth,UserID,Count,Days,AddTime,UpdateTIme)
 		VALUES
 			(#userSignIn.yearMonth#,#userSignIn.userId#,#userSignIn.count#,#userSignIn.days#,#userSignIn.addTime#,#userSignIn.updateTime#);
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30236,8 +34836,10 @@
 			UC_DairyText (Content)
 		VALUES
             (#content#)
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30245,8 +34847,10 @@
 			UC_Flower(FromUserID,ToUserID,ActionType,MainBizID,MinorBizID,AddDate,UpdateDate)
 		VALUES
 			(#fromUserId#,#toUserId#,#actionType#,#mainBizId#,#minorBizId#,now(),now());
-		   <selectKey keyProperty="FlowerID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="FlowerID" resultClass="int">
+			SELECT @@IDENTITY AS flowerID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30260,8 +34864,10 @@
 			 #bid#,
 			 #tid#,
 			 NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30283,8 +34889,10 @@
    			#mobileNo#,
    			NOW(),
    			NOW())
-		   <selectKey keyProperty="userId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="userId" resultClass="int">
+        	SELECT @@IDENTITY AS userId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30294,27 +34902,19 @@
 			(
 				#location.userId#,
 				#location.cityId#,
-				   <isNull property="location.gLat"/>
-   <isNotNull property="location.gLat"/>
-,
-				   <isNull property="location.gLng"/>
-   <isNotNull property="location.gLng"/>
-,
+				<isNull property="location.gLat">null</isNull><isNotNull property="location.gLat">#location.gLat#</isNotNull>,
+				<isNull property="location.gLng">null</isNull><isNotNull property="location.gLng">#location.gLng#</isNotNull>,
 				NOW(),
 				NOW(),
 				#location.locationType#,
-			 	   <isNull property="location.districtId"/>
-   <isNotNull property="location.districtId"/>
-,
-			 	   <isNull property="location.regionId"/>
-   <isNotNull property="location.regionId"/>
-,
-			 	   <isNull property="location.memo"/>
-   <isNotNull property="location.memo"/>
-
+			 	<isNull property="location.districtId">null</isNull><isNotNull property="location.districtId">#location.districtId#</isNotNull>,
+			 	<isNull property="location.regionId">null</isNull><isNotNull property="location.regionId">#location.regionId#</isNotNull>,
+			 	<isNull property="location.memo">null</isNull><isNotNull property="location.memo">#location.memo#</isNotNull>
 			 )
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30331,16 +34931,30 @@
     		AddDate, 
     		UpdateDate)
 		VALUES
-		   <iterate conjunction="," property="sections"/>
-</insert>
+		<iterate conjunction="," property="sections">  
+            (#sections[].userId#,
+			#sections[].dairyId#,
+			#sections[].sectionIndex#,
+			#sections[].sectionType#,
+			#sections[].flag#,
+			#sections[].bizType#,
+			#sections[].bizId#,
+			#sections[].detail#,
+			#sections[].addDate#,
+			#sections[].updateDate#)
+   	 	</iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO 
 			UC_UserActivityOrder (userId, type, name, addDate ,indexNum)
 		VALUES ( #userId#, #type#, #name#, now(), #indexNum#)
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30359,8 +34973,11 @@
 	        NOW(),
 	        NOW(),
 	        0)
-	       <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30368,8 +34985,10 @@
 			UC_DairyText (Content)
 		VALUES
             (#content#)
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30379,27 +34998,19 @@
 			(
 				#location.userId#,
 				#location.cityId#,
-				   <isNull property="location.gLat"/>
-   <isNotNull property="location.gLat"/>
-,
-				   <isNull property="location.gLng"/>
-   <isNotNull property="location.gLng"/>
-,
+				<isNull property="location.gLat">null</isNull><isNotNull property="location.gLat">#location.gLat#</isNotNull>,
+				<isNull property="location.gLng">null</isNull><isNotNull property="location.gLng">#location.gLng#</isNotNull>,
 				NOW(),
 				NOW(),
 				#location.locationType#,
-			 	   <isNull property="location.districtId"/>
-   <isNotNull property="location.districtId"/>
-,
-			 	   <isNull property="location.regionId"/>
-   <isNotNull property="location.regionId"/>
-,
-			 	   <isNull property="location.memo"/>
-   <isNotNull property="location.memo"/>
-
+			 	<isNull property="location.districtId">null</isNull><isNotNull property="location.districtId">#location.districtId#</isNotNull>,
+			 	<isNull property="location.regionId">null</isNull><isNotNull property="location.regionId">#location.regionId#</isNotNull>,
+			 	<isNull property="location.memo">null</isNull><isNotNull property="location.memo">#location.memo#</isNotNull>
 			 )
-		   <selectKey keyProperty="id" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="java.lang.Integer">
+			SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30407,8 +35018,10 @@
 			UC_DairyList (UserID,Title,Visit,Status,AddDate,UpdateDate)
 		VALUES
             (#userId#, #title#, 0, #status#, now(), now())
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30420,8 +35033,14 @@
 			AddDate,
 			UpdateDate)
 		VALUES
-		   <iterate conjunction="," property="dairyPics"/>
-</insert>
+		<iterate conjunction="," property="dairyPics">  
+            (#dairyPics[].picId#,
+            #dairyPics[].userId#,
+			#dairyPics[].desc#,
+			#dairyPics[].addDate#,
+			#dairyPics[].updateDate#)
+   	 	</iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30429,8 +35048,10 @@
           UC_DairyTag (Name, AddDate)
         VALUES
           (#tagName#, now())
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS id
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30440,15 +35061,19 @@
 		ON DUPLICATE KEY UPDATE TagName =
 		VALUES(TagName);
 
-		   <selectKey keyProperty="TagID" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="TagID" resultClass="int">
+			select @@identity
+			as TagID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		insert into UC_UserTag(UserID,TagID,AddTime,Updatetime)
 		VALUES
-		   <iterate conjunction="," property="userTagList"/>
-
+		<iterate conjunction="," property="userTagList">
+			(#userTagList[].userId#,#userTagList[].tagID#,now(),now())
+		</iterate>
 		ON DUPLICATE KEY UPDATE TagID = VALUES(TagID);
 	</insert>
 <?xml version="1.0" encoding="utf-8"?>
@@ -30458,8 +35083,10 @@
 			UC_Dairy (UserID,Title,Visit,Type,Status,Flag,Star,AddDate,UpdateDate,CityID)
 		VALUES
             (#userId#, #title#, 0, #type#, #status#, #flag#, #star#, #addDate#, #updateDate#, #cityId#)
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30467,8 +35094,10 @@
 			UC_DairyList (UserID,Title,Visit,Status,AddDate,UpdateDate)
 		VALUES
             (#userId#, #title#, 0, #status#, now(), now())
-   		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+   		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30485,16 +35114,29 @@
     		AddDate, 
     		UpdateDate)
 		VALUES
-		   <iterate conjunction="," property="sections"/>
-</insert>
+		<iterate conjunction="," property="sections">  
+            (#sections[].userId#,
+			#sections[].dairyId#,
+			#sections[].sectionIndex#,
+			#sections[].sectionType#,
+			#sections[].flag#,
+			#sections[].bizType#,
+			#sections[].bizId#,
+			#sections[].detail#,
+			#sections[].addDate#,
+			#sections[].updateDate#)
+   	 	</iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
         INSERT INTO
         UC_DairyTagRecord (DairyID, TagID, AddDate)
         VALUES
-           <iterate conjunction="," property="tagIds"/>
-</insert>
+        <iterate conjunction="," property="tagIds">
+            (#dairyId# , #tagIds[]# ,now())
+        </iterate>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30506,9 +35148,7 @@
 			 #phone#,
 			 #zip#,
 			 #addressee#,
-			    <isNotNull prepend="" property="phoneNum"/>
-   <isNull prepend="" property="phoneNum"/>
-
+			 <isNotNull prepend="" property="phoneNum">#phoneNum#,</isNotNull><isNull prepend="" property="phoneNum">'',</isNull>
 			 #isDefault#,
 			 NOW(),
 			 NOW())
@@ -30524,14 +35164,14 @@
 			 #phone#,
 			 #zip#,
 			 #addressee#,
-			    <isNotNull prepend="" property="phoneNum"/>
-   <isNull prepend="" property="phoneNum"/>
-
+			 <isNotNull prepend="" property="phoneNum">#phoneNum#,</isNotNull><isNull prepend="" property="phoneNum">'',</isNull>
 			 #isDefault#,
 			 NOW(),
 			 NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30543,24 +35183,32 @@
 			 #phone#,
 			 #zip#,
 			 #addressee#,
-			    <isNotNull prepend="" property="phoneNum"/>
-   <isNull prepend="" property="phoneNum"/>
-
+			 <isNotNull prepend="" property="phoneNum">#phoneNum#,</isNotNull><isNull prepend="" property="phoneNum">'',</isNull>
 			 #isDefault#,
 			 #province#,
 			 #city#,
 			 NOW(),
 			 NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO 
     		UC_DairyRecommend(CityID,DairyID,UserID,PicID,DairyDate,AddDate,UpdateDate)
     	VALUES
-    		   <iterate conjunction="," property="recDairys"/>
-</insert>
+    		<iterate conjunction="," property="recDairys">  
+	            (#recDairys[].cityId#,
+				#recDairys[].dairyId#,
+				#recDairys[].userId#,
+				#recDairys[].picId#,
+				#recDairys[].dairyDate#,
+				NOW(),
+				NOW())
+	   	 	</iterate> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30572,9 +35220,7 @@
 			 #phone#,
 			 #zip#,
 			 #addressee#,
-			    <isNotNull prepend="" property="phoneNum"/>
-   <isNull prepend="" property="phoneNum"/>
-
+			 <isNotNull prepend="" property="phoneNum">#phoneNum#,</isNotNull><isNull prepend="" property="phoneNum">'',</isNull>
 			 #isDefault#,
 			 NOW(),
 			 NOW())
@@ -30590,14 +35236,14 @@
 			 #phone#,
 			 #zip#,
 			 #addressee#,
-			    <isNotNull prepend="" property="phoneNum"/>
-   <isNull prepend="" property="phoneNum"/>
-
+			 <isNotNull prepend="" property="phoneNum">#phoneNum#,</isNotNull><isNull prepend="" property="phoneNum">'',</isNull>
 			 #isDefault#,
 			 NOW(),
 			 NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30609,16 +35255,16 @@
 			 #phone#,
 			 #zip#,
 			 #addressee#,
-			    <isNotNull prepend="" property="phoneNum"/>
-   <isNull prepend="" property="phoneNum"/>
-
+			 <isNotNull prepend="" property="phoneNum">#phoneNum#,</isNotNull><isNull prepend="" property="phoneNum">'',</isNull>
 			 #isDefault#,
 			 #province#,
 			 #city#,
 			 NOW(),
 			 NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30626,16 +35272,29 @@
 			UC_UserSignIn(YearMonth,UserID,Count,Days,AddTime,UpdateTIme)
 		VALUES
 			(#userSignIn.yearMonth#,#userSignIn.userId#,#userSignIn.count#,#userSignIn.days#,#userSignIn.addTime#,#userSignIn.updateTime#);
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
     	INSERT INTO 
     		UC_DairyRecommend(CityID,SecondCategoryID,DairyID,UserID,PicID,ReviewWord,PicCount,DairyDate,AddDate,UpdateDate)
     	VALUES
-    		   <iterate conjunction="," property="recDairys"/>
-</insert>
+    		<iterate conjunction="," property="recDairys">  
+	            (#recDairys[].cityId#,
+	            #recDairys[].secondCategoryId#,
+				#recDairys[].dairyId#,
+				#recDairys[].userId#,
+				#recDairys[].picId#,
+				#recDairys[].reviewWord#,
+				#recDairys[].picCount#,
+				#recDairys[].dairyDate#,
+				NOW(),
+				NOW())
+	   	 	</iterate> 
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30662,8 +35321,10 @@
 				#cardLogStatus#,
 				#lastPerson#,
 				#comments#)				
-		   <selectKey keyProperty="cardLogId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="cardLogId" resultClass="int">
+            SELECT @@IDENTITY AS cardLogId
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30679,8 +35340,11 @@
 		#cValue#,
 		now(),
 		now())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS Id
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30690,16 +35354,23 @@
              UserID,
              ADDDATE)
 		VALUES 
-		   <iterate conjunction="," property="cityAwards"/>
-</insert>
+		<iterate conjunction="," property="cityAwards">
+			(#cityAwards[].cityId#,
+	        #cityAwards[].yymm#,
+	        #cityAwards[].userId#,
+	        NOW())
+		</iterate>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 		INSERT INTO 
 			UC_UserNotice(UserID,ManaScore,UserPower,SendTimes,AddDate,UpdateDate)
 		VALUES(#userId#,#manaScore#,#userPower#,#sendTimes#,NOW(),NOW());
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 		
@@ -30719,8 +35390,10 @@
 				#toUserOprFlag#, 
 				NOW(), 
 				#ip#)
-		   <selectKey keyProperty="msgId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="msgId" resultClass="int">  
+			SELECT @@IDENTITY AS msgId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30742,8 +35415,10 @@
    			#mobileNo#,
    			NOW(),
    			NOW())
-		   <selectKey keyProperty="userId" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="userId" resultClass="int">
+        	SELECT @@IDENTITY AS userId
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30755,8 +35430,14 @@
 			AddDate,
 			UpdateDate)
 		VALUES
-		   <iterate conjunction="," property="dairyPics"/>
-</insert>
+		<iterate conjunction="," property="dairyPics">  
+            (#dairyPics[].picId#,
+            #dairyPics[].userId#,
+			#dairyPics[].desc#,
+			#dairyPics[].addDate#,
+			#dairyPics[].updateDate#)
+   	 	</iterate>  
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30776,8 +35457,11 @@
 	        NOW(),
 	        NOW(),
 	        NOW())
-	       <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+	    <selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30802,8 +35486,10 @@
 			#album.description#,
 			#album.addTime#,
 			#album.updateTime#,0);
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID 
+   			</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30828,8 +35514,10 @@
 			#album.description#,
 			#album.addTime#,
 			#album.updateTime#,0);
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID 
+   			</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30837,8 +35525,10 @@
 			(Email, CCEmails, TYPE, ADDTIME)
 		VALUES
 			(#email#, #ccList#, #type#,NOW());
-		   <selectKey keyProperty="emailId" resultClass="java.lang.Integer"/>
-</insert>
+		<selectKey keyProperty="emailId" resultClass="java.lang.Integer">     
+        	SELECT @@IDENTITY AS emailId  
+        </selectKey>
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30868,8 +35558,11 @@
     		 #jobMonitor.itemsDownloadedCount#,
     		 NOW(), 
     		 NOW())
-    	   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+    	<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30894,8 +35587,10 @@
 			#album.description#,
 			#album.addTime#,
 			#album.updateTime#,0);
-			   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+			<selectKey keyProperty="id" resultClass="int"> 
+   			SELECT @@IDENTITY AS ID 
+   			</selectKey> 
+	</insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30927,8 +35622,10 @@
             NOW(),
             NOW()
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -30972,8 +35669,11 @@
 		#jobConfig.author#,
 		NOW(), 
 		NOW())
-		   <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT @@IDENTITY
+			AS ID
+		</selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -31011,8 +35711,11 @@
             #weddingHotelHall.capacityMax#,
             #weddingHotelHall.remark#
         )
-           <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+        <selectKey keyProperty="id" resultClass="int">
+            SELECT @@IDENTITY
+            AS ID
+        </selectKey>
+    </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
@@ -31030,16 +35733,25 @@
           NOW(),
           NOW()
        )
-          <selectKey keyProperty="id" resultClass="int"/>
-</insert>
+       <selectKey keyProperty="id" resultClass="int">
+           SELECT @@IDENTITY
+           AS ID
+       </selectKey>
+   </insert>
 <?xml version="1.0" encoding="utf-8"?>
 <insert>
 
 	    INSERT INTO $table$
 	    	(
-	    	   <iterate conjunction="," property="cols"/>
-
+	    	<iterate conjunction="," property="cols">
+    			$cols[]$
+    		</iterate>
 	    	)
     		VALUES
-    		   <iterate conjunction="," property="vals"/>
-</insert>
+    		<iterate conjunction="," property="vals">
+    			(#vals[].DealID#, 
+    			#vals[].Title#,
+    			) 
+    		</iterate>
+    						
+    </insert>
