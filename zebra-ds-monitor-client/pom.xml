@@ -159,5 +159,10 @@
 			<version>1.0.b2</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.dianping.zebra</groupId>
+			<artifactId>zebra-api</artifactId>
+			<version>2.4.9-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>
