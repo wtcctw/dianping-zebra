@@ -35,6 +35,8 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	public SingleDataSourceC3P0Adapter(String id) {
 		config.setId(id);// todo:resolve config from lion
 		config.setActive(true);
+		config.setCanRead(true);
+		config.setCanWrite(true);
 	}
 
 	private void destoryInnerDs() {
