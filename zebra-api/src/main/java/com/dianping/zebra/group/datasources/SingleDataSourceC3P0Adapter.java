@@ -108,7 +108,7 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	}
 
 	private void refreshUserAndPassword() {
-		Transaction t = Cat.newTransaction("DAL", "Adapter-SingleDataSource-RefreshUser");
+		Transaction t = Cat.newTransaction("DAL.Adapter", "RefreshUser");
 		config.setUser(atomicRefresh.getNewUser());
 		config.setPassword(atomicRefresh.getNewPassword());
 		atomicRefresh.reset();
