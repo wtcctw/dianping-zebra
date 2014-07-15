@@ -29,11 +29,15 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	private volatile DataSource innerDs;
 
 	public SingleDataSourceC3P0Adapter() {
-		this("db1");
+		config.setId("db1");
+		config.setActive(true);
+		config.setCanRead(true);
+		config.setCanWrite(true);
 	}
 
 	public SingleDataSourceC3P0Adapter(String id) {
-		config.setId(id);// todo:resolve config from lion
+		// todo: resolve from lion
+		config.setId(id);
 		config.setActive(true);
 		config.setCanRead(true);
 		config.setCanWrite(true);
