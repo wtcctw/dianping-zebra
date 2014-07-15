@@ -94,11 +94,11 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	}
 
 	private void refresh() {
-		Transaction t = Cat.newTransaction("DAL.Adapter", "Refresh");
-
 		if (innerDs == null) {
 			return;
 		}
+
+		Transaction t = Cat.newTransaction("DAL.Adapter", "Refresh");
 
 		innerDs = initInnerDs();
 		destoryInnerDs();

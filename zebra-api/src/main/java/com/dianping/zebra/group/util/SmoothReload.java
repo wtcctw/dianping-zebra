@@ -38,7 +38,7 @@ public class SmoothReload {
 		if (maxMillisecondInterval <= 0) {
 			return;
 		}
-		while (startMillisecond + randomInterval < System.currentTimeMillis()) {
+		while (startMillisecond + randomInterval > System.currentTimeMillis()) {
 			Thread.yield();
 		}
 		return;
