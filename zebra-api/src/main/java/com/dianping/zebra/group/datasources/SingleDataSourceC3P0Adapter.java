@@ -43,6 +43,10 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		config.setCanWrite(true);
 	}
 
+	public void close() {
+		destoryInnerDs();
+	}
+
 	private void destoryInnerDs() {
 		Transaction t = Cat.newTransaction("DAL.Adapter", "Destory");
 		SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(config.getId(), null);
