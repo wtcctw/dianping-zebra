@@ -255,6 +255,12 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	}
 
 	public synchronized void setPassword(String password) {
+		// innerDs 未加载的时候不需要 reload 逻辑
+		if (innerDs == null) {
+			config.setPassword(password);
+			return;
+		}
+
 		if (atomicRefresh.setPassword(password)) {
 			refreshUserAndPassword();
 		}
@@ -307,6 +313,12 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	}
 
 	public synchronized void setUser(String user) {
+		// innerDs 未加载的时候不需要 reload 逻辑
+		if (innerDs == null) {
+			config.setUser(user);
+			return;
+		}
+
 		if (atomicRefresh.setUser(user)) {
 			refreshUserAndPassword();
 		}
