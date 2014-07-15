@@ -13,6 +13,7 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
 
@@ -77,6 +78,12 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	private DataSource initInnerDs() {
 		Transaction t = Cat.newTransaction("DAL.Adapter", "Init");
 		try {
+			try {
+				Class.forName(config.getDriverClass());
+			} catch (ClassNotFoundException ex) {
+				throw new DalException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
+			}
+
 			DataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
 			t.setStatus(Message.SUCCESS);
 			return ds;
