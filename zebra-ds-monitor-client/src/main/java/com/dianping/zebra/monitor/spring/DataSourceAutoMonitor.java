@@ -77,15 +77,16 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 
 	private void autoReplaceWithMonitorableDataSource(String beanName, BeanDefinition dataSourceDefinition,
 	      Class<?> dataSourceClazz, DefaultListableBeanFactory listableBeanFactory) {
-		listableBeanFactory.registerBeanDefinition(beanName, createMonitorableBeanDefinition(dataSourceDefinition));
+		listableBeanFactory.registerBeanDefinition(beanName,
+		      createMonitorableBeanDefinition(beanName, dataSourceDefinition));
 		// zebra需做特殊处理，一些inner datasource可能作为nested bean方式定义，也需要wrapper
 		if (isZebraDataSource(dataSourceClazz)) {
-			replaceInnerDataSourceInZebra(dataSourceDefinition);
+			replaceInnerDataSourceInZebra(beanName, dataSourceDefinition);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private void replaceInnerDataSourceInZebra(BeanDefinition zebraDataSourceDefinition) {
+	private void replaceInnerDataSourceInZebra(String beanName, BeanDefinition zebraDataSourceDefinition) {
 		MutablePropertyValues propertyValues = zebraDataSourceDefinition.getPropertyValues();
 		PropertyValue dataSourcePoolVal = propertyValues.getPropertyValue("dataSourcePool");
 		if (dataSourcePoolVal == null) {
@@ -101,15 +102,16 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 			if (innerDSDefVal instanceof BeanDefinitionHolder) {
 				BeanDefinitionHolder innerDSDefHolder = (BeanDefinitionHolder) innerDSDefVal;
 				BeanDefinition innerDSDefinition = innerDSDefHolder.getBeanDefinition();
-				innerDSDefEntry.setValue(new BeanDefinitionHolder(createMonitorableBeanDefinition(innerDSDefinition),
-				      innerDSDefHolder.getBeanName(), innerDSDefHolder.getAliases()));
+				innerDSDefEntry.setValue(new BeanDefinitionHolder(createMonitorableBeanDefinition(beanName,
+				      innerDSDefinition), innerDSDefHolder.getBeanName(), innerDSDefHolder.getAliases()));
 			}
 		}
 	}
 
-	private GenericBeanDefinition createMonitorableBeanDefinition(BeanDefinition dataSourceDefinition) {
+	private GenericBeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition) {
 		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			dataSourceDefinition.setBeanClassName(SingleDataSourceC3P0Adapter.class.getName());
+			dataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanName);
 			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0");
 		} else {
 			Cat.logEvent("DAL.BeanProcessor", "NotC3P0-" + dataSourceDefinition.getBeanClassName());
