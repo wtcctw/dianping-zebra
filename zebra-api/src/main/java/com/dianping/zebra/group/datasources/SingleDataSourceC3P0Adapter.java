@@ -64,18 +64,11 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 	}
 
 	public void close() {
-		destoryInnerDs();
-	}
-
-	private void destoryInnerDs() {
 		destoryInnerDs(innerDs);
 	}
 
 	private void destoryInnerDs(SingleDataSource dataSource) {
-		Transaction t = Cat.newTransaction("DAL.Adapter", "Destory");
 		SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(dataSource);
-		t.setStatus(Message.SUCCESS);
-		t.complete();
 	}
 
 	@Override
