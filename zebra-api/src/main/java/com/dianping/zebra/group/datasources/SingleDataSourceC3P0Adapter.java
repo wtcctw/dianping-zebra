@@ -37,32 +37,6 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		config.setCanWrite(true);
 	}
 
-	private DataSourceConfig cloneConfig() {
-		DataSourceConfig newConfig = new DataSourceConfig();
-
-		newConfig.setId(config.getId());
-		newConfig.setActive(config.getActive());
-		newConfig.setCanRead(config.getCanRead());
-		newConfig.setCanWrite(config.getCanWrite());
-		newConfig.setMinPoolSize(config.getMinPoolSize());
-		newConfig.setMaxPoolSize(config.getMaxPoolSize());
-		newConfig.setInitialPoolSize(config.getInitialPoolSize());
-		newConfig.setUser(config.getUser());
-		newConfig.setPassword(config.getPassword());
-		newConfig.setJdbcUrl(config.getJdbcUrl());
-		newConfig.setDriverClass(config.getDriverClass());
-		newConfig.setCheckoutTimeout(config.getCheckoutTimeout());
-
-		for (Any any : config.getProperties()) {
-			Any newAny = new Any();
-			newAny.setName(any.getName());
-			newAny.setValue(any.getValue());
-			newConfig.getProperties().add(newAny);
-		}
-
-		return newConfig;
-	}
-
 	public void close() {
 		destoryInnerDs(innerDs);
 	}
@@ -101,7 +75,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 				throw new DalException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
 			}
 
-			SingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(cloneConfig());
+			SingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
 			t.setStatus(Message.SUCCESS);
 			return ds;
 		} catch (Exception e) {
