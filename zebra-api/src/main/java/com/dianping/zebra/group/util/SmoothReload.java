@@ -39,7 +39,11 @@ public class SmoothReload {
 			return;
 		}
 		while (startMillisecond + randomInterval > System.currentTimeMillis()) {
-			Thread.yield();
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException ignore) {
+				return;
+			}
 		}
 		return;
 	}
