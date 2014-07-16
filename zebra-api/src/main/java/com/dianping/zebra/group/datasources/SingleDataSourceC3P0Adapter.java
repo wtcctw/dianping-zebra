@@ -12,7 +12,6 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
@@ -44,7 +43,13 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 	}
 
 	private void destoryInnerDs(SingleDataSource dataSource) {
-		SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(dataSource);
+		Transaction t = Cat.newTransaction("DAL", "Adapter.Destory");
+		try {
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(dataSource);
+			t.setStatus(Message.SUCCESS);
+		} finally {
+			t.complete();
+		}
 	}
 
 	@Override
@@ -57,7 +62,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		return getInnerDs().getConnection(username, password);
 	}
 
-	private DataSource getInnerDs() {
+	private DataSource getInnerDs() throws SQLException {
 		if (innerDs == null) {
 			synchronized (this) {
 				if (innerDs == null) {
@@ -68,44 +73,48 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		return innerDs;
 	}
 
-	private SingleDataSource initInnerDs() {
-		Transaction t = Cat.newTransaction("DAL.Adapter", "Init");
-		try {
-			try {
-				Class.forName(config.getDriverClass());
-			} catch (ClassNotFoundException ex) {
-				throw new DalException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
-			}
+	private SingleDataSource initInnerDs() throws SQLException {
+		Transaction t = Cat.newTransaction("DAL", "Adapter.Init");
 
-			SingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
+		try {
+			Class.forName(config.getDriverClass());
+		} catch (ClassNotFoundException ex) {
+			t.setStatus(ex);
+			t.complete();
+			throw new SQLException("Cannot find mysql driver class : " + config.getDriverClass(), ex);
+		}
+
+		SingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
+		t.setStatus(Message.SUCCESS);
+		t.complete();
+		return ds;
+	}
+
+	private void refresh(String propertyToChange) {
+		if (innerDs == null) {
+			return;
+		}
+		
+		Transaction t = Cat.newTransaction("DAL", "Adapter.Refresh");
+		Cat.logEvent("DAL.Adapter", "Refresh-" + propertyToChange);
+		try {
+			refresh();
 			t.setStatus(Message.SUCCESS);
-			return ds;
 		} catch (Exception e) {
 			Cat.logError(e);
 			t.setStatus(e);
-			return null;
 		} finally {
 			t.complete();
 		}
 	}
 
-	private void refresh() {
-		if (innerDs == null) {
-			return;
-		}
-
-		Transaction t = Cat.newTransaction("DAL.Adapter", "Refresh");
-
+	private void refresh() throws SQLException {
 		SingleDataSource tempDs = innerDs;
 		innerDs = initInnerDs();
 		destoryInnerDs(tempDs);
-
-		t.setStatus(Message.SUCCESS);
-		t.complete();
 	}
 
 	private void refreshUserAndPassword() {
-		Transaction t = Cat.newTransaction("DAL.Adapter", "RefreshUser");
 		config.setUser(atomicRefresh.getNewUser());
 		config.setPassword(atomicRefresh.getNewPassword());
 		atomicRefresh.reset();
@@ -114,9 +123,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		SmoothReload sr = new SmoothReload();
 		sr.waitForReload();
 
-		refresh();
-		t.setStatus(Message.SUCCESS);
-		t.complete();
+		refresh("user-password");
 	}
 
 	public synchronized void setAcquireIncrement(int acquireIncrement) {
@@ -145,7 +152,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 	public synchronized void setCheckoutTimeout(int checkoutTimeout) {
 		config.setCheckoutTimeout(checkoutTimeout);
-		refresh();
+		refresh("checkoutTimeout");
 	}
 
 	public synchronized void setConnectionCustomizerClassName(String connectionCustomizerClassName) {
@@ -170,7 +177,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 	public synchronized void setDriverClass(String driverClass) {
 		config.setDriverClass(driverClass);
-		refresh();
+		refresh("driverClass");
 	}
 
 	public synchronized void setFactoryClassLocation(String factoryClassLocation) {
@@ -187,12 +194,12 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 	public synchronized void setInitialPoolSize(int initialPoolSize) {
 		config.setInitialPoolSize(initialPoolSize);
-		refresh();
+		refresh("initialPoolSize");
 	}
 
 	public synchronized void setJdbcUrl(String jdbcUrl) {
 		config.setJdbcUrl(jdbcUrl);
-		refresh();
+		refresh("jdbcUrl");
 	}
 
 	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
@@ -213,7 +220,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 	public synchronized void setMaxPoolSize(int maxPoolSize) {
 		config.setMaxPoolSize(maxPoolSize);
-		refresh();
+		refresh("maxPoolSize");
 	}
 
 	public synchronized void setMaxStatements(int maxStatements) {
@@ -226,7 +233,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 	public synchronized void setMinPoolSize(int minPoolSize) {
 		config.setMinPoolSize(minPoolSize);
-		refresh();
+		refresh("minPoolSize");
 	}
 
 	public synchronized void setNumHelperThreads(int numHelperThreads) {
@@ -281,7 +288,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		any.setName(name);
 		any.setValue(value);
 
-		refresh();
+		refresh("name");
 	}
 
 	public synchronized void setPropertyCycle(int propertyCycle) {

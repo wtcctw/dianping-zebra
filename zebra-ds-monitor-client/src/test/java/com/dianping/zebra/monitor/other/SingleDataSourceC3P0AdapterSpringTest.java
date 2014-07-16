@@ -24,7 +24,7 @@ public class SingleDataSourceC3P0AdapterSpringTest {
 	private SingleDataSourceC3P0Adapter dsTest;
 
 	@Test
-	 @Ignore
+	@Ignore
 	public void test_jdbc() throws SQLException, PropertyVetoException, InterruptedException {
 		startThread();
 		startThread();
@@ -46,6 +46,9 @@ public class SingleDataSourceC3P0AdapterSpringTest {
 
 		Thread.sleep(5000);
 		dsTest.setMaxPoolSize(5);
+		Thread.sleep(5000);
+
+		dsTest.setDriverClass("asdsadasdasda.asdadas");
 
 		Thread.sleep(1000000);
 	}
