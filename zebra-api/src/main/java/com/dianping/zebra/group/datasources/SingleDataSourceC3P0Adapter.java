@@ -246,7 +246,8 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 			return;
 		}
 
-		if (atomicRefresh.setPassword(password)) {
+		atomicRefresh.setPassword(password);
+		if (atomicRefresh.needToRefresh()) {
 			refreshUserAndPassword();
 		}
 	}
@@ -304,7 +305,8 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 			return;
 		}
 
-		if (atomicRefresh.setUser(user)) {
+		atomicRefresh.setUser(user);
+		if (atomicRefresh.needToRefresh()) {
 			refreshUserAndPassword();
 		}
 	}
@@ -334,7 +336,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 			return newUser;
 		}
 
-		private boolean needToRefresh() {
+		public boolean needToRefresh() {
 			// 帐号和密码都改了，就需要 refresh
 			return (!StringUtils.equals(newUser, oldUser)) && (!StringUtils.equals(newPassword, oldPassword));
 		}
@@ -344,14 +346,12 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 			oldUser = newUser;
 		}
 
-		public boolean setPassword(String password) {
+		public void setPassword(String password) {
 			this.newPassword = password;
-			return needToRefresh();
 		}
 
-		public boolean setUser(String user) {
+		public void setUser(String user) {
 			this.newUser = user;
-			return needToRefresh();
 		}
 	}
 }
