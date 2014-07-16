@@ -28,32 +28,44 @@ public class SingleDataSourceC3P0AdapterTest {
 	public void test_atomich_refresh() {
 		SingleDataSourceC3P0Adapter.AtomicRefresh ar = new SingleDataSourceC3P0Adapter.AtomicRefresh();
 
-		Assert.assertFalse(ar.setUser("user"));
-		Assert.assertFalse(ar.setUser("user1"));
+		ar.setUser("user");
+		Assert.assertFalse(ar.needToRefresh());
+		ar.setUser("user1");
+		Assert.assertFalse(ar.needToRefresh());
 
-		Assert.assertTrue(ar.setPassword("password"));
+		ar.setPassword("password");
+		Assert.assertTrue(ar.needToRefresh());
 
 		Assert.assertEquals("user1", ar.getNewUser());
 		Assert.assertEquals("password", ar.getNewPassword());
 
 		ar.reset();
 
-		Assert.assertFalse(ar.setPassword("password3"));
-		Assert.assertTrue(ar.setUser("user3"));
+		ar.setPassword("password3");
+		Assert.assertFalse(ar.needToRefresh());
+		ar.setUser("user3");
+		Assert.assertTrue(ar.needToRefresh());
 	}
 
 	@Test
 	public void test_atomich_refresh_with_null() {
 		SingleDataSourceC3P0Adapter.AtomicRefresh ar = new SingleDataSourceC3P0Adapter.AtomicRefresh();
-		Assert.assertFalse(ar.setUser(null));
-		Assert.assertFalse(ar.setPassword(null));
-		Assert.assertFalse(ar.setUser("user"));
-		Assert.assertTrue(ar.setPassword("password"));
+		ar.setUser(null);
+		Assert.assertFalse(ar.needToRefresh());
+		ar.setPassword(null);
+		Assert.assertFalse(ar.needToRefresh());
+		ar.setUser("user");
+		Assert.assertFalse(ar.needToRefresh());
+		ar.setPassword("password");
+		Assert.assertTrue(ar.needToRefresh());
 
 		ar.reset();
 
-		Assert.assertFalse(ar.setUser(null));
-		Assert.assertTrue(ar.setPassword(null));
+		ar.setUser(null);
+		Assert.assertFalse(ar.needToRefresh());
+
+		ar.setPassword(null);
+		Assert.assertTrue(ar.needToRefresh());
 	}
 
 	@Test
