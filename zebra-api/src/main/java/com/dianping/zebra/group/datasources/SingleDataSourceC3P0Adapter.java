@@ -20,7 +20,9 @@ import com.dianping.zebra.group.util.StringUtils;
 /**
  * @author Dozer <br/>
  *         1.实现了自动 reload 机制。 <br/>
- *         2.实现了帐号密码原子修改，只改帐号或者密码不会触发重新加载流程，只有两个同时修改后，才会一次性触发重新加载。
+ *         2.实现了帐号密码原子修改，只改帐号或者密码不会触发重新加载流程，只有两个同时修改后，才会一次性触发重新加载。<br/>
+ *         3.并发策略：所有修改innerDs的地方都需要同步（set方法需要同步；init需要同步;refresh需要同步）。
+ * 
  */
 public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements DataSource {
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
@@ -37,7 +39,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		config.setCanWrite(true);
 	}
 
-	public void close() {
+	public synchronized void close() {
 		destoryInnerDs(innerDs);
 	}
 
@@ -87,7 +89,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		}
 	}
 
-	private synchronized void refresh() {
+	private void refresh() {
 		if (innerDs == null) {
 			return;
 		}
@@ -102,7 +104,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		t.complete();
 	}
 
-	private synchronized void refreshUserAndPassword() {
+	private void refreshUserAndPassword() {
 		Transaction t = Cat.newTransaction("DAL.Adapter", "RefreshUser");
 		config.setUser(atomicRefresh.getNewUser());
 		config.setPassword(atomicRefresh.getNewPassword());
@@ -117,125 +119,125 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		t.complete();
 	}
 
-	public void setAcquireIncrement(int acquireIncrement) {
+	public synchronized void setAcquireIncrement(int acquireIncrement) {
 		setProperty("acquireIncrement", String.valueOf(acquireIncrement));
 	}
 
-	public void setAcquireRetryAttempts(int acquireRetryAttempts) {
+	public synchronized void setAcquireRetryAttempts(int acquireRetryAttempts) {
 		setProperty("acquireRetryAttempts", String.valueOf(acquireRetryAttempts));
 	}
 
-	public void setAcquireRetryDelay(int acquireRetryDelay) {
+	public synchronized void setAcquireRetryDelay(int acquireRetryDelay) {
 		setProperty("acquireRetryDelay", String.valueOf(acquireRetryDelay));
 	}
 
-	public void setAutoCommitOnClose(boolean autoCommitOnClose) {
+	public synchronized void setAutoCommitOnClose(boolean autoCommitOnClose) {
 		setProperty("autoCommitOnClose", String.valueOf(autoCommitOnClose));
 	}
 
-	public void setAutomaticTestTable(String automaticTestTable) {
+	public synchronized void setAutomaticTestTable(String automaticTestTable) {
 		setProperty("automaticTestTable", automaticTestTable);
 	}
 
-	public void setBreakAfterAcquireFailure(boolean breakAfterAcquireFailure) {
+	public synchronized void setBreakAfterAcquireFailure(boolean breakAfterAcquireFailure) {
 		setProperty("breakAfterAcquireFailure", String.valueOf(breakAfterAcquireFailure));
 	}
 
-	public void setCheckoutTimeout(int checkoutTimeout) {
+	public synchronized void setCheckoutTimeout(int checkoutTimeout) {
 		config.setCheckoutTimeout(checkoutTimeout);
 		refresh();
 	}
 
-	public void setConnectionCustomizerClassName(String connectionCustomizerClassName) {
+	public synchronized void setConnectionCustomizerClassName(String connectionCustomizerClassName) {
 		setProperty("connectionCustomizerClassName", connectionCustomizerClassName);
 	}
 
-	public void setConnectionTesterClassName(String connectionTesterClassName) {
+	public synchronized void setConnectionTesterClassName(String connectionTesterClassName) {
 		setProperty("connectionTesterClassName", connectionTesterClassName);
 	}
 
-	public void setDataSourceName(String dataSourceName) {
+	public synchronized void setDataSourceName(String dataSourceName) {
 		setProperty("dataSourceName", dataSourceName);
 	}
 
-	public void setDebugUnreturnedConnectionStackTraces(boolean debugUnreturnedConnectionStackTraces) {
+	public synchronized void setDebugUnreturnedConnectionStackTraces(boolean debugUnreturnedConnectionStackTraces) {
 		setProperty("debugUnreturnedConnectionStackTraces", String.valueOf(debugUnreturnedConnectionStackTraces));
 	}
 
-	public void setDescription(String description) {
+	public synchronized void setDescription(String description) {
 		setProperty("description", description);
 	}
 
-	public void setDriverClass(String driverClass) {
+	public synchronized void setDriverClass(String driverClass) {
 		config.setDriverClass(driverClass);
 		refresh();
 	}
 
-	public void setFactoryClassLocation(String factoryClassLocation) {
+	public synchronized void setFactoryClassLocation(String factoryClassLocation) {
 		setProperty("factoryClassLocation", factoryClassLocation);
 	}
 
-	public void setForceIgnoreUnresolvedTransactions(boolean forceIgnoreUnresolvedTransactions) {
+	public synchronized void setForceIgnoreUnresolvedTransactions(boolean forceIgnoreUnresolvedTransactions) {
 		setProperty("forceIgnoreUnresolvedTransactions", String.valueOf(forceIgnoreUnresolvedTransactions));
 	}
 
-	public void setIdleConnectionTestPeriod(int idleConnectionTestPeriod) {
+	public synchronized void setIdleConnectionTestPeriod(int idleConnectionTestPeriod) {
 		setProperty("idleConnectionTestPeriod", String.valueOf(idleConnectionTestPeriod));
 	}
 
-	public void setInitialPoolSize(int initialPoolSize) {
+	public synchronized void setInitialPoolSize(int initialPoolSize) {
 		config.setInitialPoolSize(initialPoolSize);
 		refresh();
 	}
 
-	public void setJdbcUrl(String jdbcUrl) {
+	public synchronized void setJdbcUrl(String jdbcUrl) {
 		config.setJdbcUrl(jdbcUrl);
 		refresh();
 	}
 
-	public void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
+	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
 		setProperty("maxAdministrativeTaskTime", String.valueOf(maxAdministrativeTaskTime));
 	}
 
-	public void setMaxConnectionAge(int maxConnectionAge) {
+	public synchronized void setMaxConnectionAge(int maxConnectionAge) {
 		setProperty("maxConnectionAge", String.valueOf(maxConnectionAge));
 	}
 
-	public void setMaxIdleTime(int maxIdleTime) {
+	public synchronized void setMaxIdleTime(int maxIdleTime) {
 		setProperty("maxIdleTime", String.valueOf(maxIdleTime));
 	}
 
-	public void setMaxIdleTimeExcessConnections(int maxIdleTimeExcessConnections) {
+	public synchronized void setMaxIdleTimeExcessConnections(int maxIdleTimeExcessConnections) {
 		setProperty("maxIdleTimeExcessConnections", String.valueOf(maxIdleTimeExcessConnections));
 	}
 
-	public void setMaxPoolSize(int maxPoolSize) {
+	public synchronized void setMaxPoolSize(int maxPoolSize) {
 		config.setMaxPoolSize(maxPoolSize);
 		refresh();
 	}
 
-	public void setMaxStatements(int maxStatements) {
+	public synchronized void setMaxStatements(int maxStatements) {
 		setProperty("maxStatements", String.valueOf(maxStatements));
 	}
 
-	public void setMaxStatementsPerConnection(int maxStatementsPerConnection) {
+	public synchronized void setMaxStatementsPerConnection(int maxStatementsPerConnection) {
 		setProperty("maxStatementsPerConnection", String.valueOf(maxStatementsPerConnection));
 	}
 
-	public void setMinPoolSize(int minPoolSize) {
+	public synchronized void setMinPoolSize(int minPoolSize) {
 		config.setMinPoolSize(minPoolSize);
 		refresh();
 	}
 
-	public void setNumHelperThreads(int numHelperThreads) {
+	public synchronized void setNumHelperThreads(int numHelperThreads) {
 		setProperty("numHelperThreads", String.valueOf(numHelperThreads));
 	}
 
-	public void setOverrideDefaultPassword(String overrideDefaultPassword) {
+	public synchronized void setOverrideDefaultPassword(String overrideDefaultPassword) {
 		setProperty("overrideDefaultPassword", overrideDefaultPassword);
 	}
 
-	public void setOverrideDefaultUser(String overrideDefaultUser) {
+	public synchronized void setOverrideDefaultUser(String overrideDefaultUser) {
 		setProperty("overrideDefaultUser", overrideDefaultUser);
 	}
 
@@ -252,11 +254,11 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		}
 	}
 
-	public void setPreferredTestQuery(String preferredTestQuery) {
+	public synchronized void setPreferredTestQuery(String preferredTestQuery) {
 		setProperty("preferredTestQuery", preferredTestQuery);
 	}
 
-	public void setProperties(Properties properties) {
+	public synchronized void setProperties(Properties properties) {
 		for (Entry<Object, Object> item : properties.entrySet()) {
 			setProperty(String.valueOf(item.getKey().toString()), String.valueOf(item.getValue()));
 		}
@@ -282,19 +284,19 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		refresh();
 	}
 
-	public void setPropertyCycle(int propertyCycle) {
+	public synchronized void setPropertyCycle(int propertyCycle) {
 		setProperty("propertyCycle", String.valueOf(propertyCycle));
 	}
 
-	public void setTestConnectionOnCheckin(boolean testConnectionOnCheckin) {
+	public synchronized void setTestConnectionOnCheckin(boolean testConnectionOnCheckin) {
 		setProperty("testConnectionOnCheckin", String.valueOf(testConnectionOnCheckin));
 	}
 
-	public void setTestConnectionOnCheckout(boolean testConnectionOnCheckout) {
+	public synchronized void setTestConnectionOnCheckout(boolean testConnectionOnCheckout) {
 		setProperty("testConnectionOnCheckout", String.valueOf(testConnectionOnCheckout));
 	}
 
-	public void setUnreturnedConnectionTimeout(int unreturnedConnectionTimeout) {
+	public synchronized void setUnreturnedConnectionTimeout(int unreturnedConnectionTimeout) {
 		setProperty("unreturnedConnectionTimeout", String.valueOf(unreturnedConnectionTimeout));
 	}
 
@@ -311,15 +313,15 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		}
 	}
 
-	public void setUserOverridesAsString(String userOverridesAsString) {
+	public synchronized void setUserOverridesAsString(String userOverridesAsString) {
 		setProperty("userOverridesAsString", userOverridesAsString);
 	}
 
-	public void setUsesTraditionalReflectiveProxies(boolean usesTraditionalReflectiveProxies) {
+	public synchronized void setUsesTraditionalReflectiveProxies(boolean usesTraditionalReflectiveProxies) {
 		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
 	}
 
-	public static class AtomicRefresh {
+	static class AtomicRefresh {
 		private String newPassword;
 
 		private String newUser;
@@ -328,29 +330,29 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 		private String oldUser;
 
-		public String getNewPassword() {
+		public synchronized String getNewPassword() {
 			return newPassword;
 		}
 
-		public String getNewUser() {
+		public synchronized String getNewUser() {
 			return newUser;
 		}
 
-		public boolean needToRefresh() {
+		public synchronized boolean needToRefresh() {
 			// 帐号和密码都改了，就需要 refresh
 			return (!StringUtils.equals(newUser, oldUser)) && (!StringUtils.equals(newPassword, oldPassword));
 		}
 
-		public void reset() {
+		public synchronized void reset() {
 			oldPassword = newPassword;
 			oldUser = newUser;
 		}
 
-		public void setPassword(String password) {
+		public synchronized void setPassword(String password) {
 			this.newPassword = password;
 		}
 
-		public void setUser(String user) {
+		public synchronized void setUser(String user) {
 			this.newUser = user;
 		}
 	}
