@@ -112,9 +112,9 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			dataSourceDefinition.setBeanClassName(SingleDataSourceC3P0Adapter.class.getName());
 			dataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanName);
-			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0");
+			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0-" + beanName);
 		} else {
-			Cat.logEvent("DAL.BeanProcessor", "NotC3P0-" + dataSourceDefinition.getBeanClassName());
+			Cat.logEvent("DAL.BeanProcessor", "NotC3P0-" + beanName + "-" + dataSourceDefinition.getBeanClassName());
 		}
 
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
