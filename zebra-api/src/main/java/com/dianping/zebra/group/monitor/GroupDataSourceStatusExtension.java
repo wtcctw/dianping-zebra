@@ -8,11 +8,11 @@ import com.dianping.cat.status.StatusExtension;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.datasources.DataSourceState;
 
-public class DalStatusExtension implements StatusExtension {
+public class GroupDataSourceStatusExtension implements StatusExtension {
 
 	private GroupDataSourceMBean groupDataSourceBean;
 
-	public DalStatusExtension(GroupDataSourceMBean dataSource) {
+	public GroupDataSourceStatusExtension(GroupDataSourceMBean dataSource) {
 		this.groupDataSourceBean = dataSource;
 	}
 

@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.cat.Cat;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
@@ -37,7 +38,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		this.dsId = config.getId();
 		this.config = config;
 		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());
-		this.dataSource = initDataSources(config);
+		this.dataSource = initDataSource(config);
 	}
 
 	private void checkState() throws SQLException {
@@ -53,7 +54,10 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 				PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
 				if (poolBackedDataSource.getNumBusyConnections() == 0) {
 					logger.info("closing old datasource [" + this.dsId + "]");
+
 					poolBackedDataSource.close();
+
+					Cat.logEvent("DAL.Destory.End", this.dsId);
 					logger.info("old datasource [" + this.dsId + "] closed");
 					this.state = DataSourceState.CLOSED;
 				} else {
@@ -226,7 +230,13 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		return 0;
 	}
 
-	private DataSource initDataSources(DataSourceConfig value) {
+	private DataSource initDataSource(DataSourceConfig value) {
+		try {
+			Class.forName(config.getDriverClass());
+		} catch (ClassNotFoundException ex) {
+			throw new IllegalConfigException("Cannot find driver class : " + config.getDriverClass(), ex);
+		}
+
 		try {
 			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUser(),
 			      value.getPassword());
@@ -246,6 +256,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
 			      unPooledDataSource, props);
 
+			Cat.logEvent("DAL.DataSource.Created", value.getId());
 			logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
 			return pooledDataSource;

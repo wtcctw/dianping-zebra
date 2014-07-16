@@ -16,8 +16,8 @@
 </config>
 
 <!-- Lion -->
-<!-- ds.dianpingmobile.m1.write.jdbc.username = dpmobile_a -->
-<!-- ds.dianpingmobile.s1.read.jdbc.username = dpmobile_a_r -->
+<!-- ds.dianpingmobile-m1-write.jdbc.username = dpmobile_a -->
+<!-- ds.dianpingmobile-s1-read.jdbc.username = dpmobile_a_r -->
 <!-- groupds.group1 = (dianpingmobile-s1-read:1,dianpingmobile-s2-read:2),(dianpingmobile-m1-write) -->
 <!-- groupds.group2 = (dianpingmobile-s2-read,dianpingmobile-s2-read) -->
 

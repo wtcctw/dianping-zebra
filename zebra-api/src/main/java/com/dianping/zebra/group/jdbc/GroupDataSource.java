@@ -30,7 +30,7 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
-import com.dianping.zebra.group.monitor.DalStatusExtension;
+import com.dianping.zebra.group.monitor.GroupDataSourceStatusExtension;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
@@ -56,7 +56,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
-	private DalStatusExtension statusExtension;
+	private GroupDataSourceStatusExtension statusExtension;
 
 	public GroupDataSource() {
 	}
@@ -165,7 +165,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		this.initDataSources();
 		this.loadCustomizedReadWriteStrategy();
-		this.statusExtension = new DalStatusExtension(this);
+		this.statusExtension = new GroupDataSourceStatusExtension(this);
 		StatusExtensionRegister.getInstance().register(this.statusExtension);
 
 		logger.info("GroupDataSource successfully initialized.");

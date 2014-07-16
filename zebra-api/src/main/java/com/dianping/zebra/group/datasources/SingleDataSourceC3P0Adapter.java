@@ -4,15 +4,20 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+import com.dianping.cat.status.StatusExtensionRegister;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
+import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
+import com.dianping.zebra.group.monitor.SingleDataSourceStatusExtension;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
 
@@ -23,7 +28,7 @@ import com.dianping.zebra.group.util.StringUtils;
  *         3.并发策略：所有修改innerDs的地方都需要同步（set方法需要同步；init需要同步;refresh需要同步）。
  * 
  */
-public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements DataSource {
+public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements DataSource, SingleDataSourceMBean {
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 
 	private DataSourceConfig config = new DataSourceConfig();
@@ -31,11 +36,13 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 	private volatile SingleDataSource innerDs;
 
 	public SingleDataSourceC3P0Adapter(String id) {
-		// todo: resolve from lion
+		// TODO: resolve from lion later
 		config.setId(id);
 		config.setActive(true);
 		config.setCanRead(true);
 		config.setCanWrite(true);
+
+		registerMonitor();
 	}
 
 	public synchronized void close() {
@@ -43,13 +50,25 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 	}
 
 	private void destoryInnerDs(SingleDataSource dataSource) {
-		Transaction t = Cat.newTransaction("DAL", "Adapter.Destory");
+		Transaction t = Cat.newTransaction("DAL", "DataSource.Destory");
 		try {
+			Cat.logEvent("DAL.Destory.Start", dataSource.getId());
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(dataSource);
 			t.setStatus(Message.SUCCESS);
 		} finally {
+			// wait one second for dataSource to destroy
+			try {
+				TimeUnit.SECONDS.sleep(1);
+			} catch (InterruptedException e) {
+			}
+
 			t.complete();
 		}
+	}
+
+	@Override
+	public DataSourceConfig getConfig() {
+		return this.innerDs.getConfig();
 	}
 
 	@Override
@@ -62,43 +81,112 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		return getInnerDs().getConnection(username, password);
 	}
 
+	@Override
+	public String getCurrentState() {
+		return this.innerDs.getCurrentState();
+	}
+
+	@Override
+	public String getId() {
+		return this.innerDs.getId();
+	}
+
 	private DataSource getInnerDs() throws SQLException {
 		if (innerDs == null) {
 			synchronized (this) {
 				if (innerDs == null) {
-					innerDs = initInnerDs();
+					innerDs = initDataSource();
 				}
 			}
 		}
 		return innerDs;
 	}
 
-	private SingleDataSource initInnerDs() throws SQLException {
-		Transaction t = Cat.newTransaction("DAL", "Adapter.Init");
+	@Override
+	public int getNumBusyConnection() {
+		return this.innerDs.getNumBusyConnection();
+	}
+
+	@Override
+	public int getNumConnections() {
+		return this.innerDs.getNumConnections();
+	}
+
+	@Override
+	public long getNumFailedCheckins() {
+		return this.innerDs.getNumFailedCheckins();
+	}
+
+	@Override
+	public long getNumFailedCheckouts() {
+		return this.innerDs.getNumFailedCheckouts();
+	}
+
+	@Override
+	public int getNumIdleConnection() {
+		return this.innerDs.getNumIdleConnection();
+	}
+
+	@Override
+	public int getNumUnClosedOrphanedConnections() {
+		return this.innerDs.getNumUnClosedOrphanedConnections();
+	}
+
+	@Override
+	public DataSourceState getState() {
+		return this.innerDs.getState();
+	}
+
+	@Override
+	public int getThreadPoolNumActiveThreads() {
+		return this.innerDs.getThreadPoolNumActiveThreads();
+	}
+
+	@Override
+	public int getThreadPoolNumIdleThreads() {
+		return this.innerDs.getThreadPoolNumIdleThreads();
+	}
+
+	@Override
+	public int getThreadPoolNumTasksPending() {
+		return this.innerDs.getThreadPoolNumTasksPending();
+	}
+
+	@Override
+	public int getThreadPoolSize() {
+		return this.innerDs.getThreadPoolSize();
+	}
+
+	private SingleDataSource initDataSource() throws SQLException {
+		Transaction t = Cat.newTransaction("DAL", "DataSource.Init");
 
 		try {
-			Class.forName(config.getDriverClass());
-		} catch (ClassNotFoundException ex) {
-			t.setStatus(ex);
-			t.complete();
-			throw new SQLException("Cannot find mysql driver class : " + config.getDriverClass(), ex);
-		}
+			SingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
+			t.setStatus(Message.SUCCESS);
 
-		SingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
-		t.setStatus(Message.SUCCESS);
-		t.complete();
-		return ds;
+			return ds;
+		} catch (IllegalConfigException throwable) {
+			Cat.logError(throwable);
+
+			throw throwable;
+		} finally {
+			t.complete();
+		}
 	}
 
 	private void refresh(String propertyToChange) {
 		if (innerDs == null) {
 			return;
 		}
-		
-		Transaction t = Cat.newTransaction("DAL", "Adapter.Refresh");
-		Cat.logEvent("DAL.Adapter", "Refresh-" + propertyToChange);
+
+		Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh");
+		Cat.logEvent("DAL.Refresh.Property", propertyToChange);
 		try {
-			refresh();
+			SingleDataSource tempDs = initDataSource();
+
+			innerDs = tempDs;
+
+			destoryInnerDs(tempDs);
 			t.setStatus(Message.SUCCESS);
 		} catch (Exception e) {
 			Cat.logError(e);
@@ -108,22 +196,20 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		}
 	}
 
-	private void refresh() throws SQLException {
-		SingleDataSource tempDs = innerDs;
-		innerDs = initInnerDs();
-		destoryInnerDs(tempDs);
-	}
-
 	private void refreshUserAndPassword() {
 		config.setUser(atomicRefresh.getNewUser());
 		config.setPassword(atomicRefresh.getNewPassword());
 		atomicRefresh.reset();
 
-		// todo:平滑切换
+		// TODO:平滑切换
 		SmoothReload sr = new SmoothReload();
 		sr.waitForReload();
 
-		refresh("user-password");
+		refresh("user&password");
+	}
+
+	private void registerMonitor() {
+		StatusExtensionRegister.getInstance().register(new SingleDataSourceStatusExtension(this));
 	}
 
 	public synchronized void setAcquireIncrement(int acquireIncrement) {
@@ -288,7 +374,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		any.setName(name);
 		any.setValue(value);
 
-		refresh("name");
+		refresh(name);
 	}
 
 	public synchronized void setPropertyCycle(int propertyCycle) {

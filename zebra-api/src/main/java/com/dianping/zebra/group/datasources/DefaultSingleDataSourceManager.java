@@ -13,8 +13,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
 	@Override
 	public synchronized SingleDataSource createDataSource(DataSourceConfig config) {
-		SingleDataSource dataSource = new SingleDataSource(config);
-		return dataSource;
+		return new SingleDataSource(config);
 	}
 
 	@Override
