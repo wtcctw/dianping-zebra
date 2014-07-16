@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.util;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Dozer <br/>
@@ -40,11 +41,11 @@ public class SmoothReload {
 		}
 		while (startMillisecond + randomInterval > System.currentTimeMillis()) {
 			try {
-				Thread.sleep(1);
+				TimeUnit.MILLISECONDS.sleep(100);
 			} catch (InterruptedException ignore) {
-				return;
 			}
 		}
+
 		return;
 	}
 }
