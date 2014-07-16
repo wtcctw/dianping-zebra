@@ -19,9 +19,9 @@
 		<element name="user" value-type="String" primitive="true" default-value=""/>
 		<element name="driver-class" value-type="String" primitive="true" default-value=""/>
 		<element name="password" value-type="String" primitive="true" default-value=""/>
-		<element name="min-pool-size" value-type="int" primitive="true" />
-		<element name="max-pool-size" value-type="int" primitive="true" />
-		<element name="initial-pool-size" value-type="int" primitive="true" />
+		<element name="min-pool-size" value-type="int" primitive="true" default-value="3"/>
+		<element name="max-pool-size" value-type="int" primitive="true" default-value="15"/>
+		<element name="initial-pool-size" value-type="int" primitive="true" default-value="3"/>
 		<element name="checkout-timeout" value-type="int" primitive="true" default-value="1000"/>
 		<any name="properties" />
 	</entity>
