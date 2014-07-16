@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import junit.framework.Assert;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.dianping.zebra.group.Constants;
@@ -17,30 +18,32 @@ import com.dianping.zebra.group.jdbc.SingleDatabaseTestCase;
 public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 
 	private static SingleDataSourceManager manager;
-	
+
 	@BeforeClass
 	public static void setup() {
 		manager = SingleDataSourceManagerFactory.getDataSourceManager();
 	}
 
 	@Test
+	@Ignore
+	// 已经不会重用 datasource 了
 	public void test() throws Exception {
 		DataSource single = getDataSource();
-		
-		final SingleDataSource dataSource = (SingleDataSource)single;
-		
+
+		final SingleDataSource dataSource = (SingleDataSource) single;
+
 		Assert.assertEquals(DataSourceState.INITIAL, dataSource.getState());
 		execute(new ConnectionCallback() {
-			
+
 			@Override
 			public Object doInConnection(Connection conn) throws Exception {
 				Assert.assertEquals(DataSourceState.UP, dataSource.getState());
 				return null;
 			}
 		});
-		
-		manager.destoryDataSource(getDataSourceConfig().getId(), null);
-		
+
+		manager.destoryDataSource(dataSource);
+
 		TimeUnit.SECONDS.sleep(1);
 		Assert.assertEquals(DataSourceState.CLOSED, dataSource.getState());
 	}
@@ -57,12 +60,12 @@ public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 		config.setInitialPoolSize(1);
 		config.setMaxPoolSize(5);
 		config.setMinPoolSize(1);
-		
+
 		return config;
 	}
 
 	protected DataSource getDataSource() {
-		return manager.createDataSource(null, getDataSourceConfig());
+		return manager.createDataSource(getDataSourceConfig());
 	}
 
 	@Override
@@ -82,6 +85,6 @@ public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 
 	@Override
 	protected String getSchema() {
-        return getClass().getResource("/schema.sql").getPath();
+		return getClass().getResource("/schema.sql").getPath();
 	}
 }

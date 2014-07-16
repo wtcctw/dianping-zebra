@@ -1,61 +1,26 @@
 package com.dianping.zebra.group.datasources;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
-import com.dianping.zebra.group.jdbc.AbstractDataSource;
 
 public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
-
-	private Map<String, DataSourceConfig> dataSourceConfigs = new HashMap<String, DataSourceConfig>();
-
-	private Map<String, SingleDataSource> dataSources = new HashMap<String, SingleDataSource>();
 
 	private BlockingQueue<SingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<SingleDataSource>();
 
 	@Override
-	public synchronized SingleDataSource createDataSource(AbstractDataSource reference, DataSourceConfig config) {
-		String id = config.getId();
-		SingleDataSource dataSource = dataSources.get(id);
-
-		if (dataSource == null) {
-			dataSource = new SingleDataSource(config);
-			dataSource.getReferences().add(reference);
-			dataSources.put(id, dataSource);
-			dataSourceConfigs.put(id, config);
-		} else {
-			if (config.toString().equals(dataSourceConfigs.get(id).toString())) {
-				dataSource.getReferences().add(reference);
-			} else {
-				SingleDataSource newDataSource = new SingleDataSource(config);
-				newDataSource.getReferences().addAll(dataSource.getReferences());
-				this.toBeClosedDataSource.offer(dataSource);
-				newDataSource.getReferences().add(reference);
-				this.dataSources.put(id, newDataSource);
-				dataSourceConfigs.put(id, config);
-
-				return newDataSource;
-			}
-		}
-
+	public synchronized SingleDataSource createDataSource(DataSourceConfig config) {
+		SingleDataSource dataSource = new SingleDataSource(config);
 		return dataSource;
 	}
 
 	@Override
-	public synchronized void destoryDataSource(String dsId, AbstractDataSource reference) {
-		SingleDataSource dataSource = dataSources.get(dsId);
-
+	public synchronized void destoryDataSource(SingleDataSource dataSource) {
 		if (dataSource != null) {
-			dataSource.getReferences().remove(reference);
-
-			if (dataSource.getReferences().isEmpty()) {
-				this.toBeClosedDataSource.offer(dataSources.remove(dsId));
-			}
+			this.toBeClosedDataSource.offer(dataSource);
 		}
 	}
 
@@ -87,10 +52,5 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 				}
 			}
 		}
-	}
-
-	@Override
-	public SingleDataSource getDataSource(String dsId) {
-		return dataSources.get(dsId);
 	}
 }

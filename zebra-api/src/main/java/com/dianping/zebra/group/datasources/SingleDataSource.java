@@ -3,9 +3,7 @@ package com.dianping.zebra.group.datasources;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -33,8 +31,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private DataSource dataSource;
 
-	private Set<Object> references = new HashSet<Object>(); // 存储有多少业务方共享引用了这个dataSource
-
 	private CountPunisher punisher;
 
 	public SingleDataSource(DataSourceConfig config) {
@@ -52,7 +48,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	@Override
 	public void close() throws SQLException {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource) && references.isEmpty()) {
+		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
 			if (this.state == DataSourceState.UP) {
 				PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
 				if (poolBackedDataSource.getNumBusyConnections() == 0) {
@@ -179,10 +175,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	public CountPunisher getPunisher() {
 		return this.punisher;
-	}
-
-	public synchronized Set<Object> getReferences() {
-		return this.references;
 	}
 
 	@Override

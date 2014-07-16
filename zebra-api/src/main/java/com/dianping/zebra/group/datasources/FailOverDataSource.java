@@ -42,7 +42,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			masterDataSourceMonitorThread.interrupt();
 		}
 		if (master != null) {
-			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master.getId(), this);
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}
 		super.close();
 	}
@@ -67,10 +67,10 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private SingleDataSource getDataSource(DataSourceConfig config) {
 		if (master != null) {
-			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master.getId(), this);
+			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}
 
-		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(this, config);
+		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
 	}
 
 	@Override

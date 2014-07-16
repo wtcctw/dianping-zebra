@@ -1,6 +1,5 @@
 package com.dianping.zebra.group.datasources;
 
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map.Entry;
@@ -14,6 +13,7 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
 
@@ -22,12 +22,12 @@ import com.dianping.zebra.group.util.StringUtils;
  *         1.实现了自动 reload 机制。 <br/>
  *         2.实现了帐号密码原子修改，只改帐号或者密码不会触发重新加载流程，只有两个同时修改后，才会一次性触发重新加载。
  */
-public class SingleDataSourceC3P0Adapter implements DataSource {
+public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements DataSource {
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 
 	private DataSourceConfig config = new DataSourceConfig();
 
-	private volatile DataSource innerDs;
+	private volatile SingleDataSource innerDs;
 
 	public SingleDataSourceC3P0Adapter(String id) {
 		// todo: resolve from lion
@@ -37,13 +37,43 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		config.setCanWrite(true);
 	}
 
+	private DataSourceConfig cloneConfig() {
+		DataSourceConfig newConfig = new DataSourceConfig();
+
+		newConfig.setId(config.getId());
+		newConfig.setActive(config.getActive());
+		newConfig.setCanRead(config.getCanRead());
+		newConfig.setCanWrite(config.getCanWrite());
+		newConfig.setMinPoolSize(config.getMinPoolSize());
+		newConfig.setMaxPoolSize(config.getMaxPoolSize());
+		newConfig.setInitialPoolSize(config.getInitialPoolSize());
+		newConfig.setUser(config.getUser());
+		newConfig.setPassword(config.getPassword());
+		newConfig.setJdbcUrl(config.getJdbcUrl());
+		newConfig.setDriverClass(config.getDriverClass());
+		newConfig.setCheckoutTimeout(config.getCheckoutTimeout());
+
+		for (Any any : config.getProperties()) {
+			Any newAny = new Any();
+			newAny.setName(any.getName());
+			newAny.setValue(any.getValue());
+			newConfig.getProperties().add(newAny);
+		}
+
+		return newConfig;
+	}
+
 	public void close() {
 		destoryInnerDs();
 	}
 
 	private void destoryInnerDs() {
+		destoryInnerDs(innerDs);
+	}
+
+	private void destoryInnerDs(SingleDataSource dataSource) {
 		Transaction t = Cat.newTransaction("DAL.Adapter", "Destory");
-		SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(config.getId(), null);
+		SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(dataSource);
 		t.setStatus(Message.SUCCESS);
 		t.complete();
 	}
@@ -60,22 +90,16 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 
 	private DataSource getInnerDs() {
 		if (innerDs == null) {
-			innerDs = initInnerDs();
+			synchronized (this) {
+				if (innerDs == null) {
+					innerDs = initInnerDs();
+				}
+			}
 		}
 		return innerDs;
 	}
 
-	@Override
-	public int getLoginTimeout() throws SQLException {
-		return getInnerDs().getLoginTimeout();
-	}
-
-	@Override
-	public PrintWriter getLogWriter() throws SQLException {
-		return getInnerDs().getLogWriter();
-	}
-
-	private DataSource initInnerDs() {
+	private SingleDataSource initInnerDs() {
 		Transaction t = Cat.newTransaction("DAL.Adapter", "Init");
 		try {
 			try {
@@ -84,7 +108,7 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 				throw new DalException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
 			}
 
-			DataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(null, config);
+			SingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(cloneConfig());
 			t.setStatus(Message.SUCCESS);
 			return ds;
 		} catch (Exception e) {
@@ -96,26 +120,22 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 		}
 	}
 
-	@Override
-	public boolean isWrapperFor(Class<?> arg0) throws SQLException {
-		return getInnerDs().isWrapperFor(arg0);
-	}
-
-	private void refresh() {
+	private synchronized void refresh() {
 		if (innerDs == null) {
 			return;
 		}
 
 		Transaction t = Cat.newTransaction("DAL.Adapter", "Refresh");
 
+		SingleDataSource tempDs = innerDs;
 		innerDs = initInnerDs();
-		destoryInnerDs();
+		destoryInnerDs(tempDs);
 
 		t.setStatus(Message.SUCCESS);
 		t.complete();
 	}
 
-	private void refreshUserAndPassword() {
+	private synchronized void refreshUserAndPassword() {
 		Transaction t = Cat.newTransaction("DAL.Adapter", "RefreshUser");
 		config.setUser(atomicRefresh.getNewUser());
 		config.setPassword(atomicRefresh.getNewPassword());
@@ -204,16 +224,6 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 	public void setJdbcUrl(String jdbcUrl) {
 		config.setJdbcUrl(jdbcUrl);
 		refresh();
-	}
-
-	@Override
-	public void setLoginTimeout(int arg0) throws SQLException {
-		getInnerDs().setLoginTimeout(arg0);
-	}
-
-	@Override
-	public void setLogWriter(PrintWriter arg0) throws SQLException {
-		getInnerDs().setLogWriter(arg0);
 	}
 
 	public void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
@@ -338,11 +348,6 @@ public class SingleDataSourceC3P0Adapter implements DataSource {
 
 	public void setUsesTraditionalReflectiveProxies(boolean usesTraditionalReflectiveProxies) {
 		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
-	}
-
-	@Override
-	public <T> T unwrap(Class<T> arg0) throws SQLException {
-		return getInnerDs().unwrap(arg0);
 	}
 
 	public static class AtomicRefresh {

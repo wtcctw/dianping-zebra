@@ -37,8 +37,8 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	}
 
 	public void close() throws SQLException {
-		for (String dsId : dataSources.keySet()) {
-			dataSourceManager.destoryDataSource(dsId, this);
+		for (SingleDataSource ds : dataSources.values()) {
+			dataSourceManager.destoryDataSource(ds);
 		}
 	}
 
@@ -97,9 +97,9 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	public void init() {
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
-		
+
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			SingleDataSource dataSource = dataSourceManager.createDataSource(this, config);
+			SingleDataSource dataSource = dataSourceManager.createDataSource(config);
 			this.dataSources.put(config.getId(), dataSource);
 		}
 
