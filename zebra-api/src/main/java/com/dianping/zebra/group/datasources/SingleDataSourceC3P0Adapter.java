@@ -50,6 +50,10 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 	}
 
 	private void destoryInnerDs(SingleDataSource dataSource) {
+		if (dataSource == null) {
+			return;
+		}
+
 		Transaction t = Cat.newTransaction("DAL", "DataSource.Destory");
 		try {
 			Cat.logEvent("DAL.Destory.Start", dataSource.getId());
