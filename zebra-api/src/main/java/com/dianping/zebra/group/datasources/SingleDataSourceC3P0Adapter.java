@@ -209,7 +209,13 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 	}
 
 	private void registerMonitor() {
-		StatusExtensionRegister.getInstance().register(new SingleDataSourceStatusExtension(this));
+		try {
+			// compatible to Cat <= 1.0.4
+			Class.forName("com.dianping.cat.status.StatusExtensionRegister");
+			StatusExtensionRegister.getInstance().register(new SingleDataSourceStatusExtension(this));
+		} catch (Throwable e) {
+			Cat.logError(e);
+		}
 	}
 
 	public synchronized void setAcquireIncrement(int acquireIncrement) {
