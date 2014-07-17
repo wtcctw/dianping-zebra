@@ -29,6 +29,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -78,15 +79,16 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	private void autoReplaceWithMonitorableDataSource(String beanName, BeanDefinition dataSourceDefinition,
 	      Class<?> dataSourceClazz, DefaultListableBeanFactory listableBeanFactory) {
 		listableBeanFactory.registerBeanDefinition(beanName,
-		      createMonitorableBeanDefinition(beanName, dataSourceDefinition));
+		      createMonitorableBeanDefinition(beanName, dataSourceDefinition, listableBeanFactory));
 		// zebra需做特殊处理，一些inner datasource可能作为nested bean方式定义，也需要wrapper
 		if (isZebraDataSource(dataSourceClazz)) {
-			replaceInnerDataSourceInZebra(beanName, dataSourceDefinition);
+			replaceInnerDataSourceInZebra(beanName, dataSourceDefinition, listableBeanFactory);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private void replaceInnerDataSourceInZebra(String beanName, BeanDefinition zebraDataSourceDefinition) {
+	private void replaceInnerDataSourceInZebra(String beanName, BeanDefinition zebraDataSourceDefinition,
+	      DefaultListableBeanFactory listableBeanFactory) {
 		MutablePropertyValues propertyValues = zebraDataSourceDefinition.getPropertyValues();
 		PropertyValue dataSourcePoolVal = propertyValues.getPropertyValue("dataSourcePool");
 		if (dataSourcePoolVal == null) {
@@ -103,23 +105,38 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 				BeanDefinitionHolder innerDSDefHolder = (BeanDefinitionHolder) innerDSDefVal;
 				BeanDefinition innerDSDefinition = innerDSDefHolder.getBeanDefinition();
 				innerDSDefEntry.setValue(new BeanDefinitionHolder(createMonitorableBeanDefinition(beanName,
-				      innerDSDefinition), innerDSDefHolder.getBeanName(), innerDSDefHolder.getAliases()));
+				      innerDSDefinition, listableBeanFactory), innerDSDefHolder.getBeanName(), innerDSDefHolder
+				      .getAliases()));
 			}
 		}
 	}
 
-	private GenericBeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition) {
+	private GenericBeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition,
+	      DefaultListableBeanFactory listableBeanFactory) {
+
+		String newBeanName = null;
+
 		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			dataSourceDefinition.setBeanClassName(SingleDataSourceC3P0Adapter.class.getName());
 			dataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanName);
+			newBeanName = beanName + "-" + SingleDataSourceC3P0Adapter.class.getSimpleName();
+			listableBeanFactory.registerBeanDefinition(newBeanName, dataSourceDefinition);
+
 			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0-" + beanName);
+
 		} else {
 			Cat.logEvent("DAL.BeanProcessor", "NotC3P0-" + beanName + "-" + dataSourceDefinition.getBeanClassName());
 		}
 
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
 		monitorableDataSourceDefinition.setBeanClass(MonitorableDataSource.class);
-		monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(dataSourceDefinition);
+
+		if (newBeanName == null) {
+			monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(dataSourceDefinition);
+		} else {
+			monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(
+			      new RuntimeBeanReference(newBeanName));
+		}
 		return monitorableDataSourceDefinition;
 	}
 

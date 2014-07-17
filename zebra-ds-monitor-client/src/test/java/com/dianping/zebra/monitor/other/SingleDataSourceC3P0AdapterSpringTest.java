@@ -6,49 +6,49 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.annotation.Resource;
+import javax.sql.DataSource;
+
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.dianping.zebra.group.datasources.SingleDataSourceC3P0Adapter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:config/spring/appcontext-test.xml")
 public class SingleDataSourceC3P0AdapterSpringTest {
 
-	@Autowired
-	private SingleDataSourceC3P0Adapter dsTest;
+	@Resource(name = "dsTest")
+	private DataSource dsTest;
 
 	@Test
 	@Ignore
 	public void test_jdbc() throws SQLException, PropertyVetoException, InterruptedException {
 		startThread();
-		startThread();
-		startThread();
-		startThread();
-		startThread();
-		startThread();
-		startThread();
-		startThread();
-		startThread();
-		startThread();
-		startThread();
-		startThread();
+		// startThread();
+		// startThread();
+		// startThread();
+		// startThread();
+		// startThread();
+		// startThread();
+		// startThread();
+		// startThread();
+		// startThread();
+		// startThread();
+		// startThread();
 
-		Thread.sleep(5000);
-
-		dsTest.setUser("test1");
-		dsTest.setPassword("123456");
-
-		Thread.sleep(5000);
-		dsTest.setMaxPoolSize(5);
-		Thread.sleep(5000);
-
-		dsTest.setDriverClass("asdsadasdasda.asdadas");
+		// Thread.sleep(5000);
+		//
+		// dsTest.setUser("test1");
+		// dsTest.setPassword("123456");
+		//
+		// Thread.sleep(5000);
+		// dsTest.setMaxPoolSize(5);
+		// Thread.sleep(5000);
+		//
+		// dsTest.setDriverClass("asdsadasdasda.asdadas");
 
 		Thread.sleep(1000000);
 	}

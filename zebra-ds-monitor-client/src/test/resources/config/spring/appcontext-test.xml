@@ -6,29 +6,22 @@
 	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<!-- <bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor" 
-		/> -->
+	<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor" />
 
-	<bean id="dsTest"
-		class="com.dianping.zebra.group.datasources.SingleDataSourceC3P0Adapter"
+	<bean id="placeholder" class="com.dianping.lion.client.SpringConfig" />
+
+	<bean id="dsTest" class="com.mchange.v2.c3p0.ComboPooledDataSource"
 		destroy-method="close">
-		<constructor-arg value="ds" index="0" />
+		<!-- <constructor-arg value="ds" index="0" /> -->
 		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/test" />
-		<property name="user" value="root" />
-		<property name="password" value="" />
-		<property name="driverClass" value="com.mysql.jdbc.Driver" />
-		<property name="minPoolSize" value="5" />
-		<property name="maxPoolSize" value="25" />
-		<property name="initialPoolSize" value="5" />
-		<property name="maxIdleTime" value="1800" />
-		<property name="idleConnectionTestPeriod" value="60" />
-		<property name="acquireRetryAttempts" value="3" />
-		<property name="acquireRetryDelay" value="300" />
-		<property name="maxStatements" value="0" />
-		<property name="maxStatementsPerConnection" value="100" />
-		<property name="numHelperThreads" value="6" />
-		<property name="maxAdministrativeTaskTime" value="5" />
-		<property name="preferredTestQuery" value="SELECT 1" />
+		<property name="user" value="test2" />
+		<property name="password" value="123456" />
+		<property name="driverClass" value="${ba-push.master.jdbc.driverClassName}" />
+		<!-- <property name="maxIdleTime" value="1800" /> <property name="idleConnectionTestPeriod" 
+			value="60" /> <property name="acquireRetryAttempts" value="3" /> <property 
+			name="acquireRetryDelay" value="300" /> <property name="maxStatements" value="0" 
+			/> <property name="maxStatementsPerConnection" value="100" /> <property name="numHelperThreads" 
+			value="6" /> <property name="maxAdministrativeTaskTime" value="5" /> <property 
+			name="preferredTestQuery" value="SELECT 1" /> -->
 	</bean>
-
 </beans>
