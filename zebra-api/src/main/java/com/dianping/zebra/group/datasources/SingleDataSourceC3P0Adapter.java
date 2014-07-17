@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.datasources;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map.Entry;
@@ -209,8 +211,14 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 	private void registerMonitor() {
 		try {
 			// compatible to Cat <= 1.0.4
-			Class.forName("com.dianping.cat.status.StatusExtensionRegister");
-			//StatusExtensionRegister.getInstance().register(new SingleDataSourceStatusExtension(this));
+			Class<?> registerClass = Class.forName("com.dianping.cat.status.StatusExtensionRegister");
+			Class<?> extensionInterfaceClass = Class.forName("com.dianping.cat.status.StatusExtension");
+			Class<?> extensionClass = Class.forName("com.dianping.zebra.group.monitor.SingleDataSourceStatusExtension");
+			Method getInstanceMethod = registerClass.getMethod("getInstance");
+			Method registerMethod = registerClass.getMethod("register", extensionInterfaceClass);
+			Constructor<?> constructor = extensionClass.getConstructor(SingleDataSourceMBean.class);
+
+			registerMethod.invoke(getInstanceMethod.invoke(registerClass), constructor.newInstance(this));
 		} catch (Throwable e) {
 			Cat.logError(e);
 		}
