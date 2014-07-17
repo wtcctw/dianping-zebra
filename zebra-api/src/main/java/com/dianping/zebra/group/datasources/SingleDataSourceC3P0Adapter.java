@@ -68,7 +68,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 	@Override
 	public DataSourceConfig getConfig() {
-		return this.innerDs.getConfig();
+		return this.innerDs == null ? null : this.innerDs.getConfig();
 	}
 
 	@Override
@@ -83,12 +83,12 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 	@Override
 	public String getCurrentState() {
-		return this.innerDs.getCurrentState();
+		return this.innerDs == null ? null : this.innerDs.getCurrentState();
 	}
 
 	@Override
 	public String getId() {
-		return this.innerDs.getId();
+		return this.innerDs == null ? null : this.innerDs.getId();
 	}
 
 	private DataSource getInnerDs() throws SQLException {
@@ -104,57 +104,57 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 
 	@Override
 	public int getNumBusyConnection() {
-		return this.innerDs.getNumBusyConnection();
+		return this.innerDs == null ? 0 : this.innerDs.getNumBusyConnection();
 	}
 
 	@Override
 	public int getNumConnections() {
-		return this.innerDs.getNumConnections();
+		return this.innerDs == null ? 0 : this.innerDs.getNumConnections();
 	}
 
 	@Override
 	public long getNumFailedCheckins() {
-		return this.innerDs.getNumFailedCheckins();
+		return this.innerDs == null ? 0 : this.innerDs.getNumFailedCheckins();
 	}
 
 	@Override
 	public long getNumFailedCheckouts() {
-		return this.innerDs.getNumFailedCheckouts();
+		return this.innerDs == null ? 0 : this.innerDs.getNumFailedCheckouts();
 	}
 
 	@Override
 	public int getNumIdleConnection() {
-		return this.innerDs.getNumIdleConnection();
+		return this.innerDs == null ? 0 : this.innerDs.getNumIdleConnection();
 	}
 
 	@Override
 	public int getNumUnClosedOrphanedConnections() {
-		return this.innerDs.getNumUnClosedOrphanedConnections();
+		return this.innerDs == null ? 0 : this.innerDs.getNumUnClosedOrphanedConnections();
 	}
 
 	@Override
 	public DataSourceState getState() {
-		return this.innerDs.getState();
+		return this.innerDs == null ? null : this.innerDs.getState();
 	}
 
 	@Override
 	public int getThreadPoolNumActiveThreads() {
-		return this.innerDs.getThreadPoolNumActiveThreads();
+		return this.innerDs == null ? 0 : this.innerDs.getThreadPoolNumActiveThreads();
 	}
 
 	@Override
 	public int getThreadPoolNumIdleThreads() {
-		return this.innerDs.getThreadPoolNumIdleThreads();
+		return this.innerDs == null ? 0 : this.innerDs.getThreadPoolNumIdleThreads();
 	}
 
 	@Override
 	public int getThreadPoolNumTasksPending() {
-		return this.innerDs.getThreadPoolNumTasksPending();
+		return this.innerDs == null ? 0 : this.innerDs.getThreadPoolNumTasksPending();
 	}
 
 	@Override
 	public int getThreadPoolSize() {
-		return this.innerDs.getThreadPoolSize();
+		return this.innerDs == null ? 0 : this.innerDs.getThreadPoolSize();
 	}
 
 	private SingleDataSource initDataSource() throws SQLException {
