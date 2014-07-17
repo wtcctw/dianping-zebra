@@ -11,13 +11,11 @@ import javax.sql.DataSource;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import com.dianping.cat.status.StatusExtensionRegister;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
-import com.dianping.zebra.group.monitor.SingleDataSourceStatusExtension;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
 
@@ -182,9 +180,9 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh");
 		Cat.logEvent("DAL.Refresh.Property", propertyToChange);
 		try {
-			SingleDataSource tempDs = initDataSource();
+			SingleDataSource tempDs = innerDs;
 
-			innerDs = tempDs;
+			innerDs = initDataSource();
 
 			destoryInnerDs(tempDs);
 			t.setStatus(Message.SUCCESS);
@@ -212,7 +210,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		try {
 			// compatible to Cat <= 1.0.4
 			Class.forName("com.dianping.cat.status.StatusExtensionRegister");
-			StatusExtensionRegister.getInstance().register(new SingleDataSourceStatusExtension(this));
+			//StatusExtensionRegister.getInstance().register(new SingleDataSourceStatusExtension(this));
 		} catch (Throwable e) {
 			Cat.logError(e);
 		}
