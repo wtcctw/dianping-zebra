@@ -3,21 +3,25 @@ package com.dianping.zebra.group.util;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
+
 /**
  * @author Dozer <br/>
  *         重新加载 DataSource 的时候设定一个延时，防止同一时间大量的 Connection 对数据库服务器造成冲击。
  */
 
 public class SmoothReload {
-	private static Random rnd = new Random();
-
 	private static long DEFAULT_MAX_MILLISECOND_INTERVAL = 1000;
+
+	private static Random rnd = new Random();
 
 	private long maxMillisecondInterval = 0;
 
-	private long startMillisecond = 0;
-
 	private long randomInterval = 0;
+
+	private long startMillisecond = 0;
 
 	// todo:add construct load with config
 
@@ -39,13 +43,15 @@ public class SmoothReload {
 		if (maxMillisecondInterval <= 0) {
 			return;
 		}
+
+		Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh.Soomth");
 		while (startMillisecond + randomInterval > System.currentTimeMillis()) {
 			try {
 				TimeUnit.MILLISECONDS.sleep(100);
 			} catch (InterruptedException ignore) {
 			}
 		}
-
-		return;
+		t.setStatus(Message.SUCCESS);
+		t.complete();
 	}
 }
