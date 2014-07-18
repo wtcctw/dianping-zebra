@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.dianping.cat.status.StatusExtension;
-import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.datasources.DataSourceState;
 
 public class SingleDataSourceStatusExtension implements StatusExtension {
@@ -17,19 +16,12 @@ public class SingleDataSourceStatusExtension implements StatusExtension {
 
 	@Override
 	public String getDescription() {
-		StringBuilder sb = new StringBuilder(1024 * 3);
-
-		sb.append("\nversion:" + Constants.VERSION + "\n");
-		sb.append("state:" + bean.getCurrentState() + "\n");
-		sb.append("\nconfig:\n");
-		sb.append(bean.getConfig());
-
-		return sb.toString();
+		return "";
 	}
 
 	@Override
 	public String getId() {
-		return "Dal-" + bean.getId();
+		return "dal";
 	}
 
 	@Override

@@ -432,4 +432,24 @@ public class MockC3p0Connection implements Connection {
 			throws SQLException {
 		return null;
 	}
+	
+	public int getNetworkTimeout() throws SQLException {
+		throw new UnsupportedOperationException("getNetworkTimeout not supported");
+	}
+	
+	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+		throw new UnsupportedOperationException("setNetworkTimeout");
+	}	
+	
+	public void abort(Executor executor) throws SQLException {
+		throw new UnsupportedOperationException("abort");
+	}
+	
+	public String getSchema() throws SQLException {
+		throw new UnsupportedOperationException("getSchema");
+	}
+	
+	public void setSchema(String schema) throws SQLException {
+		throw new UnsupportedOperationException("setSchema");
+	}
 }

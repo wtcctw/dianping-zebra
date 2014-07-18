@@ -603,4 +603,12 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	public void setNClob(String parameterName, Reader reader) throws SQLException {
 		prepareCall.setNClob(parameterName, reader);
 	}
+	
+	public <T> T getObject(String parameterName, Class<T> type){
+		throw new UnsupportedOperationException("getObject not supported");
+	}
+	
+	public <T> T getObject(int parameterName, Class<T> type){
+		throw new UnsupportedOperationException("getObject not supported");
+	}
 }

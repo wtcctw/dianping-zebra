@@ -18,6 +18,8 @@ package com.dianping.zebra.monitor.sql;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -91,5 +93,9 @@ public class MonitorableDataSource implements DataSource {
 			return getInnerDataSource(((MonitorableDataSource) innerDataSource).innerDataSource);
 		}
 		return innerDataSource;
+	}
+	
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		throw new UnsupportedOperationException("getParentLogger");
 	}
 }
