@@ -9,15 +9,15 @@ import com.dianping.zebra.group.exception.DalException;
 
 public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
-	private BlockingQueue<SingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<SingleDataSource>();
+	private BlockingQueue<InnerSingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<InnerSingleDataSource>();
 
 	@Override
-	public synchronized SingleDataSource createDataSource(DataSourceConfig config) {
-		return new SingleDataSource(config);
+	public synchronized InnerSingleDataSource createDataSource(DataSourceConfig config) {
+		return new InnerSingleDataSource(config);
 	}
 
 	@Override
-	public synchronized void destoryDataSource(SingleDataSource dataSource) {
+	public synchronized void destoryDataSource(InnerSingleDataSource dataSource) {
 		if (dataSource != null) {
 			this.toBeClosedDataSource.offer(dataSource);
 		}
@@ -36,7 +36,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 		@Override
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
-				SingleDataSource dataSource = null;
+				InnerSingleDataSource dataSource = null;
 				try {
 					dataSource = toBeClosedDataSource.take();
 					dataSource.close();

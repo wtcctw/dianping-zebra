@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.datasources;
+package com.dianping.zebra.group.jdbc;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.google.common.collect.Lists;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -26,7 +27,7 @@ public class SingleDataSourceC3P0AdapterTest {
 
 	@Test
 	public void test_atomich_refresh() {
-		SingleDataSourceC3P0Adapter.AtomicRefresh ar = new SingleDataSourceC3P0Adapter.AtomicRefresh();
+		SingleDataSource.AtomicRefresh ar = new SingleDataSource.AtomicRefresh();
 
 		ar.setUser("user");
 		Assert.assertFalse(ar.needToRefresh());
@@ -49,7 +50,7 @@ public class SingleDataSourceC3P0AdapterTest {
 
 	@Test
 	public void test_atomich_refresh_with_null() {
-		SingleDataSourceC3P0Adapter.AtomicRefresh ar = new SingleDataSourceC3P0Adapter.AtomicRefresh();
+		SingleDataSource.AtomicRefresh ar = new SingleDataSource.AtomicRefresh();
 		ar.setUser(null);
 		Assert.assertFalse(ar.needToRefresh());
 		ar.setPassword(null);
@@ -71,7 +72,7 @@ public class SingleDataSourceC3P0AdapterTest {
 	@Test
 	public void test_properties() {
 		Map<String, Method> currentMethods = new HashMap<String, Method>();
-		for (Method m : SingleDataSourceC3P0Adapter.class.getMethods()) {
+		for (Method m : SingleDataSource.class.getMethods()) {
 			currentMethods.put(m.getName(), m);
 		}
 

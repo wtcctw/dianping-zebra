@@ -20,9 +20,9 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
 
-public class SingleDataSource extends AbstractDataSource implements MarkableDataSource, SingleDataSourceMBean {
+public class InnerSingleDataSource extends AbstractDataSource implements MarkableDataSource, SingleDataSourceMBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(SingleDataSource.class);
+	private static final Logger logger = LoggerFactory.getLogger(InnerSingleDataSource.class);
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;
 
@@ -34,7 +34,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private CountPunisher punisher;
 
-	public SingleDataSource(DataSourceConfig config) {
+	public InnerSingleDataSource(DataSourceConfig config) {
 		this.dsId = config.getId();
 		this.config = config;
 		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());

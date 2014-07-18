@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.datasources;
+package com.dianping.zebra.group.jdbc;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -15,8 +15,10 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.datasources.DataSourceState;
+import com.dianping.zebra.group.datasources.InnerSingleDataSource;
+import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.IllegalConfigException;
-import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
@@ -28,14 +30,14 @@ import com.dianping.zebra.group.util.StringUtils;
  *         3.并发策略：所有修改innerDs的地方都需要同步（set方法需要同步；init需要同步;refresh需要同步）。
  * 
  */
-public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements DataSource, SingleDataSourceMBean {
+public class SingleDataSource extends AbstractDataSource implements DataSource, SingleDataSourceMBean {
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 
 	private DataSourceConfig config = new DataSourceConfig();
 
-	private volatile SingleDataSource innerDs;
+	private volatile InnerSingleDataSource innerDs;
 
-	public SingleDataSourceC3P0Adapter(String id) {
+	public SingleDataSource(String id) {
 		// TODO: resolve from lion later
 		config.setId(id);
 		config.setActive(true);
@@ -49,7 +51,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		destoryInnerDs(innerDs);
 	}
 
-	private void destoryInnerDs(SingleDataSource dataSource) {
+	private void destoryInnerDs(InnerSingleDataSource dataSource) {
 		if (dataSource == null) {
 			return;
 		}
@@ -161,11 +163,11 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		return this.innerDs == null ? 0 : this.innerDs.getThreadPoolSize();
 	}
 
-	private SingleDataSource initDataSource() throws SQLException {
+	private InnerSingleDataSource initDataSource() throws SQLException {
 		Transaction t = Cat.newTransaction("DAL", "DataSource.Init");
 
 		try {
-			SingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
+			InnerSingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
 			t.setStatus(Message.SUCCESS);
 
 			return ds;
@@ -186,7 +188,7 @@ public class SingleDataSourceC3P0Adapter extends AbstractDataSource implements D
 		Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh");
 		Cat.logEvent("DAL.Refresh.Property", propertyToChange);
 		try {
-			SingleDataSource tempDs = innerDs;
+			InnerSingleDataSource tempDs = innerDs;
 
 			innerDs = initDataSource();
 

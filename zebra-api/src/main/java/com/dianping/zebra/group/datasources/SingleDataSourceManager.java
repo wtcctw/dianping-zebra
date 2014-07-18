@@ -4,9 +4,9 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
 public interface SingleDataSourceManager {
 
-	public SingleDataSource createDataSource(DataSourceConfig config);
+	public InnerSingleDataSource createDataSource(DataSourceConfig config);
 
-	public void destoryDataSource(SingleDataSource dataSource);
+	public void destoryDataSource(InnerSingleDataSource dataSource);
 
 	public void init();
 }

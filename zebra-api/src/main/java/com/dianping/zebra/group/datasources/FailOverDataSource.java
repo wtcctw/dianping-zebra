@@ -26,7 +26,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private static final String ERROR_MESSAGE = "Cannot find any master dataSource.";
 
-	private volatile SingleDataSource master;
+	private volatile InnerSingleDataSource master;
 
 	private Map<String, DataSourceConfig> configs;
 
@@ -65,7 +65,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		return master;
 	}
 
-	private SingleDataSource getDataSource(DataSourceConfig config) {
+	private InnerSingleDataSource getDataSource(DataSourceConfig config) {
 		if (master != null) {
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}

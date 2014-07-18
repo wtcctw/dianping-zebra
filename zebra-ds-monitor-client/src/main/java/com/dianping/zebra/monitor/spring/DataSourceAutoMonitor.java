@@ -39,7 +39,7 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 
 import com.dianping.cat.Cat;
-import com.dianping.zebra.group.datasources.SingleDataSourceC3P0Adapter;
+import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 
 /**
@@ -117,9 +117,9 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		String newBeanName = null;
 
 		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
-			dataSourceDefinition.setBeanClassName(SingleDataSourceC3P0Adapter.class.getName());
+			dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
 			dataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanName);
-			newBeanName = beanName + "-" + SingleDataSourceC3P0Adapter.class.getSimpleName();
+			newBeanName = beanName + "-" + SingleDataSource.class.getSimpleName();
 			listableBeanFactory.registerBeanDefinition(newBeanName, dataSourceDefinition);
 
 			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0-" + beanName);

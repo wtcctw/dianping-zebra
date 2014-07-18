@@ -26,18 +26,18 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private DataSourceRouter router;
 
-	private Map<String, SingleDataSource> dataSources;
+	private Map<String, InnerSingleDataSource> dataSources;
 
 	private SingleDataSourceManager dataSourceManager;
 
 	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap, int retryTimes) {
-		this.dataSources = new HashMap<String, SingleDataSource>();
+		this.dataSources = new HashMap<String, InnerSingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.retryTimes = retryTimes;
 	}
 
 	public void close() throws SQLException {
-		for (SingleDataSource ds : dataSources.values()) {
+		for (InnerSingleDataSource ds : dataSources.values()) {
 			dataSourceManager.destoryDataSource(ds);
 		}
 	}
@@ -51,7 +51,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	public Connection getConnection(String username, String password) throws SQLException {
 		RouterContext context = new RouterContext();
 
-		for (SingleDataSource dataSource : this.dataSources.values()) {
+		for (InnerSingleDataSource dataSource : this.dataSources.values()) {
 			if (dataSource.isDown() || dataSource.isClosed()) {
 				context.addExcludeTarget(dataSource.getId());
 			}
@@ -99,7 +99,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
 
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			SingleDataSource dataSource = dataSourceManager.createDataSource(config);
+			InnerSingleDataSource dataSource = dataSourceManager.createDataSource(config);
 			this.dataSources.put(config.getId(), dataSource);
 		}
 

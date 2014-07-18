@@ -30,7 +30,7 @@ public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 	public void test() throws Exception {
 		DataSource single = getDataSource();
 
-		final SingleDataSource dataSource = (SingleDataSource) single;
+		final InnerSingleDataSource dataSource = (InnerSingleDataSource) single;
 
 		Assert.assertEquals(DataSourceState.INITIAL, dataSource.getState());
 		execute(new ConnectionCallback() {
