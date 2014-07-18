@@ -342,4 +342,12 @@ public class MonitorableStatement implements Statement {
 	public void setSqlMonitor(SqlMonitor sqlMonitor) {
 		this.sqlMonitor = sqlMonitor;
 	}
+	
+	public boolean isCloseOnCompletion() throws SQLException {
+		throw new SQLException("not support exception");
+	}
+	
+	public void closeOnCompletion() throws SQLException {
+		throw new SQLException("not support exception");
+	}
 }

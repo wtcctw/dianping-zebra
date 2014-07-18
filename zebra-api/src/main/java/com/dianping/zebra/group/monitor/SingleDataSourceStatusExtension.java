@@ -29,7 +29,7 @@ public class SingleDataSourceStatusExtension implements StatusExtension {
 
 	@Override
 	public String getId() {
-		return "Dal-" + bean.getId();
+		return "dal";
 	}
 
 	@Override
