@@ -1,20 +1,10 @@
 package com.dianping.zebra.monitor.other;
 
 import java.beans.PropertyVetoException;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
-import javax.annotation.Resource;
-import javax.sql.DataSource;
-
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 //@RunWith(SpringJUnit4ClassRunner.class)
 //@ContextConfiguration(locations = "classpath:config/spring/appcontext-test.xml")
