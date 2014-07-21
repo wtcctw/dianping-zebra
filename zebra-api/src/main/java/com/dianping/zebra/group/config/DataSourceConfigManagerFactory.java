@@ -8,7 +8,7 @@ import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class DataSourceConfigManagerFactory {
 
-	private static Map<String, DataSourceConfigManager> dataSourceConfigManagers = new HashMap<String, DataSourceConfigManager>();
+	private static volatile Map<String, DataSourceConfigManager> dataSourceConfigManagers = new HashMap<String, DataSourceConfigManager>();
 
 	private DataSourceConfigManagerFactory(){
 	}
