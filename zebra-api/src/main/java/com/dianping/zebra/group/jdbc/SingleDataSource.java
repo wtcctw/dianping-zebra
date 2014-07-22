@@ -1,9 +1,12 @@
 package com.dianping.zebra.group.jdbc;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -13,6 +16,9 @@ import javax.sql.DataSource;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.datasources.DataSourceState;
@@ -37,14 +43,53 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 	private DataSourceConfig c3p0Config = new DataSourceConfig();
 
-	public SingleDataSource(String id) {
-		// TODO: resolve from lion later
-		c3p0Config.setId(id);
-		c3p0Config.setActive(true);
-		c3p0Config.setCanRead(true);
-		c3p0Config.setCanWrite(true);
+	private volatile DataSourceConfig lionConfig;
 
-		registerMonitor();
+	private DataSourceConfigManager dataSourceConfigManager;
+
+	private String jdbcRef;
+
+	private boolean useLionConfig = true;
+
+	public SingleDataSource(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
+		initSingleDataSource();
+	}
+
+	public SingleDataSource(String jdbcRef, boolean useLionConfig) {
+		this.jdbcRef = jdbcRef;
+		this.useLionConfig = useLionConfig;
+		this.c3p0Config.setActive(true);
+		initSingleDataSource();
+	}
+
+	private DataSourceConfig buildDataSourceConfig() {
+		if (!useLionConfig) {
+			return c3p0Config;
+		}
+
+		if (lionConfig.getDriverClass() == null || lionConfig.getDriverClass().length() <= 0) {
+			// in case that DBA has not give default value to driverClass.
+			lionConfig.setDriverClass(c3p0Config.getDriverClass());
+		}
+
+		// merge c3p0 properties
+		for (Any property : c3p0Config.getProperties()) {
+			String key = property.getName();
+			String value = property.getValue();
+			Any any = findAny(lionConfig.getProperties(), key);
+
+			if (any != null) {
+				any.setValue(value);
+			} else {
+				Any any1 = new Any();
+				any1.setName(key);
+				any1.setValue(value);
+				lionConfig.getProperties().add(any1);
+			}
+		}
+
+		return lionConfig;
 	}
 
 	public synchronized void close() {
@@ -72,6 +117,15 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		}
 	}
 
+	private Any findAny(List<Any> all, String name) {
+		for (Any any : all) {
+			if (any.getName().equals(name)) {
+				return any;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public DataSourceConfig getConfig() {
 		return this.innerDs == null ? null : this.innerDs.getConfig();
@@ -94,7 +148,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 	@Override
 	public String getId() {
-		return this.innerDs == null ? null : this.innerDs.getId();
+		return jdbcRef;
 	}
 
 	private DataSource getInnerDs() throws SQLException {
@@ -167,7 +221,8 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		Transaction t = Cat.newTransaction("DAL", "DataSource.Init");
 
 		try {
-			InnerSingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(c3p0Config);
+			InnerSingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(
+			      buildDataSourceConfig());
 			t.setStatus(Message.SUCCESS);
 
 			return ds;
@@ -178,6 +233,18 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		} finally {
 			t.complete();
 		}
+	}
+
+	private void initSingleDataSource() {
+		this.c3p0Config.setId(jdbcRef);
+
+		if (useLionConfig) {
+			this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef,
+			      true, false);
+			lionConfig = this.dataSourceConfigManager.getSingleDataSourceConfig();
+			this.dataSourceConfigManager.addListerner(new SingleDataSourceConfigChangedListener());
+		}
+		registerMonitor();
 	}
 
 	protected void refresh(String propertyToChange) {
@@ -207,9 +274,10 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		c3p0Config.setPassword(atomicRefresh.getNewPassword());
 		atomicRefresh.reset();
 
-		// TODO:平滑切换
-		SmoothReload sr = new SmoothReload();
-		sr.waitForReload();
+		if (lionConfig != null) {
+			SmoothReload sr = new SmoothReload(lionConfig.getWarmupTime());
+			sr.waitForReload();
+		}
 
 		refresh("user&password");
 	}
@@ -300,6 +368,10 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	public synchronized void setJdbcUrl(String jdbcUrl) {
+		if (useLionConfig) {
+			return;
+		}
+
 		c3p0Config.setJdbcUrl(jdbcUrl);
 		refresh("jdbcUrl");
 	}
@@ -349,6 +421,10 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	public synchronized void setPassword(String password) {
+		if (useLionConfig) {
+			return;
+		}
+
 		// innerDs 未加载的时候不需要 reload 逻辑
 		if (innerDs == null) {
 			c3p0Config.setPassword(password);
@@ -408,6 +484,10 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	public synchronized void setUser(String user) {
+		if (useLionConfig) {
+			return;
+		}
+
 		// innerDs 未加载的时候不需要 reload 逻辑
 		if (innerDs == null) {
 			c3p0Config.setUser(user);
@@ -461,6 +541,39 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 		public synchronized void setUser(String user) {
 			this.newUser = user;
+		}
+	}
+
+	class SingleDataSourceConfigChangedListener implements PropertyChangeListener {
+		private String userKey = Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX + "." + jdbcRef + ".jdbc."
+		      + Constants.ELEMENT_USER;
+
+		private String passwordKey = Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX + "." + jdbcRef + ".jdbc."
+		      + Constants.ELEMENT_PASSWORD;
+
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX + "." + jdbcRef)) {
+
+				if (evt.getPropertyName().equals(userKey)) {
+					atomicRefresh.setUser(evt.getNewValue().toString());
+					if (atomicRefresh.needToRefresh()) {
+						refreshUserAndPassword();
+					}
+					return;
+				}
+
+				if (evt.getPropertyName().equals(passwordKey)) {
+					atomicRefresh.setPassword(evt.getNewValue().toString());
+					if (atomicRefresh.needToRefresh()) {
+						refreshUserAndPassword();
+					}
+					return;
+				}
+
+				lionConfig = dataSourceConfigManager.getSingleDataSourceConfig();
+				refresh(evt.getPropertyName());
+			}
 		}
 	}
 }

@@ -83,7 +83,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		for (Entry<String, DataSourceConfig> entry : newGroupConfig.getDataSourceConfigs().entrySet()) {
 			DataSourceConfig config = entry.getValue();
 
-			if (config.getDriverClass().length() <= 0) {
+			if (config.getDriverClass() == null || config.getDriverClass().length() <= 0) {
 				// in case that DBA has not give default value to driverClass.
 				config.setDriverClass(c3p0Config.getDriverClass());
 			}
@@ -203,7 +203,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef,
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef, false,
 		      verbose);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();

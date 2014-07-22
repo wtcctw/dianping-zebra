@@ -47,9 +47,11 @@ public class Constants {
 
 	public static final String ELEMENT_DRIVER_CLASS = "driverClass";
 
-	public static final String ELEMENT_JDBC_URL = "jdbcUrl";
+	public static final String ELEMENT_JDBC_URL = "url";
 
 	public static final String ELEMENT_PASSWORD = "password";
+
+	public static final String ELEMENT_WARMUP_TIME = "warmupTime";
 
 	public static final String ELEMENT_USER = "user";
 

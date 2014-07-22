@@ -26,8 +26,11 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private boolean verbose = false;
 
-	public DefaultDataSourceConfigManager(String name, ConfigService configService) {
+	private boolean isSingleDataSource;
+
+	public DefaultDataSourceConfigManager(String name, ConfigService configService, boolean isSingleDataSource) {
 		super(name, configService);
+		this.isSingleDataSource = isSingleDataSource;
 	}
 
 	@Override
@@ -35,8 +38,20 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		listeners.add(listener);
 	}
 
+	@Override
 	public GroupDataSourceConfig getGroupDataSourceConfig() {
-		return initDataSourceConfig();
+		if (isSingleDataSource) {
+			return null;
+		}
+		return initGroupDataSourceConfig();
+	}
+
+	@Override
+	public DataSourceConfig getSingleDataSourceConfig() {
+		if (!isSingleDataSource) {
+			return null;
+		}
+		return initSingleDataSourceConfig();
 	}
 
 	@Override
@@ -48,14 +63,24 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	public synchronized void init() {
 		try {
 			this.builder = new GroupDataSourceConfigBuilder();
-			this.groupDataSourceConfig = initDataSourceConfig();
+
+			if (!isSingleDataSource) {
+				this.groupDataSourceConfig = initGroupDataSourceConfig();
+			}
 		} catch (Throwable e) {
 			throw new IllegalConfigException(String.format(
 			      "Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
 		}
 	}
 
-	private GroupDataSourceConfig initDataSourceConfig() {
+	private DataSourceConfig initSingleDataSourceConfig() {
+		DataSourceConfig singleDataSourceConfig = new DataSourceConfig(jdbcRef);
+		this.builder.visitDataSourceConfig(singleDataSourceConfig);
+
+		return singleDataSourceConfig;
+	}
+
+	private GroupDataSourceConfig initGroupDataSourceConfig() {
 		GroupDataSourceConfig groupDataSourceConfig = new GroupDataSourceConfig();
 		this.builder.visitGroupDataSourceConfig(groupDataSourceConfig);
 
@@ -75,11 +100,10 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	@Override
 	protected synchronized void onPropertyUpdated(PropertyChangeEvent evt) {
 		if (evt instanceof AdvancedPropertyChangeEvent) {
-			GroupDataSourceConfig newDataSourceConfigCache = initDataSourceConfig();
-
-			validateConfig(newDataSourceConfigCache.getDataSourceConfigs());
-
-			this.groupDataSourceConfig = newDataSourceConfigCache;
+			if (!isSingleDataSource) {
+				GroupDataSourceConfig newDataSourceConfigCache = initGroupDataSourceConfig();
+				this.groupDataSourceConfig = newDataSourceConfigCache;
+			}
 		}
 	}
 
@@ -201,6 +225,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			      dsConfig.getJdbcUrl()));
 			dsConfig.setPassword(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PASSWORD, dsId),
 			      dsConfig.getPassword()));
+			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),
+			      dsConfig.getWarmupTime()));
 			dsConfig.setUser(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUser()));
 
 			String properies = getProperty(getSingleDataSourceKey(Constants.ELEMENT_PROPERTIES, dsId), null);
