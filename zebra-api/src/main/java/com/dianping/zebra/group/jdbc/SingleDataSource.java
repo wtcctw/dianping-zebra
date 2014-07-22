@@ -287,7 +287,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 			// compatible to Cat <= 1.0.4
 			Class<?> registerClass = Class.forName("com.dianping.cat.status.StatusExtensionRegister");
 			Class<?> extensionInterfaceClass = Class.forName("com.dianping.cat.status.StatusExtension");
-			Class<?> extensionClass = Class.forName("com.dianping.zebra.group.monitor.SingleDataSourceStatusExtension");
+			Class<?> extensionClass = Class.forName("com.dianping.zebra.group.monitor.SingleDataSourceMonitor");
 			Method getInstanceMethod = registerClass.getMethod("getInstance");
 			Method registerMethod = registerClass.getMethod("register", extensionInterfaceClass);
 			Constructor<?> constructor = extensionClass.getConstructor(SingleDataSourceMBean.class);
