@@ -52,21 +52,22 @@
 		<property name="preferredTestQuery" value="SELECT 1" />   
 	</bean>
 
+##### 在 Spring 中使用默认配置的 DataSource 的配置
+    <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+        <property name="jdbcRef" value="TuanGou2010" />  
+    </bean>
 其中，`jdbcRef`就是该数据库的jdbc参数，由DBA给出。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
 情况一：C3P0参数是直接定义的，那么C3P0的参数将不具有动态刷新的功能。
 情况二：C3P0参数是使用的Lion中定义的值，那么一旦修改了Lion的参数值后，该数据源将进行自刷新。
 情况三：业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。
-        <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-        	<property name="jdbcRef" value="TuanGou2010" />  
-        </bean>
 但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到2.4.9-SNAPSHOT以上，`Zebra`将会对所有的ComboDataSource进行替换，替换成`SingleDataSource`
-通过替换，具有以下功能：
-1.配置变化后，数据连接池支持动态自刷新，应用无需重启
-2.更丰富的监控信息在CAT上呈现
-3.DBA可以更加方便的进行数据库维护操作，如：用户名密码变更
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到2.4.9-SNAPSHOT以上，
+`Zebra`将会对所有的ComboDataSource进行替换，替换成`SingleDataSource`。通过替换，具有以下功能：
+1. 配置变化后，数据连接池支持动态自刷新，应用无需重启
+2. 更丰富的监控信息在CAT上呈现
+3. DBA可以更加方便的进行数据库维护操作，如：用户名密码变更
 
 但这种方式有它的局限性，它不支持数据库进行切换操作。要想使用DAL的全部功能，必须显示的修改业务Spring配置，即上述的使用方式。
 
