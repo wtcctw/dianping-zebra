@@ -203,7 +203,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef,
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef, false,
 		      verbose);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();

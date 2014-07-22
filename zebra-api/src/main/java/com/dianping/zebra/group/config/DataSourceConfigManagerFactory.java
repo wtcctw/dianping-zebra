@@ -13,7 +13,8 @@ public class DataSourceConfigManagerFactory {
 	private DataSourceConfigManagerFactory() {
 	}
 
-	public static DataSourceConfigManager getConfigManager(String configManagerType, String name, boolean verbose) {
+	public static DataSourceConfigManager getConfigManager(String configManagerType, String name,
+	      boolean isSingleDataSource, boolean verbose) {
 		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(name);
 
 		if (dataSourceConfigManager == null) {
@@ -24,11 +25,11 @@ public class DataSourceConfigManagerFactory {
 					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
 						LocalConfigService configService = new LocalConfigService(name);
 						configService.init();
-						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
+						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService, isSingleDataSource);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
 						LionConfigService configService = new LionConfigService();
 						configService.init();
-						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
+						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService, isSingleDataSource);
 					} else {
 						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
 						      configManagerType));

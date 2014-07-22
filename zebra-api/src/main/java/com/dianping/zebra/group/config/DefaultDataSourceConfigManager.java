@@ -26,8 +26,11 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private boolean verbose = false;
 
-	public DefaultDataSourceConfigManager(String name, ConfigService configService) {
+	private boolean isSingleDataSource;
+
+	public DefaultDataSourceConfigManager(String name, ConfigService configService, boolean isSingleDataSource) {
 		super(name, configService);
+		this.isSingleDataSource = isSingleDataSource;
 	}
 
 	@Override

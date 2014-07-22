@@ -13,29 +13,31 @@ public class ConfigManagerTest {
 	@Test
 	public void testManager() throws IOException, InterruptedException {
 		SystemConfigManager systemConfigManager = SystemConfigManagerFactory.getConfigManger("local", "zebra.v2.system");
-		
+
 		System.out.println(systemConfigManager.getSystemConfig());
-		
+
 		systemConfigManager.addListerner(new PropertyChangeListener() {
-			
+
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				System.out.println(String.format("Property %s changed from [%s] to [%s]", evt.getPropertyName(),evt.getOldValue(),evt.getNewValue()));
+				System.out.println(String.format("Property %s changed from [%s] to [%s]", evt.getPropertyName(),
+				      evt.getOldValue(), evt.getNewValue()));
 			}
 		});
-		
-		
-		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local","sample.ds.v2",false);
+
+		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local",
+		      "sample.ds.v2", false, false);
 
 		System.out.println(dataSourceConfigManager.getGroupDataSourceConfig().getDataSourceConfigs());
 		dataSourceConfigManager.addListerner(new PropertyChangeListener() {
-			
+
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				System.out.println(String.format("Property %s changed from [%s] to [%s]", evt.getPropertyName(),evt.getOldValue(),evt.getNewValue()));
+				System.out.println(String.format("Property %s changed from [%s] to [%s]", evt.getPropertyName(),
+				      evt.getOldValue(), evt.getNewValue()));
 			}
 		});
-	
+
 		System.in.read();
 	}
 }
