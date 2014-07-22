@@ -12,16 +12,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.dianping.cat.Cat;
 import com.dianping.zebra.group.util.StringUtils;
 
-public abstract class AbstractConfigManager{
+public abstract class AbstractConfigManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractConfigManager.class);
 
-	protected final String name;
+	protected final String jdbcRef;
 
 	protected final ConfigService configService;
-	
+
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
 	private ExecutorService listenerNotifyThreadPool = Executors.newFixedThreadPool(5, new ThreadFactory() {
@@ -31,14 +32,14 @@ public abstract class AbstractConfigManager{
 		public Thread newThread(Runnable r) {
 			Thread t = new Thread(r);
 			t.setDaemon(true);
-			t.setName("Thread-Notify-" + id.incrementAndGet());
+			t.setName("Dal-Thread-Notify-" + id.incrementAndGet());
 
 			return t;
 		}
 	});
 
-	public AbstractConfigManager(String name, ConfigService configService) {
-		this.name = name;
+	public AbstractConfigManager(String jdbcRef, ConfigService configService) {
+		this.jdbcRef = jdbcRef;
 		this.configService = configService;
 		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
 	}
@@ -74,7 +75,7 @@ public abstract class AbstractConfigManager{
 			return defaultValue;
 		}
 	}
-	
+
 	protected String getProperty(String key, String defaultValue) {
 		String value = configService.getProperty(key);
 
@@ -86,33 +87,30 @@ public abstract class AbstractConfigManager{
 	}
 
 	private void notifyListeners(final PropertyChangeEvent evt) {
-		try {
-			for (final PropertyChangeListener listener : listeners) {
-				Runnable task = new Runnable() {
+		for (final PropertyChangeListener listener : listeners) {
+			Runnable task = new Runnable() {
 
-					@Override
-					public void run() {
-						listener.propertyChange(evt);
-					}
-				};
+				@Override
+				public void run() {
+					listener.propertyChange(evt);
+				}
+			};
 
-				listenerNotifyThreadPool.submit(task);
-			}
-		} catch (Throwable e) {
-			logger.warn("thread pool error!", e);
+			listenerNotifyThreadPool.submit(task);
 		}
 	}
 
-	protected abstract void onPropertiesUpdated(PropertyChangeEvent evt);
-	
+	protected abstract void onPropertyUpdated(PropertyChangeEvent evt);
+
 	class InnerPropertyChangeListener implements PropertyChangeListener {
 		@Override
 		public void propertyChange(final PropertyChangeEvent evt) {
 			try {
-				onPropertiesUpdated(evt);
+				onPropertyUpdated(evt);
 				notifyListeners(evt);
 			} catch (Throwable e) {
-				logger.warn("Illegal config file, apply old config!", e);
+				Cat.logError(e);
+				logger.warn("fail to update property, apply old config!", e);
 			}
 		}
 	}

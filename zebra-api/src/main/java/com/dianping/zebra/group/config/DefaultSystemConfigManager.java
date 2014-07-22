@@ -22,7 +22,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 	}
 
 	private String getKey(String key) {
-		return String.format("%s.%s", this.name, key);
+		return String.format("%s.%s", this.jdbcRef, key);
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 			this.systemConfig.set(initSystemConfig());
 		} catch (Throwable e) {
 			throw new IllegalConfigException(String.format(
-			      "Fail to initialize DefaultSystemConfigManager with config file[%s].", this.name), e);
+			      "Fail to initialize DefaultSystemConfigManager with config file[%s].", this.jdbcRef), e);
 		}
 	}
 
@@ -56,7 +56,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		return config;
 	}
 
-	protected void onPropertiesUpdated(PropertyChangeEvent evt) {
+	protected void onPropertyUpdated(PropertyChangeEvent evt) {
 		String key = evt.getPropertyName();
 		Object newValue = evt.getNewValue();
 

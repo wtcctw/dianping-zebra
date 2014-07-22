@@ -11,7 +11,7 @@ package com.dianping.zebra.group;
  * 
  */
 public class Constants {
-	
+
 	public static final String VERSION = "2.4.9";
 
 	public static final String SQL_FORCE_WRITE_HINT = "/*+zebra:w*/";
@@ -22,36 +22,32 @@ public class Constants {
 
 	public static final String CONFIG_MANAGER_TYPE_LOCAL = "local";
 
+	public static final String DEFAULT_DATASOURCE_GROUP_PRFIX = "groupds";
+
+	public static final String DEFAULT_DATASOURCE_SINGLE_PRFIX = "ds";
+
 	public static final String DEFAULT_SYSTEM_RESOURCE_ID = "zebra.v2.system";
 
-	public static final String DEFAULT_ZEBRA_PRFIX = "zebra.v2";
+	public static final String DEFAULT_DATASOURCE_VERBOSE_PRFIX = "zebra.v2";
 
-	public static final String DEFAULT_DATASOURCE_PRFIX = "zebra.v2.ds";
+	public static final String DEFAULT_DATASOURCE_SINGLE_VERBOSE_PRFIX = "zebra.v2.ds";
 
-	public static final String DEFAULT_BUSSINESS_PRFIX = "zebra.v2.biz";
-
-	public static final String DEFAULT_GROUP_PRFIX = "zebra.v2.group";
+	public static final String DEFAULT_DATASOURCE_GROUP_VERBOSE_PRFIX = "zebra.v2.group";
 
 	// DataSource
 	public static final String ELEMENT_ACTIVE = "active";
-	
-	public static final String ELEMENT_TEST_READONLY_SQL = "testReadOnlySql";
-	
-	public static final String ELEMENT_PUNISH_LIMIT= "punishLimit";
 
-	public static final String ELEMENT_TIME_WINDOW= "timeWindow";
-	
+	public static final String ELEMENT_TEST_READONLY_SQL = "testReadOnlySql";
+
+	public static final String ELEMENT_PUNISH_LIMIT = "punishLimit";
+
+	public static final String ELEMENT_TIME_WINDOW = "timeWindow";
+
 	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
 
 	public static final String ELEMENT_DRIVER_CLASS = "driverClass";
 
-	public static final String ELEMENT_INITIAL_POOL_SIZE = "initialPoolSize";
-
 	public static final String ELEMENT_JDBC_URL = "jdbcUrl";
-
-	public static final String ELEMENT_MAX_POOL_SIZE = "maxPoolSize";
-
-	public static final String ELEMENT_MIN_POOL_SIZE = "minPoolSize";
 
 	public static final String ELEMENT_PASSWORD = "password";
 
@@ -60,7 +56,7 @@ public class Constants {
 	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
 
 	public static final String ELEMENT_TRANSACTION_FORCE_WREITE = "transactionForceWrite";
-	
+
 	public static final String ELEMENT_WRITE_FIRST = "writeFirst";
 
 	public static final String ELEMENT_PROPERTIES = "properties";
@@ -75,8 +71,6 @@ public class Constants {
 	public static final String ELEMENT_COOKIE_NAME = "cookieName";
 
 	public static final String ELEMENT_ENCRYPT_SEED = "encryptSeed";
-
-	public static final String ELEMENT_CHECKOUT_TIMEOUT = "checkoutTimeout";
 
 	public static final String ELEMENT_COOKIE_EXPIRED_TIME = "cookieExpiredTime";
 

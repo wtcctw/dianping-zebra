@@ -7,7 +7,8 @@ public class DataSourceRouterFactory {
 
 	public static DataSourceRouter getDataSourceRouter(DataSourceConfigManager dataSourceConfigManager) {
 		if (Constants.ROUTER_STRATEGY_ROUNDROBIN.equalsIgnoreCase(dataSourceConfigManager.getRouterStrategy())) {
-			DataSourceRouter router = new WeightDataSourceRouter(dataSourceConfigManager.getDataSourceConfigs());
+			DataSourceRouter router = new WeightDataSourceRouter(dataSourceConfigManager.getGroupDataSourceConfig()
+			      .getDataSourceConfigs());
 			return router;
 		} else {
 			throw new IllegalArgumentException("Strategy not supported: " + dataSourceConfigManager.getRouterStrategy());

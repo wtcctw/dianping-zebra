@@ -33,16 +33,16 @@ import com.dianping.zebra.group.util.StringUtils;
 public class SingleDataSource extends AbstractDataSource implements DataSource, SingleDataSourceMBean {
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 
-	private DataSourceConfig config = new DataSourceConfig();
-
 	private volatile InnerSingleDataSource innerDs;
+
+	private DataSourceConfig c3p0Config = new DataSourceConfig();
 
 	public SingleDataSource(String id) {
 		// TODO: resolve from lion later
-		config.setId(id);
-		config.setActive(true);
-		config.setCanRead(true);
-		config.setCanWrite(true);
+		c3p0Config.setId(id);
+		c3p0Config.setActive(true);
+		c3p0Config.setCanRead(true);
+		c3p0Config.setCanWrite(true);
 
 		registerMonitor();
 	}
@@ -167,7 +167,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		Transaction t = Cat.newTransaction("DAL", "DataSource.Init");
 
 		try {
-			InnerSingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
+			InnerSingleDataSource ds = SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(c3p0Config);
 			t.setStatus(Message.SUCCESS);
 
 			return ds;
@@ -180,7 +180,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		}
 	}
 
-	private void refresh(String propertyToChange) {
+	protected void refresh(String propertyToChange) {
 		if (innerDs == null) {
 			return;
 		}
@@ -203,8 +203,8 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	private void refreshUserAndPassword() {
-		config.setUser(atomicRefresh.getNewUser());
-		config.setPassword(atomicRefresh.getNewPassword());
+		c3p0Config.setUser(atomicRefresh.getNewUser());
+		c3p0Config.setPassword(atomicRefresh.getNewPassword());
 		atomicRefresh.reset();
 
 		// TODO:平滑切换
@@ -255,8 +255,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	public synchronized void setCheckoutTimeout(int checkoutTimeout) {
-		config.setCheckoutTimeout(checkoutTimeout);
-		refresh("checkoutTimeout");
+		setProperty("checkoutTimeout", String.valueOf(checkoutTimeout));
 	}
 
 	public synchronized void setConnectionCustomizerClassName(String connectionCustomizerClassName) {
@@ -280,7 +279,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	public synchronized void setDriverClass(String driverClass) {
-		config.setDriverClass(driverClass);
+		c3p0Config.setDriverClass(driverClass);
 		refresh("driverClass");
 	}
 
@@ -297,12 +296,11 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	public synchronized void setInitialPoolSize(int initialPoolSize) {
-		config.setInitialPoolSize(initialPoolSize);
-		refresh("initialPoolSize");
+		setProperty("initialPoolSize", String.valueOf(initialPoolSize));
 	}
 
 	public synchronized void setJdbcUrl(String jdbcUrl) {
-		config.setJdbcUrl(jdbcUrl);
+		c3p0Config.setJdbcUrl(jdbcUrl);
 		refresh("jdbcUrl");
 	}
 
@@ -323,8 +321,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	public synchronized void setMaxPoolSize(int maxPoolSize) {
-		config.setMaxPoolSize(maxPoolSize);
-		refresh("maxPoolSize");
+		setProperty("maxPoolSize", String.valueOf(maxPoolSize));
 	}
 
 	public synchronized void setMaxStatements(int maxStatements) {
@@ -336,8 +333,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	public synchronized void setMinPoolSize(int minPoolSize) {
-		config.setMinPoolSize(minPoolSize);
-		refresh("minPoolSize");
+		setProperty("minPoolSize", String.valueOf(minPoolSize));
 	}
 
 	public synchronized void setNumHelperThreads(int numHelperThreads) {
@@ -355,7 +351,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	public synchronized void setPassword(String password) {
 		// innerDs 未加载的时候不需要 reload 逻辑
 		if (innerDs == null) {
-			config.setPassword(password);
+			c3p0Config.setPassword(password);
 			return;
 		}
 
@@ -377,7 +373,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 	private void setProperty(String name, String value) {
 		Any any = null;
-		for (Any a : config.getProperties()) {
+		for (Any a : c3p0Config.getProperties()) {
 			if (a.getName().equals(name)) {
 				any = a;
 				break;
@@ -386,7 +382,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 		if (any == null) {
 			any = new Any();
-			config.getProperties().add(any);
+			c3p0Config.getProperties().add(any);
 		}
 
 		any.setName(name);
@@ -414,7 +410,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	public synchronized void setUser(String user) {
 		// innerDs 未加载的时候不需要 reload 逻辑
 		if (innerDs == null) {
-			config.setUser(user);
+			c3p0Config.setUser(user);
 			return;
 		}
 

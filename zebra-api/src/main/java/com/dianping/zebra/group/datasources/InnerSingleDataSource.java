@@ -57,7 +57,7 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 
 					poolBackedDataSource.close();
 
-					Cat.logEvent("DAL.Destory.End", this.dsId);
+					Cat.logEvent("DAL.DataSource.Destoryed", this.dsId);
 					logger.info("old datasource [" + this.dsId + "] closed");
 					this.state = DataSourceState.CLOSED;
 				} else {
@@ -244,10 +244,6 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 			Map<String, Object> props = new HashMap<String, Object>();
 
 			props.put("driverClass", value.getDriverClass());
-			props.put("initialPoolSize", value.getInitialPoolSize());
-			props.put("minPoolSize", value.getMinPoolSize());
-			props.put("maxPoolSize", value.getMaxPoolSize());
-			props.put("checkoutTimeout", value.getCheckoutTimeout());
 
 			for (Any any : value.getProperties()) {
 				props.put(any.getName(), any.getValue());

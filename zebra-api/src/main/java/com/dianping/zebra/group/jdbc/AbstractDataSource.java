@@ -23,6 +23,9 @@ public abstract class AbstractDataSource implements DataSource {
 
 	private int loginTimeout = 0;
 
+	protected void close() throws SQLException {
+	}
+
 	@Override
 	public int getLoginTimeout() throws SQLException {
 		return this.loginTimeout;
@@ -33,10 +36,11 @@ public abstract class AbstractDataSource implements DataSource {
 		return out;
 	}
 
-	protected void init() {
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		throw new UnsupportedOperationException("getParentLogger");
 	}
 
-	protected void close() throws SQLException {
+	protected void init() {
 	}
 
 	@Override
@@ -70,9 +74,5 @@ public abstract class AbstractDataSource implements DataSource {
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
-	}
-
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		throw new UnsupportedOperationException("getParentLogger");
 	}
 }

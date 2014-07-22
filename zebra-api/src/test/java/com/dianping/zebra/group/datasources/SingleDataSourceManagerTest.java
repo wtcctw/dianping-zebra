@@ -57,9 +57,6 @@ public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
 		config.setPassword(PASSWORD);
 		config.setId("ds1");
 		config.setActive(true);
-		config.setInitialPoolSize(1);
-		config.setMaxPoolSize(5);
-		config.setMinPoolSize(1);
 
 		return config;
 	}

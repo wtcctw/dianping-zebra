@@ -6,11 +6,11 @@ import java.util.Map;
 import com.dianping.cat.status.StatusExtension;
 import com.dianping.zebra.group.datasources.DataSourceState;
 
-public class SingleDataSourceStatusExtension implements StatusExtension {
+public class SingleDataSourceMonitor implements StatusExtension {
 
 	private SingleDataSourceMBean bean;
 
-	public SingleDataSourceStatusExtension(SingleDataSourceMBean bean) {
+	public SingleDataSourceMonitor(SingleDataSourceMBean bean) {
 		this.bean = bean;
 	}
 

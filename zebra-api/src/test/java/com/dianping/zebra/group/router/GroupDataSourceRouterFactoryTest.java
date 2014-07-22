@@ -16,34 +16,35 @@ public class GroupDataSourceRouterFactoryTest {
 
 	private DataSourceRouter dataSourceRouter;
 
-	private Map<String,Integer> counter = new HashMap<String,Integer>();
+	private Map<String, Integer> counter = new HashMap<String, Integer>();
+
 	@Before
 	public void init() {
 		String dataSourceResourceId = "sample.ds.v2";
 		String configManagerType = "local";
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType,
-		      dataSourceResourceId);
+		      dataSourceResourceId, false);
 		this.dataSourceRouter = DataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
 	}
 
 	@Test
 	public void testReadSelect() {
-		for(int i = 0 ; i < 1000 ; i++){
+		for (int i = 0; i < 1000; i++) {
 			String readSql = "select * from a";
 			RouterContext routerInfo = new RouterContext(readSql);
 			RounterTarget target = dataSourceRouter.select(routerInfo);
-			
+
 			Integer integer = counter.get(target.getId());
-			if(integer == null){
+			if (integer == null) {
 				integer = 1;
-			}else{
+			} else {
 				integer++;
 			}
-			
+
 			counter.put(target.getId(), integer);
 		}
-		
-		for(Entry<String,Integer> entry: counter.entrySet()){
+
+		for (Entry<String, Integer> entry : counter.entrySet()) {
 			System.out.println(entry.getKey() + ":" + entry.getValue());
 		}
 	}

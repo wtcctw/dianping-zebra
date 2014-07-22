@@ -19,10 +19,6 @@
     <element name="user" value-type="String" />
     <element name="driver-class" value-type="String" />
     <element name="password" value-type="String" />
-    <element name="min-pool-size" value-type="int" />
-    <element name="max-pool-size" value-type="int" />
-    <element name="initial-pool-size" value-type="int" />
-    <element name="checkout-timeout" value-type="int" />
   </entity>
 </model>
 

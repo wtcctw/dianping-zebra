@@ -10,10 +10,10 @@ public class DataSourceConfigManagerFactory {
 
 	private static Map<String, DataSourceConfigManager> dataSourceConfigManagers = new HashMap<String, DataSourceConfigManager>();
 
-	private DataSourceConfigManagerFactory(){
+	private DataSourceConfigManagerFactory() {
 	}
-	
-	public static DataSourceConfigManager getConfigManager(String configManagerType, String name) {
+
+	public static DataSourceConfigManager getConfigManager(String configManagerType, String name, boolean verbose) {
 		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(name);
 
 		if (dataSourceConfigManager == null) {
@@ -33,6 +33,7 @@ public class DataSourceConfigManagerFactory {
 						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
 						      configManagerType));
 					}
+					dataSourceConfigManager.setVerbose(verbose);
 					dataSourceConfigManager.init();
 					dataSourceConfigManagers.put(name, dataSourceConfigManager);
 				}

@@ -14,7 +14,7 @@ import com.dianping.zebra.group.util.Splitters;
 
 public class DalServiceImpl implements DalService {
 
-	private final String PREFIX = Constants.DEFAULT_ZEBRA_PRFIX + ".";
+	private final String PREFIX = Constants.DEFAULT_DATASOURCE_VERBOSE_PRFIX + ".";
 
 	@Inject
 	private LionHttpService m_lionHttpService;

@@ -174,7 +174,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		private void completeSwitchTransaction(FindMasterDataSourceResult result) {
 			if (result.isChangedMaster() && transaction != null) {
-				Cat.logEvent("DAL", "SwitchToNewMaster");
+				Cat.logEvent("DAL.FailOver", "SwitchToNewMaster");
 				transaction.setStatus(Message.SUCCESS);
 				transaction.complete();
 				transaction = null;
@@ -219,7 +219,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				transactionTryLimits = 0;
 
 				if (transaction != null) {
-					Cat.logEvent("DAL", "SwitchToNewMaster-Failed");
+					Cat.logEvent("DAL.FailOver", "SwitchToNewMaster-Failed");
 					transaction.setStatus("Fail to find any master database");
 					transaction.complete();
 					transaction = null;
@@ -299,7 +299,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				}
 			}
 
-			Cat.logEvent("DAL", "ShutDown FailOverDataSource");
+			Cat.logEvent("DAL.FailOver", "ShutDown");
 			closeConnections();
 		}
 

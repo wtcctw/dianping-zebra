@@ -28,7 +28,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 		Thread dataSourceMonitor = new Thread(new CloseDataSourceTask());
 
 		dataSourceMonitor.setDaemon(true);
-		dataSourceMonitor.setName("Thread-" + CloseDataSourceTask.class.getSimpleName());
+		dataSourceMonitor.setName("Dal-" + CloseDataSourceTask.class.getSimpleName());
 		dataSourceMonitor.start();
 	}
 

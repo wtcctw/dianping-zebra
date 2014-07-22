@@ -38,7 +38,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 
-import com.dianping.cat.Cat;
 import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 
@@ -55,6 +54,8 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	private static final String ZEBRA_DATA_SOURCE_NAME = "com.dianping.zebra.jdbc.DPDataSource";
 
 	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
+
+	private int nameId = 0;
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -114,29 +115,23 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	private GenericBeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition,
 	      DefaultListableBeanFactory listableBeanFactory) {
 
-		String newBeanName = null;
-
 		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
 			dataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(beanName);
-			newBeanName = beanName + "-" + SingleDataSource.class.getSimpleName();
-			listableBeanFactory.registerBeanDefinition(newBeanName, dataSourceDefinition);
-
-			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0-" + beanName);
-
-		} else {
-			Cat.logEvent("DAL.BeanProcessor", "NotC3P0-" + beanName + "-" + dataSourceDefinition.getBeanClassName());
+//			Cat.logEvent("DAL.BeanProcessor", "ReplaceC3P0-" + beanName);
+//		} else {
+//			Cat.logEvent("DAL.BeanProcessor", "NotC3P0-" + beanName + "-" + dataSourceDefinition.getBeanClassName());
 		}
+
+		String newBeanName = String.format("%s-%d", beanName, nameId++);
+		listableBeanFactory.registerBeanDefinition(newBeanName, dataSourceDefinition);
 
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
 		monitorableDataSourceDefinition.setBeanClass(MonitorableDataSource.class);
 
-		if (newBeanName == null) {
-			monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(dataSourceDefinition);
-		} else {
-			monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(
-			      new RuntimeBeanReference(newBeanName));
-		}
+		monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(
+		      new RuntimeBeanReference(newBeanName));
+
 		return monitorableDataSourceDefinition;
 	}
 

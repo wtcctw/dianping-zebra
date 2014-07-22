@@ -25,9 +25,9 @@ public class ConfigManagerTest {
 		});
 		
 		
-		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local","sample.ds.v2");
+		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local","sample.ds.v2",false);
 
-		System.out.println(dataSourceConfigManager.getDataSourceConfigs());
+		System.out.println(dataSourceConfigManager.getGroupDataSourceConfig().getDataSourceConfigs());
 		dataSourceConfigManager.addListerner(new PropertyChangeListener() {
 			
 			@Override
