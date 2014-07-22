@@ -225,6 +225,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			      dsConfig.getJdbcUrl()));
 			dsConfig.setPassword(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PASSWORD, dsId),
 			      dsConfig.getPassword()));
+			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),
+			      dsConfig.getWarmupTime()));
 			dsConfig.setUser(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUser()));
 
 			String properies = getProperty(getSingleDataSourceKey(Constants.ELEMENT_PROPERTIES, dsId), null);

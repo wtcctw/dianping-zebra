@@ -274,9 +274,10 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		c3p0Config.setPassword(atomicRefresh.getNewPassword());
 		atomicRefresh.reset();
 
-		// todo:
-		SmoothReload sr = new SmoothReload();
-		sr.waitForReload();
+		if (lionConfig != null) {
+			SmoothReload sr = new SmoothReload(lionConfig.getWarmupTime());
+			sr.waitForReload();
+		}
 
 		refresh("user&password");
 	}

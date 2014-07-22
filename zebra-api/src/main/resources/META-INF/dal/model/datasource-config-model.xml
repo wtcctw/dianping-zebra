@@ -19,6 +19,7 @@
 		<element name="user" value-type="String" primitive="true" default-value=""/>
 		<element name="driver-class" value-type="String" primitive="true" default-value=""/>
 		<element name="password" value-type="String" primitive="true" default-value=""/>
+		<element name="warmup-time" value-type="int" primitive="true" default-value="0"/>
 		<any name="properties" />
 	</entity>
 </model>
