@@ -56,9 +56,9 @@
 情况一：C3P0参数是直接定义的，那么C3P0的参数将不具有动态刷新的功能。
 情况二：C3P0参数是使用的Lion中定义的值，那么一旦修改了Lion的参数值后，该数据源将进行自刷新。
 情况三：业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。
-    <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-    	<property name="jdbcRef" value="TuanGou2010" />  
-	</bean>
+        <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+        	<property name="jdbcRef" value="TuanGou2010" />  
+        </bean>
 但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
 ### 老业务兼容情况
