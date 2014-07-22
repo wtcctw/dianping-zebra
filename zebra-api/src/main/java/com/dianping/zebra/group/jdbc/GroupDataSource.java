@@ -229,12 +229,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 
 		try {
-			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(dataSourceConfigManager
-			      .getGroupDataSourceConfig().getDataSourceConfigs()), systemConfigManager.getSystemConfig()
-			      .getRetryTimes());
+			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
+			      systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
-			this.writeDataSource = new FailOverDataSource(getFailoverConfig(dataSourceConfigManager
-			      .getGroupDataSourceConfig().getDataSourceConfigs()));
+			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()));
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {

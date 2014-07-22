@@ -57,7 +57,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		if (master != null && master.isAvailable()) {
 			return master.getConnection();
 		} else {
-			throw new SQLException("Master database is currently in the maintaining stage.");
+			throw new SQLException("Master database is in the maintaining.");
 		}
 	}
 
@@ -87,10 +87,8 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		masterDataSourceMonitorThread = new Thread(monitor);
 		masterDataSourceMonitorThread.setDaemon(true);
-		masterDataSourceMonitorThread.setName("FailOverDataSource");
+		masterDataSourceMonitorThread.setName("Dal-" + FailOverDataSource.class.getSimpleName());
 		masterDataSourceMonitorThread.start();
-
-		super.init();
 	}
 
 	private boolean setMasterDb(DataSourceConfig config) {
@@ -174,7 +172,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		private void completeSwitchTransaction(FindMasterDataSourceResult result) {
 			if (result.isChangedMaster() && transaction != null) {
-				Cat.logEvent("DAL.FailOver", "SwitchToNewMaster");
+				Cat.logEvent("DAL.FailOver", "Success");
 				transaction.setStatus(Message.SUCCESS);
 				transaction.complete();
 				transaction = null;
@@ -182,7 +180,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 
 		private void createSwitchTransaction() {
-			transaction = Cat.newTransaction("DAL", "SwitchMaster");
+			transaction = Cat.newTransaction("DAL", "FailOver");
 		}
 
 		public FindMasterDataSourceResult findMasterDataSource() {
@@ -191,6 +189,8 @@ public class FailOverDataSource extends AbstractDataSource {
 			for (DataSourceConfig config : configs.values()) {
 				CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
 				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
+					Cat.logEvent("DAL.Master" + config.getId(), "Found");
+
 					result.setChangedMaster(setMasterDb(config));
 					result.setMasterExist(true);
 					break;
@@ -219,7 +219,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				transactionTryLimits = 0;
 
 				if (transaction != null) {
-					Cat.logEvent("DAL.FailOver", "SwitchToNewMaster-Failed");
+					Cat.logEvent("DAL.FailOver", "Failed");
 					transaction.setStatus("Fail to find any master database");
 					transaction.complete();
 					transaction = null;
@@ -299,7 +299,6 @@ public class FailOverDataSource extends AbstractDataSource {
 				}
 			}
 
-			Cat.logEvent("DAL.FailOver", "ShutDown");
 			closeConnections();
 		}
 
