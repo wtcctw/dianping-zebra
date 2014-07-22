@@ -1,21 +1,13 @@
 ## Zebra
 
 ### 简介
-`Zebra`是一个支持双IDC切换，并可以简化配置的DAL基础组件。
-更多介绍：[https://drive.google.com/a/dianping.com/#folders/0B3Kh7VPBVPl_alFBWHN1ZzZkZjQ](https://drive.google.com/a/dianping.com/#folders/0B3Kh7VPBVPl_alFBWHN1ZzZkZjQ)
+`Zebra`是在C3P0基础上进行包装成的点评内部使用的数据源工具，它有以下的功能点：
+1.简化数据源的jdbc相关配置
+2.配置变化后，数据连接池支持动态自刷新，应用无需重启
+3.更丰富的监控信息在CAT上呈现
+4.DBA可以更加方便的进行数据库维护，如写库切换，读库上线下线，用户名密码变更等操作
 
-
-### 老项目支持情况（开发中）
-`Zebra`将会支持老项目的无缝切换。
-满足以下条件的项目可以通过`Phoenix`升级。
-
-#### 使用C3P0并引用zebra-ds-moniror的项目
-自动替换成`SingleDataSourceC3P0Adapter`
-
-#### 使用C3P0、dpdl并引用zebra-ds-moniror的项目
-自动替换成`GroupDataSource`
-
-### 新项目使用说明
+### 使用说明
 ##### POM依赖
 	<dependency>
     	<groupId>com.dianping.zebra</groupId>
@@ -23,26 +15,61 @@
     	<version>${version}</version>
 	</dependency>
 
-注意：升级`Cat`到`1.0.5`版本，因为`2.3.0`开始依赖的是`1.0.5`版本的`Cat`
+注意：如果想要在CAT中的心跳中看到数据源连接池的信息，需升级`Cat`到`1.0.5`版本，
+`dpsf-net`升级到`2.1.21`版本以上。
 
 ##### 单数据库在 Spring 中 DataSource 的配置
-	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.SingleDataSourceC3P0Adapter">
-		<constructor-arg value="bizTest" />
+	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.SingleDataSource">
+		<property name="jdbcRef" value="TuanGou2010" />
 		<property name="minPoolSize" value="5" />
 		<property name="maxPoolSize" value="25" />
+        <property name="initialPoolSize" value="5" />
+    	<property name="maxIdleTime" value="1800" />
+		<property name="idleConnectionTestPeriod" value="60" />
+		<property name="acquireRetryAttempts" value="3" />
+		<property name="acquireRetryDelay" value="300" />
+		<property name="maxStatements" value="0" />
+		<property name="maxStatementsPerConnection" value="100" />
+		<property name="numHelperThreads" value="6" />
+		<property name="maxAdministrativeTaskTime" value="5" />
+		<property name="preferredTestQuery" value="SELECT 1" />
 	</bean>
 
 ##### 多数据库在 Spring 中 DataSource 的配置
-	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" 
-            init-method="init">
-		<constructor-arg value="bizTest" />      
+	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+		<property name="jdbcRef" value="TuanGou2010" />
+    	<property name="minPoolSize" value="5" />
+		<property name="maxPoolSize" value="25" />
+        <property name="initialPoolSize" value="5" />
+    	<property name="maxIdleTime" value="1800" />
+		<property name="idleConnectionTestPeriod" value="60" />
+		<property name="acquireRetryAttempts" value="3" />
+		<property name="acquireRetryDelay" value="300" />
+		<property name="maxStatements" value="0" />
+		<property name="maxStatementsPerConnection" value="100" />
+		<property name="numHelperThreads" value="6" />
+		<property name="maxAdministrativeTaskTime" value="5" />
+		<property name="preferredTestQuery" value="SELECT 1" />   
 	</bean>
+
+其中，`jdbcRef`就是该数据库的jdbc参数，由DBA给出。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
+情况一：C3P0参数是直接定义的，那么C3P0的参数将不具有动态刷新的功能。
+情况二：C3P0参数是使用的Lion中定义的值，那么一旦修改了Lion的参数值后，该数据源将进行自刷新。
+
+### 老业务兼容情况
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到2.4.9-SNAPSHOT以上，`Zebra`将会对所有的ComboDataSource进行替换，替换成`SingleDataSource`
+通过替换，具有以下功能：
+1.配置变化后，数据连接池支持动态自刷新，应用无需重启
+2.更丰富的监控信息在CAT上呈现
+3.DBA可以更加方便的进行数据库维护操作，如：用户名密码变更
+
+但这种方式有它的局限性，它不支持数据库进行切换操作。要想使用DAL的全部功能，必须显示的修改业务Spring配置，即上述的使用方式。
 
 ### 更新说明
 #### 2.4.9-SNAPSHOT
 * [+] 支持Spring方式配置`GroupDataSource`
 * [+] 支持Spring方式配置`SingleDataSource`
-* [+] 老应用通过升级zebra-ds-monitor,无缝包装`C3P0`到`SingleDataSource`
+* [+] 通过升级zebra-ds-monitor,老应用自动替换`C3P0`到`SingleDataSource`
 * [+] 两种DataSource均支持配置动态刷新
 
 ##### 2.4.8
