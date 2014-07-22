@@ -40,8 +40,10 @@
 
 ### 更新说明
 #### 2.4.9-SNAPSHOT
-* [+] 支持单独配置`SingleDataSource`
-* [+] 支持自动替换老的`C3P0`配置到`SingleDataSource`
+* [+] 支持Spring方式配置`GroupDataSource`
+* [+] 支持Spring方式配置`SingleDataSource`
+* [+] 老应用通过升级zebra-ds-monitor,无缝包装`C3P0`到`SingleDataSource`
+* [+] 两种DataSource均支持配置动态刷新
 
 ##### 2.4.8
 * [*] 重构`FailOverDataSource`，检测逻辑更合理

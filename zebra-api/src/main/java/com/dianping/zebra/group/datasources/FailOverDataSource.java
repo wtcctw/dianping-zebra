@@ -189,7 +189,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			for (DataSourceConfig config : configs.values()) {
 				CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
 				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
-					Cat.logEvent("DAL.Master" + config.getId(), "Found");
+					Cat.logEvent("DAL.Master", "Found-" + config.getId());
 
 					result.setChangedMaster(setMasterDb(config));
 					result.setMasterExist(true);
