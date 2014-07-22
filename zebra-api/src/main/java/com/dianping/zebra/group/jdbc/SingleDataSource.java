@@ -140,7 +140,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 	@Override
 	public DataSourceState getState() {
-		return this.innerDs == null ? null : this.innerDs.getState();
+		return this.innerDs == null ? DataSourceState.INITIAL : this.innerDs.getState();
 	}
 
 	@Override
