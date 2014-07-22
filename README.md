@@ -15,8 +15,7 @@
     	<version>${version}</version>
 	</dependency>
 
-注意：如果想要在CAT中的心跳中看到数据源连接池的信息，需升级`Cat`到`1.0.5`版本，
-`dpsf-net`升级到`2.1.21`版本以上。
+注意：如果想要在CAT中的心跳中看到数据源连接池的信息，需升级`Cat`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
 
 ##### 单数据库在 Spring 中 DataSource 的配置
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.SingleDataSource">
