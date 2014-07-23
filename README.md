@@ -17,7 +17,10 @@
     	<version>${version}</version>
 	</dependency>
 
-注意：如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
+##### 其他依赖
+* 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
+* `Lion`的`0.4.3`一下版本有一个BUG，如果多个`bean`指向了同一个`Lion`配置，那么配置更新的时候只会通知一个`bean`。所以如果多个`DataSource`引用了同一个`Lion`配置，如果想要实现C3P0相关配置热切换，就需要升级`Lion`到`0.4.3`。
+
 
 ##### 单数据库在 Spring 中 DataSource 的配置
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.SingleDataSource" init-method="init" destroy-method="close">
