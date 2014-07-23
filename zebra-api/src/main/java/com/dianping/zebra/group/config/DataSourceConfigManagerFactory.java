@@ -15,11 +15,12 @@ public class DataSourceConfigManagerFactory {
 
 	public static DataSourceConfigManager getConfigManager(String configManagerType, String name,
 	      boolean isSingleDataSource, boolean verbose) {
-		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(name);
+		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name,
+		      isSingleDataSource));
 
 		if (dataSourceConfigManager == null) {
 			synchronized (dataSourceConfigManagers) {
-				dataSourceConfigManager = dataSourceConfigManagers.get(name);
+				dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name, isSingleDataSource));
 
 				if (dataSourceConfigManager == null) {
 					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
@@ -36,11 +37,15 @@ public class DataSourceConfigManagerFactory {
 					}
 					dataSourceConfigManager.setVerbose(verbose);
 					dataSourceConfigManager.init();
-					dataSourceConfigManagers.put(name, dataSourceConfigManager);
+					dataSourceConfigManagers.put(getFormattedName(name, isSingleDataSource), dataSourceConfigManager);
 				}
 			}
 		}
 
 		return dataSourceConfigManager;
+	}
+
+	private static String getFormattedName(String name, boolean isSingleDataSource) {
+		return "[" + (isSingleDataSource ? "single" : "group") + "]" + name;
 	}
 }
