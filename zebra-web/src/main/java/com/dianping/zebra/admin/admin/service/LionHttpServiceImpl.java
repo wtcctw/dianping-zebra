@@ -16,7 +16,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 	private final String LION_SERVER = "http://lionapi.dp:8080";
 
 	private String callLionHttpApi(String url) throws IOException {
-		InputStream inputStream = Urls.forIO().connectTimeout(100).readTimeout(100).openStream(url);
+		InputStream inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
 
 		return Files.forIO().readFrom(inputStream, "utf-8");
 	}
