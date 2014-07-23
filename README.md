@@ -6,7 +6,7 @@
 2. 纯粹的读写分离，支持SQL语句hint
 3. 写库的自动切换
 4. 配置变化后，数据连接池支持动态自刷新，应用无需重启
-5. 更丰富的监控信息在CAT上呈现
+5. 更丰富的监控信息在`CAT`上呈现
 6. DBA可以更加方便的进行数据库维护，如写库切换，读库上线下线，用户名密码变更等操作
 
 ### 使用说明
@@ -17,7 +17,7 @@
     	<version>${version}</version>
 	</dependency>
 
-注意：如果想要在CAT中的心跳中看到数据源连接池的信息，需升级`Cat`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
+注意：如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
 
 ##### 单数据库在 Spring 中 DataSource 的配置
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.SingleDataSource">
@@ -38,7 +38,8 @@
 
 ##### 多数据库在 Spring 中 DataSource 的配置
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<constructor-arg value="TuanGou2010" /> 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
+		<constructor-arg value="TuanGou2010" />
+		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
 		<property name="maxPoolSize" value="${lion.key.maxPoolSize}" />
         <property name="initialPoolSize" value="${lion.key.initialPoolSize}" />
     	<property name="maxIdleTime" value="1800" />
