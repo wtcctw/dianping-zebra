@@ -55,7 +55,7 @@ public class GroupConnection implements Connection {
 	private DataSourceConfigManager dataSourceConfigManager;
 
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
-	
+
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
 	      DataSourceConfigManager dataSourceConfigManager, CustomizedReadWriteStrategy customizedReadWriteStrategy) {
 		super();
@@ -322,13 +322,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public DatabaseMetaData getMetaData() throws SQLException {
 		checkClosed();
-		if (rConnection != null) {
-			return rConnection.getMetaData();
-		} else if (wConnection != null) {
-			return wConnection.getMetaData();
-		} else {
-			return new GroupDatabaseMetaData();
-		}
+		return this.getWriteConnection().getMetaData();
 	}
 
 	public int getNetworkTimeout() throws SQLException {
@@ -344,12 +338,12 @@ public class GroupConnection implements Connection {
 	}
 
 	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
-		if(dataSourceConfigManager.isWriteFirst()){
-			if(wConnection != null){
+		if (dataSourceConfigManager.isWriteFirst()) {
+			if (wConnection != null) {
 				return wConnection;
 			}
 		}
-		
+
 		if (forceWriter) {
 			return getWriteConnection();
 		} else if (!autoCommit && dataSourceConfigManager.isTransactionForceWrite()) {
