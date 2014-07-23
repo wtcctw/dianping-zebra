@@ -53,14 +53,21 @@
 		<property name="preferredTestQuery" value="SELECT 1" />   
 	</bean>
 
-##### 在 Spring 中使用默认配置的 DataSource 的配置
-    <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<constructor-arg value="TuanGou2010" />  
+##### 多数据库在 Spring 中使用默认配置的 DataSource 的配置
+    <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init" destroy-method="close">
+		<property name="jdbcRef" value="TuanGou2010" /> 
     </bean>
+
+##### 配置说明
 其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，由DBA给出，`Zebra`会自动根据这个名字到`Lion`上查找`jdbcUrl`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
 1. C3P0参数是在`bean`中直接定义的，那么C3P0的参数将不具有动态刷新的功能。
 2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
 3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
+
+###### 答疑解惑
+Q：为什么要加`init-method`和`destory-method`，不加会怎么样？
+
+A：`Zebra`内不需要启动多线程，构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
 通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.4.9`及以上，
