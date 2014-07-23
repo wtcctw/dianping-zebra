@@ -57,7 +57,7 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 
 					poolBackedDataSource.close();
 
-					Cat.logEvent("DAL.DataSource.Destoryed", this.dsId);
+					Cat.logEvent("DataSource.Destoryed", this.dsId);
 					logger.info("old datasource [" + this.dsId + "] closed");
 					this.state = DataSourceState.CLOSED;
 				} else {
@@ -252,7 +252,7 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
 			      unPooledDataSource, props);
 
-			Cat.logEvent("DAL.DataSource.Created", value.getId());
+			Cat.logEvent("DataSource.Created", value.getId());
 			logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
 			return pooledDataSource;
