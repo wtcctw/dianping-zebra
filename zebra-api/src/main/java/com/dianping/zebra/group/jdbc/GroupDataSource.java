@@ -400,10 +400,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("initialPoolSize", String.valueOf(initialPoolSize));
 	}
 
-	// public synchronized void setInitialPoolSize(String initialPoolSize) {
-	// setProperty("initialPoolSize", initialPoolSize);
-	// }
-
 	public void setJdbcRef(String jdbcRef) {
 		this.jdbcRef = jdbcRef;
 	}
