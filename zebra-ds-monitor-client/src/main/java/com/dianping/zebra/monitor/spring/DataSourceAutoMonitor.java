@@ -119,6 +119,10 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 			dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
 			dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
 			dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(1, false);
+
+			if (dataSourceDefinition instanceof AbstractBeanDefinition) {
+				((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
+			}
 		}
 
 		String newBeanName = String.format("%s-%d", beanName, nameId++);

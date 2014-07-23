@@ -13,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -24,6 +27,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.datasources.DataSourceState;
 import com.dianping.zebra.group.datasources.InnerSingleDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
+import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.SmoothReload;
@@ -37,6 +41,9 @@ import com.dianping.zebra.group.util.StringUtils;
  * 
  */
 public class SingleDataSource extends AbstractDataSource implements DataSource, SingleDataSourceMBean {
+
+	private static final Logger logger = LoggerFactory.getLogger(SingleDataSource.class);
+
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 
 	private volatile InnerSingleDataSource innerDs;
@@ -51,16 +58,24 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 	private boolean useLionConfig = true;
 
-	public SingleDataSource(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
-		initSingleDataSource();
+	public SingleDataSource() {
+
 	}
 
+	public SingleDataSource(String jdbcRef) {
+		this.setJdbcRef(jdbcRef);
+	}
+
+	/**
+	 * just for auto replace spring c3p0 bean
+	 * 
+	 * @param jdbcRef
+	 * @param useLionConfig
+	 */
 	public SingleDataSource(String jdbcRef, boolean useLionConfig) {
-		this.jdbcRef = jdbcRef;
 		this.useLionConfig = useLionConfig;
 		this.c3p0Config.setActive(true);
-		initSingleDataSource();
+		this.setJdbcRef(jdbcRef);
 	}
 
 	private DataSourceConfig buildDataSourceConfig() {
@@ -162,6 +177,10 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		return innerDs;
 	}
 
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
 	@Override
 	public int getNumBusyConnection() {
 		return this.innerDs == null ? 0 : this.innerDs.getNumBusyConnection();
@@ -217,6 +236,22 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		return this.innerDs == null ? 0 : this.innerDs.getThreadPoolSize();
 	}
 
+	public void init() {
+		if (StringUtils.isBlank(jdbcRef)) {
+			throw new DalException("jdbcRef cannot be empty");
+		}
+
+		if (useLionConfig) {
+			this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef,
+			      true, false);
+			lionConfig = this.dataSourceConfigManager.getSingleDataSourceConfig();
+			this.dataSourceConfigManager.addListerner(new SingleDataSourceConfigChangedListener());
+		}
+		registerMonitor();
+
+		logger.info("SingleDataSource successfully initialized.");
+	}
+
 	private InnerSingleDataSource initDataSource() throws SQLException {
 		Transaction t = Cat.newTransaction("DAL", "DataSource.Init");
 
@@ -233,18 +268,6 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		} finally {
 			t.complete();
 		}
-	}
-
-	private void initSingleDataSource() {
-		this.c3p0Config.setId(jdbcRef);
-
-		if (useLionConfig) {
-			this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef,
-			      true, false);
-			lionConfig = this.dataSourceConfigManager.getSingleDataSourceConfig();
-			this.dataSourceConfigManager.addListerner(new SingleDataSourceConfigChangedListener());
-		}
-		registerMonitor();
 	}
 
 	protected void refresh(String propertyToChange) {
@@ -365,6 +388,11 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 	public synchronized void setInitialPoolSize(int initialPoolSize) {
 		setProperty("initialPoolSize", String.valueOf(initialPoolSize));
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
+		this.c3p0Config.setId(jdbcRef);
 	}
 
 	public synchronized void setJdbcUrl(String jdbcUrl) {

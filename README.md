@@ -20,8 +20,8 @@
 注意：如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
 
 ##### 单数据库在 Spring 中 DataSource 的配置
-	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.SingleDataSource">
-		<constructor-arg value="TuanGou2010" />
+	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.SingleDataSource" init-method="init" destroy-method="close">
+		<property name="jdbcRef" value="TuanGou2010" />
 		<property name="minPoolSize" value="5" />
 		<property name="maxPoolSize" value="25" />
         <property name="initialPoolSize" value="5" />
@@ -37,8 +37,8 @@
 	</bean>
 
 ##### 多数据库在 Spring 中 DataSource 的配置
-	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<constructor-arg value="TuanGou2010" />
+	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init" destroy-method="close">
+		<property name="jdbcRef" value="TuanGou2010" />
 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
 		<property name="maxPoolSize" value="${lion.key.maxPoolSize}" />
         <property name="initialPoolSize" value="${lion.key.initialPoolSize}" />
@@ -57,26 +57,26 @@
     <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<constructor-arg value="TuanGou2010" />  
     </bean>
-其中，构造函数的参数叫`jdbcRef`，是该数据库的在`Lion`中的业务名称，由DBA给出。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
-情况一：C3P0参数是直接定义的，那么C3P0的参数将不具有动态刷新的功能。
-情况二：C3P0参数是使用的`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
-情况三：业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。
-但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
+其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，由DBA给出，`Zebra`会自动根据这个名字到`Lion`上查找`jdbcUrl`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
+1. C3P0参数是在`bean`中直接定义的，那么C3P0的参数将不具有动态刷新的功能。
+2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
+3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到2.4.9及以上，
-`Zebra`将会对所有的`ComboPooledDataSource`进行替换，替换成`SingleDataSource`。通过替换，虽然具备了以上大部分功能，
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.4.9`及以上，
+`Zebra`将会对所有的`ComboPooledDataSource`进行替换，替换成`SingleDataSource`。通过替换，虽然具备了以上大部分功能。
 但这种方式有它的局限性，它不支持许多功能：如读库切换操作，写库Failover等。
 要想使用DAL的全部功能，必须显示的修改业务Spring配置，即上述的使用方式。
 
 ### 已知问题清单
 
+
 ### 更新说明
 #### 2.4.9-SNAPSHOT
-* [+] 支持Spring方式配置`GroupDataSource`
-* [+] 支持Spring方式配置`SingleDataSource`
-* [+] 通过升级zebra-ds-monitor,老应用自动替换`C3P0`到`SingleDataSource`
-* [+] 两种DataSource均支持配置动态刷新
+* [+] 支持`Spring`方式配置`GroupDataSource`
+* [+] 支持`Spring方`式配置`SingleDataSource`
+* [+] 通过升级`zebra-ds-monitor`,老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
+* [+] 两种`DataSource`均支持配置动态刷新
 
 ##### 2.4.8
 * [*] 重构`FailOverDataSource`，检测逻辑更合理
