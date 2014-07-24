@@ -9,6 +9,8 @@ import java.io.StringReader;
  * 
  */
 public class StringUtils {
+	private StringUtils() {
+	}
 
 	private static final String EMPTY = "";
 

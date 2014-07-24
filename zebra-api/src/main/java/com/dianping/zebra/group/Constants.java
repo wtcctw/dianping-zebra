@@ -7,10 +7,13 @@
 package com.dianping.zebra.group;
 
 /**
- * @author Leo Liang
+ * @author Leo Liang, Dozer
  * 
  */
 public class Constants {
+
+	private Constants() {
+	}
 
 	public static final String VERSION = "2.4.9";
 

@@ -1,19 +1,21 @@
 package com.dianping.zebra.group.datasources;
 
 public class SingleDataSourceManagerFactory {
-	
+	private SingleDataSourceManagerFactory() {
+	}
+
 	private volatile static SingleDataSourceManager dataSourceManager;
-	
-	public static SingleDataSourceManager getDataSourceManager(){
-		if(dataSourceManager == null){
+
+	public static SingleDataSourceManager getDataSourceManager() {
+		if (dataSourceManager == null) {
 			synchronized (SingleDataSourceManagerFactory.class) {
-				if(dataSourceManager == null){
+				if (dataSourceManager == null) {
 					dataSourceManager = new DefaultSingleDataSourceManager();
 					dataSourceManager.init();
 				}
-         }
+			}
 		}
-		
+
 		return dataSourceManager;
 	}
 }

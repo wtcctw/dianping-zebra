@@ -6,190 +6,193 @@ import java.util.List;
 import java.util.Map;
 
 public class Splitters {
-   public static StringSplitter by(char delimiter) {
-      return new StringSplitter(delimiter);
-   }
+	private Splitters() {
+	}
 
-   public static MapSplitter by(char pairSeparator, char keyValueSeparator) {
-      return new MapSplitter(pairSeparator, keyValueSeparator);
-   }
+	public static StringSplitter by(char delimiter) {
+		return new StringSplitter(delimiter);
+	}
 
-   public static StringSplitter by(String delimiter) {
-      return new StringSplitter(delimiter);
-   }
+	public static MapSplitter by(char pairSeparator, char keyValueSeparator) {
+		return new MapSplitter(pairSeparator, keyValueSeparator);
+	}
 
-   public static class MapSplitter {
-      private char m_pairSeparator;
+	public static StringSplitter by(String delimiter) {
+		return new StringSplitter(delimiter);
+	}
 
-      private char m_keyValueSeparator;
+	public static class MapSplitter {
+		private char m_pairSeparator;
 
-      private boolean m_trim;
+		private char m_keyValueSeparator;
 
-      MapSplitter(char pairSeparator, char keyValueSeparator) {
-         m_pairSeparator = pairSeparator;
-         m_keyValueSeparator = keyValueSeparator;
-      }
+		private boolean m_trim;
 
-      protected void doCharSplit(String str, Map<String, String> map) {
-         int len = str.length();
-         StringBuilder key = new StringBuilder(len);
-         StringBuilder value = new StringBuilder(len);
-         boolean inKey = true;
+		MapSplitter(char pairSeparator, char keyValueSeparator) {
+			m_pairSeparator = pairSeparator;
+			m_keyValueSeparator = keyValueSeparator;
+		}
 
-         for (int i = 0; i < len; i++) {
-            char ch = str.charAt(i);
+		protected void doCharSplit(String str, Map<String, String> map) {
+			int len = str.length();
+			StringBuilder key = new StringBuilder(len);
+			StringBuilder value = new StringBuilder(len);
+			boolean inKey = true;
 
-            if (ch == m_keyValueSeparator && inKey) {
-               inKey = false;
-            } else if (ch == m_pairSeparator) {
-               if (key.length() > 0) {
-                  if (m_trim) {
-                     map.put(key.toString().trim(), value.toString().trim());
-                  } else {
-                     map.put(key.toString(), value.toString());
-                  }
-               }
+			for (int i = 0; i < len; i++) {
+				char ch = str.charAt(i);
 
-               key.setLength(0);
-               value.setLength(0);
-               inKey = true;
-            } else {
-               if (inKey) {
-                  key.append(ch);
-               } else {
-                  value.append(ch);
-               }
-            }
-         }
+				if (ch == m_keyValueSeparator && inKey) {
+					inKey = false;
+				} else if (ch == m_pairSeparator) {
+					if (key.length() > 0) {
+						if (m_trim) {
+							map.put(key.toString().trim(), value.toString().trim());
+						} else {
+							map.put(key.toString(), value.toString());
+						}
+					}
 
-         if (!inKey && key.length() > 0) {
-            if (m_trim) {
-               map.put(key.toString().trim(), value.toString().trim());
-            } else {
-               map.put(key.toString(), value.toString());
-            }
-         }
-      }
+					key.setLength(0);
+					value.setLength(0);
+					inKey = true;
+				} else {
+					if (inKey) {
+						key.append(ch);
+					} else {
+						value.append(ch);
+					}
+				}
+			}
 
-      public Map<String, String> split(String str) {
-         return split(str, new LinkedHashMap<String, String>());
-      }
+			if (!inKey && key.length() > 0) {
+				if (m_trim) {
+					map.put(key.toString().trim(), value.toString().trim());
+				} else {
+					map.put(key.toString(), value.toString());
+				}
+			}
+		}
 
-      public Map<String, String> split(String str, Map<String, String> map) {
-         if (str != null) {
-            doCharSplit(str, map);
-         }
+		public Map<String, String> split(String str) {
+			return split(str, new LinkedHashMap<String, String>());
+		}
 
-         return map;
-      }
+		public Map<String, String> split(String str, Map<String, String> map) {
+			if (str != null) {
+				doCharSplit(str, map);
+			}
 
-      public MapSplitter trim() {
-         m_trim = true;
-         return this;
-      }
-   }
+			return map;
+		}
 
-   public static class StringSplitter {
-      private char m_charDelimiter;
+		public MapSplitter trim() {
+			m_trim = true;
+			return this;
+		}
+	}
 
-      private String m_stringDelimiter;
+	public static class StringSplitter {
+		private char m_charDelimiter;
 
-      private boolean m_trim;
+		private String m_stringDelimiter;
 
-      private boolean m_noEmptyItem;
+		private boolean m_trim;
 
-      StringSplitter(char delimiter) {
-         m_charDelimiter = delimiter;
-      }
+		private boolean m_noEmptyItem;
 
-      StringSplitter(String delimiter) {
-         m_stringDelimiter = delimiter;
-      }
+		StringSplitter(char delimiter) {
+			m_charDelimiter = delimiter;
+		}
 
-      protected void doCharSplit(String str, List<String> list) {
-         char delimiter = m_charDelimiter;
-         int len = str.length();
-         StringBuilder sb = new StringBuilder(len);
+		StringSplitter(String delimiter) {
+			m_stringDelimiter = delimiter;
+		}
 
-         for (int i = 0; i < len + 1; i++) {
-            char ch = i == len ? delimiter : str.charAt(i);
+		protected void doCharSplit(String str, List<String> list) {
+			char delimiter = m_charDelimiter;
+			int len = str.length();
+			StringBuilder sb = new StringBuilder(len);
 
-            if (ch == delimiter) {
-               String item = sb.toString();
+			for (int i = 0; i < len + 1; i++) {
+				char ch = i == len ? delimiter : str.charAt(i);
 
-               sb.setLength(0);
+				if (ch == delimiter) {
+					String item = sb.toString();
 
-               if (m_trim) {
-                  item = item.trim();
-               }
+					sb.setLength(0);
 
-               if (m_noEmptyItem && item.length() == 0) {
-                  continue;
-               }
+					if (m_trim) {
+						item = item.trim();
+					}
 
-               list.add(item);
-            } else {
-               sb.append(ch);
-            }
-         }
-      }
+					if (m_noEmptyItem && item.length() == 0) {
+						continue;
+					}
 
-      protected void doStringSplit(String source, List<String> list) {
-         String delimiter = m_stringDelimiter;
-         int len = delimiter.length();
-         int offset = 0;
-         int index = source.indexOf(delimiter, offset);
+					list.add(item);
+				} else {
+					sb.append(ch);
+				}
+			}
+		}
 
-         while (true) {
-            String part;
+		protected void doStringSplit(String source, List<String> list) {
+			String delimiter = m_stringDelimiter;
+			int len = delimiter.length();
+			int offset = 0;
+			int index = source.indexOf(delimiter, offset);
 
-            if (index == -1) { // last part
-               part = source.substring(offset);
-            } else {
-               part = source.substring(offset, index);
-            }
+			while (true) {
+				String part;
 
-            if (m_trim) {
-               part = part.trim();
-            }
+				if (index == -1) { // last part
+					part = source.substring(offset);
+				} else {
+					part = source.substring(offset, index);
+				}
 
-            if (!m_noEmptyItem || part.length() > 0) {
-               list.add(part);
-            }
+				if (m_trim) {
+					part = part.trim();
+				}
 
-            if (index == -1) { // last part
-               break;
-            } else {
-               offset = index + len;
-               index = source.indexOf(delimiter, offset);
-            }
-         }
-      }
+				if (!m_noEmptyItem || part.length() > 0) {
+					list.add(part);
+				}
 
-      public StringSplitter noEmptyItem() {
-         m_noEmptyItem = true;
-         return this;
-      }
+				if (index == -1) { // last part
+					break;
+				} else {
+					offset = index + len;
+					index = source.indexOf(delimiter, offset);
+				}
+			}
+		}
 
-      public List<String> split(String str) {
-         return split(str, new ArrayList<String>());
-      }
+		public StringSplitter noEmptyItem() {
+			m_noEmptyItem = true;
+			return this;
+		}
 
-      public List<String> split(String str, List<String> list) {
-         if (str != null) {
-            if (m_charDelimiter > 0) {
-               doCharSplit(str, list);
-            } else if (m_stringDelimiter != null) {
-               doStringSplit(str, list);
-            }
-         }
+		public List<String> split(String str) {
+			return split(str, new ArrayList<String>());
+		}
 
-         return list;
-      }
+		public List<String> split(String str, List<String> list) {
+			if (str != null) {
+				if (m_charDelimiter > 0) {
+					doCharSplit(str, list);
+				} else if (m_stringDelimiter != null) {
+					doStringSplit(str, list);
+				}
+			}
 
-      public StringSplitter trim() {
-         m_trim = true;
-         return this;
-      }
-   }
+			return list;
+		}
+
+		public StringSplitter trim() {
+			m_trim = true;
+			return this;
+		}
+	}
 }

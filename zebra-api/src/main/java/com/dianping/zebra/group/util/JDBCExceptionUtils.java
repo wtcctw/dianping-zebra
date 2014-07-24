@@ -16,6 +16,9 @@ import java.util.List;
  * 
  */
 public class JDBCExceptionUtils {
+	private JDBCExceptionUtils() {
+	}
+
 	// ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
 	private final static int READ_ONLY_ERROR_CODE = 1290;
 

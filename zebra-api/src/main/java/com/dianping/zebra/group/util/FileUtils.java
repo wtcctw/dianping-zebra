@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.net.URL;
 
 public class FileUtils {
+	private FileUtils() {
+	}
+
 	public static File toFile(URL url) {
 		if (url == null || !url.getProtocol().equals("file")) {
 			return null;
