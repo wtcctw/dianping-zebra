@@ -21,7 +21,7 @@ public class LionHttpServiceTest extends ComponentTestCase {
 
 	@Test
 	public void testSetConfig() {
-		boolean isSuccess = m_lionHttpService.setConfig("dev", "lion-test", "button.test", "true");
+		boolean isSuccess = m_lionHttpService.setConfig("product", "lion-test", "button.test", "true");
 
 		System.out.println(isSuccess);
 	}
