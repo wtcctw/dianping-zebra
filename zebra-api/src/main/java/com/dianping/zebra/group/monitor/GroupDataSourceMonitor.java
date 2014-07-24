@@ -23,8 +23,7 @@ public class GroupDataSourceMonitor implements StatusExtension {
 		sb.append("\nversion:" + Constants.VERSION + "\n");
 		SingleDataSourceMBean writeBean = groupDataSourceBean.getWriteSingleDataSourceMBean();
 		if (writeBean != null) {
-			sb.append("currentWriter:" + writeBean.getId() + " running at state:" + writeBean.getCurrentState()
-			      + "\n");
+			sb.append("currentWriter:" + writeBean.getId() + " running at state:" + writeBean.getCurrentState() + "\n");
 		} else {
 			sb.append("currentWriter: No available writer\n");
 		}
@@ -71,16 +70,11 @@ public class GroupDataSourceMonitor implements StatusExtension {
 	}
 
 	private void putProperty(Map<String, String> status, SingleDataSourceMBean bean) {
-		if(bean.getState() != DataSourceState.INITIAL){
+		if (bean.getState() != DataSourceState.INITIAL) {
 			String id = bean.getId();
 			status.put(id + "-BusyConnection", Integer.toString(bean.getNumBusyConnection()));
 			status.put(id + "-IdleConnection", Integer.toString(bean.getNumIdleConnection()));
-//		status.put(id + "-FailedCheckins", Long.toString(bean.getNumFailedCheckins()));
 			status.put(id + "-FailedCheckouts", Long.toString(bean.getNumFailedCheckouts()));
-//		status.put(id + "-ThreadPoolSize", Integer.toString(bean.getThreadPoolSize()));
-//		status.put(id + "-ThreadPoolNumActiveThreads", Integer.toString(bean.getThreadPoolNumActiveThreads()));
-//		status.put(id + "-ThreadPoolNumIdleThreads", Integer.toString(bean.getThreadPoolNumIdleThreads()));
-//		status.put(id + "-ThreadPoolNumTasksPending", Integer.toString(bean.getThreadPoolNumTasksPending()));
 		}
 	}
 }
