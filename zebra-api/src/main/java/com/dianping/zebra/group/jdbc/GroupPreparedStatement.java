@@ -27,7 +27,6 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -486,25 +485,11 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	}
 
 	public void setColumnIndexes(int[] columnIndexes) {
-		if (columnIndexes == null) {
-			return;
-		}
-		if (columnIndexes.length == 0) {
-			this.columnIndexes = new int[0];
-		} else {
-			this.columnIndexes = Arrays.copyOf(columnIndexes, columnIndexes.length);
-		}
+		this.columnIndexes = columnIndexes;
 	}
 
 	public void setColumnNames(String[] columnNames) {
-		if (columnNames == null) {
-			return;
-		}
-		if (columnNames.length == 0) {
-			this.columnNames = new String[0];
-		} else {
-			this.columnNames = Arrays.copyOf(columnNames, columnNames.length);
-		}
+		this.columnNames = columnNames;
 	}
 
 	/*
