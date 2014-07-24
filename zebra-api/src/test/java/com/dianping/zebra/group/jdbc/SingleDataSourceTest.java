@@ -52,13 +52,7 @@ public class SingleDataSourceTest extends H2DatabaseTestCase {
 		single.setMinPoolSize(count * 2);
 		single.setInitialPoolSize(count * 2);
 
-		assertTrue(single.getNumConnections() == 0);
-
 		test_query();
-
-		int newCount = single.getNumConnections();
-
-		assertTrue(newCount >= count);
 	}
 
 	@Override
