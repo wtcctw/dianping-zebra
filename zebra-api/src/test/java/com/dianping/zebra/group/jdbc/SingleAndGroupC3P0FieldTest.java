@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-public class SingleAndGroupDataSourceTest {
+public class SingleAndGroupC3P0FieldTest {
 	// C3P0文档上的标准属性
 	public static List<String> PROPERTIES = Lists.newArrayList("acquireIncrement", "acquireRetryAttempts",
 	      "acquireRetryDelay", "autoCommitOnClose", "automaticTestTable", "breakAfterAcquireFailure", "checkoutTimeout",
