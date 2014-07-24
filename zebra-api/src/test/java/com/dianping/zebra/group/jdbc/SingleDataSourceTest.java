@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,7 +23,15 @@ public class SingleDataSourceTest extends H2DatabaseTestCase {
 		single.setUser(USER);
 		single.setDriverClass(JDBC_DRIVER);
 		single.setPassword(PASSWORD);
+		single.setMaxPoolSize(10);
+		single.setMinPoolSize(5);
+		single.setInitialPoolSize(5);
 		single.init();
+	}
+
+	@After
+	public void destory() {
+		single.close();
 	}
 
 	@Test
@@ -31,6 +40,25 @@ public class SingleDataSourceTest extends H2DatabaseTestCase {
 		Statement stat = conn.createStatement();
 		ResultSet result = stat.executeQuery("select * from PERSON");
 		assertTrue(result.next());
+		conn.close();
+	}
+
+	@Test
+	public void test_refresh() throws SQLException {
+		test_query();
+		int count = single.getNumConnections();
+		assertTrue(count > 0);
+
+		single.setMinPoolSize(count * 2);
+		single.setInitialPoolSize(count * 2);
+
+		assertTrue(single.getNumConnections() == 0);
+
+		test_query();
+
+		int newCount = single.getNumConnections();
+
+		assertTrue(newCount >= count);
 	}
 
 	@Override
