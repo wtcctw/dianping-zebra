@@ -289,13 +289,15 @@ public class StringUtils {
 						}
 						continue;
 					} else if (currentChar == '/' && slashSlashComments) {
-						while ((currentChar = sourceReader.read()) != '\n' && currentChar != '\r' && currentChar >= 0)
-							;
+						do {
+							currentChar = sourceReader.read();
+						} while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
 					}
 				} else if (contextMarker == Character.MIN_VALUE && currentChar == '#' && hashComments) {
 					// Slurp up everything until the newline
-					while ((currentChar = sourceReader.read()) != '\n' && currentChar != '\r' && currentChar >= 0)
-						;
+					do {
+						currentChar = sourceReader.read();
+					} while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
 				} else if (contextMarker == Character.MIN_VALUE && currentChar == '-' && dashDashComments) {
 					currentChar = sourceReader.read();
 
@@ -311,8 +313,9 @@ public class StringUtils {
 
 					// Slurp up everything until the newline
 
-					while ((currentChar = sourceReader.read()) != '\n' && currentChar != '\r' && currentChar >= 0)
-						;
+					do {
+						currentChar = sourceReader.read();
+					} while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
 				}
 
 				if (currentChar != -1) {
