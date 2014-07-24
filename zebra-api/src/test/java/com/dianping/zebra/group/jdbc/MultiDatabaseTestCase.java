@@ -11,7 +11,7 @@ import org.junit.Before;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-public abstract class MultiDatabaseTestCase extends SingleDatabaseTestCase {
+public abstract class MultiDatabaseTestCase extends InnerSingleDatabaseTestCase {
 
 	public static class DataSourceEntry {
 		private String dataSets;

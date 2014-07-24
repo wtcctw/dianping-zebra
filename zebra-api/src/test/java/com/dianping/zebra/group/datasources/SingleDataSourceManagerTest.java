@@ -13,9 +13,9 @@ import org.junit.Test;
 
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.jdbc.SingleDatabaseTestCase;
+import com.dianping.zebra.group.jdbc.InnerSingleDatabaseTestCase;
 
-public class SingleDataSourceManagerTest extends SingleDatabaseTestCase {
+public class SingleDataSourceManagerTest extends InnerSingleDatabaseTestCase {
 
 	private static SingleDataSourceManager manager;
 
