@@ -84,7 +84,7 @@ A：`Zebra`内不需要启动多线程，构造函数中启动线程是不安全
 ### 更新说明
 #### 2.4.9-SNAPSHOT
 * [+] 支持`Spring`方式配置`GroupDataSource`
-* [+] 支持`Spring方`式配置`SingleDataSource`
+* [+] 支持`Spring`方式配置`SingleDataSource`
 * [+] 通过升级`zebra-ds-monitor`,老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
 * [+] 两种`DataSource`均支持配置动态刷新
 
