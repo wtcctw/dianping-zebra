@@ -38,6 +38,7 @@ import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapper;
 import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
 
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
@@ -191,6 +192,16 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		return loadBalancedConfigMap;
 	}
 
+	private long getMaxWarmupTime() {
+		long max = 0l;
+		for (DataSourceConfig config : groupConfig.getDataSourceConfigs().values()) {
+			if (config.getWarmupTime() > max) {
+				max = config.getWarmupTime();
+			}
+		}
+		return max;
+	}
+
 	@Override
 	public synchronized Map<String, SingleDataSourceMBean> getReaderSingleDataSourceMBean() {
 		return this.readDataSource.getCurrentDataSourceMBean();
@@ -337,11 +348,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void refreshUserAndPassword() {
 		atomicRefresh.reset();
 
-		// todo: SmoothReload
-		// if (lionConfig != null) {
-		// SmoothReload sr = new SmoothReload(lionConfig.getWarmupTime());
-		// sr.waitForReload();
-		// }
+		SmoothReload sr = new SmoothReload(getMaxWarmupTime());
+		sr.waitForReload();
 
 		refresh("user&password");
 	}
