@@ -67,7 +67,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			if (!isSingleDataSource) {
 				this.groupDataSourceConfig = initGroupDataSourceConfig();
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new IllegalConfigException(String.format(
 			      "Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
 		}

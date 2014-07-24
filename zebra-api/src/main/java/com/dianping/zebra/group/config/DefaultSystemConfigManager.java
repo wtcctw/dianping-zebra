@@ -34,7 +34,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 	public void init() {
 		try {
 			this.systemConfig.set(initSystemConfig());
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new IllegalConfigException(String.format(
 			      "Fail to initialize DefaultSystemConfigManager with config file[%s].", this.jdbcRef), e);
 		}

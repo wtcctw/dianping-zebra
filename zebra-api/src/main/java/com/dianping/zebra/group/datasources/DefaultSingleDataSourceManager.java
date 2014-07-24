@@ -47,7 +47,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 					if (dataSource != null) {
 						toBeClosedDataSource.offer(dataSource);
 					}
-				} catch (Throwable ignore) {
+				} catch (Exception ignore) {
 				}
 			}
 		}

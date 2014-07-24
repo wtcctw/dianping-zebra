@@ -79,8 +79,8 @@ public class LocalConfigService implements ConfigService {
 			updateTask.setDaemon(true);
 			updateTask.setName("Thread-" + ConfigPeroidCheckerTask.class.getName());
 			updateTask.start();
-		} catch (Throwable e) {
-			logger.error("fail to initilize Local Config Manager for DAL",e);
+		} catch (Exception e) {
+			logger.error("fail to initilize Local Config Manager for DAL", e);
 			throw new IllegalConfigException(e);
 		}
 	}
@@ -91,7 +91,7 @@ public class LocalConfigService implements ConfigService {
 		try {
 			inputStream = new FileInputStream(this.resourceFile);
 			prop.load(inputStream);
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new IllegalConfigException(String.format("fail to read properties file[%s]", this.resourceFileName), e);
 		} finally {
 			FileUtils.closeQuietly(inputStream);
@@ -107,7 +107,7 @@ public class LocalConfigService implements ConfigService {
 			for (PropertyChangeListener listener : listeners) {
 				try {
 					listener.propertyChange(evt);
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					logger.warn("fail to notify listener", e);
 				}
 			}
@@ -134,7 +134,7 @@ public class LocalConfigService implements ConfigService {
 						lastModifiedTime.set(newModifiedTime);
 						props.set(newProps);
 					}
-				} catch (Throwable throwable) {
+				} catch (Exception throwable) {
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("fail to reload the datasource config[%s]", resourceFileName), throwable);
 					}

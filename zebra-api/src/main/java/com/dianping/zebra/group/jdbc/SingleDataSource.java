@@ -262,10 +262,9 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 			t.setStatus(Message.SUCCESS);
 
 			return ds;
-		} catch (IllegalConfigException throwable) {
-			Cat.logError(throwable);
-
-			throw throwable;
+		} catch (IllegalConfigException exp) {
+			Cat.logError(exp);
+			throw exp;
 		} finally {
 			t.complete();
 		}
@@ -317,7 +316,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 			Constructor<?> constructor = extensionClass.getConstructor(SingleDataSourceMBean.class);
 
 			registerMethod.invoke(getInstanceMethod.invoke(registerClass), constructor.newInstance(this));
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			Cat.logError(e);
 		}
 	}

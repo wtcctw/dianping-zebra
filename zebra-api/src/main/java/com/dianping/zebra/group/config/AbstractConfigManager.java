@@ -108,7 +108,7 @@ public abstract class AbstractConfigManager {
 			try {
 				onPropertyUpdated(evt);
 				notifyListeners(evt);
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				Cat.logError(e);
 				logger.warn("fail to update property, apply old config!", e);
 			}

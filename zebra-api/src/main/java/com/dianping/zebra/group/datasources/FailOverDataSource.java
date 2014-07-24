@@ -294,7 +294,7 @@ public class FailOverDataSource extends AbstractDataSource {
 					}
 				} catch (InterruptedException ignore) {
 					break;
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					Cat.logError(e);
 				}
 			}

@@ -22,7 +22,7 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 			isAuthenticatedMethod.setAccessible(true);
 
 			serviceFlag = true;
-		} catch (Throwable ignore) {
+		} catch (Exception ignore) {
 		}
 	}
 
@@ -34,7 +34,7 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 				if (context != null) {
 					return (Boolean) isAuthenticatedMethod.invoke(context);
 				}
-			} catch (Throwable throwable) {
+			} catch (Exception throwable) {
 				Cat.logError(throwable);
 			}
 		}

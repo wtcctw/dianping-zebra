@@ -292,11 +292,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				writeDataSource.init(false);
 
 				preparedSwitch = true;
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				Cat.logError("error when create new dataSources", e);
 				try {
 					close(readDataSource, writeDataSource);
-				} catch (Throwable ignore) {
+				} catch (Exception ignore) {
 				}
 			}
 
@@ -313,7 +313,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				// destroy old dataSources
 				try {
 					this.close(tmpReadDataSource, tmpWriteDataSource);
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					Cat.logError("error when destroy old dataSources", e);
 				}
 

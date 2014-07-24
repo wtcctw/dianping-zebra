@@ -256,7 +256,7 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 			logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
 			return pooledDataSource;
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new IllegalConfigException(e);
 		}
 	}
