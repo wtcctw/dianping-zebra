@@ -84,8 +84,9 @@ public class CountPunisher {
 	public void countAndPunish(SQLException e) {
 		if (JDBCExceptionUtils.isReadOnlyException(e)) {
 			count();
-		} else {
-			//TODO getConnnetion loss exception 
 		}
+		// else {
+		// TODO getConnnetion loss exception
+		// }
 	}
 }
