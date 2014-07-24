@@ -38,6 +38,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 
+import com.dianping.cat.Cat;
 import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 
@@ -123,9 +124,15 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 			if (dataSourceDefinition instanceof AbstractBeanDefinition) {
 				((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
 			}
+			Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s", beanName));
+		} else {
+			Cat.logEvent("DAL.BeanFactory",
+			      String.format("NotReplace-%s-%s", beanName, dataSourceDefinition.getBeanClassName()));
 		}
 
 		String newBeanName = String.format("%s-%d", beanName, nameId++);
+		Cat.logEvent("DAL.BeanFactory", String.format("NewBeanName-%s", newBeanName));
+		
 		listableBeanFactory.registerBeanDefinition(newBeanName, dataSourceDefinition);
 
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
