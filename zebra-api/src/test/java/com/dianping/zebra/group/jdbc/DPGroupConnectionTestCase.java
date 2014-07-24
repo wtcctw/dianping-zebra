@@ -43,7 +43,6 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		conn.setAutoCommit(false);
 		assertFalse(conn.getAutoCommit());
 		assertNull(conn.getWarnings());
-//		assertTrue((conn.getMetaData() instanceof GroupDatabaseMetaData));
 
 		assertTrue((conn.createStatement() instanceof GroupStatement));
 		assertTrue((conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE) instanceof GroupStatement));
