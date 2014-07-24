@@ -30,6 +30,7 @@ import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
+import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
 
@@ -536,54 +537,16 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
 	}
 
-	static class AtomicRefresh {
-		private String newPassword;
-
-		private String newUser;
-
-		private String oldPassword;
-
-		private String oldUser;
-
-		public synchronized String getNewPassword() {
-			return newPassword;
-		}
-
-		public synchronized String getNewUser() {
-			return newUser;
-		}
-
-		public synchronized boolean needToRefresh() {
-			// 帐号和密码都改了，就需要 refresh
-			return (!StringUtils.equals(newUser, oldUser)) && (!StringUtils.equals(newPassword, oldPassword));
-		}
-
-		public synchronized void reset() {
-			oldPassword = newPassword;
-			oldUser = newUser;
-		}
-
-		public synchronized void setPassword(String password) {
-			this.newPassword = password;
-		}
-
-		public synchronized void setUser(String user) {
-			this.newUser = user;
-		}
-	}
-
 	class SingleDataSourceConfigChangedListener implements PropertyChangeListener {
-		private String userKey = Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX + "." + jdbcRef + ".jdbc."
-		      + Constants.ELEMENT_USER;
+		private String userKey = ".jdbc." + Constants.ELEMENT_USER;
 
-		private String passwordKey = Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX + "." + jdbcRef + ".jdbc."
-		      + Constants.ELEMENT_PASSWORD;
+		private String passwordKey = ".jdbc." + Constants.ELEMENT_PASSWORD;
 
 		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
+		public synchronized void propertyChange(PropertyChangeEvent evt) {
 			if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX + "." + jdbcRef)) {
 
-				if (evt.getPropertyName().equals(userKey)) {
+				if (evt.getPropertyName().endsWith(userKey)) {
 					atomicRefresh.setUser(evt.getNewValue().toString());
 					if (atomicRefresh.needToRefresh()) {
 						refreshUserAndPassword();
@@ -591,7 +554,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 					return;
 				}
 
-				if (evt.getPropertyName().equals(passwordKey)) {
+				if (evt.getPropertyName().endsWith(passwordKey)) {
 					atomicRefresh.setPassword(evt.getNewValue().toString());
 					if (atomicRefresh.needToRefresh()) {
 						refreshUserAndPassword();
