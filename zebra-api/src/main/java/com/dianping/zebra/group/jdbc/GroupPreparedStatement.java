@@ -126,8 +126,9 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 			pstmt = conn.prepareStatement(sql, columnNames);
 		} else {
 			int resultSetHoldability = this.resultSetHoldability;
-			if (resultSetHoldability == -1)
+			if (resultSetHoldability == -1) {
 				resultSetHoldability = conn.getHoldability();
+			}
 
 			pstmt = conn.prepareStatement(sql, this.resultSetType, this.resultSetConcurrency, resultSetHoldability);
 		}
@@ -174,8 +175,9 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 			}, sql, pstBatchedArgs, true);
 
 		} finally {
-			if (pstBatchedArgs != null)
+			if (pstBatchedArgs != null) {
 				pstBatchedArgs.clear();
+			}
 		}
 	}
 
