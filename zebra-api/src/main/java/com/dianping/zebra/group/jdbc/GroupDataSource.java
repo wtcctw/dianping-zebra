@@ -36,6 +36,7 @@ import com.dianping.zebra.group.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapper;
+import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.StringUtils;
 
@@ -44,6 +45,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private static final Logger logger = LoggerFactory.getLogger(GroupDataSource.class);
 
 	private String jdbcRef;
+
+	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 
 	private GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
@@ -317,7 +320,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		if (this.init) {
 			Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh");
 
-			Cat.logEvent("DAL.Property.Changed", propertyToChange);
+			Cat.logEvent("DAL.Refresh.Property", propertyToChange);
 
 			try {
 				refresh();
@@ -329,6 +332,18 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				t.complete();
 			}
 		}
+	}
+
+	private void refreshUserAndPassword() {
+		atomicRefresh.reset();
+
+		// todo: SmoothReload
+		// if (lionConfig != null) {
+		// SmoothReload sr = new SmoothReload(lionConfig.getWarmupTime());
+		// sr.waitForReload();
+		// }
+
+		refresh("user&password");
 	}
 
 	public synchronized void setAcquireIncrement(int acquireIncrement) {
@@ -532,8 +547,28 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
+		private String userKey = ".jdbc." + Constants.ELEMENT_USER;
+
+		private String passwordKey = ".jdbc." + Constants.ELEMENT_PASSWORD;
+
 		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
+		public synchronized void propertyChange(PropertyChangeEvent evt) {
+			if (evt.getPropertyName().endsWith(userKey)) {
+				atomicRefresh.setUser(evt.getNewValue().toString());
+				if (atomicRefresh.needToRefresh()) {
+					refreshUserAndPassword();
+				}
+				return;
+			}
+
+			if (evt.getPropertyName().endsWith(passwordKey)) {
+				atomicRefresh.setPassword(evt.getNewValue().toString());
+				if (atomicRefresh.needToRefresh()) {
+					refreshUserAndPassword();
+				}
+				return;
+			}
+
 			if (verbose) {
 				if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_VERBOSE_PRFIX)) {
 					refresh(evt.getPropertyName());
