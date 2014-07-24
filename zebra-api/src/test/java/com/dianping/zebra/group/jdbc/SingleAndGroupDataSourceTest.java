@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.jdbc;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,10 +10,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.dianping.zebra.group.jdbc.SingleDataSource;
+import com.dianping.zebra.group.util.AtomicRefresh;
 import com.google.common.collect.Lists;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-public class SingleDataSourceC3P0AdapterTest {
+public class SingleAndGroupDataSourceTest {
 	// C3P0文档上的标准属性
 	public static List<String> PROPERTIES = Lists.newArrayList("acquireIncrement", "acquireRetryAttempts",
 	      "acquireRetryDelay", "autoCommitOnClose", "automaticTestTable", "breakAfterAcquireFailure", "checkoutTimeout",
@@ -27,7 +29,7 @@ public class SingleDataSourceC3P0AdapterTest {
 
 	@Test
 	public void test_atomich_refresh() {
-		SingleDataSource.AtomicRefresh ar = new SingleDataSource.AtomicRefresh();
+		AtomicRefresh ar = new AtomicRefresh();
 
 		ar.setUser("user");
 		Assert.assertFalse(ar.needToRefresh());
@@ -50,7 +52,7 @@ public class SingleDataSourceC3P0AdapterTest {
 
 	@Test
 	public void test_atomich_refresh_with_null() {
-		SingleDataSource.AtomicRefresh ar = new SingleDataSource.AtomicRefresh();
+		AtomicRefresh ar = new AtomicRefresh();
 		ar.setUser(null);
 		Assert.assertFalse(ar.needToRefresh());
 		ar.setPassword(null);
@@ -70,14 +72,26 @@ public class SingleDataSourceC3P0AdapterTest {
 	}
 
 	@Test
-	public void test_properties() {
+	public void test_single_properties() {
+		test_properties(SingleDataSource.class, new ArrayList<String>());
+	}
+
+	@Test
+	public void test_group_properties() {
+		test_properties(GroupDataSource.class, Lists.newArrayList("setJdbcUrl", "setPassword", "setUser"));
+	}
+
+	private void test_properties(Class<?> clazz, List<String> ignoreList) {
 		Map<String, Method> currentMethods = new HashMap<String, Method>();
-		for (Method m : SingleDataSource.class.getMethods()) {
+		for (Method m : clazz.getMethods()) {
 			currentMethods.put(m.getName(), m);
 		}
 
 		Map<String, Method> c3p0Methods = new HashMap<String, Method>();
 		for (Method m : ComboPooledDataSource.class.getMethods()) {
+			if (ignoreList.contains(m.getName())) {
+				continue;
+			}
 			c3p0Methods.put(m.getName(), m);
 		}
 
