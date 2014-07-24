@@ -170,8 +170,8 @@ public class FailOverDataSource extends AbstractDataSource {
 			cachedConnection.clear();
 		}
 
-		private void completeSwitchTransaction(FindMasterDataSourceResult result) {
-			if (result.isChangedMaster() && transaction != null) {
+		private void completeSwitchTransaction() {
+			if (transaction != null) {
 				Cat.logEvent("DAL.FailOver", "Success");
 				transaction.setStatus(Message.SUCCESS);
 				transaction.complete();
@@ -279,7 +279,7 @@ public class FailOverDataSource extends AbstractDataSource {
 					if (!result.isMasterExist()) {
 						increaseTransactionTryTimes();
 					} else {
-						completeSwitchTransaction(result);
+						completeSwitchTransaction();
 
 						closeConnections();
 						while (!Thread.interrupted()) {
