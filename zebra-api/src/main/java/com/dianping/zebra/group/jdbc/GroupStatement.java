@@ -20,6 +20,7 @@ import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.datasources.SingleConnection;
+import com.dianping.zebra.group.exception.DalNotSupportException;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
@@ -168,7 +169,7 @@ public class GroupStatement implements Statement {
 	}
 
 	public void closeOnCompletion() throws SQLException {
-		throw new SQLException("not support exception");
+		throw new DalNotSupportException();
 	}
 
 	private Statement createStatementInternal(Connection conn, boolean isBatch) throws SQLException {
@@ -621,7 +622,7 @@ public class GroupStatement implements Statement {
 	}
 
 	public boolean isCloseOnCompletion() throws SQLException {
-		throw new SQLException("not support exception");
+		throw new DalNotSupportException();
 	}
 
 	/*
@@ -631,7 +632,7 @@ public class GroupStatement implements Statement {
 	 */
 	@Override
 	public boolean isPoolable() throws SQLException {
-		throw new SQLException("not support exception");
+		throw new DalNotSupportException();
 	}
 
 	/*
@@ -711,7 +712,7 @@ public class GroupStatement implements Statement {
 	 */
 	@Override
 	public void setPoolable(boolean poolable) throws SQLException {
-		throw new SQLException("not support exception");
+		throw new DalNotSupportException();
 	}
 
 	/*

@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import com.dianping.zebra.group.exception.DalNotSupportException;
+
 /**
  * @author danson.liu
  *
@@ -342,12 +344,12 @@ public class MonitorableStatement implements Statement {
 	public void setSqlMonitor(SqlMonitor sqlMonitor) {
 		this.sqlMonitor = sqlMonitor;
 	}
-	
+
 	public boolean isCloseOnCompletion() throws SQLException {
-		throw new SQLException("not support exception");
+		throw new DalNotSupportException();
 	}
-	
+
 	public void closeOnCompletion() throws SQLException {
-		throw new SQLException("not support exception");
+		throw new DalNotSupportException();
 	}
 }
