@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.datasources;
 
-public class SingleDataSourceManagerFactory {
+public final class SingleDataSourceManagerFactory {
 	private SingleDataSourceManagerFactory() {
 	}
 

@@ -6,7 +6,7 @@ import java.util.Map;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
-public class SystemConfigManagerFactory {
+public final class SystemConfigManagerFactory {
 
 	private static Map<String, SystemConfigManager> systemConfigManagers = new HashMap<String, SystemConfigManager>();
 	

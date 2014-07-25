@@ -15,7 +15,7 @@ import java.util.List;
  * @author Leo Liang
  * 
  */
-public class JDBCExceptionUtils {
+public final class JDBCExceptionUtils {
 	private JDBCExceptionUtils() {
 	}
 

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class FileUtils {
+public final class FileUtils {
 	private FileUtils() {
 	}
 

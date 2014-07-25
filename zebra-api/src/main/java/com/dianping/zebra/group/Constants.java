@@ -10,7 +10,7 @@ package com.dianping.zebra.group;
  * @author Leo Liang, Dozer
  * 
  */
-public class Constants {
+public final class Constants {
 
 	private Constants() {
 	}

@@ -6,7 +6,7 @@ import java.util.Map;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
-public class DataSourceConfigManagerFactory {
+public final class DataSourceConfigManagerFactory {
 
 	private static volatile Map<String, DataSourceConfigManager> dataSourceConfigManagers = new HashMap<String, DataSourceConfigManager>();
 

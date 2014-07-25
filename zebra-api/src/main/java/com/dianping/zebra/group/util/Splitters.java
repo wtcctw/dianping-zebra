@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Splitters {
+public final class Splitters {
 	private Splitters() {
 	}
 

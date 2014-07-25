@@ -8,7 +8,7 @@ import java.io.StringReader;
  * @author danson.liu
  * 
  */
-public class StringUtils {
+public final class StringUtils {
 	private StringUtils() {
 	}
 
