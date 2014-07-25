@@ -26,7 +26,6 @@ public class MonitorableCallableStatementTest extends BaseMonitorableUnitTest {
 		monitorableCallableStatement.setSqlMonitor(sqlMonitor);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testDelegatedMethods() throws SQLException {
 		monitorableCallableStatement.registerOutParameter(INT_ANY, INT_ANY);
