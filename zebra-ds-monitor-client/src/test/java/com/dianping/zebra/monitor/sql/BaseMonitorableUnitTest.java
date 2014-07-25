@@ -40,45 +40,66 @@ import org.junit.Assert;
  */
 public abstract class BaseMonitorableUnitTest {
 
-	protected static final Random 		RANDOM 					= new Random();
-	protected static final String 		STR_ANY 				= "foo";
-	protected static final Boolean 		BOOL_ANY				= RANDOM.nextBoolean();
-	protected static final Long 		LONG_ANY 				= RANDOM.nextLong();
-	protected static final Integer 		INT_ANY 				= RANDOM.nextInt();
-	protected static final Byte 		BYTE_ANY 				= (byte) RANDOM.nextInt(100);
-	protected static final Short 		SHORT_ANY 				= (short) RANDOM.nextInt(100);
-	protected static final Integer 		UINT_ANY 				= Math.abs(RANDOM.nextInt(100)) + 1;
-	protected static final Float 		FLOAT_ANY 				= RANDOM.nextFloat();
-	protected static final Double 		DOUBLE_ANY 				= RANDOM.nextDouble();
-	protected static final BigDecimal 	DECIMAL_ANY 			= new BigDecimal(DOUBLE_ANY);
-	protected static final Date 		DATE_ANY 				= new Date(Calendar.getInstance().getTimeInMillis());
-	protected static final Time 		TIME_ANY 				= new Time(Calendar.getInstance().getTimeInMillis());
-	protected static final Timestamp  	TIMESTAMP_ANY 			= new Timestamp(Calendar.getInstance().getTimeInMillis());
-	protected static final Calendar  	CALENDAR_ANY 			= Calendar.getInstance();
-	protected static final Object  		OBJECT_ANY 				= new Object();
-	@SuppressWarnings("unchecked")
-    protected static final Map 			MAP_ANY 				= new HashMap();
-	protected static final String		SQL_ANY 				= "anysql";
-	protected static final int[]		INT_ARRARY_ANY			= new int[] {RANDOM.nextInt(), RANDOM.nextInt()};
-	protected static final byte[]		BYTE_ARRARY_ANY			= new byte[] {BYTE_ANY};
-	protected static final String[]		STR_ARRARY_ANY			= new String[] {STR_ANY};
-	
-	protected Map<String, Object[]> 	innerConnMethodInvoked 	= new HashMap<String, Object[]>();
-	protected Map<String, Object> 		innerConnMethodRetVals 	= new HashMap<String, Object>();
-	
+	protected static final Random RANDOM = new Random();
+
+	protected static final String STR_ANY = "foo";
+
+	protected static final Boolean BOOL_ANY = RANDOM.nextBoolean();
+
+	protected static final Long LONG_ANY = RANDOM.nextLong();
+
+	protected static final Integer INT_ANY = RANDOM.nextInt();
+
+	protected static final Byte BYTE_ANY = (byte) RANDOM.nextInt(100);
+
+	protected static final Short SHORT_ANY = (short) RANDOM.nextInt(100);
+
+	protected static final Integer UINT_ANY = Math.abs(RANDOM.nextInt(100)) + 1;
+
+	protected static final Float FLOAT_ANY = RANDOM.nextFloat();
+
+	protected static final Double DOUBLE_ANY = RANDOM.nextDouble();
+
+	protected static final BigDecimal DECIMAL_ANY = new BigDecimal(DOUBLE_ANY);
+
+	protected static final Date DATE_ANY = new Date(Calendar.getInstance().getTimeInMillis());
+
+	protected static final Time TIME_ANY = new Time(Calendar.getInstance().getTimeInMillis());
+
+	protected static final Timestamp TIMESTAMP_ANY = new Timestamp(Calendar.getInstance().getTimeInMillis());
+
+	protected static final Calendar CALENDAR_ANY = Calendar.getInstance();
+
+	protected static final Object OBJECT_ANY = new Object();
+
+	protected static final Map<String, Class<?>> MAP_ANY = new HashMap<String, Class<?>>();
+
+	protected static final String SQL_ANY = "anysql";
+
+	protected static final int[] INT_ARRARY_ANY = new int[] { RANDOM.nextInt(), RANDOM.nextInt() };
+
+	protected static final byte[] BYTE_ARRARY_ANY = new byte[] { BYTE_ANY };
+
+	protected static final String[] STR_ARRARY_ANY = new String[] { STR_ANY };
+
+	protected Map<String, Object[]> innerConnMethodInvoked = new HashMap<String, Object[]>();
+
+	protected Map<String, Object> innerConnMethodRetVals = new HashMap<String, Object>();
+
 	protected void assertInnerMethodInvoked(String method, Object[] params) {
 		assertTrue(innerConnMethodInvoked.containsKey(method));
 		for (int i = 0; i < params.length; i++) {
 			assertEquals(params[i], innerConnMethodInvoked.get(method)[i]);
 		}
 	}
-	
+
 	protected void assertInnerMethodNotInvoked(String method, Object[] params) {
 		boolean include = innerConnMethodInvoked.containsKey(method);
 		if (include) {
 			for (int i = 0; i < params.length; i++) {
 				Object actualParam = innerConnMethodInvoked.get(method)[i];
-				if (((params[i] == null || actualParam == null) && params[i] != actualParam) || !params[i].equals(actualParam)) {
+				if (((params[i] == null || actualParam == null) && params[i] != actualParam)
+				      || !params[i].equals(actualParam)) {
 					include = false;
 					break;
 				}
@@ -86,7 +107,7 @@ public abstract class BaseMonitorableUnitTest {
 		}
 		assertFalse(include);
 	}
-	
+
 	protected void assertInnerMethodInvokeAndRetValEquals(String method, Object[] params, Object retVal) {
 		assertInnerMethodInvoked(method, params);
 		if (!innerConnMethodRetVals.containsKey(method)) {
@@ -94,44 +115,43 @@ public abstract class BaseMonitorableUnitTest {
 		}
 		assertEquals(innerConnMethodRetVals.get(method), retVal);
 	}
-	
+
 	protected void resetInnerMethodInvokeRecord() {
 		innerConnMethodInvoked.clear();
 		innerConnMethodRetVals.clear();
 	}
-	
+
 	protected Object createTraceableObject(Class<?> interfaceClazz) {
 		return createTraceableObject(null, interfaceClazz);
 	}
-	
+
 	protected Object createTraceableObject(Class<?>[] interfaceClazz) {
 		return createTraceableObject(null, interfaceClazz);
 	}
-	
+
 	protected Object createTraceableObject(Object source, Class<?> interfaceClazz) {
-		return createTraceableObject(source, new Class<?>[] {interfaceClazz});
+		return createTraceableObject(source, new Class<?>[] { interfaceClazz });
 	}
-	
+
 	protected Object createTraceableObject(Object source, Class<?>[] interfaceClazz) {
 		if (source == null && (interfaceClazz == null || interfaceClazz.length == 0)) {
-			throw new IllegalArgumentException("Create traceable object must provide either source object or interfaceClazz at least.");
+			throw new IllegalArgumentException(
+			      "Create traceable object must provide either source object or interfaceClazz at least.");
 		}
-		return Proxy.newProxyInstance(
-				BaseMonitorableUnitTest.class.getClassLoader(),
-				interfaceClazz != null ? interfaceClazz : source.getClass().getInterfaces(),
-				new TraceInvocationHandler(source)
-		);
+		return Proxy.newProxyInstance(BaseMonitorableUnitTest.class.getClassLoader(),
+		      interfaceClazz != null ? interfaceClazz : source.getClass().getInterfaces(), new TraceInvocationHandler(
+		            source));
 	}
-	
+
 	class TraceInvocationHandler implements InvocationHandler {
-		
+
 		@SuppressWarnings("unused")
 		private Object targetObject;
-		
+
 		public TraceInvocationHandler(Object targetObject) {
 			this.targetObject = targetObject;
 		}
-		
+
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			innerConnMethodInvoked.put(method.getName(), args);
@@ -172,5 +192,5 @@ public abstract class BaseMonitorableUnitTest {
 			return retVal;
 		}
 	}
-	
+
 }
