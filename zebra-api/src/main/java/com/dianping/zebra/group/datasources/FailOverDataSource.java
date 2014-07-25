@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -23,6 +26,7 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
  * master database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
+	private static final Logger logger = LoggerFactory.getLogger(FailOverDataSource.class);
 
 	private static final String ERROR_MESSAGE = "Cannot find any master dataSource.";
 
@@ -81,8 +85,14 @@ public class FailOverDataSource extends AbstractDataSource {
 	public void init(boolean forceCheckMaster) {
 		MasterDataSourceMonitor monitor = new MasterDataSourceMonitor();
 
-		if (forceCheckMaster && !monitor.findMasterDataSource().isMasterExist()) {
-			throw new MasterDsNotFoundException(ERROR_MESSAGE);
+		if (!monitor.findMasterDataSource().isMasterExist()) {
+			if (forceCheckMaster) {
+				throw new MasterDsNotFoundException(ERROR_MESSAGE);
+			} else {
+				logger.warn("FailOverDataSource find master failed!");
+			}
+		} else {
+			logger.info("FailOverDataSource find master success!");
 		}
 
 		masterDataSourceMonitorThread = new Thread(monitor);
