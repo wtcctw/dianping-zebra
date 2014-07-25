@@ -13,7 +13,7 @@ import com.dianping.cat.message.Transaction;
  */
 
 public class SmoothReload {
-	private static long DEFAULT_MAX_MILLISECOND_INTERVAL = 1000;
+	private static final long DEFAULT_MAX_MILLISECOND_INTERVAL = 1000;
 
 	private static Random rnd = new Random();
 
