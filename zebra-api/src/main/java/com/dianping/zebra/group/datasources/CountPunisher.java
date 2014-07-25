@@ -85,8 +85,6 @@ public class CountPunisher {
 		if (JDBCExceptionUtils.isReadOnlyException(e)) {
 			count();
 		}
-		// else {
 		// TODO getConnnetion loss exception
-		// }
 	}
 }
