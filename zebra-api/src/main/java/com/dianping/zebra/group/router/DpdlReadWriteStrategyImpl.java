@@ -22,7 +22,9 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 			isAuthenticatedMethod.setAccessible(true);
 
 			serviceFlag = true;
-		} catch (Exception ignore) {
+		} catch (ClassNotFoundException ignore) {
+		} catch (SecurityException ignore) {
+		} catch (NoSuchMethodException ignore) {
 		}
 	}
 
