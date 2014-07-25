@@ -6,24 +6,27 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.cat.Cat;
+
 public class SmoothReloadTest {
 
 	@Test
 	public void test_smooth_reload() {
+		Cat.logEvent("DAL", "InitCat");
 
 		Random rnd = new Random();
-		int rndTime = rnd.nextInt(1000);
+		long maxTime = rnd.nextInt(1000);
 
-		SmoothReload sr = new SmoothReload(rndTime);
+		SmoothReload sr = new SmoothReload(maxTime);
 		long now = System.currentTimeMillis();
 		sr.waitForReload();
 		long interval = System.currentTimeMillis() - now;
 
-		Assert.assertTrue(interval >= 0);
-		Assert.assertTrue(interval <= rndTime);
-
 		System.out.println(String.format("SmoothReload Actual Time: %d", interval));
-		System.out.println(String.format("SmoothReload Max Time: %d", rndTime));
+		System.out.println(String.format("SmoothReload Max Time: %d", maxTime));
+
+		Assert.assertTrue(interval >= 0);
+		Assert.assertTrue(interval <= maxTime + SmoothReload.SLEEP_TIME);
 	}
 
 }

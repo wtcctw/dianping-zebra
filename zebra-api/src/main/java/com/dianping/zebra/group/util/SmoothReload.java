@@ -23,7 +23,7 @@ public class SmoothReload {
 
 	private long startMillisecond = 0;
 
-	// todo:add construct load with config
+	public static final int SLEEP_TIME = 100;
 
 	public SmoothReload() {
 		this(DEFAULT_MAX_MILLISECOND_INTERVAL);
@@ -47,7 +47,7 @@ public class SmoothReload {
 		Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh.Soomth");
 		while (startMillisecond + randomInterval > System.currentTimeMillis()) {
 			try {
-				TimeUnit.MILLISECONDS.sleep(100);
+				TimeUnit.MILLISECONDS.sleep(SLEEP_TIME);
 			} catch (InterruptedException ignore) {
 			}
 		}
