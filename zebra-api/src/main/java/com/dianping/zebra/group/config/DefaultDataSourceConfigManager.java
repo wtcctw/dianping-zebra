@@ -81,10 +81,10 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	private GroupDataSourceConfig initGroupDataSourceConfig() {
-		GroupDataSourceConfig groupDataSourceConfig = new GroupDataSourceConfig();
-		this.builder.visitGroupDataSourceConfig(groupDataSourceConfig);
+		GroupDataSourceConfig config = new GroupDataSourceConfig();
+		this.builder.visitGroupDataSourceConfig(config);
 
-		return groupDataSourceConfig;
+		return config;
 	}
 
 	@Override

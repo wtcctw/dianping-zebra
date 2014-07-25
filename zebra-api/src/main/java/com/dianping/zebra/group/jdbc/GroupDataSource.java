@@ -281,21 +281,21 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		if (!groupConfig.toString().equals(tmpGroupConfig.toString())) {
 			logger.info("start to refresh the dataSources...");
 
-			LoadBalancedDataSource readDataSource = null;
-			FailOverDataSource writeDataSource = null;
+			LoadBalancedDataSource newReadDataSource = null;
+			FailOverDataSource newWriteDataSource = null;
 			boolean preparedSwitch = false;
 			try {
-				readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(tmpGroupConfig.getDataSourceConfigs()),
+				newReadDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(tmpGroupConfig.getDataSourceConfigs()),
 				      systemConfigManager.getSystemConfig().getRetryTimes());
-				readDataSource.init();
-				writeDataSource = new FailOverDataSource(getFailoverConfig(tmpGroupConfig.getDataSourceConfigs()));
-				writeDataSource.init(false);
+				newReadDataSource.init();
+				newWriteDataSource = new FailOverDataSource(getFailoverConfig(tmpGroupConfig.getDataSourceConfigs()));
+				newWriteDataSource.init(false);
 
 				preparedSwitch = true;
 			} catch (Exception e) {
 				Cat.logError("error when create new dataSources", e);
 				try {
-					close(readDataSource, writeDataSource);
+					close(newReadDataSource, newWriteDataSource);
 				} catch (Exception ignore) {
 				}
 			}
@@ -306,8 +306,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 				synchronized (this) {
 					// switch
-					this.readDataSource = readDataSource;
-					this.writeDataSource = writeDataSource;
+					this.readDataSource = newReadDataSource;
+					this.writeDataSource = newWriteDataSource;
 				}
 
 				// destroy old dataSources

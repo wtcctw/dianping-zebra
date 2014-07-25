@@ -60,11 +60,11 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		RounterTarget target = this.router.select(context);
 
 		if (target != null) {
-			int retryTimes = -1;
+			int tmpRetryTimes = -1;
 			Set<RounterTarget> excludeTargets = new HashSet<RounterTarget>();
 			List<SQLException> exceptions = new ArrayList<SQLException>();
 
-			while (retryTimes++ < this.retryTimes) {
+			while (tmpRetryTimes++ < this.retryTimes) {
 				try {
 					return this.dataSources.get(target.getId()).getConnection();
 				} catch (SQLException e) {

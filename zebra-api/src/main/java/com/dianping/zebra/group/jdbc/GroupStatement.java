@@ -176,12 +176,12 @@ public class GroupStatement implements Statement {
 		if (isBatch) {
 			stmt = conn.createStatement();
 		} else {
-			int resultSetHoldability = this.resultSetHoldability;
-			if (resultSetHoldability == -1) {
-				resultSetHoldability = conn.getHoldability();
+			int tmpResultSetHoldability = this.resultSetHoldability;
+			if (tmpResultSetHoldability == -1) {
+				tmpResultSetHoldability = conn.getHoldability();
 			}
 
-			stmt = conn.createStatement(this.resultSetType, this.resultSetConcurrency, resultSetHoldability);
+			stmt = conn.createStatement(this.resultSetType, this.resultSetConcurrency, tmpResultSetHoldability);
 		}
 
 		setRealStatement(stmt);

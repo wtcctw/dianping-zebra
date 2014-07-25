@@ -183,8 +183,8 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	private int[] executeBatchOnConnection(Connection conn) throws SQLException {
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 
-		for (List<ParamContext> params : pstBatchedArgs) {
-			setBatchParams(pstmt, params);
+		for (List<ParamContext> tmpParams : pstBatchedArgs) {
+			setBatchParams(pstmt, tmpParams);
 			pstmt.addBatch();
 		}
 
