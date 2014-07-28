@@ -40,9 +40,7 @@ Lion中有两个地方需要配置，`ds`项目中负责配置单个数据源，
 `.....(省略其他配置).....`
 
 * 对于properties参数，这里可以给出默认值，DBA拷贝粘贴一下即可：
-initialPoolSize=10&maxPoolSize=20&minPoolSize=10&idleConnectionTestPeriod=60
-&acquireRetryAttempts=50&acquireRetryDelay=300&maxStatements=0&numHelperThreads=6
-&maxAdministrativeTaskTime=5&preferredTestQuery=SELECT 1&checkoutTimeout=3000
+initialPoolSize=10&maxPoolSize=20&minPoolSize=10&idleConnectionTestPeriod=60&acquireRetryAttempts=50&acquireRetryDelay=300&maxStatements=0&numHelperThreads=6&maxAdministrativeTaskTime=5&preferredTestQuery=SELECT 1&checkoutTimeout=3000
 
 ####  组合数据源配置`groupds`
 配置key的命名规范是：groupds.`name`.mapping，其中`name`就是业务使用的`jdbcRef`。
