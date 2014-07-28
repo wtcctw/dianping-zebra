@@ -1,11 +1,11 @@
-##DAL DBA配置手册
+## DAL DBA配置手册
 
 
-###配置介绍
-####配置格式
+### 配置介绍
+#### 配置格式
 Lion中有两个地方需要配置，`ds`项目中负责配置单个数据源，`groupds`项目负责配置组合数据源。
 
-#####单数据源配置——`ds`
+##### 单数据源配置——`ds`
 配置key的命名规范是：ds.{`name`}.jdbc.{`parameter`}，其中`name`是标识了唯一一套数据库连接和账号，而`parameter`则是代表参数。
 对于一套数据库账号，需要配置以下参数
 1. `ds.test-m1-read.jdbc.url`：配置jdbcUrl
@@ -20,42 +20,34 @@ Lion中有两个地方需要配置，`ds`项目中负责配置单个数据源，
 * `read`表明这个是只读账号，如果是可写账号，则配置成`write`。三个部分以`-`符号分隔。
 
 * 对于每一台数据库来说，都要配置两套账号：只读账号、可写账号。因此可能的配置如下：
-ds.test-m1-read.jdbc.url = url
-ds.test-m1-read.jdbc.user = dpUser_r
-ds.test-m1-read.jdbc.password = password_r
-.....(省略其他配置).....
-ds.test-m1-write.jdbc.url = url
-ds.test-m1-write.jdbc.user = dpUser
-ds.test-m1-write.jdbc.password = password
-.....(省略其他配置).....
+`ds.test-m1-read.jdbc.url = url`
+`ds.test-m1-read.jdbc.user = dpUser_r`
+`ds.test-m1-read.jdbc.password = password_r`
+`.....(省略其他配置).....`
+`ds.test-m1-write.jdbc.url = url`
+`ds.test-m1-write.jdbc.user = dpUser`
+`ds.test-m1-write.jdbc.password = password`
+`.....(省略其他配置).....`
 
 * 如果还有其他从库，那么对于每一台从库，也需要配置两套账号，因此可以能的配置如下：
-ds.test-s1-read.jdbc.url = url
-ds.test-s1-read.jdbc.user = dpUser_r
-ds.test-s1-read.jdbc.password = password_r
-.....(省略其他配置).....
-ds.test-s1-write.jdbc.url = url
-ds.test-s1-write.jdbc.user = dpUser
-ds.test-s1-write.jdbc.password = password
-.....(省略其他配置).....
+`ds.test-s1-read.jdbc.url = url`
+`ds.test-s1-read.jdbc.user = dpUser_r`
+`ds.test-s1-read.jdbc.password = password_r`
+`.....(省略其他配置).....`
+`ds.test-s1-write.jdbc.url = url`
+`ds.test-s1-write.jdbc.user = dpUser`
+`ds.test-s1-write.jdbc.password = password`
+`.....(省略其他配置).....`
 
-#####组合数据源配置——`groupds`
+#####  组合数据源配置——`groupds`
 配置key的命名规范是：groupds.{`name`}.mapping，其中`name`就是业务使用的`jdbcRef`。
 
 value的规范是：(test-s1-read:1,test-m1-read:1),(test-m1-write,test-s1-write)
 第一个括号配置的是读库，多个读库以`,`符号分隔，数字表示分流的权重。
 第二个括号配置的是写库，需要将集群中所有的instance的写账号配置在这里。
 
-######groupds隔离原则
+######  groupds隔离原则
 1. 对于三级甚至重要性比较低的两级业务，如果是同一个库，可以使用同一个`name`给业务方当做`jdbcRef`使用。
 2. 对于一级业务或者比较重要的二级业务，虽然是同一个库，但建议给不同的名字。
 
 * 这样做目的是DBA在对某个业务库进行运维操作时，不会影响到别的业务，或者不被别的业务影响。做到业务隔离。
-
-
-
-
-
-
-
-
