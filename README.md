@@ -1,7 +1,7 @@
-## Zebra
+## DAL
 
 ### 简介
-`Zebra`是在C3P0基础上进行包装成的点评内部使用的数据源工具，它有以下的功能点：
+`DAL`是在C3P0基础上进行包装成的点评内部使用的数据源工具，它有以下的功能点：
 1. 简化数据源的jdbc相关配置
 2. 纯粹的读写分离，支持SQL语句hint
 3. 写库的自动切换
@@ -17,9 +17,10 @@
     	<version>${version}</version>
 	</dependency>
 
+或者可以通过升级zebra-ds-monitor的版本到`2.5.0`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
 ##### 其他依赖
 * 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
-* `Lion`的`0.4.3`以下版本有一个BUG，如果多个`bean`指向了同一个`Lion`配置，那么配置更新的时候只会通知一个`bean`。所以如果多个`DataSource`引用了同一个`Lion`配置，如果想要实现C3P0相关配置热切换，就需要升级`Lion`到`0.4.3`。
+* `Lion`的`0.4.3`一下版本有一个BUG，如果多个`bean`指向了同一个`Lion`配置，那么配置更新的时候只会通知一个`bean`。所以如果多个`DataSource`引用了同一个`Lion`配置，如果想要实现C3P0相关配置热切换，就需要升级`Lion`到`0.4.3`。
 
 
 ##### 单数据库在 Spring 中 DataSource 的配置
@@ -62,10 +63,10 @@
     </bean>
 
 ##### 配置说明
-其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，由DBA给出，`Zebra`会自动根据这个名字到`Lion`上查找`jdbc`相关的`url`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
+其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，由DBA给出，`Zebra`会自动根据这个名字到`Lion`上查找`jdbcUrl`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
 1. C3P0参数是在`bean`中直接定义的，那么C3P0的参数将不具有动态刷新的功能。
 2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
-3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务配置隔离。
+3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
 ###### 答疑解惑
 Q：为什么要加`init-method`和`destory-method`，不加会怎么样？
@@ -73,7 +74,7 @@ Q：为什么要加`init-method`和`destory-method`，不加会怎么样？
 A：`Zebra`内不需要启动多线程，构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.0`及以上，
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.0`以上，
 `Zebra`将会对所有的`ComboPooledDataSource`进行替换，替换成`SingleDataSource`。通过替换，虽然具备了以上大部分功能。
 但这种方式有它的局限性，它不支持许多功能：如读库切换操作，写库Failover等。
 要想使用DAL的全部功能，必须显示的修改业务Spring配置，即上述的使用方式。
@@ -82,16 +83,11 @@ A：`Zebra`内不需要启动多线程，构造函数中启动线程是不安全
 
 
 ### 更新说明
-#### 2.5.0
+#### 2.4.9-SNAPSHOT
 * [+] 支持`Spring`方式配置`GroupDataSource`
-* [+] 支持`Spring`方式配置`SingleDataSource`
-* [+] 通过升级`zebra-ds-monitor`，老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
-* [+] 加入了更多的`Cat`监控，并在`Cat`的`Heartbeat`页面中增加了`Dal`相关监控
+* [+] 支持`Spring方`式配置`SingleDataSource`
+* [+] 通过升级`zebra-ds-monitor`,老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
 * [+] 两种`DataSource`均支持配置动态刷新
-* [+] 加入了平滑切换功能，可在`Lion`上配置切换时间，防止切换过程中的连接池风暴问题
-* [/] 重新设计了`Lion`配置结构，更简洁、更合理
-* [/] 修复了`GroupDataSource`在配置刷新过程中出现不必要异常的问题
-
 
 ##### 2.4.8
 * [*] 重构`FailOverDataSource`，检测逻辑更合理
