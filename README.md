@@ -73,7 +73,7 @@ Q：为什么要加`init-method`和`destory-method`，不加会怎么样？
 A：`Zebra`内不需要启动多线程，构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.4.9`及以上，
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.0`及以上，
 `Zebra`将会对所有的`ComboPooledDataSource`进行替换，替换成`SingleDataSource`。通过替换，虽然具备了以上大部分功能。
 但这种方式有它的局限性，它不支持许多功能：如读库切换操作，写库Failover等。
 要想使用DAL的全部功能，必须显示的修改业务Spring配置，即上述的使用方式。
@@ -82,11 +82,16 @@ A：`Zebra`内不需要启动多线程，构造函数中启动线程是不安全
 
 
 ### 更新说明
-#### 2.4.9-SNAPSHOT
+#### 2.5.0
 * [+] 支持`Spring`方式配置`GroupDataSource`
 * [+] 支持`Spring`方式配置`SingleDataSource`
-* [+] 通过升级`zebra-ds-monitor`,老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
+* [+] 通过升级`zebra-ds-monitor`，老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
+* [+] 加入了更多的`Cat`监控，并在`Cat`的`Heartbeat`页面中增加了`Dal`相关监控
 * [+] 两种`DataSource`均支持配置动态刷新
+* [+] 加入了平滑切换功能，可在`Lion`上配置切换时间，防止切换过程中的连接池风暴问题
+* [/] 重新设计了`Lion`配置结构，更简洁、更合理
+* [/] 修复了`GroupDataSource`在配置刷新过程中出现不必要异常的问题
+
 
 ##### 2.4.8
 * [*] 重构`FailOverDataSource`，检测逻辑更合理
