@@ -1,9 +1,9 @@
 /**
  * Project: ${zebra-ds-monitor-client.aid}
- * 
+ *
  * File Created at 2011-11-9
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -44,9 +44,8 @@ import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 
 /**
  * 自动为spring容器中的所有DataSource添加monitor功能，配置在spring配置文件中即可，如下 <bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>
- * 
- * @author danson.liu
  *
+ * @author danson.liu
  */
 public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, PriorityOrdered {
 
@@ -64,7 +63,7 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		String[] beanDefinitionNames = listableBeanFactory.getBeanDefinitionNames();
 		for (String beanDefinitionName : beanDefinitionNames) {
 			AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) listableBeanFactory
-			      .getBeanDefinition(beanDefinitionName);
+					.getBeanDefinition(beanDefinitionName);
 			try {
 				Class<?> beanClazz = beanDefinition.resolveBeanClass(ClassUtils.getDefaultClassLoader());
 				if (beanClazz != null && DataSource.class.isAssignableFrom(beanClazz)) {
@@ -79,9 +78,9 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	}
 
 	private void autoReplaceWithMonitorableDataSource(String beanName, BeanDefinition dataSourceDefinition,
-	      Class<?> dataSourceClazz, DefaultListableBeanFactory listableBeanFactory) {
+			Class<?> dataSourceClazz, DefaultListableBeanFactory listableBeanFactory) {
 		listableBeanFactory.registerBeanDefinition(beanName,
-		      createMonitorableBeanDefinition(beanName, dataSourceDefinition, listableBeanFactory));
+				createMonitorableBeanDefinition(beanName, dataSourceDefinition, listableBeanFactory));
 		// zebra需做特殊处理，一些inner datasource可能作为nested bean方式定义，也需要wrapper
 		if (isZebraDataSource(dataSourceClazz)) {
 			replaceInnerDataSourceInZebra(beanName, dataSourceDefinition, listableBeanFactory);
@@ -90,13 +89,13 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 
 	@SuppressWarnings("unchecked")
 	private void replaceInnerDataSourceInZebra(String beanName, BeanDefinition zebraDataSourceDefinition,
-	      DefaultListableBeanFactory listableBeanFactory) {
+			DefaultListableBeanFactory listableBeanFactory) {
 		MutablePropertyValues propertyValues = zebraDataSourceDefinition.getPropertyValues();
 		PropertyValue dataSourcePoolVal = propertyValues.getPropertyValue("dataSourcePool");
 		if (dataSourcePoolVal == null) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Zebra dataSource's dataSourcePool property not found, maybe its name is modified, "
-				      + "change the automonitor's implementation, otherwise some inner dataSource cannot be monitored.");
+						+ "change the automonitor's implementation, otherwise some inner dataSource cannot be monitored.");
 			}
 			return;
 		}
@@ -107,14 +106,15 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 				BeanDefinitionHolder innerDSDefHolder = (BeanDefinitionHolder) innerDSDefVal;
 				BeanDefinition innerDSDefinition = innerDSDefHolder.getBeanDefinition();
 				innerDSDefEntry.setValue(new BeanDefinitionHolder(createMonitorableBeanDefinition(beanName,
-				      innerDSDefinition, listableBeanFactory), innerDSDefHolder.getBeanName(), innerDSDefHolder
-				      .getAliases()));
+						innerDSDefinition, listableBeanFactory), innerDSDefHolder.getBeanName(), innerDSDefHolder
+						.getAliases()));
 			}
 		}
 	}
 
 	private GenericBeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition,
-	      DefaultListableBeanFactory listableBeanFactory) {
+			DefaultListableBeanFactory listableBeanFactory) {
+		String newBeanName = String.format("%s-%d", beanName, nameId++);
 
 		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
@@ -124,22 +124,19 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 			if (dataSourceDefinition instanceof AbstractBeanDefinition) {
 				((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
 			}
-			Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s", beanName));
+			Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
 		} else {
 			Cat.logEvent("DAL.BeanFactory",
-			      String.format("NotReplace-%s-%s", beanName, dataSourceDefinition.getBeanClassName()));
+					String.format("Ignore-%s(%s)-%s", beanName, newBeanName, dataSourceDefinition.getBeanClassName()));
 		}
 
-		String newBeanName = String.format("%s-%d", beanName, nameId++);
-		Cat.logEvent("DAL.BeanFactory", String.format("NewBeanName-%s", newBeanName));
-		
 		listableBeanFactory.registerBeanDefinition(newBeanName, dataSourceDefinition);
 
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
 		monitorableDataSourceDefinition.setBeanClass(MonitorableDataSource.class);
 
 		monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(
-		      new RuntimeBeanReference(newBeanName));
+				new RuntimeBeanReference(newBeanName));
 
 		return monitorableDataSourceDefinition;
 	}
