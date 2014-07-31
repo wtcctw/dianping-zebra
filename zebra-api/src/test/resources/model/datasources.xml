@@ -4,7 +4,7 @@
 		<time-window>1000</time-window>
 		<punish-limit>100</punish-limit>
 		<jdbc-url>jdbc:h2:mem:test;MVCC=TRUE</jdbc-url>
-		<user>sa</user>
+		<username>sa</username>
 		<driver-class>org.h2.Driver</driver-class>
 		<password></password>
 		<idleConnectionTestPeriod>60</idleConnectionTestPeriod>
@@ -17,7 +17,7 @@
 		<time-window>0</time-window>
 		<punish-limit>0</punish-limit>
 		<jdbc-url>jdbc:h2:mem:test1;MVCC=TRUE</jdbc-url>
-		<user>sa</user>
+		<username>sa</username>
 		<driver-class>org.h2.Driver</driver-class>
 		<password></password>
 	</data-source-config>
@@ -26,7 +26,7 @@
 		<time-window>0</time-window>
 		<punish-limit>0</punish-limit>
 		<jdbc-url>jdbc:h2:mem:test2;MVCC=TRUE</jdbc-url>
-		<user>sa</user>
+		<username>sa</username>
 		<driver-class>org.h2.Driver</driver-class>
 		<password></password>
 		<idleConnectionTestPeriod>80</idleConnectionTestPeriod>

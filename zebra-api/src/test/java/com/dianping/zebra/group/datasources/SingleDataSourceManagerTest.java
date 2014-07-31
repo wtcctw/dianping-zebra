@@ -53,7 +53,7 @@ public class SingleDataSourceManagerTest extends InnerSingleDatabaseTestCase {
 
 		config.setJdbcUrl(JDBC_URL);
 		config.setDriverClass(JDBC_DRIVER);
-		config.setUser(USER);
+		config.setUsername(USER);
 		config.setPassword(PASSWORD);
 		config.setId("ds1");
 		config.setActive(true);

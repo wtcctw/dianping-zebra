@@ -56,7 +56,7 @@ public final class Constants {
 
 	public static final String ELEMENT_WARMUP_TIME = "warmupTime";
 
-	public static final String ELEMENT_USER = "user";
+	public static final String ELEMENT_USER = "username";
 
 	public static final String ELEMENT_ROUTER_STRATEGY = "routerStrategy";
 

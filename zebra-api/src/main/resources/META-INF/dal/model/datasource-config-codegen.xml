@@ -16,7 +16,7 @@
     <element name="time-window" value-type="long" />
     <element name="punish-limit" value-type="long" />
     <element name="jdbc-url" value-type="String" />
-    <element name="user" value-type="String" />
+    <element name="username" value-type="String" />
     <element name="driver-class" value-type="String" />
     <element name="password" value-type="String" />
   </entity>

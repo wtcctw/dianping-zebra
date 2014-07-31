@@ -16,7 +16,7 @@
     	<element name="time-window" value-type="long"  primitive="true" default-value="0"/>
     	<element name="punish-limit" value-type="long" primitive="true" default-value="0"/>
 		<element name="jdbc-url" value-type="String" primitive="true" default-value=""/>
-		<element name="user" value-type="String" primitive="true" default-value=""/>
+		<element name="username" value-type="String" primitive="true" default-value=""/>
 		<element name="driver-class" value-type="String" primitive="true" default-value=""/>
 		<element name="password" value-type="String" primitive="true" default-value=""/>
 		<element name="warmup-time" value-type="int" primitive="true" default-value="0"/>

@@ -293,7 +293,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 	}
 
 	private void refreshUserAndPassword() {
-		c3p0Config.setUser(atomicRefresh.getNewUser());
+		c3p0Config.setUsername(atomicRefresh.getNewUser());
 		c3p0Config.setPassword(atomicRefresh.getNewPassword());
 		atomicRefresh.reset();
 
@@ -518,7 +518,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 		// innerDs 未加载的时候不需要 reload 逻辑
 		if (innerDs == null) {
-			c3p0Config.setUser(user);
+			c3p0Config.setUsername(user);
 			return;
 		}
 

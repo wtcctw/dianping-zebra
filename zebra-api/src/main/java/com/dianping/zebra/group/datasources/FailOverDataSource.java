@@ -213,7 +213,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		protected Connection getConnection(DataSourceConfig config) throws SQLException {
 			if (!cachedConnection.containsKey(config.getId())) {
 				cachedConnection.put(config.getId(),
-				      DriverManager.getConnection(config.getJdbcUrl(), config.getUser(), config.getPassword()));
+				      DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
 			}
 
 			return cachedConnection.get(config.getId());
