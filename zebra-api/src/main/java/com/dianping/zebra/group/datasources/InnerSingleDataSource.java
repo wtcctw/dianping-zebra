@@ -238,7 +238,7 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 		}
 
 		try {
-			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUser(),
+			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
 			      value.getPassword());
 
 			Map<String, Object> props = new HashMap<String, Object>();

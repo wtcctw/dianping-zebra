@@ -227,7 +227,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			      dsConfig.getPassword()));
 			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),
 			      dsConfig.getWarmupTime()));
-			dsConfig.setUser(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUser()));
+			dsConfig.setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
 
 			String properies = getProperty(getSingleDataSourceKey(Constants.ELEMENT_PROPERTIES, dsId), null);
 
