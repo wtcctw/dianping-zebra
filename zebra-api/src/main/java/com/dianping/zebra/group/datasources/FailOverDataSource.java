@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.dianping.zebra.group.util.JdbcDriverClassHelper;
-import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +20,8 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
+import com.dianping.zebra.group.util.JdbcDriverClassHelper;
+import com.dianping.zebra.group.util.StringUtils;
 
 /**
  * features: 1. auto-detect master database by select @@read_only</br> 2. auto check the master database.</br> 3. if cannot find any
@@ -29,10 +29,6 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
  */
 public class FailOverDataSource extends AbstractDataSource {
 	private static final Logger logger = LoggerFactory.getLogger(FailOverDataSource.class);
-
-	private static final String FIND_MASTER_ERROR_MESSAGE = "Cannot find any master dataSource.";
-
-	private static final String FIND_MASTER_SUCCESS_MESSAGE = "FailOverDataSource find master success!";
 
 	private volatile InnerSingleDataSource master;
 
@@ -87,29 +83,23 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	private String getConfigSummary() {
-		StringBuilder stringBuilder = new StringBuilder();
+		StringBuilder sb = new StringBuilder(100);
 
-		if (configs == null || configs.size() == 0) {
-			return "empty";
-		} else {
-			for (Map.Entry<String, DataSourceConfig> config : configs.entrySet()) {
-				stringBuilder.append(
-						String.format("[id=%s,url=%s,username=%s,password=%s,driverClass=%s]", config.getValue().getId(),
-								config.getValue().getJdbcUrl(), config.getValue().getUsername(),
-								StringUtils.repeat("*",
-										config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length())
-								, config.getValue().getDriverClass()));
-			}
+		for (Map.Entry<String, DataSourceConfig> config : configs.entrySet()) {
+			sb.append(String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s]", config.getValue()
+			      .getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(), StringUtils.repeat("*",
+			      config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length()), config
+			      .getValue().getDriverClass()));
 		}
 
-		return stringBuilder.toString();
+		return sb.toString();
 	}
 
 	public void init(boolean forceCheckMaster) {
 		MasterDataSourceMonitor monitor = new MasterDataSourceMonitor();
 
 		if (!monitor.findMasterDataSource().isMasterExist()) {
-			String error_message = String.format("%s configs=%s", FIND_MASTER_ERROR_MESSAGE, getConfigSummary());
+			String error_message = String.format("Cannot find any master dataSource. Configs=%s", getConfigSummary());
 
 			if (forceCheckMaster) {
 				MasterDsNotFoundException exp = new MasterDsNotFoundException(error_message);
@@ -119,7 +109,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				logger.warn(error_message);
 			}
 		} else {
-			logger.info(FIND_MASTER_SUCCESS_MESSAGE);
+			logger.info("FailOverDataSource find master success!");
 		}
 
 		masterDataSourceMonitorThread = new Thread(monitor);
@@ -245,7 +235,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			if (!cachedConnection.containsKey(config.getId())) {
 				JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 				cachedConnection.put(config.getId(),
-						DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
+				      DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
 			}
 
 			return cachedConnection.get(config.getId());

@@ -9,7 +9,7 @@ public class JdbcDriverClassHelper {
 	private JdbcDriverClassHelper() {
 	}
 
-	public static String getDriverClassNameByJdbcUrl(String url) {
+	private static String getDriverClassNameByJdbcUrl(String url) {
 		if (url.startsWith("jdbc:mysql:")) {
 			return "com.mysql.jdbc.Driver";
 		} else if (url.startsWith("jdbc:postgresql:")) {

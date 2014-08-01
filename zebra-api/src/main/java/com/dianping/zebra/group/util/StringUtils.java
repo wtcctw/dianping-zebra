@@ -421,4 +421,12 @@ public final class StringUtils {
 	public static String trimToEmpty(String str) {
 		return str == null ? EMPTY : str.trim();
 	}
+
+	public static String repeat(String str, int repeat) {
+		StringBuffer buffer = new StringBuffer(repeat * str.length());
+		for (int i = 0; i < repeat; i++) {
+			buffer.append(str);
+		}
+		return buffer.toString();
+	}
 }
