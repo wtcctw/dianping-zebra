@@ -237,12 +237,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void initDataSources() {
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException ex) {
-			throw new DalException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
-		}
-
-		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
 			      systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();

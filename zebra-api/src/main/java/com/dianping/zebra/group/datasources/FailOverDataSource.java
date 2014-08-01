@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.dianping.zebra.group.util.JdbcDriverClassHelper;
 import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +96,8 @@ public class FailOverDataSource extends AbstractDataSource {
 				stringBuilder.append(
 						String.format("[id=%s,url=%s,username=%s,password=%s,driverClass=%s]", config.getValue().getId(),
 								config.getValue().getJdbcUrl(), config.getValue().getUsername(),
-								StringUtils.repeat("*", config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length())
+								StringUtils.repeat("*",
+										config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length())
 								, config.getValue().getDriverClass()));
 			}
 		}
@@ -110,7 +112,9 @@ public class FailOverDataSource extends AbstractDataSource {
 			String error_message = String.format("%s configs=%s", FIND_MASTER_ERROR_MESSAGE, getConfigSummary());
 
 			if (forceCheckMaster) {
-				throw new MasterDsNotFoundException(error_message);
+				MasterDsNotFoundException exp = new MasterDsNotFoundException(error_message);
+				Cat.logError(exp);
+				throw exp;
 			} else {
 				logger.warn(error_message);
 			}
@@ -239,6 +243,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		protected Connection getConnection(DataSourceConfig config) throws SQLException {
 			if (!cachedConnection.containsKey(config.getId())) {
+				JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 				cachedConnection.put(config.getId(),
 						DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
 			}
