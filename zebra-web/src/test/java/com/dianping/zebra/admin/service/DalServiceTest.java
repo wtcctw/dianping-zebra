@@ -1,6 +1,7 @@
 package com.dianping.zebra.admin.service;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
@@ -16,8 +17,14 @@ public class DalServiceTest extends ComponentTestCase {
 	}
 
 	@Test
+	@Ignore
 	public void testMarkDown() {
-		m_dalService.markDown("dev", "127.0.0.1", "3306", null);
+		m_dalService.markDown("dev", "127.0.0.2", "3306", null);
 	}
-
+	
+	@Test
+	@Ignore
+	public void testMarkUp() {
+		m_dalService.markUp("dev", "127.0.0.2", "3316", null);
+	}
 }

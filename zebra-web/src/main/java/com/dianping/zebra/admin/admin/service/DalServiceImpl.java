@@ -14,7 +14,7 @@ import com.dianping.zebra.group.util.Splitters;
 
 public class DalServiceImpl implements DalService {
 
-	private final String PREFIX = Constants.DEFAULT_DATASOURCE_VERBOSE_PRFIX + ".";
+	private final String PORJECT = Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX;
 
 	@Inject
 	private LionHttpService m_lionHttpService;
@@ -31,9 +31,9 @@ public class DalServiceImpl implements DalService {
 			String key = entry.getKey();
 			String value = entry.getValue();
 
-			if (key != null && key.contains(".jdbcUrl") && value != null && value.contains(content.trim())) {
-				int begin = "zebra.v2.ds.".length();
-				int end = key.indexOf(".jdbcUrl");
+			if (key != null && key.contains(".jdbc.url") && value != null && value.contains(content.trim())) {
+				int begin = "ds.".length();
+				int end = key.indexOf(".jdbc.url");
 
 				dataSources.add(key.substring(begin, end));
 			}
@@ -51,7 +51,7 @@ public class DalServiceImpl implements DalService {
 		}
 
 		for (String db : dataSources) {
-			boolean isSuccess = m_lionHttpService.setConfig(result.getEnv(), "zebra", "v2.ds." + db + ".active", value);
+			boolean isSuccess = m_lionHttpService.setConfig(result.getEnv(), "ds." + db + ".jdbc.active", value);
 
 			if (isSuccess) {
 				markedDataSource.add(db);
@@ -74,7 +74,7 @@ public class DalServiceImpl implements DalService {
 		DalResult result = new DalResult(ip, port, database, env, "markdown");
 		HashMap<String, String> keyValues = null;
 		try {
-			keyValues = m_lionHttpService.getKeyValuesByPrefix(env, PREFIX);
+			keyValues = m_lionHttpService.getConfigByProject(env, PORJECT);
 		} catch (IOException e) {
 			result.onFail(e.getMessage());
 
@@ -83,14 +83,14 @@ public class DalServiceImpl implements DalService {
 
 		// 找到所有符合ip:port的db
 		Set<String> dataSources = findDataSources(ip, port, database, keyValues);
-		Set<String> dataBasesWithoutReadDB = validateDataSources(keyValues, dataSources);
-
-		if (dataBasesWithoutReadDB.size() > 0) {
-			result.onFail(String.format("fail to mark down %s:%s because %s will have no read databases.", ip, port,
-			      dataBasesWithoutReadDB));
-
-			return result;
-		}
+//		Set<String> dataBasesWithoutReadDB = validateDataSources(keyValues, dataSources);
+//
+//		if (dataBasesWithoutReadDB.size() > 0) {
+//			result.onFail(String.format("fail to mark down %s:%s because %s will have no read databases.", ip, port,
+//			      dataBasesWithoutReadDB));
+//
+//			return result;
+//		}
 
 		markDBInternal(result, dataSources, false);
 
@@ -103,7 +103,7 @@ public class DalServiceImpl implements DalService {
 
 		HashMap<String, String> keyValues = null;
 		try {
-			keyValues = m_lionHttpService.getKeyValuesByPrefix(env, PREFIX);
+			keyValues = m_lionHttpService.getConfigByProject(env, PORJECT);
 		} catch (IOException e) {
 			result.onFail(e.getMessage());
 
@@ -115,7 +115,8 @@ public class DalServiceImpl implements DalService {
 		return result;
 	}
 
-	private Set<String> validateDataSources(HashMap<String, String> keyValues, Set<String> dataSources) {
+	@SuppressWarnings("unused")
+   private Set<String> validateDataSources(HashMap<String, String> keyValues, Set<String> dataSources) {
 		// 找到使用这些db的读库组
 		Set<String> dataBases = new HashSet<String>();
 		for (String db : dataSources) {

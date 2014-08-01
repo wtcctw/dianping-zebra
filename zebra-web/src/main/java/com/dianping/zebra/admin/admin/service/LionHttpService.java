@@ -5,7 +5,9 @@ import java.util.HashMap;
 
 public interface LionHttpService {
 
-	public boolean setConfig(String env, String project, String key, String value);
+	public boolean setConfig(String env, String key, String value);
 
-	public HashMap<String, String> getKeyValuesByPrefix(String env, String keyPrefix) throws IOException;
+	public String getConfig(String env, String key) throws IOException;
+
+	public HashMap<String, String> getConfigByProject(String env, String project) throws IOException;
 }
