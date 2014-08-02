@@ -23,9 +23,6 @@ public class LionConfigService implements ConfigService {
 
 	private final ConcurrentMap<String, String> cache = new ConcurrentHashMap<String, String>();
 
-	public LionConfigService() {
-	}
-
 	@Override
 	public String getProperty(String key) {
 		if (!cache.containsKey(key)) {

@@ -10,7 +10,9 @@ import org.xml.sax.SAXException;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager.GroupDataSourceConfigBuilder;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager.ReadOrWriteRole;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
+import com.dianping.zebra.group.monitor.HidePasswordVisitor;
 
 public class DataSourceConfigManagerTest {
 
@@ -30,6 +32,13 @@ public class DataSourceConfigManagerTest {
 		}
 
 		System.out.println(dataSourceConfigManager.getGroupDataSourceConfig());
+
+		GroupDataSourceConfig groupDataSourceConfig = new GroupDataSourceConfig();
+		HidePasswordVisitor visitor = new HidePasswordVisitor(groupDataSourceConfig);
+		dataSourceConfigManager.getGroupDataSourceConfig().accept(visitor);
+		System.out.println("=====after hide the password=======");
+		System.out.println(groupDataSourceConfig);
+
 	}
 
 	@Test

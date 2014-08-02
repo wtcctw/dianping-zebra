@@ -4,8 +4,6 @@ import java.sql.SQLException;
 import java.util.regex.Pattern;
 
 public final class SqlUtils {
-	private SqlUtils() {
-	}
 
 	/**
 	 * 用于判断是否是一个select ... for update的sql

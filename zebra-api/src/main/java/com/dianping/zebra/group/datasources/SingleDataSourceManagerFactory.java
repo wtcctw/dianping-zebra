@@ -1,10 +1,10 @@
 package com.dianping.zebra.group.datasources;
 
 public final class SingleDataSourceManagerFactory {
+	private volatile static SingleDataSourceManager dataSourceManager;
+
 	private SingleDataSourceManagerFactory() {
 	}
-
-	private volatile static SingleDataSourceManager dataSourceManager;
 
 	public static SingleDataSourceManager getDataSourceManager() {
 		if (dataSourceManager == null) {

@@ -6,8 +6,6 @@ import com.dianping.zebra.group.exception.IllegalConfigException;
  * Created by Dozer on 8/1/14.
  */
 public class JdbcDriverClassHelper {
-	private JdbcDriverClassHelper() {
-	}
 
 	private static String getDriverClassNameByJdbcUrl(String url) {
 		if (url.startsWith("jdbc:mysql:")) {

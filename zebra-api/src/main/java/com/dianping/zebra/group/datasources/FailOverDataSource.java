@@ -86,10 +86,10 @@ public class FailOverDataSource extends AbstractDataSource {
 		StringBuilder sb = new StringBuilder(100);
 
 		for (Map.Entry<String, DataSourceConfig> config : configs.entrySet()) {
-			sb.append(String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s]", config.getValue()
-			      .getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(), StringUtils.repeat("*",
-			      config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length()), config
-			      .getValue().getDriverClass()));
+			sb.append(String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s,properties=%s]", config
+			      .getValue().getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(), StringUtils
+			      .repeat("*", config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length()),
+			      config.getValue().getDriverClass(), config.getValue().getProperties()));
 		}
 
 		return sb.toString();

@@ -9,9 +9,6 @@ import java.io.StringReader;
  * 
  */
 public final class StringUtils {
-	private StringUtils() {
-	}
-
 	private static final String EMPTY = "";
 
 	private static final int PAD_LIMIT = 8192;
