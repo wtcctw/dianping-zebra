@@ -9,6 +9,15 @@
 			<implementation>com.dianping.zebra.admin.admin.service.LocalLogService</implementation>
 		</component>
 		<component>
+			<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.DalConfigServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.zebra.admin.admin.service.DalService</role>
 			<implementation>com.dianping.zebra.admin.admin.service.DalServiceImpl</implementation>
 			<requirements>

@@ -12,6 +12,7 @@ import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import com.dianping.zebra.admin.admin.AdminPage;
+import com.dianping.zebra.admin.admin.service.DalConfigService;
 import com.dianping.zebra.admin.admin.service.DalResult;
 import com.dianping.zebra.admin.admin.service.DalService;
 import com.dianping.zebra.admin.admin.service.LogService;
@@ -26,6 +27,9 @@ public class Handler implements PageHandler<Context> {
 
 	@Inject
 	private LogService m_logService;
+
+	@Inject
+	private DalConfigService m_dalConfigService;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -45,6 +49,7 @@ public class Handler implements PageHandler<Context> {
 		String user = payload.getUser();
 		String env = payload.getEnv();
 		String database = payload.getDatabase();
+		String name = payload.getName();
 		String[] ips = payload.getIps();
 		DalResult result = null;
 
@@ -64,8 +69,14 @@ public class Handler implements PageHandler<Context> {
 			}
 			break;
 		case NOTIFY_IP:
-			if(ips != null){
+			if (ips != null) {
 				m_logService.logNotify(ips);
+			}
+			break;
+		case INIT_DS:
+			if (name != null) {
+				m_dalConfigService.generateConfig(name);
+				ctx.sendJsonResponse("0", "success", null);
 			}
 			break;
 		default:

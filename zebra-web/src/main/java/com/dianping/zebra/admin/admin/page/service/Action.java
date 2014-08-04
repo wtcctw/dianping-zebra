@@ -7,7 +7,9 @@ public enum Action implements org.unidal.web.mvc.Action {
 	
 	MARKUP("markUp"),
 	
-	NOTIFY_IP("notifyIp")
+	NOTIFY_IP("notifyIp"),
+	
+	INIT_DS("initDs")
 	
 	;
 

@@ -16,19 +16,22 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 
 	@FieldMeta("port")
 	private String m_port;
-	
+
 	@FieldMeta("database")
 	private String m_database;
 
 	@FieldMeta("user")
 	private String m_user;
-	
+
 	@FieldMeta("env")
 	private String m_env;
 
 	@FieldMeta("ips")
 	private String[] m_ips;
-	
+
+	@FieldMeta("name")
+	private String m_name;
+
 	@Override
 	public Action getAction() {
 		return m_action;
@@ -38,7 +41,7 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 		return m_database;
 	}
 
-	public String getEnv(){
+	public String getEnv() {
 		return m_env;
 	}
 
@@ -50,13 +53,17 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	public AdminPage getPage() {
 		return m_page;
 	}
-	
+
 	public String getPort() {
 		return m_port;
 	}
 
 	public String getUser() {
 		return m_user;
+	}
+
+	public String getName() {
+		return m_name;
 	}
 
 	public void setAction(String action) {
@@ -67,7 +74,7 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 		m_database = database;
 	}
 
-	public void setEnv(String env){
+	public void setEnv(String env) {
 		m_env = env;
 	}
 
@@ -83,6 +90,10 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 		m_ips = ips;
 	}
 
+	public void setName(String name) {
+		m_name = name;
+	}
+
 	@Override
 	public void setPage(String page) {
 		m_page = AdminPage.getByName(page, AdminPage.SERVICE);
@@ -95,7 +106,7 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	public void setUser(String user) {
 		m_user = user;
 	}
-	
+
 	@Override
 	public void validate(ActionContext<?> ctx) {
 		if (m_action == null) {
