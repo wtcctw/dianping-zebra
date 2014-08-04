@@ -70,6 +70,9 @@
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.LogService</role>
 				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
