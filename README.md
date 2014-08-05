@@ -17,7 +17,7 @@
     	<version>${version}</version>
 	</dependency>
 
-或者可以通过升级zebra-ds-monitor的版本到`2.5.1`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
+或者可以通过升级zebra-ds-monitor的版本到`2.5.2`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
 
 	<dependency>
         <groupId>com.dianping.zebra</groupId>
@@ -80,7 +80,7 @@ Q：为什么要加`init-method`和`destory-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.1`以上，
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.2`以上，
 `Zebra`将会对所有的`ComboPooledDataSource`进行替换，替换成`SingleDataSource`。通过替换，虽然具备了以上大部分功能。
 但这种方式有它的局限性，它不支持许多功能：如读库切换操作，写库Failover等。
 要想使用DAL的全部功能，必须显示的修改业务Spring配置，即上述的使用方式。
@@ -91,6 +91,9 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 ### 更新说明
 #### 2.5.2
 * [/] 修复`GroupConnection`中`getMetaData`时总是得到写库信息的问题
+* [/] 修复`ZebraDsMonitorClient`中`hack`版本过低的问题
+* [/] 修复`ZebraDsMonitorClient`的`bean`在`Spring`中被多次声明时出错的问题
+* [/] 修改`CAT`监控参数，隐藏密码
 
 #### 2.5.1
 * [/] 将`Lion`中的用户名的配置从`user`改成`username`
