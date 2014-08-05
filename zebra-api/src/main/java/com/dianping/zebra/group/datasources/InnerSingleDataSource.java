@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.dianping.zebra.group.util.JdbcDriverClassHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,14 +63,15 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 					this.state = DataSourceState.CLOSED;
 				} else {
 					throw new DalException(String.format("Cannot close dataSource[%s] since there are busy connections.",
-					      dsId));
+							dsId));
 				}
 			} else {
 				this.state = DataSourceState.CLOSED;
 			}
 		} else {
 			// Normally not happen
-			logger.warn("fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
+			logger.warn(
+					"fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
 		}
 	}
 
@@ -86,7 +88,7 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		checkState();
-		Connection conn = null;
+		Connection conn;
 		try {
 			conn = this.dataSource.getConnection();
 		} catch (SQLException e) {
@@ -231,15 +233,11 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 	}
 
 	private DataSource initDataSource(DataSourceConfig value) {
-		try {
-			Class.forName(config.getDriverClass());
-		} catch (ClassNotFoundException ex) {
-			throw new IllegalConfigException("Cannot find driver class : " + config.getDriverClass(), ex);
-		}
+		JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 
 		try {
 			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
-			      value.getPassword());
+					value.getPassword());
 
 			Map<String, Object> props = new HashMap<String, Object>();
 
@@ -250,7 +248,7 @@ public class InnerSingleDataSource extends AbstractDataSource implements Markabl
 			}
 
 			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
-			      unPooledDataSource, props);
+					unPooledDataSource, props);
 
 			Cat.logEvent("DataSource.Created", value.getId());
 			logger.info(String.format("New dataSource [%s] created.", value.getId()));

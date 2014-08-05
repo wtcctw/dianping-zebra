@@ -9,9 +9,6 @@ import java.io.StringReader;
  * 
  */
 public final class StringUtils {
-	private StringUtils() {
-	}
-
 	private static final String EMPTY = "";
 
 	private static final int PAD_LIMIT = 8192;
@@ -420,5 +417,13 @@ public final class StringUtils {
 
 	public static String trimToEmpty(String str) {
 		return str == null ? EMPTY : str.trim();
+	}
+
+	public static String repeat(String str, int repeat) {
+		StringBuffer buffer = new StringBuffer(repeat * str.length());
+		for (int i = 0; i < repeat; i++) {
+			buffer.append(str);
+		}
+		return buffer.toString();
 	}
 }

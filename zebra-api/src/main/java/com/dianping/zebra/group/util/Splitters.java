@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 public final class Splitters {
-	private Splitters() {
-	}
 
 	public static StringSplitter by(char delimiter) {
 		return new StringSplitter(delimiter);

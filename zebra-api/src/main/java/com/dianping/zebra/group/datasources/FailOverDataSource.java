@@ -20,6 +20,8 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
+import com.dianping.zebra.group.util.JdbcDriverClassHelper;
+import com.dianping.zebra.group.util.StringUtils;
 
 /**
  * features: 1. auto-detect master database by select @@read_only</br> 2. auto check the master database.</br> 3. if cannot find any
@@ -27,8 +29,6 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
  */
 public class FailOverDataSource extends AbstractDataSource {
 	private static final Logger logger = LoggerFactory.getLogger(FailOverDataSource.class);
-
-	private static final String ERROR_MESSAGE = "Cannot find any master dataSource.";
 
 	private volatile InnerSingleDataSource master;
 
@@ -82,14 +82,31 @@ public class FailOverDataSource extends AbstractDataSource {
 		init(true);
 	}
 
+	private String getConfigSummary() {
+		StringBuilder sb = new StringBuilder(100);
+
+		for (Map.Entry<String, DataSourceConfig> config : configs.entrySet()) {
+			sb.append(String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s,properties=%s]", config
+			      .getValue().getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(), StringUtils
+			      .repeat("*", config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length()),
+			      config.getValue().getDriverClass(), config.getValue().getProperties()));
+		}
+
+		return sb.toString();
+	}
+
 	public void init(boolean forceCheckMaster) {
 		MasterDataSourceMonitor monitor = new MasterDataSourceMonitor();
 
 		if (!monitor.findMasterDataSource().isMasterExist()) {
+			String error_message = String.format("Cannot find any master dataSource. Configs=%s", getConfigSummary());
+
 			if (forceCheckMaster) {
-				throw new MasterDsNotFoundException(ERROR_MESSAGE);
+				MasterDsNotFoundException exp = new MasterDsNotFoundException(error_message);
+				Cat.logError(exp);
+				throw exp;
 			} else {
-				logger.warn("FailOverDataSource find master failed!");
+				logger.warn(error_message);
 			}
 		} else {
 			logger.info("FailOverDataSource find master success!");
@@ -196,6 +213,10 @@ public class FailOverDataSource extends AbstractDataSource {
 		public FindMasterDataSourceResult findMasterDataSource() {
 			FindMasterDataSourceResult result = new FindMasterDataSourceResult();
 
+			if (configs.values().size() == 0) {
+				logger.warn("0 writer data source in config!");
+			}
+
 			for (DataSourceConfig config : configs.values()) {
 				CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
 				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
@@ -212,6 +233,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		protected Connection getConnection(DataSourceConfig config) throws SQLException {
 			if (!cachedConnection.containsKey(config.getId())) {
+				JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 				cachedConnection.put(config.getId(),
 				      DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
 			}

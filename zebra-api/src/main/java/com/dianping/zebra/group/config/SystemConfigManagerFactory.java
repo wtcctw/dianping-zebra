@@ -9,8 +9,9 @@ import com.dianping.zebra.group.exception.IllegalConfigException;
 public final class SystemConfigManagerFactory {
 
 	private static Map<String, SystemConfigManager> systemConfigManagers = new HashMap<String, SystemConfigManager>();
-	
-	private SystemConfigManagerFactory(){}
+
+	private SystemConfigManagerFactory() {
+	}
 
 	public static SystemConfigManager getConfigManger(String configManagerType, String name) {
 		SystemConfigManager systemConfigManager = systemConfigManagers.get(name);
@@ -29,8 +30,8 @@ public final class SystemConfigManagerFactory {
 						configService.init();
 						systemConfigManager = new DefaultSystemConfigManager(name, configService);
 					} else {
-						throw new IllegalConfigException(
-						      String.format("illegal systemConfigManagerType[%s]", configManagerType));
+						throw new IllegalConfigException(String.format("illegal systemConfigManagerType[%s]",
+						      configManagerType));
 					}
 					systemConfigManager.init();
 					systemConfigManagers.put(name, systemConfigManager);
