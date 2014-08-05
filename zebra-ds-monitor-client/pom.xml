@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>com.dianping.hawk</groupId>
 			<artifactId>hawk-client</artifactId>
-			<version>0.5.9</version>
+			<version>0.7.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.dianping.lion</groupId>
