@@ -17,6 +17,7 @@ package com.dianping.zebra.monitor.spring;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sql.DataSource;
 
@@ -55,10 +56,16 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 
 	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
 
-	private int nameId = 0;
+	private volatile static AtomicBoolean hasProcessed = new AtomicBoolean();
+
+	private static int nameId = 0;
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		if (!hasProcessed.compareAndSet(false, true)) {
+			return;
+		}
+
 		DefaultListableBeanFactory listableBeanFactory = (DefaultListableBeanFactory) beanFactory;
 		String[] beanDefinitionNames = listableBeanFactory.getBeanDefinitionNames();
 		for (String beanDefinitionName : beanDefinitionNames) {
