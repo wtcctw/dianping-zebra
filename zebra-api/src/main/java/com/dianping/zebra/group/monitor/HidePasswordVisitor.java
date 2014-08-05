@@ -4,6 +4,7 @@ import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.BaseVisitor;
+import com.dianping.zebra.group.util.StringUtils;
 
 public class HidePasswordVisitor extends BaseVisitor {
 
@@ -21,7 +22,8 @@ public class HidePasswordVisitor extends BaseVisitor {
 		newConfig.mergeAttributes(dataSourceConfig);
 		newConfig.setJdbcUrl(dataSourceConfig.getJdbcUrl());
 		newConfig.setUsername(dataSourceConfig.getUsername());
-		newConfig.setPassword("******");
+		newConfig.setPassword(StringUtils.repeat("*",
+				dataSourceConfig.getPassword() == null ? 0 : dataSourceConfig.getPassword().length()));
 		newConfig.setDriverClass(dataSourceConfig.getDriverClass());
 		newConfig.setTestReadOnlySql(dataSourceConfig.getTestReadOnlySql());
 		newConfig.setTimeWindow(dataSourceConfig.getTimeWindow());
