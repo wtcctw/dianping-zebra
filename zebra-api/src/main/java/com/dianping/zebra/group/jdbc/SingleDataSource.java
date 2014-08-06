@@ -13,9 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -33,6 +30,8 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 /**
  * @author Dozer <br/>
@@ -43,7 +42,7 @@ import com.dianping.zebra.group.util.StringUtils;
  */
 public class SingleDataSource extends AbstractDataSource implements DataSource, SingleDataSourceMBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(SingleDataSource.class);
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 

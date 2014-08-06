@@ -9,15 +9,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.cat.Cat;
 import com.dianping.zebra.group.util.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public abstract class AbstractConfigManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractConfigManager.class);
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	protected final String jdbcRef;
 

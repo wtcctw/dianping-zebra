@@ -14,16 +14,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.util.FileUtils;
 import com.dianping.zebra.group.util.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class LocalConfigService implements ConfigService {
 
-	private static final Logger logger = LoggerFactory.getLogger(LocalConfigService.class);
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	private String resourceFileName;
 
