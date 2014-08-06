@@ -10,9 +10,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -22,13 +19,15 @@ import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.JdbcDriverClassHelper;
 import com.dianping.zebra.group.util.StringUtils;
+import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
 
 /**
  * features: 1. auto-detect master database by select @@read_only</br> 2. auto check the master database.</br> 3. if cannot find any
  * master database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
-	private static final Logger logger = LoggerFactory.getLogger(FailOverDataSource.class);
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	private volatile InnerSingleDataSource master;
 
@@ -87,9 +86,10 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		for (Map.Entry<String, DataSourceConfig> config : configs.entrySet()) {
 			sb.append(String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s,properties=%s]", config
-			      .getValue().getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(), StringUtils
-			      .repeat("*", config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length()),
-			      config.getValue().getDriverClass(), config.getValue().getProperties()));
+							.getValue().getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(), StringUtils
+							.repeat("*",
+									config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length()),
+					config.getValue().getDriverClass(), config.getValue().getProperties()));
 		}
 
 		return sb.toString();
@@ -235,7 +235,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			if (!cachedConnection.containsKey(config.getId())) {
 				JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 				cachedConnection.put(config.getId(),
-				      DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
+						DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
 			}
 
 			return cachedConnection.get(config.getId());

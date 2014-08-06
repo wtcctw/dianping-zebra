@@ -8,8 +8,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import com.dianping.zebra.group.util.JdbcDriverClassHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.group.config.datasource.entity.Any;
@@ -20,10 +18,12 @@ import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class InnerSingleDataSource extends AbstractDataSource implements MarkableDataSource, SingleDataSourceMBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(InnerSingleDataSource.class);
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;
 
