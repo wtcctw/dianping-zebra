@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.dianping.cat.status.StatusExtension;
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.datasources.DataSourceState;
 
 public class GroupDataSourceMonitor implements StatusExtension {
@@ -20,7 +20,6 @@ public class GroupDataSourceMonitor implements StatusExtension {
 	public String getDescription() {
 		StringBuilder sb = new StringBuilder(1024 * 3);
 
-		sb.append("\nversion:" + Constants.VERSION + "\n");
 		SingleDataSourceMBean writeBean = groupDataSourceBean.getWriteSingleDataSourceMBean();
 		if (writeBean != null) {
 			sb.append("currentWriter:" + writeBean.getId() + " running at state:" + writeBean.getCurrentState() + "\n");
@@ -39,7 +38,12 @@ public class GroupDataSourceMonitor implements StatusExtension {
 		}
 
 		sb.append("\ndataSourceConfig:\n");
-		sb.append(groupDataSourceBean.getConfig());
+
+		GroupDataSourceConfig groupDataSourceConfig = new GroupDataSourceConfig();
+		HidePasswordVisitor visitor = new HidePasswordVisitor(groupDataSourceConfig);
+		groupDataSourceBean.getConfig().accept(visitor);
+
+		sb.append(groupDataSourceConfig);
 
 		return sb.toString();
 	}
@@ -72,9 +76,10 @@ public class GroupDataSourceMonitor implements StatusExtension {
 	private void putProperty(Map<String, String> status, SingleDataSourceMBean bean) {
 		if (bean.getState() != DataSourceState.INITIAL) {
 			String id = bean.getId();
+			status.put(id + "-TotalConnection", Integer.toString(bean.getNumConnections()));
 			status.put(id + "-BusyConnection", Integer.toString(bean.getNumBusyConnection()));
 			status.put(id + "-IdleConnection", Integer.toString(bean.getNumIdleConnection()));
-			status.put(id + "-FailedCheckouts", Long.toString(bean.getNumFailedCheckouts()));
+			status.put(id + "-UnClosedOrphanedConnections", Integer.toString(bean.getNumUnClosedOrphanedConnections()));
 		}
 	}
 }

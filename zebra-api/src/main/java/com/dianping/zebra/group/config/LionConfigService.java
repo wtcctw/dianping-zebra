@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
@@ -17,14 +17,11 @@ import com.dianping.lion.client.LionException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class LionConfigService implements ConfigService {
-	private static final Logger logger = LoggerFactory.getLogger(LionConfigService.class);
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	private List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
 	private final ConcurrentMap<String, String> cache = new ConcurrentHashMap<String, String>();
-
-	public LionConfigService() {
-	}
 
 	@Override
 	public String getProperty(String key) {

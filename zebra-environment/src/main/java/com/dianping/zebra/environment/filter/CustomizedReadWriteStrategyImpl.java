@@ -1,25 +1,24 @@
 /**
  * Project: zebra-environment
- * 
+ *
  * File Created at Mar 10, 2014
- * 
+ *
  */
 package com.dianping.zebra.environment.filter;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 /**
  * @author Leo Liang
  */
 public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 
-	private static final Logger logger = LoggerFactory.getLogger(CustomizedReadWriteStrategyImpl.class);
+	private static final Logger logger = LogManager.getLogger(CustomizedReadWriteStrategyImpl.class);
 
 	private static final String FORCE_READ_FROM_MASTER = "ForceReadFromMaster";
 
@@ -46,13 +45,13 @@ public class CustomizedReadWriteStrategyImpl implements CustomizedReadWriteStrat
 			Class<?> contextHolderClass = Class.forName("com.dianping.avatar.tracker.ExecutionContextHolder");
 			trackerContextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
 
-			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] {});
+			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] { });
 			setContextMethod = contextHolderClass.getDeclaredMethod("setTrackerContext",
-			      new Class[] { trackerContextClass });
+					new Class[] { trackerContextClass });
 			clearContextMethod = contextHolderClass.getDeclaredMethod("clearContext");
 			getExtensionMethod = trackerContextClass.getDeclaredMethod("getExtension", new Class[] { String.class });
 			addExtensionMethod = trackerContextClass.getDeclaredMethod("addExtension", new Class[] { String.class,
-			      Object.class });
+					Object.class });
 
 			getContextMethod.setAccessible(true);
 			setContextMethod.setAccessible(true);

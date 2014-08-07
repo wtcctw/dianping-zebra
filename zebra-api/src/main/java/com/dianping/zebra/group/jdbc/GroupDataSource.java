@@ -12,9 +12,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ServiceLoader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -40,10 +37,12 @@ import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(GroupDataSource.class);
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	private String jdbcRef;
 
@@ -236,12 +235,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void initDataSources() {
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException ex) {
-			throw new DalException("Cannot find mysql driver class[com.mysql.jdbc.Driver]", ex);
-		}
-
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
 			      systemConfigManager.getSystemConfig().getRetryTimes());

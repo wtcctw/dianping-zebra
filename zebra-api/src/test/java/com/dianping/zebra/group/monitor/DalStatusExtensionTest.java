@@ -12,15 +12,15 @@ import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
 
 @Ignore
 public class DalStatusExtensionTest extends MultiDatabaseTestCase {
-	
+
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
 	@Test
 	public void testPreparedStatementQuery() throws Exception {
 		ExecutionContextHolder.getContext().add(SQL_STATEMENT_NAME, "testPreparedStatementQuery");
-		while(true){
+		while (true) {
 			execute(new ConnectionCallback() {
-				
+
 				@Override
 				public Object doInConnection(Connection conn) throws Exception {
 					PreparedStatement stmt = conn.prepareStatement("SELECT ID,NAME,AGE from PERSON where AGE = ?");
@@ -29,7 +29,7 @@ public class DalStatusExtensionTest extends MultiDatabaseTestCase {
 					return null;
 				}
 			});
-			
+
 			Thread.sleep(100);
 		}
 	}
@@ -53,11 +53,12 @@ public class DalStatusExtensionTest extends MultiDatabaseTestCase {
 	protected DataSourceEntry[] getDataSourceEntryArray() {
 		DataSourceEntry[] entries = new DataSourceEntry[3];
 
-		DataSourceEntry entry1 = new DataSourceEntry("jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets.xml", true);
+		DataSourceEntry entry1 = new DataSourceEntry("jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets.xml",
+				true);
 		DataSourceEntry entry2 = new DataSourceEntry("jdbc:h2:mem:test1;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets1.xml",
-		      false);
+				false);
 		DataSourceEntry entry3 = new DataSourceEntry("jdbc:h2:mem:test2;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets2.xml",
-		      false);
+				false);
 
 		entries[0] = entry1;
 		entries[1] = entry2;

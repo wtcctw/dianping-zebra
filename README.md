@@ -17,27 +17,33 @@
     	<version>${version}</version>
 	</dependency>
 
-或者可以通过升级zebra-ds-monitor的版本到`2.5.0`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
+或者可以通过升级zebra-ds-monitor的版本到`2.5.2`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
+
+	<dependency>
+        <groupId>com.dianping.zebra</groupId>
+        <artifactId>zebra-ds-monitor-client</artifactId>
+        <version>${version}</version>
+    </dependency>
 ##### 其他依赖
 * 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
 * `Lion`的`0.4.3`一下版本有一个BUG，如果多个`bean`指向了同一个`Lion`配置，那么配置更新的时候只会通知一个`bean`。所以如果多个`DataSource`引用了同一个`Lion`配置，如果想要实现C3P0相关配置热切换，就需要升级`Lion`到`0.4.3`。
+* `zebra-ds-monitor-client`的`0.0.7`有一个BUG，如果在`Spring`中配置了`C3P0`相关参数，启动后值变更的话将无法收到推送。建议把`zebra-ds-monitor-client`升级到和`zebra-api`一样的版本。
 
-
-##### 单数据库在 Spring 中 DataSource 的配置
-	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.SingleDataSource" init-method="init" destroy-method="close">
-		<property name="jdbcRef" value="TuanGou2010" />
-		<property name="minPoolSize" value="5" />
-		<property name="maxPoolSize" value="25" />
-        <property name="initialPoolSize" value="5" />
-    	<property name="maxIdleTime" value="1800" />
-		<property name="idleConnectionTestPeriod" value="60" />
-		<property name="acquireRetryAttempts" value="3" />
-		<property name="acquireRetryDelay" value="300" />
-		<property name="maxStatements" value="0" />
-		<property name="maxStatementsPerConnection" value="100" />
-		<property name="numHelperThreads" value="6" />
-		<property name="maxAdministrativeTaskTime" value="5" />
-		<property name="preferredTestQuery" value="SELECT 1" />
+##### 单数据库在 spring 中 datasource 的配置
+	<bean id="datasource" class="com.dianping.zebra.group.jdbc.singledatasource" init-method="init" destroy-method="close">
+		<property name="jdbcref" value="tuangou2010" />
+		<property name="minpoolsize" value="5" />
+		<property name="maxpoolsize" value="25" />
+        <property name="initialpoolsize" value="5" />
+    	<property name="maxidletime" value="1800" />
+		<property name="idleconnectiontestperiod" value="60" />
+		<property name="acquireretryattempts" value="3" />
+		<property name="acquireretrydelay" value="300" />
+		<property name="maxstatements" value="0" />
+		<property name="maxstatementsperconnection" value="100" />
+		<property name="numhelperthreads" value="6" />
+		<property name="maxadministrativetasktime" value="5" />
+		<property name="preferredtestquery" value="select 1" />
 	</bean>
 
 ##### 多数据库在 Spring 中 DataSource 的配置
@@ -74,24 +80,33 @@ Q：为什么要加`init-method`和`destory-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.0`以上，
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.2`以上，
 `Zebra`将会对所有的`ComboPooledDataSource`进行替换，替换成`SingleDataSource`。通过替换，虽然具备了以上大部分功能。
 但这种方式有它的局限性，它不支持许多功能：如读库切换操作，写库Failover等。
 要想使用DAL的全部功能，必须显示的修改业务Spring配置，即上述的使用方式。
 
 ### 已知问题清单
-
+* 配置更新推送的时候，就算配置完全没变，也会全量刷新，对性能有影响。
 
 ### 更新说明
-#### 2.4.9-SNAPSHOT
+#### 2.5.2
+* [/] 修复`GroupConnection`中`getMetaData`时总是得到写库信息的问题
+* [/] 修复`ZebraDsMonitorClient`中`hawk`版本过低的问题
+* [/] 修复`ZebraDsMonitorClient`的`bean`在`Spring`中被多次声明时出错的问题
+* [/] 修改`CAT`监控参数，隐藏密码
+
+#### 2.5.1
+* [/] 将`Lion`中的用户名的配置从`user`改成`username`
+
+#### 2.5.0
 * [+] 支持`Spring`方式配置`GroupDataSource`
-* [+] 支持`Spring方`式配置`SingleDataSource`
+* [+] 支持`Spring`方式配置`SingleDataSource`
 * [+] 通过升级`zebra-ds-monitor`,老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
 * [+] 两种`DataSource`均支持配置动态刷新
 
-##### 2.4.8
+#### 2.4.8
 * [*] 重构`FailOverDataSource`，检测逻辑更合理
 * [+] 兼容老版本`avatar`强制读写库的逻辑，业务方不需要修改相关逻辑代码
 
-##### 2.4.7
+#### 2.4.7
 * [*] 修复`iBatis`中使用`SelectKey`后无法获得主键的Bug
