@@ -14,7 +14,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 	@Override
 	public boolean generateConfig(String name) {
 		String url = String.format("%s.%s.jdbc.url", project, name);
-		String user = String.format("%s.%s.jdbc.user", project, name);
+		String user = String.format("%s.%s.jdbc.username", project, name);
 		String password = String.format("%s.%s.jdbc.password", project, name);
 		String driverClass = String.format("%s.%s.jdbc.driverClass", project, name);
 		String properties = String.format("%s.%s.jdbc.properties", project, name);
