@@ -15,29 +15,19 @@
  */
 package com.dianping.zebra.monitor.spring;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.sql.DataSource;
-
+import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
-import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.LionConfigService;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.*;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -46,9 +36,13 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 
-import com.dianping.cat.Cat;
-import com.dianping.zebra.group.jdbc.SingleDataSource;
-import com.dianping.zebra.monitor.sql.MonitorableDataSource;
+import javax.sql.DataSource;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 自动为spring容器中的所有DataSource添加monitor功能，配置在spring配置文件中即可，如下 <bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>
@@ -135,64 +129,31 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		String newBeanName = String.format("%s-z%d", beanName, nameId++);
 
 		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
-			dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
-			dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
-			dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(1, false);
+			JdbcInfo info = getBeanJdbcInfo(dataSourceDefinition);
+			if ("mysql".equals(info.getType())) {
+				dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
+				dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
+				dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(1, false);
 
-			if (dataSourceDefinition instanceof AbstractBeanDefinition) {
-				((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
+				if (dataSourceDefinition instanceof AbstractBeanDefinition) {
+					((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
+				}
+				Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
+			} else {
+				Cat.logEvent("DAL.BeanFactory", String.format("NotMysql-%s(%s)", beanName, newBeanName));
 			}
-			Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
 		} else if (dataSourceDefinition.getBeanClassName().equals(DPDL_CLASS_NAME)) {
-			String writeDsName = ((TypedStringValue) dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS")
-					.getValue()).getValue();
-			BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsName);
-			if (writeDsBean.getBeanClassName().equals(MonitorableDataSource.class.getName())) {
-				String innerName = ((RuntimeBeanReference) ((ConstructorArgumentValues.ValueHolder) writeDsBean
-						.getConstructorArgumentValues().getGenericArgumentValues().get(0)).getValue())
-						.getBeanName();
-				writeDsBean = listableBeanFactory.getBeanDefinition(innerName);
-			}
-
-			Set<PropertyValue> properties = new HashSet<PropertyValue>();
-
-			if (writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME) || writeDsBean.getBeanClassName()
-					.equals(SingleDataSource.class.getName())) {
-				String url = ((TypedStringValue) writeDsBean.getPropertyValues().getPropertyValue("jdbcUrl").getValue())
-						.getValue().trim();
-				if (url.startsWith("${") && url.endsWith("}")) {
-					url = url.substring(2, url.length() - 1);
-					url = getLionConfig(url);
-				}
-				JdbcUrlInfo info = getJdbcUrlInfo(url);
-				if (info.getType().equals("mysql")) {
-					String groupConfig = getLionConfig(String.format("groupds.%s.mapping", info.getDataBase()));
-					if (!StringUtils.isBlank(groupConfig)) {
-						properties.add(new PropertyValue("jdbcRef", info.getDataBase()));
-
-						Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
-						for (PropertyValue property : writeDsBean.getPropertyValues().getPropertyValues()) {
-							if (ignoreList.contains(property.getName())) {
-								continue;
-							}
-							properties.add(property);
-						}
-
-					}
-				}
-			}
+			BeanDefinition dpdlInnerDsBean = getDpdlInnerDsBean(dataSourceDefinition);
+			Set<PropertyValue> properties = getDpdlInnerDsPropertyValues(dpdlInnerDsBean);
 
 			if (properties.size() > 0) {
 				dataSourceDefinition.setBeanClassName(GroupDataSource.class.getName());
-
 				for (PropertyValue p : dataSourceDefinition.getPropertyValues().getPropertyValues()) {
 					dataSourceDefinition.getPropertyValues().removePropertyValue(p);
 				}
-
 				for (PropertyValue entity : properties) {
 					dataSourceDefinition.getPropertyValues().addPropertyValue(entity.getName(), entity.getValue());
 				}
-
 				if (dataSourceDefinition instanceof AbstractBeanDefinition) {
 					((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
 				}
@@ -200,8 +161,7 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 				Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
 			} else {
 				Cat.logEvent("DAL.BeanFactory",
-						String.format("GroupConfigNotFound-%s(%s)-%s", beanName, newBeanName,
-								dataSourceDefinition.getBeanClassName()));
+						String.format("GroupConfigNotFound-%s(%s)", beanName, newBeanName));
 			}
 		} else {
 			Cat.logEvent("DAL.BeanFactory",
@@ -212,11 +172,50 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
 		monitorableDataSourceDefinition.setBeanClass(MonitorableDataSource.class);
-
 		monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(
 				new RuntimeBeanReference(newBeanName));
-
 		return monitorableDataSourceDefinition;
+	}
+
+	private Set<PropertyValue> getDpdlInnerDsPropertyValues(BeanDefinition writeDsBean) {
+		Set<PropertyValue> properties = new HashSet<PropertyValue>();
+
+		if (writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME) || writeDsBean.getBeanClassName()
+				.equals(SingleDataSource.class.getName())) {
+
+			JdbcInfo info = getBeanJdbcInfo(writeDsBean);
+
+			if ("mysql".equals(info.getType())) {
+				String groupConfig = getLionConfig(String.format("groupds.%s.mapping", info.getDataBase()));
+				if (!StringUtils.isBlank(groupConfig)) {
+					properties.add(new PropertyValue("jdbcRef", info.getDataBase()));
+
+					Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
+					for (PropertyValue property : writeDsBean.getPropertyValues().getPropertyValues()) {
+						if (ignoreList.contains(property.getName())) {
+							continue;
+						}
+						properties.add(property);
+					}
+
+				}
+			}
+		}
+		return properties;
+	}
+
+	private BeanDefinition getDpdlInnerDsBean(BeanDefinition dataSourceDefinition) {
+		String writeDsName = ((TypedStringValue) dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS")
+				.getValue()).getValue();
+		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsName);
+
+		if (writeDsBean.getBeanClassName().equals(MonitorableDataSource.class.getName())) {
+			String innerName = ((RuntimeBeanReference) ((ConstructorArgumentValues.ValueHolder) writeDsBean
+					.getConstructorArgumentValues().getGenericArgumentValues().get(0)).getValue())
+					.getBeanName();
+			writeDsBean = listableBeanFactory.getBeanDefinition(innerName);
+		}
+		return writeDsBean;
 	}
 
 	private boolean isZebraDataSource(Class<?> dataSourceClazz) {
@@ -245,12 +244,34 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		return Ordered.LOWEST_PRECEDENCE - 1;
 	}
 
+	private boolean isLionKey(String key) {
+		return key.startsWith("${") && key.endsWith("}");
+	}
+
+	private String trimLionKey(String key) {
+		if (isLionKey(key)) {
+			key = key.substring(2, key.length() - 1);
+		}
+		return key;
+	}
+
 	private String getLionConfig(String key) {
 		try {
 			return ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key);
 		} catch (LionException e) {
 			return null;
 		}
+	}
+
+	private JdbcInfo getBeanJdbcInfo(BeanDefinition bean) {
+		String url = ((TypedStringValue) bean.getPropertyValues().getPropertyValue("jdbcUrl").getValue())
+				.getValue().trim();
+		String user = ((TypedStringValue) bean.getPropertyValues().getPropertyValue("user").getValue()).getValue().trim();
+
+		JdbcInfo info = getJdbcUrlInfo(isLionKey(url) ? getLionConfig(trimLionKey(url)) : url);
+		info.setUser(isLionKey(user) ? getLionConfig(trimLionKey(user)) : user);
+
+		return info;
 	}
 
 	private Set<String> getGroupDataSourceIgnoreProperties() {
@@ -262,9 +283,9 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		return result;
 	}
 
-	private JdbcUrlInfo getJdbcUrlInfo(String url) {
-		JdbcUrlInfo info = new JdbcUrlInfo();
-		Pattern p = Pattern.compile("^jdbc:([a-zA-Z0-9]+):\\/\\/([0-9\\.:]+)\\/([^?]+).*$");
+	private JdbcInfo getJdbcUrlInfo(String url) {
+		JdbcInfo info = new JdbcInfo();
+		Pattern p = Pattern.compile("^jdbc:([a-zA-Z0-9]+):\\/\\/([^\\/]+)\\/([^?]+).*$");
 		Matcher m = p.matcher(url);
 		if (m.find()) {
 			info.setType(m.group(1).toLowerCase());
@@ -274,12 +295,22 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		return info;
 	}
 
-	static class JdbcUrlInfo {
+	static class JdbcInfo {
 		private String dataBase;
+
+		private String user;
 
 		private String type;
 
 		private String ip;
+
+		public String getUser() {
+			return user;
+		}
+
+		public void setUser(String user) {
+			this.user = user;
+		}
 
 		public String getIp() {
 			return ip;
