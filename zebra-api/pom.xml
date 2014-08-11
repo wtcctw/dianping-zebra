@@ -123,6 +123,7 @@
                             <manifest><![CDATA[,
                         ${basedir}/src/main/resources/META-INF/dal/model/datasource-config-manifest.xml,
                         ${basedir}/src/main/resources/META-INF/dal/model/system-config-manifest.xml,
+                        ${basedir}/src/main/resources/META-INF/dal/model/heartbeat-manifest.xml,
                      ,]]></manifest>
                         </configuration>
                     </execution>

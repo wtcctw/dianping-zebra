@@ -1,0 +1,28 @@
+<heartbeat>
+    <datasource-info>
+        <app-name>tuangou-service</app-name>
+        <ip>192.168.1.1</ip>
+        <datasource-bean-name>tuangou-master</datasource-bean-name>
+        <database>tuangou2010</database>
+        <database-type>mysql</database-type>
+        <username>tuangou</username>
+        <datasource-bean-class>ComboDataSource</datasource-bean-class>
+        <replaced-by>SingleDataSource</replaced-by>
+        <init-pool-size>2</init-pool-size>
+        <max-pool-size>10</max-pool-size>
+        <min-pool-size>2</min-pool-size>
+    </datasource-info>
+    <datasource-info>
+        <app-name>tuangou-service</app-name>
+        <ip>192.168.1.1</ip>
+        <datasource-bean-name>tuangou-master</datasource-bean-name>
+        <database>tuangou2010</database>
+        <database-type>mysql</database-type>
+        <username>tuangou</username>
+        <replaced-by>GroupDataSource</replaced-by>
+        <datasource-bean-class>dpdl-DPGroupSource</datasource-bean-class>
+        <init-pool-size>2</init-pool-size>
+        <max-pool-size>10</max-pool-size>
+        <min-pool-size>2</min-pool-size>
+    </datasource-info>
+</heartbeat>

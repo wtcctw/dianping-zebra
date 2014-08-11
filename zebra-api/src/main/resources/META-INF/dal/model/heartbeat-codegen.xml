@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+  <entity name="heartbeat" root="true">
+    <entity-ref name="datasource-info" type="list" names="datasource-infos" />
+  </entity>
+  <entity name="datasource-info">
+    <element name="app-name" value-type="String" />
+    <element name="ip" value-type="String" />
+    <element name="datasource-bean-name" value-type="String" />
+    <element name="database" value-type="String" />
+    <element name="database-type" value-type="String" />
+    <element name="username" value-type="String" />
+    <element name="datasource-bean-class" value-type="String" />
+    <element name="replaced-by" value-type="String" />
+    <element name="init-pool-size" value-type="int" />
+    <element name="max-pool-size" value-type="int" />
+    <element name="min-pool-size" value-type="int" />
+  </entity>
+</model>
+

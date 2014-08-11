@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import javax.sql.DataSource;
 
 import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.group.util.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -55,6 +56,8 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	private static final String ZEBRA_DATA_SOURCE_NAME = "com.dianping.zebra.jdbc.DPDataSource";
 
 	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
+
+	private static final String DPDL_CLASS_NAME = "com.dianping.dpdl.sql.DPDataSource";
 
 	private static int nameId = 0;
 
@@ -134,6 +137,24 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 				((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
 			}
 			Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
+		} else if (dataSourceDefinition.getBeanClassName().equals(DPDL_CLASS_NAME)) {
+			String jdbcRef = "xxx";//todo: find jdbcRef
+
+			if (StringUtils.isBlank(jdbcRef)) {
+				Cat.logEvent("DAL.BeanFactory",
+						String.format("JdbcRefNotFound-%s(%s)-%s", beanName, newBeanName,
+								dataSourceDefinition.getBeanClassName()));
+			} else {
+				dataSourceDefinition.setBeanClassName(GroupDataSource.class.getName());
+				for (String name : dataSourceDefinition.attributeNames()) {
+					dataSourceDefinition.removeAttribute(name);
+				}
+				dataSourceDefinition.setAttribute("jdbcRef", jdbcRef);
+				if (dataSourceDefinition instanceof AbstractBeanDefinition) {
+					((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
+				}
+				Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
+			}
 		} else {
 			Cat.logEvent("DAL.BeanFactory",
 					String.format("Ignore-%s(%s)-%s", beanName, newBeanName, dataSourceDefinition.getBeanClassName()));
