@@ -9,7 +9,9 @@ import org.unidal.web.mvc.annotation.ModulePagesMeta;
 
 com.dianping.zebra.admin.admin.page.index.Handler.class,
 
-com.dianping.zebra.admin.admin.page.service.Handler.class
+com.dianping.zebra.admin.admin.page.service.Handler.class,
+
+com.dianping.zebra.admin.admin.page.notify.Handler.class
 })
 public class AdminModule extends AbstractModule {
 
