@@ -1,0 +1,35 @@
+<report>
+	<database name="tuangou2010" group-data-source="1"
+		dpdl-data-source="3" single-data-source="3" c3p0-data-source="2"
+		other-data-source="1" total-data-source="10" replaced-data-source="10">
+		<app name="tuangou-service" group-data-source="1"
+			dpdl-data-source="3" single-data-source="3" c3p0-data-source="2"
+			other-data-source="1" total-data-source="10" replaced-data-source="10">
+			<machine ip="192.168.1.1" version="2.5.4">
+				<datasource jdbc-url="jdbc:mysql//localhost:3306/tuangou2010"
+					init-pool-size="1" max-pool-size="2" min-pool-size="1" bean-name="tuangou2010-master"
+					type="GroupDataSource" replaced="true">
+				</datasource>
+				<datasource jdbc-url="jdbc:mysql//localhost:3306/tuangou2010"
+					init-pool-size="1" max-pool-size="2" min-pool-size="1" bean-name="tuangou2010-slave"
+					type="DpdlDataSource" replaced="true">
+				</datasource>
+				<datasource jdbc-url="jdbc:mysql//localhost:3306/tuangou2010"
+					init-pool-size="1" max-pool-size="2" min-pool-size="1" bean-name="tuangou2010-master"
+					type="SingleDataSource" replaced="true">
+				</datasource>
+				<datasource jdbc-url="jdbc:mysql//localhost:3306/tuangou2010" 
+					init-pool-size="1" max-pool-size="2" min-pool-size="1" bean-name="tuangou2010-slave"
+					type="C3P0DataSource" replaced="true">
+				</datasource>
+				<datasource jdbc-url="jdbc:mysql//localhost:3306/tuangou2010" 
+					init-pool-size="1" max-pool-size="2" min-pool-size="1" bean-name="tuangou2010-master"
+					type="other-data-source" replaced="false">
+				</datasource>
+			</machine>
+			<machine></machine>
+		</app>
+		<app></app>
+	</database>
+	<database></database>
+</report>

@@ -3,6 +3,7 @@ package com.dianping.zebra.admin.build;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
@@ -14,6 +15,9 @@ import com.dianping.zebra.admin.admin.service.LionHttpService;
 import com.dianping.zebra.admin.admin.service.LionHttpServiceImpl;
 import com.dianping.zebra.admin.admin.service.LocalLogService;
 import com.dianping.zebra.admin.admin.service.LogService;
+import com.dianping.zebra.admin.admin.service.ReportService;
+import com.dianping.zebra.admin.admin.service.ReportServiceImpl;
+import com.dianping.zebra.web.dal.stat.HeartbeatDao;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	@Override
@@ -24,6 +28,11 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(LogService.class, LocalLogService.class));
 		all.add(C(DalConfigService.class, DalConfigServiceImpl.class).req(LionHttpService.class));
 		all.add(C(DalService.class, DalServiceImpl.class).req(LionHttpService.class));
+		all.add(C(ReportService.class,ReportServiceImpl.class).req(HeartbeatDao.class));
+
+		// move following line to top-level project if necessary
+		all.add(C(JdbcDataSourceConfigurationManager.class));
+		all.addAll(new ZebraDatabaseConfigurator().defineComponents());
 
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());

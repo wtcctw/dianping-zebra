@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model model-package="com.dianping.zebra.admin.report" enable-base-visitor="true">
+	<entity name="report" root="true">
+		<entity-ref name="database" type="map" names="databases" method-find-or-create="true"/>
+	</entity>
+	<entity name="database">
+		<attribute name="name" value-type="String" key="true" />
+		<attribute name="group-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="dpdl-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="single-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="c3p0-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="other-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="total-data-source" value-type="int"  primitive="true" method-inc="true"/>
+    	<attribute name="replaced-data-source" value-type="int" primitive="true" method-inc="true"/>
+		<entity-ref name="app" type="map" names="apps" method-find-or-create="true"/>
+	</entity>
+	<entity name="app">
+		<attribute name="name" value-type="String" key="true" />
+		<attribute name="group-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="dpdl-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="single-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="c3p0-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="other-data-source" value-type="int"  primitive="true" method-inc="true"/>
+		<attribute name="total-data-source" value-type="int"  primitive="true" method-inc="true"/>
+    	<attribute name="replaced-data-source" value-type="int" primitive="true" method-inc="true"/>
+		<entity-ref name="machine" type="map" names="machines" method-find-or-create="true"/>
+	</entity>
+	<entity name="machine">
+		<attribute name="ip" value-type="String" key="true" />
+		<attribute name="version" value-type="String" />
+		<entity-ref name="datasource" type="map" names="datasources" method-find-or-create="true"/>
+	</entity>
+	<entity name="datasource">
+		<attribute name="jdbc-url" value-type="String" />
+		<attribute name="init-pool-size" value-type="int" />
+		<attribute name="max-pool-size" value-type="int" />
+		<attribute name="min-pool-size" value-type="int" />
+		<attribute name="name" value-type="String"/>
+		<attribute name="bean-name" value-type="String" key="true" />
+		<attribute name="type" value-type="String" />
+		<attribute name="status" value-type="int" />
+		<attribute name="replaced" value-type="boolean" default-value="false"/>
+	</entity>
+</model>
+

@@ -6,4 +6,7 @@
    <model package="com.dianping.zebra.admin.sqlMap" name="sqlMap">
       <sample-model>src/test/resources/sqlMap.xml</sample-model>
    </model>
+   <model package="com.dianping.zebra.admin.report" name="report">
+      <sample-model>src/test/resources/report.xml</sample-model>
+   </model>
 </wizard>

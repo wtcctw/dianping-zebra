@@ -12,23 +12,18 @@
 	type="com.dianping.zebra.admin.admin.page.index.Model" scope="request" />
 
 <a:layout>
+	Database: ${model.database.name }
 	<div>
 		<table class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th>Database</th>
-					<th>Auto-Replace Num</th>
-					<th>Upgrade-Dal Num</th>
-					<th>Totoal Num</th>
+					<th>App</th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="database" items="${model.report.databases}">
-					<tr id="database-info-${database.key}">
-						<td><a href="?op=database&database=${database.key}">${database.key}</a></td>
-						<td>${database.value.replacedDataSource}</td>
-						<td>${database.value.groupDataSource }</td>
-						<td>${database.value.totalDataSource }</td>
+				<c:forEach var="app" items="${model.database.apps}">
+					<tr id="app-info-${app.key}">
+						<td><a href="?op=app&app=${app.key}">${app.key}</a></td>
 					</tr>
 				</c:forEach>
 			</tbody>
