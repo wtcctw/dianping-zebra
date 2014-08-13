@@ -129,7 +129,7 @@
 							<goal>plexus</goal>
 						</goals>
 						<configuration>
-							<className>com.dianping.zebra.web.build.ComponentsConfigurator</className>
+							<className>com.dianping.zebra.admin.build.ComponentsConfigurator</className>
 						</configuration>
 					</execution>
 					<execution>
