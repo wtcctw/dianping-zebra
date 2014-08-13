@@ -142,13 +142,13 @@ public class ReportServiceImpl implements ReportService {
 		@Override
 		public void visitDatasource(Datasource datasource) {
 			String type = datasource.getType();
-			if (type.equalsIgnoreCase("groupdatasource")) {
+			if (type.equals("com.dianping.zebra.group.jdbc.GroupDataSource")) {
 				m_app.incGroupDataSource();
-			} else if (type.equalsIgnoreCase("dpdldatasource")) {
+			} else if (type.equals("com.dianping.dpdl.sql.DPDataSource")) {
 				m_app.incDpdlDataSource();
-			} else if (type.equalsIgnoreCase("singledatasource")) {
+			} else if (type.equals("com.dianping.zebra.group.jdbc.SingleDataSource")) {
 				m_app.incSingleDataSource();
-			} else if (type.equalsIgnoreCase("c3p0datasource")) {
+			} else if (type.equals("com.mchange.v2.c3p0.ComboPooledDataSource")) {
 				m_app.incC3p0DataSource();
 			} else {
 				m_app.incOtherDataSource();
