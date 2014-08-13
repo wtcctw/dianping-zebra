@@ -106,7 +106,11 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		}
 	}
 
-	private GenericBeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition) {
+	private BeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition) {
+		if (MonitorableDataSource.class.getName().equals(dataSourceDefinition.getBeanClassName())) {
+			return dataSourceDefinition;
+		}
+
 		String newBeanName = String.format("%s-z%d", beanName, nameId++);
 
 		listableBeanFactory.registerBeanDefinition(newBeanName, dataSourceDefinition);
