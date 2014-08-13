@@ -136,8 +136,8 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 
 		DataSourceInfo info = getBeanJdbcInfo(dataSourceDefinition, beanName);
 
-		if (C3P0_CLASS_NAME.equals(info.getDataSourceBeanClass()) && canReplace(info)) {
-			if ("mysql".equals(info.getType())) {
+		if (C3P0_CLASS_NAME.equals(info.getDataSourceBeanClass())) {
+			if ("mysql".equals(info.getType()) && canReplace(info)) {
 				dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
 				dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
 				dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(1, false);
@@ -149,7 +149,7 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 				info.setReplaced(true);
 				Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
 			} else {
-				Cat.logEvent("DAL.BeanFactory", String.format("NotMysql-%s(%s)", beanName, newBeanName));
+				Cat.logEvent("DAL.BeanFactory", String.format("IgnoreC3P0-%s(%s)", beanName, newBeanName));
 			}
 		} else if (DPDL_CLASS_NAME.equals(info.getDataSourceBeanClass())) {
 			BeanDefinition dpdlInnerDsBean = getDpdlInnerDsBean(dataSourceDefinition);
