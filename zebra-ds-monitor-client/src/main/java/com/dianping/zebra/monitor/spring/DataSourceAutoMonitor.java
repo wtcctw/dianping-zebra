@@ -45,10 +45,8 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -138,7 +136,7 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 
 		DataSourceInfo info = getBeanJdbcInfo(dataSourceDefinition, beanName);
 
-		if (C3P0_CLASS_NAME.equals(info.getDataSourceBeanClass())) {
+		if (C3P0_CLASS_NAME.equals(info.getDataSourceBeanClass()) && canReplace(info)) {
 			if ("mysql".equals(info.getType())) {
 				dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
 				dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
@@ -173,7 +171,7 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 				Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
 			} else {
 				Cat.logEvent("DAL.BeanFactory",
-						String.format("GroupConfigNotFound-%s(%s)", beanName, newBeanName));
+						String.format("IgnoreDpdl-%s(%s)", beanName, newBeanName));
 			}
 		} else {
 			Cat.logEvent("DAL.BeanFactory",
@@ -210,25 +208,26 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	private Set<PropertyValue> getDpdlInnerDsPropertyValues(BeanDefinition writeDsBean) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
-		if (writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME) || writeDsBean.getBeanClassName()
-				.equals(SingleDataSource.class.getName())) {
+		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME) &&
+				!writeDsBean.getBeanClassName().equals(SingleDataSource.class.getName())) {
+			return properties;
+		}
 
-			DataSourceInfo info = getBeanJdbcInfo(writeDsBean, null);
+		DataSourceInfo info = getBeanJdbcInfo(writeDsBean, null);
 
-			if ("mysql".equals(info.getType())) {
-				String groupConfig = getLionConfig(String.format("groupds.%s.mapping", info.getDatabase()));
-				if (!StringUtils.isBlank(groupConfig)) {
-					properties.add(new PropertyValue("jdbcRef", info.getDatabase()));
+		if ("mysql".equals(info.getType()) && canReplace(info)) {
+			String groupConfig = getLionConfig(String.format("groupds.%s.mapping", info.getDatabase()));
+			if (!StringUtils.isBlank(groupConfig)) {
+				properties.add(new PropertyValue("jdbcRef", info.getDatabase()));
 
-					Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
-					for (PropertyValue property : writeDsBean.getPropertyValues().getPropertyValues()) {
-						if (ignoreList.contains(property.getName())) {
-							continue;
-						}
-						properties.add(property);
+				Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
+				for (PropertyValue property : writeDsBean.getPropertyValues().getPropertyValues()) {
+					if (ignoreList.contains(property.getName())) {
+						continue;
 					}
-
+					properties.add(property);
 				}
+
 			}
 		}
 		return properties;
@@ -345,6 +344,20 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	private String callHttp(String url) throws IOException {
 		InputStream inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
 		return Files.forIO().readFrom(inputStream, "utf-8");
+	}
+
+	private boolean canReplace(DataSourceInfo info) {
+		String configString = getLionConfig("groupds.autoreplace.database");
+
+		if (StringUtils.isBlank(info.getDatabase()) || StringUtils.isBlank(configString)) {
+			return false;
+		}
+		if ("all".equals(configString)) {
+			return true;
+		}
+
+		List<String> dataBases = Arrays.asList(configString.toLowerCase().split(","));
+		return dataBases.contains(info.getDatabase());
 	}
 
 	static class DataSourceInfo {
