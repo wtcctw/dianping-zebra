@@ -1,6 +1,8 @@
 package com.dianping.zebra.monitor.model;
 
+import com.dianping.phoenix.config.ConfigServiceManager;
 import org.springframework.beans.BeanUtils;
+import org.unidal.net.Networks;
 
 import java.beans.PropertyDescriptor;
 import java.net.URLEncoder;
@@ -9,58 +11,34 @@ import java.net.URLEncoder;
  * Created by Dozer on 8/13/14.
  */
 public class DataSourceInfo {
-	private static String app;
-
-	private static String ip;
-
-	private static String version;
-
-	private String dataSourceBeanName;
+	private String app;
 
 	private String dataSourceBeanClass;
 
+	private String dataSourceBeanName;
+
 	private String database;
 
-	private String url;
-
-	private String username;
-
-	private boolean replaced;
-
 	private String initPoolSize;
+
+	private String ip;
 
 	private String maxPoolSize;
 
 	private String minPoolSize;
 
+	private boolean replaced;
+
 	private String type;
 
-	static {
-		//todo: read from phoenix env
-	}
+	private String url;
 
-	public static String getApp() {
-		return app;
-	}
+	private String username;
 
-	public static void setApp(String app) {
-		DataSourceInfo.app = app;
-	}
+	private String version;
 
-	public static String getIp() {
-		return ip;
-	}
-
-	public static void setIp(String ip) {
-		DataSourceInfo.ip = ip;
-	}
-
-	public String getDataSourceBeanName() {
-		return dataSourceBeanName;
-	}
-
-	public void setDataSourceBeanName(String dataSourceBeanName) {
-		this.dataSourceBeanName = dataSourceBeanName;
+	public String getApp() {
+		return ConfigServiceManager.getConfig().getAppName();
 	}
 
 	public String getDataSourceBeanClass() {
@@ -71,6 +49,14 @@ public class DataSourceInfo {
 		this.dataSourceBeanClass = dataSourceBeanClass;
 	}
 
+	public String getDataSourceBeanName() {
+		return dataSourceBeanName;
+	}
+
+	public void setDataSourceBeanName(String dataSourceBeanName) {
+		this.dataSourceBeanName = dataSourceBeanName;
+	}
+
 	public String getDatabase() {
 		return database;
 	}
@@ -79,36 +65,16 @@ public class DataSourceInfo {
 		this.database = database;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public boolean getReplaced() {
-		return replaced;
-	}
-
-	public void setReplaced(boolean replaced) {
-		this.replaced = replaced;
-	}
-
 	public String getInitPoolSize() {
 		return initPoolSize;
 	}
 
 	public void setInitPoolSize(String initPoolSize) {
 		this.initPoolSize = initPoolSize;
+	}
+
+	public String getIp() {
+		return Networks.forIp().getLocalHostAddress();
 	}
 
 	public String getMaxPoolSize() {
@@ -127,12 +93,12 @@ public class DataSourceInfo {
 		this.minPoolSize = minPoolSize;
 	}
 
-	public String getVersion() {
-		return version;
+	public boolean getReplaced() {
+		return replaced;
 	}
 
-	public void setVersion(String version) {
-		this.version = version;
+	public void setReplaced(boolean replaced) {
+		this.replaced = replaced;
 	}
 
 	public String getType() {
@@ -141,6 +107,30 @@ public class DataSourceInfo {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
 	@Override public String toString() {
