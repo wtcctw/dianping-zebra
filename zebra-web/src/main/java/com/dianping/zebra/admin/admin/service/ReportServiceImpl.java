@@ -29,6 +29,7 @@ public class ReportServiceImpl implements ReportService {
 		Datasource ds = machine.findOrCreateDatasource(hb.getDatasourceBeanName());
 		
 		ds.setName(hb.getDatabase());
+		ds.setUsername(hb.getUsername());
 		ds.setBeanName(hb.getDatasourceBeanName());
 		ds.setType(hb.getDatasourceBeanClass());
 		ds.setInitPoolSize(hb.getInitPoolSize());

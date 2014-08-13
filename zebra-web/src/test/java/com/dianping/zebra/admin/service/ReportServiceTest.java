@@ -29,10 +29,11 @@ public class ReportServiceTest extends ComponentTestCase {
 		h.setDatabase("tuangou2010");
 		h.setDatabaseType("mysql");
 		h.setUsername("asgen");
-		h.setDatasourceBeanClass("DpdlDataSource");
+		h.setDatasourceBeanClass("com.dianping.dpdl.sql.DPDataSource");
+//		h.setDatasourceBeanClass("com.dianping.zebra.group.jdbc.GroupDataSource");
 		h.setDatasourceBeanName("tuangou-master");
 		h.setInitPoolSize(2);
-		h.setIp("192.168.1.1");
+		h.setIp("192.168.1.4");
 		h.setJdbcUrl("jdbc:mysql://localhost:3306/test");
 		h.setMaxPoolSize(5);
 		h.setMinPoolSize(2);

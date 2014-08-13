@@ -32,7 +32,7 @@
   </entity>
   <entity name="datasource">
     <attribute name="jdbc-url" value-type="String" />
-    <attribute name="name" value-type="String" />
+    <attribute name="username" value-type="String" />
     <attribute name="init-pool-size" value-type="int" />
     <attribute name="max-pool-size" value-type="int" />
     <attribute name="min-pool-size" value-type="int" />

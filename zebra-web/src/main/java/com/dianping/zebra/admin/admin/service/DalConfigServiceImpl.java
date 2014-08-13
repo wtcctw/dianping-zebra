@@ -27,7 +27,10 @@ public class DalConfigServiceImpl implements DalConfigService {
 			m_lionHttpService.createKey(project, driverClass);
 			m_lionHttpService.createKey(project, properties);
 			m_lionHttpService.createKey(project, active);
+		} catch (Throwable ignore) {
+		}
 
+		try {
 			for (String env : envs) {
 				String originUrl = m_lionHttpService.getConfig(env, url);
 				if (originUrl == null || originUrl.length() == 0) {

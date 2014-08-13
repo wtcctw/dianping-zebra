@@ -12,8 +12,11 @@
 	type="com.dianping.zebra.admin.admin.page.index.Model" scope="request" />
 
 <a:layout>
-	Database: ${model.database.name }
+	<br>
+	<strong style="color: #08C;">Database: ${model.database.name }</strong>
 	<div>
+		<br>
+		<strong style="color: #08C;">应用列表</strong>
 		<table class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
