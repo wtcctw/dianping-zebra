@@ -129,11 +129,7 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		String newBeanName = String.format("%s-z%d", beanName, nameId++);
 
 		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
-<<<<<<< HEAD
 			JdbcInfo info = getBeanJdbcInfo(dataSourceDefinition);
-=======
-			JdbcUrlInfo info = getBeanJdbcInfo(dataSourceDefinition);
->>>>>>> 279a512d4239dab7e3f249d2a1cfdbe84c71d1be
 			if ("mysql".equals(info.getType())) {
 				dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
 				dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
@@ -187,15 +183,9 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		if (writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME) || writeDsBean.getBeanClassName()
 				.equals(SingleDataSource.class.getName())) {
 
-<<<<<<< HEAD
 			JdbcInfo info = getBeanJdbcInfo(writeDsBean);
 
 			if ("mysql".equals(info.getType())) {
-=======
-			JdbcUrlInfo info = getBeanJdbcInfo(writeDsBean);
-
-			if (info.getType().equals("mysql")) {
->>>>>>> 279a512d4239dab7e3f249d2a1cfdbe84c71d1be
 				String groupConfig = getLionConfig(String.format("groupds.%s.mapping", info.getDataBase()));
 				if (!StringUtils.isBlank(groupConfig)) {
 					properties.add(new PropertyValue("jdbcRef", info.getDataBase()));
@@ -273,7 +263,6 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		}
 	}
 
-<<<<<<< HEAD
 	private JdbcInfo getBeanJdbcInfo(BeanDefinition bean) {
 		String url = ((TypedStringValue) bean.getPropertyValues().getPropertyValue("jdbcUrl").getValue())
 				.getValue().trim();
@@ -283,16 +272,6 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		info.setUser(isLionKey(user) ? getLionConfig(trimLionKey(user)) : user);
 
 		return info;
-=======
-	private JdbcUrlInfo getBeanJdbcInfo(BeanDefinition bean) {
-		String url = ((TypedStringValue) bean.getPropertyValues().getPropertyValue("jdbcUrl").getValue())
-				.getValue().trim();
-		if (url.startsWith("${") && url.endsWith("}")) {
-			url = url.substring(2, url.length() - 1);
-			url = getLionConfig(url);
-		}
-		return getJdbcUrlInfo(url);
->>>>>>> 279a512d4239dab7e3f249d2a1cfdbe84c71d1be
 	}
 
 	private Set<String> getGroupDataSourceIgnoreProperties() {
