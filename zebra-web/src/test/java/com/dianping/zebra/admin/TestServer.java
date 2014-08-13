@@ -11,7 +11,6 @@ import org.mortbay.servlet.GzipFilter;
 import org.unidal.test.jetty.JettyServer;
 
 @RunWith(JUnit4.class)
-@Ignore
 public class TestServer extends JettyServer {
    public static void main(String[] args) throws Exception {
       TestServer server = new TestServer();

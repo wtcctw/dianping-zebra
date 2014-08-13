@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.admin.page.index;
+package com.dianping.zebra.admin.admin.page.notify;
 
 import com.dianping.zebra.admin.admin.AdminPage;
 import org.unidal.web.mvc.view.BaseJspViewer;
@@ -11,10 +11,6 @@ public class JspViewer extends BaseJspViewer<AdminPage, Action, Context, Model> 
 		switch (action) {
 		case VIEW:
 			return JspFile.VIEW.getPath();
-		case APP:
-			return JspFile.APP.getPath();
-		case DATABASE:
-			return JspFile.DATABASE.getPath();
 		}
 
 		throw new RuntimeException("Unknown action: " + action);

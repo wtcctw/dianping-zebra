@@ -52,11 +52,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.dbunit</groupId>
-            <artifactId>dbunit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>
@@ -86,6 +81,11 @@
             <artifactId>lion-client</artifactId>
             <version>0.4.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -123,7 +123,6 @@
                             <manifest><![CDATA[,
                         ${basedir}/src/main/resources/META-INF/dal/model/datasource-config-manifest.xml,
                         ${basedir}/src/main/resources/META-INF/dal/model/system-config-manifest.xml,
-                        ${basedir}/src/main/resources/META-INF/dal/model/heartbeat-manifest.xml,
                      ,]]></manifest>
                         </configuration>
                     </execution>

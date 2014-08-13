@@ -75,8 +75,8 @@ public class Handler implements PageHandler<Context> {
 			break;
 		case INIT_DS:
 			if (name != null) {
-				m_dalConfigService.generateConfig(name);
-				ctx.sendJsonResponse("0", "success", null);
+				boolean success = m_dalConfigService.generateConfig(name);
+				ctx.sendJsonResponse(success == true ? "0" : "1", success == true ? "success" : "fail", null);
 			}
 			break;
 		default:

@@ -27,16 +27,40 @@ public class DalConfigServiceImpl implements DalConfigService {
 			m_lionHttpService.createKey(project, driverClass);
 			m_lionHttpService.createKey(project, properties);
 			m_lionHttpService.createKey(project, active);
-		} catch (Throwable ignore) {
-		}
 
-		for (String env : envs) {
-			m_lionHttpService.setConfig(env, url, "");
-			m_lionHttpService.setConfig(env, user, "");
-			m_lionHttpService.setConfig(env, password, "");
-			m_lionHttpService.setConfig(env, driverClass, "com.mysql.jdbc.Driver");
-			m_lionHttpService.setConfig(env, properties, "${ds.datasource.properties}");
-			m_lionHttpService.setConfig(env, active, "true");
+			for (String env : envs) {
+				String originUrl = m_lionHttpService.getConfig(env, url);
+				if (originUrl == null || originUrl.length() == 0) {
+					m_lionHttpService.setConfig(env, url, "");
+				}
+
+				String originUser = m_lionHttpService.getConfig(env, user);
+				if (originUser == null || originUser.length() == 0) {
+					m_lionHttpService.setConfig(env, user, "");
+				}
+
+				String originPassword = m_lionHttpService.getConfig(env, password);
+				if (originPassword == null || originPassword.length() == 0) {
+					m_lionHttpService.setConfig(env, password, "");
+				}
+
+				String originDriverClass = m_lionHttpService.getConfig(env, driverClass);
+				if (originDriverClass == null || originDriverClass.length() == 0) {
+					m_lionHttpService.setConfig(env, driverClass, "com.mysql.jdbc.Driver");
+				}
+
+				String originProperties = m_lionHttpService.getConfig(env, properties);
+				if (originProperties == null || originProperties.length() == 0) {
+					m_lionHttpService.setConfig(env, properties, "${ds.datasource.properties}");
+				}
+
+				String originActive = m_lionHttpService.getConfig(env, active);
+				if (originActive == null || originActive.length() == 0) {
+					m_lionHttpService.setConfig(env, active, "true");
+				}
+			}
+		} catch (Throwable ignore) {
+			return false;
 		}
 
 		return true;

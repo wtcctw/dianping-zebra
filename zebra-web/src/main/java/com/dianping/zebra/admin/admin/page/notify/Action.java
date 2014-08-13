@@ -1,11 +1,7 @@
-package com.dianping.zebra.admin.admin.page.index;
+package com.dianping.zebra.admin.admin.page.notify;
 
 public enum Action implements org.unidal.web.mvc.Action {
-	VIEW("view"),
-
-	DATABASE("database"),
-
-	APP("app");
+	VIEW("view");
 
 	private String m_name;
 

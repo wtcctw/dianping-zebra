@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wizard package="com.dianping.zebra.admin">
+   <jdbc package="com.dianping.zebra.web.dal" name="zebra">
+      <datasource>
+         <driver>com.mysql.jdbc.Driver</driver>
+         <url>jdbc:mysql://localhost:3306/zebra</url>
+         <user>root</user>
+         <password>123456</password>
+         <properties>useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true</properties>
+      </datasource>
+      <group name="stat" package="com.dianping.zebra.web.dal.stat">
+         <table name="heartbeat"/>
+      </group>
+   </jdbc>
+</wizard>

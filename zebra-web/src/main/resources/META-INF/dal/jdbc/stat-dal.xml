@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities do-package="com.dianping.zebra.web.dal.stat" gen="true">
+<entity name="heartbeat" table="heartbeat" alias="h">
+    <member name="replaced" field="replaced" value-type="boolean"/>
+	<member name="create-time" field="create_time" value-type="Date" insert-expr="NOW()"/>
+    <member name="update-time" field="update_time" value-type="Date" insert-expr="NOW()" update-expr="NOW()"/>
+    <query-defs>
+	  <query name="find-all" type="SELECT" multiple="true">
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>]]></statement>
+      </query>
+      <query name="exists" type="SELECT">
+        <param name="app-name" />
+        <param name="ip" />
+        <param name="database" />
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='app-name'/> = ${app-name}
+        and <FIELD name='ip'/> = ${ip} 
+        and <FIELD name='database'/> = ${database} ]]></statement>
+      </query>
+      <query name="find-by-app-name" type="SELECT" multiple="true">
+        <param name="app-name" />
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='app-name'/> = ${app-name}]]></statement>
+      </query>
+      <query name="find-by-database" type="SELECT" multiple="true">
+        <param name="database" />
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='database'/> = ${database}]]></statement>
+      </query>
+    </query-defs>
+  </entity>
+</entities>

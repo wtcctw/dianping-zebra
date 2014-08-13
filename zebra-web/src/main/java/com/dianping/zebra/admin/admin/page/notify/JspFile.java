@@ -1,11 +1,7 @@
-package com.dianping.zebra.admin.admin.page.index;
+package com.dianping.zebra.admin.admin.page.notify;
 
 public enum JspFile {
-	VIEW("/jsp/admin/index.jsp"),
-
-	DATABASE("/jsp/admin/database.jsp"),
-
-	APP("/jsp/admin/app.jsp"),
+	VIEW("/jsp/admin/notify.jsp"),
 
 	;
 

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entities>
+  <entity name="heartbeat" table="heartbeat" alias="h">
+    <member name="id" field="id" value-type="int" length="10" nullable="false" key="true" auto-increment="true" />
+    <member name="app-name" field="app_name" value-type="String" length="50" />
+    <member name="ip" field="ip" value-type="String" length="20" />
+    <member name="datasource-bean-name" field="datasource_bean_name" value-type="String" length="50" />
+    <member name="database" field="database" value-type="String" length="50" />
+    <member name="database-type" field="database_type" value-type="String" length="20" />
+    <member name="username" field="username" value-type="String" length="50" />
+    <member name="datasource-bean-class" field="datasource_bean_class" value-type="String" length="50" />
+    <member name="replaced" field="replaced" value-type="int" length="3" />
+    <member name="jdbc-url" field="jdbc_url" value-type="String" length="50" />
+    <member name="init-pool-size" field="init_pool_size" value-type="int" length="10" />
+    <member name="max-pool-size" field="max_pool_size" value-type="int" length="10" />
+    <member name="min-pool-size" field="min_pool_size" value-type="int" length="10" />
+    <member name="version" field="version" value-type="String" length="20" />
+    <member name="create-time" field="create_time" value-type="Date" />
+    <member name="update-time" field="update_time" value-type="Date" />
+    <var name="key-id" value-type="int" key-member="id" />
+    <primary-key name="PRIMARY" members="id" />
+    <index name="database" members="database ASC" />
+    <index name="app_name" members="app_name ASC" />
+    <index name="ip" members="ip ASC" />
+    <readsets>
+      <readset name="FULL" all="true" />
+    </readsets>
+    <updatesets>
+      <updateset name="FULL" all="true" />
+    </updatesets>
+    <query-defs>
+      <query name="find-by-PK" type="SELECT">
+        <param name="key-id" />
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+      <query name="insert" type="INSERT">
+        <statement><![CDATA[INSERT INTO <TABLE/>(<FIELDS/>)
+        VALUES(<VALUES/>)]]></statement>
+      </query>
+      <query name="update-by-PK" type="UPDATE">
+        <param name="key-id" />
+        <statement><![CDATA[UPDATE <TABLE/>
+        SET <FIELDS/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+      <query name="delete-by-PK" type="DELETE">
+        <param name="key-id" />
+        <statement><![CDATA[DELETE FROM <TABLE/>
+        WHERE <FIELD name='id'/> = ${key-id}]]></statement>
+      </query>
+    </query-defs>
+  </entity>
+</entities>
+

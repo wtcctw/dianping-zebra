@@ -7,7 +7,9 @@ public enum AdminPage implements Page {
 
    INDEX("index", "index", "Index", "Index", true),
 
-   SERVICE("service", "service", "Service", "Service", true);
+   SERVICE("service", "service", "Service", "Service", true),
+
+   NOTIFY("notify", "notify", "Notify", "Notify", true);
 
    private String m_name;
 
