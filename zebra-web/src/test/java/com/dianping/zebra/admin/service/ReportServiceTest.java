@@ -26,7 +26,7 @@ public class ReportServiceTest extends ComponentTestCase {
 		Heartbeat h = m_heartbeatDao.createLocal();
 		
 		h.setAppName("group-service");
-		h.setDatabase("tuangou2010");
+		h.setDatabaseName("tuangou2010");
 		h.setDatabaseType("mysql");
 		h.setUsername("asgen");
 		h.setDatasourceBeanClass("com.dianping.dpdl.sql.DPDataSource");

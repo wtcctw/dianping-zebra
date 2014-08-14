@@ -34,7 +34,7 @@ public class Handler implements PageHandler<Context> {
 			Heartbeat hb = new Heartbeat();
 
 			hb.setAppName(payload.getApp().toLowerCase());
-			hb.setDatabase(payload.getDatabase().toLowerCase());
+			hb.setDatabaseName(payload.getDatabase().toLowerCase());
 			hb.setDatasourceBeanClass(payload.getDataSourceBeanClass());
 			hb.setDatasourceBeanName(payload.getDataSourceBeanName());
 			hb.setInitPoolSize(payload.getInitPoolSize());

@@ -26,10 +26,10 @@
         WHERE <FIELD name='app-name'/> = ${app-name}]]></statement>
       </query>
       <query name="find-by-database" type="SELECT" multiple="true">
-        <param name="database" />
+        <param name="database-name" />
         <statement><![CDATA[SELECT <FIELDS/>
         FROM <TABLE/>
-        WHERE <FIELD name='database'/> = ${database}]]></statement>
+        WHERE <FIELD name='database-name'/> = ${database-name}]]></statement>
       </query>
     </query-defs>
   </entity>

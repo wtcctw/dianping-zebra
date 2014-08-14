@@ -5,12 +5,12 @@
     <member name="app-name" field="app_name" value-type="String" length="50" />
     <member name="ip" field="ip" value-type="String" length="20" />
     <member name="datasource-bean-name" field="datasource_bean_name" value-type="String" length="50" />
-    <member name="database" field="database" value-type="String" length="50" />
+    <member name="database-name" field="database_name" value-type="String" length="50" />
     <member name="database-type" field="database_type" value-type="String" length="20" />
     <member name="username" field="username" value-type="String" length="50" />
     <member name="datasource-bean-class" field="datasource_bean_class" value-type="String" length="50" />
     <member name="replaced" field="replaced" value-type="int" length="3" />
-    <member name="jdbc-url" field="jdbc_url" value-type="String" length="50" />
+    <member name="jdbc-url" field="jdbc_url" value-type="String" length="200" />
     <member name="init-pool-size" field="init_pool_size" value-type="int" length="10" />
     <member name="max-pool-size" field="max_pool_size" value-type="int" length="10" />
     <member name="min-pool-size" field="min_pool_size" value-type="int" length="10" />
@@ -19,7 +19,7 @@
     <member name="update-time" field="update_time" value-type="Date" />
     <var name="key-id" value-type="int" key-member="id" />
     <primary-key name="PRIMARY" members="id" />
-    <index name="database" members="database ASC" />
+    <index name="database" members="database_name ASC" />
     <index name="app_name" members="app_name ASC" />
     <index name="ip" members="ip ASC" />
     <readsets>

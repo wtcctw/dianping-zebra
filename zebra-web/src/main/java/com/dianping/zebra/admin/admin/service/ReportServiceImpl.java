@@ -28,7 +28,7 @@ public class ReportServiceImpl implements ReportService {
 
 		Datasource ds = machine.findOrCreateDatasource(hb.getDatasourceBeanName());
 
-		ds.setName(hb.getDatabase());
+		ds.setName(hb.getDatabaseName());
 		ds.setUsername(hb.getUsername());
 		ds.setBeanName(hb.getDatasourceBeanName());
 		ds.setType(hb.getDatasourceBeanClass());
@@ -89,8 +89,8 @@ public class ReportServiceImpl implements ReportService {
 			List<Heartbeat> all = m_heartbeatDao.findAll(HeartbeatEntity.READSET_FULL);
 
 			for (Heartbeat hb : all) {
-				Database database = report.findOrCreateDatabase(hb.getDatabase());
-				database.setName(hb.getDatabase());
+				Database database = report.findOrCreateDatabase(hb.getDatabaseName());
+				database.setName(hb.getDatabaseName());
 
 				App app = database.findOrCreateApp(hb.getAppName());
 				app.setName(hb.getAppName());
