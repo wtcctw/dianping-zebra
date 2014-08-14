@@ -1,6 +1,11 @@
 package com.dianping.zebra.monitor.spring;
 
 import com.dianping.cat.Cat;
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.SingleDataSource;
@@ -11,10 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.config.*;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -265,6 +267,29 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private void processOther() {
 		new DataSourceProcesser().process(otherDs, new DataSourceProcesserTemplate() {
 			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
+
+				String jdbcRef = null;
+				PropertyValue propertyValue = dataSourceDefinition.getPropertyValues().getPropertyValue("jdbcRef");
+
+				if (propertyValue == null) {
+					ConstructorArgumentValues.ValueHolder valueHolder = dataSourceDefinition.getConstructorArgumentValues()
+							.getArgumentValue(0, String.class);
+					jdbcRef = ((TypedStringValue) valueHolder.getValue()).getValue();
+				} else {
+					jdbcRef = ((TypedStringValue) propertyValue.getValue()).getValue();
+				}
+
+				if (!StringUtils.isBlank(jdbcRef)) {
+					DataSourceConfigManager manager = DataSourceConfigManagerFactory
+							.getConfigManager(Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef, false, false);
+					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
+					if (config.getDataSourceConfigs().size() > 0) {
+						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
+						getJdbcUrlInfo(info, dsConfig.getJdbcUrl());
+						info.setUsername(dsConfig.getUsername());
+					}
+				}
+
 				Cat.logEvent("DAL.BeanFactory",
 						String.format("Ignore-%s-%s", beanName, dataSourceDefinition.getBeanClassName()));
 			}
@@ -274,7 +299,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private void replace() {
 		processDpdl();
 		processC3P0();
-//		processC3P0InDpdl();
+		//processC3P0InDpdl();
 		processOther();
 	}
 
