@@ -65,6 +65,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private Set<String> otherDs = new HashSet<String>();
 
+	private Pattern pattern = Pattern.compile("^jdbc:([a-zA-Z0-9]+)://([^/]+)/([^?]+).*$");
+
 	private String callHttp(String url) throws IOException {
 		InputStream inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
 		return Files.forIO().readFrom(inputStream, "utf-8");
@@ -164,8 +166,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			return;
 		}
 
-		Pattern p = Pattern.compile("^jdbc:([a-zA-Z0-9]+)://([^/]+)/([^?]+).*$");
-		Matcher m = p.matcher(url);
+		Matcher m = pattern.matcher(url);
 		if (m.find()) {
 			info.setType(m.group(1).toLowerCase());
 			info.setDatabase(m.group(3).toLowerCase());
@@ -211,7 +212,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void processC3P0() {
-		// remove c3p0 in dpdl
+		// remove c3p0 bean which has already caculated in dpdl
 		for (String bean : c3p0InDpdlDs) {
 			c3p0Ds.remove(bean);
 		}
@@ -289,8 +290,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				PropertyValue propertyValue = dataSourceDefinition.getPropertyValues().getPropertyValue("jdbcRef");
 
 				if (propertyValue == null) {
-					ConstructorArgumentValues.ValueHolder valueHolder = (ValueHolder) dataSourceDefinition.getConstructorArgumentValues()
-					      .getGenericArgumentValues().get(0);
+					ConstructorArgumentValues.ValueHolder valueHolder = (ValueHolder) dataSourceDefinition
+					      .getConstructorArgumentValues().getGenericArgumentValues().get(0);
 					jdbcRef = ((TypedStringValue) valueHolder.getValue()).getValue();
 				} else {
 					jdbcRef = ((TypedStringValue) propertyValue.getValue()).getValue();
