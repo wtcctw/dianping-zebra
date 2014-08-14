@@ -42,21 +42,25 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public void createOrUpdate(Heartbeat heartbeat) {
 		try {
-			Heartbeat h = m_heartbeatDao.exists(heartbeat.getAppName(), heartbeat.getIp(), heartbeat.getDatabase(),
+			Heartbeat h = m_heartbeatDao.exists(heartbeat.getAppName(), heartbeat.getIp(), heartbeat.getDatasourceBeanName(),
 			      HeartbeatEntity.READSET_FULL);
 
-			h.setDatasourceBeanClass(heartbeat.getDatasourceBeanClass());
-			h.setDatasourceBeanName(heartbeat.getDatasourceBeanName());
-			h.setInitPoolSize(heartbeat.getInitPoolSize());
-			h.setJdbcUrl(heartbeat.getJdbcUrl());
-			h.setMaxPoolSize(heartbeat.getMaxPoolSize());
-			h.setMinPoolSize(heartbeat.getMinPoolSize());
-			h.setReplaced(heartbeat.isReplaced());
-			h.setUsername(heartbeat.getUsername());
-			h.setVersion(heartbeat.getVersion());
+//			h.setDatasourceBeanClass(heartbeat.getDatasourceBeanClass());
+//			h.setDatasourceBeanName(heartbeat.getDatasourceBeanName());
+//			h.setDatabase(heartbeat.getDatabase());
+//			h.setInitPoolSize(heartbeat.getInitPoolSize());
+//			h.setJdbcUrl(heartbeat.getJdbcUrl());
+//			h.setMaxPoolSize(heartbeat.getMaxPoolSize());
+//			h.setMinPoolSize(heartbeat.getMinPoolSize());
+//			h.setReplaced(heartbeat.isReplaced());
+//			h.setUsername(heartbeat.getUsername());
+//			h.setVersion(heartbeat.getVersion());
+			
+			heartbeat.setId(h.getId());
 
 			m_heartbeatDao.updateByPK(h, HeartbeatEntity.UPDATESET_FULL);
 		} catch (DalException e) {
+			Cat.logError(e);
 			try {
 				m_heartbeatDao.insert(heartbeat);
 			} catch (DalException e1) {

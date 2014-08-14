@@ -12,12 +12,12 @@
       <query name="exists" type="SELECT">
         <param name="app-name" />
         <param name="ip" />
-        <param name="database" />
+        <param name="datasource-bean-name" />
         <statement><![CDATA[SELECT <FIELDS/>
         FROM <TABLE/>
         WHERE <FIELD name='app-name'/> = ${app-name}
         and <FIELD name='ip'/> = ${ip} 
-        and <FIELD name='database'/> = ${database} ]]></statement>
+        and <FIELD name='datasource-bean-name'/> = ${datasource-bean-name} ]]></statement>
       </query>
       <query name="find-by-app-name" type="SELECT" multiple="true">
         <param name="app-name" />

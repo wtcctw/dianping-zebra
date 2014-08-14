@@ -10,7 +10,7 @@ CREATE TABLE `heartbeat` (
   `username` varchar(50) DEFAULT NULL,
   `datasource_bean_class` varchar(50) DEFAULT NULL,
   `replaced` tinyint(2) DEFAULT NULL,
-  `jdbc_url` varchar(50) DEFAULT NULL,
+  `jdbc_url` varchar(200) DEFAULT NULL,
   `init_pool_size` int(11) DEFAULT NULL,
   `max_pool_size` int(11) DEFAULT NULL,
   `min_pool_size` int(11) DEFAULT NULL,
@@ -18,7 +18,4 @@ CREATE TABLE `heartbeat` (
   `create_time` timestamp NULL DEFAULT NULL,
   `update_time` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `database` (`database`),
-  KEY `app_name` (`app_name`),
-  KEY `ip` (`ip`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
