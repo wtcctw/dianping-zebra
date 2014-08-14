@@ -17,6 +17,7 @@ import org.unidal.dal.jdbc.datasource.DataSourceException;
 import org.unidal.dal.jdbc.datasource.JdbcDataSourceConfiguration;
 import org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager;
 
+import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
@@ -110,6 +111,7 @@ public class JdbcDataSource implements DataSource, Initializable, LogEnabled, Di
 				String property = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(lionKey);
 				return property + key.substring(end + 1);
 			} catch (LionException e) {
+				Cat.logError(e);
 				return key;
 			}
 		} else {
