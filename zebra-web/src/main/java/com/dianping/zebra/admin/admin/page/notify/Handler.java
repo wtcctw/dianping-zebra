@@ -28,25 +28,29 @@ public class Handler implements PageHandler<Context> {
 		// display only, no action here
 		Payload payload = ctx.getPayload();
 
-		if (payload.getApp() != null && payload.getIp() != null) {
+		if (payload.getApp() != null && payload.getIp() != null && payload.getDataSourceBeanName() != null) {
 			Heartbeat hb = new Heartbeat();
 
 			hb.setAppName(payload.getApp().toLowerCase());
-			hb.setDatabaseName(payload.getDatabase().toLowerCase());
-			hb.setDatasourceBeanClass(payload.getDataSourceBeanClass());
-			hb.setDatasourceBeanName(payload.getDataSourceBeanName());
-			hb.setInitPoolSize(payload.getInitPoolSize());
 			hb.setIp(payload.getIp());
+			hb.setDatasourceBeanName(payload.getDataSourceBeanName());
+			hb.setDatabaseName(payload.getDatabase() == null ? "N/A" : payload.getDatabase().toLowerCase());
+			hb.setDatasourceBeanClass(payload.getDataSourceBeanClass() == null ? "N/A" :payload.getDataSourceBeanClass());
+			hb.setInitPoolSize(payload.getInitPoolSize());
 			hb.setMaxPoolSize(payload.getMaxPoolSize());
 			hb.setMinPoolSize(payload.getMinPoolSize());
 			hb.setReplaced(payload.isReplaced());
-			hb.setVersion(payload.getVersion());
-			hb.setUsername(payload.getUsername());
+			hb.setVersion(payload.getVersion() == null ? "N/A" : payload.getVersion());
+			hb.setUsername(payload.getUsername() == null ? "N/A" : payload.getUsername());
 			String jdbcUrl = payload.getUrl();
-			hb.setJdbcUrl(jdbcUrl);
-			String[] parts = jdbcUrl.split(":");
-			if (parts != null && parts.length > 2) {
-				hb.setDatabaseType(parts[1].toLowerCase());
+			if(jdbcUrl != null){
+				hb.setJdbcUrl(jdbcUrl);
+				String[] parts = jdbcUrl.split(":");
+				if (parts != null && parts.length > 2) {
+					hb.setDatabaseType(parts[1].toLowerCase());
+				}
+			}else{
+				hb.setDatabaseType("N/A");
 			}
 
 			m_reportService.createOrUpdate(hb);

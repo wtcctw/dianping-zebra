@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.*;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -45,7 +46,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
 
 	private static final String DPDL_CLASS_NAME = "com.dianping.dpdl.sql.DPDataSource";
-	
+
 	private static final String GROUP_CLASS_NAME = "com.dianping.zebra.group.jdbc.GroupDataSource";
 
 	private static final Log logger = LogFactory.getLog(DataSourceAutoReplacer.class);
@@ -57,7 +58,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private Set<String> c3p0InDpdlDs = new HashSet<String>();
 
 	private Set<String> dpdlDs = new HashSet<String>();
-	
+
 	private Set<String> groupds = new HashSet<String>();
 
 	private DefaultListableBeanFactory listableBeanFactory = null;
@@ -99,7 +100,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private BeanDefinition getDpdlInnerDsBean(BeanDefinition dataSourceDefinition) {
 		String writeDsName = ((TypedStringValue) dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS")
-				.getValue()).getValue();
+		      .getValue()).getValue();
 
 		c3p0InDpdlDs.add(writeDsName);
 		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsName);
@@ -118,8 +119,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private Set<PropertyValue> getDpdlInnerDsPropertyValues(BeanDefinition writeDsBean, DataSourceInfo dpdlInfo) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
-		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME) &&
-				!writeDsBean.getBeanClassName().equals(SingleDataSource.class.getName())) {
+		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME)
+		      && !writeDsBean.getBeanClassName().equals(SingleDataSource.class.getName())) {
 			return properties;
 		}
 
@@ -171,13 +172,14 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		}
 	}
 
-	@Override public int getOrder() {
-		//必须在DataSourceAutoMonitor之前执行
+	@Override
+	public int getOrder() {
+		// 必须在DataSourceAutoMonitor之前执行
 		return Ordered.LOWEST_PRECEDENCE - 2;
 	}
 
-	@Override public synchronized void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-			throws BeansException {
+	@Override
+	public synchronized void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (hasProcessd) {
 			return;
 		}
@@ -188,17 +190,17 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 		for (String beanDefinitionName : beanDefinitionNames) {
 			try {
-				AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) listableBeanFactory.getBeanDefinition(
-						beanDefinitionName);
+				AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) listableBeanFactory
+				      .getBeanDefinition(beanDefinitionName);
 				Class<?> beanClazz = beanDefinition.resolveBeanClass(ClassUtils.getDefaultClassLoader());
 				if (beanClazz != null && DataSource.class.isAssignableFrom(beanClazz)) {
 					if (beanClazz.getName().equals(C3P0_CLASS_NAME)) {
 						c3p0Ds.add(beanDefinitionName);
 					} else if (beanClazz.getName().equals(DPDL_CLASS_NAME)) {
 						dpdlDs.add(beanDefinitionName);
-					} else if(beanClazz.getName().equals(GROUP_CLASS_NAME)){
+					} else if (beanClazz.getName().equals(GROUP_CLASS_NAME)) {
 						groupds.add(beanDefinitionName);
-					}else {
+					} else {
 						otherDs.add(beanDefinitionName);
 					}
 				}
@@ -209,13 +211,14 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void processC3P0() {
-		//remove c3p0 in dpdl
-		for(String bean : c3p0InDpdlDs){
+		// remove c3p0 in dpdl
+		for (String bean : c3p0InDpdlDs) {
 			c3p0Ds.remove(bean);
 		}
-		
+
 		new DataSourceProcesser().process(c3p0Ds, new DataSourceProcesserTemplate() {
-			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
+			@Override
+			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 				if (c3p0InDpdlDs.contains(beanName)) {
 					return;
 				}
@@ -233,25 +236,26 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 					Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s", beanName));
 				} else {
 					Cat.logEvent("DAL.BeanFactory",
-							String.format("IgnoreC3P0-%s-%s-%s", beanName, info.getType(), info.getDatabase()));
+					      String.format("IgnoreC3P0-%s-%s-%s", beanName, info.getType(), info.getDatabase()));
 				}
 			}
 		});
 	}
 
 	@SuppressWarnings("unused")
-   private void processC3P0InDpdl() {
+	private void processC3P0InDpdl() {
 		new DataSourceProcesser().process(c3p0InDpdlDs, new DataSourceProcesserTemplate() {
-			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
-				Cat.logEvent("DAL.BeanFactory",
-						String.format("IgnoreC3P0InDpdl-%s", beanName));
+			@Override
+			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
+				Cat.logEvent("DAL.BeanFactory", String.format("IgnoreC3P0InDpdl-%s", beanName));
 			}
 		});
 	}
 
 	private void processDpdl() {
 		new DataSourceProcesser().process(dpdlDs, new DataSourceProcesserTemplate() {
-			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
+			@Override
+			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 				BeanDefinition dpdlInnerDsBean = getDpdlInnerDsBean(dataSourceDefinition);
 				Set<PropertyValue> properties = getDpdlInnerDsPropertyValues(dpdlInnerDsBean, info);
 
@@ -271,8 +275,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 					info.setReplaced(true);
 					Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s", beanName));
 				} else {
-					Cat.logEvent("DAL.BeanFactory",
-							String.format("IgnoreDpdl-%s", beanName));
+					Cat.logEvent("DAL.BeanFactory", String.format("IgnoreDpdl-%s", beanName));
 				}
 			}
 		});
@@ -280,22 +283,22 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private void processGroupDs() {
 		new DataSourceProcesser().process(groupds, new DataSourceProcesserTemplate() {
-			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
-
+			@Override
+			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 				String jdbcRef = null;
 				PropertyValue propertyValue = dataSourceDefinition.getPropertyValues().getPropertyValue("jdbcRef");
 
 				if (propertyValue == null) {
-					ConstructorArgumentValues.ValueHolder valueHolder = dataSourceDefinition.getConstructorArgumentValues()
-							.getArgumentValue(0, String.class);
+					ConstructorArgumentValues.ValueHolder valueHolder = (ValueHolder) dataSourceDefinition.getConstructorArgumentValues()
+					      .getGenericArgumentValues().get(0);
 					jdbcRef = ((TypedStringValue) valueHolder.getValue()).getValue();
 				} else {
 					jdbcRef = ((TypedStringValue) propertyValue.getValue()).getValue();
 				}
 
 				if (!StringUtils.isBlank(jdbcRef)) {
-					DataSourceConfigManager manager = DataSourceConfigManagerFactory
-							.getConfigManager(Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef, false, false);
+					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
+					      Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef, false, false);
 					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
 					if (config.getDataSourceConfigs().size() > 0) {
 						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
@@ -305,23 +308,24 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				}
 
 				Cat.logEvent("DAL.BeanFactory",
-						String.format("Ignore-%s-%s", beanName, dataSourceDefinition.getBeanClassName()));
+				      String.format("Ignore-%s-%s", beanName, dataSourceDefinition.getBeanClassName()));
 			}
 		});
 	}
 
 	private void processOther() {
 		new DataSourceProcesser().process(otherDs, new DataSourceProcesserTemplate() {
-			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
-				//TODO
+			@Override
+			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
+				// TODO
 			}
 		});
 	}
-	
+
 	private void replace() {
 		processDpdl();
 		processC3P0();
-		//processC3P0InDpdl();
+		// processC3P0InDpdl();
 		processGroupDs();
 		processOther();
 	}
