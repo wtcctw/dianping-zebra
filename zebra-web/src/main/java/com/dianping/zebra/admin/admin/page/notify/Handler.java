@@ -50,6 +50,7 @@ public class Handler implements PageHandler<Context> {
 					hb.setDatabaseType(parts[1].toLowerCase());
 				}
 			}else{
+				hb.setJdbcUrl("N/A");
 				hb.setDatabaseType("N/A");
 			}
 
