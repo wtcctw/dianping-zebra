@@ -107,7 +107,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		return writeDsBean;
 	}
 
-	private Set<PropertyValue> getDpdlInnerDsPropertyValues(BeanDefinition writeDsBean) {
+	private Set<PropertyValue> getDpdlInnerDsPropertyValues(BeanDefinition writeDsBean, DataSourceInfo dpdlInfo) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
 		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME) &&
@@ -116,6 +116,10 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		}
 
 		DataSourceInfo info = getDataSourceInfo(writeDsBean, null);
+		dpdlInfo.setDatabase(info.getDatabase());
+		dpdlInfo.setUrl(info.getUrl());
+		dpdlInfo.setUsername(info.getUsername());
+		dpdlInfo.setType(info.getType());
 
 		if ("mysql".equals(info.getType()) && canReplace(info)) {
 			String groupConfig = LionUtil.getLionConfig(String.format("groupds.%s.mapping", info.getDatabase()));
@@ -233,7 +237,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		new DataSourceProcesser().process(dpdlDs, new DataSourceProcesserTemplate() {
 			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 				BeanDefinition dpdlInnerDsBean = getDpdlInnerDsBean(dataSourceDefinition);
-				Set<PropertyValue> properties = getDpdlInnerDsPropertyValues(dpdlInnerDsBean);
+				Set<PropertyValue> properties = getDpdlInnerDsPropertyValues(dpdlInnerDsBean, info);
 
 				if (properties.size() > 0) {
 					dataSourceDefinition.setBeanClassName(GroupDataSource.class.getName());

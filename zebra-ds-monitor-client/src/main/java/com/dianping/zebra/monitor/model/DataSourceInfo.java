@@ -1,6 +1,7 @@
 package com.dianping.zebra.monitor.model;
 
 import com.dianping.phoenix.config.ConfigServiceManager;
+import com.dianping.zebra.group.Constants;
 import org.springframework.beans.BeanUtils;
 import org.unidal.net.Networks;
 
@@ -11,7 +12,6 @@ import java.net.URLEncoder;
  * Created by Dozer on 8/13/14.
  */
 public class DataSourceInfo {
-	private String app;
 
 	private String dataSourceBeanClass;
 
@@ -20,8 +20,6 @@ public class DataSourceInfo {
 	private String database;
 
 	private String initPoolSize;
-
-	private String ip;
 
 	private String maxPoolSize;
 
@@ -34,8 +32,6 @@ public class DataSourceInfo {
 	private String url;
 
 	private String username;
-
-	private String version;
 
 	public String getApp() {
 		return ConfigServiceManager.getConfig().getAppName();
@@ -126,11 +122,7 @@ public class DataSourceInfo {
 	}
 
 	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
+		return Constants.ZEBRA_VERSION;
 	}
 
 	@Override public String toString() {
