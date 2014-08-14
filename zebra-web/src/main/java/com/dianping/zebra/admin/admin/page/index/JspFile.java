@@ -3,6 +3,10 @@ package com.dianping.zebra.admin.admin.page.index;
 public enum JspFile {
 	VIEW("/jsp/admin/index.jsp"),
 
+	DATABASE("/jsp/admin/database.jsp"),
+
+	APP("/jsp/admin/app.jsp"),
+
 	;
 
 	private String m_path;

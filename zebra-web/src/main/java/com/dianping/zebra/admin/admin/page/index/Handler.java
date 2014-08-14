@@ -4,16 +4,21 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 
-import com.dianping.zebra.admin.admin.AdminPage;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
+import com.dianping.zebra.admin.admin.AdminPage;
+import com.dianping.zebra.admin.admin.service.ReportService;
+
 public class Handler implements PageHandler<Context> {
 	@Inject
 	private JspViewer m_jspViewer;
+
+	@Inject
+	private ReportService m_heartbeatService;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -26,12 +31,27 @@ public class Handler implements PageHandler<Context> {
 	@OutboundActionMeta(name = "index")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
 		Model model = new Model(ctx);
+		Payload payload = ctx.getPayload();
+		
+		switch (payload.getAction()) {
+		case VIEW:
+			model.setAction(Action.VIEW);
+			model.setReport(m_heartbeatService.getReport());
+			break;
+		case DATABASE:
+			model.setAction(Action.DATABASE);
+			model.setDatabase(m_heartbeatService.getDatabase(payload.getDatabase()));
+			break;
+		case APP:
+			model.setAction(Action.APP);
+			model.setApp(m_heartbeatService.getApp(payload.getApp()));
+			break;
+		}
 
-		model.setAction(Action.VIEW);
 		model.setPage(AdminPage.INDEX);
 
 		if (!ctx.isProcessStopped()) {
-		   m_jspViewer.view(ctx, model);
+			m_jspViewer.view(ctx, model);
 		}
 	}
 }

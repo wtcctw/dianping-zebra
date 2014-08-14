@@ -5,7 +5,7 @@
     <groupId>com.dianping.zebra</groupId>
     <artifactId>zebra-all</artifactId>
     <packaging>pom</packaging>
-    <version>2.5.3</version>
+    <version>0.0.1-SNAPSHOT</version>
     <name>zebra-all</name>
     <organization>
         <name>dianping</name>
@@ -34,7 +34,6 @@
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>1.2.14</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
@@ -119,6 +118,27 @@
         </dependencies>
     </dependencyManagement>
     <build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.9</version>
+					<configuration>
+					<includes>
+						<include>**/AllTests.java</include>
+					</includes>
+			<!-- <debugForkedProcess>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -Xnoagent -Djava.compiler=NONE</debugForkedProcess> -->
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.surefire</groupId>
+							<artifactId>surefire-junit47</artifactId>
+							<version>2.9</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

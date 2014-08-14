@@ -1,16 +1,17 @@
 /**
  * Project: zebra-client
- * 
+ *
  * File Created at Feb 17, 2014
- * 
+ *
  */
 package com.dianping.zebra.group;
 
 /**
  * @author Leo Liang, Dozer
- * 
+ *
  */
 public final class Constants {
+	public static final String ZEBRA_VERSION = "2.5.4";
 
 	public static final String SQL_FORCE_WRITE_HINT = "/*+zebra:w*/";
 

@@ -4,23 +4,23 @@
 	<parent>
 		<artifactId>zebra-all</artifactId>
 		<groupId>com.dianping.zebra</groupId>
-		<version>2.5.3</version>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<name>zebra-web</name>
 	<artifactId>zebra-web</artifactId>
-	<version>2.5.3</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>com.dianping.cat</groupId>
 			<artifactId>cat-client</artifactId>
-			<version>1.0.4</version>
+			<version>1.0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.dianping.zebra</groupId>
 			<artifactId>zebra-api</artifactId>
-			<version>2.5.3</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -35,12 +35,7 @@
 		<dependency>
 			<groupId>com.dianping.lion</groupId>
 			<artifactId>lion-client</artifactId>
-			<version>0.3.5</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dianping.lion</groupId>
-			<artifactId>lion-${env}</artifactId>
-			<version>1.0.0</version>
+			<version>0.4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.unidal.framework</groupId>
@@ -74,6 +69,21 @@
 			<version>6.1.14</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.unidal.framework</groupId>
+			<artifactId>dal-jdbc</artifactId>
+			<version>2.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.20</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+  			<artifactId>log4j</artifactId>
+		</dependency>
 	</dependencies>
 	<build>
 		<pluginManagement>
@@ -98,71 +108,85 @@
 								<content><![CDATA[org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.6
 												eclipse.preferences.version=1
 												org.eclipse.jdt.core.compiler.source=1.6
-												org.eclipse.jdt.core.compiler.compliance=1.6]]>
-								</content>
-                     </file>
-                  </additionalConfig>
-               </configuration>
-            </plugin>
-         </plugins>
-      </pluginManagement>
-      <plugins>
-         <plugin>
-            <groupId>org.unidal.maven.plugins</groupId>
-            <artifactId>codegen-maven-plugin</artifactId>
-            <version>2.0.15</version>
-            <executions>
-               <execution>
-                  <id>generate plexus component descriptor</id>
-                  <phase>process-classes</phase>
-                  <goals>
-                     <goal>plexus</goal>
-                  </goals>
-                  <configuration>
-                     <className>com.dianping.zebra.admin.build.ComponentsConfigurator</className>
-                  </configuration>
-               </execution>
-               <execution>
-                  <id>generate dal model files</id>
-                  <phase>generate-sources</phase>
-                  <goals>
-                     <goal>dal-model</goal>
-                  </goals>
-                  <configuration>
-                     <manifest><![CDATA[
-                        ${basedir}/src/main/resources/META-INF/dal/model/query-manifest.xml,
+												org.eclipse.jdt.core.compiler.compliance=1.6]]></content>
+							</file>
+						</additionalConfig>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.unidal.maven.plugins</groupId>
+				<artifactId>wizard-maven-plugin</artifactId>
+				<version>2.0.5</version>
+			</plugin>
+			<plugin>
+				<groupId>org.unidal.maven.plugins</groupId>
+				<artifactId>codegen-maven-plugin</artifactId>
+				<version>2.0.15</version>
+				<executions>
+					<execution>
+						<id>generate plexus component descriptor</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>plexus</goal>
+						</goals>
+						<configuration>
+							<className>com.dianping.zebra.admin.build.ComponentsConfigurator</className>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate dal model files</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>dal-model</goal>
+						</goals>
+						<configuration>
+							<manifest><![CDATA[${basedir}/src/main/resources/META-INF/dal/model/query-manifest.xml,
                         ${basedir}/src/main/resources/META-INF/dal/model/sqlMap-manifest.xml,
-                     ]]></manifest>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-war-plugin</artifactId>
-            <version>2.1.1</version>
-            <configuration>
-               <warName>${artifactId}-${env}-${version}</warName>
-               <webResources>
-                  <resource>
-                     <directory>src/main/resources</directory>
-                     <filtering>false</filtering>
-                     <targetPath>WEB-INF/classes</targetPath>
-                  </resource>
-                  <resource>
-                     <directory>src/main/webapp</directory>
-                     <filtering>false</filtering>
-                     <includes>
-                        <include>WEB-INF/web.xml</include>
-                     </includes>
-                  </resource>
-               </webResources>
-            </configuration>
-         </plugin>
-      </plugins>
-   </build>
-   <properties>
-      <env>alpha</env>
-      <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-   </properties>
+                        ${basedir}/src/main/resources/META-INF/dal/model/report-manifest.xml,]]></manifest>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate dal jdbc model</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>dal-jdbc</goal>
+						</goals>
+						<configuration>
+							<manifest><![CDATA[${basedir}/src/main/resources/META-INF/dal/jdbc/stat-manifest.xml,]]></manifest>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.1.1</version>
+				<configuration>
+					<warName>${artifactId}-${env}-${version}</warName>
+					<webResources>
+						<resource>
+							<directory>src/main/resources</directory>
+							<filtering>false</filtering>
+							<targetPath>WEB-INF/classes</targetPath>
+						</resource>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>false</filtering>
+							<includes>
+								<include>WEB-INF/web.xml</include>
+							</includes>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<properties>
+		<env>alpha</env>
+		<project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+	</properties>
 </project>
+

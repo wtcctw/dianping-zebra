@@ -27,6 +27,62 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.zebra.admin.admin.service.ReportService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.ReportServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.web.dal.stat.HeartbeatDao</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</role>
+			<implementation>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</implementation>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.datasource.DataSource</role>
+			<role-hint>zebra</role-hint>
+			<implementation>com.dianping.zebra.admin.datasource.JdbcDataSource</implementation>
+			<configuration>
+				<id>zebra</id>
+				<maximum-pool-size>3</maximum-pool-size>
+				<connection-timeout>1s</connection-timeout>
+				<idle-timeout>10m</idle-timeout>
+				<statement-cache-size>1000</statement-cache-size>
+				<properties>
+					<driver>com.mysql.jdbc.Driver</driver>
+					<URL>${zebra.server.jdbc.url}</URL>
+					<user>${zebra.server.jdbc.username}</user>
+					<password>${zebra.server.jdbc.password}</password>
+					<connectionProperties><![CDATA[useUnicode=true&characterEncoding=UTF-8&autoReconnect=true]]></connectionProperties>
+				</properties>
+			</configuration>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>heartbeat</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>heartbeat</logical-table-name>
+				<physical-table-name>heartbeat</physical-table-name>
+				<data-source-name>zebra</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>com.dianping.zebra.web.dal.stat.HeartbeatDao</role>
+			<implementation>com.dianping.zebra.web.dal.stat.HeartbeatDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
 			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
 			<configuration>
@@ -45,6 +101,9 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.page.index.JspViewer</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -78,6 +137,27 @@
 		<component>
 			<role>com.dianping.zebra.admin.admin.page.service.JspViewer</role>
 			<implementation>com.dianping.zebra.admin.admin.page.service.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.page.notify.Handler</role>
+			<implementation>com.dianping.zebra.admin.admin.page.notify.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.page.notify.JspViewer</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.page.notify.JspViewer</role>
+			<implementation>com.dianping.zebra.admin.admin.page.notify.JspViewer</implementation>
 			<requirements>
 				<requirement>
 					<role>org.unidal.web.mvc.view.model.ModelHandler</role>

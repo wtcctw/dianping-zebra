@@ -64,7 +64,7 @@ public class LionHttpServiceTest extends ComponentTestCase {
 
 	@Test
 	public void getAllPassowrds() throws IOException {
-		HashMap<String, String> result = m_lionHttpService.getConfigByProject("performance", "ds");
+		HashMap<String, String> result = m_lionHttpService.getConfigByProject("qa", "ds");
 
 		for (Entry<String, String> entry : result.entrySet()) {
 			if (entry.getKey().contains("password")) {

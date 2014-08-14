@@ -15,22 +15,13 @@
  */
 package com.dianping.zebra.monitor.spring;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.sql.DataSource;
-
+import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.config.*;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -38,9 +29,9 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 
-import com.dianping.cat.Cat;
-import com.dianping.zebra.group.jdbc.SingleDataSource;
-import com.dianping.zebra.monitor.sql.MonitorableDataSource;
+import javax.sql.DataSource;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 自动为spring容器中的所有DataSource添加monitor功能，配置在spring配置文件中即可，如下 <bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>
@@ -52,8 +43,6 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	private static final Log logger = LogFactory.getLog(DataSourceAutoMonitor.class);
 
 	private static final String ZEBRA_DATA_SOURCE_NAME = "com.dianping.zebra.jdbc.DPDataSource";
-
-	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
 
 	private static int nameId = 0;
 
@@ -82,10 +71,8 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	private void autoReplaceWithMonitorableDataSource(String beanName, BeanDefinition dataSourceDefinition,
 			Class<?> dataSourceClazz) {
 
-		if (needToReplace(beanName, dataSourceDefinition)) {
-			listableBeanFactory.registerBeanDefinition(beanName,
-					createMonitorableBeanDefinition(beanName, dataSourceDefinition));
-		}
+		listableBeanFactory.registerBeanDefinition(beanName,
+				createMonitorableBeanDefinition(beanName, dataSourceDefinition));
 
 		// zebra需做特殊处理，一些inner datasource可能作为nested bean方式定义，也需要wrapper
 		if (isZebraDataSource(dataSourceClazz)) {
@@ -111,41 +98,27 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 			Object innerDSDefVal = innerDSDefEntry.getValue();
 			if (innerDSDefVal instanceof BeanDefinitionHolder) {
 				BeanDefinitionHolder innerDSDefHolder = (BeanDefinitionHolder) innerDSDefVal;
-				if (needToReplace(innerDSDefHolder.getBeanName(), innerDSDefHolder.getBeanDefinition())) {
-					BeanDefinition innerDSDefinition = innerDSDefHolder.getBeanDefinition();
-					innerDSDefEntry.setValue(new BeanDefinitionHolder(createMonitorableBeanDefinition(beanName,
-							innerDSDefinition), innerDSDefHolder.getBeanName(), innerDSDefHolder
-							.getAliases()));
-				}
+				BeanDefinition innerDSDefinition = innerDSDefHolder.getBeanDefinition();
+				innerDSDefEntry.setValue(new BeanDefinitionHolder(createMonitorableBeanDefinition(beanName,
+						innerDSDefinition), innerDSDefHolder.getBeanName(), innerDSDefHolder
+						.getAliases()));
 			}
 		}
 	}
 
-	private GenericBeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition) {
-		String newBeanName = String.format("%s-z%d", beanName, nameId++);
-
-		if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
-			dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
-			dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
-			dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(1, false);
-
-			if (dataSourceDefinition instanceof AbstractBeanDefinition) {
-				((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
-			}
-			Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s(%s)", beanName, newBeanName));
-		} else {
-			Cat.logEvent("DAL.BeanFactory",
-					String.format("Ignore-%s(%s)-%s", beanName, newBeanName, dataSourceDefinition.getBeanClassName()));
+	private BeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition) {
+		if (MonitorableDataSource.class.getName().equals(dataSourceDefinition.getBeanClassName())) {
+			return dataSourceDefinition;
 		}
+
+		String newBeanName = String.format("%s-z%d", beanName, nameId++);
 
 		listableBeanFactory.registerBeanDefinition(newBeanName, dataSourceDefinition);
 
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
 		monitorableDataSourceDefinition.setBeanClass(MonitorableDataSource.class);
-
 		monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(
 				new RuntimeBeanReference(newBeanName));
-
 		return monitorableDataSourceDefinition;
 	}
 
@@ -153,23 +126,8 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		return ZEBRA_DATA_SOURCE_NAME.equals(dataSourceClazz.getName());
 	}
 
-	private boolean needToReplace(String beanName, BeanDefinition dataSourceDefinition) {
-		if (dataSourceDefinition.getBeanClassName().equals(MonitorableDataSource.class.getName())) {
-			return false;
-		}
-		if (dataSourceDefinition.getBeanClassName().equals(SingleDataSource.class.getName())) {
-			return false;
-		}
-
-		if (beanName != null && beanName.matches("^.*z\\d+$")) {
-			return false;
-		}
-		return true;
-	}
-
 	@Override
 	public int getOrder() {
 		return Ordered.LOWEST_PRECEDENCE - 1;
 	}
-
 }
