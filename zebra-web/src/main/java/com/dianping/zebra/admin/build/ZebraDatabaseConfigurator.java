@@ -11,7 +11,7 @@ final class ZebraDatabaseConfigurator extends AbstractJdbcResourceConfigurator {
    public List<Component> defineComponents() {
       List<Component> all = new ArrayList<Component>();
 
-      all.add(defineJdbcDataSourceComponent("zebra", "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306/zebra", "root", "123456", "<![CDATA[useUnicode=true&characterEncoding=UTF-8&autoReconnect=true]]>"));
+      all.add(defineJdbcDataSourceComponent("zebra", "com.mysql.jdbc.Driver", "jdbc:mysql://192.168.7.105:3306/zebra", "zebra", "dp!@mDhX20RM5", "<![CDATA[useUnicode=true&characterEncoding=UTF-8&autoReconnect=true]]>"));
 
       defineSimpleTableProviderComponents(all, "zebra", com.dianping.zebra.web.dal.stat._INDEX.getEntityClasses());
       defineDaoComponents(all, com.dianping.zebra.web.dal.stat._INDEX.getDaoClasses());

@@ -19,9 +19,6 @@
     <member name="update-time" field="update_time" value-type="Date" />
     <var name="key-id" value-type="int" key-member="id" />
     <primary-key name="PRIMARY" members="id" />
-    <index name="database" members="database_name ASC" />
-    <index name="app_name" members="app_name ASC" />
-    <index name="ip" members="ip ASC" />
     <readsets>
       <readset name="FULL" all="true" />
     </readsets>
