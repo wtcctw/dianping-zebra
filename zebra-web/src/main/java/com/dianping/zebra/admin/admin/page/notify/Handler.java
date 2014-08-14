@@ -28,9 +28,7 @@ public class Handler implements PageHandler<Context> {
 		// display only, no action here
 		Payload payload = ctx.getPayload();
 
-		if (payload.getApp() != null && payload.getDatabase() != null && payload.getDataSourceBeanClass() != null
-		      && payload.getDataSourceBeanName() != null && payload.getIp() != null && payload.getVersion() != null
-		      && payload.getUrl() != null && payload.getUsername() != null) {
+		if (payload.getApp() != null && payload.getIp() != null) {
 			Heartbeat hb = new Heartbeat();
 
 			hb.setAppName(payload.getApp().toLowerCase());

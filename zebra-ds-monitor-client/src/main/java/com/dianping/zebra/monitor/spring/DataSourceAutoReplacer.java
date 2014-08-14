@@ -12,6 +12,7 @@ import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.dianping.zebra.monitor.util.LionUtil;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -27,6 +28,7 @@ import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
 import javax.sql.DataSource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -43,6 +45,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
 
 	private static final String DPDL_CLASS_NAME = "com.dianping.dpdl.sql.DPDataSource";
+	
+	private static final String GROUP_CLASS_NAME = "com.dianping.zebra.group.jdbc.GroupDataSource";
 
 	private static final Log logger = LogFactory.getLog(DataSourceAutoReplacer.class);
 
@@ -53,6 +57,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private Set<String> c3p0InDpdlDs = new HashSet<String>();
 
 	private Set<String> dpdlDs = new HashSet<String>();
+	
+	private Set<String> groupds = new HashSet<String>();
 
 	private DefaultListableBeanFactory listableBeanFactory = null;
 
@@ -190,7 +196,9 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 						c3p0Ds.add(beanDefinitionName);
 					} else if (beanClazz.getName().equals(DPDL_CLASS_NAME)) {
 						dpdlDs.add(beanDefinitionName);
-					} else {
+					} else if(beanClazz.getName().equals(GROUP_CLASS_NAME)){
+						groupds.add(beanDefinitionName);
+					}else {
 						otherDs.add(beanDefinitionName);
 					}
 				}
@@ -201,6 +209,11 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void processC3P0() {
+		//remove c3p0 in dpdl
+		for(String bean : c3p0InDpdlDs){
+			c3p0Ds.remove(bean);
+		}
+		
 		new DataSourceProcesser().process(c3p0Ds, new DataSourceProcesserTemplate() {
 			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 				if (c3p0InDpdlDs.contains(beanName)) {
@@ -226,7 +239,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		});
 	}
 
-	private void processC3P0InDpdl() {
+	@SuppressWarnings("unused")
+   private void processC3P0InDpdl() {
 		new DataSourceProcesser().process(c3p0InDpdlDs, new DataSourceProcesserTemplate() {
 			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 				Cat.logEvent("DAL.BeanFactory",
@@ -264,8 +278,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		});
 	}
 
-	private void processOther() {
-		new DataSourceProcesser().process(otherDs, new DataSourceProcesserTemplate() {
+	private void processGroupDs() {
+		new DataSourceProcesser().process(groupds, new DataSourceProcesserTemplate() {
 			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 
 				String jdbcRef = null;
@@ -296,10 +310,19 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		});
 	}
 
+	private void processOther() {
+		new DataSourceProcesser().process(otherDs, new DataSourceProcesserTemplate() {
+			@Override public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
+				//TODO
+			}
+		});
+	}
+	
 	private void replace() {
 		processDpdl();
 		processC3P0();
 		//processC3P0InDpdl();
+		processGroupDs();
 		processOther();
 	}
 
