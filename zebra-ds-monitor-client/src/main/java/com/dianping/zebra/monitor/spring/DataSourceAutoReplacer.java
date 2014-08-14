@@ -274,7 +274,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private void replace() {
 		processDpdl();
 		processC3P0();
-		processC3P0InDpdl();
+//		processC3P0InDpdl();
 		processOther();
 	}
 
