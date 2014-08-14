@@ -27,7 +27,7 @@ public class ReportServiceImpl implements ReportService {
 		machine.setVersion(hb.getVersion());
 
 		Datasource ds = machine.findOrCreateDatasource(hb.getDatasourceBeanName());
-		
+
 		ds.setName(hb.getDatabase());
 		ds.setUsername(hb.getUsername());
 		ds.setBeanName(hb.getDatasourceBeanName());
@@ -47,7 +47,7 @@ public class ReportServiceImpl implements ReportService {
 
 			heartbeat.setId(h.getId());
 
-			m_heartbeatDao.updateByPK(h, HeartbeatEntity.UPDATESET_FULL);
+			m_heartbeatDao.updateByPK(heartbeat, HeartbeatEntity.UPDATESET_FULL);
 		} catch (DalException e) {
 			Cat.logError(e);
 			try {
@@ -68,7 +68,7 @@ public class ReportServiceImpl implements ReportService {
 			for (Heartbeat hb : all) {
 				buildApp(app, hb);
 			}
-			
+
 			new StatisticsVisitor().visitApp(app);
 		} catch (DalException e) {
 			Cat.logError(e);
