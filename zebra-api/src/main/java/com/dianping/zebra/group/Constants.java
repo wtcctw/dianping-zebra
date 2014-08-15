@@ -34,6 +34,8 @@ public final class Constants {
 	public static final String DEFAULT_DATASOURCE_GROUP_VERBOSE_PRFIX = "zebra.v2.group";
 
 	// DataSource
+	public static final String ELEMENT_APP_REFRESH_FLAG = "appkey.refresh.time";
+
 	public static final String ELEMENT_ACTIVE = "active";
 
 	public static final String ELEMENT_TEST_READONLY_SQL = "testReadOnlySql";

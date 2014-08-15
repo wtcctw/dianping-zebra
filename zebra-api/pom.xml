@@ -106,6 +106,10 @@
             <version>2.5.6</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.dianping.platform</groupId>
+            <artifactId>phoenix-environment</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
