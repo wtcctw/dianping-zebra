@@ -1,28 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
   <entity name="report" root="true">
+    <attribute name="group-data-source" value-type="int" />
+    <attribute name="dpdl-data-source" value-type="int" />
+    <attribute name="c3p0-data-source" value-type="int" />
+    <attribute name="single-data-source" value-type="int" />
+    <attribute name="other-data-source" value-type="int" />
+    <attribute name="total-data-source" value-type="int" />
+    <attribute name="replaced-single-data-source" value-type="int" />
+    <attribute name="replaced-dpdl-data-source" value-type="int" />
     <entity-ref name="database" type="list" names="databases" />
   </entity>
   <entity name="database">
     <attribute name="name" value-type="String" />
     <attribute name="group-data-source" value-type="int" />
     <attribute name="dpdl-data-source" value-type="int" />
-    <attribute name="single-data-source" value-type="int" />
     <attribute name="c3p0-data-source" value-type="int" />
+    <attribute name="single-data-source" value-type="int" />
     <attribute name="other-data-source" value-type="int" />
     <attribute name="total-data-source" value-type="int" />
-    <attribute name="replaced-data-source" value-type="int" />
+    <attribute name="replaced-single-data-source" value-type="int" />
+    <attribute name="replaced-dpdl-data-source" value-type="int" />
     <entity-ref name="app" type="list" names="apps" />
   </entity>
   <entity name="app">
     <attribute name="name" value-type="String" />
     <attribute name="group-data-source" value-type="int" />
     <attribute name="dpdl-data-source" value-type="int" />
-    <attribute name="single-data-source" value-type="int" />
     <attribute name="c3p0-data-source" value-type="int" />
+    <attribute name="single-data-source" value-type="int" />
     <attribute name="other-data-source" value-type="int" />
     <attribute name="total-data-source" value-type="int" />
-    <attribute name="replaced-data-source" value-type="int" />
+    <attribute name="replaced-single-data-source" value-type="int" />
+    <attribute name="replaced-dpdl-data-source" value-type="int" />
     <entity-ref name="machine" type="list" names="machines" />
   </entity>
   <entity name="machine">

@@ -15,16 +15,18 @@
 <link href="${model.webapp}/css/jquery.treetable.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="${model.webapp}/js/jquery.treetable.js"></script>
 	<br>
-	
+	<strong style="color: #08C;">App: ${model.app.name }</strong>
+	<br>
 	<table class="table table-bordered table-striped table-condensed">
 		<thead>
 			<tr>
 				<th>GroupDataSource</th>
 				<th>DpdlDataSource</th>
-				<th>SingleDataSource</th>
 				<th>C3P0DataSource</th>
+				<th>SingleDataSource</th>
 				<th>OtherDataSource</th>
-				<th>自动替换的数据源</th>
+				<th>自动替换的C3P0数据源</th>
+				<th>自动替换的DPDL数据源</th>
 				<th>总数据源</th>
 			</tr>
 		</thead>
@@ -32,10 +34,11 @@
 				<tr id="machine-info-${machine.key}">
 					<td>${model.app.groupDataSource}</td>
 					<td>${model.app.dpdlDataSource}</td>
-					<td>${model.app.singleDataSource}</td>
 					<td>${model.app.c3p0DataSource}</td>
+					<td>${model.app.singleDataSource}</td>
 					<td>${model.app.otherDataSource}</td>
-					<td>${model.app.replacedDataSource}</td>
+					<td>${model.app.replacedSingleDataSource}</td>
+					<td>${model.app.replacedDpdlDataSource}</td>
 					<td>${model.app.totalDataSource}</td>
 				</tr>
 		</tbody>

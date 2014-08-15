@@ -42,8 +42,8 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public void createOrUpdate(Heartbeat heartbeat) {
 		try {
-			Heartbeat h = m_heartbeatDao.exists(heartbeat.getAppName(), heartbeat.getIp(), heartbeat.getDatasourceBeanName(),
-			      HeartbeatEntity.READSET_FULL);
+			Heartbeat h = m_heartbeatDao.exists(heartbeat.getAppName(), heartbeat.getIp(),
+			      heartbeat.getDatasourceBeanName(), HeartbeatEntity.READSET_FULL);
 
 			heartbeat.setId(h.getId());
 
@@ -111,6 +111,22 @@ public class ReportServiceImpl implements ReportService {
 		private App m_app;
 
 		@Override
+		public void visitReport(Report report) {
+			for (Database database : report.getDatabases().values()) {
+				visitDatabase(database);
+
+				report.incGroupDataSource(database.getGroupDataSource());
+				report.incDpdlDataSource(database.getDpdlDataSource());
+				report.incC3p0DataSource(database.getC3p0DataSource());
+				report.incSingleDataSource(database.getSingleDataSource());
+				report.incOtherDataSource(database.getOtherDataSource());
+				report.incReplacedSingleDataSource(database.getReplacedSingleDataSource());
+				report.incReplacedDpdlDataSource(database.getReplacedDpdlDataSource());
+				report.incTotalDataSource(database.getTotalDataSource());
+			}
+		}
+
+		@Override
 		public void visitApp(App app) {
 			m_app = app;
 			for (Machine machine : app.getMachines().values()) {
@@ -125,10 +141,11 @@ public class ReportServiceImpl implements ReportService {
 
 				database.incGroupDataSource(app.getGroupDataSource());
 				database.incDpdlDataSource(app.getDpdlDataSource());
-				database.incSingleDataSource(app.getSingleDataSource());
 				database.incC3p0DataSource(app.getC3p0DataSource());
+				database.incSingleDataSource(app.getSingleDataSource());
 				database.incOtherDataSource(app.getOtherDataSource());
-				database.incReplacedDataSource(app.getReplacedDataSource());
+				database.incReplacedSingleDataSource(app.getReplacedSingleDataSource());
+				database.incReplacedDpdlDataSource(app.getReplacedDpdlDataSource());
 				database.incTotalDataSource(app.getTotalDataSource());
 			}
 		}
@@ -140,16 +157,18 @@ public class ReportServiceImpl implements ReportService {
 				m_app.incGroupDataSource();
 			} else if (type.equals("com.dianping.dpdl.sql.DPDataSource")) {
 				m_app.incDpdlDataSource();
+				if (datasource.isReplaced()) {
+					m_app.incReplacedDpdlDataSource();
+				}
 			} else if (type.equals("com.dianping.zebra.group.jdbc.SingleDataSource")) {
 				m_app.incSingleDataSource();
 			} else if (type.equals("com.mchange.v2.c3p0.ComboPooledDataSource")) {
 				m_app.incC3p0DataSource();
+				if (datasource.isReplaced()) {
+					m_app.incReplacedSingleDataSource();
+				}
 			} else {
 				m_app.incOtherDataSource();
-			}
-
-			if (datasource.isReplaced()) {
-				m_app.incReplacedDataSource();
 			}
 
 			m_app.incTotalDataSource();
