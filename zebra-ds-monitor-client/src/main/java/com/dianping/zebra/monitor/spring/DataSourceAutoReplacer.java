@@ -6,13 +6,13 @@ import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.dianping.zebra.monitor.util.LionUtil;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -29,7 +29,6 @@ import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
 import javax.sql.DataSource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -102,7 +101,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private BeanDefinition getDpdlInnerDsBean(BeanDefinition dataSourceDefinition) {
 		String writeDsName = ((TypedStringValue) dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS")
-		      .getValue()).getValue();
+				.getValue()).getValue();
 
 		c3p0InDpdlDs.add(writeDsName);
 		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsName);
@@ -122,7 +121,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
 		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME)
-		      && !writeDsBean.getBeanClassName().equals(SingleDataSource.class.getName())) {
+				&& !writeDsBean.getBeanClassName().equals(SingleDataSource.class.getName())) {
 			return properties;
 		}
 
@@ -192,7 +191,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		for (String beanDefinitionName : beanDefinitionNames) {
 			try {
 				AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) listableBeanFactory
-				      .getBeanDefinition(beanDefinitionName);
+						.getBeanDefinition(beanDefinitionName);
 				Class<?> beanClazz = beanDefinition.resolveBeanClass(ClassUtils.getDefaultClassLoader());
 				if (beanClazz != null && DataSource.class.isAssignableFrom(beanClazz)) {
 					if (beanClazz.getName().equals(C3P0_CLASS_NAME)) {
@@ -237,7 +236,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 					Cat.logEvent("DAL.BeanFactory", String.format("Replace-%s", beanName));
 				} else {
 					Cat.logEvent("DAL.BeanFactory",
-					      String.format("IgnoreC3P0-%s-%s-%s", beanName, info.getType(), info.getDatabase()));
+							String.format("IgnoreC3P0-%s-%s-%s", beanName, info.getType(), info.getDatabase()));
 				}
 			}
 		});
@@ -291,7 +290,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 				if (propertyValue == null) {
 					ConstructorArgumentValues.ValueHolder valueHolder = (ValueHolder) dataSourceDefinition
-					      .getConstructorArgumentValues().getGenericArgumentValues().get(0);
+							.getConstructorArgumentValues().getGenericArgumentValues().get(0);
 					jdbcRef = ((TypedStringValue) valueHolder.getValue()).getValue();
 				} else {
 					jdbcRef = ((TypedStringValue) propertyValue.getValue()).getValue();
@@ -299,7 +298,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 				if (!StringUtils.isBlank(jdbcRef)) {
 					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
-					      Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef, false, false);
+							Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef, false, false);
 					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
 					if (config.getDataSourceConfigs().size() > 0) {
 						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
@@ -309,7 +308,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				}
 
 				Cat.logEvent("DAL.BeanFactory",
-				      String.format("Ignore-%s-%s", beanName, dataSourceDefinition.getBeanClassName()));
+						String.format("Ignore-%s-%s", beanName, dataSourceDefinition.getBeanClassName()));
 			}
 		});
 	}
@@ -357,7 +356,15 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				BeanDefinition dataSourceDefinition = listableBeanFactory.getBeanDefinition(beanName);
 				DataSourceInfo info = getDataSourceInfo(dataSourceDefinition, beanName);
 
-				template.process(dataSourceDefinition, beanName, info);
+				try {
+					template.process(dataSourceDefinition, beanName, info);
+				} catch (Exception e) {
+					String msg = String.format("DataSourceProcesser Error! bean:%s  class:%s", info.getDataSourceBeanName(),
+							info.getDataSourceBeanClass());
+					Exception exp = new DalException(e);
+					logger.error(msg, exp);
+					Cat.logError(msg, exp);
+				}
 
 				uploadDataSourceInfo(info);
 			}
