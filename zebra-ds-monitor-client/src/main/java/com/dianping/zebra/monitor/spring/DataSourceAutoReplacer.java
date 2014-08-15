@@ -1,5 +1,37 @@
 package com.dianping.zebra.monitor.spring;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.sql.DataSource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
+import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.ManagedMap;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
+import org.springframework.util.ClassUtils;
+import org.unidal.helper.Files;
+import org.unidal.helper.Urls;
+
 import com.dianping.cat.Cat;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
@@ -12,32 +44,6 @@ import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.dianping.zebra.monitor.util.LionUtil;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.config.*;
-import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.core.Ordered;
-import org.springframework.core.PriorityOrdered;
-import org.springframework.util.ClassUtils;
-import org.unidal.helper.Files;
-import org.unidal.helper.Urls;
-
-import javax.sql.DataSource;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by Dozer on 8/13/14.
@@ -67,6 +73,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private Pattern pattern = Pattern.compile("^jdbc:([a-zA-Z0-9]+)://([^/]+)/([^?]+).*$");
 
+	private Map<String, String> canReplacedDatabase = new HashMap<String, String>();
+
 	private String callHttp(String url) throws IOException {
 		InputStream inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
 		return Files.forIO().readFrom(inputStream, "utf-8");
@@ -82,8 +90,13 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			return true;
 		}
 
-		List<String> dataBases = Arrays.asList(configString.toLowerCase().split(","));
-		return dataBases.contains(info.getDatabase());
+		List<String> dataBases = Arrays.asList(configString.split(","));
+
+		for (String key : dataBases) {
+			canReplacedDatabase.put(key.toLowerCase(), key);
+		}
+
+		return canReplacedDatabase.containsKey(info.getDatabase());
 	}
 
 	private DataSourceInfo getDataSourceInfo(BeanDefinition bean, String beanName) {
@@ -133,7 +146,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		dpdlInfo.setType(info.getType());
 
 		if ("mysql".equals(info.getType()) && canReplace(info)) {
-			String groupConfig = LionUtil.getLionConfig(String.format("groupds.%s.mapping", info.getDatabase()));
+			String groupConfig = LionUtil.getLionConfig(String.format("groupds.%s.mapping",
+			      canReplacedDatabase.get(info.getDatabase())));
 			if (!StringUtils.isBlank(groupConfig)) {
 				properties.add(new PropertyValue("jdbcRef", info.getDatabase()));
 
@@ -343,10 +357,6 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		}
 	}
 
-	interface DataSourceProcesserTemplate {
-		void process(BeanDefinition bean, String beanName, DataSourceInfo info);
-	}
-
 	class DataSourceProcesser {
 		public void process(Set<String> ds, DataSourceProcesserTemplate template) {
 			for (String beanName : ds) {
@@ -358,5 +368,9 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				uploadDataSourceInfo(info);
 			}
 		}
+	}
+
+	interface DataSourceProcesserTemplate {
+		void process(BeanDefinition bean, String beanName, DataSourceInfo info);
 	}
 }
