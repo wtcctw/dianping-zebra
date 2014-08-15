@@ -133,6 +133,10 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	class GroupDataSourceConfigBuilder extends BaseVisitor {
 
+		private String getGroupDataSourceKeyForAppUpdateFlag(){
+			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, Constants.ELEMENT_APP_REFRESH_FLAG);
+		}
+
 		private String getGroupDataSourceKey() {
 			if (verbose) {
 				return String.format("%s.%s.mapping", Constants.DEFAULT_DATASOURCE_GROUP_VERBOSE_PRFIX, jdbcRef);
@@ -257,6 +261,9 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			String config = configService.getProperty(getGroupDataSourceKeyForApp());
 			if (StringUtils.isBlank(config)) {
 				config = configService.getProperty(getGroupDataSourceKey());
+
+				//监听该属性的自动触发
+				configService.getProperty(getGroupDataSourceKeyForAppUpdateFlag());
 			}
 
 			if (config != null && config.length() > 0) {
