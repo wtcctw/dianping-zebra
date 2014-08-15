@@ -92,7 +92,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 		getJdbcUrlInfo(info, LionUtil.getLionValueFromBean(bean, "jdbcUrl"));
 		info.setUsername(LionUtil.getLionValueFromBean(bean, "user"));
-		info.setInitPoolSize(LionUtil.getLionValueFromBean(bean, "initPoolSize"));
+		info.setInitPoolSize(LionUtil.getLionValueFromBean(bean, "initialPoolSize"));
 		info.setMaxPoolSize(LionUtil.getLionValueFromBean(bean, "maxPoolSize"));
 		info.setMinPoolSize(LionUtil.getLionValueFromBean(bean, "minPoolSize"));
 
