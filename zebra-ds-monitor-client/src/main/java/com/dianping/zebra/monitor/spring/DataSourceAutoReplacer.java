@@ -38,6 +38,7 @@ import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.SingleDataSource;
@@ -106,7 +107,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 		getJdbcUrlInfo(info, LionUtil.getLionValueFromBean(bean, "jdbcUrl"));
 		info.setUsername(LionUtil.getLionValueFromBean(bean, "user"));
-		info.setInitPoolSize(LionUtil.getLionValueFromBean(bean, "initPoolSize"));
+		info.setInitPoolSize(LionUtil.getLionValueFromBean(bean, "initialPoolSize"));
 		info.setMaxPoolSize(LionUtil.getLionValueFromBean(bean, "maxPoolSize"));
 		info.setMinPoolSize(LionUtil.getLionValueFromBean(bean, "minPoolSize"));
 
@@ -363,7 +364,15 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				BeanDefinition dataSourceDefinition = listableBeanFactory.getBeanDefinition(beanName);
 				DataSourceInfo info = getDataSourceInfo(dataSourceDefinition, beanName);
 
-				template.process(dataSourceDefinition, beanName, info);
+				try {
+					template.process(dataSourceDefinition, beanName, info);
+				} catch (Exception e) {
+					String msg = String.format("DataSourceProcesser Error! bean:%s  class:%s", info.getDataSourceBeanName(),
+					      info.getDataSourceBeanClass());
+					Exception exp = new DalException(e);
+					logger.error(msg, exp);
+					Cat.logError(msg, exp);
+				}
 
 				uploadDataSourceInfo(info);
 			}
