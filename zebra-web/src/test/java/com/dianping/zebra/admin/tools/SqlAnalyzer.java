@@ -11,6 +11,7 @@ import com.dianping.zebra.admin.query.entity.Query;
 import com.dianping.zebra.admin.query.transform.DefaultJsonParser;
 import com.dianping.zebra.admin.sqlMap.entity.Insert;
 import com.dianping.zebra.admin.sqlMap.entity.SqlMap;
+import com.dianping.zebra.group.util.SqlUtils;
 
 public class SqlAnalyzer {
 
@@ -28,7 +29,7 @@ public class SqlAnalyzer {
 		StringBuilder updateSb = new StringBuilder(1024 * 10);
 		StringBuilder deleteSb = new StringBuilder(1024 * 10);
 		StringBuilder selectSb = new StringBuilder(1024 * 10);
-		
+
 		for (Hits hits : query.getHits()) {
 			String code = hits.getFields().getCode();
 
@@ -38,19 +39,41 @@ public class SqlAnalyzer {
 
 					for (Insert insert : parse.getInserts()) {
 						if (insert.getDynamicElements().size() > 1) {
+							try {
+								SqlUtils.getSqlType(insert.toString());
+							} catch (Throwable t) {
+								// System.err.println(insert);
+							}
 							insertSb.append(insert);
 						}
 					}
 
 					for (String update : parse.getUpdates()) {
+						try {
+							SqlUtils.getSqlType(update);
+						} catch (Throwable t) {
+							// System.err.println(update);
+						}
 						updateSb.append(update);
 					}
 
 					for (String delete : parse.getDeletes()) {
+						try {
+							SqlUtils.getSqlType(delete.trim());
+						} catch (Throwable t) {
+							// System.err.println(delete);
+						}
 						deleteSb.append(delete);
 					}
 
 					for (String select : parse.getSelects()) {
+						try {
+							if (!select.trim().toLowerCase().startsWith("order by")) {
+								SqlUtils.getSqlType(select.trim());
+							}
+						} catch (Throwable t) {
+							System.err.println(select.trim());
+						}
 						selectSb.append(select);
 					}
 				} catch (Throwable e) {

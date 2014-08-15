@@ -219,10 +219,6 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		new DataSourceProcesser().process(c3p0Ds, new DataSourceProcesserTemplate() {
 			@Override
 			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
-				if (c3p0InDpdlDs.contains(beanName)) {
-					return;
-				}
-
 				if ("mysql".equals(info.getType()) && canReplace(info)) {
 					dataSourceDefinition.setBeanClassName(SingleDataSource.class.getName());
 					dataSourceDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
