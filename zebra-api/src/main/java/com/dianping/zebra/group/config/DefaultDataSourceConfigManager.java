@@ -142,7 +142,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 
 		private String getGroupDataSourceKeyForApp() {
-			return String.format("%s.%s", getGroupDataSourceKey(), ConfigServiceManager.getConfig().getAppName());
+			return String
+					.format("%s.%s", getGroupDataSourceKey(), ConfigServiceManager.getConfig().getAppName().toLowerCase());
 		}
 
 		private String getSingleDataSourceKey(String key, String dsId) {
