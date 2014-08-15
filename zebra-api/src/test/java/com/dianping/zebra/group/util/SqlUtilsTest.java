@@ -16,6 +16,20 @@ public class SqlUtilsTest {
 	}
 
 	@Test
+	public void testSelectUnion() throws SQLException {
+		String sql = "select * from xx union select * from xx";
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		Assert.assertEquals(SqlType.DEFAULT_SQL_TYPE, sqlType);
+	}
+
+	@Test
+	public void testSelectUnionAll() throws SQLException {
+		String sql = "select * from xx union all select * from xx";
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		Assert.assertEquals(SqlType.DEFAULT_SQL_TYPE, sqlType);
+	}
+
+	@Test
 	public void testSelectFOrUpdate() throws SQLException {
 		String sql = "select * from xx for update";
 		SqlType sqlType = SqlUtils.getSqlType(sql);
@@ -30,7 +44,7 @@ public class SqlUtilsTest {
 		Assert.assertEquals(SqlType.UPDATE, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());
 	}
-	
+
 	@Test
 	public void testInsert() throws SQLException {
 		String sql = "INSERT into table select from table2";
@@ -46,7 +60,7 @@ public class SqlUtilsTest {
 		Assert.assertEquals(SqlType.DELETE, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());
 	}
-	
+
 	@Test
 	public void testExecute() throws SQLException {
 		String sql = "{call sp_proc}";
@@ -54,14 +68,14 @@ public class SqlUtilsTest {
 		Assert.assertEquals(SqlType.EXECUTE, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());
 	}
-	
+
 	@Test
 	public void testSelectIdentity() throws SQLException {
 		String sql = "select @@identity";
 		SqlType sqlType = SqlUtils.getSqlType(sql);
 		Assert.assertEquals(SqlType.SELECT_FOR_IDENTITY, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());
-		
+
 		String sql2 = "select last_insert_id()";
 		SqlType sqlType2 = SqlUtils.getSqlType(sql2);
 		Assert.assertEquals(SqlType.SELECT_FOR_IDENTITY, sqlType2);
