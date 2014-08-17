@@ -23,7 +23,7 @@ public class GroupDataSourceRouterFactoryTest {
 		String dataSourceResourceId = "sample.ds.v2";
 		String configManagerType = "local";
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType,
-		      dataSourceResourceId, false, false);
+		      dataSourceResourceId, false);
 		this.dataSourceRouter = DataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
 	}
 

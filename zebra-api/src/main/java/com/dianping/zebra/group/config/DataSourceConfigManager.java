@@ -20,6 +20,4 @@ public interface DataSourceConfigManager {
 	public boolean isTransactionForceWrite();
 
 	public boolean isWriteFirst();
-
-	public void setVerbose(boolean verbose);
 }

@@ -64,8 +64,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private volatile boolean init = false;
 
-	private boolean verbose = false;
-
 	public GroupDataSource() {
 	}
 
@@ -216,8 +214,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef, false,
-		      verbose);
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef, false);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
@@ -278,8 +275,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			FailOverDataSource newWriteDataSource = null;
 			boolean preparedSwitch = false;
 			try {
-				newReadDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(tmpGroupConfig.getDataSourceConfigs()),
-				      systemConfigManager.getSystemConfig().getRetryTimes());
+				newReadDataSource = new LoadBalancedDataSource(
+				      getLoadBalancedConfig(tmpGroupConfig.getDataSourceConfigs()), systemConfigManager.getSystemConfig()
+				            .getRetryTimes());
 				newReadDataSource.init();
 				newWriteDataSource = new FailOverDataSource(getFailoverConfig(tmpGroupConfig.getDataSourceConfigs()));
 				newWriteDataSource.init(false);
@@ -533,15 +531,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
 	}
 
-	/**
-	 * For test purpose
-	 * 
-	 * @param verbose
-	 */
-	public void setVerbose(boolean verbose) {
-		this.verbose = verbose;
-	}
-
 	public void setWriteFirst(boolean writeFirst) {
 		this.groupConfig.setWriteFirst(writeFirst);
 		refresh("writeFirst");
@@ -570,15 +559,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				return;
 			}
 
-			if (verbose) {
-				if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_VERBOSE_PRFIX)) {
-					refresh(evt.getPropertyName());
-				}
-			} else {
-				if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
-				      || evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
-					refresh(evt.getPropertyName());
-				}
+			if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
+			      || evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
+				refresh(evt.getPropertyName());
 			}
 		}
 	}

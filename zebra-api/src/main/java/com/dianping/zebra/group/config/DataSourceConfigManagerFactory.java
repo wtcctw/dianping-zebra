@@ -14,7 +14,7 @@ public final class DataSourceConfigManagerFactory {
 	}
 
 	public static DataSourceConfigManager getConfigManager(String configManagerType, String name,
-	      boolean isSingleDataSource, boolean verbose) {
+	      boolean isSingleDataSource) {
 		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name,
 		      isSingleDataSource));
 
@@ -35,7 +35,6 @@ public final class DataSourceConfigManagerFactory {
 						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
 						      configManagerType));
 					}
-					dataSourceConfigManager.setVerbose(verbose);
 					dataSourceConfigManager.init();
 					dataSourceConfigManagers.put(getFormattedName(name, isSingleDataSource), dataSourceConfigManager);
 				}

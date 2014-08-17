@@ -243,7 +243,7 @@ public class SingleDataSource extends AbstractDataSource implements DataSource, 
 
 		if (useLionConfig) {
 			this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef,
-			      true, false);
+			      true);
 			lionConfig = this.dataSourceConfigManager.getSingleDataSourceConfig();
 			this.dataSourceConfigManager.addListerner(new SingleDataSourceConfigChangedListener());
 		}

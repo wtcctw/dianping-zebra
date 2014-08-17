@@ -19,6 +19,9 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMonitorTest;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapperTest;
 import com.dianping.zebra.group.router.DpdlReadWriteStrategyImplTest;
 import com.dianping.zebra.group.router.GroupDataSourceRouterFactoryTest;
+import com.dianping.zebra.group.util.AtomicRefreshTest;
+import com.dianping.zebra.group.util.SmoothReloadTest;
+import com.dianping.zebra.group.util.SqlUtilsTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -47,8 +50,11 @@ import com.dianping.zebra.group.router.GroupDataSourceRouterFactoryTest;
 	CustomizedReadWriteStrategyWrapperTest.class,
 	DpdlReadWriteStrategyImplTest.class,
 	GroupDataSourceRouterFactoryTest.class,
-	
 
+//util
+	AtomicRefreshTest.class,
+	SmoothReloadTest.class,
+	SqlUtilsTest.class,
 })
 public class AllTests {
 
