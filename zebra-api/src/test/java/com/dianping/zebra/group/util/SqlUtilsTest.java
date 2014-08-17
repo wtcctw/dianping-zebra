@@ -19,12 +19,12 @@ public class SqlUtilsTest {
 	public void testSelectUnion() throws SQLException {
 		String sql = "select * from xx union select * from xx";
 		SqlType sqlType = SqlUtils.getSqlType(sql);
-		Assert.assertEquals(SqlType.DEFAULT_SQL_TYPE, sqlType);
+		Assert.assertEquals(SqlType.SELECT, sqlType);
 	}
 
 	@Test
 	public void testSelectUnionAll() throws SQLException {
-		String sql = "select * from xx union all select * from xx";
+		String sql = "(select * from xx) union all (select * from xx)";
 		SqlType sqlType = SqlUtils.getSqlType(sql);
 		Assert.assertEquals(SqlType.DEFAULT_SQL_TYPE, sqlType);
 	}
