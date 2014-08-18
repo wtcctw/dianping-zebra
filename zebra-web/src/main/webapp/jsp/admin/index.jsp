@@ -34,7 +34,7 @@
 					<c:forEach var="database" items="${model.report.databases}">
 						<tr id="database-info-${database.key}">
 							<td><a href="?op=database&database=${database.key}">${database.key}</a></td>
-							<td>${database.value.replacedSingleDataSource}</td>
+							<td>${database.value.replacedSingleDataSource}/${database.value.c3p0DataSource}</td>
 							<td>${database.value.dpdlDataSource}</td>
 							<td>${database.value.replacedDpdlDataSource}</td>
 							<td>${database.value.groupDataSource }</td>
