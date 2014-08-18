@@ -2,6 +2,9 @@ package com.dianping.zebra.group.jdbc;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -40,11 +43,15 @@ import com.dianping.zebra.group.util.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import javax.sql.DataSource;
+
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	private String jdbcRef;
+
+	private String jdbcUrlExtra;
 
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
 
@@ -71,6 +78,44 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.jdbcRef = jdbcRef;
 	}
 
+	private String joinToString(Map<String,String> map){
+		StringBuffer sb = new StringBuffer(100);
+		for(Map.Entry<String,String> entity:map.entrySet()){
+			try {
+				String temp = String.format("%s=%s", URLEncoder.encode(entity.getKey(),"utf-8"),URLEncoder.encode(entity.getValue(),"utf-8"));
+				if(sb.length()>0){
+					sb.append("&");
+				}
+				sb.append(temp);
+			} catch (UnsupportedEncodingException e) {
+				continue;
+			}
+		}
+		return sb.toString();
+	}
+
+	private void splitToMap(Map<String,String> map,String input){
+		if(StringUtils.isBlank(input)||map==null){
+			return;
+		}
+
+		for(String keyValue : input.split("&")){
+			String[] keyValueArray = keyValue.split("=");
+			if(keyValueArray.length!=2){
+				continue;
+			}
+			try {
+				String key = URLDecoder.decode(keyValueArray[0],"utf-8");
+				String value = URLDecoder.decode(keyValueArray[1],"utf-8");
+
+				map.put(key,value);
+
+			} catch (UnsupportedEncodingException e) {
+				continue;
+			}
+		}
+	}
+
 	private GroupDataSourceConfig buildGroupConfig() {
 		// load jdbc config
 		GroupDataSourceConfig newGroupConfig = this.dataSourceConfigManager.getGroupDataSourceConfig();
@@ -79,6 +124,25 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		newGroupConfig.setRouterStrategy(this.groupConfig.getRouterStrategy());
 		newGroupConfig.setTransactionForceWrite(this.groupConfig.getTransactionForceWrite());
 		newGroupConfig.setWriteFirst(this.groupConfig.getWriteFirst());
+
+		//merge auto replace c3p0 jdbcurl extra
+		if (!StringUtils.isBlank(jdbcUrlExtra)) {
+			for (DataSourceConfig cfg : newGroupConfig.getDataSourceConfigs().values()) {
+				String[] urlInfo = cfg.getJdbcUrl().split("\\?");
+				String url = urlInfo[0];
+				String param = urlInfo.length > 1 ? urlInfo[1] : null;
+
+				if (StringUtils.isBlank(param) && StringUtils.isBlank(jdbcUrlExtra)) {
+					continue;
+				}
+
+				Map<String, String> map = new HashMap<String, String>();
+				splitToMap(map, param);
+				splitToMap(map, jdbcUrlExtra);
+
+				cfg.setJdbcUrl(String.format("%s?%s", url, joinToString(map)));
+			}
+		}
 
 		// merge c3p0 properties
 		for (Entry<String, DataSourceConfig> entry : newGroupConfig.getDataSourceConfigs().entrySet()) {
@@ -469,6 +533,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public synchronized void setPreferredTestQuery(String preferredTestQuery) {
 		setProperty("preferredTestQuery", preferredTestQuery);
+	}
+
+	public String getJdbcUrlExtra() {
+		return jdbcUrlExtra;
+	}
+
+	public void setJdbcUrlExtra(String jdbcUrlExtra) {
+		this.jdbcUrlExtra = jdbcUrlExtra;
 	}
 
 	public synchronized void setProperties(Properties properties) {

@@ -166,8 +166,11 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		return Ordered.LOWEST_PRECEDENCE - 2;
 	}
 
-	private Map<String, String> parseUrlExtra(String url) {
-		//TODO parse jdbc url, need small enhance in the groupdatasource
+	private String parseUrlExtra(String url) {
+		int index = url.lastIndexOf("?");
+		if (index >= 0 && index < url.length() - 2) {
+			return url.substring(index + 1);
+		}
 		return null;
 	}
 
