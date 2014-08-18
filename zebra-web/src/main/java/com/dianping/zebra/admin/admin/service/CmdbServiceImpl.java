@@ -6,6 +6,7 @@ import java.io.InputStream;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
+import com.dianping.cat.Cat;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -31,8 +32,8 @@ public class CmdbServiceImpl implements CmdbService {
 			}
 			
 			return name;
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Throwable ignore) {
+			Cat.logError(ignore);
 		}
 
 		return "noname";
