@@ -70,7 +70,7 @@ public class GroupDataSourceTest {
 		GroupDataSourceConfig config = initGroupDataSourceConfig(
 				"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?");
 		test_build_group_datasource_config_url_extra(config, null);
-		Assert.assertEquals("jdbc:mysql://192.168.8.44:3306/localhost-m1-write",
+		Assert.assertEquals("jdbc:mysql://192.168.8.44:3306/localhost-m1-write?",
 				config.getDataSourceConfigs().get("1").getJdbcUrl());
 	}
 
