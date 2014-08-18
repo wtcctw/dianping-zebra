@@ -31,22 +31,23 @@
 					</tr>
 				</thead>
 				<tbody>
-					<c:forEach var="database" items="${model.report.databases}">
-						<tr id="database-info-${database.key}">
-							<td><a href="?op=database&database=${database.key}">${database.key}</a></td>
-							<td>${database.value.replacedSingleDataSource}/${database.value.c3p0DataSource}</td>
-							<td>${database.value.dpdlDataSource}</td>
-							<td>${database.value.replacedDpdlDataSource}</td>
-							<td>${database.value.groupDataSource }</td>
+					<c:forEach var="e" items="${model.report.databases}">
+						<c:set var="database" value="${e.value}" />
+						<tr id="database-info-${database.name}">
+							<td><a href="?op=database&database=${database.name}">${database.name}</a></td>
+							<td>${database.replacedSingleDataSource}/${database.c3p0DataSource}</td>
+							<td>${database.dpdlDataSource}</td>
+							<td>${database.replacedDpdlDataSource}</td>
+							<td>${database.groupDataSource }</td>
 							<td>
 							<c:choose>
-								<c:when test="${database.value.replacedDpdlDataSource == 0 && database.value.groupDataSource == 0 }">
-									<span class="badge badge-important">${database.value.totalDataSource }</span>
+								<c:when test="${database.replacedDpdlDataSource == 0 && database.groupDataSource == 0 }">
+									<span class="badge badge-important">${database.totalDataSource }</span>
 								</c:when>
-								<c:when test="${(model.report.replacedSingleDataSource + database.value.replacedDpdlDataSource + database.value.groupDataSource) == database.value.totalDataSource}">
-									<span class="badge badge-success">${database.value.totalDataSource }</span>
+								<c:when test="${(database.replacedSingleDataSource + database.replacedDpdlDataSource + database.groupDataSource) == database.totalDataSource}">
+									<span class="badge badge-success">${database.totalDataSource }</span>
 								</c:when>
-								<c:otherwise><span class="badge badge-warning">${database.value.totalDataSource }</span></c:otherwise>
+								<c:otherwise><span class="badge badge-warning">${database.totalDataSource }</span></c:otherwise>
 							</c:choose>
 							</td>
 						</tr>
