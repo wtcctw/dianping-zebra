@@ -27,12 +27,6 @@ public final class Constants {
 
 	public static final String DEFAULT_SYSTEM_RESOURCE_ID = "zebra.v2.system";
 
-	public static final String DEFAULT_DATASOURCE_VERBOSE_PRFIX = "zebra.v2";
-
-	public static final String DEFAULT_DATASOURCE_SINGLE_VERBOSE_PRFIX = "zebra.v2.ds";
-
-	public static final String DEFAULT_DATASOURCE_GROUP_VERBOSE_PRFIX = "zebra.v2.group";
-
 	// DataSource
 	public static final String ELEMENT_APP_REFRESH_FLAG = "appkey.refresh.time";
 

@@ -28,8 +28,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private boolean isSingleDataSource;
 
-	private boolean verbose = false;
-
 	public DefaultDataSourceConfigManager(String name, ConfigService configService, boolean isSingleDataSource) {
 		super(name, configService);
 		this.isSingleDataSource = isSingleDataSource;
@@ -71,7 +69,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			}
 		} catch (Exception e) {
 			throw new IllegalConfigException(String.format(
-					"Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
+			      "Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
 		}
 	}
 
@@ -109,11 +107,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	@Override
-	public void setVerbose(boolean verbose) {
-		this.verbose = verbose;
-	}
-
 	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
 		int readNum = 0, writeNum = 0;
 		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
@@ -127,35 +120,32 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 		if (readNum < 1 || writeNum < 1) {
 			throw new IllegalConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
-					readNum, writeNum));
+			      readNum, writeNum));
 		}
 	}
 
 	class GroupDataSourceConfigBuilder extends BaseVisitor {
 
-		private String getGroupDataSourceKeyForAppUpdateFlag(){
+		private String getGroupDataSourceKeyForAppUpdateFlag() {
 			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, Constants.ELEMENT_APP_REFRESH_FLAG);
 		}
 
 		private String getGroupDataSourceKey() {
-			if (verbose) {
-				return String.format("%s.%s.mapping", Constants.DEFAULT_DATASOURCE_GROUP_VERBOSE_PRFIX, jdbcRef);
-			} else {
-				return String.format("%s.%s.mapping", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, jdbcRef);
-			}
+			return String.format("%s.%s.mapping", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, jdbcRef);
 		}
 
 		private String getGroupDataSourceKeyForApp() {
-			return String
-					.format("%s.%s", getGroupDataSourceKey(), ConfigServiceManager.getConfig().getAppName().toLowerCase());
+			String app = "NoName";
+			try {
+				app = ConfigServiceManager.getConfig().getAppName().toLowerCase();
+			} catch (Throwable ignore) {
+			}
+
+			return String.format("%s.%s", getGroupDataSourceKey(), app);
 		}
 
 		private String getSingleDataSourceKey(String key, String dsId) {
-			if (verbose) {
-				return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_SINGLE_VERBOSE_PRFIX, dsId, key);
-			} else {
-				return String.format("%s.%s.jdbc.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsId, key);
-			}
+			return String.format("%s.%s.jdbc.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsId, key);
 		}
 
 		Map<String, ReadOrWriteRole> parseConfig(String config) {
@@ -225,21 +215,21 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			dsConfig.setId(dsId);
 			dsConfig.setActive(getProperty(getSingleDataSourceKey(Constants.ELEMENT_ACTIVE, dsId), dsConfig.getActive()));
 			dsConfig.setTestReadOnlySql(getProperty(getSingleDataSourceKey(Constants.ELEMENT_TEST_READONLY_SQL, dsId),
-					dsConfig.getTestReadOnlySql()));
+			      dsConfig.getTestReadOnlySql()));
 			dsConfig.setPunishLimit(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PUNISH_LIMIT, dsId),
-					dsConfig.getPunishLimit()));
+			      dsConfig.getPunishLimit()));
 			dsConfig.setTimeWindow(getProperty(getSingleDataSourceKey(Constants.ELEMENT_TIME_WINDOW, dsId),
-					dsConfig.getTimeWindow()));
+			      dsConfig.getTimeWindow()));
 			dsConfig.setDriverClass(getProperty(getSingleDataSourceKey(Constants.ELEMENT_DRIVER_CLASS, dsId),
-					dsConfig.getDriverClass()));
+			      dsConfig.getDriverClass()));
 			dsConfig.setJdbcUrl(getProperty(getSingleDataSourceKey(Constants.ELEMENT_JDBC_URL, dsId),
-					dsConfig.getJdbcUrl()));
+			      dsConfig.getJdbcUrl()));
 			dsConfig.setPassword(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PASSWORD, dsId),
-					dsConfig.getPassword()));
+			      dsConfig.getPassword()));
 			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),
-					dsConfig.getWarmupTime()));
+			      dsConfig.getWarmupTime()));
 			dsConfig
-					.setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
+			      .setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
 
 			String properies = getProperty(getSingleDataSourceKey(Constants.ELEMENT_PROPERTIES, dsId), null);
 
@@ -262,7 +252,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			if (StringUtils.isBlank(config)) {
 				config = configService.getProperty(getGroupDataSourceKey());
 
-				//监听该属性的自动触发
+				// 监听该属性的自动触发
 				configService.getProperty(getGroupDataSourceKeyForAppUpdateFlag());
 			}
 
