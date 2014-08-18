@@ -23,21 +23,30 @@
 				<tr>
 					<th>App(${fn:length(model.database.apps) })</th>
 					<th>自动替换的C3P0(${model.database.replacedSingleDataSource }/${model.database.c3p0DataSource })</th>
-					<th>所有的DPDL(${model.database.dpdlDataSource })</th>
-					<th>自动替换的DPDL(${model.database.replacedDpdlDataSource })</th>
+					<th>自动替换的DPDL(${model.database.replacedDpdlDataSource })/所有的DPDL(${model.database.dpdlDataSource })</th>
 					<th>升级Dal的数据源(${model.database.groupDataSource })</th>
 					<th>总数据源(${model.database.totalDataSource })</th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="app" items="${model.database.apps}">
-					<tr id="app-info-${app.key}">
-						<td><a href="?op=app&app=${app.key}">${app.key}</a></td>
-						<td>${app.value.replacedSingleDataSource }/${app.value.c3p0DataSource}</td>
-						<td>${app.value.dpdlDataSource }</td>
-						<td>${app.value.replacedDpdlDataSource }</td>
-						<td>${app.value.groupDataSource }</td>
-						<td>${app.value.totalDataSource }</td>
+				<c:forEach var="e" items="${model.database.apps}">
+					<c:set var="app" value="${e.value}" />
+					<tr id="app-info-${app.name}">
+						<td><a href="?op=app&app=${app.name}">${app.name}</a></td>
+						<td>${app.replacedSingleDataSource }/${app.c3p0DataSource}</td>
+						<td>${app.replacedDpdlDataSource }/${app.dpdlDataSource }</td>
+						<td>${app.groupDataSource }</td>
+						<td>
+							<c:choose>
+								<c:when test="${(app.replacedSingleDataSource + app.replacedDpdlDataSource + app.groupDataSource) == app.totalDataSource}">
+									<span class="badge badge-success">${app.totalDataSource }</span>
+								</c:when>
+								<c:when test="${app.replacedDpdlDataSource == 0 && app.groupDataSource == 0 }">
+									<span class="badge badge-important">${app.totalDataSource }</span>
+								</c:when>
+								<c:otherwise><span class="badge badge-warning">${app.totalDataSource }</span></c:otherwise>
+							</c:choose>
+						</td>
 					</tr>
 				</c:forEach>
 			</tbody>
