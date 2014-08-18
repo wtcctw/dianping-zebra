@@ -9,7 +9,6 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.dianping.zebra.monitor.util.LionUtil;
@@ -96,8 +95,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			boolean isFromDpdl) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
-		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME)
-				&& !writeDsBean.getBeanClassName().equals(SingleDataSource.class.getName())) {
+		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			return properties;
 		}
 

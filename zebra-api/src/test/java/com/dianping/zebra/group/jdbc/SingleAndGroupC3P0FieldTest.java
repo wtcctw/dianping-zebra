@@ -26,11 +26,6 @@ public class SingleAndGroupC3P0FieldTest {
 	      "testConnectionOnCheckin", "testConnectionOnCheckout", "unreturnedConnectionTimeout", "user");
 
 	@Test
-	public void test_single_properties() {
-		test_properties(SingleDataSource.class, new ArrayList<String>());
-	}
-
-	@Test
 	public void test_group_properties() {
 		test_properties(GroupDataSource.class, Lists.newArrayList("setJdbcUrl", "setPassword", "setUser"));
 	}

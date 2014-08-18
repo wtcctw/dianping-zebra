@@ -13,7 +13,6 @@ import com.dianping.zebra.group.jdbc.DPGroupConnectionTestCase;
 import com.dianping.zebra.group.jdbc.DPGroupPreparedStatementTest;
 import com.dianping.zebra.group.jdbc.DPGroupStatementTest;
 import com.dianping.zebra.group.jdbc.SingleAndGroupC3P0FieldTest;
-import com.dianping.zebra.group.jdbc.SingleDataSourceTest;
 import com.dianping.zebra.group.monitor.GroupDataSourceMonitorTest;
 import com.dianping.zebra.group.monitor.SingleDataSourceMonitorTest;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapperTest;
@@ -40,8 +39,7 @@ import com.dianping.zebra.group.util.SqlUtilsTest;
 	DPGroupPreparedStatementTest.class,
 	DPGroupStatementTest.class,
 	SingleAndGroupC3P0FieldTest.class,
-	SingleDataSourceTest.class,
-	
+
 //monitor
 	GroupDataSourceMonitorTest.class,
 	SingleDataSourceMonitorTest.class,
