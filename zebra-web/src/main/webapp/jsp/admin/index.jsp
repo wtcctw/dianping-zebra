@@ -44,6 +44,7 @@
 									<span class="badge badge-important">${database.value.totalDataSource }</span>
 								</c:when>
 								<c:when test="${(model.report.replacedSingleDataSource + database.value.replacedDpdlDataSource + database.value.groupDataSource) == database.value.totalDataSource}">
+									<c:out>${model.report.replacedSingleDataSource + database.value.replacedDpdlDataSource + database.value.groupDataSource}</c:out>
 									<span class="badge badge-success">${database.value.totalDataSource }</span>
 								</c:when>
 								<c:otherwise><span class="badge badge-warning">${database.value.totalDataSource }</span></c:otherwise>
