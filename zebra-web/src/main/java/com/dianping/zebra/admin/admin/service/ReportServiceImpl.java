@@ -2,6 +2,7 @@ package com.dianping.zebra.admin.admin.service;
 
 import java.util.List;
 
+import com.dianping.zebra.group.Constants;
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 
@@ -84,7 +85,7 @@ public class ReportServiceImpl implements ReportService {
 	}
 
 	private void updateAppNameIfNeeded(Heartbeat hb) throws DalException {
-	   if(hb.getAppName().equalsIgnoreCase("noname") && hb.getIp() != null){
+	   if(hb.getAppName().equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME) && hb.getIp() != null){
 	   	hb.setAppName(m_cmdbService.getAppName(hb.getIp()));
 	   	
 	   	m_heartbeatDao.updateByPK(hb, HeartbeatEntity.UPDATESET_FULL);

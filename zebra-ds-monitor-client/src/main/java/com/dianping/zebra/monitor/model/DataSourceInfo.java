@@ -2,6 +2,7 @@ package com.dianping.zebra.monitor.model;
 
 import com.dianping.phoenix.config.ConfigServiceManager;
 import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.util.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.unidal.net.Networks;
 
@@ -41,7 +42,13 @@ public class DataSourceInfo {
 	}
 
 	public String getApp() {
-		return ConfigServiceManager.getConfig().getAppName();
+		String appName = null;
+		try {
+			appName = ConfigServiceManager.getConfig().getAppName();
+		} catch (Exception ignore) {
+		}
+
+		return StringUtils.isBlank(appName) ? Constants.PHOENIX_APP_NO_NAME : appName;
 	}
 
 	public String getDataSourceBeanClass() {

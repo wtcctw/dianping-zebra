@@ -3,6 +3,7 @@ package com.dianping.zebra.admin.admin.service;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.dianping.zebra.group.Constants;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
@@ -36,7 +37,7 @@ public class CmdbServiceImpl implements CmdbService {
 			Cat.logError(ignore);
 		}
 
-		return "noname";
+		return Constants.PHOENIX_APP_NO_NAME;
 	}
 
 	private String callHttpApi(String url) throws IOException {

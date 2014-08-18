@@ -73,4 +73,7 @@ public final class Constants {
 
 	// router
 	public static final String ROUTER_STRATEGY_ROUNDROBIN = "roundrobin";
+
+	//phoenix
+	public static final String PHOENIX_APP_NO_NAME ="noname";
 }
