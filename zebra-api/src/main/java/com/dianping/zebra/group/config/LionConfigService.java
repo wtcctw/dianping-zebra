@@ -22,7 +22,7 @@ public class LionConfigService implements ConfigService {
 	@Override
 	public String getProperty(String key) {
 		try {
-			return ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key);
+			return ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key).trim();
 		} catch (LionException e) {
 			return null;
 		}
