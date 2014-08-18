@@ -41,11 +41,11 @@
 							<td>${database.groupDataSource }</td>
 							<td>
 							<c:choose>
-								<c:when test="${database.replacedDpdlDataSource == 0 && database.groupDataSource == 0 }">
-									<span class="badge badge-important">${database.totalDataSource }</span>
-								</c:when>
 								<c:when test="${(database.replacedSingleDataSource + database.replacedDpdlDataSource + database.groupDataSource) == database.totalDataSource}">
 									<span class="badge badge-success">${database.totalDataSource }</span>
+								</c:when>
+								<c:when test="${database.replacedDpdlDataSource == 0 && database.groupDataSource == 0 }">
+									<span class="badge badge-important">${database.totalDataSource }</span>
 								</c:when>
 								<c:otherwise><span class="badge badge-warning">${database.totalDataSource }</span></c:otherwise>
 							</c:choose>
