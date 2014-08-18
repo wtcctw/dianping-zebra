@@ -103,13 +103,15 @@ public class ReportServiceImpl implements ReportService {
 			List<Heartbeat> all = m_heartbeatDao.findAll(HeartbeatEntity.READSET_FULL);
 
 			for (Heartbeat hb : all) {
-				Database database = report.findOrCreateDatabase(hb.getDatabaseName());
-				database.setName(hb.getDatabaseName());
-
-				App app = database.findOrCreateApp(hb.getAppName());
-				app.setName(hb.getAppName());
-
-				buildApp(app, hb);
+				if(!hb.getDatabaseName().equals("N/A")){
+					Database database = report.findOrCreateDatabase(hb.getDatabaseName());
+					database.setName(hb.getDatabaseName());
+					
+					App app = database.findOrCreateApp(hb.getAppName());
+					app.setName(hb.getAppName());
+					
+					buildApp(app, hb);
+				}
 			}
 
 			new StatisticsVisitor().visitReport(report);
