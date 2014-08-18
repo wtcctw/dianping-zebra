@@ -23,9 +23,9 @@
 				<thead>
 					<tr>
 						<th>数据库(${fn:length(model.report.databases) })</th>
-						<th>自动替换的C3P0(${model.report.replacedSingleDataSource }/${model.report.c3p0DataSource })</th>
-						<th>自动替换的DPDL(${model.report.replacedDpdlDataSource })/所有的DPDL(${model.report.dpdlDataSource })</th>
-						<th>升级Dal的数据源(${model.report.groupDataSource })</th>
+						<th>自动替换的数目(${model.report.replacedSingleDataSource })/所有的C3P0数目(${model.report.c3p0DataSource })</th>
+						<th>自动替换的数目(${model.report.replacedDpdlDataSource })/所有的DPDL数目(${model.report.dpdlDataSource })</th>
+						<th>升级Dal的数目(${model.report.groupDataSource })</th>
 						<th>总数据源(${model.report.totalDataSource })</th>
 					</tr>
 				</thead>
