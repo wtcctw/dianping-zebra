@@ -62,8 +62,6 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private Set<String> c3p0Ds = new HashSet<String>();
 
-	private Set<String> c3p0InDpdlDs = new HashSet<String>();
-
 	private Set<String> dpdlDs = new HashSet<String>();
 
 	private Set<String> groupds = new HashSet<String>();
@@ -109,14 +107,14 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		String writeDsBeanName = ((TypedStringValue) dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS")
 		      .getValue()).getValue();
 
-		c3p0InDpdlDs.add(writeDsBeanName);
+		c3p0Ds.remove(writeDsBeanName);
 		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsBeanName);
 
 		PropertyValue pv = dataSourceDefinition.getPropertyValues().getPropertyValue("readDS");
 		if (pv != null && pv.getValue() != null) {
 			ManagedMap map = (ManagedMap) pv.getValue();
 			for (Object item : map.keySet()) {
-				c3p0InDpdlDs.add(((TypedStringValue) item).getValue());
+				c3p0Ds.remove(((TypedStringValue) item).getValue());
 			}
 		}
 
@@ -218,11 +216,6 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void processC3P0() {
-		// remove c3p0 bean which has already calculated in dpdl
-		for (String bean : c3p0InDpdlDs) {
-			c3p0Ds.remove(bean);
-		}
-
 		new DataSourceProcesser().process(c3p0Ds, new DataSourceProcesserTemplate() {
 			@Override
 			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
