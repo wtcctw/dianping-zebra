@@ -21,6 +21,8 @@ public class Handler implements PageHandler<Context> {
 	@Inject
 	private ReportService m_reportService;
 
+	private String NOT_FOUND = "N/A";
+
 	@Override
 	@PayloadMeta(Payload.class)
 	@InboundActionMeta(name = "notify")
@@ -34,24 +36,25 @@ public class Handler implements PageHandler<Context> {
 			hb.setAppName(payload.getApp().toLowerCase());
 			hb.setIp(payload.getIp());
 			hb.setDatasourceBeanName(payload.getDataSourceBeanName());
-			hb.setDatabaseName(payload.getDatabase() == null ? "N/A" : payload.getDatabase().toLowerCase());
-			hb.setDatasourceBeanClass(payload.getDataSourceBeanClass() == null ? "N/A" :payload.getDataSourceBeanClass());
+			hb.setDatabaseName(payload.getDatabase() == null ? NOT_FOUND : payload.getDatabase().toLowerCase());
+			hb.setDatasourceBeanClass(payload.getDataSourceBeanClass() == null ? NOT_FOUND : payload
+			      .getDataSourceBeanClass());
 			hb.setInitPoolSize(payload.getInitPoolSize());
 			hb.setMaxPoolSize(payload.getMaxPoolSize());
 			hb.setMinPoolSize(payload.getMinPoolSize());
 			hb.setReplaced(payload.isReplaced());
-			hb.setVersion(payload.getVersion() == null ? "N/A" : payload.getVersion());
-			hb.setUsername(payload.getUsername() == null ? "N/A" : payload.getUsername());
+			hb.setVersion(payload.getVersion() == null ? NOT_FOUND : payload.getVersion());
+			hb.setUsername(payload.getUsername() == null ? NOT_FOUND : payload.getUsername());
 			String jdbcUrl = payload.getUrl();
-			if(jdbcUrl != null){
+			if (jdbcUrl != null) {
 				hb.setJdbcUrl(jdbcUrl);
 				String[] parts = jdbcUrl.split(":");
 				if (parts != null && parts.length > 2) {
 					hb.setDatabaseType(parts[1].toLowerCase());
 				}
-			}else{
-				hb.setJdbcUrl("N/A");
-				hb.setDatabaseType("N/A");
+			} else {
+				hb.setJdbcUrl(NOT_FOUND);
+				hb.setDatabaseType(NOT_FOUND);
 			}
 
 			m_reportService.createOrUpdate(hb);
