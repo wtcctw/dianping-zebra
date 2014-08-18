@@ -7,6 +7,8 @@ import org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.zebra.admin.admin.service.CmdbService;
+import com.dianping.zebra.admin.admin.service.CmdbServiceImpl;
 import com.dianping.zebra.admin.admin.service.DalConfigService;
 import com.dianping.zebra.admin.admin.service.DalConfigServiceImpl;
 import com.dianping.zebra.admin.admin.service.DalService;
@@ -26,9 +28,10 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(LionHttpService.class, LionHttpServiceImpl.class));
 		all.add(C(LogService.class, LocalLogService.class));
+		all.add(C(CmdbService.class, CmdbServiceImpl.class));
 		all.add(C(DalConfigService.class, DalConfigServiceImpl.class).req(LionHttpService.class));
 		all.add(C(DalService.class, DalServiceImpl.class).req(LionHttpService.class));
-		all.add(C(ReportService.class,ReportServiceImpl.class).req(HeartbeatDao.class));
+		all.add(C(ReportService.class, ReportServiceImpl.class).req(HeartbeatDao.class, CmdbService.class));
 
 		// move following line to top-level project if necessary
 		all.add(C(JdbcDataSourceConfigurationManager.class));

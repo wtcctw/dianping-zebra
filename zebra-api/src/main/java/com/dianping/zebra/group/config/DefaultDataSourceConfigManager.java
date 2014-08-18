@@ -1,5 +1,11 @@
 package com.dianping.zebra.group.config;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.dianping.phoenix.config.ConfigServiceManager;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
@@ -9,12 +15,6 @@ import com.dianping.zebra.group.config.datasource.transform.BaseVisitor;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.util.Splitters;
 import com.dianping.zebra.group.util.StringUtils;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class DefaultDataSourceConfigManager extends AbstractConfigManager implements DataSourceConfigManager {
 
@@ -63,7 +63,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	public synchronized void init() {
 		try {
 			this.builder = new GroupDataSourceConfigBuilder();
-
 			if (!isSingleDataSource) {
 				this.groupDataSourceConfig = initGroupDataSourceConfig();
 			}

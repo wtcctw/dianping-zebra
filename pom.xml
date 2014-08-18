@@ -118,7 +118,7 @@
             <dependency>
                 <groupId>com.dianping.platform</groupId>
                 <artifactId>phoenix-environment</artifactId>
-                <version>0.3.3</version>
+                <version>0.3.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -197,7 +197,8 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <executions>
+                <version>2.2</version>
+		<executions>
                     <execution>
                         <id>attach-sources</id>
                         <goals>
@@ -205,13 +206,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <updateReleaseInfo>true</updateReleaseInfo>
-                </configuration>
             </plugin>
         </plugins>
     </build>

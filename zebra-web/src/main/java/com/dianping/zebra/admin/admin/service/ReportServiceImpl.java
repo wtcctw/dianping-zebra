@@ -20,6 +20,9 @@ public class ReportServiceImpl implements ReportService {
 
 	@Inject
 	private HeartbeatDao m_heartbeatDao;
+	
+	@Inject
+	private CmdbService m_cmdbService;
 
 	private void buildApp(App app, Heartbeat hb) {
 		Machine machine = app.findOrCreateMachine(hb.getIp());
@@ -42,6 +45,8 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public void createOrUpdate(Heartbeat heartbeat) {
 		try {
+			updateAppNameIfNeeded(heartbeat);
+			
 			Heartbeat h = m_heartbeatDao.exists(heartbeat.getAppName(), heartbeat.getIp(),
 			      heartbeat.getDatasourceBeanName(), HeartbeatEntity.READSET_FULL);
 
@@ -66,6 +71,7 @@ public class ReportServiceImpl implements ReportService {
 			List<Heartbeat> all = m_heartbeatDao.findByAppName(appName, HeartbeatEntity.READSET_FULL);
 
 			for (Heartbeat hb : all) {
+				updateAppNameIfNeeded(hb);
 				buildApp(app, hb);
 			}
 
@@ -76,6 +82,14 @@ public class ReportServiceImpl implements ReportService {
 
 		return app;
 	}
+
+	private void updateAppNameIfNeeded(Heartbeat hb) throws DalException {
+	   if(hb.getAppName().equalsIgnoreCase("noname") && hb.getIp() != null){
+	   	hb.setAppName(m_cmdbService.getAppName(hb.getIp()));
+	   	
+	   	m_heartbeatDao.updateByPK(hb, HeartbeatEntity.UPDATESET_FULL);
+	   }
+   }
 
 	@Override
 	public Database getDatabase(String database) {
@@ -89,13 +103,15 @@ public class ReportServiceImpl implements ReportService {
 			List<Heartbeat> all = m_heartbeatDao.findAll(HeartbeatEntity.READSET_FULL);
 
 			for (Heartbeat hb : all) {
-				Database database = report.findOrCreateDatabase(hb.getDatabaseName());
-				database.setName(hb.getDatabaseName());
-
-				App app = database.findOrCreateApp(hb.getAppName());
-				app.setName(hb.getAppName());
-
-				buildApp(app, hb);
+				if(!hb.getDatabaseName().equals("N/A")){
+					Database database = report.findOrCreateDatabase(hb.getDatabaseName());
+					database.setName(hb.getDatabaseName());
+					
+					App app = database.findOrCreateApp(hb.getAppName());
+					app.setName(hb.getAppName());
+					
+					buildApp(app, hb);
+				}
 			}
 
 			new StatisticsVisitor().visitReport(report);
