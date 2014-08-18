@@ -62,6 +62,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private Set<String> c3p0Ds = new HashSet<String>();
 
+	private Set<String> c3p0InDpdlDs = new HashSet<String>();
+
 	private Set<String> dpdlDs = new HashSet<String>();
 
 	private Set<String> groupds = new HashSet<String>();
@@ -116,14 +118,14 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		String writeDsName = ((TypedStringValue) dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS")
 		      .getValue()).getValue();
 
-		c3p0Ds.remove(writeDsName);
+		c3p0InDpdlDs.add(writeDsName);
 		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsName);
 
 		PropertyValue pv = dataSourceDefinition.getPropertyValues().getPropertyValue("readDS");
 		if (pv != null && pv.getValue() != null) {
 			ManagedMap map = (ManagedMap) pv.getValue();
 			for (Object item : map.keySet()) {
-				c3p0Ds.remove(((TypedStringValue) item).getValue());
+				c3p0InDpdlDs.add(((TypedStringValue) item).getValue());
 			}
 		}
 
@@ -225,6 +227,11 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void processC3P0() {
+		// remove c3p0 bean which has already caculated in dpdl
+		for (String bean : c3p0InDpdlDs) {
+			c3p0Ds.remove(bean);
+		}
+
 		new DataSourceProcesser().process(c3p0Ds, new DataSourceProcesserTemplate() {
 			@Override
 			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
@@ -243,6 +250,16 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 					Cat.logEvent("DAL.BeanFactory",
 					      String.format("IgnoreC3P0-%s-%s-%s", beanName, info.getType(), info.getDatabase()));
 				}
+			}
+		});
+	}
+
+	@SuppressWarnings("unused")
+	private void processC3P0InDpdl() {
+		new DataSourceProcesser().process(c3p0InDpdlDs, new DataSourceProcesserTemplate() {
+			@Override
+			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
+				Cat.logEvent("DAL.BeanFactory", String.format("IgnoreC3P0InDpdl-%s", beanName));
 			}
 		});
 	}
