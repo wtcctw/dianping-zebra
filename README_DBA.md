@@ -49,6 +49,14 @@ value的规范是：(test-s1-read:1,test-m1-read:1),(test-m1-write,test-s1-write
 第一个括号配置的是`读库`，多个读库以`,`符号分隔，`数字`表示分流的`权重`。
 第二个括号配置的是`写库`，需要将集群中所有的instance的写账号配置在这里。
 
+####  组合数据源配置`groupds`特殊配置
+groupds.`name`.single.mapping：配置该规则后，一个不使用`dpdl`的数据源也将自动替换成`GroupDataSource`。
+
+groupds.`name`.mapping.`app_name`：配置该规则后，一个应用会优先使用独立配置，而不使用统一配置。
+
+groupds.`name`.single.mapping.`app_name`：以上两条可以规则可以组合使用
+
+
 ####  groupds隔离原则
 1. 对于三级甚至重要性比较低的两级业务，如果是同一个库，可以使用同一个`name`给业务方当做`jdbcRef`使用。
 2. 对于一级业务或者比较重要的二级业务，虽然是同一个库，但建议给不同的名字。

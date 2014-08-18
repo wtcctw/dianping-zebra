@@ -29,23 +29,6 @@
 * `Lion`的`0.4.3`以下版本有一个BUG，如果多个`bean`指向了同一个`Lion`配置，那么配置更新的时候只会通知一个`bean`。所以如果多个`DataSource`引用了同一个`Lion`配置，如果想要实现C3P0相关配置热切换，就需要升级`Lion`到`0.4.3`。
 * `zebra-ds-monitor-client`的`0.0.7`有一个BUG，如果在`Spring`中配置了`C3P0`相关参数，启动后值变更的话将无法收到推送。建议把`zebra-ds-monitor-client`升级到和`zebra-api`一样的版本。
 
-##### 单数据库在 spring 中 datasource 的配置
-	<bean id="datasource" class="com.dianping.zebra.group.jdbc.singledatasource" init-method="init" destroy-method="close">
-		<property name="jdbcref" value="tuangou2010" />
-		<property name="minpoolsize" value="5" />
-		<property name="maxpoolsize" value="25" />
-        <property name="initialpoolsize" value="5" />
-    	<property name="maxidletime" value="1800" />
-		<property name="idleconnectiontestperiod" value="60" />
-		<property name="acquireretryattempts" value="3" />
-		<property name="acquireretrydelay" value="300" />
-		<property name="maxstatements" value="0" />
-		<property name="maxstatementsperconnection" value="100" />
-		<property name="numhelperthreads" value="6" />
-		<property name="maxadministrativetasktime" value="5" />
-		<property name="preferredtestquery" value="select 1" />
-	</bean>
-
 ##### 多数据库在 Spring 中 DataSource 的配置
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init" destroy-method="close">
 		<property name="jdbcRef" value="TuanGou2010" />
@@ -80,18 +63,17 @@ Q：为什么要加`init-method`和`destory-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.4`以上，
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.4`以上，`Zebra`会自动替换满足条件的`DataSource`。
 
 #### 没有使用`dpdl`的`ComboPooledDataSource`
-`Zebra`将会对所有的`ComboPooledDataSource`进行替换，替换成`SingleDataSource`。通过替换，虽然具备了以上大部分功能。
-但这种方式有它的局限性，它不支持许多功能：如读库切换操作，写库Failover等。
-要想使用DAL的全部功能，必须显示的修改业务Spring配置，即上述的使用方式。
-（以上方案还在商量中）
+* 数据源在`Lion`的白名单`groupds.autoreplace.database`配置过
+* 在`Lion`上找到了`groupds.${database_name}.single.mapping`配置
+* 数据源是`mysql`
 
 #### 使用`dpdl`的
-`Zebra`将会对所有的`dpdl.DPDataSource`进行替换，替换成`GroupDataSource`。
-`Zebra`会自动根据写库的数据库名去`Lion`上查找对应的配置，如果找到并且在自动替换白名单，就会自动替换。
-替换后的功能和手动修改代码的效果一直。
+* 数据源在`Lion`的白名单`groupds.autoreplace.database`配置过
+* 在`Lion`上找到了`groupds.${database_name}.mapping`配置
+* 写库数据源是`mysql`
 
 ### 已知问题清单
 * 配置更新推送的时候，就算配置完全没变，也会全量刷新，对性能有影响。
@@ -99,6 +81,7 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 ### 更新说明
 #### 2.5.4
 * [+] 支持自动替换`dpdl`数据源，并且可以通过数据库白名单进行限制
+* [/] 移除自动替换`SingleDataSource`，全部改为替换成`GroupDataSource`
 * [+] 添加`DataSource`信息上传功能，便于监控升级情况
 
 #### 2.5.2
