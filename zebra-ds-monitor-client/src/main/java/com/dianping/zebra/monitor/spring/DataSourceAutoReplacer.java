@@ -9,7 +9,6 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.jdbc.SingleDataSource;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.dianping.zebra.monitor.util.LionUtil;
@@ -96,8 +95,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			boolean isFromDpdl) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
-		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME)
-				&& !writeDsBean.getBeanClassName().equals(SingleDataSource.class.getName())) {
+		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			return properties;
 		}
 
@@ -168,8 +166,11 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		return Ordered.LOWEST_PRECEDENCE - 2;
 	}
 
-	private Map<String, String> parseUrlExtra(String url) {
-		//TODO parse jdbc url, need small enhance in the groupdatasource
+	private String parseUrlExtra(String url) {
+		int index = url.lastIndexOf("?");
+		if (index >= 0 && index < url.length() - 2) {
+			return url.substring(index + 1);
+		}
 		return null;
 	}
 
