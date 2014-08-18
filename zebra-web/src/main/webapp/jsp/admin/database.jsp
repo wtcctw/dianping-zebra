@@ -21,12 +21,22 @@
 			<thead>
 				<tr>
 					<th>App</th>
+					<th>自动替换的C3P0</th>
+					<th>所有的DPDL</th>
+					<th>自动替换的DPDL</th>
+					<th>升级Dal的数据源</th>
+					<th>总数据源</th>
 				</tr>
 			</thead>
 			<tbody>
 				<c:forEach var="app" items="${model.database.apps}">
 					<tr id="app-info-${app.key}">
 						<td><a href="?op=app&app=${app.key}">${app.key}</a></td>
+						<td>${app.value.replacedSingleDataSource }</td>
+						<td>${app.value.dpdlDataSource }</td>
+						<td>${app.value.replacedDpdlDataSource }</td>
+						<td>${app.value.groupDataSource }</td>
+						<td>${app.value.totalDataSource }</td>
 					</tr>
 				</c:forEach>
 			</tbody>
