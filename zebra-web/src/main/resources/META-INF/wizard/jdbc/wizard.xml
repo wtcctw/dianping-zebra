@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <wizard package="com.dianping.zebra.admin">
-   <jdbc package="com.dianping.zebra.web.dal" name="zebra">
+   <!-- <jdbc package="com.dianping.zebra.web.dal" name="zebra">
       <datasource>
          <driver>com.mysql.jdbc.Driver</driver>
          <url>jdbc:mysql://192.168.7.105:3306/zebra</url>
@@ -11,5 +11,5 @@
       <group name="stat" package="com.dianping.zebra.web.dal.stat">
          <table name="heartbeat"/>
       </group>
-   </jdbc>
+   </jdbc> -->
 </wizard>
