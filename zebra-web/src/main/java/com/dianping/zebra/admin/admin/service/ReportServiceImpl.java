@@ -55,7 +55,6 @@ public class ReportServiceImpl implements ReportService {
 
 			m_heartbeatDao.updateByPK(heartbeat, HeartbeatEntity.UPDATESET_FULL);
 		} catch (DalException e) {
-			Cat.logError(e);
 			try {
 				m_heartbeatDao.insert(heartbeat);
 			} catch (DalException e1) {
