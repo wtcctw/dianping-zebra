@@ -21,6 +21,8 @@ public class Handler implements PageHandler<Context> {
 	@Inject
 	private ReportService m_reportService;
 
+	private String NOT_FOUND = "N/A";
+
 	@Override
 	@PayloadMeta(Payload.class)
 	@InboundActionMeta(name = "notify")
@@ -28,27 +30,31 @@ public class Handler implements PageHandler<Context> {
 		// display only, no action here
 		Payload payload = ctx.getPayload();
 
-		if (payload.getApp() != null && payload.getDatabase() != null && payload.getDataSourceBeanClass() != null
-		      && payload.getDataSourceBeanName() != null && payload.getIp() != null && payload.getVersion() != null
-		      && payload.getUrl() != null && payload.getUsername() != null) {
+		if (payload.getApp() != null && payload.getIp() != null && payload.getDataSourceBeanName() != null) {
 			Heartbeat hb = new Heartbeat();
 
 			hb.setAppName(payload.getApp().toLowerCase());
-			hb.setDatabaseName(payload.getDatabase().toLowerCase());
-			hb.setDatasourceBeanClass(payload.getDataSourceBeanClass());
-			hb.setDatasourceBeanName(payload.getDataSourceBeanName());
-			hb.setInitPoolSize(payload.getInitPoolSize());
 			hb.setIp(payload.getIp());
+			hb.setDatasourceBeanName(payload.getDataSourceBeanName());
+			hb.setDatabaseName(payload.getDatabase() == null ? NOT_FOUND : payload.getDatabase().toLowerCase());
+			hb.setDatasourceBeanClass(payload.getDataSourceBeanClass() == null ? NOT_FOUND : payload
+			      .getDataSourceBeanClass());
+			hb.setInitPoolSize(payload.getInitPoolSize());
 			hb.setMaxPoolSize(payload.getMaxPoolSize());
 			hb.setMinPoolSize(payload.getMinPoolSize());
 			hb.setReplaced(payload.isReplaced());
-			hb.setVersion(payload.getVersion());
-			hb.setUsername(payload.getUsername());
+			hb.setVersion(payload.getVersion() == null ? NOT_FOUND : payload.getVersion());
+			hb.setUsername(payload.getUsername() == null ? NOT_FOUND : payload.getUsername());
 			String jdbcUrl = payload.getUrl();
-			hb.setJdbcUrl(jdbcUrl);
-			String[] parts = jdbcUrl.split(":");
-			if (parts != null && parts.length > 2) {
-				hb.setDatabaseType(parts[1].toLowerCase());
+			if (jdbcUrl != null) {
+				hb.setJdbcUrl(jdbcUrl);
+				String[] parts = jdbcUrl.split(":");
+				if (parts != null && parts.length > 2) {
+					hb.setDatabaseType(parts[1].toLowerCase());
+				}
+			} else {
+				hb.setJdbcUrl(NOT_FOUND);
+				hb.setDatabaseType(NOT_FOUND);
 			}
 
 			m_reportService.createOrUpdate(hb);

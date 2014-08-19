@@ -51,8 +51,9 @@ public final class SqlUtils {
 		} else if (noCommentsSql.toLowerCase().contains("call")) {
 			sqlType = SqlType.EXECUTE;
 		} else {
-			throw new SQLException(
-			      "only select, insert, update, delete,replace,truncate,create,drop,load,merge,call sql is supported");
+			sqlType = SqlType.DEFAULT_SQL_TYPE;
+//			throw new SQLException(
+//			      "only select, insert, update, delete,replace,truncate,create,drop,load,merge,call sql is supported");
 		}
 
 		return sqlType;

@@ -2,6 +2,10 @@ package com.dianping.zebra.group.util;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Map;
 
 /**
  * @author Leo Liang
@@ -425,5 +429,44 @@ public final class StringUtils {
 			buffer.append(str);
 		}
 		return buffer.toString();
+	}
+
+	public static String joinMapToString(Map<String, String> map) {
+		StringBuffer sb = new StringBuffer(100);
+		for (Map.Entry<String, String> entity : map.entrySet()) {
+			try {
+				String temp = String.format("%s=%s", URLEncoder.encode(entity.getKey(), "utf-8"),
+						URLEncoder.encode(entity.getValue(), "utf-8"));
+				if (sb.length() > 0) {
+					sb.append("&");
+				}
+				sb.append(temp);
+			} catch (UnsupportedEncodingException e) {
+				continue;
+			}
+		}
+		return sb.toString();
+	}
+
+	public static void splitStringToMap(Map<String, String> map, String input) {
+		if (StringUtils.isBlank(input) || map == null) {
+			return;
+		}
+
+		for (String keyValue : input.split("&")) {
+			String[] keyValueArray = keyValue.split("=");
+			if (keyValueArray.length != 2) {
+				continue;
+			}
+			try {
+				String key = URLDecoder.decode(keyValueArray[0], "utf-8");
+				String value = URLDecoder.decode(keyValueArray[1], "utf-8");
+
+				map.put(key, value);
+
+			} catch (UnsupportedEncodingException e) {
+				continue;
+			}
+		}
 	}
 }

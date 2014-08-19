@@ -3,8 +3,6 @@ package com.dianping.zebra.group.config;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.LogManager;
@@ -21,23 +19,14 @@ public class LionConfigService implements ConfigService {
 
 	private List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
-	private final ConcurrentMap<String, String> cache = new ConcurrentHashMap<String, String>();
-
 	@Override
 	public String getProperty(String key) {
-		if (!cache.containsKey(key)) {
-			try {
-				String value = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key);
-				
-				if(value != null){
-					cache.put(key, value);
-				}else{
-					return null;
-				}
-			} catch (LionException e) {
-			}
+		try {
+			String value = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key);
+			return value == null ? null : value.trim();
+		} catch (LionException e) {
+			return null;
 		}
-		return cache.get(key);
 	}
 
 	@Override
@@ -51,9 +40,7 @@ public class LionConfigService implements ConfigService {
 			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new ConfigChange() {
 				@Override
 				public void onChange(String key, String value) {
-					String oldValue = cache.get(key);
-					cache.put(key, value);
-					PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, oldValue, value);
+					PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
 					for (PropertyChangeListener listener : listeners) {
 						listener.propertyChange(event);
 					}

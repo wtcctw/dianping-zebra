@@ -1,17 +1,5 @@
 package com.dianping.zebra.group.jdbc;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.ServiceLoader;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -40,31 +28,38 @@ import com.dianping.zebra.group.util.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.Map.Entry;
+
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
-	private String jdbcRef;
-
 	private AtomicRefresh atomicRefresh = new AtomicRefresh();
-
-	private GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
 	private DataSourceConfig c3p0Config = new DataSourceConfig();
 
-	private LoadBalancedDataSource readDataSource;
-
-	private FailOverDataSource writeDataSource;
+	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
-	private SystemConfigManager systemConfigManager;
-
-	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
+	private GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
 	private volatile boolean init = false;
 
-	private boolean verbose = false;
+	private String jdbcRef;
+
+	private String jdbcUrlExtra;
+
+	private LoadBalancedDataSource readDataSource;
+
+	private SystemConfigManager systemConfigManager;
+
+	private FailOverDataSource writeDataSource;
 
 	public GroupDataSource() {
 	}
@@ -73,16 +68,39 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.jdbcRef = jdbcRef;
 	}
 
-	private GroupDataSourceConfig buildGroupConfig() {
-		// load jdbc config
+	protected GroupDataSourceConfig buildGroupConfig() {
 		GroupDataSourceConfig newGroupConfig = this.dataSourceConfigManager.getGroupDataSourceConfig();
+		return buildGroupConfig(newGroupConfig);
+	}
 
-		// merge group-dataSource properties
-		newGroupConfig.setRouterStrategy(this.groupConfig.getRouterStrategy());
-		newGroupConfig.setTransactionForceWrite(this.groupConfig.getTransactionForceWrite());
-		newGroupConfig.setWriteFirst(this.groupConfig.getWriteFirst());
+	protected GroupDataSourceConfig buildGroupConfig(GroupDataSourceConfig newGroupConfig) {
+		buildGroupConfigMergeProperties(newGroupConfig);
+		buildGroupConfigJdbcUrlExtra(newGroupConfig);
+		buildGroupConfigMergeC3P0Properties(newGroupConfig);
+		return newGroupConfig;
+	}
 
-		// merge c3p0 properties
+	protected void buildGroupConfigJdbcUrlExtra(GroupDataSourceConfig newGroupConfig) {
+		if (!StringUtils.isBlank(jdbcUrlExtra)) {
+			for (DataSourceConfig cfg : newGroupConfig.getDataSourceConfigs().values()) {
+				String[] urlInfo = cfg.getJdbcUrl().split("\\?");
+				String url = urlInfo[0];
+				String param = urlInfo.length > 1 ? urlInfo[1] : null;
+
+				if (StringUtils.isBlank(param) && StringUtils.isBlank(jdbcUrlExtra)) {
+					continue;
+				}
+
+				Map<String, String> map = new HashMap<String, String>();
+				StringUtils.splitStringToMap(map, param);
+				StringUtils.splitStringToMap(map, jdbcUrlExtra);
+
+				cfg.setJdbcUrl(String.format("%s?%s", url, StringUtils.joinMapToString(map)));
+			}
+		}
+	}
+
+	protected void buildGroupConfigMergeC3P0Properties(GroupDataSourceConfig newGroupConfig) {
 		for (Entry<String, DataSourceConfig> entry : newGroupConfig.getDataSourceConfigs().entrySet()) {
 			DataSourceConfig config = entry.getValue();
 
@@ -106,8 +124,12 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				}
 			}
 		}
+	}
 
-		return newGroupConfig;
+	protected void buildGroupConfigMergeProperties(GroupDataSourceConfig newGroupConfig) {
+		newGroupConfig.setRouterStrategy(this.groupConfig.getRouterStrategy());
+		newGroupConfig.setTransactionForceWrite(this.groupConfig.getTransactionForceWrite());
+		newGroupConfig.setWriteFirst(this.groupConfig.getWriteFirst());
 	}
 
 	public void close() throws SQLException {
@@ -176,6 +198,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		return failoverConfigMap;
 	}
 
+	public String getJdbcUrlExtra() {
+		return jdbcUrlExtra;
+	}
+
+	public void setJdbcUrlExtra(String jdbcUrlExtra) {
+		this.jdbcUrlExtra = jdbcUrlExtra;
+	}
+
 	private Map<String, DataSourceConfig> getLoadBalancedConfig(Map<String, DataSourceConfig> configs) {
 		Map<String, DataSourceConfig> loadBalancedConfigMap = new HashMap<String, DataSourceConfig>();
 
@@ -216,12 +246,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef, false,
-		      verbose);
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef, false);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
 
@@ -237,7 +266,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-			      systemConfigManager.getSystemConfig().getRetryTimes());
+					systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()));
 			this.writeDataSource.init();
@@ -278,8 +307,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			FailOverDataSource newWriteDataSource = null;
 			boolean preparedSwitch = false;
 			try {
-				newReadDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(tmpGroupConfig.getDataSourceConfigs()),
-				      systemConfigManager.getSystemConfig().getRetryTimes());
+				newReadDataSource = new LoadBalancedDataSource(
+						getLoadBalancedConfig(tmpGroupConfig.getDataSourceConfigs()), systemConfigManager.getSystemConfig()
+						.getRetryTimes());
 				newReadDataSource.init();
 				newWriteDataSource = new FailOverDataSource(getFailoverConfig(tmpGroupConfig.getDataSourceConfigs()));
 				newWriteDataSource.init(false);
@@ -533,24 +563,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
 	}
 
-	/**
-	 * For test purpose
-	 * 
-	 * @param verbose
-	 */
-	public void setVerbose(boolean verbose) {
-		this.verbose = verbose;
-	}
-
 	public void setWriteFirst(boolean writeFirst) {
 		this.groupConfig.setWriteFirst(writeFirst);
 		refresh("writeFirst");
 	}
 
 	class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
-		private String userKey = ".jdbc." + Constants.ELEMENT_USER;
-
 		private String passwordKey = ".jdbc." + Constants.ELEMENT_PASSWORD;
+
+		private String userKey = ".jdbc." + Constants.ELEMENT_USER;
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
@@ -570,15 +591,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				return;
 			}
 
-			if (verbose) {
-				if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_VERBOSE_PRFIX)) {
-					refresh(evt.getPropertyName());
-				}
-			} else {
-				if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
-				      || evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
-					refresh(evt.getPropertyName());
-				}
+			if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
+					|| evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
+				refresh(evt.getPropertyName());
 			}
 		}
 	}

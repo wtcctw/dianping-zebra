@@ -2,6 +2,7 @@ package com.dianping.zebra.monitor.model;
 
 import com.dianping.phoenix.config.ConfigServiceManager;
 import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.util.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.unidal.net.Networks;
 
@@ -33,8 +34,21 @@ public class DataSourceInfo {
 
 	private String username;
 
+	public DataSourceInfo() {
+	}
+
+	public DataSourceInfo(String beanName) {
+		this.dataSourceBeanName = beanName;
+	}
+
 	public String getApp() {
-		return ConfigServiceManager.getConfig().getAppName();
+		String appName = null;
+		try {
+			appName = ConfigServiceManager.getConfig().getAppName();
+		} catch (Exception ignore) {
+		}
+
+		return StringUtils.isBlank(appName) ? Constants.PHOENIX_APP_NO_NAME : appName;
 	}
 
 	public String getDataSourceBeanClass() {
@@ -125,7 +139,8 @@ public class DataSourceInfo {
 		return Constants.ZEBRA_VERSION;
 	}
 
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 
 		PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(this.getClass());
@@ -143,8 +158,7 @@ public class DataSourceInfo {
 				if (sb.length() > 0) {
 					sb.append("&");
 				}
-				sb.append(prop.getName()).append("=")
-						.append(URLEncoder.encode(String.valueOf(value), "utf8"));
+				sb.append(prop.getName()).append("=").append(URLEncoder.encode(String.valueOf(value), "utf8"));
 			} catch (Exception e) {
 			}
 		}

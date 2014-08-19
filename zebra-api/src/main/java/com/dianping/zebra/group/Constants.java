@@ -27,13 +27,9 @@ public final class Constants {
 
 	public static final String DEFAULT_SYSTEM_RESOURCE_ID = "zebra.v2.system";
 
-	public static final String DEFAULT_DATASOURCE_VERBOSE_PRFIX = "zebra.v2";
-
-	public static final String DEFAULT_DATASOURCE_SINGLE_VERBOSE_PRFIX = "zebra.v2.ds";
-
-	public static final String DEFAULT_DATASOURCE_GROUP_VERBOSE_PRFIX = "zebra.v2.group";
-
 	// DataSource
+	public static final String ELEMENT_APP_REFRESH_FLAG = "appkey.refresh.time";
+
 	public static final String ELEMENT_ACTIVE = "active";
 
 	public static final String ELEMENT_TEST_READONLY_SQL = "testReadOnlySql";
@@ -77,4 +73,7 @@ public final class Constants {
 
 	// router
 	public static final String ROUTER_STRATEGY_ROUNDROBIN = "roundrobin";
+
+	//phoenix
+	public static final String PHOENIX_APP_NO_NAME ="noname";
 }

@@ -1,7 +1,6 @@
 package com.dianping.zebra.group.jdbc;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +23,6 @@ public class SingleAndGroupC3P0FieldTest {
 	      "numHelperThreads", "overrideDefaultUser", "overrideDefaultPassword", "password", "preferredTestQuery",
 	      "privilegeSpawnedThreads", "propertyCycle", "statementCacheNumDeferredCloseThreads",
 	      "testConnectionOnCheckin", "testConnectionOnCheckout", "unreturnedConnectionTimeout", "user");
-
-	@Test
-	public void test_single_properties() {
-		test_properties(SingleDataSource.class, new ArrayList<String>());
-	}
 
 	@Test
 	public void test_group_properties() {

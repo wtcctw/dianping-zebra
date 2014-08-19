@@ -2,6 +2,7 @@
 <%@ taglib prefix="a" uri="/WEB-INF/app.tld"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="res" uri="http://www.unidal.org/webres"%>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <jsp:useBean id="ctx"
 	type="com.dianping.zebra.admin.admin.page.index.Context"
@@ -21,27 +22,30 @@
 			<table class="table table-bordered table-striped table-condensed">
 				<thead>
 					<tr>
-						<th>数据库</th>
-						<th>自动替换的数据源</th>
-						<th>升级Dal的数据源</th>
-						<th>总数据源</th>
+						<th>数据库(${fn:length(model.report.databases) })</th>
+						<th>自动替换的数目(${model.report.replacedSingleDataSource })/所有的C3P0数目(${model.report.c3p0DataSource })</th>
+						<th>自动替换的数目(${model.report.replacedDpdlDataSource })/所有的DPDL数目(${model.report.dpdlDataSource })</th>
+						<th>升级Dal的数目(${model.report.groupDataSource })</th>
+						<th>总数据源(${model.report.totalDataSource })</th>
 					</tr>
 				</thead>
 				<tbody>
-					<c:forEach var="database" items="${model.report.databases}">
-						<tr id="database-info-${database.key}">
-							<td><a href="?op=database&database=${database.key}">${database.key}</a></td>
-							<td>${database.value.replacedDataSource}</td>
-							<td>${database.value.groupDataSource }</td>
+					<c:forEach var="e" items="${model.report.databases}">
+						<c:set var="database" value="${e.value}" />
+						<tr id="database-info-${database.name}">
+							<td><a href="?op=database&database=${database.name}">${database.name}</a></td>
+							<td>${database.replacedSingleDataSource}/${database.c3p0DataSource}</td>
+							<td>${database.replacedDpdlDataSource}/${database.dpdlDataSource}</td>
+							<td>${database.groupDataSource }</td>
 							<td>
 							<c:choose>
-								<c:when test="${database.value.replacedDataSource == 0 && database.value.groupDataSource == 0 }">
-									<span class="badge badge-important">${database.value.totalDataSource }</span>
+								<c:when test="${(database.replacedSingleDataSource + database.replacedDpdlDataSource + database.groupDataSource) == database.totalDataSource}">
+									<span class="badge badge-success">${database.totalDataSource }</span>
 								</c:when>
-								<c:when test="${(database.value.replacedDataSource + database.value.groupDataSource) == database.value.totalDataSource}">
-									<span class="badge badge-success">${database.value.totalDataSource }</span>
+								<c:when test="${database.replacedDpdlDataSource == 0 && database.groupDataSource == 0 }">
+									<span class="badge badge-important">${database.totalDataSource }</span>
 								</c:when>
-								<c:otherwise><span class="badge badge-warning">${database.value.totalDataSource }</span></c:otherwise>
+								<c:otherwise><span class="badge badge-warning">${database.totalDataSource }</span></c:otherwise>
 							</c:choose>
 							</td>
 						</tr>

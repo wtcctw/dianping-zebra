@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.dianping.phoenix.config.ConfigServiceManager;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
@@ -13,18 +14,17 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.BaseVisitor;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.util.Splitters;
+import com.dianping.zebra.group.util.StringUtils;
 
 public class DefaultDataSourceConfigManager extends AbstractConfigManager implements DataSourceConfigManager {
 
-	private final char pairSeparator = '&';
-
 	private final char keyValueSeparator = '=';
 
-	private GroupDataSourceConfig groupDataSourceConfig;
+	private final char pairSeparator = '&';
 
 	private GroupDataSourceConfigBuilder builder;
 
-	private boolean verbose = false;
+	private GroupDataSourceConfig groupDataSourceConfig;
 
 	private boolean isSingleDataSource;
 
@@ -47,6 +47,11 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	@Override
+	public synchronized String getRouterStrategy() {
+		return this.groupDataSourceConfig.getRouterStrategy();
+	}
+
+	@Override
 	public DataSourceConfig getSingleDataSourceConfig() {
 		if (!isSingleDataSource) {
 			return null;
@@ -55,15 +60,9 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	@Override
-	public synchronized String getRouterStrategy() {
-		return this.groupDataSourceConfig.getRouterStrategy();
-	}
-
-	@Override
 	public synchronized void init() {
 		try {
 			this.builder = new GroupDataSourceConfigBuilder();
-
 			if (!isSingleDataSource) {
 				this.groupDataSourceConfig = initGroupDataSourceConfig();
 			}
@@ -73,18 +72,18 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	private DataSourceConfig initSingleDataSourceConfig() {
-		DataSourceConfig singleDataSourceConfig = new DataSourceConfig(jdbcRef);
-		this.builder.visitDataSourceConfig(singleDataSourceConfig);
-
-		return singleDataSourceConfig;
-	}
-
 	private GroupDataSourceConfig initGroupDataSourceConfig() {
 		GroupDataSourceConfig config = new GroupDataSourceConfig();
 		this.builder.visitGroupDataSourceConfig(config);
 
 		return config;
+	}
+
+	private DataSourceConfig initSingleDataSourceConfig() {
+		DataSourceConfig singleDataSourceConfig = new DataSourceConfig(jdbcRef);
+		this.builder.visitDataSourceConfig(singleDataSourceConfig);
+
+		return singleDataSourceConfig;
 	}
 
 	@Override
@@ -107,11 +106,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	@Override
-	public void setVerbose(boolean verbose) {
-		this.verbose = verbose;
-	}
-
 	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {
 		int readNum = 0, writeNum = 0;
 		for (Entry<String, DataSourceConfig> entry : dataSourceConfigs.entrySet()) {
@@ -131,20 +125,26 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	class GroupDataSourceConfigBuilder extends BaseVisitor {
 
+		private String getGroupDataSourceKeyForAppUpdateFlag() {
+			return String.format("%s.%s", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, Constants.ELEMENT_APP_REFRESH_FLAG);
+		}
+
 		private String getGroupDataSourceKey() {
-			if (verbose) {
-				return String.format("%s.%s.mapping", Constants.DEFAULT_DATASOURCE_GROUP_VERBOSE_PRFIX, jdbcRef);
-			} else {
-				return String.format("%s.%s.mapping", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, jdbcRef);
+			return String.format("%s.%s.mapping", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, jdbcRef);
+		}
+
+		private String getGroupDataSourceKeyForApp() {
+			String app = "NoName";
+			try {
+				app = ConfigServiceManager.getConfig().getAppName().toLowerCase();
+			} catch (Throwable ignore) {
 			}
+
+			return String.format("%s.%s", getGroupDataSourceKey(), app);
 		}
 
 		private String getSingleDataSourceKey(String key, String dsId) {
-			if (verbose) {
-				return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_SINGLE_VERBOSE_PRFIX, dsId, key);
-			} else {
-				return String.format("%s.%s.jdbc.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsId, key);
-			}
+			return String.format("%s.%s.jdbc.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsId, key);
 		}
 
 		Map<String, ReadOrWriteRole> parseConfig(String config) {
@@ -227,7 +227,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			      dsConfig.getPassword()));
 			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),
 			      dsConfig.getWarmupTime()));
-			dsConfig.setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
+			dsConfig
+			      .setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
 
 			String properies = getProperty(getSingleDataSourceKey(Constants.ELEMENT_PROPERTIES, dsId), null);
 
@@ -246,7 +247,13 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 		@Override
 		public void visitGroupDataSourceConfig(GroupDataSourceConfig groupDsConfig) {
-			String config = configService.getProperty(getGroupDataSourceKey());
+			String config = configService.getProperty(getGroupDataSourceKeyForApp());
+			if (StringUtils.isBlank(config)) {
+				config = configService.getProperty(getGroupDataSourceKey());
+
+				// 监听该属性的自动触发
+				configService.getProperty(getGroupDataSourceKeyForAppUpdateFlag());
+			}
 
 			if (config != null && config.length() > 0) {
 				Map<String, ReadOrWriteRole> pairs = parseConfig(config);
@@ -278,20 +285,20 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			return weight;
 		}
 
-		public boolean isRead() {
-			return isRead;
+		public void setWeight(int weight) {
+			this.weight = weight;
 		}
 
-		public boolean isWrite() {
-			return isWrite;
+		public boolean isRead() {
+			return isRead;
 		}
 
 		public void setRead(boolean isRead) {
 			this.isRead = isRead;
 		}
 
-		public void setWeight(int weight) {
-			this.weight = weight;
+		public boolean isWrite() {
+			return isWrite;
 		}
 
 		public void setWrite(boolean isWrite) {
