@@ -10,6 +10,8 @@ public final class DataSourceConfigManagerFactory {
 
 	private static volatile Map<String, DataSourceConfigManager> dataSourceConfigManagers = new HashMap<String, DataSourceConfigManager>();
 
+	private static volatile LionConfigService configService;
+
 	private DataSourceConfigManagerFactory() {
 	}
 
@@ -28,8 +30,11 @@ public final class DataSourceConfigManagerFactory {
 						configService.init();
 						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService, isSingleDataSource);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
-						LionConfigService configService = new LionConfigService();
-						configService.init();
+						if (configService == null) {
+							configService = new LionConfigService();
+							configService.init();
+						}
+
 						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService, isSingleDataSource);
 					} else {
 						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
