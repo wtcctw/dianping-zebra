@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!--<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoReplacer"/>-->
+    <!--<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>-->
+    <!--<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoReplacer"/>-->
+    <!--<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>-->
+
+	<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>
+	<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoReplacer"/>
+   	<bean id="placeholder" class="com.dianping.lion.client.SpringConfig"/>
+   	
+   	<bean id="group-datasource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init"> 
+   		<property name="jdbcRef" value="localhost-m1-write"></property>
+   	</bean>
+
+    <bean id="dsTest" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <constructor-arg value="ds" index="0"/>
+        <property name="jdbcUrl" value="jdbc:mysql://10.1.77.22:3306/localhost-m1-write?Encodeee"/>
+        <property name="user" value="test2"/>
+        <property name="password" value="123456"/>
+        <property name="driverClass" value="${ba-push.master.jdbc.driverClassName}"/>
+        <property name="maxIdleTime" value="1800"/>
+        <property name="idleConnectionTestPeriod" value="60"/>
+        <property name="acquireRetryAttempts" value="3"/>
+        <property name="acquireRetryDelay" value="300"/>
+        <property name="maxStatements" value="0"/>
+        <property name="maxStatementsPerConnection" value="100"/>
+        <property name="numHelperThreads" value="6"/>
+        <property name="maxAdministrativeTaskTime" value="5"/>
+        <property name="preferredTestQuery" value="SELECT 1"/>
+    </bean>
+
+    <bean id="dpdl.dataSource" class="com.dianping.dpdl.sql.DPDataSource">
+        <property name="writeDS" value="dsTest"/>
+        <property name="readDS">
+            <map>
+                <entry key="dsTest" value="10"/>
+            </map>
+        </property>
+    </bean>
+</beans>
