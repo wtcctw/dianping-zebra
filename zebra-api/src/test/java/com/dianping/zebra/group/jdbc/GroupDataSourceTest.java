@@ -123,6 +123,7 @@ public class GroupDataSourceTest {
 
 		GroupDataSource target = new GroupDataSource();
 		target.setMaxPoolSize(2);
+		target.setMinPoolSize(1);
 
 		Method method = GroupDataSource.class
 				.getDeclaredMethod("buildGroupConfigMergeC3P0Properties", GroupDataSourceConfig.class);
