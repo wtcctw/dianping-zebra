@@ -7,9 +7,6 @@ import java.util.Map.Entry;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-
 import com.dianping.phoenix.status.AbstractComponentStatus;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
@@ -34,71 +31,94 @@ public class DataSourceStatus extends AbstractComponentStatus {
 		TableBuilder configTable = newTable();
 		TableBuilder statusTable = newTable();
 
-		WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(ctx);
-		@SuppressWarnings("unchecked")
-		Map<String, DataSource> beans = context.getBeansOfType(DataSource.class);
-
-		configTable.caption("Group DataSource Config");
+		configTable.caption("DataSource Config");
 		configTable.header("Name", "Type", "Url", "Username", "InitialPoolSize", "MaxPoolSize", "MinPoolSize",
 		      "CheckoutTimeout", "DalVersion");
-		statusTable.caption("Group DataSource Status");
+		statusTable.caption("DataSource Connections");
 		statusTable.header("Name", "Url", "BusyConnection", "IdleConnection", "IsMaster", "Weight", "Status");
 
-		for (Entry<String, DataSource> entry : beans.entrySet()) {
-			String name = entry.getKey();
-			DataSource ds = entry.getValue();
+		// in case of spring framework has listener in web.xml
+		Object object = ctx.getAttribute("org.springframework.web.context.WebApplicationContext.ROOT");
 
-			if (ds instanceof MonitorableDataSource) {
-				// ds = ((MonitorableDataSource) ds).getInnerDataSource();
-				continue;
-			}
+		if (object != null) {
+			org.springframework.web.context.WebApplicationContext context = (org.springframework.web.context.WebApplicationContext) object;
+			@SuppressWarnings("unchecked")
+			Map<String, DataSource> beans = context.getBeansOfType(DataSource.class);
 
-			if (ds instanceof ComboPooledDataSource) {
-				configTable.row(name, ComboPooledDataSource.class, ((ComboPooledDataSource) ds).getJdbcUrl(),
-				      ((ComboPooledDataSource) ds).getUser(), ((ComboPooledDataSource) ds).getInitialPoolSize(),
-				      ((ComboPooledDataSource) ds).getMaxPoolSize(), ((ComboPooledDataSource) ds).getMinPoolSize(),
-				      ((ComboPooledDataSource) ds).getCheckoutTimeout(), null);
-				statusTable.row(name, ((ComboPooledDataSource) ds).getJdbcUrl(),
-				      ((ComboPooledDataSource) ds).getNumBusyConnections(),
-				      ((ComboPooledDataSource) ds).getNumIdleConnections(), null, null);
-			} else if (ds instanceof GroupDataSourceMBean) {
-				try {
-					SingleDataSourceMBean masterBean = ((GroupDataSourceMBean) ds).getWriteSingleDataSourceMBean();
-					DataSourceConfig config = masterBean.getConfig();
-					configTable.row(name, GroupDataSource.class, config.getJdbcUrl(), config.getUsername(),
-					      findByKey(config.getProperties(), "InitialPoolSize"),
-					      findByKey(config.getProperties(), "MaxPoolSize"),
-					      findByKey(config.getProperties(), "MinPoolSize"),
-					      findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
-					statusTable.row(name, config.getJdbcUrl(),
-					      masterBean.getState() == DataSourceState.UP ? masterBean.getNumBusyConnection() : 0,
-					      masterBean.getState() == DataSourceState.UP ? masterBean.getNumIdleConnection() : 0, "Yes", null,
-					      masterBean.getState());
+			for (Entry<String, DataSource> entry : beans.entrySet()) {
+				String name = narmalized(entry.getKey());
+				DataSource ds = entry.getValue();
 
-					for (SingleDataSourceMBean mbean : ((GroupDataSourceMBean) ds).getReaderSingleDataSourceMBean().values()) {
-						config = mbean.getConfig();
-						configTable.row(null, null, config.getJdbcUrl(), config.getUsername(),
+				if (ds instanceof MonitorableDataSource) {
+					// ds = ((MonitorableDataSource) ds).getInnerDataSource();
+					continue;
+				}
+
+				if (ds instanceof ComboPooledDataSource) {
+					configTable.row(name, ComboPooledDataSource.class.getName(), ((ComboPooledDataSource) ds).getJdbcUrl(),
+					      ((ComboPooledDataSource) ds).getUser(), ((ComboPooledDataSource) ds).getInitialPoolSize(),
+					      ((ComboPooledDataSource) ds).getMaxPoolSize(), ((ComboPooledDataSource) ds).getMinPoolSize(),
+					      ((ComboPooledDataSource) ds).getCheckoutTimeout(), null);
+					statusTable.row(name, ((ComboPooledDataSource) ds).getJdbcUrl(),
+					      ((ComboPooledDataSource) ds).getNumBusyConnections(),
+					      ((ComboPooledDataSource) ds).getNumIdleConnections(), null, null, null);
+				} else if (ds instanceof GroupDataSourceMBean) {
+					try {
+						SingleDataSourceMBean masterBean = ((GroupDataSourceMBean) ds).getWriteSingleDataSourceMBean();
+						DataSourceConfig config = masterBean.getConfig();
+						configTable.row(name, GroupDataSource.class.getName(), config.getJdbcUrl(), config.getUsername(),
 						      findByKey(config.getProperties(), "InitialPoolSize"),
 						      findByKey(config.getProperties(), "MaxPoolSize"),
 						      findByKey(config.getProperties(), "MinPoolSize"),
 						      findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
-						statusTable.row(null, config.getJdbcUrl(),
-						      mbean.getState() == DataSourceState.UP ? mbean.getNumBusyConnection() : 0,
-						      mbean.getState() == DataSourceState.UP ? mbean.getNumIdleConnection() : 0, "No", mbean
-						            .getConfig().getWeight(), mbean.getState());
+						statusTable.row(name, config.getJdbcUrl(),
+						      masterBean.getState() == DataSourceState.UP ? masterBean.getNumBusyConnection() : 0,
+						      masterBean.getState() == DataSourceState.UP ? masterBean.getNumIdleConnection() : 0, "Yes",
+						      null, masterBean.getState());
+
+						for (SingleDataSourceMBean mbean : ((GroupDataSourceMBean) ds).getReaderSingleDataSourceMBean()
+						      .values()) {
+							config = mbean.getConfig();
+							configTable.row(null, null, config.getJdbcUrl(), config.getUsername(),
+							      findByKey(config.getProperties(), "InitialPoolSize"),
+							      findByKey(config.getProperties(), "MaxPoolSize"),
+							      findByKey(config.getProperties(), "MinPoolSize"),
+							      findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
+							statusTable.row(null, config.getJdbcUrl(),
+							      mbean.getState() == DataSourceState.UP ? mbean.getNumBusyConnection() : 0,
+							      mbean.getState() == DataSourceState.UP ? mbean.getNumIdleConnection() : 0, "No", mbean
+							            .getConfig().getWeight(), mbean.getState());
+						}
+					} catch (Exception e) {
+						configTable.row(name, GroupDataSource.class.getName(), null, null, null, null, null, null, null,
+						      "Not-Initilized", Constants.ZEBRA_VERSION);
+						setState(State.ERROR);
 					}
-				} catch (Exception e) {
-					configTable.row(name, GroupDataSource.class, null, null, null, null, null, null, null, "Not-Initilized",
-					      Constants.ZEBRA_VERSION);
-					setState(State.ERROR);
+				} else {
+					configTable.row(name, ds.getClass(), null, null, null, null, null, null, null);
 				}
-			} else {
-				configTable.row(name, ds.getClass(), null, null, null, null, null, null, null, null, null);
 			}
 		}
 
 		configTable.build();
 		statusTable.build();
+	}
+
+	private String narmalized(String name) {
+		String[] parts = name.split("-");
+		if (parts.length > 0) {
+			int pos = parts[parts.length - 1].indexOf('z');
+			if (pos >= 0) {
+				String noramlName = "";
+				for (int i = 0; i < parts.length - 1; i++) {
+					noramlName += parts[i];
+				}
+
+				return noramlName;
+			}
+		}
+
+		return name;
 	}
 
 	private String findByKey(List<Any> anys, String key) {
