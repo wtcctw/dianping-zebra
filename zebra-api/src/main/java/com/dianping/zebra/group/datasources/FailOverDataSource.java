@@ -114,7 +114,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		masterDataSourceMonitorThread = new Thread(monitor);
 		masterDataSourceMonitorThread.setDaemon(true);
-		masterDataSourceMonitorThread.setName("Dal-" + FailOverDataSource.class.getSimpleName());
+		masterDataSourceMonitorThread.setName("Dal-MasterDataSourceChecker");
 		masterDataSourceMonitorThread.start();
 	}
 
@@ -214,7 +214,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			FindMasterDataSourceResult result = new FindMasterDataSourceResult();
 
 			if (configs.values().size() == 0) {
-				logger.warn("0 writer data source in config!");
+				logger.warn("zero writer data source in config!");
 			}
 
 			for (DataSourceConfig config : configs.values()) {
