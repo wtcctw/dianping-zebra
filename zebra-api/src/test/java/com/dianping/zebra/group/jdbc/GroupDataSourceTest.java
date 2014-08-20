@@ -1,8 +1,10 @@
 package com.dianping.zebra.group.jdbc;
 
+import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.util.StringUtils;
+import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -105,5 +107,28 @@ public class GroupDataSourceTest {
 		test_build_group_datasource_config_url_extra(config, "autoReconnect=false");
 		assert_params("jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=false&cc=1",
 				config.getDataSourceConfigs().get("1").getJdbcUrl());
+	}
+
+	@Test
+	public void test_override_properties_by_srping_bean()
+			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
+		DataSourceConfig config = new DataSourceConfig();
+		config.setId("1");
+		Any any = new Any();
+		any.setName("maxPoolSize");
+		any.setValue("1");
+		config.setProperties(Lists.newArrayList(any));
+		groupConfig.addDataSourceConfig(config);
+
+		GroupDataSource target = new GroupDataSource();
+		target.setMaxPoolSize(2);
+
+		Method method = GroupDataSource.class
+				.getDeclaredMethod("buildGroupConfigMergeC3P0Properties", GroupDataSourceConfig.class);
+		method.setAccessible(true);
+		method.invoke(target, groupConfig);
+
+		Assert.assertEquals("2", groupConfig.getDataSourceConfigs().get("1").getProperties().get(0).getValue());
 	}
 }
