@@ -9,6 +9,8 @@ import com.dianping.zebra.group.exception.DalException;
 
 public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
+	private Thread dataSourceMonitor;
+
 	private BlockingQueue<InnerSingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<InnerSingleDataSource>();
 
 	@Override
@@ -24,12 +26,14 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 	}
 
 	@Override
-	public void init() {
-		Thread dataSourceMonitor = new Thread(new CloseDataSourceTask());
+	public synchronized void init() {
+		if (dataSourceMonitor == null) {
+			dataSourceMonitor = new Thread(new CloseDataSourceTask());
 
-		dataSourceMonitor.setDaemon(true);
-		dataSourceMonitor.setName("Dal-" + CloseDataSourceTask.class.getSimpleName());
-		dataSourceMonitor.start();
+			dataSourceMonitor.setDaemon(true);
+			dataSourceMonitor.setName("Dal-" + CloseDataSourceTask.class.getSimpleName());
+			dataSourceMonitor.start();
+		}
 	}
 
 	class CloseDataSourceTask implements Runnable {
