@@ -75,14 +75,13 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 * 在`Lion`上找到了`groupds.${database_name}.mapping`配置
 * 写库数据源是`mysql`
 
-### 已知问题清单
-* 配置更新推送的时候，就算配置完全没变，也会全量刷新，对性能有影响。
-
 ### 更新说明
-#### 2.5.4
+#### 2.5.5
 * [+] 支持自动替换`dpdl`数据源，并且可以通过数据库白名单进行限制
 * [/] 移除自动替换`SingleDataSource`，全部改为替换成`GroupDataSource`
 * [+] 添加`DataSource`信息上传功能，便于监控升级情况
+* [+] 将`DataSource`信息展示在`inspect`页面，便于观察站点状况
+* [+] 支持针对单独应用配置`mapping`，并支持运行时切换
 
 #### 2.5.2
 * [/] 修复`GroupConnection`中`getMetaData`时总是得到写库信息的问题
