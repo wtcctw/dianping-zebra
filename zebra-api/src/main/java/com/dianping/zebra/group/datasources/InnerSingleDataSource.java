@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.dianping.zebra.group.util.DataSourceState;
 import com.dianping.zebra.group.util.JdbcDriverClassHelper;
 
 import com.dianping.cat.Cat;

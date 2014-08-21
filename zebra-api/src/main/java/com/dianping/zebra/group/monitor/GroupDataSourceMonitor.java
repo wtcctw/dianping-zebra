@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 import com.dianping.cat.status.StatusExtension;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
-import com.dianping.zebra.group.datasources.DataSourceState;
+import com.dianping.zebra.group.util.DataSourceState;
 
 public class GroupDataSourceMonitor implements StatusExtension {
 

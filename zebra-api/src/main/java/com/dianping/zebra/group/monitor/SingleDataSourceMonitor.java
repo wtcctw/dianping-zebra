@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.dianping.cat.status.StatusExtension;
-import com.dianping.zebra.group.datasources.DataSourceState;
+import com.dianping.zebra.group.util.DataSourceState;
 
 public class SingleDataSourceMonitor implements StatusExtension {
 
