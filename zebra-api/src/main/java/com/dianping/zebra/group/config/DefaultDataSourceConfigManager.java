@@ -134,7 +134,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 
 		private String getGroupDataSourceKeyForApp() {
-			String app = "NoName";
+			String app = Constants.PHOENIX_APP_NO_NAME;
 			try {
 				app = ConfigServiceManager.getConfig().getAppName().toLowerCase();
 			} catch (Throwable ignore) {

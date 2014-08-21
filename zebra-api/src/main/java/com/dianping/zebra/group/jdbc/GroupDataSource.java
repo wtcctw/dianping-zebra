@@ -356,15 +356,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void refresh(String propertyToChange) {
 		if (this.init) {
-			GroupDataSourceConfig tmpGroupConfig = buildGroupConfig();
+			GroupDataSourceConfig newGroupConfig = buildGroupConfig();
 
-			if (!groupConfig.toString().equals(tmpGroupConfig.toString())) {
+			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
 				Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh");
 
 				Cat.logEvent("DAL.Refresh.Property", propertyToChange);
 
 				try {
-					refreshIntenal(tmpGroupConfig);
+					refreshIntenal(newGroupConfig);
 					t.setStatus(Message.SUCCESS);
 				} catch (Exception e) {
 					Cat.logError(e);
