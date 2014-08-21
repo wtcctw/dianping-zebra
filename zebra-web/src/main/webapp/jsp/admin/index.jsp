@@ -23,10 +23,10 @@
 				<thead>
 					<tr>
 						<th>数据库(${fn:length(model.report.databases) })</th>
-						<th>自动替换的数目(${model.report.replacedSingleDataSource })/所有的C3P0数目(${model.report.c3p0DataSource })</th>
-						<th>自动替换的数目(${model.report.replacedDpdlDataSource })/所有的DPDL数目(${model.report.dpdlDataSource })</th>
-						<th>升级Dal的数目(${model.report.groupDataSource })</th>
-						<th>总数据源(${model.report.totalDataSource })</th>
+                        <th>C3P0替换情况<span class="badge badge-success">${model.report.replacedSingleDataSource }</span><span class="badge badge-primary">${model.report.c3p0DataSource }</span></th>
+                        <th>DPDL替换情况<span class="badge badge-success">${model.report.replacedDpdlDataSource }</span><span class="badge badge-primary">${model.report.dpdlDataSource }</span></th>
+						<th>DAL升级情况<span class="badge badge-success">${model.report.groupDataSource }</span></th>
+						<th>总数据源<span class="badge badge-primary">${model.report.totalDataSource }</span></th>
 					</tr>
 				</thead>
 				<tbody>
