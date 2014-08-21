@@ -22,11 +22,11 @@
 			<table class="table table-bordered table-striped table-condensed">
 				<thead>
 					<tr>
-						<th>数据库(${fn:length(model.report.databases) })</th>
-                        <th>C3P0替换情况<span class="badge badge-success">${model.report.replacedSingleDataSource }</span><span class="badge badge-primary">${model.report.c3p0DataSource }</span></th>
-                        <th>DPDL替换情况<span class="badge badge-success">${model.report.replacedDpdlDataSource }</span><span class="badge badge-primary">${model.report.dpdlDataSource }</span></th>
-						<th>DAL升级情况<span class="badge badge-success">${model.report.groupDataSource }</span></th>
-						<th>总数据源<span class="badge badge-primary">${model.report.totalDataSource }</span></th>
+						<th>数据库 <span class="badge badge-info">${fn:length(model.report.databases) }</span></th>
+                        <th>C3P0替换情况 <span class="badge badge-success">${model.report.replacedSingleDataSource }</span>/<span class="badge badge-info">${model.report.c3p0DataSource }</span></th>
+                        <th>DPDL替换情况 <span class="badge badge-success">${model.report.replacedDpdlDataSource }</span>/<span class="badge badge-info">${model.report.dpdlDataSource }</span></th>
+						<th>DAL升级情况 <span class="badge badge-success">${model.report.groupDataSource }</span></th>
+						<th>总数据源 <span class="badge badge-info">${model.report.totalDataSource }</span></th>
 					</tr>
 				</thead>
 				<tbody>
