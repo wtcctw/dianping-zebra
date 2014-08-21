@@ -7,7 +7,8 @@
 3. 写库的自动切换
 4. 配置变化后，数据连接池支持动态自刷新，应用无需重启
 5. 更丰富的监控信息在`CAT`上呈现
-6. DBA可以更加方便的进行数据库维护，如写库切换，读库上线下线，用户名密码变更等操作
+6. 集成Pheonix Inspect页面，方便看到DataSource的实时信息
+7. DBA可以更加方便的进行数据库维护，如写库切换，读库上线下线，用户名密码变更等操作
 
 ### 使用说明
 ##### POM依赖
@@ -17,7 +18,7 @@
     	<version>${version}</version>
 	</dependency>
 
-或者可以通过升级zebra-ds-monitor的版本到`2.5.2`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
+或者可以通过升级zebra-ds-monitor的版本到`2.5.5`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
 
 	<dependency>
         <groupId>com.dianping.zebra</groupId>
@@ -58,12 +59,12 @@
 3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
 ###### 答疑解惑
-Q：为什么要加`init-method`和`destory-method`，不加会怎么样？
+Q：为什么要加`init-method`，不加会怎么样？
 
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.4`以上，`Zebra`会自动替换满足条件的`DataSource`。
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.5`以上，`Zebra`会自动替换满足条件的`DataSource`。
 
 #### 没有使用`dpdl`的`ComboPooledDataSource`
 * 数据源在`Lion`的白名单`groupds.autoreplace.database`配置过
