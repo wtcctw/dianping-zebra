@@ -30,7 +30,7 @@
 * `zebra-ds-monitor-client`的`0.0.7`有一个BUG，如果在`Spring`中配置了`C3P0`相关参数，启动后值变更的话将无法收到推送。建议把`zebra-ds-monitor-client`升级到和`zebra-api`一样的版本。
 
 ##### 多数据库在 Spring 中 DataSource 的配置
-	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init" destroy-method="close">
+	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="TuanGou2010" />
 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
 		<property name="maxPoolSize" value="${lion.key.maxPoolSize}" />
@@ -47,7 +47,7 @@
 	</bean>
 
 ##### 多数据库在 Spring 中使用默认配置的 DataSource 的配置
-    <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init" destroy-method="close">
+    <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="TuanGou2010" /> 
     </bean>
 
