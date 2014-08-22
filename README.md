@@ -77,6 +77,9 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 * 写库数据源是`mysql`
 
 ### 更新说明
+#### 2.5.6
+* [+] `FailOverDataSource`加入自动终止`Monitor`线程的功能，防止内存泄露
+
 #### 2.5.5
 * [+] 支持自动替换`dpdl`数据源，并且可以通过数据库白名单进行限制
 * [/] 移除自动替换`SingleDataSource`，全部改为替换成`GroupDataSource`
