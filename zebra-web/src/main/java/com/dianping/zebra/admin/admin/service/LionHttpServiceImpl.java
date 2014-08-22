@@ -8,6 +8,7 @@ import java.util.Map;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
+import com.dianping.cat.Cat;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -70,7 +71,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 				return false;
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Cat.logError(e);
 			return false;
 		}
 	}
@@ -85,7 +86,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 			JsonObject obj = parser.parse(result).getAsJsonObject();
 			return obj.get("result").getAsString();
 		} catch (Throwable t) {
-			throw new IOException("cannot get config from lion", t);
+			return null;
 		}
 	}
 
