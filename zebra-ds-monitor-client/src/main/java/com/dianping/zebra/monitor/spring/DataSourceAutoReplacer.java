@@ -297,7 +297,6 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		}
 		if (dataSourceDefinition instanceof AbstractBeanDefinition) {
 			((AbstractBeanDefinition) dataSourceDefinition).setInitMethodName("init");
-			((AbstractBeanDefinition) dataSourceDefinition).setDestroyMethodName("close");
 		}
 		info.setReplaced(true);
 	}
