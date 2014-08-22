@@ -1,17 +1,12 @@
 package com.dianping.zebra.group.datasources;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.dianping.cat.Cat;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import junit.framework.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -20,29 +15,24 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.Assert;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class FailoverDataSourceTest {
 	Map<String, DataSourceConfig> configs;
 
-	Statement state = mock(Statement.class);
+	Connection coon = mock(Connection.class);
+
+	Connection readOnlyCoon = mock(Connection.class);
+
+	ResultSet readOnlyResult = mock(ResultSet.class);
 
 	Statement readonlyState = mock(Statement.class);
 
 	ResultSet result = mock(ResultSet.class);
 
-	ResultSet readOnlyResult = mock(ResultSet.class);
-
-	Connection coon = mock(Connection.class);
-
-	Connection readOnlyCoon = mock(Connection.class);
+	Statement state = mock(Statement.class);
 
 	@Before
 	public void init() throws SQLException {
@@ -68,23 +58,75 @@ public class FailoverDataSourceTest {
 		when(readOnlyCoon.createStatement()).thenReturn(readonlyState);
 	}
 
-	class ConnectionAnswer implements Answer<Connection> {
-		private Connection coon;
+	@Test
+	public void test_check_write_data_source_result_error() throws Exception {
+		FailOverDataSource ds = new FailOverDataSource(configs);
+		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
-		@Override
-		public Connection answer(InvocationOnMock invocation) throws Throwable {
-			return coon;
-		}
+		Connection errorCoon = mock(Connection.class);
+		when(errorCoon.createStatement()).thenThrow(new SQLException());
 
-		public void setCoon(Connection coon) {
-			this.coon = coon;
-		}
+		doReturn(errorCoon).when(monitor).getConnection(any(DataSourceConfig.class));
+		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
+				FailOverDataSource.CheckMasterDataSourceResult.ERROR);
+		verify(errorCoon, atLeastOnce()).createStatement();
+	}
+
+	@Test
+	public void test_check_write_data_source_result_ok() throws Exception {
+		FailOverDataSource ds = new FailOverDataSource(configs);
+		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
+
+		doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
+		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
+				FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
+		verify(coon, atLeastOnce()).createStatement();
+	}
+
+	@Test
+	public void test_check_write_data_source_result_readonly() throws Exception {
+		FailOverDataSource ds = new FailOverDataSource(configs);
+		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
+
+		doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
+		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
+				FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
+		verify(readOnlyCoon, atLeastOnce()).createStatement();
+	}
+
+	@Test
+	public void test_find_write_data_source1() throws Exception {
+		FailOverDataSource ds = new FailOverDataSource(configs);
+		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
+
+		doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
+
+		monitor.findMasterDataSource();
+
+		Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db1");
+		verify(coon, atLeastOnce()).createStatement();
+	}
+
+	@Test
+	public void test_find_write_data_source2() throws Exception {
+		FailOverDataSource ds = new FailOverDataSource(configs);
+		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
+
+		doReturn(readOnlyCoon).when(monitor).getConnection(configs.get("db1"));
+		doReturn(coon).when(monitor).getConnection(configs.get("db2"));
+
+		monitor.findMasterDataSource();
+
+		Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db2");
+
+		verify(coon, atLeastOnce()).createStatement();
+		verify(readOnlyCoon, atLeastOnce()).createStatement();
 	}
 
 	@Test(timeout = 30000)
 	public void test_hot_switch() throws SQLException, InterruptedException {
 		FailOverDataSource ds = new FailOverDataSource(configs);
-		FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
+		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		ConnectionAnswer connectionAnswer = new ConnectionAnswer();
 		connectionAnswer.setCoon(coon);
@@ -114,69 +156,45 @@ public class FailoverDataSourceTest {
 		verify(readOnlyCoon, times(2)).createStatement();
 	}
 
-	@Test
-	public void test_find_write_data_source1() throws Exception {
+	@Test(timeout = 5000)
+	public void test_thread_auto_close() throws Exception {
+		Cat.logEvent("Init", "Init");
 		FailOverDataSource ds = new FailOverDataSource(configs);
-		FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
+		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
-		doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
+		FailOverDataSource.FindMasterDataSourceResult result = new FailOverDataSource.FindMasterDataSourceResult();
+		result.setMasterExist(true);
 
-		monitor.findMasterDataSource();
+		doReturn(result).when(monitor).findMasterDataSource();
+		doReturn(FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE).when(monitor)
+				.isMasterDataSource(any(DataSourceConfig.class));
 
-		Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db1");
-		verify(coon, atLeastOnce()).createStatement();
+		Thread t = new Thread(monitor);
+		t.start();
+
+		//清空引用，强制GC
+		ds = null;
+		System.gc();
+
+		while (true) {
+			Thread.sleep(500);
+			if (!t.isAlive()) {
+				break;
+			}
+		}
 	}
 
-	@Test
-	public void test_find_write_data_source2() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs);
-		FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
+	class ConnectionAnswer implements Answer<Connection> {
+		private Connection coon;
 
-		doReturn(readOnlyCoon).when(monitor).getConnection(configs.get("db1"));
-		doReturn(coon).when(monitor).getConnection(configs.get("db2"));
+		@Override
+		public Connection answer(InvocationOnMock invocation) throws Throwable {
+			return coon;
+		}
 
-		monitor.findMasterDataSource();
-
-		Assert.assertEquals(ds.getCurrentDataSourceMBean().getId(), "db2");
-
-		verify(coon, atLeastOnce()).createStatement();
-		verify(readOnlyCoon, atLeastOnce()).createStatement();
-	}
-
-	@Test
-	public void test_check_write_data_source_result_ok() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs);
-		FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
-
-		doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
-		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-		      FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
-		verify(coon, atLeastOnce()).createStatement();
-	}
-
-	@Test
-	public void test_check_write_data_source_result_readonly() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs);
-		FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
-
-		doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
-		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-		      FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
-		verify(readOnlyCoon, atLeastOnce()).createStatement();
-	}
-
-	@Test
-	public void test_check_write_data_source_result_error() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs);
-		FailOverDataSource.MasterDataSourceMonitor monitor = spy(ds.new MasterDataSourceMonitor());
-
-		Connection errorCoon = mock(Connection.class);
-		when(errorCoon.createStatement()).thenThrow(new SQLException());
-
-		doReturn(errorCoon).when(monitor).getConnection(any(DataSourceConfig.class));
-		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-		      FailOverDataSource.CheckMasterDataSourceResult.ERROR);
-		verify(errorCoon, atLeastOnce()).createStatement();
+		public void setCoon(Connection coon) {
+			this.coon = coon;
+		}
 	}
 
 }
