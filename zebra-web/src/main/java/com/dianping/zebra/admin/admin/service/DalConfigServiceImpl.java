@@ -2,6 +2,8 @@ package com.dianping.zebra.admin.admin.service;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.dianping.cat.Cat;
+
 public class DalConfigServiceImpl implements DalConfigService {
 
 	private String project = "ds";
@@ -34,7 +36,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 			for (String env : envs) {
 				String originUrl = m_lionHttpService.getConfig(env, url);
 				if (originUrl == null || originUrl.length() == 0) {
-					m_lionHttpService.setConfig(env, url, "");
+					m_lionHttpService.setConfig(env, url, "jdbc:mysql://{ip}:{port}/{database}?characterEncoding=UTF8");
 				}
 
 				String originUser = m_lionHttpService.getConfig(env, user);
@@ -62,7 +64,8 @@ public class DalConfigServiceImpl implements DalConfigService {
 					m_lionHttpService.setConfig(env, active, "true");
 				}
 			}
-		} catch (Throwable ignore) {
+		} catch (Throwable t) {
+			Cat.logError(t);
 			return false;
 		}
 
