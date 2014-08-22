@@ -16,7 +16,6 @@ import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class DataSourceStatus extends AbstractComponentStatus {
 
@@ -54,15 +53,17 @@ public class DataSourceStatus extends AbstractComponentStatus {
 					continue;
 				}
 
-				if (ds instanceof ComboPooledDataSource) {
-					configTable.row(name, ComboPooledDataSource.class.getName(), ((ComboPooledDataSource) ds).getJdbcUrl(),
-					      ((ComboPooledDataSource) ds).getUser(), ((ComboPooledDataSource) ds).getInitialPoolSize(),
-					      ((ComboPooledDataSource) ds).getMaxPoolSize(), ((ComboPooledDataSource) ds).getMinPoolSize(),
-					      ((ComboPooledDataSource) ds).getCheckoutTimeout(), null);
-					statusTable.row(name, ((ComboPooledDataSource) ds).getJdbcUrl(),
-					      ((ComboPooledDataSource) ds).getNumBusyConnections(),
-					      ((ComboPooledDataSource) ds).getNumIdleConnections(), null, null, null);
-				} else if (ds instanceof GroupDataSourceMBean) {
+				// if (ds instanceof ComboPooledDataSource) {
+				// configTable.row(name, ComboPooledDataSource.class.getName(), ((ComboPooledDataSource) ds).getJdbcUrl(),
+				// ((ComboPooledDataSource) ds).getUser(), ((ComboPooledDataSource) ds).getInitialPoolSize(),
+				// ((ComboPooledDataSource) ds).getMaxPoolSize(), ((ComboPooledDataSource) ds).getMinPoolSize(),
+				// ((ComboPooledDataSource) ds).getCheckoutTimeout(), null);
+				// statusTable.row(name, ((ComboPooledDataSource) ds).getJdbcUrl(),
+				// ((ComboPooledDataSource) ds).getNumBusyConnections(),
+				// ((ComboPooledDataSource) ds).getNumIdleConnections(), null, null, null);
+				// } else
+
+				if (ds instanceof GroupDataSourceMBean) {
 					try {
 						SingleDataSourceMBean masterBean = ((GroupDataSourceMBean) ds).getWriteSingleDataSourceMBean();
 						DataSourceConfig config = masterBean.getConfig();
@@ -94,9 +95,11 @@ public class DataSourceStatus extends AbstractComponentStatus {
 						      "Not-Initilized", Constants.ZEBRA_VERSION);
 						setState(State.ERROR);
 					}
-				} else {
-					configTable.row(name, ds.getClass(), null, null, null, null, null, null, null);
 				}
+
+				// else {
+				// configTable.row(name, ds.getClass(), null, null, null, null, null, null, null);
+				// }
 			}
 		}
 

@@ -11,7 +11,7 @@ package com.dianping.zebra.group;
  *
  */
 public final class Constants {
-	public static final String ZEBRA_VERSION = "2.5.4";
+	public static final String ZEBRA_VERSION = "2.5.5";
 
 	public static final String SQL_FORCE_WRITE_HINT = "/*+zebra:w*/";
 
@@ -74,6 +74,6 @@ public final class Constants {
 	// router
 	public static final String ROUTER_STRATEGY_ROUNDROBIN = "roundrobin";
 
-	//phoenix
-	public static final String PHOENIX_APP_NO_NAME ="noname";
+	// phoenix
+	public static final String PHOENIX_APP_NO_NAME = "noname";
 }

@@ -8,7 +8,7 @@
 				<showClass>true</showClass>
 				<logFilePattern>zebra_{0,date,yyyyMMdd}.log</logFilePattern>
 				<baseDirRef>ZEBRA_HOME</baseDirRef>
-				<defaultBaseDir>/data/applogs/zebra</defaultBaseDir>
+				<defaultBaseDir>/data/applogs/zebra-web/logs</defaultBaseDir>
 			</configuration>
 		</component>
 	</components>

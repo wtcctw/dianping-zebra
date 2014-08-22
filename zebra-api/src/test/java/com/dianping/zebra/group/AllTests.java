@@ -49,7 +49,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		//util
 		AtomicRefreshTest.class,
 		SmoothReloadTest.class,
-		SqlUtilsTest.class,
+		SqlUtilsTest.class
 })
 public class AllTests {
 
