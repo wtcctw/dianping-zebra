@@ -85,7 +85,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 			JsonObject obj = parser.parse(result).getAsJsonObject();
 			return obj.get("result").getAsString();
 		} catch (Throwable t) {
-			throw new IOException("cannot get config from lion", t);
+			throw new IOException(result, t);
 		}
 	}
 
