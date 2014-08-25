@@ -29,7 +29,7 @@ public final class DataSourceConfigManagerFactory {
 						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService, isSingleDataSource);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
 						LionConfigService configService = new LionConfigService();
-
+						configService.init();
 						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService, isSingleDataSource);
 					} else {
 						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
