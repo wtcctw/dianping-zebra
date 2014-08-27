@@ -44,6 +44,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private static final String GROUP_CLASS_NAME = "com.dianping.zebra.group.jdbc.GroupDataSource";
 
+	private static final String UPLOAD_DS_INFO_KEY = "zebra.server.heartbeat.url";
+
 	private static final Log logger = LogFactory.getLog(DataSourceAutoReplacer.class);
 
 	private static boolean hasProcessd;
@@ -302,10 +304,11 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void uploadDataSourceInfo(DataSourceInfo info) {
-		String url = LionUtil.getLionConfig("zebra.server.heartbeat.url");
+		String url = LionUtil.getLionConfig(UPLOAD_DS_INFO_KEY);
 		if (StringUtils.isBlank(url)) {
-			logger.error("zebra.v2.datasource.upload.url not exists!");
-			Cat.logError(new IllegalConfigException("zebra.v2.datasource.upload.url not exists!"));
+			Exception exp = new IllegalConfigException(UPLOAD_DS_INFO_KEY + " not exists!");
+			logger.error(exp);
+			Cat.logError(exp);
 		} else {
 			try {
 				callHttp(String.format("%s?%s", url, info.toString()));
