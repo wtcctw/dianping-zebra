@@ -6,6 +6,8 @@ public enum JspFile {
 	DATABASE("/jsp/admin/database.jsp"),
 
 	APP("/jsp/admin/app.jsp"),
+	
+	CONNECTION("/jsp/admin/connection.jsp"),
 
 	;
 

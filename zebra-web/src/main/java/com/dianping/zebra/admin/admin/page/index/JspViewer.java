@@ -15,6 +15,8 @@ public class JspViewer extends BaseJspViewer<AdminPage, Action, Context, Model> 
 			return JspFile.APP.getPath();
 		case DATABASE:
 			return JspFile.DATABASE.getPath();
+		case CONNECTION:
+			return JspFile.CONNECTION.getPath();
 		}
 
 		throw new RuntimeException("Unknown action: " + action);

@@ -3,6 +3,7 @@ package com.dianping.zebra.admin.admin.page.index;
 import org.unidal.web.mvc.ViewModel;
 
 import com.dianping.zebra.admin.admin.AdminPage;
+import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl.ConnectionStatus;
 import com.dianping.zebra.admin.report.entity.App;
 import com.dianping.zebra.admin.report.entity.Database;
 import com.dianping.zebra.admin.report.entity.Report;
@@ -13,6 +14,8 @@ public class Model extends ViewModel<AdminPage, Action, Context> {
 	private Database m_database;
 
 	private App m_app;
+	
+	private ConnectionStatus m_connectionStatus;
 
 	public Model(Context ctx) {
 		super(ctx);
@@ -47,4 +50,11 @@ public class Model extends ViewModel<AdminPage, Action, Context> {
 		return m_app;
 	}
 
+	public void setConnectionStatus(ConnectionStatus connectionStatus){
+		m_connectionStatus = connectionStatus;
+	}
+	
+	public ConnectionStatus getConnectionStatus(){
+		return m_connectionStatus;
+	}
 }
