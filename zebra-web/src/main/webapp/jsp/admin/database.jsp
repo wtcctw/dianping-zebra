@@ -21,12 +21,11 @@
 		<table class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th>App<span class="badge badge-info">${fn:length(model.database.apps) }</span></th>
-
-                    <th>C3P0替换情况 <span class="badge badge-success">${model.database.replacedSingleDataSource }</span>/<span class="badge badge-info">${model.database.c3p0DataSource }</span></th>
-                    <th>DPDL替换情况 <span class="badge badge-success">${model.database.replacedDpdlDataSource }</span>/<span class="badge badge-info">${model.database.dpdlDataSource }</span></th>
-                    <th>DAL升级情况 <span class="badge badge-success">${model.database.groupDataSource }</span></th>
-                    <th>总数据源 <span class="badge badge-info">${model.database.totalDataSource }</span></th>
+                   <th>App(${fn:length(model.database.apps) })</th>
+                   <th>自动替换的数目(${model.database.replacedSingleDataSource })/所有的C3P0数目(${model.database.c3p0DataSource })</th>
+                   <th>自动替换的数目(${model.database.replacedDpdlDataSource })/所有的DPDL数目(${model.database.dpdlDataSource })</th>
+                   <th>升级Dal的数目(${model.database.groupDataSource })</th>
+                   <th>总数据源(${model.database.totalDataSource })</th>
 				</tr>
 			</thead>
 			<tbody>
