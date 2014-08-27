@@ -315,7 +315,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			} catch (IOException e) {
 				String msg = String.format("Call Zebra-Web failed! [%s]", url);
 				logger.error(msg, e);
-				Cat.logError("msg", e);
+				Cat.logError(msg, e);
 			}
 		}
 	}
