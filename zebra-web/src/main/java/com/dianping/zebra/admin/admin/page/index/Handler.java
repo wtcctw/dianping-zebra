@@ -1,12 +1,9 @@
 package com.dianping.zebra.admin.admin.page.index;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 
-import com.dianping.cat.Cat;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -28,16 +25,6 @@ public class Handler implements PageHandler<Context> {
 	@InboundActionMeta(name = "index")
 	public void handleInbound(Context ctx) throws ServletException, IOException {
 		// display only, no action here
-
-		try {
-		GroupDataSource ds = new GroupDataSource();
-		ds.setJdbcRef("dianpingcomm");
-		ds.init();
-		Cat.logEvent("DAL.Config",ds.getConfig().toString());
-			ds.close();
-		} catch (SQLException e) {
-			Cat.logError(e);
-		}
 	}
 
 	@Override
