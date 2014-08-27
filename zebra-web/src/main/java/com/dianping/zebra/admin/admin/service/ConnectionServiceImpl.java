@@ -37,7 +37,7 @@ public class ConnectionServiceImpl implements ConnectionService {
 			return ds.getConfig();
 		} catch (Throwable t) {
 			Cat.logError(t);
-			return null;
+			return ds.getConfig();
 		} finally {
 			if (ds != null) {
 				try {
@@ -66,11 +66,6 @@ public class ConnectionServiceImpl implements ConnectionService {
 		}
 
 		public void setConfig(String config) {
-//			String tmp = config;
-//			tmp.replaceAll("<", "");
-//			tmp.replaceAll("/>", "&gt;");
-			
-			
 			this.config = config;
 		}
 	}
