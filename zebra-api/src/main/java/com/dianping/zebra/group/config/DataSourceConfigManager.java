@@ -11,8 +11,6 @@ public interface DataSourceConfigManager {
 
 	public GroupDataSourceConfig getGroupDataSourceConfig();
 
-	public DataSourceConfig getSingleDataSourceConfig();
-
 	public String getRouterStrategy();
 
 	public void init();

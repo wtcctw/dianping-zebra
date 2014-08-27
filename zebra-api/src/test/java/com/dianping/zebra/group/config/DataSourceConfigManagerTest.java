@@ -19,7 +19,7 @@ public class DataSourceConfigManagerTest {
 	@Test
 	public void testConfig() throws SAXException, IOException {
 		DataSourceConfigManager dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager("local",
-		      "sample.ds.v2", false);
+		      "sample.ds.v2");
 		Map<String, DataSourceConfig> config = dataSourceConfigManager.getGroupDataSourceConfig().getDataSourceConfigs();
 
 		Map<String, DataSourceConfig> dataSourceConfigs = DefaultSaxParser.parse(
@@ -52,7 +52,7 @@ public class DataSourceConfigManagerTest {
 
 	public void testAssert(String config, String expected) {
 		DefaultDataSourceConfigManager dataSourceConfigManager = (DefaultDataSourceConfigManager) DataSourceConfigManagerFactory
-		      .getConfigManager("local", "sample.ds.v2", false);
+		      .getConfigManager("local", "sample.ds.v2");
 
 		GroupDataSourceConfigBuilder groupDataSourceConfigBuilder = dataSourceConfigManager.new GroupDataSourceConfigBuilder();
 

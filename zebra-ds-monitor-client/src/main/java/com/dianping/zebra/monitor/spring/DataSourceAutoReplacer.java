@@ -259,8 +259,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				}
 
 				if (!StringUtils.isBlank(jdbcRef)) {
-					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
-							Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef, false);
+					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
 					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
 					if (config.getDataSourceConfigs().size() > 0) {
 						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();

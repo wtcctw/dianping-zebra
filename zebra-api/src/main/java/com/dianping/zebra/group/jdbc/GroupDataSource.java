@@ -1,20 +1,5 @@
 package com.dianping.zebra.group.jdbc;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.ServiceLoader;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
@@ -40,6 +25,15 @@ import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
 
@@ -76,7 +70,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	protected GroupDataSourceConfig buildGroupConfig() {
 		GroupDataSourceConfig newGroupConfig = this.dataSourceConfigManager.getGroupDataSourceConfig();
-		
+
 		return buildGroupConfig(newGroupConfig);
 	}
 
@@ -84,7 +78,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		buildGroupConfigMergeProperties(newGroupConfig);
 		buildGroupConfigJdbcUrlExtra(newGroupConfig);
 		buildGroupConfigMergeC3P0Properties(newGroupConfig);
-		
+
 		return newGroupConfig;
 	}
 
@@ -254,11 +248,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef, false);
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
 
@@ -274,7 +268,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-			      systemConfigManager.getSystemConfig().getRetryTimes());
+					systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()));
 			this.writeDataSource.init();
@@ -305,6 +299,28 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 	}
 
+	private void refresh(String propertyToChange) {
+		if (this.init) {
+			GroupDataSourceConfig newGroupConfig = buildGroupConfig();
+
+			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
+				Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh");
+
+				Cat.logEvent("DAL.Refresh.Property", propertyToChange);
+
+				try {
+					refreshIntenal(newGroupConfig);
+					t.setStatus(Message.SUCCESS);
+				} catch (Exception e) {
+					Cat.logError(e);
+					t.setStatus(e);
+				} finally {
+					t.complete();
+				}
+			}
+		}
+	}
+
 	private void refreshIntenal(GroupDataSourceConfig groupDataSourceConfig) {
 		logger.info("start to refresh the dataSources...");
 
@@ -313,8 +329,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), systemConfigManager
-			            .getSystemConfig().getRetryTimes());
+					getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), systemConfigManager
+					.getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()));
 			newWriteDataSource.init(false);
@@ -352,28 +368,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		// switch config
 		groupConfig = groupDataSourceConfig;
-	}
-
-	private void refresh(String propertyToChange) {
-		if (this.init) {
-			GroupDataSourceConfig newGroupConfig = buildGroupConfig();
-
-			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
-				Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh");
-
-				Cat.logEvent("DAL.Refresh.Property", propertyToChange);
-
-				try {
-					refreshIntenal(newGroupConfig);
-					t.setStatus(Message.SUCCESS);
-				} catch (Exception e) {
-					Cat.logError(e);
-					t.setStatus(e);
-				} finally {
-					t.complete();
-				}
-			}
-		}
 	}
 
 	private void refreshUserAndPassword() {
@@ -600,7 +594,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			}
 
 			if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
-			      || evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
+					|| evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
 				refresh(evt.getPropertyName());
 			}
 		}
