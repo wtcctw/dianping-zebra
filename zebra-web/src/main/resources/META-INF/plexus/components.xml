@@ -43,6 +43,10 @@
 			</requirements>
 		</component>
 		<component>
+			<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.ConnectionServiceImpl</implementation>
+		</component>
+		<component>
 			<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</role>
 			<implementation>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</implementation>
 		</component>
@@ -111,6 +115,9 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
 				</requirement>
 			</requirements>
 		</component>

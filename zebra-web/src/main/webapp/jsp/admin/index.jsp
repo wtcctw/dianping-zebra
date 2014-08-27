@@ -27,6 +27,7 @@
 						<th>自动替换的数目(${model.report.replacedDpdlDataSource })/所有的DPDL数目(${model.report.dpdlDataSource })</th>
 						<th>升级Dal的数目(${model.report.groupDataSource })</th>
 						<th>总数据源(${model.report.totalDataSource })</th>
+						<th>测试连接</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -48,6 +49,7 @@
 								<c:otherwise><span class="badge badge-warning">${database.totalDataSource }</span></c:otherwise>
 							</c:choose>
 							</td>
+							<td><a href="?op=connection&database=${database.name}">测试</a></td>
 						</tr>
 					</c:forEach>
 				</tbody>
