@@ -1,5 +1,7 @@
 package com.dianping.zebra.plugin;
 
+import java.io.File;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -7,6 +9,7 @@ import org.codehaus.plexus.util.DirectoryScanner;
 
 /**
  * @goal migrate
+ * @aggregator true
  */
 public class DalMigrateMojo extends AbstractMojo {
 
@@ -16,7 +19,8 @@ public class DalMigrateMojo extends AbstractMojo {
 
 		DirectoryScanner scanner = new DirectoryScanner();
 		System.out.println("Working Directory = " + System.getProperty("user.dir"));
-		scanner.setBasedir(System.getProperty("user.dir"));
+		String baseDir = System.getProperty("user.dir");
+		scanner.setBasedir(baseDir);
 		String[] includes = { "**\\src\\main\\resources\\**\\*.xml" };
 		String[] excludes = { "**\\pom.xml", "**\\log4j.xml", "**\\web.xml", "**\\dict.xml", "**\\client.xml" };
 		scanner.setIncludes(includes);
@@ -27,11 +31,9 @@ public class DalMigrateMojo extends AbstractMojo {
 
 		String[] files = scanner.getIncludedFiles();
 		for (int i = 0; i < files.length; i++) {
-			System.out.println(files[i]);
+			DefaultBeanDefinitionXmlReader reader = new DefaultBeanDefinitionXmlReader(baseDir + File.separatorChar
+					+ files[i]);
 		}
-		
-		DefaultBeanDefinitionXmlReader reader = new DefaultBeanDefinitionXmlReader(files[0]);
-		
-		reader.print();
+
 	}
 }
