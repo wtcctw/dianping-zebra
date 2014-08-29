@@ -259,7 +259,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				}
 
 				if (!StringUtils.isBlank(jdbcRef)) {
-					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
+					DataSourceConfigManager manager = DataSourceConfigManagerFactory
+							.getConfigManager(Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
 					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
 					if (config.getDataSourceConfigs().size() > 0) {
 						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
@@ -306,15 +307,13 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		String url = LionUtil.getLionConfig(UPLOAD_DS_INFO_KEY);
 		if (StringUtils.isBlank(url)) {
 			Exception exp = new IllegalConfigException(UPLOAD_DS_INFO_KEY + " not exists!");
-			logger.error(exp);
-			Cat.logError(exp);
+			logger.warn(exp);
 		} else {
 			try {
 				callHttp(String.format("%s?%s", url, info.toString()));
 			} catch (IOException e) {
 				String msg = String.format("Call Zebra-Web failed! [%s]", url);
-				logger.error(msg, e);
-				Cat.logError(msg, e);
+				logger.warn(msg, e);
 			}
 		}
 	}
@@ -339,8 +338,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 					String msg = String.format("DataSourceProcesser Error! bean:%s  class:%s", info.getDataSourceBeanName(),
 							info.getDataSourceBeanClass());
 					Exception exp = new DalException(e);
-					logger.error(msg, exp);
-					Cat.logError(msg, exp);
+					logger.warn(msg, exp);
 				}
 
 				uploadDataSourceInfo(info);
