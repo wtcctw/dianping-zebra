@@ -250,13 +250,17 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				String jdbcRef;
 				PropertyValue propertyValue = dataSourceDefinition.getPropertyValues().getPropertyValue("jdbcRef");
 
+				Object tempValue;
 				if (propertyValue == null) {
 					ConstructorArgumentValues.ValueHolder valueHolder = (ValueHolder) dataSourceDefinition
 							.getConstructorArgumentValues().getGenericArgumentValues().get(0);
-					jdbcRef = ((TypedStringValue) valueHolder.getValue()).getValue();
+					tempValue = valueHolder.getValue();
 				} else {
-					jdbcRef = ((TypedStringValue) propertyValue.getValue()).getValue();
+					tempValue = propertyValue.getValue();
 				}
+				jdbcRef = tempValue instanceof String ?
+						String.valueOf(tempValue) :
+						((TypedStringValue) tempValue).getValue();
 
 				if (!StringUtils.isBlank(jdbcRef)) {
 					DataSourceConfigManager manager = DataSourceConfigManagerFactory
