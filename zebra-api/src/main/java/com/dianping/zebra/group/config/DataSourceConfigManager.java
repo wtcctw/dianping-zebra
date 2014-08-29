@@ -2,7 +2,6 @@ package com.dianping.zebra.group.config;
 
 import java.beans.PropertyChangeListener;
 
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 
 public interface DataSourceConfigManager {

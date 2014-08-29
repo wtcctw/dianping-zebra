@@ -143,6 +143,11 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	static class FailOverDataSourceGCException extends Exception {
 
+		/**
+		 * 
+		 */
+      private static final long serialVersionUID = -8241429431083896757L;
+
 	}
 
 	static class FindMasterDataSourceResult {
