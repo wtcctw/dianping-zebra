@@ -270,7 +270,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(this));
 
 		this.metaData = new JdbcMetaData();
-		this.metaData.setJdbcUrl(this.jdbcRef);
+		this.metaData.setJdbcRef(this.jdbcRef);
 
 		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
 
