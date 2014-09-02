@@ -408,11 +408,12 @@ public class GroupConnection implements Connection {
 	private Connection getWriteConnection() throws SQLException {
 		if (wConnection == null) {
 			wConnection = writeDataSource.getConnection();
+			
+			if (wConnection.getAutoCommit() != autoCommit) {
+				wConnection.setAutoCommit(autoCommit);
+			}
 		}
 
-		if (wConnection.getAutoCommit() != autoCommit) {
-			wConnection.setAutoCommit(autoCommit);
-		}
 		return wConnection;
 	}
 
