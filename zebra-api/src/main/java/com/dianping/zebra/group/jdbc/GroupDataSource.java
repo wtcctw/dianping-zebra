@@ -16,6 +16,9 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.filter.FilterManagerFactory;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -47,6 +50,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
+	private JdbcFilter filter;
+
 	private GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
 	private volatile boolean init = false;
@@ -54,6 +59,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private String jdbcRef;
 
 	private String jdbcUrlExtra;
+
+	private JdbcMetaData metaData;
 
 	private LoadBalancedDataSource readDataSource;
 
@@ -182,6 +189,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
+		filter.get_connection(metaData);
 		return new GroupConnection(readDataSource, writeDataSource, dataSourceConfigManager, customizedReadWriteStrategy);
 	}
 
@@ -260,6 +268,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.loadCustomizedReadWriteStrategy();
 
 		StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(this));
+
+		this.metaData = new JdbcMetaData();
+		this.metaData.setJdbcUrl(this.jdbcRef);
+
+		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
 
 		this.init = true;
 		logger.info("GroupDataSource successfully initialized.");

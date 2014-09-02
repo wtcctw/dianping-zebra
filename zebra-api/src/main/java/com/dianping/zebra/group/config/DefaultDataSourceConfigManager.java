@@ -246,6 +246,9 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 				validateConfig(groupDsConfig.getDataSourceConfigs());
 			}
+
+			groupDsConfig.setFilters(
+					getProperty(String.format("%s.%s.filters", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, jdbcRef), null));
 		}
 	}
 
