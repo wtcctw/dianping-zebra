@@ -295,13 +295,13 @@ public class GroupStatement implements Statement {
 		checkClosed();
 		closeCurrentResultSet();
 
-		return new JDBCOperationCallback<ResultSet>() {
+		return new GroupResultSet(new JDBCOperationCallback<ResultSet>() {
 
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
 			}
-		}.doAction(this.dpGroupConnection.getRealConnection(sql, false));
+		}.doAction(this.dpGroupConnection.getRealConnection(sql, false)));
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
@@ -449,7 +449,7 @@ public class GroupStatement implements Statement {
 	@Override
 	public ResultSet getGeneratedKeys() throws SQLException {
 		if (this.openedStatement != null) {
-			return this.openedStatement.getGeneratedKeys();
+			return new GroupResultSet( this.openedStatement.getGeneratedKeys());
 		} else {
 			throw new SQLException("No update operations executed before getGeneratedKeys");
 		}
@@ -542,7 +542,7 @@ public class GroupStatement implements Statement {
 	 */
 	@Override
 	public ResultSet getResultSet() throws SQLException {
-		return currentResultSet;
+		return new GroupResultSet(currentResultSet);
 	}
 
 	/*

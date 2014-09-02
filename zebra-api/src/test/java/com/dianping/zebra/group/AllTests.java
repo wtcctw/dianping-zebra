@@ -4,7 +4,6 @@ import com.dianping.zebra.group.config.DataSourceConfigManagerTest;
 import com.dianping.zebra.group.config.LocalConfigServiceTest;
 import com.dianping.zebra.group.config.SystemConfigManagerTest;
 import com.dianping.zebra.group.datasources.FailoverDataSourceTest;
-import com.dianping.zebra.group.datasources.SingleDataSourceManagerTest;
 import com.dianping.zebra.group.jdbc.*;
 import com.dianping.zebra.group.monitor.GroupDataSourceMonitorTest;
 import com.dianping.zebra.group.monitor.SingleDataSourceMonitorTest;
@@ -28,7 +27,6 @@ import org.junit.runners.Suite.SuiteClasses;
 
 		//datasources
 		FailoverDataSourceTest.class,
-		SingleDataSourceManagerTest.class,
 
 		//jdbc
 		DPGroupConnectionTestCase.class,

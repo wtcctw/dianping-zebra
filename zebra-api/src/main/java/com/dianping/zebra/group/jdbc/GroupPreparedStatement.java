@@ -157,13 +157,13 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return new JDBCOperationCallback<ResultSet>() {
+		return new GroupResultSet( new JDBCOperationCallback<ResultSet>() {
 
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
 			}
-		}.doAction(this.dpGroupConnection.getRealConnection(sql, false));
+		}.doAction(this.dpGroupConnection.getRealConnection(sql, false)));
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {

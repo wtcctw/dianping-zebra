@@ -11,10 +11,10 @@ import java.util.Map;
 /**
  * Created by Dozer on 9/1/14.
  */
-public class GroupResult implements ResultSet {
+public class GroupResultSet implements ResultSet {
 	private ResultSet innerResultSet;
 
-	public GroupResult(ResultSet resultSet) {
+	public GroupResultSet(ResultSet resultSet) {
 		this.innerResultSet = resultSet;
 	}
 
