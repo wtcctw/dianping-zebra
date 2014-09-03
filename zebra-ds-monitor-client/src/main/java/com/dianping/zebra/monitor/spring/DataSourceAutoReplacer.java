@@ -99,6 +99,15 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		return value == null ? null : value.endsWith("_r");
 	}
 
+	private String getBeanPropertyStringValue(Object tempValue) {
+		if (tempValue == null) {
+			return null;
+		}
+		return tempValue instanceof TypedStringValue ?
+				((TypedStringValue) tempValue).getValue() :
+				String.valueOf(tempValue);
+	}
+
 	private Set<PropertyValue> getC3P0PropertyValues(BeanDefinition c3p0BeanDefinition, DataSourceInfo info,
 			RouterType routerType) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
@@ -114,7 +123,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				if (!StringUtils.isBlank(groupConfig)) {
 					properties.add(new PropertyValue("jdbcRef", jdbcRef));
 					properties.add(new PropertyValue("jdbcUrlExtra", parseUrlExtra(info.getUrl())));
-					properties.add(new PropertyValue("routerType", routerType));
+					properties.add(new PropertyValue("routerType", routerType.getRouterType()));
 
 					Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
 					for (PropertyValue property : c3p0BeanDefinition.getPropertyValues().getPropertyValues()) {
@@ -137,7 +146,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		if (pv != null && pv.getValue() != null) {
 			ManagedMap map = (ManagedMap) pv.getValue();
 			for (Object item : map.keySet()) {
-				String name = ((TypedStringValue) item).getValue();
+				String name = getBeanPropertyStringValue(item);
 				c3p0Ds.remove(name);
 				BeanDefinition readDsBean = listableBeanFactory.getBeanDefinition(name);
 				if (readDsBean != null) {
@@ -150,8 +159,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private BeanDefinition getDpdlWriteDsBean(BeanDefinition dataSourceDefinition) {
-		String writeDsBeanName = ((TypedStringValue) dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS")
-				.getValue()).getValue();
+		String writeDsBeanName = getBeanPropertyStringValue(
+				dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS").getValue());
 
 		c3p0Ds.remove(writeDsBeanName);
 		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsBeanName);
@@ -317,13 +326,12 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				} else {
 					tempValue = propertyValue.getValue();
 				}
-				jdbcRef = tempValue instanceof String ?
-						String.valueOf(tempValue) :
-						((TypedStringValue) tempValue).getValue();
+
+				jdbcRef = getBeanPropertyStringValue(tempValue);
 
 				if (!StringUtils.isBlank(jdbcRef)) {
-					DataSourceConfigManager manager = DataSourceConfigManagerFactory
-							.getConfigManager(Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
+					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
+							Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
 					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
 					if (config.getDataSourceConfigs().size() > 0) {
 						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
