@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
+import com.dianping.zebra.group.util.DataSourceState;
 import junit.framework.Assert;
 
 import org.junit.BeforeClass;

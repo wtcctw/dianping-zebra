@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.router;
 
-public class RounterTarget implements Comparable<RounterTarget> {
+public class RouterTarget implements Comparable<RouterTarget> {
 
 	private String id;
 
@@ -8,12 +8,12 @@ public class RounterTarget implements Comparable<RounterTarget> {
 
 	private int end;
 
-	public RounterTarget(String dsId) {
+	public RouterTarget(String dsId) {
 		super();
 		this.id = dsId;
 	}
 
-	public RounterTarget(String id, int weight, int end) {
+	public RouterTarget(String id, int weight, int end) {
 		super();
 		this.id = id;
 		this.weight = weight;
@@ -51,7 +51,7 @@ public class RounterTarget implements Comparable<RounterTarget> {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		RounterTarget other = (RounterTarget) obj;
+		RouterTarget other = (RouterTarget) obj;
 		if (id == null) {
 			if (other.id != null) {
 				return false;
@@ -68,7 +68,7 @@ public class RounterTarget implements Comparable<RounterTarget> {
 	}
 
 	@Override
-	public int compareTo(RounterTarget o) {
+	public int compareTo(RouterTarget o) {
 		return end - o.end;
 	}
 }

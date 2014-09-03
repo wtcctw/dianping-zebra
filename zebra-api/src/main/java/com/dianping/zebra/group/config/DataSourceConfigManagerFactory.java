@@ -1,10 +1,10 @@
 package com.dianping.zebra.group.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.IllegalConfigException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public final class DataSourceConfigManagerFactory {
 
@@ -13,30 +13,28 @@ public final class DataSourceConfigManagerFactory {
 	private DataSourceConfigManagerFactory() {
 	}
 
-	public static DataSourceConfigManager getConfigManager(String configManagerType, String name,
-	      boolean isSingleDataSource) {
-		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name,
-		      isSingleDataSource));
+	public static DataSourceConfigManager getConfigManager(String configManagerType, String name) {
+		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name));
 
 		if (dataSourceConfigManager == null) {
 			synchronized (dataSourceConfigManagers) {
-				dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name, isSingleDataSource));
+				dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name));
 
 				if (dataSourceConfigManager == null) {
 					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
 						LocalConfigService configService = new LocalConfigService(name);
 						configService.init();
-						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService, isSingleDataSource);
+						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
 						LionConfigService configService = new LionConfigService();
 						configService.init();
-						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService, isSingleDataSource);
+						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
 					} else {
 						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
-						      configManagerType));
+								configManagerType));
 					}
 					dataSourceConfigManager.init();
-					dataSourceConfigManagers.put(getFormattedName(name, isSingleDataSource), dataSourceConfigManager);
+					dataSourceConfigManagers.put(getFormattedName(name), dataSourceConfigManager);
 				}
 			}
 		}
@@ -44,7 +42,7 @@ public final class DataSourceConfigManagerFactory {
 		return dataSourceConfigManager;
 	}
 
-	private static String getFormattedName(String name, boolean isSingleDataSource) {
-		return "[" + (isSingleDataSource ? "single" : "group") + "]" + name;
+	private static String getFormattedName(String name) {
+		return "[group]" + name;
 	}
 }

@@ -11,7 +11,7 @@ import com.dianping.phoenix.status.AbstractComponentStatus;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.datasources.DataSourceState;
+import com.dianping.zebra.group.util.DataSourceState;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;

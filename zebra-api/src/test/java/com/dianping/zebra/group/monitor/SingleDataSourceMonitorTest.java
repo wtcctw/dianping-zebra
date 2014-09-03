@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 
-import com.dianping.zebra.group.datasources.DataSourceState;
+import com.dianping.zebra.group.util.DataSourceState;
 
 public class SingleDataSourceMonitorTest {
 	@Test

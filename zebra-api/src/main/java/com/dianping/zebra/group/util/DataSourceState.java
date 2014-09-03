@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.datasources;
+package com.dianping.zebra.group.util;
 
 public enum DataSourceState {
 

@@ -18,7 +18,7 @@
     	<version>${version}</version>
 	</dependency>
 
-或者可以通过升级zebra-ds-monitor的版本到`2.5.5`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
+或者可以通过升级zebra-ds-monitor的版本到`2.5.7`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
 
 	<dependency>
         <groupId>com.dianping.zebra</groupId>
@@ -64,7 +64,7 @@ Q：为什么要加`init-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.5`以上，`Zebra`会自动替换满足条件的`DataSource`。
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.7`以上，`Zebra`会自动替换满足条件的`DataSource`。
 
 #### 没有使用`dpdl`的`ComboPooledDataSource`
 * 数据源在`Lion`的白名单`groupds.autoreplace.database`配置过
@@ -77,6 +77,10 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 * 写库数据源是`mysql`
 
 ### 更新说明
+#### 2.5.7
+* [+] `FailOverDataSource`加入自动终止`Monitor`线程的功能，防止内存泄露
+* [+] 支持事务中默认走写库
+
 #### 2.5.5
 * [+] 支持自动替换`dpdl`数据源，并且可以通过数据库白名单进行限制
 * [/] 移除自动替换`SingleDataSource`，全部改为替换成`GroupDataSource`
