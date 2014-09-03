@@ -9,9 +9,11 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.dianping.zebra.monitor.util.LionUtil;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -28,6 +30,7 @@ import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
 import javax.sql.DataSource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -91,39 +94,50 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		return canReplacedDatabase.containsKey(info.getDatabase());
 	}
 
-	private Set<PropertyValue> getC3P0PropertyValues(BeanDefinition writeDsBean, DataSourceInfo info,
-			boolean isFromDpdl) {
+	private Set<PropertyValue> getC3P0PropertyValues(BeanDefinition c3p0BeanDefinition, DataSourceInfo info,
+	      boolean isFromDpdl) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
-		if (!writeDsBean.getBeanClassName().equals(C3P0_CLASS_NAME)) {
+		if (!c3p0BeanDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
 			return properties;
-		}
+		} else {
+			buildDataSourceInfo(info, c3p0BeanDefinition);
 
-		buildDataSourceInfo(info, writeDsBean);
+			if ("mysql".equals(info.getType()) && canReplace(info)) {
+				String jdbcRef = canReplacedDatabase.get(info.getDatabase());
+				String groupConfig = LionUtil.getLionConfig(String.format("groupds.%s.mapping", jdbcRef));
+				if (!StringUtils.isBlank(groupConfig)) {
+					properties.add(new PropertyValue("jdbcRef", jdbcRef));
+					properties.add(new PropertyValue("jdbcUrlExtra", parseUrlExtra(info.getUrl())));
 
-		if ("mysql".equals(info.getType()) && canReplace(info)) {
-			String jdbcRef = isFromDpdl ? canReplacedDatabase.get(info.getDatabase()) : info.getDatabase() + ".single";
-			String groupConfig = LionUtil.getLionConfig(String.format("groupds.%s.mapping", jdbcRef));
-			if (!StringUtils.isBlank(groupConfig)) {
-				properties.add(new PropertyValue("jdbcRef", jdbcRef));
-				properties.add(new PropertyValue("jdbcUrlExtra", parseUrlExtra(info.getUrl())));
-
-				Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
-				for (PropertyValue property : writeDsBean.getPropertyValues().getPropertyValues()) {
-					if (ignoreList.contains(property.getName())) {
-						continue;
+					if (isFromDpdl) {
+						properties.add(new PropertyValue("routerType", RouterType.ROUND_ROBIN.getRouterType()));
+					} else {
+						String username = info.getUsername();
+						if (username.indexOf("_r") > 0) {
+							properties.add(new PropertyValue("routerType", RouterType.LOAD_BALANCE.getRouterType()));
+						} else {
+							properties.add(new PropertyValue("routerType", RouterType.FAIL_OVER.getRouterType()));
+						}
 					}
-					properties.add(property);
+
+					Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
+					for (PropertyValue property : c3p0BeanDefinition.getPropertyValues().getPropertyValues()) {
+						if (ignoreList.contains(property.getName())) {
+							continue;
+						}
+						properties.add(property);
+					}
 				}
 			}
-		}
 
-		return properties;
+			return properties;
+		}
 	}
 
 	private BeanDefinition getDpdlWriteDsBean(BeanDefinition dataSourceDefinition) {
 		String writeDsBeanName = ((TypedStringValue) dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS")
-				.getValue()).getValue();
+		      .getValue()).getValue();
 
 		c3p0Ds.remove(writeDsBeanName);
 		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsBeanName);
@@ -187,7 +201,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		for (String beanDefinitionName : beanDefinitionNames) {
 			try {
 				AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) listableBeanFactory
-						.getBeanDefinition(beanDefinitionName);
+				      .getBeanDefinition(beanDefinitionName);
 				Class<?> beanClazz = beanDefinition.resolveBeanClass(ClassUtils.getDefaultClassLoader());
 				if (beanClazz != null && DataSource.class.isAssignableFrom(beanClazz)) {
 					if (beanClazz.getName().equals(C3P0_CLASS_NAME)) {
@@ -250,7 +264,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 				if (propertyValue == null) {
 					ConstructorArgumentValues.ValueHolder valueHolder = (ValueHolder) dataSourceDefinition
-							.getConstructorArgumentValues().getGenericArgumentValues().get(0);
+					      .getConstructorArgumentValues().getGenericArgumentValues().get(0);
 					jdbcRef = ((TypedStringValue) valueHolder.getValue()).getValue();
 				} else {
 					jdbcRef = ((TypedStringValue) propertyValue.getValue()).getValue();
@@ -258,7 +272,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 				if (!StringUtils.isBlank(jdbcRef)) {
 					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
-							Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef, false);
+					      Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef, false);
 					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
 					if (config.getDataSourceConfigs().size() > 0) {
 						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
@@ -287,7 +301,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void setGroupDataSourceProperties(BeanDefinition dataSourceDefinition, DataSourceInfo info,
-			Set<PropertyValue> properties) {
+	      Set<PropertyValue> properties) {
 		dataSourceDefinition.setBeanClassName(GroupDataSource.class.getName());
 		for (PropertyValue p : dataSourceDefinition.getPropertyValues().getPropertyValues()) {
 			dataSourceDefinition.getPropertyValues().removePropertyValue(p);
@@ -328,15 +342,12 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				BeanDefinition dataSourceDefinition = listableBeanFactory.getBeanDefinition(beanName);
 				DataSourceInfo info = new DataSourceInfo(beanName);
 				info.setDataSourceBeanClass(dataSourceDefinition.getBeanClassName());
-				if (dataSourceDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
-					buildDataSourceInfo(info, dataSourceDefinition);
-				}
 
 				try {
 					template.process(dataSourceDefinition, beanName, info);
 				} catch (Exception e) {
 					String msg = String.format("DataSourceProcesser Error! bean:%s  class:%s", info.getDataSourceBeanName(),
-							info.getDataSourceBeanClass());
+					      info.getDataSourceBeanClass());
 					Exception exp = new DalException(e);
 					logger.error(msg, exp);
 					Cat.logError(msg, exp);

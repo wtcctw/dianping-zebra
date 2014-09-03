@@ -7,7 +7,7 @@ public class RouterContext {
 
 	private String sql;
 
-	private Set<RounterTarget> excludeTargets = new HashSet<RounterTarget>();
+	private Set<RouterTarget> excludeTargets = new HashSet<RouterTarget>();
 
 	public RouterContext() {
 	}
@@ -17,13 +17,13 @@ public class RouterContext {
 		this.sql = sql;
 	}
 
-	public RouterContext(String sql, Set<RounterTarget> excludeTargets) {
+	public RouterContext(String sql, Set<RouterTarget> excludeTargets) {
 		super();
 		this.sql = sql;
 		this.excludeTargets = excludeTargets;
 	}
 	
-	public RouterContext(Set<RounterTarget> excludeTargets) {
+	public RouterContext(Set<RouterTarget> excludeTargets) {
 		super();
 		this.excludeTargets = excludeTargets;
 	}
@@ -32,11 +32,11 @@ public class RouterContext {
 		return sql;
 	}
 
-	public Set<RounterTarget> getExcludeTargets() {
+	public Set<RouterTarget> getExcludeTargets() {
 		return excludeTargets;
 	}
 	
 	public void addExcludeTarget(String dsId){
-		this.excludeTargets.add(new RounterTarget(dsId));
+		this.excludeTargets.add(new RouterTarget(dsId));
 	}
 }
