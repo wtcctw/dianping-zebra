@@ -11,7 +11,7 @@ package com.dianping.zebra.group;
  *
  */
 public final class Constants {
-	public static final String ZEBRA_VERSION = "2.5.5";
+	public static final String ZEBRA_VERSION = "2.5.7";
 
 	public static final String SQL_FORCE_WRITE_HINT = "/*+zebra:w*/";
 

@@ -21,11 +21,11 @@
 		<table class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th>App(${fn:length(model.database.apps) })</th>
-					<th>自动替换的数目(${model.database.replacedSingleDataSource })/所有的C3P0数目(${model.database.c3p0DataSource })</th>
-					<th>自动替换的数目(${model.database.replacedDpdlDataSource })/所有的DPDL数目(${model.database.dpdlDataSource })</th>
-					<th>升级Dal的数目(${model.database.groupDataSource })</th>
-					<th>总数据源(${model.database.totalDataSource })</th>
+                   <th>App(${fn:length(model.database.apps) })</th>
+                   <th>自动替换的数目(${model.database.replacedSingleDataSource })/所有的C3P0数目(${model.database.c3p0DataSource })</th>
+                   <th>自动替换的数目(${model.database.replacedDpdlDataSource })/所有的DPDL数目(${model.database.dpdlDataSource })</th>
+                   <th>升级Dal的数目(${model.database.groupDataSource })</th>
+                   <th>总数据源(${model.database.totalDataSource })</th>
 				</tr>
 			</thead>
 			<tbody>

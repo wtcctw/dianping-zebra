@@ -23,7 +23,7 @@ public class GroupDataSourceRouterFactoryTest {
 		String dataSourceResourceId = "sample.ds.v2";
 		String configManagerType = "local";
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType,
-		      dataSourceResourceId, false);
+		      dataSourceResourceId);
 		this.dataSourceRouter = DataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
 	}
 
@@ -32,7 +32,7 @@ public class GroupDataSourceRouterFactoryTest {
 		for (int i = 0; i < 1000; i++) {
 			String readSql = "select * from a";
 			RouterContext routerInfo = new RouterContext(readSql);
-			RounterTarget target = dataSourceRouter.select(routerInfo);
+			RouterTarget target = dataSourceRouter.select(routerInfo);
 
 			Integer integer = counter.get(target.getId());
 			if (integer == null) {

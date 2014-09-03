@@ -13,7 +13,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.DataSourceRouter;
-import com.dianping.zebra.group.router.RounterTarget;
+import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.router.RouterContext;
 import com.dianping.zebra.group.router.WeightDataSourceRouter;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
@@ -57,11 +57,11 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 			}
 		}
 
-		RounterTarget target = this.router.select(context);
+		RouterTarget target = this.router.select(context);
 
 		if (target != null) {
 			int tmpRetryTimes = -1;
-			Set<RounterTarget> excludeTargets = new HashSet<RounterTarget>();
+			Set<RouterTarget> excludeTargets = new HashSet<RouterTarget>();
 			List<SQLException> exceptions = new ArrayList<SQLException>();
 
 			while (tmpRetryTimes++ < this.retryTimes) {
