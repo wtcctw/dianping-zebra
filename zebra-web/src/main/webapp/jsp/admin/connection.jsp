@@ -22,7 +22,7 @@
 		<c:when test="${model.connectionStatus.connected}">
 			Status:<span class="badge badge-success">Connected</span><br>
 		</c:when>
-		<c:otherwise>Status:<span class="badge badge-success">DisConnected</span><br></c:otherwise>
+		<c:otherwise>Status:<span class="badge badge-important">DisConnected</span><br></c:otherwise>
 	</c:choose>
 	Config:
 	<pre class="prettyprint">
