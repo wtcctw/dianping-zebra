@@ -21,6 +21,7 @@ import com.dianping.zebra.group.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapper;
+import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SmoothReload;
@@ -54,6 +55,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private String jdbcRef;
 
 	private String jdbcUrlExtra;
+
+	private RouterType routerType = RouterType.ROUND_ROBIN;
 
 	private LoadBalancedDataSource readDataSource;
 
@@ -182,7 +185,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return new GroupConnection(readDataSource, writeDataSource, dataSourceConfigManager, customizedReadWriteStrategy);
+		switch (this.routerType) {
+		case ROUND_ROBIN:
+			return new GroupConnection(readDataSource, writeDataSource, dataSourceConfigManager,
+			      customizedReadWriteStrategy);
+		case LOAD_BALANCE:
+			return this.readDataSource.getConnection();
+		default:
+			return this.writeDataSource.getConnection(); // fail over type
+		}
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -202,10 +213,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public String getJdbcUrlExtra() {
 		return jdbcUrlExtra;
-	}
-
-	public void setJdbcUrlExtra(String jdbcUrlExtra) {
-		this.jdbcUrlExtra = jdbcUrlExtra;
 	}
 
 	private Map<String, DataSourceConfig> getLoadBalancedConfig(Map<String, DataSourceConfig> configs) {
@@ -452,6 +459,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.jdbcRef = jdbcRef;
 	}
 
+	public void setJdbcUrlExtra(String jdbcUrlExtra) {
+		this.jdbcUrlExtra = jdbcUrlExtra;
+	}
+
 	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
 		setProperty("maxAdministrativeTaskTime", String.valueOf(maxAdministrativeTaskTime));
 	}
@@ -538,6 +549,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	public void setRouterStrategy(String routerStrategy) {
 		this.groupConfig.setRouterStrategy(routerStrategy);
 		refresh("routerStrategy");
+	}
+
+	// hack for single datasource replace
+	public void setRouterType(String routerType) {
+		this.routerType = RouterType.getRouterType(routerType);
 	}
 
 	public synchronized void setTestConnectionOnCheckin(boolean testConnectionOnCheckin) {
