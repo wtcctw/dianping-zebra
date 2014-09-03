@@ -62,6 +62,10 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 	private void assertResultInReadDs(String res) {
 		Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(res));
 	}
+	
+	private void assertResultInWriteDs(String res) {
+		Assert.assertTrue(Arrays.asList(new String[] { "writer","writer-new1" }).contains(res));
+	}
 
 	@Test
 	public void test_callable_statement_use_write_connection() throws Exception {
@@ -334,9 +338,9 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		try {
 			conn = getDataSource().getConnection();
 			conn.setAutoCommit(false);
-			assertResultInReadDs(executeSelectSql(conn, "select * from PERSON"));
+			assertResultInWriteDs(executeSelectSql(conn, "select * from PERSON"));
 			executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
-			assertResultInReadDs(executeSelectSql(conn, "select * from PERSON"));
+			assertResultInWriteDs(executeSelectSql(conn, "select * from PERSON"));
 
 			conn.commit();
 
@@ -372,9 +376,9 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		try {
 			conn = getDataSource().getConnection();
 			conn.setAutoCommit(false);
-			assertResultInReadDs(executeSelectSql(conn, "select * from PERSON"));
+			assertResultInWriteDs(executeSelectSql(conn, "select * from PERSON"));
 			executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
-			assertResultInReadDs(executeSelectSql(conn, "select * from PERSON"));
+			assertResultInWriteDs(executeSelectSql(conn, "select * from PERSON"));
 
 			conn.rollback();
 
