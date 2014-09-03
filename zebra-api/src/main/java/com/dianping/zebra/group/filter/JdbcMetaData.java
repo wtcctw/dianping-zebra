@@ -5,17 +5,17 @@ package com.dianping.zebra.group.filter;
  * Filters read metadata from this class
  */
 public class JdbcMetaData implements Cloneable {
-	private String jdbcUrl;
+	private String dataSourceClass;
+
+	private String dataSourceId;
+
+	private String jdbcPassword;
 
 	private String jdbcRef;
 
-	public String getJdbcRef() {
-		return jdbcRef;
-	}
+	private String jdbcUrl;
 
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
-	}
+	private String jdbcUsername;
 
 	public JdbcMetaData clone() {
 		try {
@@ -23,6 +23,38 @@ public class JdbcMetaData implements Cloneable {
 		} catch (CloneNotSupportedException e) {
 			return null;
 		}
+	}
+
+	public String getDataSourceClass() {
+		return dataSourceClass;
+	}
+
+	public void setDataSourceClass(String dataSourceClass) {
+		this.dataSourceClass = dataSourceClass;
+	}
+
+	public String getDataSourceId() {
+		return dataSourceId;
+	}
+
+	public void setDataSourceId(String dataSourceId) {
+		this.dataSourceId = dataSourceId;
+	}
+
+	public String getJdbcPassword() {
+		return jdbcPassword;
+	}
+
+	public void setJdbcPassword(String jdbcPassword) {
+		this.jdbcPassword = jdbcPassword;
+	}
+
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
 	}
 
 	public String getJdbcUrl() {
@@ -33,10 +65,22 @@ public class JdbcMetaData implements Cloneable {
 		this.jdbcUrl = jdbcUrl;
 	}
 
+	public String getJdbcUsername() {
+		return jdbcUsername;
+	}
+
+	public void setJdbcUsername(String jdbcUsername) {
+		this.jdbcUsername = jdbcUsername;
+	}
+
 	@Override public String toString() {
 		return "JdbcMetaData{" +
-				"jdbcUrl='" + jdbcUrl + '\'' +
+				"dataSourceClass='" + dataSourceClass + '\'' +
+				", dataSourceId='" + dataSourceId + '\'' +
+				", jdbcPassword='" + jdbcPassword + '\'' +
 				", jdbcRef='" + jdbcRef + '\'' +
+				", jdbcUrl='" + jdbcUrl + '\'' +
+				", jdbcUsername='" + jdbcUsername + '\'' +
 				'}';
 	}
 }

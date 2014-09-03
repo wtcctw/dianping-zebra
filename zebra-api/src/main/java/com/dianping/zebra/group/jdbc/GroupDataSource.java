@@ -17,6 +17,7 @@ import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
+import com.dianping.zebra.group.filter.FilterWrapper;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
@@ -50,7 +51,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
-	private JdbcFilter filter;
+	private JdbcFilter filter = new FilterWrapper();
 
 	private GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
@@ -264,15 +265,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
 
+		this.initFilters();
 		this.initDataSources();
 		this.loadCustomizedReadWriteStrategy();
 
 		StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(this));
-
-		this.metaData = new JdbcMetaData();
-		this.metaData.setJdbcRef(this.jdbcRef);
-
-		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
 
 		this.init = true;
 		logger.info("GroupDataSource successfully initialized.");
@@ -293,6 +290,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 			throw new DalException("fail to initialize group dataSource", e);
 		}
+	}
+
+	private void initFilters() {
+
+		this.metaData = new JdbcMetaData();
+		this.metaData.setJdbcRef(this.jdbcRef);
+		this.metaData.setDataSourceClass(this.getClass().getName());
+
+		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
 	}
 
 	private void loadCustomizedReadWriteStrategy() {

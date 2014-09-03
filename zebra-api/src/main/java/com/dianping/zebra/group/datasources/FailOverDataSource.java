@@ -5,6 +5,9 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
+import com.dianping.zebra.group.filter.FilterWrapper;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.JdbcDriverClassHelper;
@@ -28,12 +31,23 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private Map<String, DataSourceConfig> configs;
 
+	private JdbcFilter filter = new FilterWrapper();
+
 	private volatile InnerSingleDataSource master;
 
 	private Thread masterDataSourceMonitorThread;
 
+	private JdbcMetaData metaData;
+
 	public FailOverDataSource(Map<String, DataSourceConfig> configs) {
 		this.configs = configs;
+	}
+
+	public FailOverDataSource(Map<String, DataSourceConfig> configs, JdbcMetaData metaData, JdbcFilter filter) {
+		this(configs);
+		this.filter = filter;
+		this.metaData = metaData.clone();
+		this.metaData.setDataSourceClass(this.getClass().getName());
 	}
 
 	@Override
@@ -144,9 +158,9 @@ public class FailOverDataSource extends AbstractDataSource {
 	static class FailOverDataSourceGCException extends Exception {
 
 		/**
-		 * 
+		 *
 		 */
-      private static final long serialVersionUID = -8241429431083896757L;
+		private static final long serialVersionUID = -8241429431083896757L;
 
 	}
 
