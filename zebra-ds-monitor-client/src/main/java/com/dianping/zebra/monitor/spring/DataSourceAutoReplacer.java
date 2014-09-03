@@ -123,7 +123,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				if (!StringUtils.isBlank(groupConfig)) {
 					properties.add(new PropertyValue("jdbcRef", jdbcRef));
 					properties.add(new PropertyValue("jdbcUrlExtra", parseUrlExtra(info.getUrl())));
-					properties.add(new PropertyValue("routerType", routerType));
+					properties.add(new PropertyValue("routerType", routerType.getRouterType()));
 
 					Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
 					for (PropertyValue property : c3p0BeanDefinition.getPropertyValues().getPropertyValues()) {
@@ -326,11 +326,12 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				} else {
 					tempValue = propertyValue.getValue();
 				}
+
 				jdbcRef = getBeanPropertyStringValue(tempValue);
 
 				if (!StringUtils.isBlank(jdbcRef)) {
-					DataSourceConfigManager manager = DataSourceConfigManagerFactory
-							.getConfigManager(Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
+					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
+							Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
 					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
 					if (config.getDataSourceConfigs().size() > 0) {
 						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
