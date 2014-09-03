@@ -55,6 +55,9 @@ public class Handler implements PageHandler<Context> {
 			model.setAction(Action.CONNECTION);
 			String jdbcRef = payload.getDatabase().toLowerCase();
 			ConnectionStatus connectionstatus = new ConnectionStatus();
+			if(jdbcRef.toLowerCase().equals("dpreview")){
+				jdbcRef = "DPReview"; //hack
+			}
 			connectionstatus.setConnected(m_connectionService.canConnect(jdbcRef));
 			connectionstatus.setConfig(m_connectionService.getConfig(jdbcRef).toString());
 			model.setConnectionStatus(connectionstatus);
