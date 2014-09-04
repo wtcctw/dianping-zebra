@@ -79,7 +79,6 @@ public class GroupDataSourceMonitor implements StatusExtension {
 			status.put(id + "-TotalConnection", Integer.toString(bean.getNumConnections()));
 			status.put(id + "-BusyConnection", Integer.toString(bean.getNumBusyConnection()));
 			status.put(id + "-IdleConnection", Integer.toString(bean.getNumIdleConnection()));
-			status.put(id + "-UnClosedOrphanedConnections", Integer.toString(bean.getNumUnClosedOrphanedConnections()));
 		}
 	}
 }
