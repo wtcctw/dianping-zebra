@@ -7,8 +7,6 @@ import com.dianping.zebra.group.datasources.FailoverDataSourceTest;
 import com.dianping.zebra.group.filter.DefaultFilterManagerTest;
 import com.dianping.zebra.group.filter.JdbcMetaDataTest;
 import com.dianping.zebra.group.jdbc.*;
-import com.dianping.zebra.group.monitor.GroupDataSourceMonitorTest;
-import com.dianping.zebra.group.monitor.SingleDataSourceMonitorTest;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapperTest;
 import com.dianping.zebra.group.router.DpdlReadWriteStrategyImplTest;
 import com.dianping.zebra.group.router.GroupDataSourceRouterFactoryTest;
@@ -40,10 +38,6 @@ import org.junit.runners.Suite.SuiteClasses;
 		DPGroupStatementTest.class,
 		SingleAndGroupC3P0FieldTest.class,
 		GroupDataSourceTest.class,
-
-		//monitor
-		GroupDataSourceMonitorTest.class,
-		SingleDataSourceMonitorTest.class,
 
 		//router
 		CustomizedReadWriteStrategyWrapperTest.class,

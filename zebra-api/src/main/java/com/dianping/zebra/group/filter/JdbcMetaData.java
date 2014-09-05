@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.filter;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.util.Properties;
 
 /**
@@ -7,6 +9,10 @@ import java.util.Properties;
  * Filters read metadata from this class
  */
 public class JdbcMetaData implements Cloneable {
+	private Connection connection;
+
+	private DataSource dataSource;
+
 	private String dataSourceClass;
 
 	private String dataSourceId;
@@ -29,12 +35,20 @@ public class JdbcMetaData implements Cloneable {
 		}
 	}
 
-	public Properties getProperties() {
-		return properties;
+	public Connection getConnection() {
+		return connection;
 	}
 
-	public void setProperties(Properties properties) {
-		this.properties = properties;
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
 	}
 
 	public String getDataSourceClass() {
@@ -83,6 +97,17 @@ public class JdbcMetaData implements Cloneable {
 
 	public void setJdbcUsername(String jdbcUsername) {
 		this.jdbcUsername = jdbcUsername;
+	}
+
+	public Properties getProperties() {
+		if (properties == null) {
+			properties = new Properties();
+		}
+		return properties;
+	}
+
+	public void setProperties(Properties properties) {
+		this.properties = properties;
 	}
 
 	@Override public String toString() {

@@ -1,17 +1,30 @@
 package com.dianping.zebra.group.filter;
 
-import java.sql.Connection;
-import java.util.Properties;
-
 /**
  * Created by Dozer on 9/2/14.
  */
 public interface JdbcFilter {
-	void getConnectionAfter(JdbcMetaData metaData);
+	void getGroupConnectionAfter(JdbcMetaData metaData);
 
-	void getConnectionBefore(JdbcMetaData metaData);
+	void getGroupConnectionBefore(JdbcMetaData metaData);
 
-	void getConnectionError(JdbcMetaData metaData);
+	void getGroupConnectionError(JdbcMetaData metaData);
 
-	void getConnectionSuccess(JdbcMetaData metaData, Connection connection);
+	void getGroupConnectionSuccess(JdbcMetaData metaData);
+
+	void initGroupDataSourceAfter(JdbcMetaData metaData);
+
+	void initGroupDataSourceBefore(JdbcMetaData metaData);
+
+	void initGroupDataSourceError(JdbcMetaData metaData);
+
+	void initGroupDataSourceSuccess(JdbcMetaData metaData);
+
+	void refreshGroupDataSourceAfter(JdbcMetaData metaData, String propertiesName);
+
+	void refreshGroupDataSourceBefore(JdbcMetaData metaData, String propertiesName);
+
+	void refreshGroupDataSourceError(JdbcMetaData metaData, String propertiesName, Exception exp);
+
+	void refreshGroupDataSourceSuccess(JdbcMetaData metaData, String propertiesName);
 }

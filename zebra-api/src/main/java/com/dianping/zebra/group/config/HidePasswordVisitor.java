@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.monitor;
+package com.dianping.zebra.group.config;
 
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;

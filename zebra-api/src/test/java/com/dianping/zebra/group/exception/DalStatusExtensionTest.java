@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.monitor;
+package com.dianping.zebra.group.exception;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
