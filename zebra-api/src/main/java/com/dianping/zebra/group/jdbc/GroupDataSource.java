@@ -609,10 +609,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				return;
 			}
 
-			if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
-			      || evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
-				refresh(evt.getPropertyName());
-			}
+			refresh(evt.getPropertyName());
 		}
 	}
 }

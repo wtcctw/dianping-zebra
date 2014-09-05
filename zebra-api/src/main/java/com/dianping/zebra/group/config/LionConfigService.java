@@ -12,6 +12,7 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
+import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public class LionConfigService implements ConfigService {
@@ -40,9 +41,13 @@ public class LionConfigService implements ConfigService {
 			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new ConfigChange() {
 				@Override
 				public void onChange(String key, String value) {
-					PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
-					for (PropertyChangeListener listener : listeners) {
-						listener.propertyChange(event);
+					if (key.startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
+					      || key.startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)
+					      || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX)) {
+						PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
+						for (PropertyChangeListener listener : listeners) {
+							listener.propertyChange(event);
+						}
 					}
 				}
 			});
