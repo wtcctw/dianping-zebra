@@ -40,11 +40,9 @@ public class LionConfigService implements ConfigService {
 			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new ConfigChange() {
 				@Override
 				public void onChange(String key, String value) {
-					if (key.startsWith("ds") || key.startsWith("groupds") || key.startsWith("zebra")) {
-						PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
-						for (PropertyChangeListener listener : listeners) {
-							listener.propertyChange(event);
-						}
+					PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
+					for (PropertyChangeListener listener : listeners) {
+						listener.propertyChange(event);
 					}
 				}
 			});
