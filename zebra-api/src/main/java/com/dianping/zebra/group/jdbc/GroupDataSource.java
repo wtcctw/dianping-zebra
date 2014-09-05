@@ -193,16 +193,31 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		filter.get_connection(metaData);
+		Properties context = null;
+		try {
+			context = filter.getConnectionBefore(metaData);
 
-		switch (this.routerType) {
-		case ROUND_ROBIN:
-			return new GroupConnection(readDataSource, writeDataSource, dataSourceConfigManager,
-					customizedReadWriteStrategy);
-		case LOAD_BALANCE:
-			return this.readDataSource.getConnection();
-		default:
-			return this.writeDataSource.getConnection(); // fail over type
+			Connection conn;
+			switch (this.routerType) {
+			case ROUND_ROBIN:
+				conn = new GroupConnection(readDataSource, writeDataSource, dataSourceConfigManager,
+						customizedReadWriteStrategy);
+				break;
+			case LOAD_BALANCE:
+				conn = this.readDataSource.getConnection();
+				break;
+			default:
+				conn = this.writeDataSource.getConnection();
+				break;
+			}
+
+			filter.getConnectionSuccess(metaData, context, conn);
+			return conn;
+		} catch (SQLException exp) {
+			filter.getConnectionError(metaData, context);
+			throw exp;
+		} finally {
+			filter.getConnectionAfter(metaData, context);
 		}
 	}
 
