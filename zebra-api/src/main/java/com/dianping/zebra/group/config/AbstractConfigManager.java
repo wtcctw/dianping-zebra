@@ -31,7 +31,7 @@ public abstract class AbstractConfigManager {
 		public Thread newThread(Runnable r) {
 			Thread t = new Thread(r);
 			t.setDaemon(true);
-			t.setName("Dal-Thread-Notify-" + id.incrementAndGet());
+			t.setName("Dal-Config-Notify-" + id.incrementAndGet());
 
 			return t;
 		}
