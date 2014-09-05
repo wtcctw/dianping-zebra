@@ -1,20 +1,20 @@
 package com.dianping.zebra.group.config;
 
-import com.dianping.phoenix.config.ConfigServiceManager;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.BaseVisitor;
 import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.group.util.AppPropertiesUtils;
 import com.dianping.zebra.group.util.Splitters;
 import com.dianping.zebra.group.util.StringUtils;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class DefaultDataSourceConfigManager extends AbstractConfigManager implements DataSourceConfigManager {
 
@@ -105,13 +105,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 
 		private String getGroupDataSourceKeyForApp() {
-			String app = Constants.PHOENIX_APP_NO_NAME;
-			try {
-				app = ConfigServiceManager.getConfig().getAppName().toLowerCase();
-			} catch (Throwable ignore) {
-			}
-
-			return String.format("%s.%s", getGroupDataSourceKey(), app);
+			return String.format("%s.%s", getGroupDataSourceKey(), AppPropertiesUtils.getAppName());
 		}
 
 		private String getGroupDataSourceKeyForAppUpdateFlag() {

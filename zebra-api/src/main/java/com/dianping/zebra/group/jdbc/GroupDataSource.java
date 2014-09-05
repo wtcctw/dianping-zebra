@@ -287,7 +287,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
 
@@ -298,13 +298,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(this));
 
 		this.init = true;
-		logger.info("GroupDataSource successfully initialized.");
+		logger.info(String.format("GroupDataSource(%s) successfully initialized.", jdbcRef));
 	}
 
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-					systemConfigManager.getSystemConfig().getRetryTimes());
+			      systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()));
 			this.writeDataSource.init();
@@ -314,7 +314,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			} catch (SQLException ignore) {
 			}
 
-			throw new DalException("fail to initialize group dataSource", e);
+			throw new DalException("fail to initialize group dataSource [" + jdbcRef + "]", e);
 		}
 	}
 
@@ -349,7 +349,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			GroupDataSourceConfig newGroupConfig = buildGroupConfig();
 
 			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
-				Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh");
+				Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh-" + jdbcRef);
 
 				Cat.logEvent("DAL.Refresh.Property", propertyToChange);
 
@@ -367,15 +367,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void refreshIntenal(GroupDataSourceConfig groupDataSourceConfig) {
-		logger.info("start to refresh the dataSources...");
+		logger.info(String.format("start to refresh the dataSources(%s)...", jdbcRef));
 
 		LoadBalancedDataSource newReadDataSource = null;
 		FailOverDataSource newWriteDataSource = null;
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-					getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), systemConfigManager
-					.getSystemConfig().getRetryTimes());
+			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), systemConfigManager
+			            .getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()));
 			newWriteDataSource.init(false);
@@ -406,9 +406,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				Cat.logError("error when destroy old dataSources", e);
 			}
 
-			logger.info("refresh the dataSources successfully!");
+			logger.info(String.format("refresh the dataSources(%s) successfully!", jdbcRef));
 		} else {
-			logger.warn("fail to refresh the dataSource");
+			logger.warn(String.format("fail to refresh the dataSource(%s)", jdbcRef));
 		}
 
 		// switch config
@@ -644,7 +644,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			}
 
 			if (evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
-					|| evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
+			      || evt.getPropertyName().startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)) {
 				refresh(evt.getPropertyName());
 			}
 		}
