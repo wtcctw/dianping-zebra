@@ -15,7 +15,6 @@ import com.dianping.zebra.group.util.DataSourceState;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
-import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 
 public class DataSourceStatus extends AbstractComponentStatus {
 
@@ -47,21 +46,6 @@ public class DataSourceStatus extends AbstractComponentStatus {
 			for (Entry<String, DataSource> entry : beans.entrySet()) {
 				String name = narmalized(entry.getKey());
 				DataSource ds = entry.getValue();
-
-				if (ds instanceof MonitorableDataSource) {
-					// ds = ((MonitorableDataSource) ds).getInnerDataSource();
-					continue;
-				}
-
-				// if (ds instanceof ComboPooledDataSource) {
-				// configTable.row(name, ComboPooledDataSource.class.getName(), ((ComboPooledDataSource) ds).getJdbcUrl(),
-				// ((ComboPooledDataSource) ds).getUser(), ((ComboPooledDataSource) ds).getInitialPoolSize(),
-				// ((ComboPooledDataSource) ds).getMaxPoolSize(), ((ComboPooledDataSource) ds).getMinPoolSize(),
-				// ((ComboPooledDataSource) ds).getCheckoutTimeout(), null);
-				// statusTable.row(name, ((ComboPooledDataSource) ds).getJdbcUrl(),
-				// ((ComboPooledDataSource) ds).getNumBusyConnections(),
-				// ((ComboPooledDataSource) ds).getNumIdleConnections(), null, null, null);
-				// } else
 
 				if (ds instanceof GroupDataSourceMBean) {
 					try {
@@ -96,10 +80,6 @@ public class DataSourceStatus extends AbstractComponentStatus {
 						setState(State.ERROR);
 					}
 				}
-
-				// else {
-				// configTable.row(name, ds.getClass(), null, null, null, null, null, null, null);
-				// }
 			}
 		}
 

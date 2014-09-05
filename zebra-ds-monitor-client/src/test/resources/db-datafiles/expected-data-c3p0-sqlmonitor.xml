@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<dataset>
-	<person id="1" name="lucy1" age="22" gender="male" height="171"/>
-	<person id="3" name="lucy3" age="20" gender="male" height="173"/>
-	<person id="4" name="lucy4" age="19" gender="male" height="174"/>
-</dataset>
