@@ -1,5 +1,6 @@
 package com.dianping.zebra.group.filter;
 
+import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.util.SpringBeanUtils;
 import com.dianping.zebra.group.util.StringUtils;
 
@@ -28,7 +29,7 @@ public class DefaultFilterManager implements FilterManager {
 		List<JdbcFilter> result = new ArrayList<JdbcFilter>();
 		String[] beanNames = filterBeanName.split(",");
 		for (String beanName : beanNames) {
-			Object tempBean = SpringBeanUtils.loadByName(beanName);
+			Object tempBean = SpringBeanUtils.loadByName(Constants.ZEBRA_FILTER_PRFIX + beanName);
 			if (tempBean == null) {
 				continue;
 			}

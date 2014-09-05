@@ -22,8 +22,10 @@ public final class Constants {
 	public static final String CONFIG_MANAGER_TYPE_LOCAL = "local";
 
 	public static final String DEFAULT_DATASOURCE_GROUP_PRFIX = "groupds";
-	
+
 	public static final String DEFAULT_DATASOURCE_ZEBRA_PRFIX = "zebra";
+
+	public static final String ZEBRA_FILTER_PRFIX = "zebra.filter.";
 
 	public static final String DEFAULT_DATASOURCE_SINGLE_PRFIX = "ds";
 
