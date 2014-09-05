@@ -1,13 +1,13 @@
 package com.dianping.zebra.monitor.model;
 
-import com.dianping.phoenix.config.ConfigServiceManager;
-import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.util.StringUtils;
+import java.beans.PropertyDescriptor;
+import java.net.URLEncoder;
+
 import org.springframework.beans.BeanUtils;
 import org.unidal.net.Networks;
 
-import java.beans.PropertyDescriptor;
-import java.net.URLEncoder;
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.util.AppPropertiesUtils;
 
 /**
  * Created by Dozer on 8/13/14.
@@ -42,13 +42,7 @@ public class DataSourceInfo {
 	}
 
 	public String getApp() {
-		String appName = null;
-		try {
-			appName = ConfigServiceManager.getConfig().getAppName();
-		} catch (Exception ignore) {
-		}
-
-		return StringUtils.isBlank(appName) ? Constants.PHOENIX_APP_NO_NAME : appName;
+		return AppPropertiesUtils.getAppName();
 	}
 
 	public String getDataSourceBeanClass() {

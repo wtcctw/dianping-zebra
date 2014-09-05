@@ -36,6 +36,14 @@ public class SqlUtilsTest {
 		Assert.assertEquals(SqlType.SELECT_FOR_UPDATE, sqlType);
 		Assert.assertEquals(false, sqlType.isRead());
 	}
+	
+	@Test
+	public void testSelectFOrUpdate1() throws SQLException {
+		String sql = "SELECT type, value, addtime, updatetime, description FROM AC_SystemLock WHERE type=? AND value=? for update";
+		SqlType sqlType = SqlUtils.getSqlType(sql);
+		Assert.assertEquals(SqlType.SELECT_FOR_UPDATE, sqlType);
+		Assert.assertEquals(false, sqlType.isRead());
+	}
 
 	@Test
 	public void testUpdate() throws SQLException {
