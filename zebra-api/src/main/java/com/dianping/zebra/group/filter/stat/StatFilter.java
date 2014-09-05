@@ -10,19 +10,19 @@ import java.util.Properties;
  * Created by Dozer on 9/2/14.
  */
 public class StatFilter extends AbstractJdbcFilter {
-	@Override public void getConnectionAfter(JdbcMetaData metaData, Properties properties) {
+	@Override public void getConnectionAfter(JdbcMetaData metaData) {
 
 	}
 
-	@Override public Properties getConnectionBefore(JdbcMetaData metaData) {
-		return null;
-	}
-
-	@Override public void getConnectionError(JdbcMetaData metaData, Properties properties) {
+	@Override public void getConnectionBefore(JdbcMetaData metaData) {
 
 	}
 
-	@Override public void getConnectionSuccess(JdbcMetaData metaData, Properties properties, Connection connection) {
+	@Override public void getConnectionError(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void getConnectionSuccess(JdbcMetaData metaData, Connection connection) {
 
 	}
 }

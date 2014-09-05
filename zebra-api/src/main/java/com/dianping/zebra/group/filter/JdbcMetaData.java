@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.filter;
 
+import java.util.Properties;
+
 /**
  * Created by Dozer on 9/2/14.
  * Filters read metadata from this class
@@ -17,12 +19,22 @@ public class JdbcMetaData implements Cloneable {
 
 	private String jdbcUsername;
 
+	private Properties properties;
+
 	public JdbcMetaData clone() {
 		try {
 			return (JdbcMetaData) super.clone();
 		} catch (CloneNotSupportedException e) {
 			return null;
 		}
+	}
+
+	public Properties getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Properties properties) {
+		this.properties = properties;
 	}
 
 	public String getDataSourceClass() {

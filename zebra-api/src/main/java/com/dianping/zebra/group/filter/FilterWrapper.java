@@ -1,5 +1,6 @@
 package com.dianping.zebra.group.filter;
 
+import java.sql.Connection;
 import java.util.List;
 
 /**
@@ -16,10 +17,34 @@ public class FilterWrapper implements JdbcFilter {
 		this.filters = filters;
 	}
 
-	@Override public void get_connection(final JdbcMetaData metaData) {
+	@Override public void getConnectionAfter(final JdbcMetaData metaData) {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {
-				filter.get_connection(metaData);
+				filter.getConnectionAfter(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void getConnectionBefore(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.getConnectionBefore(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void getConnectionError(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.getConnectionError(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void getConnectionSuccess(final JdbcMetaData metaData, final Connection connection) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.getConnectionSuccess(metaData, connection);
 			}
 		}.execute();
 	}

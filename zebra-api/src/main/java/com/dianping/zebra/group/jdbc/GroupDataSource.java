@@ -193,9 +193,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		Properties context = null;
 		try {
-			context = filter.getConnectionBefore(metaData);
+			filter.getConnectionBefore(metaData.clone());
 
 			Connection conn;
 			switch (this.routerType) {
@@ -211,13 +210,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				break;
 			}
 
-			filter.getConnectionSuccess(metaData, context, conn);
+			filter.getConnectionSuccess(metaData.clone(), conn);
 			return conn;
 		} catch (SQLException exp) {
-			filter.getConnectionError(metaData, context);
+			filter.getConnectionError(metaData.clone());
 			throw exp;
 		} finally {
-			filter.getConnectionAfter(metaData, context);
+			filter.getConnectionAfter(metaData.clone());
 		}
 	}
 
