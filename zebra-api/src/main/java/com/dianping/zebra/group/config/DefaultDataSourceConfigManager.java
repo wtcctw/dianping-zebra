@@ -36,8 +36,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	@Override
-	public GroupDataSourceConfig getGroupDataSourceConfig() {
-		return initGroupDataSourceConfig();
+	public synchronized GroupDataSourceConfig getGroupDataSourceConfig() {
+		return this.groupDataSourceConfig;
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			this.groupDataSourceConfig = initGroupDataSourceConfig();
 		} catch (Exception e) {
 			throw new IllegalConfigException(String.format(
-					"Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
+			      "Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
 		}
 	}
 
@@ -94,7 +94,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 		if (readNum < 1 || writeNum < 1) {
 			throw new IllegalConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
-					readNum, writeNum));
+			      readNum, writeNum));
 		}
 	}
 
@@ -183,21 +183,21 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			dsConfig.setId(dsId);
 			dsConfig.setActive(getProperty(getSingleDataSourceKey(Constants.ELEMENT_ACTIVE, dsId), dsConfig.getActive()));
 			dsConfig.setTestReadOnlySql(getProperty(getSingleDataSourceKey(Constants.ELEMENT_TEST_READONLY_SQL, dsId),
-					dsConfig.getTestReadOnlySql()));
+			      dsConfig.getTestReadOnlySql()));
 			dsConfig.setPunishLimit(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PUNISH_LIMIT, dsId),
-					dsConfig.getPunishLimit()));
+			      dsConfig.getPunishLimit()));
 			dsConfig.setTimeWindow(getProperty(getSingleDataSourceKey(Constants.ELEMENT_TIME_WINDOW, dsId),
-					dsConfig.getTimeWindow()));
+			      dsConfig.getTimeWindow()));
 			dsConfig.setDriverClass(getProperty(getSingleDataSourceKey(Constants.ELEMENT_DRIVER_CLASS, dsId),
-					dsConfig.getDriverClass()));
+			      dsConfig.getDriverClass()));
 			dsConfig.setJdbcUrl(getProperty(getSingleDataSourceKey(Constants.ELEMENT_JDBC_URL, dsId),
-					dsConfig.getJdbcUrl()));
+			      dsConfig.getJdbcUrl()));
 			dsConfig.setPassword(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PASSWORD, dsId),
-					dsConfig.getPassword()));
+			      dsConfig.getPassword()));
 			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),
-					dsConfig.getWarmupTime()));
+			      dsConfig.getWarmupTime()));
 			dsConfig
-					.setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
+			      .setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
 
 			String properies = getProperty(getSingleDataSourceKey(Constants.ELEMENT_PROPERTIES, dsId), null);
 
