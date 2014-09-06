@@ -2,6 +2,7 @@ package com.dianping.zebra.group.util;
 
 import com.dianping.zebra.group.spring.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 
 /**
  * Created by Dozer on 9/2/14.
@@ -13,6 +14,8 @@ public class SpringBeanUtils {
 		} catch (ClassNotFoundException ignore) {
 			return null;
 		}
+
+		ContextSingletonBeanFactoryLocator.getInstance().useBeanFactory()
 
 		ApplicationContext context = ApplicationContextProvider.getCurrentApplicationContext();
 		if (context == null) {
