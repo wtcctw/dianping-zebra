@@ -30,7 +30,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private JdbcFilter filter;
 
-	private volatile InnerSingleDataSource master;
+	private volatile SingleDataSource master;
 
 	private Thread masterDataSourceMonitorThread;
 
@@ -93,7 +93,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		return master;
 	}
 
-	private InnerSingleDataSource getDataSource(DataSourceConfig config) {
+	private SingleDataSource getDataSource(DataSourceConfig config) {
 		if (master != null) {
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}

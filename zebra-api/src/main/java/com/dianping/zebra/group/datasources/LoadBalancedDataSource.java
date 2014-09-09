@@ -19,7 +19,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private SingleDataSourceManager dataSourceManager;
 
-	private Map<String, InnerSingleDataSource> dataSources;
+	private Map<String, SingleDataSource> dataSources;
 
 	private JdbcFilter filter;
 
@@ -33,7 +33,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
 			JdbcMetaData metaData, JdbcFilter filter, int retryTimes) {
-		this.dataSources = new HashMap<String, InnerSingleDataSource>();
+		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.retryTimes = retryTimes;
 		this.filter = filter;
@@ -41,7 +41,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	}
 
 	public void close() throws SQLException {
-		for (InnerSingleDataSource ds : dataSources.values()) {
+		for (SingleDataSource ds : dataSources.values()) {
 			dataSourceManager.destoryDataSource(ds);
 		}
 	}
@@ -55,7 +55,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	public Connection getConnection(String username, String password) throws SQLException {
 		RouterContext context = new RouterContext();
 
-		for (InnerSingleDataSource dataSource : this.dataSources.values()) {
+		for (SingleDataSource dataSource : this.dataSources.values()) {
 			if (dataSource.isDown() || dataSource.isClosed()) {
 				context.addExcludeTarget(dataSource.getId());
 			}
@@ -105,7 +105,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
 
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			InnerSingleDataSource dataSource = dataSourceManager.createDataSource(config);
+			SingleDataSource dataSource = dataSourceManager.createDataSource(config);
 			this.dataSources.put(config.getId(), dataSource);
 		}
 

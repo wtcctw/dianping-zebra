@@ -21,16 +21,16 @@ import java.util.concurrent.Executor;
 
 public class SingleConnection implements Connection {
 
-	private InnerSingleDataSource dataSource;
+	private SingleDataSource dataSource;
 	
 	private Connection conn;
 
-	public SingleConnection(InnerSingleDataSource dataSource, Connection conn) {
+	public SingleConnection(SingleDataSource dataSource, Connection conn) {
 		this.dataSource = dataSource;
 		this.conn = conn;
 	}
 
-	public InnerSingleDataSource getDataSource() {
+	public SingleDataSource getDataSource() {
 		return dataSource;
 	}
 

@@ -11,15 +11,15 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
 	private Thread dataSourceMonitor;
 
-	private BlockingQueue<InnerSingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<InnerSingleDataSource>();
+	private BlockingQueue<SingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<SingleDataSource>();
 
 	@Override
-	public synchronized InnerSingleDataSource createDataSource(DataSourceConfig config) {
-		return new InnerSingleDataSource(config);
+	public synchronized SingleDataSource createDataSource(DataSourceConfig config) {
+		return new SingleDataSource(config);
 	}
 
 	@Override
-	public synchronized void destoryDataSource(InnerSingleDataSource dataSource) {
+	public synchronized void destoryDataSource(SingleDataSource dataSource) {
 		if (dataSource != null) {
 			this.toBeClosedDataSource.offer(dataSource);
 		}
@@ -40,7 +40,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 		@Override
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
-				InnerSingleDataSource dataSource = null;
+				SingleDataSource dataSource = null;
 				try {
 					dataSource = toBeClosedDataSource.take();
 					dataSource.close();
