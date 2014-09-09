@@ -393,6 +393,7 @@ public class GroupStatement implements Statement {
 		JdbcMetaData tempMetaData = this.metaData.clone();
 		tempMetaData.setSql(sql);
 		tempMetaData.setParams(params);
+		tempMetaData.setBatchedSqls(batchedSqls);
 
 		this.filter.executeBefore(tempMetaData);
 

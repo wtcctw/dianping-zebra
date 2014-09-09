@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.filter;
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -8,6 +9,8 @@ import java.util.Properties;
  * Filters read metadata from this class
  */
 public class JdbcMetaData implements Cloneable {
+	private List<String> batchedSqls;
+
 	private DataSource dataSource;
 
 	private String dataSourceClass;
@@ -34,6 +37,14 @@ public class JdbcMetaData implements Cloneable {
 		} catch (CloneNotSupportedException e) {
 			return null;
 		}
+	}
+
+	public List<String> getBatchedSqls() {
+		return batchedSqls;
+	}
+
+	public void setBatchedSqls(List<String> batchedSqls) {
+		this.batchedSqls = batchedSqls;
 	}
 
 	public DataSource getDataSource() {

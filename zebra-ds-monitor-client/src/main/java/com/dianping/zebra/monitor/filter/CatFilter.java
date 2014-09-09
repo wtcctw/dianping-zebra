@@ -1,19 +1,27 @@
 package com.dianping.zebra.monitor.filter;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.CatConstants;
+import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.status.StatusExtensionRegister;
 import com.dianping.zebra.group.filter.AbstractJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
+import com.dianping.zebra.group.util.SqlUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
+import org.unidal.helper.Stringizers;
 
 /**
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends AbstractJdbcFilter {
+	private static String BATCH = "batch";
+
 	private static String DAL_CAT_TYPE = "DAL";
+
+	private ThreadLocal<Transaction> executeTransaction = null;
 
 	private ThreadLocal<Transaction> refreshGroupDataSourceTransaction = null;
 
@@ -36,19 +44,36 @@ public class CatFilter extends AbstractJdbcFilter {
 	}
 
 	@Override public void executeAfter(JdbcMetaData metaData) {
-
+		if (executeTransaction != null) {
+			executeTransaction.get().complete();
+		}
 	}
 
 	@Override public void executeBefore(JdbcMetaData metaData) {
-
+		executeTransaction = newTransaction("SQL", metaData.getSql());
+		if (metaData.getSql().equals(BATCH)) {
+			executeTransaction.get().addData(Stringizers.forJson().compact().from(metaData.getBatchedSqls()));
+		} else {
+			executeTransaction.get().addData(metaData.getSql());
+		}
 	}
 
 	@Override public void executeError(JdbcMetaData metaData, Exception exp) {
-
+		if (executeTransaction != null) {
+			Cat.logError(exp);
+			executeTransaction.get().setStatus(exp);
+		}
 	}
 
 	@Override public void executeSuccess(JdbcMetaData metaData) {
+		if (executeTransaction != null) {
+			Cat.logEvent("SQL.Database", metaData.getJdbcUrl(), Event.SUCCESS, metaData.getDataSourceId());
+			Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS,
+					Stringizers.forJson().compact()
+							.from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
 
+			executeTransaction.get().setStatus(Transaction.SUCCESS);
+		}
 	}
 
 	@Override public void findMasterFailOverDataSourceAfter(JdbcMetaData metaData) {
