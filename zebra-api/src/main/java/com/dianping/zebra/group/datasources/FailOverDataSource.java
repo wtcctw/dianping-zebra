@@ -142,8 +142,8 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private boolean setMasterDb(DataSourceConfig config) {
 		if (master == null || !master.getId().equals(config.getId())) {
-			master = getDataSource(config);
 			changeMetaData(config);
+			master = getDataSource(config);
 			return true;
 		}
 		return false;
