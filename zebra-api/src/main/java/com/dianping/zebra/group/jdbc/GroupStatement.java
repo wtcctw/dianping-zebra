@@ -8,6 +8,8 @@ package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.exception.DalNotSupportException;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
@@ -55,8 +57,14 @@ public class GroupStatement implements Statement {
 
 	protected int updateCount;
 
-	public GroupStatement(GroupConnection connection) {
+	protected JdbcFilter filter;
+
+	protected JdbcMetaData metaData;
+
+	public GroupStatement(GroupConnection connection, JdbcMetaData metaData, JdbcFilter filter) {
 		this.dpGroupConnection = connection;
+		this.metaData = metaData;
+		this.filter = filter;
 	}
 
 	/*
@@ -449,7 +457,7 @@ public class GroupStatement implements Statement {
 	@Override
 	public ResultSet getGeneratedKeys() throws SQLException {
 		if (this.openedStatement != null) {
-			return new GroupResultSet( this.openedStatement.getGeneratedKeys());
+			return new GroupResultSet(this.openedStatement.getGeneratedKeys());
 		} else {
 			throw new SQLException("No update operations executed before getGeneratedKeys");
 		}

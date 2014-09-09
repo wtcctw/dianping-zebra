@@ -199,7 +199,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
-		Statement stmt = new GroupStatement(this);
+		Statement stmt = new GroupStatement(this, this.metaData.clone(), this.filter);
 		openedStatements.add(stmt);
 		return stmt;
 	}
@@ -584,7 +584,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
-		PreparedStatement pstmt = new GroupPreparedStatement(this, sql);
+		PreparedStatement pstmt = new GroupPreparedStatement(this, sql, this.metaData.clone(), this.filter);
 		openedStatements.add(pstmt);
 		return pstmt;
 	}

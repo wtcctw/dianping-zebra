@@ -7,6 +7,8 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.datasources.SingleConnection;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.jdbc.param.*;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
@@ -38,9 +40,10 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	private String sql;
 
-	public GroupPreparedStatement(GroupConnection connection, String sql) {
-		super(connection);
+	public GroupPreparedStatement(GroupConnection connection, String sql, JdbcMetaData metaData, JdbcFilter filter) {
+		super(connection, metaData, filter);
 		this.sql = sql;
+		this.metaData.setSql(sql);
 	}
 
 	/*
@@ -157,7 +160,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return new GroupResultSet( new JDBCOperationCallback<ResultSet>() {
+		return new GroupResultSet(new JDBCOperationCallback<ResultSet>() {
 
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {

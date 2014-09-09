@@ -24,6 +24,16 @@ public class JdbcMetaData implements Cloneable {
 
 	private Properties properties;
 
+	private String sql;
+
+	public String getSql() {
+		return sql;
+	}
+
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
+
 	public JdbcMetaData clone() {
 		try {
 			return (JdbcMetaData) super.clone();
