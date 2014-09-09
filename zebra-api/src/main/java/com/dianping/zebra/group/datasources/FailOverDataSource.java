@@ -43,7 +43,7 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	private void changeMetaData(DataSourceConfig config) {
-		this.metaData.setDataSourceId(master.getId());
+		this.metaData.setDataSourceId(config.getId());
 		this.metaData.setJdbcUrl(config.getJdbcUrl());
 		this.metaData.setJdbcUsername(config.getUsername());
 		this.metaData.setJdbcPassword(
