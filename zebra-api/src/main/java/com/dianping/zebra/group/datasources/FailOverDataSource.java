@@ -42,6 +42,14 @@ public class FailOverDataSource extends AbstractDataSource {
 		this.metaData = metaData.clone();
 	}
 
+	private void changeMetaData(DataSourceConfig config) {
+		this.metaData.setDataSourceId(master.getId());
+		this.metaData.setJdbcUrl(config.getJdbcUrl());
+		this.metaData.setJdbcUsername(config.getUsername());
+		this.metaData.setJdbcPassword(
+				config.getPassword() == null ? null : StringUtils.repeat("*", config.getPassword().length()));
+	}
+
 	@Override
 	public void close() throws SQLException {
 		if (this.masterDataSourceMonitorThread != null) {
@@ -135,7 +143,7 @@ public class FailOverDataSource extends AbstractDataSource {
 	private boolean setMasterDb(DataSourceConfig config) {
 		if (master == null || !master.getId().equals(config.getId())) {
 			master = getDataSource(config);
-			this.metaData.setDataSourceId(master.getId());
+			changeMetaData(config);
 			return true;
 		}
 		return false;
