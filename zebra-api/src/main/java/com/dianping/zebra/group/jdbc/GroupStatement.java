@@ -25,12 +25,6 @@ public class GroupStatement implements Statement {
 
 	private static final String BATCH = "batch";
 
-	private static final String CAT_LOGGED = "cat_log";
-
-	;
-
-	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
-
 	protected List<String> batchedSqls;
 
 	protected boolean closed = false;
@@ -41,7 +35,11 @@ public class GroupStatement implements Statement {
 
 	protected int fetchSize;
 
+	protected JdbcFilter filter;
+
 	protected int maxRows;
+
+	protected JdbcMetaData metaData;
 
 	protected boolean moreResults = false;
 
@@ -56,10 +54,6 @@ public class GroupStatement implements Statement {
 	protected int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
 	protected int updateCount;
-
-	protected JdbcFilter filter;
-
-	protected JdbcMetaData metaData;
 
 	public GroupStatement(GroupConnection connection, JdbcMetaData metaData, JdbcFilter filter) {
 		this.dpGroupConnection = connection;
