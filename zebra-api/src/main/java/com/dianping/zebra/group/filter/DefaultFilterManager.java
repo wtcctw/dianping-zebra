@@ -63,7 +63,7 @@ public class DefaultFilterManager implements FilterManager {
 		List<JdbcFilter> result = new ArrayList<JdbcFilter>();
 		String[] names = filterName.split(",");
 		for (String name : names) {
-			List<JdbcFilter> filters = loadFilterFromCache(filterName);
+			List<JdbcFilter> filters = loadFilterFromCache(name);
 			if (filters != null && filters.size() > 0) {
 				result.addAll(filters);
 			}

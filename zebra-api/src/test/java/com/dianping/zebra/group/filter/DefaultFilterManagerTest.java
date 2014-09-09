@@ -6,11 +6,15 @@ package com.dianping.zebra.group.filter;
 
 import junit.framework.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 public class DefaultFilterManagerTest {
+
+	@Test
+	public void test_load_by_empty_name() {
+		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("");
+		Assert.assertTrue(filter instanceof FilterWrapper);
+		Assert.assertEquals(((FilterWrapper) filter).size(), 0);
+	}
 
 	@Test
 	public void test_load_by_name() {
@@ -20,9 +24,9 @@ public class DefaultFilterManagerTest {
 	}
 
 	@Test
-	public void test_load_by_empty_name() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("");
+	public void test_load_by_two_name() {
+		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat,no_exist");
 		Assert.assertTrue(filter instanceof FilterWrapper);
-		Assert.assertEquals(((FilterWrapper) filter).size(), 0);
+		Assert.assertEquals(((FilterWrapper) filter).size(), 1);
 	}
 }
