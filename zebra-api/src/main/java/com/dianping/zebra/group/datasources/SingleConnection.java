@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.datasources;
 
+import com.dianping.zebra.group.filter.JdbcMetaData;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;

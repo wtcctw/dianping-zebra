@@ -291,7 +291,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	}
 
 	private void initFilters() {
-		this.metaData.setDataSourceClass(this.getClass().getName());
+		this.metaData.setDataSource(this);
 	}
 
 	public boolean isAvailable() {

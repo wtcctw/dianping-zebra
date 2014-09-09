@@ -113,7 +113,6 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	}
 
 	private void initFilter() {
-		this.metaData.setDataSourceClass(this.getClass().getName());
 		this.metaData.setDataSource(this);
 	}
 }

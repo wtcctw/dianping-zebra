@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.filter;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.util.List;
 import java.util.Properties;
 
@@ -11,9 +12,9 @@ import java.util.Properties;
 public class JdbcMetaData implements Cloneable {
 	private List<String> batchedSqls;
 
-	private DataSource dataSource;
+	private Connection connection;
 
-	private String dataSourceClass;
+	private DataSource dataSource;
 
 	private String dataSourceId;
 
@@ -47,20 +48,20 @@ public class JdbcMetaData implements Cloneable {
 		this.batchedSqls = batchedSqls;
 	}
 
+	public Connection getConnection() {
+		return connection;
+	}
+
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+
 	public DataSource getDataSource() {
 		return dataSource;
 	}
 
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
-	}
-
-	public String getDataSourceClass() {
-		return dataSourceClass;
-	}
-
-	public void setDataSourceClass(String dataSourceClass) {
-		this.dataSourceClass = dataSourceClass;
 	}
 
 	public String getDataSourceId() {
@@ -132,12 +133,17 @@ public class JdbcMetaData implements Cloneable {
 
 	@Override public String toString() {
 		return "JdbcMetaData{" +
-				"dataSourceClass='" + dataSourceClass + '\'' +
+				"batchedSqls=" + batchedSqls +
+				", connection=" + connection +
+				", dataSource=" + dataSource +
 				", dataSourceId='" + dataSourceId + '\'' +
 				", jdbcPassword='" + jdbcPassword + '\'' +
 				", jdbcRef='" + jdbcRef + '\'' +
 				", jdbcUrl='" + jdbcUrl + '\'' +
 				", jdbcUsername='" + jdbcUsername + '\'' +
+				", params=" + params +
+				", properties=" + properties +
+				", sql='" + sql + '\'' +
 				'}';
 	}
 }

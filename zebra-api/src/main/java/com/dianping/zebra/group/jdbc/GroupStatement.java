@@ -400,6 +400,8 @@ public class GroupStatement implements Statement {
 		try {
 			Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
 			T result = callback.doAction(conn);
+
+			tempMetaData.setConnection(conn);
 			this.filter.executeSuccess(tempMetaData);
 			return result;
 		} catch (SQLException e) {
