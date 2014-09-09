@@ -197,7 +197,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			switch (this.routerType) {
 			case ROUND_ROBIN:
 				conn = new GroupConnection(readDataSource, writeDataSource, dataSourceConfigManager,
-						customizedReadWriteStrategy);
+						customizedReadWriteStrategy, tempMetaData, filter);
 				break;
 			case LOAD_BALANCE:
 				conn = this.readDataSource.getConnection();
@@ -310,10 +310,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void initDataSources() {
 		try {
-			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
+			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(
+					groupConfig.getDataSourceConfigs()),
+					this.metaData.clone(), this.filter,
 					systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
-			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()));
+			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
+					this.metaData.clone(), this.filter);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -380,10 +383,12 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-					getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), systemConfigManager
-					.getSystemConfig().getRetryTimes());
+					getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()),
+					this.metaData.clone(), this.filter,
+					systemConfigManager.getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
-			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()));
+			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
+					this.metaData.clone(), this.filter);
 			newWriteDataSource.init(false);
 
 			preparedSwitch = true;

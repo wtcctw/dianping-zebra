@@ -1,68 +1,56 @@
 package com.dianping.zebra.group.jdbc;
 
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.SQLXML;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.Struct;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.Executor;
-
-import javax.sql.DataSource;
-
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
 import com.dianping.zebra.group.util.StringUtils;
 
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.Executor;
+
 public class GroupConnection implements Connection {
-
-	private DataSource readDataSource;
-
-	private DataSource writeDataSource;
-
-	private Connection rConnection;
-
-	private Connection wConnection;
-
-	private boolean closed = false;
 
 	private boolean autoCommit = true;
 
-	private int transactionIsolation = -1;
-
-	private Set<Statement> openedStatements = new HashSet<Statement>();
-
-	private DataSourceConfigManager dataSourceConfigManager;
+	private boolean closed = false;
 
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
+	private DataSourceConfigManager dataSourceConfigManager;
+
+	private JdbcFilter filter;
+
+	private JdbcMetaData metaData;
+
+	private Set<Statement> openedStatements = new HashSet<Statement>();
+
+	private Connection rConnection;
+
+	private DataSource readDataSource;
+
+	private int transactionIsolation = -1;
+
+	private Connection wConnection;
+
+	private DataSource writeDataSource;
+
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
-	      DataSourceConfigManager dataSourceConfigManager, CustomizedReadWriteStrategy customizedReadWriteStrategy) {
+			DataSourceConfigManager dataSourceConfigManager, CustomizedReadWriteStrategy customizedReadWriteStrategy,
+			JdbcMetaData metaData, JdbcFilter filter) {
 		super();
 		this.dataSourceConfigManager = dataSourceConfigManager;
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
 		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
+		this.filter = filter;
+		this.metaData = metaData;
 	}
 
 	public void abort(Executor executor) throws SQLException {
@@ -236,7 +224,7 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-	      throws SQLException {
+			throws SQLException {
 		GroupStatement stmt = (GroupStatement) createStatement(resultSetType, resultSetConcurrency);
 		stmt.setResultSetHoldability(resultSetHoldability);
 		return stmt;
@@ -263,8 +251,26 @@ public class GroupConnection implements Connection {
 		return this.autoCommit;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see java.sql.Connection#setAutoCommit(boolean)
+	 */
+	@Override
+	public void setAutoCommit(boolean autoCommit) throws SQLException {
+		checkClosed();
+		if (this.autoCommit == autoCommit) {
+			return;
+		}
+		this.autoCommit = autoCommit;
+		if (this.wConnection != null) {
+			this.wConnection.setAutoCommit(autoCommit);
+		}
+
+	}
+
 	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
-	      int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+			int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		if (resultSetType == Integer.MIN_VALUE) {
 			return conn.prepareCall(sql);
 		} else if (resultSetHoldability == Integer.MIN_VALUE) {
@@ -276,7 +282,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#getCatalog()
 	 */
 	@Override
@@ -286,7 +292,17 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Connection#setCatalog(java.lang.String)
+	 */
+	@Override
+	public void setCatalog(String catalog) throws SQLException {
+		throw new UnsupportedOperationException("setCatalog");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Connection#getClientInfo()
 	 */
 	@Override
@@ -296,7 +312,17 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Connection#setClientInfo(java.util.Properties)
+	 */
+	@Override
+	public void setClientInfo(Properties properties) throws SQLClientInfoException {
+		throw new UnsupportedOperationException("setClientInfo");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Connection#getClientInfo(java.lang.String)
 	 */
 	@Override
@@ -306,7 +332,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#getHoldability()
 	 */
 	@Override
@@ -316,7 +342,17 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Connection#setHoldability(int)
+	 */
+	@Override
+	public void setHoldability(int holdability) throws SQLException {
+		throw new UnsupportedOperationException("setHoldability");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Connection#getMetaData()
 	 */
 	@Override
@@ -368,9 +404,13 @@ public class GroupConnection implements Connection {
 		throw new UnsupportedOperationException("getSchema");
 	}
 
+	public void setSchema(String schema) throws SQLException {
+		throw new UnsupportedOperationException("setSchema");
+	}
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#getTransactionIsolation()
 	 */
 	@Override
@@ -380,7 +420,18 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Connection#setTransactionIsolation(int)
+	 */
+	@Override
+	public void setTransactionIsolation(int level) throws SQLException {
+		checkClosed();
+		this.transactionIsolation = level;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Connection#getTypeMap()
 	 */
 	@Override
@@ -390,7 +441,17 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Connection#setTypeMap(java.util.Map)
+	 */
+	@Override
+	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
+		throw new UnsupportedOperationException("setTypeMap");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Connection#getWarnings()
 	 */
 	@Override
@@ -408,7 +469,7 @@ public class GroupConnection implements Connection {
 	private Connection getWriteConnection() throws SQLException {
 		if (wConnection == null) {
 			wConnection = writeDataSource.getConnection();
-			
+
 			if (wConnection.getAutoCommit() != autoCommit) {
 				wConnection.setAutoCommit(autoCommit);
 			}
@@ -419,7 +480,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#isClosed()
 	 */
 	@Override
@@ -429,7 +490,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#isReadOnly()
 	 */
 	@Override
@@ -439,7 +500,17 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Connection#setReadOnly(boolean)
+	 */
+	@Override
+	public void setReadOnly(boolean readOnly) throws SQLException {
+		// do nothing
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Connection#isValid(int)
 	 */
 	@Override
@@ -449,7 +520,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
 	 */
 	@Override
@@ -459,7 +530,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#nativeSQL(java.lang.String)
 	 */
 	@Override
@@ -469,7 +540,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareCall(java.lang.String)
 	 */
 	@Override
@@ -479,7 +550,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareCall(java.lang.String, int, int)
 	 */
 	@Override
@@ -489,12 +560,12 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareCall(java.lang.String, int, int, int)
 	 */
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-	      int resultSetHoldability) throws SQLException {
+			int resultSetHoldability) throws SQLException {
 		checkClosed();
 		CallableStatement cstmt = null;
 		// 存储过程强制走写库
@@ -507,7 +578,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareStatement(java.lang.String)
 	 */
 	@Override
@@ -520,7 +591,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareStatement(java.lang.String, int)
 	 */
 	@Override
@@ -532,12 +603,12 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-	      throws SQLException {
+			throws SQLException {
 		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
 		pstmt.setResultSetType(resultSetType);
 		pstmt.setResultSetConcurrency(resultSetConcurrency);
@@ -546,20 +617,21 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-	      int resultSetHoldability) throws SQLException {
-		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType, resultSetConcurrency);
+			int resultSetHoldability) throws SQLException {
+		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType,
+				resultSetConcurrency);
 		pstmt.setResultSetHoldability(resultSetHoldability);
 		return pstmt;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareStatement(java.lang.String, int[])
 	 */
 	@Override
@@ -571,7 +643,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#prepareStatement(java.lang.String, java.lang.String[])
 	 */
 	@Override
@@ -583,7 +655,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint)
 	 */
 	@Override
@@ -593,7 +665,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#rollback()
 	 */
 	@Override
@@ -610,7 +682,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#rollback(java.sql.Savepoint)
 	 */
 	@Override
@@ -620,60 +692,12 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setAutoCommit(boolean)
-	 */
-	@Override
-	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		checkClosed();
-		if (this.autoCommit == autoCommit) {
-			return;
-		}
-		this.autoCommit = autoCommit;
-		if (this.wConnection != null) {
-			this.wConnection.setAutoCommit(autoCommit);
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setCatalog(java.lang.String)
-	 */
-	@Override
-	public void setCatalog(String catalog) throws SQLException {
-		throw new UnsupportedOperationException("setCatalog");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setClientInfo(java.util.Properties)
-	 */
-	@Override
-	public void setClientInfo(Properties properties) throws SQLClientInfoException {
-		throw new UnsupportedOperationException("setClientInfo");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#setClientInfo(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public void setClientInfo(String name, String value) throws SQLClientInfoException {
 		throw new UnsupportedOperationException("setClientInfo");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setHoldability(int)
-	 */
-	@Override
-	public void setHoldability(int holdability) throws SQLException {
-		throw new UnsupportedOperationException("setHoldability");
 	}
 
 	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
@@ -682,17 +706,7 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setReadOnly(boolean)
-	 */
-	@Override
-	public void setReadOnly(boolean readOnly) throws SQLException {
-		// do nothing
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#setSavepoint()
 	 */
 	@Override
@@ -702,37 +716,12 @@ public class GroupConnection implements Connection {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Connection#setSavepoint(java.lang.String)
 	 */
 	@Override
 	public Savepoint setSavepoint(String name) throws SQLException {
 		throw new UnsupportedOperationException("setSavepoint");
-	}
-
-	public void setSchema(String schema) throws SQLException {
-		throw new UnsupportedOperationException("setSchema");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setTransactionIsolation(int)
-	 */
-	@Override
-	public void setTransactionIsolation(int level) throws SQLException {
-		checkClosed();
-		this.transactionIsolation = level;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setTypeMap(java.util.Map)
-	 */
-	@Override
-	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-		throw new UnsupportedOperationException("setTypeMap");
 	}
 
 	/*

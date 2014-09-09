@@ -1,39 +1,43 @@
 package com.dianping.zebra.group.datasources;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.DataSourceRouter;
-import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.router.RouterContext;
+import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.router.WeightDataSourceRouter;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+
 public class LoadBalancedDataSource extends AbstractDataSource {
-
-	private int retryTimes;
-
-	private Map<String, DataSourceConfig> loadBalancedConfigMap;
-
-	private DataSourceRouter router;
-
-	private Map<String, InnerSingleDataSource> dataSources;
 
 	private SingleDataSourceManager dataSourceManager;
 
-	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap, int retryTimes) {
+	private Map<String, InnerSingleDataSource> dataSources;
+
+	private JdbcFilter filter;
+
+	private Map<String, DataSourceConfig> loadBalancedConfigMap;
+
+	private JdbcMetaData metaData;
+
+	private int retryTimes;
+
+	private DataSourceRouter router;
+
+	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
+			JdbcMetaData metaData, JdbcFilter filter, int retryTimes) {
 		this.dataSources = new HashMap<String, InnerSingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.retryTimes = retryTimes;
+		this.filter = filter;
+		this.metaData = metaData;
 	}
 
 	public void close() throws SQLException {
@@ -96,6 +100,8 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	}
 
 	public void init() {
+		initFilter();
+
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
 
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
@@ -104,5 +110,9 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		}
 
 		this.router = new WeightDataSourceRouter(loadBalancedConfigMap);
+	}
+
+	private void initFilter() {
+		this.metaData.setDataSourceClass(this.getClass().getName());
 	}
 }

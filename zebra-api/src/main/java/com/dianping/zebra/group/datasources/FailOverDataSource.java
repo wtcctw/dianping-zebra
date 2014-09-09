@@ -5,7 +5,6 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
-import com.dianping.zebra.group.filter.FilterWrapper;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
@@ -31,7 +30,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private Map<String, DataSourceConfig> configs;
 
-	private JdbcFilter filter = new FilterWrapper();
+	private JdbcFilter filter;
 
 	private volatile InnerSingleDataSource master;
 
@@ -39,15 +38,10 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private JdbcMetaData metaData;
 
-	public FailOverDataSource(Map<String, DataSourceConfig> configs) {
-		this.configs = configs;
-	}
-
 	public FailOverDataSource(Map<String, DataSourceConfig> configs, JdbcMetaData metaData, JdbcFilter filter) {
-		this(configs);
+		this.configs = configs;
 		this.filter = filter;
 		this.metaData = metaData.clone();
-		this.metaData.setDataSourceClass(this.getClass().getName());
 	}
 
 	@Override
@@ -107,6 +101,8 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	public void init(boolean forceCheckMaster) {
+		initFilter();
+
 		MasterDataSourceMonitor monitor = new MasterDataSourceMonitor(this);
 
 		try {
@@ -131,6 +127,10 @@ public class FailOverDataSource extends AbstractDataSource {
 		masterDataSourceMonitorThread.setDaemon(true);
 		masterDataSourceMonitorThread.setName("Dal-MasterDataSourceChecker");
 		masterDataSourceMonitorThread.start();
+	}
+
+	private void initFilter() {
+		this.metaData.setDataSourceClass(this.getClass().getName());
 	}
 
 	private boolean setMasterDb(DataSourceConfig config) {

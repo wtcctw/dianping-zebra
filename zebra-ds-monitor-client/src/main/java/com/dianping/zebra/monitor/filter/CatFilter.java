@@ -58,7 +58,7 @@ public class CatFilter extends AbstractJdbcFilter {
 	}
 
 	@Override public void refreshGroupDataSourceAfter(JdbcMetaData metaData, String propertiesName) {
-
+		refreshGroupDataSourceTransaction = null;
 	}
 
 	@Override public void refreshGroupDataSourceBefore(JdbcMetaData metaData, String propertiesName) {
