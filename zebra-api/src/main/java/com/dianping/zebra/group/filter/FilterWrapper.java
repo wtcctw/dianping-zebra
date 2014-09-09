@@ -16,6 +16,38 @@ public class FilterWrapper implements JdbcFilter {
 		this.filters = filters;
 	}
 
+	@Override public void findMasterFailOverDataSourceAfter(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.findMasterFailOverDataSourceAfter(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void findMasterFailOverDataSourceBefore(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.findMasterFailOverDataSourceBefore(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void findMasterFailOverDataSourceError(final JdbcMetaData metaData, final Exception exp) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.findMasterFailOverDataSourceError(metaData, exp);
+			}
+		}.execute();
+	}
+
+	@Override public void findMasterFailOverDataSourceSuccess(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.findMasterFailOverDataSourceSuccess(metaData);
+			}
+		}.execute();
+	}
+
 	@Override public void getGroupConnectionAfter(final JdbcMetaData metaData) {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {
@@ -115,6 +147,38 @@ public class FilterWrapper implements JdbcFilter {
 
 	public int size() {
 		return filters == null ? 0 : filters.size();
+	}
+
+	@Override public void switchFailOverDataSourceAfter(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.switchFailOverDataSourceAfter(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void switchFailOverDataSourceBefore(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.switchFailOverDataSourceBefore(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void switchFailOverDataSourceError(final JdbcMetaData metaData, final Exception exp) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.switchFailOverDataSourceError(metaData, exp);
+			}
+		}.execute();
+	}
+
+	@Override public void switchFailOverDataSourceSuccess(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.switchFailOverDataSourceSuccess(metaData);
+			}
+		}.execute();
 	}
 
 	abstract class JdbcFilterExecuter {

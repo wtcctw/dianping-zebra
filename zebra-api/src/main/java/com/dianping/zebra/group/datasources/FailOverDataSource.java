@@ -1,9 +1,7 @@
 package com.dianping.zebra.group.datasources;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
-import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
@@ -111,7 +109,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 				if (forceCheckMaster) {
 					MasterDsNotFoundException exp = new MasterDsNotFoundException(error_message);
-					Cat.logError(exp);
+					logger.error(exp.getMessage(), exp);
 					throw exp;
 				} else {
 					logger.warn(error_message);
@@ -120,7 +118,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				logger.info("FailOverDataSource find master success!");
 			}
 		} catch (FailOverDataSourceGCException e) {
-			Cat.logError("FailOverDataSource should not be null!", e);
+			logger.error("should never be here!", e);
 		}
 
 		masterDataSourceMonitorThread = new Thread(monitor);
@@ -131,11 +129,13 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private void initFilter() {
 		this.metaData.setDataSourceClass(this.getClass().getName());
+		this.metaData.setDataSource(this);
 	}
 
 	private boolean setMasterDb(DataSourceConfig config) {
 		if (master == null || !master.getId().equals(config.getId())) {
 			master = getDataSource(config);
+			this.metaData.setDataSourceId(master.getId());
 			return true;
 		}
 		return false;
@@ -197,8 +197,6 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		private WeakReference<FailOverDataSource> ref;
 
-		private Transaction transaction = null;
-
 		private int transactionTryLimits = 0;
 
 		public MasterDataSourceMonitor(FailOverDataSource dsRef) {
@@ -233,36 +231,34 @@ public class FailOverDataSource extends AbstractDataSource {
 			cachedConnection.clear();
 		}
 
-		private void completeSwitchTransaction() {
-			if (transaction != null) {
-				Cat.logEvent("DAL.FailOver", "Success");
-				transaction.setStatus(Message.SUCCESS);
-				transaction.complete();
-				transaction = null;
-			}
-		}
-
-		private void createSwitchTransaction() {
-			transaction = Cat.newTransaction("DAL", "FailOver");
-		}
-
 		public FindMasterDataSourceResult findMasterDataSource() throws FailOverDataSourceGCException {
+			getWeakFailOverDataSource().filter
+					.findMasterFailOverDataSourceBefore(getWeakFailOverDataSource().metaData.clone());
+
 			FindMasterDataSourceResult result = new FindMasterDataSourceResult();
 
 			if (getWeakFailOverDataSource().configs.values().size() == 0) {
-				logger.warn("zero writer data source in config!");
+				Exception exp = new IllegalConfigException("zero writer data source in config!");
+				getWeakFailOverDataSource().filter
+						.findMasterFailOverDataSourceError(getWeakFailOverDataSource().metaData.clone(), exp);
+				logger.warn(exp.getMessage(), exp);
 			}
 
 			for (DataSourceConfig config : getWeakFailOverDataSource().configs.values()) {
 				CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
 				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
-					Cat.logEvent("DAL.Master", "Found-" + config.getId());
 
 					result.setChangedMaster(getWeakFailOverDataSource().setMasterDb(config));
 					result.setMasterExist(true);
+
+					getWeakFailOverDataSource().filter
+							.findMasterFailOverDataSourceSuccess(getWeakFailOverDataSource().metaData.clone());
 					break;
 				}
 			}
+
+			getWeakFailOverDataSource().filter
+					.findMasterFailOverDataSourceAfter(getWeakFailOverDataSource().metaData.clone());
 
 			return result;
 		}
@@ -289,17 +285,15 @@ public class FailOverDataSource extends AbstractDataSource {
 			return weak;
 		}
 
-		private void increaseTransactionTryTimes() {
+		private void increaseTransactionTryTimes() throws FailOverDataSourceGCException {
 			transactionTryLimits++;
 			if (transactionTryLimits >= maxTransactionTryLimits) {
 				transactionTryLimits = 0;
 
-				if (transaction != null) {
-					Cat.logEvent("DAL.FailOver", "Failed");
-					transaction.setStatus("Fail to find any master database");
-					transaction.complete();
-					transaction = null;
-				}
+				getWeakFailOverDataSource().filter
+						.switchFailOverDataSourceError(getWeakFailOverDataSource().metaData.clone(), null);
+				getWeakFailOverDataSource().filter
+						.switchFailOverDataSourceAfter(getWeakFailOverDataSource().metaData.clone());
 			}
 		}
 
@@ -325,7 +319,7 @@ public class FailOverDataSource extends AbstractDataSource {
 					return CheckMasterDataSourceResult.READ_ONLY;
 				}
 			} catch (SQLException e) {
-				Cat.logError(e);
+				logger.error(e.getMessage(), e);
 				closeConnection(config.getId());
 
 				return CheckMasterDataSourceResult.ERROR;
@@ -356,7 +350,10 @@ public class FailOverDataSource extends AbstractDataSource {
 					if (!result.isMasterExist()) {
 						increaseTransactionTryTimes();
 					} else {
-						completeSwitchTransaction();
+						getWeakFailOverDataSource().filter
+								.switchFailOverDataSourceSuccess(getWeakFailOverDataSource().metaData.clone());
+						getWeakFailOverDataSource().filter
+								.switchFailOverDataSourceAfter(getWeakFailOverDataSource().metaData.clone());
 
 						closeConnections();
 						while (!Thread.interrupted()) {
@@ -365,19 +362,20 @@ public class FailOverDataSource extends AbstractDataSource {
 							if (isMasterDataSource(
 									getWeakFailOverDataSource().configs.get(getWeakFailOverDataSource().master.getId()))
 									!= CheckMasterDataSourceResult.READ_WRITE) {
-								createSwitchTransaction();
+								getWeakFailOverDataSource().filter
+										.switchFailOverDataSourceBefore(getWeakFailOverDataSource().metaData.clone());
 								closeConnections();
 								break;
 							}
 						}
 					}
 				} catch (FailOverDataSourceGCException e) {
-					Cat.logError("FailOverDataSource has be GC", e);
+					logger.error("FailOverDataSource has be GC", e);
 					break;
 				} catch (InterruptedException ignore) {
 					break;
 				} catch (Exception e) {
-					Cat.logError(e);
+					logger.error(e);
 				}
 			}
 

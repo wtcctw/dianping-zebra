@@ -17,6 +17,24 @@ public class CatFilter extends AbstractJdbcFilter {
 
 	private ThreadLocal<Transaction> refreshGroupDataSourceTransaction = null;
 
+	private ThreadLocal<Transaction> switchFailOverDataSourceTransaction = null;
+
+	@Override public void findMasterFailOverDataSourceAfter(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void findMasterFailOverDataSourceBefore(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void findMasterFailOverDataSourceError(JdbcMetaData metaData, Exception exp) {
+
+	}
+
+	@Override public void findMasterFailOverDataSourceSuccess(JdbcMetaData metaData) {
+		Cat.logEvent("DAL.Master", "Found-" + metaData.getDataSourceId());
+	}
+
 	@Override public void getGroupConnectionAfter(JdbcMetaData metaData) {
 
 	}
@@ -58,6 +76,7 @@ public class CatFilter extends AbstractJdbcFilter {
 	}
 
 	@Override public void refreshGroupDataSourceAfter(JdbcMetaData metaData, String propertiesName) {
+		switchFailOverDataSourceTransaction.get().complete();
 		refreshGroupDataSourceTransaction = null;
 	}
 
@@ -67,14 +86,39 @@ public class CatFilter extends AbstractJdbcFilter {
 	}
 
 	@Override public void refreshGroupDataSourceError(JdbcMetaData metaData, String propertiesName, Exception exp) {
-		if (refreshGroupDataSourceTransaction != null && refreshGroupDataSourceTransaction.get() != null) {
+		if (refreshGroupDataSourceTransaction != null) {
 			refreshGroupDataSourceTransaction.get().setStatus(exp);
 		}
 	}
 
 	@Override public void refreshGroupDataSourceSuccess(JdbcMetaData metaData, String propertiesName) {
-		if (refreshGroupDataSourceTransaction != null && refreshGroupDataSourceTransaction.get() != null) {
+		if (refreshGroupDataSourceTransaction != null) {
 			refreshGroupDataSourceTransaction.get().setStatus(Message.SUCCESS);
+		}
+	}
+
+	@Override public void switchFailOverDataSourceAfter(JdbcMetaData metaData) {
+		if (switchFailOverDataSourceTransaction != null) {
+			switchFailOverDataSourceTransaction.get().complete();
+			switchFailOverDataSourceTransaction = null;
+		}
+	}
+
+	@Override public void switchFailOverDataSourceBefore(JdbcMetaData metaData) {
+		switchFailOverDataSourceTransaction = newTransaction(DAL_CAT_TYPE, "FailOver");
+	}
+
+	@Override public void switchFailOverDataSourceError(JdbcMetaData metaData, Exception exp) {
+		if (switchFailOverDataSourceTransaction != null) {
+			Cat.logEvent("DAL.FailOver", "Failed");
+			switchFailOverDataSourceTransaction.get().setStatus("Fail to find any master database");
+		}
+	}
+
+	@Override public void switchFailOverDataSourceSuccess(JdbcMetaData metaData) {
+		if (switchFailOverDataSourceTransaction != null) {
+			Cat.logEvent("DAL.FailOver", "Success");
+			switchFailOverDataSourceTransaction.get().setStatus(Message.SUCCESS);
 		}
 	}
 

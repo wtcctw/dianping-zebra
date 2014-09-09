@@ -98,7 +98,7 @@ public class FailoverDataSourceTest {
 
 	@Test
 	public void test_find_write_data_source1() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcMetaData.class), mock(JdbcFilter.class));
+		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcMetaData(), mock(JdbcFilter.class));
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
@@ -111,7 +111,7 @@ public class FailoverDataSourceTest {
 
 	@Test
 	public void test_find_write_data_source2() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcMetaData.class), mock(JdbcFilter.class));
+		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcMetaData(), mock(JdbcFilter.class));
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		doReturn(readOnlyCoon).when(monitor).getConnection(configs.get("db1"));
@@ -127,7 +127,7 @@ public class FailoverDataSourceTest {
 
 	@Test(timeout = 30000)
 	public void test_hot_switch() throws SQLException, InterruptedException {
-		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcMetaData.class), mock(JdbcFilter.class));
+		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcMetaData(), mock(JdbcFilter.class));
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		ConnectionAnswer connectionAnswer = new ConnectionAnswer();
@@ -161,7 +161,7 @@ public class FailoverDataSourceTest {
 	@Test(timeout = 5000)
 	public void test_thread_auto_close() throws Exception {
 		Cat.logEvent("Init", "Init");
-		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcMetaData.class), mock(JdbcFilter.class));
+		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcMetaData(), mock(JdbcFilter.class));
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		FailOverDataSource.FindMasterDataSourceResult result = new FailOverDataSource.FindMasterDataSourceResult();
