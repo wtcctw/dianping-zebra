@@ -48,6 +48,38 @@ public class FilterWrapper implements JdbcFilter {
 		}.execute();
 	}
 
+	@Override public void executeAfter(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.executeAfter(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void executeBefore(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.executeBefore(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void executeError(final JdbcMetaData metaData, final Exception exp) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.executeError(metaData, exp);
+			}
+		}.execute();
+	}
+
+	@Override public void executeSuccess(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.executeSuccess(metaData);
+			}
+		}.execute();
+	}
+
 	@Override public void findMasterFailOverDataSourceAfter(final JdbcMetaData metaData) {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {

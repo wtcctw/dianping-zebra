@@ -124,14 +124,12 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				return new int[0];
 			}
 
-			return new JDBCOperationCallback<int[]>() {
-
+			return executeWithFilter(new JDBCOperationCallback<int[]>() {
 				@Override
 				public int[] doAction(Connection conn) throws SQLException {
 					return executeBatchOnConnection(conn);
 				}
-			}.doAction(this.dpGroupConnection.getRealConnection(sql, true));
-
+			}, sql, pstBatchedArgs, true);
 		} finally {
 			if (pstBatchedArgs != null) {
 				pstBatchedArgs.clear();
@@ -160,13 +158,13 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return new GroupResultSet(new JDBCOperationCallback<ResultSet>() {
+		return executeWithFilter(new JDBCOperationCallback<ResultSet>() {
 
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
 			}
-		}.doAction(this.dpGroupConnection.getRealConnection(sql, false)));
+		}, sql, params, false);
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
@@ -186,8 +184,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return new JDBCOperationCallback<Integer>() {
-
+		return executeWithFilter(new JDBCOperationCallback<Integer>() {
 			@Override
 			public Integer doAction(Connection conn) throws SQLException {
 				try {
@@ -196,14 +193,11 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 					if (conn instanceof SingleConnection) {
 						((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
 					}
-
 					JDBCExceptionUtils.throwWrappedSQLException(e);
 				}
-
 				return updateCount;
 			}
-
-		}.doAction(this.dpGroupConnection.getRealConnection(sql, true));
+		}, sql, params, true);
 	}
 
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {
@@ -733,6 +727,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	 * @see java.sql.PreparedStatement#setUnicodeStream(int, java.io.InputStream, int)
 	 */
 	@Override
+	@Deprecated
 	public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
 		params.add(new AsciiParamContext(parameterIndex, new Object[] { x }));
 	}

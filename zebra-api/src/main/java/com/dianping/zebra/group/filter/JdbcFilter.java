@@ -12,6 +12,14 @@ public interface JdbcFilter {
 
 	void closeSingleDataSourceSuccess(JdbcMetaData metaData);
 
+	void executeAfter(JdbcMetaData metaData);
+
+	void executeBefore(JdbcMetaData metaData);
+
+	void executeError(JdbcMetaData metaData, Exception exp);
+
+	void executeSuccess(JdbcMetaData metaData);
+
 	void findMasterFailOverDataSourceAfter(JdbcMetaData metaData);
 
 	void findMasterFailOverDataSourceBefore(JdbcMetaData metaData);

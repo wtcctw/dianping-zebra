@@ -22,17 +22,11 @@ public class JdbcMetaData implements Cloneable {
 
 	private String jdbcUsername;
 
+	private Object params;
+
 	private Properties properties;
 
 	private String sql;
-
-	public String getSql() {
-		return sql;
-	}
-
-	public void setSql(String sql) {
-		this.sql = sql;
-	}
 
 	public JdbcMetaData clone() {
 		try {
@@ -98,6 +92,14 @@ public class JdbcMetaData implements Cloneable {
 		this.jdbcUsername = jdbcUsername;
 	}
 
+	public Object getParams() {
+		return params;
+	}
+
+	public void setParams(Object params) {
+		this.params = params;
+	}
+
 	public Properties getProperties() {
 		if (properties == null) {
 			properties = new Properties();
@@ -107,6 +109,14 @@ public class JdbcMetaData implements Cloneable {
 
 	public void setProperties(Properties properties) {
 		this.properties = properties;
+	}
+
+	public String getSql() {
+		return sql;
+	}
+
+	public void setSql(String sql) {
+		this.sql = sql;
 	}
 
 	@Override public String toString() {

@@ -23,6 +23,22 @@ public class StatFilter extends AbstractJdbcFilter {
 
 	}
 
+	@Override public void executeAfter(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void executeBefore(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void executeError(JdbcMetaData metaData, Exception exp) {
+
+	}
+
+	@Override public void executeSuccess(JdbcMetaData metaData) {
+
+	}
+
 	@Override public void findMasterFailOverDataSourceAfter(JdbcMetaData metaData) {
 
 	}
