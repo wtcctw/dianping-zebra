@@ -19,6 +19,22 @@ public class CatFilter extends AbstractJdbcFilter {
 
 	private ThreadLocal<Transaction> switchFailOverDataSourceTransaction = null;
 
+	@Override public void closeSingleDataSourceAfter(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void closeSingleDataSourceBefore(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void closeSingleDataSourceError(JdbcMetaData metaData, Exception exp) {
+
+	}
+
+	@Override public void closeSingleDataSourceSuccess(JdbcMetaData metaData) {
+		Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
+	}
+
 	@Override public void findMasterFailOverDataSourceAfter(JdbcMetaData metaData) {
 
 	}
@@ -62,11 +78,27 @@ public class CatFilter extends AbstractJdbcFilter {
 
 	}
 
-	@Override public void initGroupDataSourceError(JdbcMetaData metaData) {
+	@Override public void initGroupDataSourceError(JdbcMetaData metaData, Exception exp) {
 
 	}
 
 	@Override public void initGroupDataSourceSuccess(JdbcMetaData metaData) {
+	}
+
+	@Override public void initSingleDataSourceAfter(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void initSingleDataSourceBefore(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void initSingleDataSourceError(JdbcMetaData metaData, Exception exp) {
+
+	}
+
+	@Override public void initSingleDataSourceSuccess(JdbcMetaData metaData) {
+		Cat.logEvent("DataSource.Created", metaData.getDataSourceId());
 	}
 
 	private ThreadLocal<Transaction> newTransaction(String type, String name) {

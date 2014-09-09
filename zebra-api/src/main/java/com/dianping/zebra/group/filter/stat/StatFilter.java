@@ -7,6 +7,22 @@ import com.dianping.zebra.group.filter.JdbcMetaData;
  * Created by Dozer on 9/2/14.
  */
 public class StatFilter extends AbstractJdbcFilter {
+	@Override public void closeSingleDataSourceAfter(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void closeSingleDataSourceBefore(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void closeSingleDataSourceError(JdbcMetaData metaData, Exception exp) {
+
+	}
+
+	@Override public void closeSingleDataSourceSuccess(JdbcMetaData metaData) {
+
+	}
+
 	@Override public void findMasterFailOverDataSourceAfter(JdbcMetaData metaData) {
 
 	}
@@ -47,11 +63,27 @@ public class StatFilter extends AbstractJdbcFilter {
 
 	}
 
-	@Override public void initGroupDataSourceError(JdbcMetaData metaData) {
+	@Override public void initGroupDataSourceError(JdbcMetaData metaData, Exception exp) {
 
 	}
 
 	@Override public void initGroupDataSourceSuccess(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void initSingleDataSourceAfter(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void initSingleDataSourceBefore(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void initSingleDataSourceError(JdbcMetaData metaData, Exception exp) {
+
+	}
+
+	@Override public void initSingleDataSourceSuccess(JdbcMetaData metaData) {
 
 	}
 

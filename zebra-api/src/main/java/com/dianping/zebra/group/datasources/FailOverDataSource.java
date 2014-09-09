@@ -98,7 +98,8 @@ public class FailOverDataSource extends AbstractDataSource {
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}
 
-		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config);
+		return SingleDataSourceManagerFactory.getDataSourceManager()
+				.createDataSource(config, this.metaData.clone(), this.filter);
 	}
 
 	@Override

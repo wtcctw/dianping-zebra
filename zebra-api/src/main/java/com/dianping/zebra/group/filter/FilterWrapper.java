@@ -16,6 +16,38 @@ public class FilterWrapper implements JdbcFilter {
 		this.filters = filters;
 	}
 
+	@Override public void closeSingleDataSourceAfter(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.closeSingleDataSourceAfter(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void closeSingleDataSourceBefore(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.closeSingleDataSourceBefore(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void closeSingleDataSourceError(final JdbcMetaData metaData, final Exception exp) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.closeSingleDataSourceError(metaData, exp);
+			}
+		}.execute();
+	}
+
+	@Override public void closeSingleDataSourceSuccess(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.closeSingleDataSourceSuccess(metaData);
+			}
+		}.execute();
+	}
+
 	@Override public void findMasterFailOverDataSourceAfter(final JdbcMetaData metaData) {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {
@@ -96,10 +128,10 @@ public class FilterWrapper implements JdbcFilter {
 		}.execute();
 	}
 
-	@Override public void initGroupDataSourceError(final JdbcMetaData metaData) {
+	@Override public void initGroupDataSourceError(final JdbcMetaData metaData, final Exception exp) {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {
-				filter.initGroupDataSourceError(metaData);
+				filter.initGroupDataSourceError(metaData, exp);
 			}
 		}.execute();
 	}
@@ -108,6 +140,38 @@ public class FilterWrapper implements JdbcFilter {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {
 				filter.initGroupDataSourceSuccess(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void initSingleDataSourceAfter(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.initSingleDataSourceAfter(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void initSingleDataSourceBefore(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.initSingleDataSourceBefore(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void initSingleDataSourceError(final JdbcMetaData metaData, final Exception exp) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.initSingleDataSourceError(metaData, exp);
+			}
+		}.execute();
+	}
+
+	@Override public void initSingleDataSourceSuccess(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.initSingleDataSourceSuccess(metaData);
 			}
 		}.execute();
 	}

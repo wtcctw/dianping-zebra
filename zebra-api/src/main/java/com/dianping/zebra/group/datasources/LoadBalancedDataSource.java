@@ -105,7 +105,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
 
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			SingleDataSource dataSource = dataSourceManager.createDataSource(config);
+			SingleDataSource dataSource = dataSourceManager.createDataSource(config, this.metaData.clone(), this.filter);
 			this.dataSources.put(config.getId(), dataSource);
 		}
 
@@ -114,5 +114,6 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private void initFilter() {
 		this.metaData.setDataSourceClass(this.getClass().getName());
+		this.metaData.setDataSource(this);
 	}
 }

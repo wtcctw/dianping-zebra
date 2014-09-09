@@ -301,7 +301,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 			filter.initGroupDataSourceSuccess(metaData);
 		} catch (RuntimeException exp) {
-			filter.initGroupDataSourceError(metaData);
+			filter.initGroupDataSourceError(metaData, exp);
 			throw exp;
 		} finally {
 			filter.initGroupDataSourceAfter(metaData);

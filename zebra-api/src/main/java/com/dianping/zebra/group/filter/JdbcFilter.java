@@ -4,9 +4,17 @@ package com.dianping.zebra.group.filter;
  * Created by Dozer on 9/2/14.
  */
 public interface JdbcFilter {
-	void findMasterFailOverDataSourceBefore(JdbcMetaData metaData);
+	void closeSingleDataSourceAfter(JdbcMetaData metaData);
+
+	void closeSingleDataSourceBefore(JdbcMetaData metaData);
+
+	void closeSingleDataSourceError(JdbcMetaData metaData, Exception exp);
+
+	void closeSingleDataSourceSuccess(JdbcMetaData metaData);
 
 	void findMasterFailOverDataSourceAfter(JdbcMetaData metaData);
+
+	void findMasterFailOverDataSourceBefore(JdbcMetaData metaData);
 
 	void findMasterFailOverDataSourceError(JdbcMetaData metaData, Exception exp);
 
@@ -24,9 +32,17 @@ public interface JdbcFilter {
 
 	void initGroupDataSourceBefore(JdbcMetaData metaData);
 
-	void initGroupDataSourceError(JdbcMetaData metaData);
+	void initGroupDataSourceError(JdbcMetaData metaData, Exception exp);
 
 	void initGroupDataSourceSuccess(JdbcMetaData metaData);
+
+	void initSingleDataSourceAfter(JdbcMetaData metaData);
+
+	void initSingleDataSourceBefore(JdbcMetaData metaData);
+
+	void initSingleDataSourceError(JdbcMetaData metaData, Exception exp);
+
+	void initSingleDataSourceSuccess(JdbcMetaData metaData);
 
 	void refreshGroupDataSourceAfter(JdbcMetaData metaData, String propertiesName);
 
