@@ -1,6 +1,5 @@
 package com.dianping.zebra.group.datasources;
 
-import com.dianping.cat.Cat;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
@@ -160,7 +159,6 @@ public class FailoverDataSourceTest {
 
 	@Test(timeout = 5000)
 	public void test_thread_auto_close() throws Exception {
-		Cat.logEvent("Init", "Init");
 		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcMetaData(), mock(JdbcFilter.class));
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 

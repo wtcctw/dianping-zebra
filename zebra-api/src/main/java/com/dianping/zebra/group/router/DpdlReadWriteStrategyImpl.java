@@ -1,8 +1,9 @@
 package com.dianping.zebra.group.router;
 
-import java.lang.reflect.Method;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
-import com.dianping.cat.Cat;
+import java.lang.reflect.Method;
 
 public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 	private static Method getContextMethod = null;
@@ -14,11 +15,11 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 	static {
 		try {
 			Class<?> contextHolderClass = Class.forName("com.dianping.avatar.tracker.ExecutionContextHolder");
-			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] {});
+			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] { });
 			getContextMethod.setAccessible(true);
 
 			Class<?> contextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
-			isAuthenticatedMethod = contextClass.getDeclaredMethod("isAuthenticated", new Class[] {});
+			isAuthenticatedMethod = contextClass.getDeclaredMethod("isAuthenticated", new Class[] { });
 			isAuthenticatedMethod.setAccessible(true);
 
 			serviceFlag = true;
@@ -28,6 +29,8 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 		}
 	}
 
+	private final Logger logger = LogManager.getLogger(this.getClass());
+
 	@Override
 	public boolean forceReadFromMaster() {
 		if (serviceFlag) {
@@ -36,8 +39,8 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 				if (context != null) {
 					return (Boolean) isAuthenticatedMethod.invoke(context);
 				}
-			} catch (Exception throwable) {
-				Cat.logError(throwable);
+			} catch (Exception error) {
+				logger.error(error.getMessage(), error);
 			}
 		}
 

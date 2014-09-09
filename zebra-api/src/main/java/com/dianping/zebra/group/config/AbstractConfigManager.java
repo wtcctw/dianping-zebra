@@ -1,5 +1,9 @@
 package com.dianping.zebra.group.config;
 
+import com.dianping.zebra.group.util.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -9,18 +13,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.dianping.cat.Cat;
-import com.dianping.zebra.group.util.StringUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 public abstract class AbstractConfigManager {
 
-	private final Logger logger = LogManager.getLogger(this.getClass());
+	protected final ConfigService configService;
 
 	protected final String jdbcRef;
 
-	protected final ConfigService configService;
+	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
@@ -108,8 +107,7 @@ public abstract class AbstractConfigManager {
 				onPropertyUpdated(evt);
 				notifyListeners(evt);
 			} catch (Exception e) {
-				Cat.logError(e);
-				logger.warn("fail to update property, apply old config!", e);
+				logger.error("fail to update property, apply old config!", e);
 			}
 		}
 	}
