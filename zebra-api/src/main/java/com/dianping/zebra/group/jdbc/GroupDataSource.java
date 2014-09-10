@@ -137,7 +137,12 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public void close() throws SQLException {
-		this.close(this.readDataSource, this.writeDataSource);
+		JdbcMetaData tempMetaData = this.metaData.clone();
+		try {
+			this.close(this.readDataSource, this.writeDataSource);
+		} catch (SQLException exp) {
+
+		}
 	}
 
 	private void close(LoadBalancedDataSource readDataSource, FailOverDataSource writeDataSource) throws SQLException {

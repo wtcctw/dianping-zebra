@@ -4,6 +4,14 @@ package com.dianping.zebra.group.filter;
  * Created by Dozer on 9/2/14.
  */
 public interface JdbcFilter {
+	void closeGroupConnectionAfter(JdbcMetaData metaData);
+
+	void closeGroupConnectionBefore(JdbcMetaData metaData);
+
+	void closeGroupConnectionError(JdbcMetaData metaData, Exception exp);
+
+	void closeGroupConnectionSuccess(JdbcMetaData metaData);
+
 	void closeSingleDataSourceAfter(JdbcMetaData metaData);
 
 	void closeSingleDataSourceBefore(JdbcMetaData metaData);
@@ -32,7 +40,7 @@ public interface JdbcFilter {
 
 	void getGroupConnectionBefore(JdbcMetaData metaData);
 
-	void getGroupConnectionError(JdbcMetaData metaData);
+	void getGroupConnectionError(JdbcMetaData metaData, Exception exp);
 
 	void getGroupConnectionSuccess(JdbcMetaData metaData);
 

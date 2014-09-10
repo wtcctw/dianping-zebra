@@ -31,18 +31,6 @@ public class CatFilter extends AbstractJdbcFilter {
 
 	private ThreadLocal<Transaction> switchFailOverDataSourceTransaction = null;
 
-	@Override public void closeSingleDataSourceAfter(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void closeSingleDataSourceBefore(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void closeSingleDataSourceError(JdbcMetaData metaData, Exception exp) {
-
-	}
-
 	@Override public void closeSingleDataSourceSuccess(JdbcMetaData metaData) {
 		Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
 	}
@@ -94,36 +82,8 @@ public class CatFilter extends AbstractJdbcFilter {
 		}
 	}
 
-	@Override public void findMasterFailOverDataSourceAfter(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void findMasterFailOverDataSourceBefore(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void findMasterFailOverDataSourceError(JdbcMetaData metaData, Exception exp) {
-
-	}
-
 	@Override public void findMasterFailOverDataSourceSuccess(JdbcMetaData metaData) {
 		Cat.logEvent("DAL.Master", "Found-" + metaData.getDataSourceId());
-	}
-
-	@Override public void getGroupConnectionAfter(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void getGroupConnectionBefore(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void getGroupConnectionError(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void getGroupConnectionSuccess(JdbcMetaData metaData) {
-
 	}
 
 	@Override public void initGroupDataSourceAfter(JdbcMetaData metaData) {
@@ -131,29 +91,6 @@ public class CatFilter extends AbstractJdbcFilter {
 			StatusExtensionRegister.getInstance()
 					.register(new GroupDataSourceMonitor((GroupDataSourceMBean) metaData.getDataSource()));
 		}
-	}
-
-	@Override public void initGroupDataSourceBefore(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void initGroupDataSourceError(JdbcMetaData metaData, Exception exp) {
-
-	}
-
-	@Override public void initGroupDataSourceSuccess(JdbcMetaData metaData) {
-	}
-
-	@Override public void initSingleDataSourceAfter(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void initSingleDataSourceBefore(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void initSingleDataSourceError(JdbcMetaData metaData, Exception exp) {
-
 	}
 
 	@Override public void initSingleDataSourceSuccess(JdbcMetaData metaData) {

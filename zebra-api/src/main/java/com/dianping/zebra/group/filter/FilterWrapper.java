@@ -16,6 +16,38 @@ public class FilterWrapper implements JdbcFilter {
 		this.filters = filters;
 	}
 
+	@Override public void closeGroupConnectionAfter(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.closeGroupConnectionAfter(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void closeGroupConnectionBefore(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.closeGroupConnectionBefore(metaData);
+			}
+		}.execute();
+	}
+
+	@Override public void closeGroupConnectionError(final JdbcMetaData metaData, final Exception exp) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.closeGroupConnectionError(metaData, exp);
+			}
+		}.execute();
+	}
+
+	@Override public void closeGroupConnectionSuccess(final JdbcMetaData metaData) {
+		new JdbcFilterExecuter() {
+			@Override protected void execute(JdbcFilter filter) {
+				filter.closeGroupConnectionSuccess(metaData);
+			}
+		}.execute();
+	}
+
 	@Override public void closeSingleDataSourceAfter(final JdbcMetaData metaData) {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {
@@ -128,10 +160,10 @@ public class FilterWrapper implements JdbcFilter {
 		}.execute();
 	}
 
-	@Override public void getGroupConnectionError(final JdbcMetaData metaData) {
+	@Override public void getGroupConnectionError(final JdbcMetaData metaData, final Exception exp) {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {
-				filter.getGroupConnectionError(metaData);
+				filter.getGroupConnectionError(metaData, exp);
 			}
 		}.execute();
 	}
