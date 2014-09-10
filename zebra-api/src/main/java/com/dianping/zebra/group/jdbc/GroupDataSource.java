@@ -13,8 +13,6 @@ import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
-import com.dianping.zebra.group.filter.FilterWrapper;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -47,7 +45,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
-	private JdbcFilter filter = new FilterWrapper();
+	private String filterStr;
 
 	private GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
@@ -56,8 +54,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private String jdbcRef;
 
 	private String jdbcUrlExtra;
-
-	private JdbcMetaData metaData;
 
 	private LoadBalancedDataSource readDataSource;
 
@@ -334,7 +330,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.metaData.setJdbcRef(this.jdbcRef);
 		this.metaData.setDataSource(this);
 
-		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
+		this.filter = FilterManagerFactory.getFilterManager()
+				.loadFilter(StringUtils.isEmpty(this.filterStr) ? this.groupConfig.getFilters() : this.filterStr);
 	}
 
 	private void loadCustomizedReadWriteStrategy() {
@@ -489,6 +486,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public synchronized void setFactoryClassLocation(String factoryClassLocation) {
 		setProperty("factoryClassLocation", factoryClassLocation);
+	}
+
+	public void setFilter(String filter) {
+		this.filterStr = filter;
 	}
 
 	public synchronized void setForceIgnoreUnresolvedTransactions(boolean forceIgnoreUnresolvedTransactions) {

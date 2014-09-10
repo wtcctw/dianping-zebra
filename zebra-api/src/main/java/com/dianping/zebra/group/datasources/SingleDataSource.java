@@ -31,10 +31,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private String dsId;
 
-	private JdbcFilter filter;
-
-	private JdbcMetaData metaData;
-
 	private CountPunisher punisher;
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;

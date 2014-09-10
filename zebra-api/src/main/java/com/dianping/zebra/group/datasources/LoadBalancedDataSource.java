@@ -21,11 +21,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private Map<String, SingleDataSource> dataSources;
 
-	private JdbcFilter filter;
-
 	private Map<String, DataSourceConfig> loadBalancedConfigMap;
-
-	private JdbcMetaData metaData;
 
 	private int retryTimes;
 

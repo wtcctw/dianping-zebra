@@ -28,13 +28,9 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private Map<String, DataSourceConfig> configs;
 
-	private JdbcFilter filter;
-
 	private volatile SingleDataSource master;
 
 	private Thread masterDataSourceMonitorThread;
-
-	private JdbcMetaData metaData;
 
 	public FailOverDataSource(Map<String, DataSourceConfig> configs, JdbcMetaData metaData, JdbcFilter filter) {
 		this.configs = configs;

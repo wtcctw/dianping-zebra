@@ -1,15 +1,16 @@
 package com.dianping.zebra.group.jdbc;
 
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.util.StringUtils;
+
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
-import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.exception.DalException;
-import com.dianping.zebra.group.util.StringUtils;
 
 public abstract class AbstractDataSource implements DataSource {
 
@@ -19,11 +20,25 @@ public abstract class AbstractDataSource implements DataSource {
 
 	protected String configManagerType = REMOTE;
 
-	private PrintWriter out = null;
+	protected JdbcFilter filter;
+
+	protected volatile JdbcMetaData metaData;
 
 	private int loginTimeout = 0;
 
+	private PrintWriter out = null;
+
 	protected void close() throws SQLException {
+	}
+
+	@Override
+	public PrintWriter getLogWriter() throws SQLException {
+		return out;
+	}
+
+	@Override
+	public void setLogWriter(PrintWriter out) throws SQLException {
+		this.out = out;
 	}
 
 	@Override
@@ -32,8 +47,8 @@ public abstract class AbstractDataSource implements DataSource {
 	}
 
 	@Override
-	public PrintWriter getLogWriter() throws SQLException {
-		return out;
+	public void setLoginTimeout(int seconds) throws SQLException {
+		this.loginTimeout = seconds;
 	}
 
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
@@ -54,16 +69,6 @@ public abstract class AbstractDataSource implements DataSource {
 		}
 
 		this.configManagerType = configManagerType;
-	}
-
-	@Override
-	public void setLoginTimeout(int seconds) throws SQLException {
-		this.loginTimeout = seconds;
-	}
-
-	@Override
-	public void setLogWriter(PrintWriter out) throws SQLException {
-		this.out = out;
 	}
 
 	@Override
