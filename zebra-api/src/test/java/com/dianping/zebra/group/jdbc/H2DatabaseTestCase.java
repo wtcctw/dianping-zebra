@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.jdbc;
 
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.MockFilterHelper;
 import org.dbunit.IDatabaseTester;
 import org.dbunit.JdbcDatabaseTester;
 import org.dbunit.dataset.IDataSet;
@@ -17,12 +19,20 @@ public abstract class H2DatabaseTestCase {
 
 	protected static final String USER = "sa";
 
+	protected JdbcFilter mockedFilter;
+
 	protected void cleanlyInsert(String driver, String jdbcUrl, String user, String password, IDataSet dataSet)
-	      throws Exception {
+			throws Exception {
 		IDatabaseTester databaseTester = new JdbcDatabaseTester(driver, jdbcUrl, user, password);
 		databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
 		databaseTester.setDataSet(dataSet);
 		databaseTester.onSetup();
+	}
+
+	@Before
+	public void mockFilter(){
+		MockFilterHelper.injectMockFilter();
+		mockedFilter = MockFilterHelper.getMockedFilter();
 	}
 
 	@Before

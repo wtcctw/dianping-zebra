@@ -28,7 +28,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		//datasources
 		FailoverDataSourceTest.class,
 
-		//filter
+		//mockedFilter
 		JdbcMetaDataTest.class,
 		DefaultFilterManagerTest.class,
 

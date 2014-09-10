@@ -20,6 +20,19 @@ public class DefaultFilterManager implements FilterManager {
 
 	private final ConcurrentHashMap<String, List<JdbcFilter>> cachedFilterMap = new ConcurrentHashMap<String, List<JdbcFilter>>();
 
+	@Override public void addFilter(String name, JdbcFilter filter) {
+		List<JdbcFilter> filters;
+		if (cachedFilterMap.containsKey(name)) {
+			filters = cachedFilterMap.get(name);
+		} else {
+			filters = new ArrayList<JdbcFilter>();
+			cachedFilterMap.put(name, filters);
+		}
+
+		filters.add(filter);
+
+	}
+
 	public void init() {
 		try {
 			Properties filterProperties = loadFilterConfig();
