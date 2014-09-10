@@ -6,7 +6,6 @@ import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.status.StatusExtensionRegister;
-import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.AbstractJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
@@ -69,11 +68,9 @@ public class CatFilter extends AbstractJdbcFilter {
 	@Override public void executeSuccess(JdbcMetaData metaData) {
 		if (executeTransaction != null) {
 
-			if (metaData.getConnection() instanceof SingleConnection) {
-				SingleConnection conn = (SingleConnection) metaData.getConnection();
-
-				Cat.logEvent("SQL.Database", conn.getJdbcMetaData().getJdbcUrl(), Event.SUCCESS,
-						conn.getJdbcMetaData().getDataSourceId());
+			if (metaData.getRealJdbcMetaData() != null) {
+				Cat.logEvent("SQL.Database", metaData.getRealJdbcMetaData().getJdbcUrl(), Event.SUCCESS,
+						metaData.getRealJdbcMetaData().getDataSourceId());
 				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS,
 						Stringizers.forJson().compact()
 								.from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));

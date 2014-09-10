@@ -399,6 +399,9 @@ public class GroupStatement implements Statement {
 
 		try {
 			Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
+
+			tempMetaData.setRealJdbcMetaData(getRealJdbcMetaData(conn));
+
 			T result = callback.doAction(conn);
 
 			tempMetaData.setConnection(conn);
@@ -554,6 +557,13 @@ public class GroupStatement implements Statement {
 	@Override
 	public void setQueryTimeout(int queryTimeout) throws SQLException {
 		this.queryTimeout = queryTimeout;
+	}
+
+	private JdbcMetaData getRealJdbcMetaData(Connection conn) {
+		if (conn instanceof SingleConnection) {
+			return ((SingleConnection) conn).getJdbcMetaData();
+		}
+		return null;
 	}
 
 	/*

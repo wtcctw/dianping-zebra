@@ -30,6 +30,8 @@ public class JdbcMetaData implements Cloneable {
 
 	private Properties properties;
 
+	private JdbcMetaData realJdbcMetaData;
+
 	private String sql;
 
 	public JdbcMetaData clone() {
@@ -121,6 +123,14 @@ public class JdbcMetaData implements Cloneable {
 
 	public void setProperties(Properties properties) {
 		this.properties = properties;
+	}
+
+	public JdbcMetaData getRealJdbcMetaData() {
+		return realJdbcMetaData;
+	}
+
+	public void setRealJdbcMetaData(JdbcMetaData realJdbcMetaData) {
+		this.realJdbcMetaData = realJdbcMetaData;
 	}
 
 	public String getSql() {
