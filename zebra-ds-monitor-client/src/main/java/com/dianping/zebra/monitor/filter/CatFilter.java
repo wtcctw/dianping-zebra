@@ -1,5 +1,6 @@
 package com.dianping.zebra.monitor.filter;
 
+import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Event;
@@ -10,6 +11,7 @@ import com.dianping.zebra.group.filter.AbstractJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.util.SqlUtils;
+import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import org.unidal.helper.Stringizers;
 
@@ -17,9 +19,11 @@ import org.unidal.helper.Stringizers;
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends AbstractJdbcFilter {
-	private static String BATCH = "batch";
+	private static final String BATCH = "batch";
 
-	private static String DAL_CAT_TYPE = "DAL";
+	private static final String DAL_CAT_TYPE = "DAL";
+
+	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
 	private ThreadLocal<Transaction> executeTransaction = null;
 
@@ -50,10 +54,20 @@ public class CatFilter extends AbstractJdbcFilter {
 	}
 
 	@Override public void executeBefore(JdbcMetaData metaData) {
-		executeTransaction = newTransaction("SQL", metaData.getSql());
-		if (metaData.getSql().equals(BATCH)) {
-			executeTransaction.get().addData(Stringizers.forJson().compact().from(metaData.getBatchedSqls()));
+
+		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
+
+		if (StringUtils.isBlank(sqlName)) {
+
+			executeTransaction = newTransaction("SQL", metaData.getSql());
+
+			if (metaData.getSql().equals(BATCH)) {
+				executeTransaction.get().addData(Stringizers.forJson().compact().from(metaData.getBatchedSqls()));
+			} else {
+				executeTransaction.get().addData(metaData.getSql());
+			}
 		} else {
+			executeTransaction = newTransaction("SQL", sqlName);
 			executeTransaction.get().addData(metaData.getSql());
 		}
 	}
