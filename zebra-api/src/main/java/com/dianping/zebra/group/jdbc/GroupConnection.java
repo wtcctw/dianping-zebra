@@ -1,10 +1,10 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
+import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
@@ -23,8 +23,6 @@ public class GroupConnection implements Connection {
 
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
-	private DataSourceConfigManager dataSourceConfigManager;
-
 	private JdbcFilter filter;
 
 	private JdbcMetaData metaData;
@@ -35,6 +33,8 @@ public class GroupConnection implements Connection {
 
 	private DataSource readDataSource;
 
+	private RouterType routerType;
+
 	private int transactionIsolation = -1;
 
 	private Connection wConnection;
@@ -42,15 +42,15 @@ public class GroupConnection implements Connection {
 	private DataSource writeDataSource;
 
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
-			DataSourceConfigManager dataSourceConfigManager, CustomizedReadWriteStrategy customizedReadWriteStrategy,
+			CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType,
 			JdbcMetaData metaData, JdbcFilter filter) {
 		super();
-		this.dataSourceConfigManager = dataSourceConfigManager;
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
 		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
 		this.filter = filter;
 		this.metaData = metaData;
+		this.routerType = routerType;
 	}
 
 	public void abort(Executor executor) throws SQLException {
@@ -378,12 +378,6 @@ public class GroupConnection implements Connection {
 	}
 
 	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
-		if (dataSourceConfigManager.isWriteFirst()) {
-			if (wConnection != null) {
-				return wConnection;
-			}
-		}
-
 		if (forceWriter) {
 			return getWriteConnection();
 		} else if (!autoCommit || StringUtils.trimToEmpty(sql).startsWith(Constants.SQL_FORCE_WRITE_HINT)) {
@@ -392,11 +386,17 @@ public class GroupConnection implements Connection {
 			return getWriteConnection();
 		}
 
-		SqlType sqlType = SqlUtils.getSqlType(sql);
-		if (sqlType.isRead()) {
+		if (this.routerType == RouterType.LOAD_BALANCE) {
 			return getReadConnection();
-		} else {
+		} else if (this.routerType == RouterType.FAIL_OVER) {
 			return getWriteConnection();
+		} else {
+			SqlType sqlType = SqlUtils.getSqlType(sql);
+			if (sqlType.isRead()) {
+				return getReadConnection();
+			} else {
+				return getWriteConnection();
+			}
 		}
 	}
 
