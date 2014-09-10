@@ -185,15 +185,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		switch (this.routerType) {
-		case ROUND_ROBIN:
-			return new GroupConnection(readDataSource, writeDataSource, dataSourceConfigManager,
-			      customizedReadWriteStrategy);
-		case LOAD_BALANCE:
-			return this.readDataSource.getConnection();
-		default:
-			return this.writeDataSource.getConnection(); // fail over type
-		}
+		return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy, this.routerType);
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {

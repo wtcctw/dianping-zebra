@@ -27,8 +27,8 @@ import java.util.concurrent.Executor;
 import javax.sql.DataSource;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
+import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
@@ -52,17 +52,17 @@ public class GroupConnection implements Connection {
 
 	private Set<Statement> openedStatements = new HashSet<Statement>();
 
-	private DataSourceConfigManager dataSourceConfigManager;
-
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
+	private RouterType routerType;
+
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
-	      DataSourceConfigManager dataSourceConfigManager, CustomizedReadWriteStrategy customizedReadWriteStrategy) {
+	      CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType) {
 		super();
-		this.dataSourceConfigManager = dataSourceConfigManager;
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
 		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
+		this.routerType = routerType;
 	}
 
 	public void abort(Executor executor) throws SQLException {
@@ -342,12 +342,6 @@ public class GroupConnection implements Connection {
 	}
 
 	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
-		if (dataSourceConfigManager.isWriteFirst()) {
-			if (wConnection != null) {
-				return wConnection;
-			}
-		}
-
 		if (forceWriter) {
 			return getWriteConnection();
 		} else if (!autoCommit || StringUtils.trimToEmpty(sql).startsWith(Constants.SQL_FORCE_WRITE_HINT)) {
@@ -356,11 +350,17 @@ public class GroupConnection implements Connection {
 			return getWriteConnection();
 		}
 
-		SqlType sqlType = SqlUtils.getSqlType(sql);
-		if (sqlType.isRead()) {
+		if (this.routerType == RouterType.LOAD_BALANCE) {
 			return getReadConnection();
-		} else {
+		} else if (this.routerType == RouterType.FAIL_OVER) {
 			return getWriteConnection();
+		}else{
+			SqlType sqlType = SqlUtils.getSqlType(sql);
+			if (sqlType.isRead()) {
+				return getReadConnection();
+			} else {
+				return getWriteConnection();
+			}
 		}
 	}
 
@@ -408,7 +408,7 @@ public class GroupConnection implements Connection {
 	private Connection getWriteConnection() throws SQLException {
 		if (wConnection == null) {
 			wConnection = writeDataSource.getConnection();
-			
+
 			if (wConnection.getAutoCommit() != autoCommit) {
 				wConnection.setAutoCommit(autoCommit);
 			}
