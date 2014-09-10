@@ -22,7 +22,7 @@ public abstract class AbstractDataSource implements DataSource {
 
 	protected JdbcFilter filter;
 
-	protected volatile JdbcMetaData metaData;
+	protected JdbcMetaData metaData;
 
 	private int loginTimeout = 0;
 
