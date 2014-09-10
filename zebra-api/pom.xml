@@ -127,28 +127,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>maven-replacer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <file>src/main/java/com/dianping/zebra/group/Constants.java</file>
-                    <outputFile>src/main/java/com/dianping/zebra/group/Constants.java</outputFile>
-                    <replacements>
-                        <replacement>
-                            <token>@version@</token>
-                            <value>${version}</value>
-                        </replacement>
-                    </replacements>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.unidal.maven.plugins</groupId>
                 <artifactId>codegen-maven-plugin</artifactId>
                 <version>2.0.14</version>
