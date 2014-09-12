@@ -86,7 +86,7 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 #### 2.5.8
 * [+] 修正了Lion的值不停变化导致数据源的频繁刷新的bug(只有在应用使用了alpaca的情况下发生)
 * [/] 移除了zebra-api对phoenix-environment的强依赖
->>>>>>> dev
+
 #### 2.5.7
 * [+] `FailOverDataSource`加入自动终止`Monitor`线程的功能，防止内存泄露
 * [+] 支持事务中默认走写库
