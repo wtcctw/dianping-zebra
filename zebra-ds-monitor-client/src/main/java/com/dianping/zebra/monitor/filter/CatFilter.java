@@ -15,6 +15,9 @@ import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import org.unidal.helper.Stringizers;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by Dozer on 9/5/14.
  */
@@ -24,6 +27,8 @@ public class CatFilter extends AbstractJdbcFilter {
 	private static final String DAL_CAT_TYPE = "DAL";
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
+
+	private Set<Integer> allSqlSet = new HashSet<Integer>();
 
 	private ThreadLocal<Transaction> executeTransaction = null;
 
@@ -47,7 +52,7 @@ public class CatFilter extends AbstractJdbcFilter {
 
 		if (StringUtils.isBlank(sqlName)) {
 
-			executeTransaction = newTransaction("SQL", metaData.getSql());
+			executeTransaction = newTransaction("SQL", isTooManySql(metaData.getSql()) ? null : metaData.getSql());
 
 			if (metaData.getSql().equals(BATCH)) {
 				executeTransaction.get().addData(Stringizers.forJson().compact().from(metaData.getBatchedSqls()));
@@ -95,6 +100,15 @@ public class CatFilter extends AbstractJdbcFilter {
 
 	@Override public void initSingleDataSourceSuccess(JdbcMetaData metaData) {
 		Cat.logEvent("DataSource.Created", metaData.getDataSourceId());
+	}
+
+	private boolean isTooManySql(String sql) {
+		if (allSqlSet.size() >= 10000) {
+			return false;
+		} else {
+			allSqlSet.add(sql.hashCode());
+			return true;
+		}
 	}
 
 	private ThreadLocal<Transaction> newTransaction(String type, String name) {
