@@ -8,5 +8,5 @@ public interface FilterManager {
 
 	void init();
 
-	JdbcFilter loadFilter(String filterBeanName);
+	JdbcFilter loadFilter(String remoteConfig,String beanConfig);
 }

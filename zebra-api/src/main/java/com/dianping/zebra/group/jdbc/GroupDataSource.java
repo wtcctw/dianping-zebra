@@ -321,7 +321,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.metaData.setDataSource(this);
 
 		this.filter = FilterManagerFactory.getFilterManager()
-				.loadFilter(StringUtils.isEmpty(this.filterStr) ? this.groupConfig.getFilters() : this.filterStr);
+				.loadFilter(this.groupConfig.getFilters(), this.filterStr);
 	}
 
 	private void loadCustomizedReadWriteStrategy() {
