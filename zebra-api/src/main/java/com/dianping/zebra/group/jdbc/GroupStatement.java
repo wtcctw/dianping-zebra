@@ -408,11 +408,11 @@ public class GroupStatement implements Statement {
 			String sqlName = (String) ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 
 			if (sqlName == null || sqlName.trim().length() == 0) {
-				t = Cat.newTransaction("SQL", sql);
-
 				if (sql.equals(BATCH)) {
+					t = Cat.newTransaction("SQL", sql);
 					t.addData(Stringizers.forJson().compact().from(this.batchedSqls));
 				} else {
+					t = Cat.newTransaction("SQL", "Null");
 					t.addData(sql);
 				}
 			} else {
@@ -421,11 +421,8 @@ public class GroupStatement implements Statement {
 			}
 
 			try {
-				long beginTime = System.currentTimeMillis();
 				Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-				long endTime = System.currentTimeMillis();
 
-				Cat.logEvent("SQL.Conn", "Checkout", Event.SUCCESS, String.format("%dms", endTime - beginTime));
 				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, ((SingleConnection) conn)
 				      .getDataSource().getId());
 				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, Stringizers.forJson().compact()
@@ -443,11 +440,7 @@ public class GroupStatement implements Statement {
 				ExecutionContextHolder.getContext().clear(CAT_LOGGED);
 			}
 		} else {
-			long beginTime = System.currentTimeMillis();
 			Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-			long endTime = System.currentTimeMillis();
-
-			Cat.logEvent("SQL.Conn", "Checkout", Event.SUCCESS, String.format("%dms", endTime - beginTime));
 
 			return callback.doAction(conn);
 		}
