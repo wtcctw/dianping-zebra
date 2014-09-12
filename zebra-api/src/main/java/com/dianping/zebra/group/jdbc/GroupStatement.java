@@ -404,29 +404,23 @@ public class GroupStatement implements Statement {
 	      throws SQLException {
 		String isLogged = ExecutionContextHolder.getContext().get(CAT_LOGGED);
 		if (isLogged == null) {
-			Transaction t = null;
 			String sqlName = (String) ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
+			Transaction t = Cat.newTransaction("SQL", sqlName);
 
-			if (sqlName == null || sqlName.trim().length() == 0) {
-				if (sql.equals(BATCH)) {
-					t = Cat.newTransaction("SQL", sql);
-					t.addData(Stringizers.forJson().compact().from(this.batchedSqls));
-				} else {
-					t = Cat.newTransaction("SQL", "Null");
-					t.addData(sql);
-				}
+			if (sql.equals(BATCH)) {
+				t.addData(Stringizers.forJson().compact().from(this.batchedSqls));
 			} else {
-				t = Cat.newTransaction("SQL", sqlName);
 				t.addData(sql);
 			}
 
 			try {
 				Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
+				String id = ((SingleConnection) conn).getDataSource().getId();
+				String parameters = Stringizers.forJson().compact()
+				      .from(params, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
 
-				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, ((SingleConnection) conn)
-				      .getDataSource().getId());
-				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, Stringizers.forJson().compact()
-				      .from(params, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
+				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, id);
+				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, parameters);
 				t.setStatus(Transaction.SUCCESS);
 				ExecutionContextHolder.getContext().add(CAT_LOGGED, "Logged");
 
