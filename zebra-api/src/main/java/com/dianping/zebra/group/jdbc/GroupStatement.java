@@ -404,32 +404,23 @@ public class GroupStatement implements Statement {
 	      throws SQLException {
 		String isLogged = ExecutionContextHolder.getContext().get(CAT_LOGGED);
 		if (isLogged == null) {
-			Transaction t = null;
 			String sqlName = (String) ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
+			Transaction t = Cat.newTransaction("SQL", sqlName);
 
-			if (sqlName == null || sqlName.trim().length() == 0) {
-				t = Cat.newTransaction("SQL", sql);
-
-				if (sql.equals(BATCH)) {
-					t.addData(Stringizers.forJson().compact().from(this.batchedSqls));
-				} else {
-					t.addData(sql);
-				}
+			if (sql.equals(BATCH)) {
+				t.addData(Stringizers.forJson().compact().from(this.batchedSqls));
 			} else {
-				t = Cat.newTransaction("SQL", sqlName);
 				t.addData(sql);
 			}
 
 			try {
-				long beginTime = System.currentTimeMillis();
 				Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-				long endTime = System.currentTimeMillis();
+				String id = ((SingleConnection) conn).getDataSource().getId();
+				String parameters = Stringizers.forJson().compact()
+				      .from(params, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
 
-				Cat.logEvent("SQL.Conn", "Checkout", Event.SUCCESS, String.format("%dms", endTime - beginTime));
-				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, ((SingleConnection) conn)
-				      .getDataSource().getId());
-				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, Stringizers.forJson().compact()
-				      .from(params, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
+				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, id);
+				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, parameters);
 				t.setStatus(Transaction.SUCCESS);
 				ExecutionContextHolder.getContext().add(CAT_LOGGED, "Logged");
 
@@ -443,11 +434,7 @@ public class GroupStatement implements Statement {
 				ExecutionContextHolder.getContext().clear(CAT_LOGGED);
 			}
 		} else {
-			long beginTime = System.currentTimeMillis();
 			Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-			long endTime = System.currentTimeMillis();
-
-			Cat.logEvent("SQL.Conn", "Checkout", Event.SUCCESS, String.format("%dms", endTime - beginTime));
 
 			return callback.doAction(conn);
 		}
