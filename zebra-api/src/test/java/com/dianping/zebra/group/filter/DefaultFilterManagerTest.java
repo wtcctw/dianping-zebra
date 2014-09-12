@@ -31,6 +31,13 @@ public class DefaultFilterManagerTest {
 	}
 
 	@Test
+	public void test_load_null() {
+		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter(null, null);
+		Assert.assertTrue(filter instanceof FilterWrapper);
+		Assert.assertEquals(((FilterWrapper) filter).size(), 0);
+	}
+
+	@Test
 	public void test_load_with_ignore() {
 		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat", "!stat");
 		Assert.assertTrue(filter instanceof FilterWrapper);
