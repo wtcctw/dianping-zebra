@@ -392,6 +392,7 @@ public class GroupStatement implements Statement {
 		tempMetaData.setSql(sql);
 		tempMetaData.setBatch(isBatch);
 		tempMetaData.setParams(params);
+		tempMetaData.setTransaction(!this.dpGroupConnection.getAutoCommit());
 		tempMetaData.setBatchedSqls(batchedSqls);
 
 		this.filter.executeBefore(tempMetaData);

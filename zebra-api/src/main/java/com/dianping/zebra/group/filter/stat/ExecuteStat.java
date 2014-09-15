@@ -31,6 +31,8 @@ public class ExecuteStat {
 
 	private final RangeCounter successTimeRange = RangeCounter.getDefaultTimeRange();
 
+	private final AtomicLong transactionCount = new AtomicLong();
+
 	private final AtomicLong updateErrorCount = new AtomicLong();
 
 	private final AtomicLong updateSuccessCount = new AtomicLong();
@@ -91,6 +93,10 @@ public class ExecuteStat {
 
 	public RangeCounter getSuccessTimeRange() {
 		return successTimeRange;
+	}
+
+	public AtomicLong getTransactionCount() {
+		return transactionCount;
 	}
 
 	public AtomicLong getUpdateErrorCount() {

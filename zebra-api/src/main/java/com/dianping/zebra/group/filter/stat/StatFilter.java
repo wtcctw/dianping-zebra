@@ -99,6 +99,7 @@ public class StatFilter extends AbstractJdbcFilter {
 		}
 
 		public void deleteNode(DeleteNode node) {
+			incrementTransaction();
 			increment(StatContext.getExecuteSummary().getDeleteSuccessCount(),
 					StatContext.getExecuteSummary().getDeleteErrorCount());
 			increment(StatContext.getExecute(metaData).getDeleteSuccessCount(),
@@ -113,7 +114,15 @@ public class StatFilter extends AbstractJdbcFilter {
 			}
 		}
 
+		private void incrementTransaction() {
+			if (this.metaData.isTransaction()) {
+				StatContext.getExecuteSummary().getTransactionCount().incrementAndGet();
+				StatContext.getExecute(metaData).getTransactionCount().incrementAndGet();
+			}
+		}
+
 		public void insertNode(InsertNode node) {
+			incrementTransaction();
 			increment(StatContext.getExecuteSummary().getInsertSuccessCount(),
 					StatContext.getExecuteSummary().getInsertErrorCount());
 			increment(StatContext.getExecute(metaData).getInsertSuccessCount(),
@@ -121,6 +130,7 @@ public class StatFilter extends AbstractJdbcFilter {
 		}
 
 		public void selectNode(SelectNode node) {
+			incrementTransaction();
 			increment(StatContext.getExecuteSummary().getSelectSuccessCount(),
 					StatContext.getExecuteSummary().getSelectErrorCount());
 			increment(StatContext.getExecute(metaData).getSelectSuccessCount(),
@@ -136,6 +146,7 @@ public class StatFilter extends AbstractJdbcFilter {
 		}
 
 		public void updateNode(UpdateNode node) {
+			incrementTransaction();
 			increment(StatContext.getExecuteSummary().getUpdateSuccessCount(),
 					StatContext.getExecuteSummary().getUpdateErrorCount());
 			increment(StatContext.getExecute(metaData).getUpdateSuccessCount(),
