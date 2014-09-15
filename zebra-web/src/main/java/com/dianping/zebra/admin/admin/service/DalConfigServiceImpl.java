@@ -39,21 +39,21 @@ public class DalConfigServiceImpl implements DalConfigService {
 				if (originUrl == null || originUrl.length() == 0) {
 					m_lionHttpService.setConfig(env, url, "jdbc:mysql://{ip}:{port}/{database}?characterEncoding=UTF8");
 				} else {
-					m_lionHttpService.setConfig(env, active, originUrl);
+					m_lionHttpService.setConfig(env, url, originUrl);
 				}
 
 				String originUser = m_lionHttpService.getConfig(env, user);
 				if (originUser == null || originUser.length() == 0) {
 					m_lionHttpService.setConfig(env, user, "");
 				} else {
-					m_lionHttpService.setConfig(env, active, originUser);
+					m_lionHttpService.setConfig(env, user, originUser);
 				}
 
 				String originPassword = m_lionHttpService.getConfig(env, password);
 				if (originPassword == null || originPassword.length() == 0) {
 					m_lionHttpService.setConfig(env, password, "");
 				} else {
-					m_lionHttpService.setConfig(env, active, originPassword);
+					m_lionHttpService.setConfig(env, password, originPassword);
 				}
 
 				String originDriverClass = m_lionHttpService.getConfig(env, driverClass);
