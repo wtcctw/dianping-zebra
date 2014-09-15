@@ -40,6 +40,7 @@ public final class StatContext {
 	}
 
 	private static void checkExecute(Integer key, JdbcMetaData metaData) {
+		//todo: to many sql
 		if (!execute.containsKey(key)) {
 			try {
 				executeLock.lock();
