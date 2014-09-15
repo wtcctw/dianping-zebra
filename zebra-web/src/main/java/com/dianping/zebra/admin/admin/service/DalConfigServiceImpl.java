@@ -8,7 +8,8 @@ public class DalConfigServiceImpl implements DalConfigService {
 
 	private String project = "ds";
 
-	private final String[] envs = new String[] { "dev", "alpha", "qa", "prelease", "product", "performance" };
+	private final String[] envs = new String[] { "dev", "alpha", "qa", "prelease", "product", "performance",
+	      "product-hm" };
 
 	@Inject
 	private LionHttpService m_lionHttpService;
@@ -37,22 +38,22 @@ public class DalConfigServiceImpl implements DalConfigService {
 				String originUrl = m_lionHttpService.getConfig(env, url);
 				if (originUrl == null || originUrl.length() == 0) {
 					m_lionHttpService.setConfig(env, url, "jdbc:mysql://{ip}:{port}/{database}?characterEncoding=UTF8");
-				}else{
-					m_lionHttpService.setConfig(env, active, originUrl);
+				} else {
+					m_lionHttpService.setConfig(env, url, originUrl);
 				}
 
 				String originUser = m_lionHttpService.getConfig(env, user);
 				if (originUser == null || originUser.length() == 0) {
 					m_lionHttpService.setConfig(env, user, "");
-				}else{
-					m_lionHttpService.setConfig(env, active, originUser);
+				} else {
+					m_lionHttpService.setConfig(env, user, originUser);
 				}
 
 				String originPassword = m_lionHttpService.getConfig(env, password);
 				if (originPassword == null || originPassword.length() == 0) {
 					m_lionHttpService.setConfig(env, password, "");
-				}else{
-					m_lionHttpService.setConfig(env, active, originPassword);
+				} else {
+					m_lionHttpService.setConfig(env, password, originPassword);
 				}
 
 				String originDriverClass = m_lionHttpService.getConfig(env, driverClass);
@@ -68,7 +69,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 				String originActive = m_lionHttpService.getConfig(env, active);
 				if (originActive == null || originActive.length() == 0) {
 					m_lionHttpService.setConfig(env, active, "true");
-				}else{
+				} else {
 					m_lionHttpService.setConfig(env, active, originActive);
 				}
 			}
