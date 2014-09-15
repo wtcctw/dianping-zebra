@@ -6,6 +6,7 @@ import com.foundationdb.sql.parser.StatementNode;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,6 +15,10 @@ import java.util.Properties;
  * Filters read metadata from this class
  */
 public class JdbcMetaData implements Cloneable {
+	private final static SQLParser parser = new SQLParser();
+
+	private List<StatementNode> batchedNode;
+
 	private List<String> batchedSqls;
 
 	private Connection connection;
@@ -48,12 +53,35 @@ public class JdbcMetaData implements Cloneable {
 		}
 	}
 
+	public List<StatementNode> getBatchedNode() {
+		return batchedNode;
+	}
+
+	public void setBatchedNode(List<StatementNode> batchedNode) {
+		this.batchedNode = batchedNode;
+	}
+
 	public List<String> getBatchedSqls() {
 		return batchedSqls;
 	}
 
 	public void setBatchedSqls(List<String> batchedSqls) {
 		this.batchedSqls = batchedSqls;
+		if (batchedSqls != null) {
+			this.batchedNode = new ArrayList<StatementNode>();
+			StringBuffer sb = new StringBuffer();
+			for (String sql : batchedSqls) {
+				sb.append(sql);
+				if (!sql.endsWith(";")) {
+					sb.append(";");
+				}
+			}
+
+			try {
+				this.batchedNode = parser.parseStatements(sb.toString());
+			} catch (StandardException e) {
+			}
+		}
 	}
 
 	public Connection getConnection() {
@@ -154,7 +182,6 @@ public class JdbcMetaData implements Cloneable {
 	public void setSql(String sql) {
 		this.sql = sql;
 
-		SQLParser parser = new SQLParser();
 		try {
 			node = parser.parseStatement(sql);
 		} catch (StandardException e) {
