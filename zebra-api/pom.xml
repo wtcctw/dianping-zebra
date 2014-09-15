@@ -123,6 +123,10 @@
             <groupId>org.dbunit</groupId>
             <artifactId>dbunit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.foundationdb</groupId>
+            <artifactId>fdb-sql-parser</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

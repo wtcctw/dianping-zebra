@@ -1,5 +1,9 @@
 package com.dianping.zebra.group.filter;
 
+import com.foundationdb.sql.StandardException;
+import com.foundationdb.sql.parser.SQLParser;
+import com.foundationdb.sql.parser.StatementNode;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.List;
@@ -25,6 +29,8 @@ public class JdbcMetaData implements Cloneable {
 	private String jdbcUrl;
 
 	private String jdbcUsername;
+
+	private StatementNode node;
 
 	private Object params;
 
@@ -106,6 +112,14 @@ public class JdbcMetaData implements Cloneable {
 		this.jdbcUsername = jdbcUsername;
 	}
 
+	public StatementNode getNode() {
+		return node;
+	}
+
+	public void setNode(StatementNode node) {
+		this.node = node;
+	}
+
 	public Object getParams() {
 		return params;
 	}
@@ -139,6 +153,12 @@ public class JdbcMetaData implements Cloneable {
 
 	public void setSql(String sql) {
 		this.sql = sql;
+
+		SQLParser parser = new SQLParser();
+		try {
+			node = parser.parseStatement(sql);
+		} catch (StandardException e) {
+		}
 	}
 
 	@Override public String toString() {
