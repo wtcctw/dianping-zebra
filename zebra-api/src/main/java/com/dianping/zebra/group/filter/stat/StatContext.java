@@ -62,6 +62,8 @@ public final class StatContext {
 
 		result = result * 31 + metaData.getSql().hashCode();
 
+		result = result * 31 + Boolean.hashCode(metaData.isBatch());
+
 		if (metaData.getDataSourceId() != null) {
 			result = result * 31 + metaData.getDataSourceId().hashCode();
 		}

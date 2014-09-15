@@ -90,6 +90,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
 				// 测试批量更新
 				stmt = conn.prepareStatement("insert into PERSON(NAME,LAST_NAME,AGE) values(?,?,?)");
+
 				stmt.setString(1, "zhuhao");
 				stmt.setString(2, "zhuhao");
 				stmt.setInt(3, 2);
