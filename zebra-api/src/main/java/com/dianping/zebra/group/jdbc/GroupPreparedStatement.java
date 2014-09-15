@@ -129,7 +129,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				public int[] doAction(Connection conn) throws SQLException {
 					return executeBatchOnConnection(conn);
 				}
-			}, sql, pstBatchedArgs, true);
+			}, sql, pstBatchedArgs, true, true);
 		} finally {
 			if (pstBatchedArgs != null) {
 				pstBatchedArgs.clear();
@@ -164,7 +164,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
 			}
-		}, sql, params, false);
+		}, sql, params, false, false);
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
@@ -197,7 +197,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				}
 				return updateCount;
 			}
-		}, sql, params, true);
+		}, sql, params, false, true);
 	}
 
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {

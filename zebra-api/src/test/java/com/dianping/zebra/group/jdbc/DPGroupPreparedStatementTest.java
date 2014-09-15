@@ -105,6 +105,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 				Assert.assertEquals(updateCounts.length, 2);
 				stmt.close();
 
+				conn.close();
 				return null;
 			}
 		});

@@ -1,5 +1,6 @@
 package com.dianping.zebra.group.filter;
 
+import com.dianping.zebra.group.util.StringUtils;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.SQLParser;
 import com.foundationdb.sql.parser.StatementNode;
@@ -26,6 +27,8 @@ public class JdbcMetaData implements Cloneable {
 	private DataSource dataSource;
 
 	private String dataSourceId;
+
+	private boolean isBatch;
 
 	private String jdbcPassword;
 
@@ -76,6 +79,7 @@ public class JdbcMetaData implements Cloneable {
 			}
 
 			try {
+				this.sql = sb.toString();
 				this.batchedNode = parser.parseStatements(sb.toString());
 			} catch (StandardException e) {
 			}
@@ -172,10 +176,22 @@ public class JdbcMetaData implements Cloneable {
 	public void setSql(String sql) {
 		this.sql = sql;
 
+		if (StringUtils.isBlank(sql)) {
+			return;
+		}
+
 		try {
 			node = parser.parseStatement(sql);
 		} catch (StandardException e) {
 		}
+	}
+
+	public boolean isBatch() {
+		return isBatch;
+	}
+
+	public void setBatch(boolean isBatch) {
+		this.isBatch = isBatch;
 	}
 
 	@Override public String toString() {

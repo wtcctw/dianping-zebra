@@ -91,8 +91,12 @@ public class GroupConnection implements Connection {
 		}
 		closed = true;
 
+		JdbcMetaData tempMetaData = this.metaData.clone();
+
 		List<SQLException> exceptions = new LinkedList<SQLException>();
 		try {
+			this.filter.closeGroupConnectionBefore(tempMetaData);
+
 			for (Statement stmt : openedStatements) {
 				try {
 					stmt.close();
@@ -121,7 +125,14 @@ public class GroupConnection implements Connection {
 			wConnection = null;
 		}
 
-		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
+		try {
+			JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
+			this.filter.closeGroupConnectionSuccess(tempMetaData);
+		} catch (SQLException exp) {
+			this.filter.closeGroupConnectionError(tempMetaData, exp);
+		} finally {
+			this.filter.closeGroupConnectionAfter(tempMetaData);
+		}
 	}
 
 	/*

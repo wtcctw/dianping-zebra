@@ -22,8 +22,6 @@ import java.util.Set;
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends AbstractJdbcFilter {
-	private static final String BATCH = "batch";
-
 	private static final String DAL_CAT_TYPE = "DAL";
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
@@ -54,7 +52,7 @@ public class CatFilter extends AbstractJdbcFilter {
 
 			executeTransaction = newTransaction("SQL", isTooManySql(metaData.getSql()) ? null : metaData.getSql());
 
-			if (metaData.getSql().equals(BATCH)) {
+			if (metaData.isBatch()) {
 				executeTransaction.get().addData(Stringizers.forJson().compact().from(metaData.getBatchedSqls()));
 			} else {
 				executeTransaction.get().addData(metaData.getSql());
@@ -123,7 +121,8 @@ public class CatFilter extends AbstractJdbcFilter {
 	}
 
 	@Override public void refreshGroupDataSourceBefore(JdbcMetaData metaData, String propertiesName) {
-		refreshGroupDataSourceTransaction = newTransaction(DAL_CAT_TYPE, "DataSource.Refresh-" + metaData.getJdbcRef());
+		refreshGroupDataSourceTransaction = newTransaction(DAL_CAT_TYPE,
+				"DataSource.Refresh-" + metaData.getDataSourceId());
 		Cat.logEvent("DAL.Refresh.Property", propertiesName);
 	}
 

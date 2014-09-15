@@ -57,21 +57,22 @@ public class StatFilter extends AbstractJdbcFilter {
 	}
 
 	private void visitNode(JdbcMetaData metaData, Exception exp) {
-		try {
-			new SqlStatVisitor(metaData, exp).visit(metaData.getNode());
-		} catch (StandardException e) {
-		}
-
-		if (metaData.getBatchedNode() == null) {
-			return;
-		}
-		for (StatementNode node : metaData.getBatchedNode()) {
+		if (!metaData.isBatch()) {
 			try {
-				new SqlStatVisitor(metaData, exp).visit(node);
+				new SqlStatVisitor(metaData, exp).visit(metaData.getNode());
 			} catch (StandardException e) {
 			}
+		} else {
+			if (metaData.getBatchedNode() == null) {
+				return;
+			}
+			for (StatementNode node : metaData.getBatchedNode()) {
+				try {
+					new SqlStatVisitor(metaData, exp).visit(node);
+				} catch (StandardException e) {
+				}
+			}
 		}
-
 	}
 
 	private void visitNode(JdbcMetaData node) {
