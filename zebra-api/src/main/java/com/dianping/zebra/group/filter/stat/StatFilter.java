@@ -5,7 +5,6 @@ import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.*;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -14,11 +13,13 @@ import java.util.concurrent.atomic.AtomicLong;
 public class StatFilter extends AbstractJdbcFilter {
 
 	@Override public void closeGroupConnectionError(JdbcMetaData metaData, Exception exp) {
-		StatContext.closeGroupConnectionErrorCount.incrementAndGet();
+		StatContext.getDataSourceSummary().getCloseGroupConnectionErrorCount().incrementAndGet();
+		StatContext.getDataSource(metaData).getCloseGroupConnectionErrorCount().incrementAndGet();
 	}
 
 	@Override public void closeGroupConnectionSuccess(JdbcMetaData metaData) {
-		StatContext.closeGroupConnectionSuccessCount.incrementAndGet();
+		StatContext.getDataSourceSummary().getCloseGroupConnectionSuccessCount().incrementAndGet();
+		StatContext.getDataSource(metaData).getCloseGroupConnectionSuccessCount().incrementAndGet();
 	}
 
 	@Override public void executeError(JdbcMetaData metaData, Exception exp) {
@@ -30,46 +31,49 @@ public class StatFilter extends AbstractJdbcFilter {
 	}
 
 	@Override public void getGroupConnectionError(JdbcMetaData metaData, Exception exp) {
-		StatContext.getGroupConnectionErrorCount.incrementAndGet();
+		StatContext.getDataSourceSummary().getGetGroupConnectionErrorCount().incrementAndGet();
+		StatContext.getDataSource(metaData).getGetGroupConnectionErrorCount().incrementAndGet();
 	}
 
 	@Override public void getGroupConnectionSuccess(JdbcMetaData metaData) {
-		StatContext.getGroupConnectionSuccessCount.incrementAndGet();
+		StatContext.getDataSourceSummary().getGetGroupConnectionSuccessCount().incrementAndGet();
+		StatContext.getDataSource(metaData).getGetGroupConnectionSuccessCount().incrementAndGet();
 	}
 
 	private void visitNode(JdbcMetaData metaData, Exception exp) {
-		visitNode(metaData.getNode(), exp);
-		visitNode(metaData.getBatchedNode(), exp);
+		try {
+			new SqlStatVisitor(metaData, exp).visit(metaData.getNode());
+		} catch (StandardException e) {
+		}
+
+		if (metaData.getBatchedNode() == null) {
+			return;
+		}
+		for (StatementNode node : metaData.getBatchedNode()) {
+			try {
+				new SqlStatVisitor(metaData, exp).visit(node);
+			} catch (StandardException e) {
+			}
+		}
+
 	}
 
 	private void visitNode(JdbcMetaData node) {
 		visitNode(node, null);
 	}
 
-	private void visitNode(StatementNode node, Exception exp) {
-		try {
-			new SqlStatVisitor(exp).visit(node);
-		} catch (StandardException e) {
-		}
-	}
-
-	private void visitNode(List<StatementNode> nodes, Exception exp) {
-		if (nodes == null) {
-			return;
-		}
-		for (StatementNode node : nodes) {
-			visitNode(node, exp);
-		}
-	}
-
 	class SqlStatVisitor implements Visitor {
 		private final Exception exception;
 
-		public SqlStatVisitor() {
-			exception = null;
+		private final JdbcMetaData metaData;
+
+		public SqlStatVisitor(JdbcMetaData metaData) {
+			this.exception = null;
+			this.metaData = metaData;
 		}
 
-		public SqlStatVisitor(Exception exp) {
+		public SqlStatVisitor(JdbcMetaData metadata, Exception exp) {
+			this.metaData = metadata;
 			this.exception = exp;
 		}
 
@@ -78,7 +82,10 @@ public class StatFilter extends AbstractJdbcFilter {
 		}
 
 		public void deleteNode(DeleteNode node) {
-			increment(StatContext.deleteSuccessCount, StatContext.deleteErrorCount);
+			increment(StatContext.getExecuteSummary().getDeleteSuccessCount(),
+					StatContext.getExecuteSummary().getDeleteErrorCount());
+			increment(StatContext.getExecute(metaData).getDeleteSuccessCount(),
+					StatContext.getExecute(metaData).getDeleteErrorCount());
 		}
 
 		private void increment(AtomicLong success, AtomicLong error) {
@@ -90,11 +97,17 @@ public class StatFilter extends AbstractJdbcFilter {
 		}
 
 		public void insertNode(InsertNode node) {
-			increment(StatContext.insertSuccessCount, StatContext.insertErrorCount);
+			increment(StatContext.getExecuteSummary().getInsertSuccessCount(),
+					StatContext.getExecuteSummary().getInsertErrorCount());
+			increment(StatContext.getExecute(metaData).getInsertSuccessCount(),
+					StatContext.getExecute(metaData).getInsertErrorCount());
 		}
 
 		public void selectNode(SelectNode node) {
-			increment(StatContext.selectSuccessCount, StatContext.selectErrorCount);
+			increment(StatContext.getExecuteSummary().getSelectSuccessCount(),
+					StatContext.getExecuteSummary().getSelectErrorCount());
+			increment(StatContext.getExecute(metaData).getSelectSuccessCount(),
+					StatContext.getExecute(metaData).getSelectErrorCount());
 		}
 
 		@Override public boolean skipChildren(Visitable node) throws StandardException {
@@ -106,7 +119,10 @@ public class StatFilter extends AbstractJdbcFilter {
 		}
 
 		public void updateNode(UpdateNode node) {
-			increment(StatContext.updateSuccessCount, StatContext.updateErrorCount);
+			increment(StatContext.getExecuteSummary().getUpdateSuccessCount(),
+					StatContext.getExecuteSummary().getUpdateErrorCount());
+			increment(StatContext.getExecute(metaData).getUpdateSuccessCount(),
+					StatContext.getExecute(metaData).getUpdateErrorCount());
 		}
 
 		@Override public Visitable visit(Visitable node) throws StandardException {

@@ -15,7 +15,7 @@ import java.util.Properties;
  * Filters read metadata from this class
  */
 public class JdbcMetaData implements Cloneable {
-	private final static SQLParser parser = new SQLParser();
+	private final static SQLParser parser = new SQLParser();//todo:cache result
 
 	private List<StatementNode> batchedNode;
 
@@ -28,8 +28,6 @@ public class JdbcMetaData implements Cloneable {
 	private String dataSourceId;
 
 	private String jdbcPassword;
-
-	private String jdbcRef;
 
 	private String jdbcUrl;
 
@@ -116,14 +114,6 @@ public class JdbcMetaData implements Cloneable {
 		this.jdbcPassword = jdbcPassword;
 	}
 
-	public String getJdbcRef() {
-		return jdbcRef;
-	}
-
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
-	}
-
 	public String getJdbcUrl() {
 		return jdbcUrl;
 	}
@@ -195,7 +185,6 @@ public class JdbcMetaData implements Cloneable {
 				", dataSource=" + dataSource +
 				", dataSourceId='" + dataSourceId + '\'' +
 				", jdbcPassword='" + jdbcPassword + '\'' +
-				", jdbcRef='" + jdbcRef + '\'' +
 				", jdbcUrl='" + jdbcUrl + '\'' +
 				", jdbcUsername='" + jdbcUsername + '\'' +
 				", params=" + params +

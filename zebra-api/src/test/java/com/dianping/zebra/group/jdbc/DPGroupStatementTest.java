@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.stat.StatContext;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -95,6 +96,7 @@ public class DPGroupStatementTest extends MultiDatabaseTestCase {
 				Assert.assertTrue(stmt.getGeneratedKeys().next());
 
 				stmt.close();
+
 				return null;
 			}
 		});

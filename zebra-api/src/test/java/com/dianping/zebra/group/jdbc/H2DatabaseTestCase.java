@@ -47,29 +47,6 @@ public abstract class H2DatabaseTestCase {
 		mockedFilter = MockFilterHelper.getMockedFilter();
 	}
 
-	@After
-	public void printStat() {
-		System.out.println("==================Stat==================");
-		System.out.println(
-				String.format("Get GroupConnection Success Times:%d", StatContext.getGroupConnectionSuccessCount.get()));
-		System.out.println(
-				String.format("Get GroupConnection Error Times:%d", StatContext.getGroupConnectionErrorCount.get()));
-		System.out.println(String.format("Close GroupConnection Success Times:%d",
-				StatContext.closeGroupConnectionSuccessCount.get()));
-		System.out.println(
-				String.format("Close GroupConnection Error Times:%d", StatContext.closeGroupConnectionErrorCount.get()));
-		System.out.println(String.format("Execute Select Success Times:%d", StatContext.selectSuccessCount.get()));
-		System.out.println(String.format("Execute Select Error Times:%d", StatContext.selectErrorCount.get()));
-		System.out.println(String.format("Execute Update Success Times:%d", StatContext.updateSuccessCount.get()));
-		System.out.println(String.format("Execute Update Error Times:%d", StatContext.updateErrorCount.get()));
-		System.out.println(String.format("Execute Insert Success Times:%d", StatContext.insertSuccessCount.get()));
-		System.out.println(String.format("Execute Insert Error Times:%d", StatContext.insertErrorCount.get()));
-		System.out.println(String.format("Execute Delete Success Times:%d", StatContext.deleteSuccessCount.get()));
-		System.out.println(String.format("Execute Delete Error Times:%d", StatContext.deleteErrorCount.get()));
-
-		System.out.println("========================================");
-	}
-
 	private IDataSet readDataSet() throws Exception {
 		return new FlatXmlDataSetBuilder().build(getClass().getClassLoader().getResource(getDataSets()));
 	}

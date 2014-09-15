@@ -317,7 +317,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void initFilters() {
 
 		this.metaData = new JdbcMetaData();
-		this.metaData.setJdbcRef(this.jdbcRef);
+		this.metaData.setDataSourceId(this.jdbcRef);
 		this.metaData.setDataSource(this);
 
 		this.filter = FilterManagerFactory.getFilterManager()
