@@ -30,8 +30,11 @@ public class StatFilter extends AbstractJdbcFilter {
 
 	@Override public void executeError(JdbcMetaData metaData, Exception exp) {
 		if (executeTime.get() != null) {
-			StatContext.getExecute(metaData).getErrorTimeRange()
-					.increment(System.currentTimeMillis() - executeTime.get());
+			long time = System.currentTimeMillis() - executeTime.get();
+			StatContext.getExecuteSummary().getErrorTimeRange().increment(time);
+			StatContext.getExecute(metaData).getErrorTimeRange().increment(time);
+			StatContext.getExecuteSummary().getErrorTime().addAndGet(time);
+			StatContext.getExecute(metaData).getErrorTime().addAndGet(time);
 		}
 		executeTime.set(null);
 		visitNode(metaData, exp);
@@ -39,8 +42,11 @@ public class StatFilter extends AbstractJdbcFilter {
 
 	@Override public void executeSuccess(JdbcMetaData metaData) {
 		if (executeTime.get() != null) {
-			StatContext.getExecute(metaData).getSuccessTimeRange()
-					.increment(System.currentTimeMillis() - executeTime.get());
+			long time = System.currentTimeMillis() - executeTime.get();
+			StatContext.getExecuteSummary().getSuccessTimeRange().increment(time);
+			StatContext.getExecute(metaData).getSuccessTimeRange().increment(time);
+			StatContext.getExecuteSummary().getSuccessTime().addAndGet(time);
+			StatContext.getExecute(metaData).getSuccessTime().addAndGet(time);
 		}
 		executeTime.set(null);
 		visitNode(metaData);
@@ -99,7 +105,7 @@ public class StatFilter extends AbstractJdbcFilter {
 		}
 
 		public void deleteNode(DeleteNode node) {
-			incrementTransaction();
+			sqlNode(node);
 			increment(StatContext.getExecuteSummary().getDeleteSuccessCount(),
 					StatContext.getExecuteSummary().getDeleteErrorCount());
 			increment(StatContext.getExecute(metaData).getDeleteSuccessCount(),
@@ -114,15 +120,8 @@ public class StatFilter extends AbstractJdbcFilter {
 			}
 		}
 
-		private void incrementTransaction() {
-			if (this.metaData.isTransaction()) {
-				StatContext.getExecuteSummary().getTransactionCount().incrementAndGet();
-				StatContext.getExecute(metaData).getTransactionCount().incrementAndGet();
-			}
-		}
-
 		public void insertNode(InsertNode node) {
-			incrementTransaction();
+			sqlNode(node);
 			increment(StatContext.getExecuteSummary().getInsertSuccessCount(),
 					StatContext.getExecuteSummary().getInsertErrorCount());
 			increment(StatContext.getExecute(metaData).getInsertSuccessCount(),
@@ -130,7 +129,7 @@ public class StatFilter extends AbstractJdbcFilter {
 		}
 
 		public void selectNode(SelectNode node) {
-			incrementTransaction();
+			sqlNode(node);
 			increment(StatContext.getExecuteSummary().getSelectSuccessCount(),
 					StatContext.getExecuteSummary().getSelectErrorCount());
 			increment(StatContext.getExecute(metaData).getSelectSuccessCount(),
@@ -141,12 +140,23 @@ public class StatFilter extends AbstractJdbcFilter {
 			return false;
 		}
 
+		public void sqlNode(Visitable node) {
+			if (this.metaData.isTransaction()) {
+				StatContext.getExecuteSummary().getTransactionCount().incrementAndGet();
+				StatContext.getExecute(metaData).getTransactionCount().incrementAndGet();
+			}
+
+			increment(StatContext.getExecuteSummary().getSuccessCount(), StatContext.getExecuteSummary().getErrorCount());
+			increment(StatContext.getExecute(metaData).getSuccessCount(),
+					StatContext.getExecute(metaData).getErrorCount());
+		}
+
 		@Override public boolean stopTraversal() {
 			return false;
 		}
 
 		public void updateNode(UpdateNode node) {
-			incrementTransaction();
+			sqlNode(node);
 			increment(StatContext.getExecuteSummary().getUpdateSuccessCount(),
 					StatContext.getExecuteSummary().getUpdateErrorCount());
 			increment(StatContext.getExecute(metaData).getUpdateSuccessCount(),
