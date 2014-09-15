@@ -8,13 +8,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * Created by Dozer on 9/15/14.
  */
 public class RangeCounter {
-	private final TreeMap<Integer, AtomicLong> result = new TreeMap<Integer, AtomicLong>();
+	private final TreeMap<Long, AtomicLong> result = new TreeMap<Long, AtomicLong>();
 
-	public RangeCounter(int... ranges) {
-		result.put(0, new AtomicLong());
+	public RangeCounter(long... ranges) {
+		result.put(0l, new AtomicLong());
 
-		int last = 0;
-		for (Integer number : ranges) {
+		long last = 0l;
+		for (Long number : ranges) {
 			if (number < last) {
 				continue;
 			}
@@ -23,15 +23,19 @@ public class RangeCounter {
 		}
 
 		if (ranges.length == 0 || ranges[ranges.length - 1] != Integer.MAX_VALUE) {
-			result.put(Integer.MAX_VALUE, new AtomicLong());
+			result.put(Long.MAX_VALUE, new AtomicLong());
 		}
 	}
 
-	public Map<Integer, AtomicLong> getResult() {
+	public static RangeCounter getDefaultTimeRange() {
+		return new RangeCounter(5, 10, 50, 100, 200, 500, 1000, 5000);
+	}
+
+	public Map<Long, AtomicLong> getResult() {
 		return result;
 	}
 
-	public void increment(int value) {
+	public void increment(long value) {
 		AtomicLong temp = result.get(value);
 		if (temp == null) {
 			temp = result.higherEntry(value).getValue();

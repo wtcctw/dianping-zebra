@@ -1,28 +1,50 @@
 package com.dianping.zebra.group.jdbc;
 
+import junit.framework.Assert;
+import org.junit.Test;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
 
-import junit.framework.Assert;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
+
+	private String insertSql = "insert into PERSON(NAME,LAST_NAME,AGE) values('damon.zhu','zhu',28)";
 
 	private String selectSql = "select * from PERSON p where p.AGE = ?";
 
 	private String updateSql = "update PERSON p set p.Name = ? where p.NAME = ?";
 
-	private String insertSql = "insert into PERSON(NAME,LAST_NAME,AGE) values('damon.zhu','zhu',28)";
-
 	private void assertResultInReadDs(String res) {
 		Assert.assertTrue(Arrays.asList(new String[] { "reader1", "reader2" }).contains(res));
+	}
+
+	@Override
+	protected String getConfigManagerType() {
+		return "local";
+	}
+
+	@Override
+	protected DataSourceEntry[] getDataSourceEntryArray() {
+		DataSourceEntry[] entries = new DataSourceEntry[3];
+
+		entries[0] = new DataSourceEntry("jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets.xml", true);
+		entries[1] = new DataSourceEntry("jdbc:h2:mem:test1;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets1.xml", false);
+		entries[2] = new DataSourceEntry("jdbc:h2:mem:test2;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets2.xml", false);
+
+		return entries;
+	}
+
+	@Override
+	protected String getResourceId() {
+		return "sample.ds.v2";
+	}
+
+	@Override
+	protected String getSchema() {
+		return getClass().getResource("/schema.sql").getPath();
 	}
 
 	@Test
@@ -140,31 +162,5 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 				return null;
 			}
 		});
-	}
-
-	@Override
-	protected String getConfigManagerType() {
-		return "local";
-	}
-
-	@Override
-	protected String getResourceId() {
-		return "sample.ds.v2";
-	}
-
-	@Override
-	protected String getSchema() {
-		return getClass().getResource("/schema.sql").getPath();
-	}
-
-	@Override
-	protected DataSourceEntry[] getDataSourceEntryArray() {
-		DataSourceEntry[] entries = new DataSourceEntry[3];
-
-		entries[0] = new DataSourceEntry("jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets.xml", true);
-		entries[1] = new DataSourceEntry("jdbc:h2:mem:test1;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets1.xml", false);
-		entries[2] = new DataSourceEntry("jdbc:h2:mem:test2;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets2.xml", false);
-
-		return entries;
 	}
 }

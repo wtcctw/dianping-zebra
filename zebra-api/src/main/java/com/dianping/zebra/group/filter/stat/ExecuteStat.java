@@ -15,6 +15,8 @@ public class ExecuteStat {
 
 	private final AtomicLong deleteSuccessCount = new AtomicLong();
 
+	private final RangeCounter errorTimeRange = RangeCounter.getDefaultTimeRange();
+
 	private final String groupDataSourceId;
 
 	private final AtomicLong insertErrorCount = new AtomicLong();
@@ -26,6 +28,8 @@ public class ExecuteStat {
 	private final AtomicLong selectSuccessCount = new AtomicLong();
 
 	private final String sql;
+
+	private final RangeCounter successTimeRange = RangeCounter.getDefaultTimeRange();
 
 	private final AtomicLong updateErrorCount = new AtomicLong();
 
@@ -57,6 +61,10 @@ public class ExecuteStat {
 		return deleteSuccessCount;
 	}
 
+	public RangeCounter getErrorTimeRange() {
+		return errorTimeRange;
+	}
+
 	public String getGroupDataSourceId() {
 		return groupDataSourceId;
 	}
@@ -79,6 +87,10 @@ public class ExecuteStat {
 
 	public String getSql() {
 		return sql;
+	}
+
+	public RangeCounter getSuccessTimeRange() {
+		return successTimeRange;
 	}
 
 	public AtomicLong getUpdateErrorCount() {

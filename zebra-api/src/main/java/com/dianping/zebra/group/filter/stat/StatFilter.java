@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class StatFilter extends AbstractJdbcFilter {
 
+	private ThreadLocal<Long> executeTime = new ThreadLocal<Long>();
+
 	@Override public void closeGroupConnectionError(JdbcMetaData metaData, Exception exp) {
 		StatContext.getDataSourceSummary().getCloseGroupConnectionErrorCount().incrementAndGet();
 		StatContext.getDataSource(metaData).getCloseGroupConnectionErrorCount().incrementAndGet();
@@ -22,11 +24,25 @@ public class StatFilter extends AbstractJdbcFilter {
 		StatContext.getDataSource(metaData).getCloseGroupConnectionSuccessCount().incrementAndGet();
 	}
 
+	@Override public void executeBefore(JdbcMetaData metaData) {
+		executeTime.set(System.currentTimeMillis());
+	}
+
 	@Override public void executeError(JdbcMetaData metaData, Exception exp) {
+		if (executeTime.get() != null) {
+			StatContext.getExecute(metaData).getErrorTimeRange()
+					.increment(System.currentTimeMillis() - executeTime.get());
+		}
+		executeTime.set(null);
 		visitNode(metaData, exp);
 	}
 
 	@Override public void executeSuccess(JdbcMetaData metaData) {
+		if (executeTime.get() != null) {
+			StatContext.getExecute(metaData).getSuccessTimeRange()
+					.increment(System.currentTimeMillis() - executeTime.get());
+		}
+		executeTime.set(null);
 		visitNode(metaData);
 	}
 
