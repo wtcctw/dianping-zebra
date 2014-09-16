@@ -90,11 +90,6 @@ public class StatFilter extends AbstractJdbcFilter {
 
 		private final JdbcMetaData metaData;
 
-		public SqlStatVisitor(JdbcMetaData metaData) {
-			this.exception = null;
-			this.metaData = metaData;
-		}
-
 		public SqlStatVisitor(JdbcMetaData metadata, Exception exp) {
 			this.metaData = metadata;
 			this.exception = exp;
@@ -163,32 +158,33 @@ public class StatFilter extends AbstractJdbcFilter {
 					StatContext.getExecute(metaData).getUpdateErrorCount());
 		}
 
+		private <T extends QueryTreeNode> void visit(QueryTreeNodeList<T> nodes) throws StandardException {
+			for (QueryTreeNode node : nodes) {
+				visit(node);
+			}
+		}
+
 		@Override public Visitable visit(Visitable node) throws StandardException {
 			if (node == null) {
 				return node;
 			}
 
 			switch (((QueryTreeNode) node).getNodeType()) {
-			case NodeTypes.CURSOR_NODE: {
+			case NodeTypes.CURSOR_NODE:
 				cursorNode((CursorNode) node);
 				break;
-			}
-			case NodeTypes.SELECT_NODE: {
+			case NodeTypes.SELECT_NODE:
 				selectNode((SelectNode) node);
 				break;
-			}
-			case NodeTypes.UPDATE_NODE: {
+			case NodeTypes.UPDATE_NODE:
 				updateNode((UpdateNode) node);
 				break;
-			}
-			case NodeTypes.INSERT_NODE: {
+			case NodeTypes.INSERT_NODE:
 				insertNode((InsertNode) node);
 				break;
-			}
-			case NodeTypes.DELETE_NODE: {
+			case NodeTypes.DELETE_NODE:
 				deleteNode((DeleteNode) node);
 				break;
-			}
 			}
 			return node;
 		}

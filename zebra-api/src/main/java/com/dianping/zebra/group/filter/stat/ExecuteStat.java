@@ -27,6 +27,14 @@ public class ExecuteStat {
 
 	private final AtomicLong insertSuccessCount = new AtomicLong();
 
+	private final AtomicLong maxErrorTime = new AtomicLong();
+
+	private final AtomicLong maxSuccessTime = new AtomicLong();
+
+	private final AtomicLong minErrorTime = new AtomicLong();
+
+	private final AtomicLong minSuccessTime = new AtomicLong();
+
 	private final AtomicLong selectErrorCount = new AtomicLong();
 
 	private final AtomicLong selectSuccessCount = new AtomicLong();
@@ -93,6 +101,22 @@ public class ExecuteStat {
 
 	public AtomicLong getInsertSuccessCount() {
 		return insertSuccessCount;
+	}
+
+	public AtomicLong getMaxErrorTime() {
+		return maxErrorTime;
+	}
+
+	public AtomicLong getMaxSuccessTime() {
+		return maxSuccessTime;
+	}
+
+	public AtomicLong getMinErrorTime() {
+		return minErrorTime;
+	}
+
+	public AtomicLong getMinSuccessTime() {
+		return minSuccessTime;
 	}
 
 	public AtomicLong getSelectErrorCount() {
