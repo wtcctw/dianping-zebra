@@ -13,7 +13,7 @@
 
 
 <a:layout>
-<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+    <script src="${model.webapp}/js/run_prettify.js" type="text/javascript"></script>
 
 	<br>
 	<strong style="color: #08C;">Database: ${payload.database }</strong>
