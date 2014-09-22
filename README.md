@@ -13,23 +13,27 @@
 
 ### 使用说明
 ##### POM依赖
+
 	<dependency>
     	<groupId>com.dianping.zebra</groupId>
 	    <artifactId>zebra-api</artifactId>
     	<version>${version}</version>
 	</dependency>
 
-或者可以通过升级zebra-ds-monitor的版本到`2.5.8`以上获得最新版的dal，因为最新版的zebra-ds-monitor直接依赖了dal。
+目前的最新版本为`2.5.9`
+
+##### 数据库监控功能
 
 	<dependency>
         <groupId>com.dianping.zebra</groupId>
         <artifactId>zebra-ds-monitor-client</artifactId>
         <version>${version}</version>
     </dependency>
+    
+`version`和`zebra-api`保持一致
+    
 ##### 其他依赖
 * 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
-* `Lion`的`0.4.3`以下版本有一个BUG，如果多个`bean`指向了同一个`Lion`配置，那么配置更新的时候只会通知一个`bean`。所以如果多个`DataSource`引用了同一个`Lion`配置，如果想要实现C3P0相关配置热切换，就需要升级`Lion`到`0.4.3`。
-* `zebra-ds-monitor-client`的`0.0.7`有一个BUG，如果在`Spring`中配置了`C3P0`相关参数，启动后值变更的话将无法收到推送。建议把`zebra-ds-monitor-client`升级到和`zebra-api`一样的版本。
 
 ##### 多数据库在 Spring 中 DataSource 的配置
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
@@ -65,7 +69,7 @@ Q：为什么要加`init-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ### 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.8`以上，`Zebra`会自动替换满足条件的`DataSource`。
+通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.9`以上，`Zebra`会自动替换满足条件的`DataSource`。
 
 #### 没有使用`dpdl`的`ComboPooledDataSource`
 * 数据源在`Lion`的白名单`groupds.autoreplace.database`配置过
