@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.filter;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -13,6 +15,11 @@ public class FilterWrapper implements JdbcFilter {
 	}
 
 	public FilterWrapper(List<JdbcFilter> filters) {
+		Collections.sort(filters, new Comparator<JdbcFilter>() {
+			@Override public int compare(JdbcFilter o1, JdbcFilter o2) {
+				return Integer.compare(o1.getOrder(), o2.getOrder());
+			}
+		});
 		this.filters = filters;
 	}
 

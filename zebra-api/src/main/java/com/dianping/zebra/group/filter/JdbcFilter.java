@@ -52,7 +52,7 @@ public interface JdbcFilter {
 
 	int getOrder();
 
-	<S> void initGroupDataSource(JdbcMetaData metaData,S source, FilterAction<S> action);
+	<S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action);
 
 	void initSingleDataSourceAfter(JdbcMetaData metaData);
 
