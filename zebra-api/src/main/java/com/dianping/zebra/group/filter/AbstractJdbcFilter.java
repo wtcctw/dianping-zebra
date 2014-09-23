@@ -88,20 +88,8 @@ public abstract class AbstractJdbcFilter implements JdbcFilter {
 		return this.DEFAULT_ORDER;
 	}
 
-	@Override public void initGroupDataSourceAfter(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void initGroupDataSourceBefore(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void initGroupDataSourceError(JdbcMetaData metaData, Exception exp) {
-
-	}
-
-	@Override public void initGroupDataSourceSuccess(JdbcMetaData metaData) {
-
+	@Override public <S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {
+		action.execute(source);
 	}
 
 	@Override public void initSingleDataSourceAfter(JdbcMetaData metaData) {

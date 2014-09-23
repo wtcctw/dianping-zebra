@@ -5,7 +5,7 @@ package com.dianping.zebra.group.filter;
  */
 public interface JdbcFilter {
 	public static final int DEFAULT_ORDER = 0;
-	
+
 	public static final int MAX_ORDER = Integer.MAX_VALUE;
 
 	public static final int MIN_ORDER = Integer.MIN_VALUE;
@@ -52,13 +52,7 @@ public interface JdbcFilter {
 
 	int getOrder();
 
-	void initGroupDataSourceAfter(JdbcMetaData metaData);
-
-	void initGroupDataSourceBefore(JdbcMetaData metaData);
-
-	void initGroupDataSourceError(JdbcMetaData metaData, Exception exp);
-
-	void initGroupDataSourceSuccess(JdbcMetaData metaData);
+	<S> void initGroupDataSource(JdbcMetaData metaData,S source, FilterAction<S> action);
 
 	void initSingleDataSourceAfter(JdbcMetaData metaData);
 

@@ -12,6 +12,7 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.filter.FilterAction;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
@@ -266,22 +267,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		this.initFilters();
 
-		try {
-			filter.initGroupDataSourceBefore(metaData);
+		this.filter.initGroupDataSource(this.metaData.clone(), this, new FilterAction<GroupDataSource>() {
+			@Override public void execute(GroupDataSource source) {
+				source.initDataSources();
+				source.loadCustomizedReadWriteStrategy();
+			}
+		});
 
-			this.initDataSources();
-			this.loadCustomizedReadWriteStrategy();
-
-			this.init = true;
-			logger.info(String.format("GroupDataSource(%s) successfully initialized.", jdbcRef));
-
-			filter.initGroupDataSourceSuccess(metaData);
-		} catch (RuntimeException exp) {
-			filter.initGroupDataSourceError(metaData, exp);
-			throw exp;
-		} finally {
-			filter.initGroupDataSourceAfter(metaData);
-		}
+		this.init = true;
+		logger.info(String.format("GroupDataSource(%s) successfully initialized.", jdbcRef));
 	}
 
 	private void initDataSources() {

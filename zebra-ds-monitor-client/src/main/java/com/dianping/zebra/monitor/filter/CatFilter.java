@@ -8,6 +8,7 @@ import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.status.StatusExtensionRegister;
 import com.dianping.zebra.group.filter.AbstractJdbcFilter;
+import com.dianping.zebra.group.filter.FilterAction;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.util.SqlUtils;
@@ -89,10 +90,9 @@ public class CatFilter extends AbstractJdbcFilter {
 		Cat.logEvent("DAL.Master", "Found-" + metaData.getDataSourceId());
 	}
 
-	@Override public void initGroupDataSourceAfter(JdbcMetaData metaData) {
-		if (metaData.getDataSource() instanceof GroupDataSourceMBean) {
-			StatusExtensionRegister.getInstance()
-					.register(new GroupDataSourceMonitor((GroupDataSourceMBean) metaData.getDataSource()));
+	@Override public <S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {
+		if (source instanceof GroupDataSourceMBean) {
+			StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor((GroupDataSourceMBean) source));
 		}
 	}
 

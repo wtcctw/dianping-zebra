@@ -176,34 +176,15 @@ public class FilterWrapper implements JdbcFilter {
 		}.execute();
 	}
 
-	@Override public void initGroupDataSourceAfter(final JdbcMetaData metaData) {
-		new JdbcFilterExecuter() {
-			@Override protected void execute(JdbcFilter filter) {
-				filter.initGroupDataSourceAfter(metaData);
-			}
-		}.execute();
+	@Override public int getOrder() {
+		return DEFAULT_ORDER;
 	}
 
-	@Override public void initGroupDataSourceBefore(final JdbcMetaData metaData) {
+	@Override public <S> void initGroupDataSource(final JdbcMetaData metaData, final S source,
+			final FilterAction<S> action) {
 		new JdbcFilterExecuter() {
 			@Override protected void execute(JdbcFilter filter) {
-				filter.initGroupDataSourceBefore(metaData);
-			}
-		}.execute();
-	}
-
-	@Override public void initGroupDataSourceError(final JdbcMetaData metaData, final Exception exp) {
-		new JdbcFilterExecuter() {
-			@Override protected void execute(JdbcFilter filter) {
-				filter.initGroupDataSourceError(metaData, exp);
-			}
-		}.execute();
-	}
-
-	@Override public void initGroupDataSourceSuccess(final JdbcMetaData metaData) {
-		new JdbcFilterExecuter() {
-			@Override protected void execute(JdbcFilter filter) {
-				filter.initGroupDataSourceSuccess(metaData);
+				filter.initGroupDataSource(metaData, source, action);
 			}
 		}.execute();
 	}
