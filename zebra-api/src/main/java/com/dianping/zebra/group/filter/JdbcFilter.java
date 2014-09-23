@@ -4,6 +4,12 @@ package com.dianping.zebra.group.filter;
  * Created by Dozer on 9/2/14.
  */
 public interface JdbcFilter {
+	public static final int DEFAULT_ORDER = 0;
+	
+	public static final int MAX_ORDER = Integer.MAX_VALUE;
+
+	public static final int MIN_ORDER = Integer.MIN_VALUE;
+
 	void closeGroupConnectionAfter(JdbcMetaData metaData);
 
 	void closeGroupConnectionBefore(JdbcMetaData metaData);
@@ -43,6 +49,8 @@ public interface JdbcFilter {
 	void getGroupConnectionError(JdbcMetaData metaData, Exception exp);
 
 	void getGroupConnectionSuccess(JdbcMetaData metaData);
+
+	int getOrder();
 
 	void initGroupDataSourceAfter(JdbcMetaData metaData);
 

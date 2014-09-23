@@ -3,7 +3,23 @@ package com.dianping.zebra.group.filter;
 /**
  * Created by Dozer on 9/2/14.
  */
-public abstract class AbstractJdbcFilter implements JdbcFilter{
+public abstract class AbstractJdbcFilter implements JdbcFilter {
+	@Override public void closeGroupConnectionAfter(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void closeGroupConnectionBefore(JdbcMetaData metaData) {
+
+	}
+
+	@Override public void closeGroupConnectionError(JdbcMetaData metaData, Exception exp) {
+
+	}
+
+	@Override public void closeGroupConnectionSuccess(JdbcMetaData metaData) {
+
+	}
+
 	@Override public void closeSingleDataSourceAfter(JdbcMetaData metaData) {
 
 	}
@@ -68,20 +84,8 @@ public abstract class AbstractJdbcFilter implements JdbcFilter{
 
 	}
 
-	@Override public void closeGroupConnectionAfter(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void closeGroupConnectionBefore(JdbcMetaData metaData) {
-
-	}
-
-	@Override public void closeGroupConnectionError(JdbcMetaData metaData, Exception exp) {
-
-	}
-
-	@Override public void closeGroupConnectionSuccess(JdbcMetaData metaData) {
-
+	@Override public int getOrder() {
+		return this.DEFAULT_ORDER;
 	}
 
 	@Override public void initGroupDataSourceAfter(JdbcMetaData metaData) {
