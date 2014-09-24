@@ -3,17 +3,21 @@ package com.dianping.zebra.group.filter.wall;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Dozer on 9/24/14.
  */
 public class WallFilter extends DefaultJdbcFilter {
-	private final static int MAX_LENGTH = 5;
+	protected final static int MAX_LENGTH = 5;
 
-	private static String sha1(String input) throws NoSuchAlgorithmException {
+	protected static String sha1(String input) throws NoSuchAlgorithmException {
 		MessageDigest mDigest = MessageDigest.getInstance("SHA1");
 		byte[] result = mDigest.digest(input.getBytes());
 		StringBuffer sb = new StringBuffer();
@@ -24,7 +28,7 @@ public class WallFilter extends DefaultJdbcFilter {
 		return sb.toString();
 	}
 
-	private String addIdToSql(String sql) {
+	protected String addIdToSql(String sql) {
 		try {
 			return String.format("%s/*%s*/", sql, generateId(sql));
 		} catch (NoSuchAlgorithmException e) {
@@ -32,8 +36,24 @@ public class WallFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	private String generateId(String sql) throws NoSuchAlgorithmException {
+	@Override public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
+			throws SQLException {
+		System.out.println(metaData.getSql());
+		return super.execute(metaData, source, action);
+	}
+
+	protected String generateId(String sql) throws NoSuchAlgorithmException {
 		return sha1(sql);
+	}
+
+	protected String getIdFromSQL(String sql) {
+		Pattern pattern = Pattern.compile("(.*)(\\/\\*)([a-zA-Z0-9]{10})(\\*\\/$)");
+		Matcher matcher = pattern.matcher(sql);
+		if (matcher.matches()) {
+			return matcher.group(3);
+		} else {
+			return null;
+		}
 	}
 
 	public int getOrder() {
@@ -42,11 +62,7 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	@Override public <S> String sql(JdbcMetaData metaData, S source, FilterFunction<S, String> action) {
 		String result = super.sql(metaData, source, action);
-
 		result = addIdToSql(result);
-
-		System.out.println(result);
-
 		return result;
 	}
 }
