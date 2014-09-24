@@ -37,54 +37,6 @@
 
 ## Spring 配置
 
-    <bean id="main.master" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close"> 
-    	<property name="jdbcUrl" value="${tuangou-mt.main.master.jdbc.url}" />
-		<property name="user" value="${tuangou-mt.main.master.jdbc.username}" /> 
-		<property name="password" value="${tuangou-mt.main.master.jdbc.password}" /> 
-		<property name="driverClass" value="com.mysql.jdbc.Driver" /> 
-		<property name="minPoolSize" value="5" /> 
-		<property name="maxPoolSize" value="30" /> 
-		<property name="initialPoolSize" value="15" />  
-		<property name="maxIdleTime" value="1800" /> 
-		<property name="idleConnectionTestPeriod" value="60" /> 
-		<property name="acquireRetryAttempts" value="3" /> 
-		<property name="acquireRetryDelay" value="300" />
-		<property name="maxStatements" value="0"/> 
-		<property name="maxStatementsPerConnection" value="100"/>
-		<property name="numHelperThreads" value="6"/>
-		<property name="maxAdministrativeTaskTime" value="5"/>
-		<property name="preferredTestQuery" value="SELECT 1"/>
-	</bean>
-	<bean id="main.slave" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close"> 
-		<property name="jdbcUrl" value="${tuangou-mt.main.slave.jdbc.url}" />
-		<property name="user" value="${tuangou-mt.main.slave.jdbc.username}" /> 
-		<property name="password" value="${tuangou-mt.main.slave.jdbc.password}" /> 
-		<property name="driverClass" value="com.mysql.jdbc.Driver" /> 
-		<property name="minPoolSize" value="5" /> 
-		<property name="maxPoolSize" value="30" /> 
-		<property name="initialPoolSize" value="15" />  
-		<property name="maxIdleTime" value="1800" /> 
-		<property name="idleConnectionTestPeriod" value="60" /> 
-		<property name="acquireRetryAttempts" value="3" /> 
-		<property name="acquireRetryDelay" value="300" />
-		<property name="maxStatements" value="0"/> 
-		<property name="maxStatementsPerConnection" value="100"/>
-		<property name="numHelperThreads" value="6"/>
-		<property name="maxAdministrativeTaskTime" value="5"/>
-		<property name="preferredTestQuery" value="SELECT 1"/>
-	</bean>
-	<bean id="main.dataSource" class="com.dianping.dpdl.sql.DPDataSource">
-		<!-- 写库(主库) -->
-		<property name="writeDS" value="main.master"/>
-		<!-- 读库(从库) -->
-		<property name="readDS">
-			<map>
-			<!-- 可设置多个从库，并配置相应的权重 -->
-			<entry key="main.slave" value="10" />
-			</map>
-		</property>
-	</bean>
-
 ### 在 Spring 中 DataSource 的配置
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="TuanGou2010" />
