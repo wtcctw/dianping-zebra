@@ -25,11 +25,22 @@ public interface JdbcFilter {
 
 	<S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action) throws SQLException;
 
-	<S,T > T findMasterFailOverDataSource(JdbcMetaData metaData, S source, FilterFunction<S,T> action);
+	<S, T> T findMasterFailOverDataSource(JdbcMetaData metaData, S source, FilterFunction<S, T> action);
 
 	<S, T> T getGroupConnection(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
 			throws SQLException;
 
+	/**
+	 * filter_with_order_3_start
+	 * filter_with_order_2_start
+	 * filter_with_order_1_start
+	 * targer_start
+	 * filter_with_order_1_finish
+	 * filter_with_order_2_finish
+	 * filter_with_order_3_finish
+	 *
+	 * @return the order of execute
+	 */
 	int getOrder();
 
 	<S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action);
