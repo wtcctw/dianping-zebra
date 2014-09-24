@@ -1,5 +1,12 @@
 package com.dianping.zebra.group.filter;
 
+import com.dianping.zebra.group.filter.delegate.FilterAction;
+import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
+import com.dianping.zebra.group.filter.delegate.FilterFunction;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+
+import java.sql.SQLException;
+
 /**
  * Created by Dozer on 9/2/14.
  */
@@ -10,71 +17,26 @@ public interface JdbcFilter {
 
 	public static final int MIN_ORDER = Integer.MIN_VALUE;
 
-	void closeGroupConnectionAfter(JdbcMetaData metaData);
+	<S> void closeGroupConnection(JdbcMetaData metaData, S source, FilterActionWithSQLExcption<S> action)
+			throws SQLException;
 
-	void closeGroupConnectionBefore(JdbcMetaData metaData);
+	<S> void closeSingleDataSource(JdbcMetaData metaData, S source, FilterActionWithSQLExcption<S> action)
+			throws SQLException;
 
-	void closeGroupConnectionError(JdbcMetaData metaData, Exception exp);
+	<S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action) throws SQLException;
 
-	void closeGroupConnectionSuccess(JdbcMetaData metaData);
+	<S,T > T findMasterFailOverDataSource(JdbcMetaData metaData, S source, FilterFunction<S,T> action);
 
-	void closeSingleDataSourceAfter(JdbcMetaData metaData);
-
-	void closeSingleDataSourceBefore(JdbcMetaData metaData);
-
-	void closeSingleDataSourceError(JdbcMetaData metaData, Exception exp);
-
-	void closeSingleDataSourceSuccess(JdbcMetaData metaData);
-
-	void executeAfter(JdbcMetaData metaData);
-
-	void executeBefore(JdbcMetaData metaData);
-
-	void executeError(JdbcMetaData metaData, Exception exp);
-
-	void executeSuccess(JdbcMetaData metaData);
-
-	void findMasterFailOverDataSourceAfter(JdbcMetaData metaData);
-
-	void findMasterFailOverDataSourceBefore(JdbcMetaData metaData);
-
-	void findMasterFailOverDataSourceError(JdbcMetaData metaData, Exception exp);
-
-	void findMasterFailOverDataSourceSuccess(JdbcMetaData metaData);
-
-	void getGroupConnectionAfter(JdbcMetaData metaData);
-
-	void getGroupConnectionBefore(JdbcMetaData metaData);
-
-	void getGroupConnectionError(JdbcMetaData metaData, Exception exp);
-
-	void getGroupConnectionSuccess(JdbcMetaData metaData);
+	<S, T> T getGroupConnection(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
+			throws SQLException;
 
 	int getOrder();
 
 	<S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action);
 
-	void initSingleDataSourceAfter(JdbcMetaData metaData);
+	<S, T> T initSingleDataSource(JdbcMetaData metaData, S source, FilterFunction<S, T> action);
 
-	void initSingleDataSourceBefore(JdbcMetaData metaData);
+	<S> void refreshGroupDataSource(JdbcMetaData metaData, String propertiesName, S source, FilterAction<S> action);
 
-	void initSingleDataSourceError(JdbcMetaData metaData, Exception exp);
-
-	void initSingleDataSourceSuccess(JdbcMetaData metaData);
-
-	void refreshGroupDataSourceAfter(JdbcMetaData metaData, String propertiesName);
-
-	void refreshGroupDataSourceBefore(JdbcMetaData metaData, String propertiesName);
-
-	void refreshGroupDataSourceError(JdbcMetaData metaData, String propertiesName, Exception exp);
-
-	void refreshGroupDataSourceSuccess(JdbcMetaData metaData, String propertiesName);
-
-	void switchFailOverDataSourceAfter(JdbcMetaData metaData);
-
-	void switchFailOverDataSourceBefore(JdbcMetaData metaData);
-
-	void switchFailOverDataSourceError(JdbcMetaData metaData, Exception exp);
-
-	void switchFailOverDataSourceSuccess(JdbcMetaData metaData);
+	<S> void switchFailOverDataSource(JdbcMetaData metaData, S source, FilterAction<S> action);
 }

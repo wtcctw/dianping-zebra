@@ -6,6 +6,8 @@ import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
+import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
@@ -55,40 +57,36 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	@Override
 	public void close() throws SQLException {
-		JdbcMetaData tempMetaData = this.metaData.clone();
+		this.filter
+				.closeSingleDataSource(this.metaData.clone(), this, new FilterActionWithSQLExcption<SingleDataSource>() {
+					@Override public void execute(SingleDataSource source) throws SQLException {
+						if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+							if (source.state == DataSourceState.UP) {
+								PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
+								if (poolBackedDataSource.getNumBusyConnections() == 0) {
+									logger.info("closing old datasource [" + source.dsId + "]");
 
-		this.filter.closeSingleDataSourceBefore(tempMetaData);
+									poolBackedDataSource.close();
 
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			if (this.state == DataSourceState.UP) {
-				PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
-				if (poolBackedDataSource.getNumBusyConnections() == 0) {
-					logger.info("closing old datasource [" + this.dsId + "]");
+									logger.info("old datasource [" + source.dsId + "] closed");
+									source.state = DataSourceState.CLOSED;
+								} else {
+									DalException exp = new DalException(
+											String.format("Cannot close dataSource[%s] since there are busy connections.",
+													dsId));
+									throw exp;
+								}
+							} else {
+								source.state = DataSourceState.CLOSED;
+							}
 
-					poolBackedDataSource.close();
-
-					this.filter.closeSingleDataSourceSuccess(tempMetaData);
-
-					logger.info("old datasource [" + this.dsId + "] closed");
-					this.state = DataSourceState.CLOSED;
-				} else {
-					DalException exp = new DalException(
-							String.format("Cannot close dataSource[%s] since there are busy connections.",
-									dsId));
-					this.filter.closeSingleDataSourceError(tempMetaData, exp);
-					throw exp;
-				}
-			} else {
-				this.state = DataSourceState.CLOSED;
-			}
-
-			this.filter.closeSingleDataSourceAfter(tempMetaData);
-		} else {
-			Exception exp = new DalException(
-					"fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
-			this.filter.closeSingleDataSourceError(tempMetaData, exp);
-			logger.warn(exp.getMessage(), exp);
-		}
+						} else {
+							Exception exp = new DalException(
+									"fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
+							logger.warn(exp.getMessage(), exp);
+						}
+					}
+				});
 	}
 
 	public synchronized DataSourceConfig getConfig() {
@@ -248,42 +246,39 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		return 0;
 	}
 
-	private DataSource initDataSource(DataSourceConfig value) {
-		JdbcMetaData tempMetaData = this.metaData.clone();
+	private DataSource initDataSource(final DataSourceConfig value) {
+		return this.filter.initSingleDataSource(
+				this.metaData.clone(), this,
+				new FilterFunction<SingleDataSource, DataSource>() {
+					@Override public DataSource execute(SingleDataSource source) {
+						try {
+							JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 
-		this.filter.initSingleDataSourceBefore(tempMetaData);
+							DataSource unPooledDataSource = DataSources
+									.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
+											value.getPassword());
 
-		try {
-			JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
+							Map<String, Object> props = new HashMap<String, Object>();
 
-			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
-					value.getPassword());
+							props.put("driverClass", value.getDriverClass());
 
-			Map<String, Object> props = new HashMap<String, Object>();
+							for (Any any : value.getProperties()) {
+								props.put(any.getName(), any.getValue());
+							}
 
-			props.put("driverClass", value.getDriverClass());
+							PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
+									unPooledDataSource, props);
 
-			for (Any any : value.getProperties()) {
-				props.put(any.getName(), any.getValue());
-			}
-
-			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
-					unPooledDataSource, props);
-
-			logger.info(String.format("New dataSource [%s] created.", value.getId()));
-
-			this.filter.initSingleDataSourceSuccess(tempMetaData);
-
-			return pooledDataSource;
-		} catch (IllegalConfigException e) {
-			this.filter.initSingleDataSourceError(tempMetaData, e);
-			throw e;
-		} catch (Exception e) {
-			this.filter.initSingleDataSourceError(tempMetaData, e);
-			throw new IllegalConfigException(e);
-		} finally {
-			this.filter.initSingleDataSourceAfter(tempMetaData);
-		}
+							logger.info(String.format("New dataSource [%s] created.", value.getId()));
+							return pooledDataSource;
+						} catch (IllegalConfigException e) {
+							throw e;
+						} catch (Exception e) {
+							throw new IllegalConfigException(e);
+						} finally {
+						}
+					}
+				});
 	}
 
 	private void initFilters() {

@@ -4,10 +4,10 @@ package com.dianping.zebra.group.filter;
  * Created by Dozer on 9/10/14.
  */
 
-import static org.mockito.Mockito.mock;
+import org.mockito.Mockito;
 
 public class MockFilterHelper {
-	private static JdbcFilter mockedFilter = mock(JdbcFilter.class);
+	private static JdbcFilter mockedFilter = Mockito.spy(new DefaultJdbcFilter());
 
 	public static JdbcFilter getMockedFilter() {
 		return mockedFilter;

@@ -1,63 +1,68 @@
 package com.dianping.zebra.group.filter.stat;
 
-import com.dianping.zebra.group.filter.AbstractJdbcFilter;
+import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.StatementNode;
+
+import java.sql.SQLException;
 
 /**
  * Created by Dozer on 9/2/14.
  */
-public class StatFilter extends AbstractJdbcFilter {
+public class StatFilter extends DefaultJdbcFilter {
 
-	private ThreadLocal<Long> executeTime = new ThreadLocal<Long>();
-
-	@Override public void closeGroupConnectionError(JdbcMetaData metaData, Exception exp) {
-		StatContext.getDataSourceSummary().getCloseGroupConnectionErrorCount().incrementAndGet();
-		StatContext.getDataSource(metaData).getCloseGroupConnectionErrorCount().incrementAndGet();
-	}
-
-	@Override public void closeGroupConnectionSuccess(JdbcMetaData metaData) {
-		StatContext.getDataSourceSummary().getCloseGroupConnectionSuccessCount().incrementAndGet();
-		StatContext.getDataSource(metaData).getCloseGroupConnectionSuccessCount().incrementAndGet();
-	}
-
-	@Override public void executeBefore(JdbcMetaData metaData) {
-		executeTime.set(System.currentTimeMillis());
-	}
-
-	@Override public void executeError(JdbcMetaData metaData, Exception exp) {
-		if (executeTime.get() != null) {
-			long time = System.currentTimeMillis() - executeTime.get();
-			StatContext.getExecuteSummary().getErrorTimeRange().increment(time);
-			StatContext.getExecute(metaData).getErrorTimeRange().increment(time);
-			StatContext.getExecuteSummary().getErrorTime().addAndGet(time);
-			StatContext.getExecute(metaData).getErrorTime().addAndGet(time);
+	@Override public <S> void closeGroupConnection(JdbcMetaData metaData, S source,
+			FilterActionWithSQLExcption<S> action)
+			throws SQLException {
+		try {
+			super.closeGroupConnection(metaData, source, action);
+			StatContext.getDataSourceSummary().getCloseGroupConnectionSuccessCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseGroupConnectionSuccessCount().incrementAndGet();
+		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getCloseGroupConnectionErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseGroupConnectionErrorCount().incrementAndGet();
+			throw exp;
 		}
-		executeTime.set(null);
-		visitNode(metaData, exp);
 	}
 
-	@Override public void executeSuccess(JdbcMetaData metaData) {
-		if (executeTime.get() != null) {
-			long time = System.currentTimeMillis() - executeTime.get();
+	@Override public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
+			throws SQLException {
+		Long executeStart = System.currentTimeMillis();
+		try {
+			T result = super.execute(metaData, source, action);
+			long time = System.currentTimeMillis() - executeStart;
 			StatContext.getExecuteSummary().getSuccessTimeRange().increment(time);
 			StatContext.getExecute(metaData).getSuccessTimeRange().increment(time);
 			StatContext.getExecuteSummary().getSuccessTime().addAndGet(time);
 			StatContext.getExecute(metaData).getSuccessTime().addAndGet(time);
+			visitNode(metaData);
+			return result;
+		} catch (SQLException exp) {
+			long time = System.currentTimeMillis() - executeStart;
+			StatContext.getExecuteSummary().getErrorTimeRange().increment(time);
+			StatContext.getExecute(metaData).getErrorTimeRange().increment(time);
+			StatContext.getExecuteSummary().getErrorTime().addAndGet(time);
+			StatContext.getExecute(metaData).getErrorTime().addAndGet(time);
+			visitNode(metaData, exp);
+			throw exp;
 		}
-		executeTime.set(null);
-		visitNode(metaData);
 	}
 
-	@Override public void getGroupConnectionError(JdbcMetaData metaData, Exception exp) {
-		StatContext.getDataSourceSummary().getGetGroupConnectionErrorCount().incrementAndGet();
-		StatContext.getDataSource(metaData).getGetGroupConnectionErrorCount().incrementAndGet();
-	}
-
-	@Override public void getGroupConnectionSuccess(JdbcMetaData metaData) {
-		StatContext.getDataSourceSummary().getGetGroupConnectionSuccessCount().incrementAndGet();
-		StatContext.getDataSource(metaData).getGetGroupConnectionSuccessCount().incrementAndGet();
+	@Override public <S, T> T getGroupConnection(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, T> action) throws SQLException {
+		try {
+			T result = super.getGroupConnection(metaData, source, action);
+			StatContext.getDataSourceSummary().getGetGroupConnectionSuccessCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getGetGroupConnectionSuccessCount().incrementAndGet();
+			return result;
+		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getGetGroupConnectionErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getGetGroupConnectionErrorCount().incrementAndGet();
+			throw exp;
+		}
 	}
 
 	private void visitNode(JdbcMetaData metaData, Exception exp) {

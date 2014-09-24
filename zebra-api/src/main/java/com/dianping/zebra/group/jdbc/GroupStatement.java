@@ -8,6 +8,7 @@ package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.exception.DalNotSupportException;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
@@ -385,34 +386,25 @@ public class GroupStatement implements Statement {
 		}
 	}
 
-	protected <T> T executeWithFilter(JDBCOperationCallback<T> callback, String sql, Object params, boolean isBatch
-			, boolean forceWriter) throws SQLException {
+	protected <T> T executeWithFilter(final JDBCOperationCallback<T> callback, final String sql, Object params,
+			boolean isBatch
+			, final boolean forceWriter) throws SQLException {
 
-		JdbcMetaData tempMetaData = this.metaData.clone();
+		final JdbcMetaData tempMetaData = this.metaData.clone();
 		tempMetaData.setSql(sql);
 		tempMetaData.setBatch(isBatch);
 		tempMetaData.setParams(params);
 		tempMetaData.setTransaction(!this.dpGroupConnection.getAutoCommit());
 		tempMetaData.setBatchedSqls(batchedSqls);
 
-		this.filter.executeBefore(tempMetaData);
-
-		try {
-			Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-
-			tempMetaData.setRealJdbcMetaData(getRealJdbcMetaData(conn));
-
-			T result = callback.doAction(conn);
-
-			tempMetaData.setConnection(conn);
-			this.filter.executeSuccess(tempMetaData);
-			return result;
-		} catch (SQLException e) {
-			this.filter.executeError(tempMetaData, e);
-			throw e;
-		} finally {
-			this.filter.executeAfter(tempMetaData);
-		}
+		return this.filter.execute(tempMetaData, this, new FilterFunctionWithSQLException<GroupStatement, T>() {
+			@Override public T execute(GroupStatement source) throws SQLException {
+				Connection conn = source.dpGroupConnection.getRealConnection(sql, forceWriter);
+				tempMetaData.setRealJdbcMetaData(getRealJdbcMetaData(conn));
+				T result = callback.doAction(conn);
+				return result;
+			}
+		});
 	}
 
 	/*

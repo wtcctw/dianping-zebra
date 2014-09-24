@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
@@ -91,48 +92,41 @@ public class GroupConnection implements Connection {
 		}
 		closed = true;
 
-		JdbcMetaData tempMetaData = this.metaData.clone();
+		final List<SQLException> exceptions = new LinkedList<SQLException>();
 
-		List<SQLException> exceptions = new LinkedList<SQLException>();
 		try {
-			this.filter.closeGroupConnectionBefore(tempMetaData);
-
-			for (Statement stmt : openedStatements) {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					exceptions.add(e);
+			this.filter.closeGroupConnection(this.metaData.clone(), this, new FilterActionWithSQLExcption<GroupConnection>() {
+				@Override public void execute(GroupConnection source) {
+					for (Statement stmt : openedStatements) {
+						try {
+							stmt.close();
+						} catch (SQLException e) {
+							exceptions.add(e);
+						}
+					}
+					try {
+						if (rConnection != null && !rConnection.isClosed()) {
+							rConnection.close();
+						}
+					} catch (SQLException e) {
+						exceptions.add(e);
+					}
+					try {
+						if (wConnection != null && !wConnection.isClosed()) {
+							wConnection.close();
+						}
+					} catch (SQLException e) {
+						exceptions.add(e);
+					}
 				}
-			}
-
-			try {
-				if (rConnection != null && !rConnection.isClosed()) {
-					rConnection.close();
-				}
-			} catch (SQLException e) {
-				exceptions.add(e);
-			}
-			try {
-				if (wConnection != null && !wConnection.isClosed()) {
-					wConnection.close();
-				}
-			} catch (SQLException e) {
-				exceptions.add(e);
-			}
+			});
 		} finally {
 			openedStatements.clear();
 			rConnection = null;
 			wConnection = null;
 		}
 
-		try {
-			JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
-			this.filter.closeGroupConnectionSuccess(tempMetaData);
-		} catch (SQLException exp) {
-			this.filter.closeGroupConnectionError(tempMetaData, exp);
-		} finally {
-			this.filter.closeGroupConnectionAfter(tempMetaData);
-		}
+		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
 	}
 
 	/*

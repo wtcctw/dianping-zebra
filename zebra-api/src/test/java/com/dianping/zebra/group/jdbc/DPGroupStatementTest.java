@@ -1,14 +1,10 @@
 package com.dianping.zebra.group.jdbc;
 
-import com.dianping.zebra.group.filter.JdbcMetaData;
-import com.dianping.zebra.group.filter.stat.StatContext;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.Statement;
-
-import static org.mockito.Mockito.*;
 
 public class DPGroupStatementTest extends MultiDatabaseTestCase {
 
@@ -54,15 +50,7 @@ public class DPGroupStatementTest extends MultiDatabaseTestCase {
 
 				//Statement.execute如果第一个结果为 ResultSet 对象，则返回 true；如果其为更新计数或者不存在任何结果，则返回 false
 
-				reset(mockedFilter);
-
 				Assert.assertFalse(stmt.execute(insertSql));
-
-				verify(mockedFilter, atLeastOnce()).executeBefore(any(JdbcMetaData.class));
-				verify(mockedFilter, atLeastOnce()).executeAfter(any(JdbcMetaData.class));
-				verify(mockedFilter, atLeastOnce()).executeSuccess(any(JdbcMetaData.class));
-				verify(mockedFilter, never()).executeError(any(JdbcMetaData.class),
-						any(Exception.class));
 
 				Assert.assertTrue(stmt.execute(selectSql));
 

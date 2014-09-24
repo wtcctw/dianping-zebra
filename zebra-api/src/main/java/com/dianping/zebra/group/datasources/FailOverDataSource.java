@@ -5,6 +5,7 @@ import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.JdbcDriverClassHelper;
@@ -159,7 +160,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 	}
 
-	static class FailOverDataSourceGCException extends Exception {
+	static class FailOverDataSourceGCException extends RuntimeException {
 
 		/**
 		 *
@@ -168,7 +169,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	}
 
-	static class FindMasterDataSourceResult {
+	public static class FindMasterDataSourceResult {
 		private boolean changedMaster;
 
 		private boolean masterExist;
@@ -236,35 +237,32 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 
 		public FindMasterDataSourceResult findMasterDataSource() throws FailOverDataSourceGCException {
-			getWeakFailOverDataSource().filter
-					.findMasterFailOverDataSourceBefore(getWeakFailOverDataSource().metaData.clone());
+			return getWeakFailOverDataSource().filter
+					.findMasterFailOverDataSource(getWeakFailOverDataSource().metaData.clone(), this,
+							new FilterFunction<MasterDataSourceMonitor, FindMasterDataSourceResult>() {
+								@Override public FindMasterDataSourceResult execute(
+										MasterDataSourceMonitor source) {
+									FindMasterDataSourceResult result = new FindMasterDataSourceResult();
 
-			FindMasterDataSourceResult result = new FindMasterDataSourceResult();
+									if (source.getWeakFailOverDataSource().configs.values().size() == 0) {
+										Exception exp = new IllegalConfigException("zero writer data source in config!");
+										logger.warn(exp.getMessage(), exp);
+									}
 
-			if (getWeakFailOverDataSource().configs.values().size() == 0) {
-				Exception exp = new IllegalConfigException("zero writer data source in config!");
-				getWeakFailOverDataSource().filter
-						.findMasterFailOverDataSourceError(getWeakFailOverDataSource().metaData.clone(), exp);
-				logger.warn(exp.getMessage(), exp);
-			}
+									for (DataSourceConfig config : source.getWeakFailOverDataSource().configs.values()) {
+										CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
+										if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
 
-			for (DataSourceConfig config : getWeakFailOverDataSource().configs.values()) {
-				CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
-				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
+											result.setChangedMaster(source.getWeakFailOverDataSource().setMasterDb(config));
+											result.setMasterExist(true);
 
-					result.setChangedMaster(getWeakFailOverDataSource().setMasterDb(config));
-					result.setMasterExist(true);
+											break;
+										}
+									}
 
-					getWeakFailOverDataSource().filter
-							.findMasterFailOverDataSourceSuccess(getWeakFailOverDataSource().metaData.clone());
-					break;
-				}
-			}
-
-			getWeakFailOverDataSource().filter
-					.findMasterFailOverDataSourceAfter(getWeakFailOverDataSource().metaData.clone());
-
-			return result;
+									return result;
+								}
+							});
 		}
 
 		protected Connection getConnection(DataSourceConfig config) throws SQLException {
@@ -293,11 +291,6 @@ public class FailOverDataSource extends AbstractDataSource {
 			transactionTryLimits++;
 			if (transactionTryLimits >= maxTransactionTryLimits) {
 				transactionTryLimits = 0;
-
-				getWeakFailOverDataSource().filter
-						.switchFailOverDataSourceError(getWeakFailOverDataSource().metaData.clone(), null);
-				getWeakFailOverDataSource().filter
-						.switchFailOverDataSourceAfter(getWeakFailOverDataSource().metaData.clone());
 			}
 		}
 
@@ -354,11 +347,6 @@ public class FailOverDataSource extends AbstractDataSource {
 					if (!result.isMasterExist()) {
 						increaseTransactionTryTimes();
 					} else {
-						getWeakFailOverDataSource().filter
-								.switchFailOverDataSourceSuccess(getWeakFailOverDataSource().metaData.clone());
-						getWeakFailOverDataSource().filter
-								.switchFailOverDataSourceAfter(getWeakFailOverDataSource().metaData.clone());
-
 						closeConnections();
 						while (!Thread.interrupted()) {
 							sleepForSeconds(5);
@@ -366,8 +354,6 @@ public class FailOverDataSource extends AbstractDataSource {
 							if (isMasterDataSource(
 									getWeakFailOverDataSource().configs.get(getWeakFailOverDataSource().master.getId()))
 									!= CheckMasterDataSourceResult.READ_WRITE) {
-								getWeakFailOverDataSource().filter
-										.switchFailOverDataSourceBefore(getWeakFailOverDataSource().metaData.clone());
 								closeConnections();
 								break;
 							}

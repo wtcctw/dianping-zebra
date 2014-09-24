@@ -12,9 +12,10 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
-import com.dianping.zebra.group.filter.FilterAction;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
 import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.delegate.FilterAction;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
@@ -185,13 +186,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		JdbcMetaData tempMetaData = metaData.clone();
-		filter.getGroupConnectionBefore(tempMetaData);
-		Connection conn = new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy,
-				this.routerType, tempMetaData, this.filter);
-		filter.getGroupConnectionSuccess(tempMetaData);
-		filter.getGroupConnectionAfter(tempMetaData);
-		return conn;
+		final JdbcMetaData tempMetaData = this.metaData.clone();
+		return filter
+				.getGroupConnection(tempMetaData, this, new FilterFunctionWithSQLException<GroupDataSource, Connection>() {
+					@Override public Connection execute(GroupDataSource source) throws SQLException {
+						return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy,
+								source.routerType, tempMetaData, source.filter);
+					}
+				});
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -327,20 +329,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void refresh(String propertyToChange) {
 		if (this.init) {
-			GroupDataSourceConfig newGroupConfig = buildGroupConfig();
+			final GroupDataSourceConfig newGroupConfig = buildGroupConfig();
 
 			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
-
-				JdbcMetaData tempMetaData = metaData.clone();
-				try {
-					filter.refreshGroupDataSourceBefore(tempMetaData, propertyToChange);
-					refreshIntenal(newGroupConfig);
-					filter.refreshGroupDataSourceSuccess(tempMetaData, propertyToChange);
-				} catch (Exception e) {
-					filter.refreshGroupDataSourceError(tempMetaData, propertyToChange, e);
-				} finally {
-					filter.refreshGroupDataSourceAfter(tempMetaData, propertyToChange);
-				}
+				filter.refreshGroupDataSource(this.metaData.clone(), propertyToChange, this,
+						new FilterAction<GroupDataSource>() {
+							@Override public void execute(GroupDataSource source) {
+								refreshIntenal(newGroupConfig);
+							}
+						});
 			}
 		}
 	}
@@ -363,7 +360,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 			preparedSwitch = true;
 		} catch (Exception e) {
-			//todo:add log
 			try {
 				close(newReadDataSource, newWriteDataSource);
 			} catch (Exception ignore) {
