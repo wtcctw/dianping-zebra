@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
  * Created by Dozer on 9/24/14.
  */
 public class WallFilter extends DefaultJdbcFilter {
+	protected final static Pattern ID_PATTERN = Pattern.compile("(.*)(\\/\\*)([a-zA-Z0-9]{10})(\\*\\/$)");
+
 	protected final static int MAX_LENGTH = 5;
 
 	protected static String sha1(String input) throws NoSuchAlgorithmException {
@@ -24,11 +26,10 @@ public class WallFilter extends DefaultJdbcFilter {
 		for (int i = 0; i < Math.min(MAX_LENGTH, result.length); i++) {
 			sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
 		}
-
 		return sb.toString();
 	}
 
-	protected String addIdToSql(String sql) {
+	protected String addIdToSql(String sql, JdbcMetaData metaData) {
 		try {
 			return String.format("%s/*%s*/", sql, generateId(sql));
 		} catch (NoSuchAlgorithmException e) {
@@ -36,10 +37,21 @@ public class WallFilter extends DefaultJdbcFilter {
 		}
 	}
 
+	protected void analyticsExecute(JdbcMetaData sql, long executeTime) {
+
+	}
+
 	@Override public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
 			throws SQLException {
-		System.out.println(metaData.getSql());
-		return super.execute(metaData, source, action);
+		findLongSqlString(metaData);
+		long executeStart = System.currentTimeMillis();
+		T result = super.execute(metaData, source, action);
+		long executeTime = System.currentTimeMillis() - executeStart;
+		analyticsExecute(metaData, executeTime);
+		return result;
+	}
+
+	protected void findLongSqlString(JdbcMetaData metaData) throws SQLException {
 	}
 
 	protected String generateId(String sql) throws NoSuchAlgorithmException {
@@ -47,8 +59,7 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	protected String getIdFromSQL(String sql) {
-		Pattern pattern = Pattern.compile("(.*)(\\/\\*)([a-zA-Z0-9]{10})(\\*\\/$)");
-		Matcher matcher = pattern.matcher(sql);
+		Matcher matcher = ID_PATTERN.matcher(sql);
 		if (matcher.matches()) {
 			return matcher.group(3);
 		} else {
@@ -62,7 +73,7 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	@Override public <S> String sql(JdbcMetaData metaData, S source, FilterFunction<S, String> action) {
 		String result = super.sql(metaData, source, action);
-		result = addIdToSql(result);
+		result = addIdToSql(result, metaData);
 		return result;
 	}
 }

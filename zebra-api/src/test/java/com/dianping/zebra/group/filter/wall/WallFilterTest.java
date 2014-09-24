@@ -4,6 +4,7 @@ package com.dianping.zebra.group.filter.wall;
  * Created by Dozer on 9/24/14.
  */
 
+import com.dianping.zebra.group.filter.JdbcMetaData;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -11,7 +12,8 @@ public class WallFilterTest {
 	@Test
 	public void test_add_id_to_sql() {
 		WallFilter filter = new WallFilter();
-		filter.addIdToSql("select * from user");
+		JdbcMetaData metaData = new JdbcMetaData();
+		filter.addIdToSql("select * from user", metaData);
 	}
 
 	@Test
