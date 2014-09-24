@@ -109,10 +109,10 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	private boolean isTooManySql(String sql) {
 		if (allSqlSet.size() >= 10000) {
-			return false;
+			return true;
 		} else {
 			allSqlSet.add(sql.hashCode());
-			return true;
+			return false;
 		}
 	}
 
