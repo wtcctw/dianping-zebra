@@ -1,10 +1,13 @@
 package com.dianping.zebra.group.filter;
 
+import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.jdbc.GroupConnection;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
@@ -28,13 +31,14 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		return action.execute(source);
 	}
 
-	@Override public <S, T> T findMasterFailOverDataSource(JdbcMetaData metaData, S source,
-			FilterFunction<S, T> action) {
+	@Override public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
+			JdbcMetaData metaData, S source,
+			FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
 		return action.execute(source);
 	}
 
-	@Override public <S, T> T getGroupConnection(JdbcMetaData metaData, S source,
-			FilterFunctionWithSQLException<S, T> action) throws SQLException {
+	@Override public <S> GroupConnection getGroupConnection(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException {
 		return action.execute(source);
 	}
 
@@ -46,13 +50,18 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		action.execute(source);
 	}
 
-	@Override public <S, T> T initSingleDataSource(JdbcMetaData metaData, S source, FilterFunction<S, T> action) {
+	@Override public <S> DataSource initSingleDataSource(JdbcMetaData metaData, S source,
+			FilterFunction<S, DataSource> action) {
 		return action.execute(source);
 	}
 
 	@Override public <S> void refreshGroupDataSource(JdbcMetaData metaData, String propertiesName, S source,
 			FilterAction<S> action) {
 		action.execute(source);
+	}
+
+	@Override public <S> String sql(JdbcMetaData metaData, S source, FilterFunction<S, String> action) {
+		return action.execute(source);
 	}
 
 	@Override public <S> void switchFailOverDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {

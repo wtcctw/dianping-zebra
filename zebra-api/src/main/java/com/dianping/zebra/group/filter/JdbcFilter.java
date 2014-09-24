@@ -1,10 +1,13 @@
 package com.dianping.zebra.group.filter;
 
+import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.jdbc.GroupConnection;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
@@ -25,9 +28,10 @@ public interface JdbcFilter {
 
 	<S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action) throws SQLException;
 
-	<S, T> T findMasterFailOverDataSource(JdbcMetaData metaData, S source, FilterFunction<S, T> action);
+	<S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(JdbcMetaData metaData, S source,
+			FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action);
 
-	<S, T> T getGroupConnection(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
+	<S> GroupConnection getGroupConnection(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, GroupConnection> action)
 			throws SQLException;
 
 	/**
@@ -45,9 +49,12 @@ public interface JdbcFilter {
 
 	<S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action);
 
-	<S, T> T initSingleDataSource(JdbcMetaData metaData, S source, FilterFunction<S, T> action);
+	<S> DataSource initSingleDataSource(JdbcMetaData metaData, S source,
+			FilterFunction<S, DataSource> action);
 
 	<S> void refreshGroupDataSource(JdbcMetaData metaData, String propertiesName, S source, FilterAction<S> action);
+
+	<S> String sql(JdbcMetaData metaData, S source, FilterFunction<S, String> action);
 
 	<S> void switchFailOverDataSource(JdbcMetaData metaData, S source, FilterAction<S> action);
 }

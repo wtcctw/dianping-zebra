@@ -1,10 +1,13 @@
 package com.dianping.zebra.group.filter;
 
+import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.jdbc.GroupConnection;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,13 +81,14 @@ public class FilterWrapper implements JdbcFilter {
 		return todo.execute(source);
 	}
 
-	@Override public <S, T> T findMasterFailOverDataSource(final JdbcMetaData metaData, S source,
-			FilterFunction<S, T> action) {
-		FilterFunction<S, T> todo = action;
+	@Override public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
+			final JdbcMetaData metaData, S source,
+			FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
+		FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> todo = action;
 		for (final JdbcFilter filter : filters) {
-			final FilterFunction<S, T> finalTodo = todo;
-			todo = new FilterFunction<S, T>() {
-				@Override public T execute(S source) {
+			final FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> finalTodo = todo;
+			todo = new FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult>() {
+				@Override public FailOverDataSource.FindMasterDataSourceResult execute(S source) {
 					return filter.findMasterFailOverDataSource(metaData, source, finalTodo);
 				}
 			};
@@ -92,13 +96,13 @@ public class FilterWrapper implements JdbcFilter {
 		return todo.execute(source);
 	}
 
-	@Override public <S, T> T getGroupConnection(final JdbcMetaData metaData, S source,
-			FilterFunctionWithSQLException<S, T> action) throws SQLException {
-		FilterFunctionWithSQLException<S, T> todo = action;
+	@Override public <S> GroupConnection getGroupConnection(final JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException {
+		FilterFunctionWithSQLException<S, GroupConnection> todo = action;
 		for (final JdbcFilter filter : filters) {
-			final FilterFunctionWithSQLException<S, T> finalTodo = todo;
-			todo = new FilterFunctionWithSQLException<S, T>() {
-				@Override public T execute(S source) throws SQLException {
+			final FilterFunctionWithSQLException<S, GroupConnection> finalTodo = todo;
+			todo = new FilterFunctionWithSQLException<S, GroupConnection>() {
+				@Override public GroupConnection execute(S source) throws SQLException {
 					return filter.getGroupConnection(metaData, source, finalTodo);
 				}
 			};
@@ -125,12 +129,13 @@ public class FilterWrapper implements JdbcFilter {
 		todo.execute(source);
 	}
 
-	@Override public <S, T> T initSingleDataSource(final JdbcMetaData metaData, S source, FilterFunction<S, T> action) {
-		FilterFunction<S, T> todo = action;
+	@Override public <S> DataSource initSingleDataSource(final JdbcMetaData metaData, S source,
+			FilterFunction<S, DataSource> action) {
+		FilterFunction<S, DataSource> todo = action;
 		for (final JdbcFilter filter : filters) {
-			final FilterFunction<S, T> finalTodo = todo;
-			todo = new FilterFunction<S, T>() {
-				@Override public T execute(S source) {
+			final FilterFunction<S, DataSource> finalTodo = todo;
+			todo = new FilterFunction<S, DataSource>() {
+				@Override public DataSource execute(S source) {
 					return filter.initSingleDataSource(metaData, source, finalTodo);
 				}
 			};
@@ -155,6 +160,19 @@ public class FilterWrapper implements JdbcFilter {
 
 	public int size() {
 		return filters.size();
+	}
+
+	@Override public <S> String sql(final JdbcMetaData metaData, S source, FilterFunction<S, String> action) {
+		FilterFunction<S, String> todo = action;
+		for (final JdbcFilter filter : filters) {
+			final FilterFunction<S, String> finalTodo = todo;
+			todo = new FilterFunction<S, String>() {
+				@Override public String execute(S source) {
+					return filter.sql(metaData, source, finalTodo);
+				}
+			};
+		}
+		return todo.execute(source);
 	}
 
 	@Override public <S> void switchFailOverDataSource(final JdbcMetaData metaData, S source, FilterAction<S> action) {

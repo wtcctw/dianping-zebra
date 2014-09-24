@@ -188,12 +188,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	public Connection getConnection(String username, String password) throws SQLException {
 		final JdbcMetaData tempMetaData = this.metaData.clone();
 		return filter
-				.getGroupConnection(tempMetaData, this, new FilterFunctionWithSQLException<GroupDataSource, Connection>() {
-					@Override public Connection execute(GroupDataSource source) throws SQLException {
-						return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy,
-								source.routerType, tempMetaData, source.filter);
-					}
-				});
+				.getGroupConnection(tempMetaData, this,
+						new FilterFunctionWithSQLException<GroupDataSource, GroupConnection>() {
+							@Override public GroupConnection execute(GroupDataSource source) throws SQLException {
+								return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy,
+										source.routerType, tempMetaData, source.filter);
+							}
+						});
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {

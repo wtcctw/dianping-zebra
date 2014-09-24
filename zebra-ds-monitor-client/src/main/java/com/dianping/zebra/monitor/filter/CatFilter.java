@@ -20,6 +20,7 @@ import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.site.helper.Stringizers;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
@@ -84,11 +85,12 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	@Override public <S, T> T findMasterFailOverDataSource(JdbcMetaData metaData, S source,
-			FilterFunction<S, T> action) {
-		T result = super.findMasterFailOverDataSource(metaData, source, action);
-		if (result != null && result instanceof FailOverDataSource.FindMasterDataSourceResult
-				&& ((FailOverDataSource.FindMasterDataSourceResult) result).isChangedMaster()) {
+	@Override public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
+			JdbcMetaData metaData, S source,
+			FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
+		FailOverDataSource.FindMasterDataSourceResult result = super
+				.findMasterFailOverDataSource(metaData, source, action);
+		if (result != null && result.isChangedMaster()) {
 			Cat.logEvent("DAL.Master", "Found-" + metaData.getDataSourceId());
 		}
 		return result;
@@ -101,8 +103,9 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	@Override public <S, T> T initSingleDataSource(JdbcMetaData metaData, S source, FilterFunction<S, T> action) {
-		T result = super.initSingleDataSource(metaData, source, action);
+	@Override public <S> DataSource initSingleDataSource(JdbcMetaData metaData, S source,
+			FilterFunction<S, DataSource> action) {
+		DataSource result = super.initSingleDataSource(metaData, source, action);
 		Cat.logEvent("DataSource.Created", metaData.getDataSourceId());
 		return result;
 	}

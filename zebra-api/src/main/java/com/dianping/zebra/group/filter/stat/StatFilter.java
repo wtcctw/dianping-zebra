@@ -4,6 +4,7 @@ import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.StatementNode;
 
@@ -51,10 +52,10 @@ public class StatFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	@Override public <S, T> T getGroupConnection(JdbcMetaData metaData, S source,
-			FilterFunctionWithSQLException<S, T> action) throws SQLException {
+	@Override public <S> GroupConnection getGroupConnection(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException {
 		try {
-			T result = super.getGroupConnection(metaData, source, action);
+			GroupConnection result = super.getGroupConnection(metaData, source, action);
 			StatContext.getDataSourceSummary().getGetGroupConnectionSuccessCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getGetGroupConnectionSuccessCount().incrementAndGet();
 			return result;
