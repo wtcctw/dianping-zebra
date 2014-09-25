@@ -42,6 +42,11 @@ public class TestServer extends JettyServer {
 		execute("update `app` set `name` = 'test2'");
 		execute("delete from `app`");
 		execute("select 1");
+		execute("select 1");
+		execute("select 1");
+		execute("select 1");
+		execute("select 1");
+		execute("select 1");
 	}
 
 	private void createTable() throws SQLException {

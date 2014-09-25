@@ -2,6 +2,7 @@ package com.dianping.zebra.monitor.inspect;
 
 import com.dianping.phoenix.status.AbstractComponentStatus;
 import com.dianping.zebra.group.filter.stat.DataSourceStat;
+import com.dianping.zebra.group.filter.stat.ExecuteStat;
 import com.dianping.zebra.group.filter.stat.StatContext;
 
 import javax.servlet.ServletContext;
@@ -19,6 +20,8 @@ public class DataSourceStatus extends AbstractComponentStatus {
 	protected void build(ServletContext ctx) throws Exception {
 		buildDataSourceSummaryTable();
 		buildDataSourceTable();
+		buildExecuteSummaryTable();
+		buildExecuteTable();
 	}
 
 	private void buildDataSourceSummaryTable() {
@@ -37,6 +40,27 @@ public class DataSourceStatus extends AbstractComponentStatus {
 		table.header(Arrays.copyOf(headers, headers.length, String[].class));
 
 		for (DataSourceStat stat : StatContext.getDataSource().values()) {
+			table.row(stat.toMap().values().toArray());
+		}
+		table.build();
+	}
+
+	private void buildExecuteSummaryTable() {
+		TableBuilder table = newTable();
+		table.caption("SQL Summary");
+		Object[] headers = StatContext.getExecuteSummary().toMap().keySet().toArray();
+		table.header(Arrays.copyOf(headers, headers.length, String[].class));
+		table.row(StatContext.getExecuteSummary().toMap().values().toArray());
+		table.build();
+	}
+
+	private void buildExecuteTable() {
+		TableBuilder table = newTable();
+		table.caption("SQL");
+		Object[] headers = StatContext.getExecuteSummary().toMap().keySet().toArray();
+		table.header(Arrays.copyOf(headers, headers.length, String[].class));
+
+		for (ExecuteStat stat : StatContext.getExecute().values()) {
 			table.row(stat.toMap().values().toArray());
 		}
 		table.build();
