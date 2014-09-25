@@ -30,7 +30,9 @@ public class FilterWrapper implements JdbcFilter {
 		} else {
 			Collections.sort(filters, new Comparator<JdbcFilter>() {
 				@Override public int compare(JdbcFilter o1, JdbcFilter o2) {
-					return Integer.compare(o1.getOrder(), o2.getOrder());
+					int x = o1.getOrder();
+					int y = o2.getOrder();
+					return (x < y) ? -1 : ((x == y) ? 0 : 1);
 				}
 			});
 			this.filters = filters;

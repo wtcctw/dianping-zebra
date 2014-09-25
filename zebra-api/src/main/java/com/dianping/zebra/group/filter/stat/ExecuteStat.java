@@ -2,9 +2,7 @@ package com.dianping.zebra.group.filter.stat;
 
 import com.dianping.zebra.group.filter.JdbcMetaData;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -65,18 +63,24 @@ public class ExecuteStat {
 
 	private void convertTimeRange(Map<String, Object> resultMap, String titlePrefix,
 			Map<Long, AtomicLong> resultResult) {
-		List<String> successKey = new ArrayList<String>();
-		List<String> successValue = new ArrayList<String>();
+		StringBuffer successKey = new StringBuffer();
+		StringBuffer successValue = new StringBuffer();
 		for (Map.Entry<Long, AtomicLong> entry : resultResult.entrySet()) {
 			if (entry.getKey().equals(Long.MAX_VALUE)) {
 				continue;
 			}
-			successKey.add(String.valueOf(entry.getKey()));
-			successValue.add(String.valueOf(entry.getValue()));
+			if (successKey.length() > 0) {
+				successKey.append(",");
+			}
+			if (successKey.length() > 0) {
+				successValue.append(",");
+			}
+			successKey.append(entry.getKey());
+			successValue.append(entry.getValue());
 		}
 		resultMap.put(
-				String.format("%s[%s]", titlePrefix, String.join(",", successKey)),
-				String.join(",", successValue));
+				String.format("%s[%s]", titlePrefix, successKey),
+				successValue);
 	}
 
 	public String getDataSourceId() {

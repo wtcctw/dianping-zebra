@@ -264,14 +264,6 @@ public class GroupResultSet implements ResultSet {
 		return innerResultSet.getObject(columnLabel, map);
 	}
 
-	@Override public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-		return innerResultSet.getObject(columnIndex, type);
-	}
-
-	@Override public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
-		return innerResultSet.getObject(columnLabel, type);
-	}
-
 	@Override public Ref getRef(int columnIndex) throws SQLException {
 		return innerResultSet.getRef(columnIndex);
 	}
