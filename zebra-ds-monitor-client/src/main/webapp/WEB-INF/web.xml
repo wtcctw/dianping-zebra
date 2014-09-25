@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<web-app xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	version="2.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee">
-	
+<web-app
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee">
 	<listener>
 		<listener-class>com.dianping.phoenix.servlet.PhoenixListener</listener-class>
 	</listener>
-	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-	</listener>
- 	<filter>
-		<filter-name>phoenix-filter</filter-name>
-		<filter-class>com.dianping.phoenix.servlet.PhoenixFilter</filter-class>
-		<init-param>
-			<param-name>_INDEX_</param-name>
-			<param-value>+com.dianping.phoenix.environment.WeixinFilter|+org.springframework.web.filter.CharacterEncodingFilter|+org.unidal.web.MVCFilter|+1</param-value>
-		</init-param>
-	</filter>
+	<context-param>
+		<param-name>com.dianping.phoenix.servlet.PhoenixListener</param-name>
+		<param-value>+1</param-value>
+	</context-param>
+
 	<filter>
-		<filter-name>mvc-filter</filter-name>
+		<filter-name>inspect-filter</filter-name>
 		<filter-class>org.unidal.web.MVCFilter</filter-class>
 		<init-param>
 			<param-name>_INDEX_</param-name>
@@ -32,14 +27,39 @@
 			<param-value>/data/appdatas/liger</param-value>
 		</init-param>
 		<init-param>
-			<param-name>excludes</param-name>
-			<param-value>/css/*,/img/*,/js/*</param-value>
+			<param-name>skip-rest</param-name>
+			<param-value>/css/*,/img/*,/js/*,/jsp/*</param-value>
+		</init-param>
+		<init-param>
+			<param-name>path-prefix</param-name>
+			<param-value>/inspect</param-value>
+		</init-param>
+	</filter>
+	<filter>
+		<filter-name>inspect-jsp-filter</filter-name>
+		<filter-class>com.dianping.phoenix.servlet.InspectFilter</filter-class>
+		<init-param>
+			<param-name>_INDEX_</param-name>
+			<param-value>+org.unidal.web.MVCFilter|+2</param-value>
+		</init-param>
+	</filter>
+	<filter>
+		<filter-name>phoenix-filter</filter-name>
+		<filter-class>com.dianping.phoenix.servlet.PhoenixFilter</filter-class>
+		<init-param>
+			<param-name>_INDEX_</param-name>
+			<param-value>+com.dianping.phoenix.environment.WeixinFilter|+org.springframework.web.filter.CharacterEncodingFilter|+org.unidal.web.MVCFilter|+3</param-value>
 		</init-param>
 	</filter>
 	<filter-mapping>
-		<filter-name>mvc-filter</filter-name>
+		<filter-name>inspect-filter</filter-name>
 		<url-pattern>/inspect/*</url-pattern>
 		<dispatcher>REQUEST</dispatcher>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>inspect-jsp-filter</filter-name>
+		<url-pattern>/inspect/jsp/*</url-pattern>
+		<dispatcher>FORWARD</dispatcher>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>phoenix-filter</filter-name>
