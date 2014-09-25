@@ -3,6 +3,7 @@ package com.dianping.zebra.monitor.inspect;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -13,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 @RunWith(JUnit4.class)
+@Ignore
 public class TestServer extends JettyServer {
 	GroupDataSource ds;
 
