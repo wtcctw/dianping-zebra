@@ -97,13 +97,12 @@
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
 			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
 			<configuration>
-				<modules>
-					<module default="true">com.dianping.zebra.admin.admin.AdminModule</module>
-				</modules>
+				<defaultModule>com.dianping.zebra.admin.admin.AdminModule</defaultModule>
 			</configuration>
 		</component>
 		<component>
-			<role>com.dianping.zebra.admin.admin.AdminModule</role>
+			<role>org.unidal.web.mvc.Module</role>
+			<role-hint>com.dianping.zebra.admin.admin.AdminModule</role-hint>
 			<implementation>com.dianping.zebra.admin.admin.AdminModule</implementation>
 		</component>
 		<component>

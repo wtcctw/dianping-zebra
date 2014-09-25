@@ -28,12 +28,10 @@
 		<dependency>
 			<groupId>org.unidal.maven.plugins</groupId>
 			<artifactId>common</artifactId>
-			<version>2.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.unidal.framework</groupId>
 			<artifactId>foundation-service</artifactId>
-			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>dom4j</groupId>
@@ -43,7 +41,6 @@
 		<dependency>
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-client</artifactId>
-            <version>0.4.3</version>
         </dependency>
 	</dependencies>
 
