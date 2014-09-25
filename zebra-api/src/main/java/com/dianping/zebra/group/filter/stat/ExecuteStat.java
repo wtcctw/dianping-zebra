@@ -162,6 +162,7 @@ public class ExecuteStat {
 		resultMap.put("GroupDataSourceId", this.groupDataSourceId);
 		resultMap.put("DataSourceId", this.dataSourceId);
 		resultMap.put("Sql", this.sql);
+		resultMap.put("Success", this.successCount.get());
 		return resultMap;
 	}
 }
