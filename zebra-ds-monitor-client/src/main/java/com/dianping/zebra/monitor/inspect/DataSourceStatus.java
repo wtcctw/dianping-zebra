@@ -1,20 +1,11 @@
 package com.dianping.zebra.monitor.inspect;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.dianping.phoenix.status.AbstractComponentStatus;
+import com.dianping.zebra.group.filter.stat.DataSourceStat;
+import com.dianping.zebra.group.filter.stat.StatContext;
 
 import javax.servlet.ServletContext;
-import javax.sql.DataSource;
-
-import com.dianping.phoenix.status.AbstractComponentStatus;
-import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.datasource.entity.Any;
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.util.DataSourceState;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
-import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
+import java.util.Arrays;
 
 public class DataSourceStatus extends AbstractComponentStatus {
 
@@ -26,92 +17,29 @@ public class DataSourceStatus extends AbstractComponentStatus {
 
 	@Override
 	protected void build(ServletContext ctx) throws Exception {
-		TableBuilder configTable = newTable();
-		TableBuilder statusTable = newTable();
-
-		configTable.caption("DataSource Config");
-		configTable.header("Name", "Type", "Url", "Username", "InitialPoolSize", "MaxPoolSize", "MinPoolSize",
-		      "CheckoutTimeout", "DalVersion");
-		statusTable.caption("DataSource Connections");
-		statusTable.header("Name", "Url", "BusyConnection", "IdleConnection", "IsMaster", "Weight", "Status");
-
-		// in case of spring framework has listener in web.xml
-		Object object = ctx.getAttribute("org.springframework.web.context.WebApplicationContext.ROOT");
-
-		if (object != null) {
-			org.springframework.web.context.WebApplicationContext context = (org.springframework.web.context.WebApplicationContext) object;
-			@SuppressWarnings("unchecked")
-			Map<String, DataSource> beans = context.getBeansOfType(DataSource.class);
-
-			for (Entry<String, DataSource> entry : beans.entrySet()) {
-				String name = narmalized(entry.getKey());
-				DataSource ds = entry.getValue();
-
-				if (ds instanceof GroupDataSourceMBean) {
-					try {
-						SingleDataSourceMBean masterBean = ((GroupDataSourceMBean) ds).getWriteSingleDataSourceMBean();
-						DataSourceConfig config = masterBean.getConfig();
-						configTable.row(name, GroupDataSource.class.getName(), config.getJdbcUrl(), config.getUsername(),
-						      findByKey(config.getProperties(), "InitialPoolSize"),
-						      findByKey(config.getProperties(), "MaxPoolSize"),
-						      findByKey(config.getProperties(), "MinPoolSize"),
-						      findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
-						statusTable.row(name, config.getJdbcUrl(),
-						      masterBean.getState() == DataSourceState.UP ? masterBean.getNumBusyConnection() : 0,
-						      masterBean.getState() == DataSourceState.UP ? masterBean.getNumIdleConnection() : 0, "Yes",
-						      null, masterBean.getState());
-
-						for (SingleDataSourceMBean mbean : ((GroupDataSourceMBean) ds).getReaderSingleDataSourceMBean()
-						      .values()) {
-							config = mbean.getConfig();
-							configTable.row(null, null, config.getJdbcUrl(), config.getUsername(),
-							      findByKey(config.getProperties(), "InitialPoolSize"),
-							      findByKey(config.getProperties(), "MaxPoolSize"),
-							      findByKey(config.getProperties(), "MinPoolSize"),
-							      findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
-							statusTable.row(null, config.getJdbcUrl(),
-							      mbean.getState() == DataSourceState.UP ? mbean.getNumBusyConnection() : 0,
-							      mbean.getState() == DataSourceState.UP ? mbean.getNumIdleConnection() : 0, "No", mbean
-							            .getConfig().getWeight(), mbean.getState());
-						}
-					} catch (Exception e) {
-						configTable.row(name, GroupDataSource.class.getName(), null, null, null, null, null, null, null,
-						      "Not-Initilized", Constants.ZEBRA_VERSION);
-						setState(State.ERROR);
-					}
-				}
-			}
-		}
-
-		configTable.build();
-		statusTable.build();
+		buildDataSourceSummaryTable();
+		buildDataSourceTable();
 	}
 
-	private String narmalized(String name) {
-		String[] parts = name.split("-");
-		if (parts.length > 0) {
-			int pos = parts[parts.length - 1].indexOf('z');
-			if (pos >= 0) {
-				String noramlName = "";
-				for (int i = 0; i < parts.length - 1; i++) {
-					noramlName += parts[i];
-				}
-
-				return noramlName;
-			}
-		}
-
-		return name;
+	private void buildDataSourceSummaryTable() {
+		TableBuilder table = newTable();
+		table.caption("DataSource Summary");
+		Object[] headers = StatContext.getDataSourceSummary().toMap().keySet().toArray();
+		table.header(Arrays.copyOf(headers, headers.length, String[].class));
+		table.row(StatContext.getDataSourceSummary().toMap().values().toArray());
+		table.build();
 	}
 
-	private String findByKey(List<Any> anys, String key) {
-		for (Any any : anys) {
-			if (any.getName().equalsIgnoreCase(key.toLowerCase())) {
-				return any.getValue();
-			}
-		}
+	private void buildDataSourceTable() {
+		TableBuilder table = newTable();
+		table.caption("DataSource");
+		Object[] headers = StatContext.getDataSourceSummary().toMap().keySet().toArray();
+		table.header(Arrays.copyOf(headers, headers.length, String[].class));
 
-		return null;
+		for (DataSourceStat stat : StatContext.getDataSource().values()) {
+			table.row(stat.toMap().values().toArray());
+		}
+		table.build();
 	}
 
 	@Override

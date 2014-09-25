@@ -82,7 +82,7 @@ public class PerformanceTest {
 	class Executer implements Runnable {
 		@Override public void run() {
 			try {
-				for (int k = 1; k <= 10000; k++) {
+				for (int k = 1; k <= 1000; k++) {
 					execute("insert into `app` (`name`) values ('test')");
 					execute("update `app` set `name` = 'test2'");
 					execute("delete from `app`");
