@@ -27,9 +27,9 @@ public class DataSourceStatus extends AbstractComponentStatus {
 	private void buildDataSourceSummaryTable() {
 		TableBuilder table = newTable();
 		table.caption("DataSource Summary");
-		Object[] headers = StatContext.getDataSourceSummary().toMap().keySet().toArray();
+		Object[] headers = StatContext.getDataSourceSummary().toMap(true).keySet().toArray();
 		table.header(Arrays.copyOf(headers, headers.length, String[].class));
-		table.row(StatContext.getDataSourceSummary().toMap().values().toArray());
+		table.row(StatContext.getDataSourceSummary().toMap(true).values().toArray());
 		table.build();
 	}
 
@@ -48,9 +48,9 @@ public class DataSourceStatus extends AbstractComponentStatus {
 	private void buildExecuteSummaryTable() {
 		TableBuilder table = newTable();
 		table.caption("SQL Summary");
-		Object[] headers = StatContext.getExecuteSummary().toMap().keySet().toArray();
+		Object[] headers = StatContext.getExecuteSummary().toMap(true).keySet().toArray();
 		table.header(Arrays.copyOf(headers, headers.length, String[].class));
-		table.row(StatContext.getExecuteSummary().toMap().values().toArray());
+		table.row(StatContext.getExecuteSummary().toMap(true).values().toArray());
 		table.build();
 	}
 

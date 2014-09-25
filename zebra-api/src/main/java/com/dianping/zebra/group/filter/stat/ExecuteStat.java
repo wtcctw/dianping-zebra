@@ -2,7 +2,9 @@ package com.dianping.zebra.group.filter.stat;
 
 import com.dianping.zebra.group.filter.JdbcMetaData;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -28,14 +30,6 @@ public class ExecuteStat {
 	private final AtomicLong insertErrorCount = new AtomicLong();
 
 	private final AtomicLong insertSuccessCount = new AtomicLong();
-
-	private final AtomicLong maxErrorTime = new AtomicLong();
-
-	private final AtomicLong maxSuccessTime = new AtomicLong();
-
-	private final AtomicLong minErrorTime = new AtomicLong();
-
-	private final AtomicLong minSuccessTime = new AtomicLong();
 
 	private final AtomicLong selectErrorCount = new AtomicLong();
 
@@ -67,6 +61,22 @@ public class ExecuteStat {
 		this.dataSourceId =
 				metaData.getRealJdbcMetaData() == null ? null : metaData.getRealJdbcMetaData().getDataSourceId();
 
+	}
+
+	private void convertTimeRange(Map<String, Object> resultMap, String titlePrefix,
+			Map<Long, AtomicLong> resultResult) {
+		List<String> successKey = new ArrayList<String>();
+		List<String> successValue = new ArrayList<String>();
+		for (Map.Entry<Long, AtomicLong> entry : resultResult.entrySet()) {
+			if (entry.getKey().equals(Long.MAX_VALUE)) {
+				continue;
+			}
+			successKey.add(String.valueOf(entry.getKey()));
+			successValue.add(String.valueOf(entry.getValue()));
+		}
+		resultMap.put(
+				String.format("%s[%s]", titlePrefix, String.join(",", successKey)),
+				String.join(",", successValue));
 	}
 
 	public String getDataSourceId() {
@@ -103,22 +113,6 @@ public class ExecuteStat {
 
 	public AtomicLong getInsertSuccessCount() {
 		return insertSuccessCount;
-	}
-
-	public AtomicLong getMaxErrorTime() {
-		return maxErrorTime;
-	}
-
-	public AtomicLong getMaxSuccessTime() {
-		return maxSuccessTime;
-	}
-
-	public AtomicLong getMinErrorTime() {
-		return minErrorTime;
-	}
-
-	public AtomicLong getMinSuccessTime() {
-		return minSuccessTime;
 	}
 
 	public AtomicLong getSelectErrorCount() {
@@ -158,11 +152,29 @@ public class ExecuteStat {
 	}
 
 	public Map<String, Object> toMap() {
+		return toMap(false);
+	}
+
+	public Map<String, Object> toMap(boolean isSummary) {
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		resultMap.put("GroupDataSourceId", this.groupDataSourceId);
-		resultMap.put("DataSourceId", this.dataSourceId);
-		resultMap.put("Sql", this.sql);
+		if (!isSummary) {
+			resultMap.put("GroupDataSourceId", this.groupDataSourceId);
+			resultMap.put("DataSourceId", this.dataSourceId);
+			resultMap.put("Sql", this.sql);
+		}
 		resultMap.put("Success", this.successCount.get());
+		resultMap.put("Error", this.errorCount.get());
+		resultMap.put("Transaction", this.transactionCount.get());
+		resultMap.put("SelectSuccess", this.selectSuccessCount.get());
+		resultMap.put("SelectError", this.selectErrorCount.get());
+		resultMap.put("InsertSuccess", this.insertSuccessCount.get());
+		resultMap.put("InsertError", this.insertErrorCount.get());
+		resultMap.put("UpdateSuccess", this.updateSuccessCount.get());
+		resultMap.put("UpdateError", this.updateErrorCount.get());
+		resultMap.put("DeleteSuccess", this.deleteSuccessCount.get());
+		resultMap.put("DeleteError", this.deleteErrorCount.get());
+		convertTimeRange(resultMap, "S", this.successTimeRange.getResult());
+		convertTimeRange(resultMap, "E", this.errorTimeRange.getResult());
 		return resultMap;
 	}
 }

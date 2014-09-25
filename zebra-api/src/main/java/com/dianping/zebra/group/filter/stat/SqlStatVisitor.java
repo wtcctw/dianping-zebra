@@ -20,6 +20,10 @@ public class SqlStatVisitor implements Visitor {
 		this.exception = exp;
 	}
 
+	public void createTableNode(CreateTableNode node) {
+		sqlNode(node);
+	}
+
 	public void cursorNode(CursorNode node) throws StandardException {
 		visit(node.getResultSetNode());
 	}
@@ -109,6 +113,9 @@ public class SqlStatVisitor implements Visitor {
 			break;
 		case NodeTypes.DELETE_NODE:
 			deleteNode((DeleteNode) node);
+			break;
+		case NodeTypes.CREATE_TABLE_NODE:
+			createTableNode((CreateTableNode) node);
 			break;
 		}
 		return node;
