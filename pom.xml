@@ -100,6 +100,16 @@
             <dependency>
                 <groupId>com.dianping.lion</groupId>
                 <artifactId>lion-client</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>0.4.3</version>
             </dependency>
             <dependency>
@@ -115,6 +125,12 @@
             <dependency>
                 <groupId>org.dbunit</groupId>
                 <artifactId>dbunit</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>2.4.8</version>
             </dependency>
             <dependency>
@@ -166,6 +182,16 @@
                 <groupId>org.unidal.framework</groupId>
                 <artifactId>test-framework</artifactId>
                 <version>2.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>1.7.7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.7</version>
             </dependency>
             <dependency>
                 <groupId>org.unidal.framework</groupId>

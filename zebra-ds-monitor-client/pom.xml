@@ -58,7 +58,6 @@
         <dependency>
             <groupId>com.dianping.lion</groupId>
             <artifactId>lion-client</artifactId>
-            <version>0.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -154,6 +153,16 @@
         <dependency>
             <groupId>org.unidal.framework</groupId>
             <artifactId>web-framework</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
