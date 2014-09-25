@@ -16,7 +16,6 @@ import java.util.Properties;
  * Filters read metadata from this class
  */
 public class JdbcMetaData implements Cloneable {
-	private final static SQLParser parser = new SQLParser();//todo:cache result
 
 	private List<StatementNode> batchedNode;
 
@@ -82,7 +81,7 @@ public class JdbcMetaData implements Cloneable {
 
 			try {
 				this.sql = sb.toString();
-				this.batchedNode = parser.parseStatements(sb.toString());
+				this.batchedNode = new SQLParser().parseStatements(sb.toString());
 			} catch (StandardException e) {
 			}
 		}
@@ -183,8 +182,9 @@ public class JdbcMetaData implements Cloneable {
 		}
 
 		try {
-			node = parser.parseStatement(sql);
+			node = new SQLParser().parseStatement(sql);
 		} catch (StandardException e) {
+			e.printStackTrace();
 		}
 	}
 
