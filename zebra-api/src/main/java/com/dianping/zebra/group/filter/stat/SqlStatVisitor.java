@@ -15,9 +15,12 @@ public class SqlStatVisitor implements Visitor {
 
 	private final JdbcMetaData metaData;
 
-	public SqlStatVisitor(JdbcMetaData metadata, Exception exp) {
+	private final Object result;
+
+	public SqlStatVisitor(JdbcMetaData metadata, Object result, Exception exp) {
 		this.metaData = metadata;
 		this.exception = exp;
+		this.result = result;
 	}
 
 	public void createTableNode(CreateTableNode node) {
@@ -30,10 +33,22 @@ public class SqlStatVisitor implements Visitor {
 
 	public void deleteNode(DeleteNode node) {
 		sqlNode(node);
+		StatContext.getExecuteSummary().getDeleteRow().addAndGet(getResultUpdateRows());
+		StatContext.getExecute(metaData).getDeleteRow().addAndGet(getResultUpdateRows());
 		increment(StatContext.getExecuteSummary().getDeleteSuccessCount(),
 				StatContext.getExecuteSummary().getDeleteErrorCount());
 		increment(StatContext.getExecute(metaData).getDeleteSuccessCount(),
 				StatContext.getExecute(metaData).getDeleteErrorCount());
+	}
+
+	private long getResultUpdateRows() {
+		if (result instanceof Integer) {
+			return ((Integer) result).intValue();
+		}
+		if (result instanceof Long) {
+			return ((Long) result).longValue();
+		}
+		return 0;
 	}
 
 	private void increment(AtomicLong success, AtomicLong error) {
@@ -46,6 +61,8 @@ public class SqlStatVisitor implements Visitor {
 
 	public void insertNode(InsertNode node) {
 		sqlNode(node);
+		StatContext.getExecuteSummary().getInsertRow().addAndGet(getResultUpdateRows());
+		StatContext.getExecute(metaData).getInsertRow().addAndGet(getResultUpdateRows());
 		increment(StatContext.getExecuteSummary().getInsertSuccessCount(),
 				StatContext.getExecuteSummary().getInsertErrorCount());
 		increment(StatContext.getExecute(metaData).getInsertSuccessCount(),
@@ -81,6 +98,8 @@ public class SqlStatVisitor implements Visitor {
 
 	public void updateNode(UpdateNode node) {
 		sqlNode(node);
+		StatContext.getExecuteSummary().getUpdateRow().addAndGet(getResultUpdateRows());
+		StatContext.getExecute(metaData).getUpdateRow().addAndGet(getResultUpdateRows());
 		increment(StatContext.getExecuteSummary().getUpdateSuccessCount(),
 				StatContext.getExecuteSummary().getUpdateErrorCount());
 		increment(StatContext.getExecute(metaData).getUpdateSuccessCount(),

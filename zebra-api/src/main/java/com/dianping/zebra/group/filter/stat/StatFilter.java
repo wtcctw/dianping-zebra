@@ -82,7 +82,7 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getExecute(metaData).getSuccessTimeRange().increment(time);
 			StatContext.getExecuteSummary().getSuccessTime().addAndGet(time);
 			StatContext.getExecute(metaData).getSuccessTime().addAndGet(time);
-			visitNode(metaData);
+			visitNode(metaData, result);
 			return result;
 		} catch (SQLException exp) {
 			long time = System.currentTimeMillis() - executeStart;
@@ -90,7 +90,7 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getExecute(metaData).getErrorTimeRange().increment(time);
 			StatContext.getExecuteSummary().getErrorTime().addAndGet(time);
 			StatContext.getExecute(metaData).getErrorTime().addAndGet(time);
-			visitNode(metaData, exp);
+			visitNode(metaData, null, exp);
 			throw exp;
 		}
 	}
@@ -148,16 +148,16 @@ public class StatFilter extends DefaultJdbcFilter {
 			FilterFunctionWithSQLException<S, Boolean> action) throws SQLException {
 		Boolean result = super.resultSetNext(metaData, source, action);
 		if (result) {
-			StatContext.getExecuteSummary().getReadRow().incrementAndGet();
-			StatContext.getExecute(metaData).getReadRow().incrementAndGet();
+			StatContext.getExecuteSummary().getSelectRow().incrementAndGet();
+			StatContext.getExecute(metaData).getSelectRow().incrementAndGet();
 		}
 		return result;
 	}
 
-	private void visitNode(JdbcMetaData metaData, Exception exp) {
+	private void visitNode(JdbcMetaData metaData, Object result, Exception exp) {
 		if (!metaData.isBatch()) {
 			try {
-				new SqlStatVisitor(metaData, exp).visit(metaData.getNode());
+				new SqlStatVisitor(metaData, result, exp).visit(metaData.getNode());
 			} catch (StandardException e) {
 			}
 		} else {
@@ -166,14 +166,14 @@ public class StatFilter extends DefaultJdbcFilter {
 			}
 			for (StatementNode node : metaData.getBatchedNode()) {
 				try {
-					new SqlStatVisitor(metaData, exp).visit(node);
+					new SqlStatVisitor(metaData, result, exp).visit(node);
 				} catch (StandardException e) {
 				}
 			}
 		}
 	}
 
-	private void visitNode(JdbcMetaData node) {
-		visitNode(node, null);
+	private void visitNode(JdbcMetaData metadata, Object result) {
+		visitNode(metadata, result, null);
 	}
 }

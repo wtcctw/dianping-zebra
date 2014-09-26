@@ -41,8 +41,10 @@ public class TestServer extends JettyServer {
 		ds.init();
 
 		createTable();
+		executeWithTransaction("update `app` set `name` = 'ttt'", "update `app` set `name` = 'ttt2'");
 		execute("insert into `app` (`name`) values ('test')");
-		execute("update `app` set `name` = 'test2'");
+		execute("update `app` set `name` = (select 1)");//todo: 需要支持子查询
+		execute("update `app` set `name` = 'xxx'");
 		execute("update `app` set `name1` = 'test2'");
 		execute("delete from `app`");
 		execute("select 1");
@@ -66,7 +68,7 @@ public class TestServer extends JettyServer {
 	void execute(String sql) throws SQLException {
 		Connection conn = null;
 		Statement stat = null;
-		ResultSet result = null;
+		ResultSet result;
 		try {
 			conn = ds.getConnection();
 			stat = conn.createStatement();
@@ -83,6 +85,26 @@ public class TestServer extends JettyServer {
 			if (stat != null) {
 				stat.close();
 			}
+			if (conn != null) {
+				conn.close();
+			}
+		}
+	}
+
+	void executeWithTransaction(String... sqls) throws SQLException {
+		Connection conn = null;
+		try {
+			conn = ds.getConnection();
+			conn.setAutoCommit(false);
+			for (String sql : sqls) {
+				Statement stat = conn.createStatement();
+				stat.execute(sql);
+				stat.close();
+			}
+			conn.commit();
+		} catch (SQLException ignore) {
+
+		} finally {
 			if (conn != null) {
 				conn.close();
 			}

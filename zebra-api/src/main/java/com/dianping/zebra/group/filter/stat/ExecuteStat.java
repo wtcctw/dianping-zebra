@@ -11,11 +11,11 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ExecuteStat {
 
-	private final AtomicLong readRow = new AtomicLong();
-
 	private final String dataSourceId;
 
 	private final AtomicLong deleteErrorCount = new AtomicLong();
+
+	private final AtomicLong deleteRow = new AtomicLong();
 
 	private final AtomicLong deleteSuccessCount = new AtomicLong();
 
@@ -29,9 +29,13 @@ public class ExecuteStat {
 
 	private final AtomicLong insertErrorCount = new AtomicLong();
 
+	private final AtomicLong insertRow = new AtomicLong();
+
 	private final AtomicLong insertSuccessCount = new AtomicLong();
 
 	private final AtomicLong selectErrorCount = new AtomicLong();
+
+	private final AtomicLong selectRow = new AtomicLong();
 
 	private final AtomicLong selectSuccessCount = new AtomicLong();
 
@@ -46,6 +50,8 @@ public class ExecuteStat {
 	private final AtomicLong transactionCount = new AtomicLong();
 
 	private final AtomicLong updateErrorCount = new AtomicLong();
+
+	private final AtomicLong updateRow = new AtomicLong();
 
 	private final AtomicLong updateSuccessCount = new AtomicLong();
 
@@ -93,6 +99,10 @@ public class ExecuteStat {
 		return deleteErrorCount;
 	}
 
+	public AtomicLong getDeleteRow() {
+		return deleteRow;
+	}
+
 	public AtomicLong getDeleteSuccessCount() {
 		return deleteSuccessCount;
 	}
@@ -117,6 +127,10 @@ public class ExecuteStat {
 		return insertErrorCount;
 	}
 
+	public AtomicLong getInsertRow() {
+		return insertRow;
+	}
+
 	public AtomicLong getInsertSuccessCount() {
 		return insertSuccessCount;
 	}
@@ -125,8 +139,8 @@ public class ExecuteStat {
 		return selectErrorCount;
 	}
 
-	public AtomicLong getReadRow() {
-		return readRow;
+	public AtomicLong getSelectRow() {
+		return selectRow;
 	}
 
 	public AtomicLong getSelectSuccessCount() {
@@ -157,6 +171,10 @@ public class ExecuteStat {
 		return updateErrorCount;
 	}
 
+	public AtomicLong getUpdateRow() {
+		return updateRow;
+	}
+
 	public AtomicLong getUpdateSuccessCount() {
 		return updateSuccessCount;
 	}
@@ -178,10 +196,13 @@ public class ExecuteStat {
 				this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get() / this.getErrorCount().get()));
 		resultMap.put("Summary(S/E)", String.format("%d/%d", this.successCount.get(), this.errorCount.get()));
 		resultMap.put("Select(S/E)", String.format("%d/%d", this.selectSuccessCount.get(), this.selectErrorCount.get()));
-		resultMap.put("SelectRows", this.getReadRow().get());
+		resultMap.put("SelectRows", this.selectRow.get());
 		resultMap.put("Update(S/E)", String.format("%d/%d", this.updateSuccessCount.get(), this.updateErrorCount.get()));
+		resultMap.put("UpdateRows", this.updateRow.get());
 		resultMap.put("Insert(S/E)", String.format("%d/%d", this.insertSuccessCount.get(), this.insertErrorCount.get()));
+		resultMap.put("InsertRows", this.insertRow.get());
 		resultMap.put("Delete(S/E)", String.format("%d/%d", this.deleteSuccessCount.get(), this.deleteErrorCount.get()));
+		resultMap.put("DeleteRows", this.deleteRow.get());
 		convertTimeRange(resultMap, "S", this.successTimeRange.getResult());
 		convertTimeRange(resultMap, "E", this.errorTimeRange.getResult());
 		return resultMap;
