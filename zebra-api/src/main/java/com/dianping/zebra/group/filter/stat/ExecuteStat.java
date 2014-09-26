@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ExecuteStat {
 
+	private final AtomicLong readRow = new AtomicLong();
+
 	private final String dataSourceId;
 
 	private final AtomicLong deleteErrorCount = new AtomicLong();
@@ -123,6 +125,10 @@ public class ExecuteStat {
 		return selectErrorCount;
 	}
 
+	public AtomicLong getReadRow() {
+		return readRow;
+	}
+
 	public AtomicLong getSelectSuccessCount() {
 		return selectSuccessCount;
 	}
@@ -172,6 +178,7 @@ public class ExecuteStat {
 				this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get() / this.getErrorCount().get()));
 		resultMap.put("Summary(S/E)", String.format("%d/%d", this.successCount.get(), this.errorCount.get()));
 		resultMap.put("Select(S/E)", String.format("%d/%d", this.selectSuccessCount.get(), this.selectErrorCount.get()));
+		resultMap.put("SelectRows", this.getReadRow().get());
 		resultMap.put("Update(S/E)", String.format("%d/%d", this.updateSuccessCount.get(), this.updateErrorCount.get()));
 		resultMap.put("Insert(S/E)", String.format("%d/%d", this.insertSuccessCount.get(), this.insertErrorCount.get()));
 		resultMap.put("Delete(S/E)", String.format("%d/%d", this.deleteSuccessCount.get(), this.deleteErrorCount.get()));

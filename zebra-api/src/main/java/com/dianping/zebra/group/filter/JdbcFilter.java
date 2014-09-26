@@ -66,6 +66,9 @@ public interface JdbcFilter {
 
 	<S> void refreshGroupDataSource(JdbcMetaData metaData, String propertiesName, S source, FilterAction<S> action);
 
+	<S> Boolean resultSetNext(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, Boolean> action)
+			throws SQLException;
+
 	<S> String sql(JdbcMetaData metaData, S source, FilterFunction<S, String> action);
 
 	<S> void switchFailOverDataSource(JdbcMetaData metaData, S source, FilterAction<S> action);

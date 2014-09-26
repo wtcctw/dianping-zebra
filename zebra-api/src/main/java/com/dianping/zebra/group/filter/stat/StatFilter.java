@@ -144,6 +144,16 @@ public class StatFilter extends DefaultJdbcFilter {
 		StatContext.getDataSource(metaData).getRefreshGroupDataSourceSuccessCount().incrementAndGet();
 	}
 
+	@Override public <S> Boolean resultSetNext(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, Boolean> action) throws SQLException {
+		Boolean result = super.resultSetNext(metaData, source, action);
+		if (result) {
+			StatContext.getExecuteSummary().getReadRow().incrementAndGet();
+			StatContext.getExecute(metaData).getReadRow().incrementAndGet();
+		}
+		return result;
+	}
+
 	private void visitNode(JdbcMetaData metaData, Exception exp) {
 		if (!metaData.isBatch()) {
 			try {

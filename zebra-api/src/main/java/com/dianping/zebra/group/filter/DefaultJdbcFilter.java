@@ -76,6 +76,11 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		action.execute(source);
 	}
 
+	@Override public <S> Boolean resultSetNext(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, Boolean> action) throws SQLException {
+		return action.execute(source);
+	}
+
 	@Override public <S> String sql(JdbcMetaData metaData, S source, FilterFunction<S, String> action) {
 		return action.execute(source);
 	}

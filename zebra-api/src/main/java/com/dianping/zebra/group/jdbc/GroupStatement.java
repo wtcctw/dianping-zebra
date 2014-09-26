@@ -29,7 +29,7 @@ public class GroupStatement implements Statement {
 
 	protected boolean closed = false;
 
-	protected ResultSet currentResultSet = null;
+	protected GroupResultSet currentResultSet = null;
 
 	protected GroupConnection dpGroupConnection;
 
@@ -309,7 +309,7 @@ public class GroupStatement implements Statement {
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
 		Statement stmt = createStatementInternal(conn, false);
-		currentResultSet = stmt.executeQuery(sql);
+		currentResultSet = new GroupResultSet(this.metaData.clone(), this.filter, stmt.executeQuery(sql));
 		return currentResultSet;
 	}
 
@@ -397,17 +397,17 @@ public class GroupStatement implements Statement {
 	protected <T> T executeWithFilter(final JDBCOperationCallback<T> callback, final String sql, Object params,
 			boolean isBatch
 			, final boolean forceWriter) throws SQLException {
-		final JdbcMetaData tempMetaData = this.metaData.clone();
-		tempMetaData.setSql(sql);
-		tempMetaData.setBatch(isBatch);
-		tempMetaData.setParams(params);
-		tempMetaData.setTransaction(!this.dpGroupConnection.getAutoCommit());
-		tempMetaData.setBatchedSqls(batchedSqls);
 
-		return this.filter.execute(tempMetaData, this, new FilterFunctionWithSQLException<GroupStatement, T>() {
+		this.metaData.setSql(sql);
+		this.metaData.setBatch(isBatch);
+		this.metaData.setParams(params);
+		this.metaData.setTransaction(!this.dpGroupConnection.getAutoCommit());
+		this.metaData.setBatchedSqls(batchedSqls);
+		final Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
+		this.metaData.setRealJdbcMetaData(getRealJdbcMetaData(conn));
+
+		return this.filter.execute(this.metaData.clone(), this, new FilterFunctionWithSQLException<GroupStatement, T>() {
 			@Override public T execute(GroupStatement source) throws SQLException {
-				Connection conn = source.dpGroupConnection.getRealConnection(sql, forceWriter);
-				tempMetaData.setRealJdbcMetaData(getRealJdbcMetaData(conn));
 				T result = callback.doAction(conn);
 				return result;
 			}
@@ -472,7 +472,7 @@ public class GroupStatement implements Statement {
 	@Override
 	public ResultSet getGeneratedKeys() throws SQLException {
 		if (this.openedStatement != null) {
-			return new GroupResultSet(this.openedStatement.getGeneratedKeys());
+			return new GroupResultSet(this.metaData.clone(), this.filter, this.openedStatement.getGeneratedKeys());
 		} else {
 			throw new SQLException("No update operations executed before getGeneratedKeys");
 		}
@@ -572,7 +572,7 @@ public class GroupStatement implements Statement {
 	 */
 	@Override
 	public ResultSet getResultSet() throws SQLException {
-		return new GroupResultSet(currentResultSet);
+		return currentResultSet;
 	}
 
 	/*

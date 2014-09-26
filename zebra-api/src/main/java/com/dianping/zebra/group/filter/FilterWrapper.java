@@ -203,6 +203,20 @@ public class FilterWrapper implements JdbcFilter {
 		todo.execute(source);
 	}
 
+	@Override public <S> Boolean resultSetNext(final JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, Boolean> action) throws SQLException {
+		FilterFunctionWithSQLException<S, Boolean> todo = action;
+		for (final JdbcFilter filter : filters) {
+			final FilterFunctionWithSQLException<S, Boolean> finalTodo = todo;
+			todo = new FilterFunctionWithSQLException<S, Boolean>() {
+				@Override public Boolean execute(S source) throws SQLException {
+					return filter.resultSetNext(metaData, source, finalTodo);
+				}
+			};
+		}
+		return todo.execute(source);
+	}
+
 	public int size() {
 		return filters.size();
 	}

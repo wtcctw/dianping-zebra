@@ -10,6 +10,7 @@ import org.junit.runners.JUnit4;
 import org.unidal.test.jetty.JettyServer;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -65,10 +66,17 @@ public class TestServer extends JettyServer {
 	void execute(String sql) throws SQLException {
 		Connection conn = null;
 		Statement stat = null;
+		ResultSet result = null;
 		try {
 			conn = ds.getConnection();
 			stat = conn.createStatement();
 			stat.execute(sql);
+			result = stat.getResultSet();
+
+			if (result != null) {
+				while (result.next()) {
+				}
+			}
 		} catch (SQLException ignore) {
 
 		} finally {

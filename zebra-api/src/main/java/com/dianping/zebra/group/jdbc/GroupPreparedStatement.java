@@ -170,7 +170,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 		setParams(pstmt);
-		this.currentResultSet = pstmt.executeQuery();
+		this.currentResultSet = new GroupResultSet(this.metaData.clone(), this.filter, pstmt.executeQuery());
 		return this.currentResultSet;
 	}
 

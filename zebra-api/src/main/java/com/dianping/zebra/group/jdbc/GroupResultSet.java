@@ -1,5 +1,9 @@
 package com.dianping.zebra.group.jdbc;
 
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -12,10 +16,16 @@ import java.util.Map;
  * Created by Dozer on 9/1/14.
  */
 public class GroupResultSet implements ResultSet {
-	private ResultSet innerResultSet;
+	private final JdbcFilter filter;
 
-	public GroupResultSet(ResultSet resultSet) {
+	private final ResultSet innerResultSet;
+
+	private final JdbcMetaData metaData;
+
+	public GroupResultSet(JdbcMetaData metaData, JdbcFilter filter, ResultSet resultSet) {
 		this.innerResultSet = resultSet;
+		this.filter = filter;
+		this.metaData = metaData;
 	}
 
 	@Override public boolean absolute(int row) throws SQLException {
@@ -411,7 +421,12 @@ public class GroupResultSet implements ResultSet {
 	}
 
 	@Override public boolean next() throws SQLException {
-		return innerResultSet.next();
+		return this.filter
+				.resultSetNext(this.metaData.clone(), this, new FilterFunctionWithSQLException<GroupResultSet, Boolean>() {
+					@Override public Boolean execute(GroupResultSet source) throws SQLException {
+						return innerResultSet.next();
+					}
+				});
 	}
 
 	@Override public boolean previous() throws SQLException {
