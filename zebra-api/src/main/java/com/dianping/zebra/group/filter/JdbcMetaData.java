@@ -4,6 +4,8 @@ import com.dianping.zebra.group.util.StringUtils;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.SQLParser;
 import com.foundationdb.sql.parser.StatementNode;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -16,6 +18,8 @@ import java.util.Properties;
  * Filters read metadata from this class
  */
 public class JdbcMetaData implements Cloneable {
+
+	private static final Logger log = LogManager.getLogger(JdbcMetaData.class);
 
 	private List<StatementNode> batchedNode;
 
@@ -184,7 +188,7 @@ public class JdbcMetaData implements Cloneable {
 		try {
 			node = new SQLParser().parseStatement(sql);
 		} catch (StandardException e) {
-			e.printStackTrace();
+			log.warn(e.getMessage(), e);
 		}
 	}
 

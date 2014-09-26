@@ -42,12 +42,14 @@ public class TestServer extends JettyServer {
 		createTable();
 		execute("insert into `app` (`name`) values ('test')");
 		execute("update `app` set `name` = 'test2'");
+		execute("update `app` set `name1` = 'test2'");
 		execute("delete from `app`");
 		execute("select 1");
 		execute("select 1");
 		execute("select 1");
 		execute("select 1");
 		execute("select 1");
+		execute("select * from `not_exist`");
 		execute("select 1");
 
 		ds.setMaxPoolSize(100);
@@ -67,6 +69,8 @@ public class TestServer extends JettyServer {
 			conn = ds.getConnection();
 			stat = conn.createStatement();
 			stat.execute(sql);
+		} catch (SQLException ignore) {
+
 		} finally {
 			if (stat != null) {
 				stat.close();
