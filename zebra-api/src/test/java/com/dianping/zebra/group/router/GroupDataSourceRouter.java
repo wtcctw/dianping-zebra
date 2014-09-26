@@ -1,30 +1,30 @@
 package com.dianping.zebra.group.router;
 
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.Before;
-import org.junit.Test;
+public class GroupDataSourceRouter {
 
-import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
-
-public class GroupDataSourceRouterFactoryTest {
+	private Map<String, Integer> counter = new HashMap<String, Integer>();
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
 	private DataSourceRouter dataSourceRouter;
-
-	private Map<String, Integer> counter = new HashMap<String, Integer>();
 
 	@Before
 	public void init() {
 		String dataSourceResourceId = "sample.ds.v2";
 		String configManagerType = "local";
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType,
-		      dataSourceResourceId);
-		this.dataSourceRouter = DataSourceRouterFactory.getDataSourceRouter(dataSourceConfigManager);
+				dataSourceResourceId);
+		this.dataSourceRouter = new WeightDataSourceRouter(
+				dataSourceConfigManager.getGroupDataSourceConfig().getDataSourceConfigs());
 	}
 
 	@Test

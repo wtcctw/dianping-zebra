@@ -24,8 +24,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 	private GroupDataSourceConfigBuilder builder;
 
-	private GroupDataSourceConfig groupDataSourceConfig;
-
 	public DefaultDataSourceConfigManager(String name, ConfigService configService) {
 		super(name, configService);
 	}
@@ -36,49 +34,27 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	}
 
 	@Override
-	public synchronized GroupDataSourceConfig getGroupDataSourceConfig() {
-		return this.groupDataSourceConfig;
-	}
-
-	@Override
-	public synchronized String getRouterStrategy() {
-		return this.groupDataSourceConfig.getRouterStrategy();
-	}
-
-	@Override
 	public synchronized void init() {
 		try {
 			this.builder = new GroupDataSourceConfigBuilder();
-			this.groupDataSourceConfig = initGroupDataSourceConfig();
 		} catch (Exception e) {
 			throw new IllegalConfigException(String.format(
 					"Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
 		}
 	}
 
+	@Override public GroupDataSourceConfig getGroupDataSourceConfig() {
+		return initGroupDataSourceConfig();
+	}
+
 	private GroupDataSourceConfig initGroupDataSourceConfig() {
 		GroupDataSourceConfig config = new GroupDataSourceConfig();
 		this.builder.visitGroupDataSourceConfig(config);
-
 		return config;
 	}
 
 	@Override
-	public synchronized boolean isTransactionForceWrite() {
-		return this.groupDataSourceConfig.getTransactionForceWrite();
-	}
-
-	@Override
-	public boolean isWriteFirst() {
-		return this.groupDataSourceConfig.isWriteFirst();
-	}
-
-	@Override
 	protected synchronized void onPropertyUpdated(PropertyChangeEvent evt) {
-		if (evt instanceof AdvancedPropertyChangeEvent) {
-			GroupDataSourceConfig newDataSourceConfigCache = initGroupDataSourceConfig();
-			this.groupDataSourceConfig = newDataSourceConfigCache;
-		}
 	}
 
 	private void validateConfig(Map<String, DataSourceConfig> dataSourceConfigs) {

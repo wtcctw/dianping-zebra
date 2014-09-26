@@ -9,7 +9,7 @@ import com.dianping.zebra.group.filter.JdbcMetaDataTest;
 import com.dianping.zebra.group.jdbc.*;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapperTest;
 import com.dianping.zebra.group.router.DpdlReadWriteStrategyImplTest;
-import com.dianping.zebra.group.router.GroupDataSourceRouterFactoryTest;
+import com.dianping.zebra.group.router.GroupDataSourceRouter;
 import com.dianping.zebra.group.util.AtomicRefreshTest;
 import com.dianping.zebra.group.util.SmoothReloadTest;
 import com.dianping.zebra.group.util.SqlUtilsTest;
@@ -42,7 +42,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		//router
 		CustomizedReadWriteStrategyWrapperTest.class,
 		DpdlReadWriteStrategyImplTest.class,
-		GroupDataSourceRouterFactoryTest.class,
+		GroupDataSourceRouter.class,
 
 		//util
 		AtomicRefreshTest.class,
