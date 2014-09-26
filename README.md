@@ -39,7 +39,7 @@
 
 ### 在 Spring 中 DataSource 的配置
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<property name="jdbcRef" value="TuanGou2010" />
+		<property name="jdbcRef" value="tuangou2010" />
 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
 		<property name="maxPoolSize" value="${lion.key.maxPoolSize}" />
         <property name="initialPoolSize" value="${lion.key.initialPoolSize}" />
@@ -56,11 +56,11 @@
 
 ### 在 Spring 中使用默认 DataSource 的配置
     <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<property name="jdbcRef" value="TuanGou2010" /> 
+		<property name="jdbcRef" value="tuangou2010" /> 
     </bean>
 
 ### 配置说明
-其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，由DBA给出，`Zebra`会自动根据这个名字到`Lion`上查找`jdbcUrl`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
+其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，一般是数据库名的全小写，`zebra`会自动根据这个名字到`Lion`上查找`jdbcUrl`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
 1. C3P0参数是在`bean`中直接定义的，那么C3P0的参数将不具有动态刷新的功能。
 2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
 3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
