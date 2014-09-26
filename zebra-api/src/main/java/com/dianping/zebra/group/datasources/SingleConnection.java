@@ -2,6 +2,7 @@ package com.dianping.zebra.group.datasources;
 
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 
 import java.sql.*;
 import java.util.Map;
@@ -39,7 +40,12 @@ public class SingleConnection implements Connection {
 
 	@Override
 	public void close() throws SQLException {
-		conn.close();
+		this.filter.closeSingleConnection(this.metaData.clone(), this,
+				new FilterActionWithSQLExcption<SingleConnection>() {
+					@Override public void execute(SingleConnection source) throws SQLException {
+						conn.close();
+					}
+				});
 	}
 
 	@Override

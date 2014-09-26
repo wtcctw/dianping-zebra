@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.filter;
 
 import com.dianping.zebra.group.datasources.FailOverDataSource;
+import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
@@ -47,6 +48,34 @@ public class FilterWrapper implements JdbcFilter {
 			todo = new FilterActionWithSQLExcption<S>() {
 				@Override public void execute(S source) throws SQLException {
 					filter.closeGroupConnection(metaData, source, finalTodo);
+				}
+			};
+		}
+		todo.execute(source);
+	}
+
+	@Override public <S> void closeGroupDataSource(final JdbcMetaData metaData, final S source,
+			final FilterActionWithSQLExcption<S> action) throws SQLException {
+		FilterActionWithSQLExcption<S> todo = action;
+		for (final JdbcFilter filter : filters) {
+			final FilterActionWithSQLExcption<S> finalTodo = todo;
+			todo = new FilterActionWithSQLExcption<S>() {
+				@Override public void execute(S source) throws SQLException {
+					filter.closeGroupDataSource(metaData, source, finalTodo);
+				}
+			};
+		}
+		todo.execute(source);
+	}
+
+	@Override public <S> void closeSingleConnection(final JdbcMetaData metaData, final S source,
+			final FilterActionWithSQLExcption<S> action) throws SQLException {
+		FilterActionWithSQLExcption<S> todo = action;
+		for (final JdbcFilter filter : filters) {
+			final FilterActionWithSQLExcption<S> finalTodo = todo;
+			todo = new FilterActionWithSQLExcption<S>() {
+				@Override public void execute(S source) throws SQLException {
+					filter.closeSingleConnection(metaData, source, finalTodo);
 				}
 			};
 		}
@@ -114,6 +143,20 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override public int getOrder() {
 		return DEFAULT_ORDER;
+	}
+
+	@Override public <S> SingleConnection getSingleConnection(final JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException {
+		FilterFunctionWithSQLException<S, SingleConnection> todo = action;
+		for (final JdbcFilter filter : filters) {
+			final FilterFunctionWithSQLException<S, SingleConnection> finalTodo = todo;
+			todo = new FilterFunctionWithSQLException<S, SingleConnection>() {
+				@Override public SingleConnection execute(S source) throws SQLException {
+					return filter.getSingleConnection(metaData, source, finalTodo);
+				}
+			};
+		}
+		return todo.execute(source);
 	}
 
 	@Override public <S> void initGroupDataSource(final JdbcMetaData metaData, final S source,

@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.filter;
 
 import com.dianping.zebra.group.datasources.FailOverDataSource;
+import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
@@ -17,6 +18,16 @@ public class DefaultJdbcFilter implements JdbcFilter {
 	@Override public <S> void closeGroupConnection(JdbcMetaData metaData, S source,
 			FilterActionWithSQLExcption<S> action)
 			throws SQLException {
+		action.execute(source);
+	}
+
+	@Override public <S> void closeGroupDataSource(JdbcMetaData metaData, S source,
+			FilterActionWithSQLExcption<S> action) throws SQLException {
+		action.execute(source);
+	}
+
+	@Override public <S> void closeSingleConnection(JdbcMetaData metaData, S source,
+			FilterActionWithSQLExcption<S> action) throws SQLException {
 		action.execute(source);
 	}
 
@@ -44,6 +55,11 @@ public class DefaultJdbcFilter implements JdbcFilter {
 
 	@Override public int getOrder() {
 		return this.DEFAULT_ORDER;
+	}
+
+	@Override public <S> SingleConnection getSingleConnection(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException {
+		return action.execute(source);
 	}
 
 	@Override public <S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {

@@ -1,13 +1,17 @@
 package com.dianping.zebra.group.filter.stat;
 
+import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
+import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.StatementNode;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
@@ -25,6 +29,45 @@ public class StatFilter extends DefaultJdbcFilter {
 		} catch (SQLException exp) {
 			StatContext.getDataSourceSummary().getCloseGroupConnectionErrorCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getCloseGroupConnectionErrorCount().incrementAndGet();
+			throw exp;
+		}
+	}
+
+	@Override public <S> void closeGroupDataSource(JdbcMetaData metaData, S source,
+			FilterActionWithSQLExcption<S> action) throws SQLException {
+		try {
+			super.closeGroupDataSource(metaData, source, action);
+			StatContext.getDataSourceSummary().getCloseGroupDataSourceSuccessCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseGroupDataSourceSuccessCount().incrementAndGet();
+		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getCloseGroupDataSourceErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseGroupDataSourceErrorCount().incrementAndGet();
+			throw exp;
+		}
+	}
+
+	@Override public <S> void closeSingleConnection(JdbcMetaData metaData, S source,
+			FilterActionWithSQLExcption<S> action) throws SQLException {
+		try {
+			super.closeSingleConnection(metaData, source, action);
+			StatContext.getDataSourceSummary().getCloseSingleConnectionSuccessCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseSingleConnectionSuccessCount().incrementAndGet();
+		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getCloseSingleConnectionErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseSingleConnectionErrorCount().incrementAndGet();
+			throw exp;
+		}
+	}
+
+	@Override public <S> void closeSingleDataSource(JdbcMetaData metaData, S source,
+			FilterActionWithSQLExcption<S> action) throws SQLException {
+		try {
+			super.closeSingleDataSource(metaData, source, action);
+			StatContext.getDataSourceSummary().getCloseSingleDataSourceSuccessCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseSingleDataSourceSuccessCount().incrementAndGet();
+		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getCloseSingleDataSourceErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseSingleDataSourceErrorCount().incrementAndGet();
 			throw exp;
 		}
 	}
@@ -64,6 +107,34 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getDataSource(metaData).getGetGroupConnectionErrorCount().incrementAndGet();
 			throw exp;
 		}
+	}
+
+	@Override public <S> SingleConnection getSingleConnection(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException {
+		try {
+			SingleConnection result = super.getSingleConnection(metaData, source, action);
+			StatContext.getDataSourceSummary().getGetSingleConnectionSuccessCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getGetSingleConnectionSuccessCount().incrementAndGet();
+			return result;
+		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getGetSingleConnectionErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getGetSingleConnectionErrorCount().incrementAndGet();
+			throw exp;
+		}
+	}
+
+	@Override public <S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {
+		super.initGroupDataSource(metaData, source, action);
+		StatContext.getDataSourceSummary().getInitGroupDataSourceSuccessCount().incrementAndGet();
+		StatContext.getDataSource(metaData).getInitGroupDataSourceSuccessCount().incrementAndGet();
+	}
+
+	@Override public <S> DataSource initSingleDataSource(JdbcMetaData metaData, S source,
+			FilterFunction<S, DataSource> action) {
+		DataSource result = super.initSingleDataSource(metaData, source, action);
+		StatContext.getDataSourceSummary().getInitSingleDataSourceSuccessCount().incrementAndGet();
+		StatContext.getDataSource(metaData).getInitSingleDataSourceSuccessCount().incrementAndGet();
+		return result;
 	}
 
 	private void visitNode(JdbcMetaData metaData, Exception exp) {

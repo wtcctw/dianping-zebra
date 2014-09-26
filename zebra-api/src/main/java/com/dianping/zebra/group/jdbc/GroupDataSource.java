@@ -15,6 +15,7 @@ import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
+import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -139,7 +140,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public void close() throws SQLException {
-		this.close(this.readDataSource, this.writeDataSource);
+		this.filter.closeGroupDataSource(this.metaData.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
+			@Override public void execute(GroupDataSource source) throws SQLException {
+				source.close(source.readDataSource, source.writeDataSource);
+			}
+		});
 	}
 
 	private void close(LoadBalancedDataSource readDataSource, FailOverDataSource writeDataSource) throws SQLException {

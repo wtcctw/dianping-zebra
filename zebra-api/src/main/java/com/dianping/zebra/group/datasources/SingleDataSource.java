@@ -8,6 +8,7 @@ import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
@@ -102,22 +103,26 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		checkState();
-		Connection conn;
-		try {
-			conn = this.dataSource.getConnection();
-		} catch (SQLException e) {
-			punisher.countAndPunish(e);
 
-			throw e;
-		}
+		return this.filter.getSingleConnection(this.metaData.clone(), this,
+				new FilterFunctionWithSQLException<SingleDataSource, SingleConnection>() {
+					@Override public SingleConnection execute(SingleDataSource source) throws SQLException {
+						Connection conn;
+						try {
+							conn = source.dataSource.getConnection();
+						} catch (SQLException e) {
+							punisher.countAndPunish(e);
+							throw e;
+						}
 
-		if (state == DataSourceState.INITIAL) {
-			state = DataSourceState.UP;
-		}
+						if (state == DataSourceState.INITIAL) {
+							state = DataSourceState.UP;
+						}
 
-		return new SingleConnection(this, conn, this.metaData.clone(), this.filter);
+						return new SingleConnection(source, conn, source.metaData.clone(), source.filter);
+					}
+				});
 	}
-
 	@Override
 	public String getCurrentState() {
 		return state.toString();

@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.filter;
 
 import com.dianping.zebra.group.datasources.FailOverDataSource;
+import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
@@ -23,6 +24,12 @@ public interface JdbcFilter {
 	<S> void closeGroupConnection(JdbcMetaData metaData, S source, FilterActionWithSQLExcption<S> action)
 			throws SQLException;
 
+	<S> void closeGroupDataSource(JdbcMetaData metaData, S source, FilterActionWithSQLExcption<S> action)
+			throws SQLException;
+
+	<S> void closeSingleConnection(JdbcMetaData metaData, S source, FilterActionWithSQLExcption<S> action)
+			throws SQLException;
+
 	<S> void closeSingleDataSource(JdbcMetaData metaData, S source, FilterActionWithSQLExcption<S> action)
 			throws SQLException;
 
@@ -31,7 +38,8 @@ public interface JdbcFilter {
 	<S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(JdbcMetaData metaData, S source,
 			FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action);
 
-	<S> GroupConnection getGroupConnection(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, GroupConnection> action)
+	<S> GroupConnection getGroupConnection(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, GroupConnection> action)
 			throws SQLException;
 
 	/**
@@ -46,6 +54,10 @@ public interface JdbcFilter {
 	 * @return the order of execute
 	 */
 	int getOrder();
+
+	<S> SingleConnection getSingleConnection(JdbcMetaData metaData, S source,
+			FilterFunctionWithSQLException<S, SingleConnection> action)
+			throws SQLException;
 
 	<S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action);
 
