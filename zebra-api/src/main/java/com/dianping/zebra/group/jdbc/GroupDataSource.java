@@ -143,7 +143,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.close(this.readDataSource, this.writeDataSource);
 	}
 
-	private void close(LoadBalancedDataSource readDataSource, FailOverDataSource writeDataSource) throws SQLException {
+	private void close(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
 
 		this.filter.closeGroupDataSource(this.metaData.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
 			@Override public void execute(GroupDataSource source) throws SQLException {
@@ -151,16 +151,16 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				List<SQLException> exps = new ArrayList<SQLException>();
 
 				try {
-					if (source.readDataSource != null) {
-						source.readDataSource.close();
+					if (read != null) {
+						read.close();
 					}
 				} catch (SQLException e) {
 					exps.add(e);
 				}
 
 				try {
-					if (source.writeDataSource != null) {
-						source.writeDataSource.close();
+					if (write != null) {
+						write.close();
 					}
 				} catch (SQLException e) {
 					exps.add(e);
