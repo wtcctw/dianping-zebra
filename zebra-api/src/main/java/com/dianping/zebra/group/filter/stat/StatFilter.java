@@ -137,6 +137,13 @@ public class StatFilter extends DefaultJdbcFilter {
 		return result;
 	}
 
+	@Override public <S> void refreshGroupDataSource(JdbcMetaData metaData, String propertiesName, S source,
+			FilterAction<S> action) {
+		super.refreshGroupDataSource(metaData, propertiesName, source, action);
+		StatContext.getDataSourceSummary().getRefreshGroupDataSourceSuccessCount().incrementAndGet();
+		StatContext.getDataSource(metaData).getRefreshGroupDataSourceSuccessCount().incrementAndGet();
+	}
+
 	private void visitNode(JdbcMetaData metaData, Exception exp) {
 		if (!metaData.isBatch()) {
 			try {

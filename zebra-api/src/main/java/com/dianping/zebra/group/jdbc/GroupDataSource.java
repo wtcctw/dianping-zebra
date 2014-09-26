@@ -140,33 +140,35 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public void close() throws SQLException {
-		this.filter.closeGroupDataSource(this.metaData.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
-			@Override public void execute(GroupDataSource source) throws SQLException {
-				source.close(source.readDataSource, source.writeDataSource);
-			}
-		});
+		this.close(this.readDataSource, this.writeDataSource);
 	}
 
 	private void close(LoadBalancedDataSource readDataSource, FailOverDataSource writeDataSource) throws SQLException {
-		List<SQLException> exps = new ArrayList<SQLException>();
 
-		try {
-			if (readDataSource != null) {
-				readDataSource.close();
+		this.filter.closeGroupDataSource(this.metaData.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
+			@Override public void execute(GroupDataSource source) throws SQLException {
+
+				List<SQLException> exps = new ArrayList<SQLException>();
+
+				try {
+					if (source.readDataSource != null) {
+						source.readDataSource.close();
+					}
+				} catch (SQLException e) {
+					exps.add(e);
+				}
+
+				try {
+					if (source.writeDataSource != null) {
+						source.writeDataSource.close();
+					}
+				} catch (SQLException e) {
+					exps.add(e);
+				}
+
+				JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
 			}
-		} catch (SQLException e) {
-			exps.add(e);
-		}
-
-		try {
-			if (writeDataSource != null) {
-				writeDataSource.close();
-			}
-		} catch (SQLException e) {
-			exps.add(e);
-		}
-
-		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
+		});
 	}
 
 	private Any findAny(List<Any> all, String name) {

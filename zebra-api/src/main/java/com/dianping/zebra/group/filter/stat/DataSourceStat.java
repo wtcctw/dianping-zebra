@@ -44,6 +44,10 @@ public class DataSourceStat {
 
 	private final AtomicLong initSingleDataSourceSuccessCount = new AtomicLong();
 
+	private final AtomicLong refreshGroupDataSourceErrorCount = new AtomicLong();
+
+	private final AtomicLong refreshGroupDataSourceSuccessCount = new AtomicLong();
+
 	public DataSourceStat() {
 		dataSourceId = null;
 	}
@@ -120,6 +124,14 @@ public class DataSourceStat {
 		return initSingleDataSourceSuccessCount;
 	}
 
+	public AtomicLong getRefreshGroupDataSourceErrorCount() {
+		return refreshGroupDataSourceErrorCount;
+	}
+
+	public AtomicLong getRefreshGroupDataSourceSuccessCount() {
+		return refreshGroupDataSourceSuccessCount;
+	}
+
 	public Map<String, Object> toMap() {
 		return toMap(false);
 	}
@@ -137,6 +149,8 @@ public class DataSourceStat {
 				this.getSingleConnectionErrorCount.get()));
 		resultMap.put("CloseSingleConnection(S/E)", String.format("%d/%d", this.closeSingleConnectionSuccessCount.get(),
 				this.closeSingleConnectionErrorCount.get()));
+		resultMap.put("RefreshGroupDataSource(S/E)", String.format("%d/%d", this.refreshGroupDataSourceSuccessCount.get(),
+				this.refreshGroupDataSourceErrorCount.get()));
 		resultMap.put("InitGroupDataSource(S/E)", String.format("%d/%d", this.initGroupDataSourceSuccessCount.get(),
 				this.initGroupDataSourceErrorCount.get()));
 		resultMap.put("CloseGroupDataSource(S/E)", String.format("%d/%d", this.closeGroupDataSourceSuccessCount.get(),

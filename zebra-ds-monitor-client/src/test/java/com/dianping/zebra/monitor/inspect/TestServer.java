@@ -49,6 +49,11 @@ public class TestServer extends JettyServer {
 		execute("select 1");
 		execute("select 1");
 		execute("select 1");
+
+		ds.setMaxPoolSize(100);
+		ds.setMaxPoolSize(101);
+
+		execute("select 1");
 	}
 
 	private void createTable() throws SQLException {
