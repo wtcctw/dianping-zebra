@@ -162,21 +162,19 @@ public class ExecuteStat {
 	public Map<String, Object> toMap(boolean isSummary) {
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 		if (!isSummary) {
-			resultMap.put("GroupDataSourceId", this.groupDataSourceId);
-			resultMap.put("DataSourceId", this.dataSourceId);
+			resultMap.put("GId", this.groupDataSourceId);
+			resultMap.put("Id", this.dataSourceId);
 			resultMap.put("Sql", this.sql);
 		}
-		resultMap.put("Success", this.successCount.get());
-		resultMap.put("Error", this.errorCount.get());
-		resultMap.put("Transaction", this.transactionCount.get());
-		resultMap.put("SelectSuccess", this.selectSuccessCount.get());
-		resultMap.put("SelectError", this.selectErrorCount.get());
-		resultMap.put("InsertSuccess", this.insertSuccessCount.get());
-		resultMap.put("InsertError", this.insertErrorCount.get());
-		resultMap.put("UpdateSuccess", this.updateSuccessCount.get());
-		resultMap.put("UpdateError", this.updateErrorCount.get());
-		resultMap.put("DeleteSuccess", this.deleteSuccessCount.get());
-		resultMap.put("DeleteError", this.deleteErrorCount.get());
+		resultMap.put("T", this.transactionCount.get());
+		resultMap.put("Avg(S/E)", String.format("%d/%d",
+				this.getSuccessCount().get() == 0 ? 0 : this.getSuccessTime().get() / this.getSuccessCount().get(),
+				this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get() / this.getErrorCount().get()));
+		resultMap.put("Summary(S/E)", String.format("%d/%d", this.successCount.get(), this.errorCount.get()));
+		resultMap.put("Select(S/E)", String.format("%d/%d", this.selectSuccessCount.get(), this.selectErrorCount.get()));
+		resultMap.put("Update(S/E)", String.format("%d/%d", this.updateSuccessCount.get(), this.updateErrorCount.get()));
+		resultMap.put("Insert(S/E)", String.format("%d/%d", this.insertSuccessCount.get(), this.insertErrorCount.get()));
+		resultMap.put("Delete(S/E)", String.format("%d/%d", this.deleteSuccessCount.get(), this.deleteErrorCount.get()));
 		convertTimeRange(resultMap, "S", this.successTimeRange.getResult());
 		convertTimeRange(resultMap, "E", this.errorTimeRange.getResult());
 		return resultMap;

@@ -55,12 +55,10 @@ public class DataSourceStat {
 	public Map<String, Object> toMap(boolean isSummary) {
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 		if (!isSummary) {
-			resultMap.put("DataSourceId", this.dataSourceId);
+			resultMap.put("Id", this.dataSourceId);
 		}
-		resultMap.put("GetGroupConnectionSuccess", this.getGroupConnectionSuccessCount.get());
-		resultMap.put("GetGroupConnectionError", this.getGroupConnectionErrorCount.get());
-		resultMap.put("CloseGroupConnectionSuccess", this.closeGroupConnectionSuccessCount.get());
-		resultMap.put("CloseGroupConnectionError", this.closeGroupConnectionErrorCount.get());
+		resultMap.put("GetGroupConnection(S/E)", String.format("%d/%d", this.getGroupConnectionSuccessCount.get(), this.getGroupConnectionErrorCount.get()));
+		resultMap.put("CloseGroupConnection(S/E)", String.format("%d/%d", this.closeGroupConnectionSuccessCount.get(), this.closeGroupConnectionErrorCount.get()));
 		return resultMap;
 	}
 }
