@@ -13,6 +13,7 @@ import com.foundationdb.sql.parser.StatementNode;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by Dozer on 9/2/14.
@@ -164,9 +165,18 @@ public class StatFilter extends DefaultJdbcFilter {
 			if (metaData.getBatchedNode() == null) {
 				return;
 			}
-			for (StatementNode node : metaData.getBatchedNode()) {
+			if (!(result instanceof int[])) {
+				return;
+			}
+			int[] intResult = (int[]) result;
+			List<StatementNode> batchedNodes = metaData.getBatchedNode();
+			if (intResult.length != batchedNodes.size()) {
+				return;
+			}
+
+			for (int k = 0; k < intResult.length; k++) {
 				try {
-					new SqlStatVisitor(metaData, result, exp).visit(node);
+					new SqlStatVisitor(metaData, intResult[k], exp).visit(batchedNodes.get(k));
 				} catch (StandardException e) {
 				}
 			}
