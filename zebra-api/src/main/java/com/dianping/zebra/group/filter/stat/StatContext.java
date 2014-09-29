@@ -67,6 +67,8 @@ public final class StatContext {
 
 		result = result * 31 + new Boolean(metaData.isBatch()).hashCode();
 
+		result = result * 31 + new Boolean(metaData.isPrepared()).hashCode();
+
 		if (metaData.getBatchedSqls() != null) {
 			result = result * 31 + Arrays.toString(metaData.getBatchedSqls().toArray()).hashCode();
 		}
@@ -75,10 +77,8 @@ public final class StatContext {
 			result = result * 31 + metaData.getDataSourceId().hashCode();
 		}
 
-		if (metaData.getRealJdbcMetaData() != null) {
-			if (metaData.getRealJdbcMetaData().getDataSourceId() != null) {
-				result = result * 31 + metaData.getRealJdbcMetaData().getDataSourceId().hashCode();
-			}
+		if (metaData.getRealJdbcMetaData() != null && metaData.getRealJdbcMetaData().getDataSourceId() != null) {
+			result = result * 31 + metaData.getRealJdbcMetaData().getDataSourceId().hashCode();
 		}
 
 		return result;

@@ -9,10 +9,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.unidal.test.jetty.JettyServer;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 @RunWith(JUnit4.class)
 @Ignore
@@ -42,6 +39,8 @@ public class TestServer extends JettyServer {
 
 		createTable();
 		executeWithTransaction("update `app` set `name` = 'ttt'", "update `app` set `name` = 'ttt2'");
+		executeWithBatch("update `app` set `name` = 'ttt'", "update `app` set `name` = 'ttt2'");
+		executeWithPreparedBatch("update `app` set `name` = ?", "aa", "bb", "cc");
 		execute("insert into `app` (`name`) values ('test')");
 		execute("update `app` set `name` = (select 1)");//todo: 需要支持子查询
 		execute("update `app` set `name` = 'xxx'");
@@ -89,6 +88,35 @@ public class TestServer extends JettyServer {
 				conn.close();
 			}
 		}
+	}
+
+	void executeWithBatch(String... sqls) throws SQLException {
+		Connection conn = ds.getConnection();
+
+		Statement stmt = conn.createStatement();
+
+		for (String sql : sqls) {
+			stmt.addBatch(sql);
+		}
+
+		stmt.executeBatch();
+		stmt.close();
+		conn.close();
+	}
+
+	void executeWithPreparedBatch(String sql, String... args) throws SQLException {
+		Connection conn = ds.getConnection();
+
+		PreparedStatement stmt = conn.prepareStatement(sql);
+
+		for (int k = 0; k < args.length; k++) {
+			stmt.setString(1, args[k]);
+			stmt.addBatch();
+		}
+
+		stmt.executeBatch();
+		stmt.close();
+		conn.close();
 	}
 
 	void executeWithTransaction(String... sqls) throws SQLException {

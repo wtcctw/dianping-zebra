@@ -36,6 +36,8 @@ public class ExecuteStat {
 
 	private final boolean isBatch;
 
+	private final boolean isPrepared;
+
 	private final AtomicLong selectErrorCount = new AtomicLong();
 
 	private final AtomicLong selectRow = new AtomicLong();
@@ -63,6 +65,7 @@ public class ExecuteStat {
 		this.dataSourceId = null;
 		this.groupDataSourceId = null;
 		this.isBatch = false;
+		this.isPrepared = false;
 	}
 
 	public ExecuteStat(JdbcMetaData metaData) {
@@ -72,6 +75,7 @@ public class ExecuteStat {
 		} else {
 			this.sql = metaData.getSql();
 		}
+		this.isPrepared = metaData.isPrepared();
 		this.groupDataSourceId = metaData.getDataSourceId();
 		this.dataSourceId =
 				metaData.getRealJdbcMetaData() == null ? null : metaData.getRealJdbcMetaData().getDataSourceId();
@@ -200,7 +204,8 @@ public class ExecuteStat {
 			resultMap.put("Sql", this.sql);
 		}
 		resultMap.put("T", this.transactionCount.get());
-		resultMap.put("B", this.isBatch);
+		resultMap.put("B", this.isBatch ? "T" : "F");
+		resultMap.put("P", this.isPrepared ? "T" : "F");
 		resultMap.put("Avg(S/E)", String.format("%d/%d",
 				this.getSuccessCount().get() == 0 ? 0 : this.getSuccessTime().get() / this.getSuccessCount().get(),
 				this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get() / this.getErrorCount().get()));
