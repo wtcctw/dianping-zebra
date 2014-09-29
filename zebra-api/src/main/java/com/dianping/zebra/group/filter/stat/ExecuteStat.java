@@ -199,16 +199,16 @@ public class ExecuteStat {
 	public Map<String, Object> toMap(boolean isSummary) {
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 		if (!isSummary) {
-			resultMap.put("GId", this.groupDataSourceId);
+			resultMap.put("GroupId", this.groupDataSourceId);
 			resultMap.put("Id", this.dataSourceId);
-			resultMap.put("Sql", this.sql);
+			resultMap.put("SQL", this.sql);
 			resultMap.put("IsBatch", this.isBatch);
 			resultMap.put("IsPrepared", this.isPrepared);
 		}
-		resultMap.put("Avg(S/E)", String.format("%d/%d",
+		resultMap.put("AvgTime(S/E)", String.format("%d/%d",
 				this.getSuccessCount().get() == 0 ? 0 : this.getSuccessTime().get() / this.getSuccessCount().get(),
 				this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get() / this.getErrorCount().get()));
-		resultMap.put("Summary(S/E)", String.format("%d/%d", this.successCount.get(), this.errorCount.get()));
+		resultMap.put("Execute(S/E)", String.format("%d/%d", this.successCount.get(), this.errorCount.get()));
 		resultMap.put("Select(S/E)", String.format("%d/%d", this.selectSuccessCount.get(), this.selectErrorCount.get()));
 		resultMap.put("SelectRows", this.selectRow.get());
 		resultMap.put("Update(S/E)", String.format("%d/%d", this.updateSuccessCount.get(), this.updateErrorCount.get()));
