@@ -18,19 +18,9 @@ public class DataSourceStatus extends AbstractComponentStatus {
 
 	@Override
 	protected void build(ServletContext ctx) throws Exception {
-		buildDataSourceSummaryTable();
 		buildDataSourceTable();
 		buildExecuteSummaryTable();
 		buildExecuteTable();
-	}
-
-	private void buildDataSourceSummaryTable() {
-		TableBuilder table = newTable();
-		table.caption("DataSource Summary");
-		Object[] headers = StatContext.getDataSourceSummary().toMap(true).keySet().toArray();
-		table.header(Arrays.copyOf(headers, headers.length, String[].class));
-		table.row(StatContext.getDataSourceSummary().toMap(true).values().toArray());
-		table.build();
 	}
 
 	private void buildDataSourceTable() {
