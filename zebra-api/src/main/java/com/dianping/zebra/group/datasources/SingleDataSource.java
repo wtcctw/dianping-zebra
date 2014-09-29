@@ -123,6 +123,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 					}
 				});
 	}
+
 	@Override
 	public String getCurrentState() {
 		return state.toString();
@@ -289,6 +290,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	private void initFilters() {
 		this.metaData.setDataSource(this);
 		this.metaData.setDataSourceId(this.dsId);
+		this.metaData.setDataSourceProperties(this);
 	}
 
 	public boolean isAvailable() {

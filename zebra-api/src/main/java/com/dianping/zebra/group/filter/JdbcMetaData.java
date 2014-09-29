@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.filter;
 
+import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
+import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.StringUtils;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.SQLParser;
@@ -10,8 +12,9 @@ import org.apache.log4j.Logger;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 
 /**
  * Created by Dozer on 9/2/14.
@@ -47,7 +50,7 @@ public class JdbcMetaData implements Cloneable {
 
 	private Object params;
 
-	private Properties properties;
+	private LinkedHashMap<String, Object> properties = new LinkedHashMap<String, Object>();
 
 	private JdbcMetaData realJdbcMetaData;
 
@@ -55,7 +58,9 @@ public class JdbcMetaData implements Cloneable {
 
 	public JdbcMetaData clone() {
 		try {
-			return (JdbcMetaData) super.clone();
+			JdbcMetaData result = (JdbcMetaData) super.clone();
+			result.properties = (LinkedHashMap<String, Object>) this.properties.clone();
+			return result;
 		} catch (CloneNotSupportedException e) {
 			return null;
 		}
@@ -157,15 +162,8 @@ public class JdbcMetaData implements Cloneable {
 		this.params = params;
 	}
 
-	public Properties getProperties() {
-		if (properties == null) {
-			properties = new Properties();
-		}
+	public Map<String, Object> getProperties() {
 		return properties;
-	}
-
-	public void setProperties(Properties properties) {
-		this.properties = properties;
 	}
 
 	public JdbcMetaData getRealJdbcMetaData() {
@@ -218,18 +216,23 @@ public class JdbcMetaData implements Cloneable {
 		this.isTransaction = isTransaction;
 	}
 
-	@Override public String toString() {
-		return "JdbcMetaData{" +
-				"batchedSqls=" + batchedSqls +
-				", connection=" + connection +
-				", dataSource=" + dataSource +
-				", dataSourceId='" + dataSourceId + '\'' +
-				", jdbcPassword='" + jdbcPassword + '\'' +
-				", jdbcUrl='" + jdbcUrl + '\'' +
-				", jdbcUsername='" + jdbcUsername + '\'' +
-				", params=" + params +
-				", properties=" + properties +
-				", sql='" + sql + '\'' +
-				'}';
+	public void setDataSourceProperties(DataSource dataSource) {
+		if (dataSource instanceof GroupDataSourceMBean) {
+			GroupDataSourceMBean ds = (GroupDataSourceMBean) dataSource;
+			properties.put("AllDataSource",
+					StringUtils.joinCollectionToString(ds.getConfig().getDataSourceConfigs().keySet(), ","));
+		} else if (dataSource instanceof SingleDataSourceMBean) {
+			SingleDataSourceMBean ds = (SingleDataSourceMBean) dataSource;
+			properties.put("JdbcUrl", ds.getConfig().getJdbcUrl());
+			properties.put("Username", ds.getConfig().getUsername());
+			properties.put("Password",
+					ds.getConfig().getPassword() != null ?
+							StringUtils.repeat("*", ds.getConfig().getPassword().length()) :
+							null);
+			properties.put("DriverClass", ds.getConfig().getDriverClass());
+			properties.put("CanRead", ds.getConfig().isCanRead());
+			properties.put("CanWrite", ds.getConfig().isCanWrite());
+			properties.put("Weight", ds.getConfig().getWeight());
+		}
 	}
 }

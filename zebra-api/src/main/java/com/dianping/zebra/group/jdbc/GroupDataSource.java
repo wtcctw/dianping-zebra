@@ -309,11 +309,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void initFilters() {
-
 		this.metaData = new JdbcMetaData();
 		this.metaData.setDataSourceId(this.jdbcRef);
 		this.metaData.setDataSource(this);
-
+		this.metaData.setDataSourceProperties(this);
 		this.filter = FilterManagerFactory.getFilterManager()
 				.loadFilter(this.groupConfig.getFilters(), this.filterStr);
 	}
@@ -388,7 +387,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			try {
 				this.close(tmpReadDataSource, tmpWriteDataSource);
 			} catch (Exception e) {
-				//todo:add log
+				logger.error(e.getMessage(), e);
 			}
 
 			logger.info(String.format("refresh the dataSources(%s) successfully!", jdbcRef));

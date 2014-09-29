@@ -28,6 +28,8 @@ public class DataSourceStat {
 
 	private final AtomicLong initDataSourceSuccessCount = new AtomicLong();
 
+	private final Map<String, Object> properties;
+
 	private final AtomicLong refreshDataSourceErrorCount = new AtomicLong();
 
 	private final AtomicLong refreshDataSourceSuccessCount = new AtomicLong();
@@ -37,10 +39,12 @@ public class DataSourceStat {
 	public DataSourceStat() {
 		this.dataSourceId = null;
 		this.type = null;
+		this.properties = null;
 	}
 
 	public DataSourceStat(JdbcMetaData metaData) {
 		this.dataSourceId = metaData.getDataSourceId();
+		this.properties = metaData.getProperties();
 		this.type = metaData.getDataSource().getClass().getSimpleName();
 	}
 
@@ -112,6 +116,11 @@ public class DataSourceStat {
 				this.initDataSourceErrorCount.get()));
 		resultMap.put("CloseDataSource(S/E)", String.format("%d/%d", this.closeDataSourceSuccessCount.get(),
 				this.closeDataSourceErrorCount.get()));
+
+		for (Map.Entry<String, Object> entity : this.properties.entrySet()) {
+			resultMap.put(entity.getKey(), entity.getValue());
+		}
+
 		return resultMap;
 	}
 }

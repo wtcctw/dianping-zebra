@@ -5,12 +5,12 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.Map;
 
 /**
  * @author Leo Liang
  * @author danson.liu
- * 
  */
 public final class StringUtils {
 	private static final String EMPTY = "";
@@ -57,6 +57,34 @@ public final class StringUtils {
 			}
 		}
 		return true;
+	}
+
+	public static <T extends Object> String joinCollectionToString(Collection<T> list, String str) {
+		StringBuffer sb = new StringBuffer(100);
+		for (Object entity : list) {
+			if (sb.length() > 0) {
+				sb.append(str);
+			}
+			sb.append(String.valueOf(entity));
+		}
+		return sb.toString();
+	}
+
+	public static String joinMapToString(Map<String, String> map) {
+		StringBuffer sb = new StringBuffer(100);
+		for (Map.Entry<String, String> entity : map.entrySet()) {
+			try {
+				String temp = String.format("%s=%s", URLEncoder.encode(entity.getKey(), "utf-8"),
+						URLEncoder.encode(entity.getValue(), "utf-8"));
+				if (sb.length() > 0) {
+					sb.append("&");
+				}
+				sb.append(temp);
+			} catch (UnsupportedEncodingException e) {
+				continue;
+			}
+		}
+		return sb.toString();
 	}
 
 	public static String leftPad(String str, int size, char padChar) {
@@ -115,22 +143,48 @@ public final class StringUtils {
 		return new String(buf);
 	}
 
+	public static String repeat(String str, int repeat) {
+		StringBuffer buffer = new StringBuffer(repeat * str.length());
+		for (int i = 0; i < repeat; i++) {
+			buffer.append(str);
+		}
+		return buffer.toString();
+	}
+
+	public static void splitStringToMap(Map<String, String> map, String input) {
+		if (StringUtils.isBlank(input) || map == null) {
+			return;
+		}
+
+		for (String keyValue : input.split("&")) {
+			String[] keyValueArray = keyValue.split("=");
+			if (keyValueArray.length != 2) {
+				continue;
+			}
+			try {
+				String key = URLDecoder.decode(keyValueArray[0], "utf-8");
+				String value = URLDecoder.decode(keyValueArray[1], "utf-8");
+
+				map.put(key, value);
+
+			} catch (UnsupportedEncodingException e) {
+				continue;
+			}
+		}
+	}
+
 	/**
 	 * <pre>
 	 * Determines whether or not the string 'searchIn' contains the string
 	 * 'searchFor', dis-regarding case starting at 'startAt' Shorthand for a
 	 * String.regionMatch(...)
-	 * 
+	 *
 	 * From mysql connector-j
 	 * </pre>
-	 * 
-	 * @param searchIn
-	 *           the string to search in
-	 * @param startAt
-	 *           the position to start at
-	 * @param searchFor
-	 *           the string to search for
-	 * 
+	 *
+	 * @param searchIn  the string to search in
+	 * @param startAt   the position to start at
+	 * @param searchFor the string to search for
 	 * @return whether searchIn starts with searchFor, ignoring case
 	 */
 	public static boolean startsWithIgnoreCase(String searchIn, int startAt, String searchFor) {
@@ -141,15 +195,12 @@ public final class StringUtils {
 	 * <pre>
 	 * Determines whether or not the string 'searchIn' contains the string
 	 * 'searchFor', dis-regarding case. Shorthand for a String.regionMatch(...)
-	 * 
+	 *
 	 * From mysql connector-j
 	 * </pre>
-	 * 
-	 * @param searchIn
-	 *           the string to search in
-	 * @param searchFor
-	 *           the string to search for
-	 * 
+	 *
+	 * @param searchIn  the string to search in
+	 * @param searchFor the string to search for
 	 * @return whether searchIn starts with searchFor, ignoring case
 	 */
 	public static boolean startsWithIgnoreCase(String searchIn, String searchFor) {
@@ -160,15 +211,12 @@ public final class StringUtils {
 	 * <pre>
 	 * Determines whether or not the sting 'searchIn' contains the string
 	 * 'searchFor', disregarding case and leading whitespace
-	 * 
+	 *
 	 * From mysql connector-j
 	 * </pre>
-	 * 
-	 * @param searchIn
-	 *           the string to search in
-	 * @param searchFor
-	 *           the string to search for
-	 * 
+	 *
+	 * @param searchIn  the string to search in
+	 * @param searchFor the string to search for
 	 * @return true if the string starts with 'searchFor' ignoring whitespace
 	 */
 	public static boolean startsWithIgnoreCaseAndWs(String searchIn, String searchFor) {
@@ -179,17 +227,13 @@ public final class StringUtils {
 	 * <pre>
 	 * Determines whether or not the sting 'searchIn' contains the string
 	 * 'searchFor', disregarding case and leading whitespace
-	 * 
+	 *
 	 * From mysql connector-j
 	 * </pre>
-	 * 
-	 * @param searchIn
-	 *           the string to search in
-	 * @param searchFor
-	 *           the string to search for
-	 * @param beginPos
-	 *           where to start searching
-	 * 
+	 *
+	 * @param searchIn  the string to search in
+	 * @param searchFor the string to search for
+	 * @param beginPos  where to start searching
 	 * @return true if the string starts with 'searchFor' ignoring whitespace
 	 */
 
@@ -212,28 +256,21 @@ public final class StringUtils {
 	/**
 	 * <pre>
 	 * Returns the given string, with comments removed
-	 * 
+	 *
 	 * From mysql connector-j
 	 * </pre>
-	 * 
-	 * @param src
-	 *           the source string
-	 * @param stringOpens
-	 *           characters which delimit the "open" of a string
-	 * @param stringCloses
-	 *           characters which delimit the "close" of a string, in counterpart order to <code>stringOpens</code>
-	 * @param slashStarComments
-	 *           strip slash-star type "C" style comments
-	 * @param slashSlashComments
-	 *           strip slash-slash C++ style comments to end-of-line
-	 * @param hashComments
-	 *           strip #-style comments to end-of-line
-	 * @param dashDashComments
-	 *           strip "--" style comments to end-of-line
+	 *
+	 * @param src                the source string
+	 * @param stringOpens        characters which delimit the "open" of a string
+	 * @param stringCloses       characters which delimit the "close" of a string, in counterpart order to <code>stringOpens</code>
+	 * @param slashStarComments  strip slash-star type "C" style comments
+	 * @param slashSlashComments strip slash-slash C++ style comments to end-of-line
+	 * @param hashComments       strip #-style comments to end-of-line
+	 * @param dashDashComments   strip "--" style comments to end-of-line
 	 * @return the input string with all comment-delimited data removed
 	 */
 	public static String stripComments(String src, String stringOpens, String stringCloses, boolean slashStarComments,
-	      boolean slashSlashComments, boolean hashComments, boolean dashDashComments) {
+			boolean slashSlashComments, boolean hashComments, boolean dashDashComments) {
 		if (src == null) {
 			return null;
 		}
@@ -264,12 +301,13 @@ public final class StringUtils {
 					contextMarker = Character.MIN_VALUE;
 					markerTypeFound = -1;
 				} else if ((ind = stringOpens.indexOf(currentChar)) != -1 && !escaped
-				      && contextMarker == Character.MIN_VALUE) {
+						&& contextMarker == Character.MIN_VALUE) {
 					markerTypeFound = ind;
 					contextMarker = currentChar;
 				}
 
-				if (contextMarker == Character.MIN_VALUE && currentChar == '/' && (slashSlashComments || slashStarComments)) {
+				if (contextMarker == Character.MIN_VALUE && currentChar == '/' && (slashSlashComments
+						|| slashStarComments)) {
 					currentChar = sourceReader.read();
 					if (currentChar == '*' && slashStarComments) {
 						int prevChar = 0;
@@ -286,8 +324,9 @@ public final class StringUtils {
 									currentChar = sourceReader.read();
 								}
 							}
-							if (currentChar < 0)
+							if (currentChar < 0) {
 								break;
+							}
 							prevChar = currentChar;
 						}
 						continue;
@@ -421,52 +460,5 @@ public final class StringUtils {
 
 	public static String trimToEmpty(String str) {
 		return str == null ? EMPTY : str.trim();
-	}
-
-	public static String repeat(String str, int repeat) {
-		StringBuffer buffer = new StringBuffer(repeat * str.length());
-		for (int i = 0; i < repeat; i++) {
-			buffer.append(str);
-		}
-		return buffer.toString();
-	}
-
-	public static String joinMapToString(Map<String, String> map) {
-		StringBuffer sb = new StringBuffer(100);
-		for (Map.Entry<String, String> entity : map.entrySet()) {
-			try {
-				String temp = String.format("%s=%s", URLEncoder.encode(entity.getKey(), "utf-8"),
-						URLEncoder.encode(entity.getValue(), "utf-8"));
-				if (sb.length() > 0) {
-					sb.append("&");
-				}
-				sb.append(temp);
-			} catch (UnsupportedEncodingException e) {
-				continue;
-			}
-		}
-		return sb.toString();
-	}
-
-	public static void splitStringToMap(Map<String, String> map, String input) {
-		if (StringUtils.isBlank(input) || map == null) {
-			return;
-		}
-
-		for (String keyValue : input.split("&")) {
-			String[] keyValueArray = keyValue.split("=");
-			if (keyValueArray.length != 2) {
-				continue;
-			}
-			try {
-				String key = URLDecoder.decode(keyValueArray[0], "utf-8");
-				String value = URLDecoder.decode(keyValueArray[1], "utf-8");
-
-				map.put(key, value);
-
-			} catch (UnsupportedEncodingException e) {
-				continue;
-			}
-		}
 	}
 }

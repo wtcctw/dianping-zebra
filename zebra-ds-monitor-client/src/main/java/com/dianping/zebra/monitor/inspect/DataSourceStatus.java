@@ -7,6 +7,7 @@ import com.dianping.zebra.group.filter.stat.StatContext;
 
 import javax.servlet.ServletContext;
 import java.util.Arrays;
+import java.util.Map;
 
 public class DataSourceStatus extends AbstractComponentStatus {
 
@@ -24,15 +25,16 @@ public class DataSourceStatus extends AbstractComponentStatus {
 	}
 
 	private void buildDataSourceTable() {
-		TableBuilder table = newTable();
-		table.caption("DataSource");
-		Object[] headers = StatContext.getDataSourceSummary().toMap().keySet().toArray();
-		table.header(Arrays.copyOf(headers, headers.length, String[].class));
+		for (Map.Entry<String, DataSourceStat> datasource : StatContext.getDataSource().entrySet()) {
+			TableBuilder table = newTable();
+			table.caption("DataSource " + datasource.getKey());
+			table.header("Property", "Value");
 
-		for (DataSourceStat stat : StatContext.getDataSource().values()) {
-			table.row(stat.toMap().values().toArray());
+			for (Map.Entry<String, Object> properties : datasource.getValue().toMap().entrySet()) {
+				table.row(properties.getKey(), properties.getValue());
+			}
+			table.build();
 		}
-		table.build();
 	}
 
 	private void buildExecuteSummaryTable() {
