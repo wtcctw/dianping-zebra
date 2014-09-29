@@ -31,6 +31,10 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getDataSourceSummary().getCloseGroupConnectionErrorCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getCloseGroupConnectionErrorCount().incrementAndGet();
 			throw exp;
+		} catch (RuntimeException exp) {
+			StatContext.getDataSourceSummary().getCloseGroupConnectionErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseGroupConnectionErrorCount().incrementAndGet();
+			throw exp;
 		}
 	}
 
@@ -41,6 +45,10 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getDataSourceSummary().getCloseGroupDataSourceSuccessCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getCloseGroupDataSourceSuccessCount().incrementAndGet();
 		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getCloseGroupDataSourceErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseGroupDataSourceErrorCount().incrementAndGet();
+			throw exp;
+		} catch (RuntimeException exp) {
 			StatContext.getDataSourceSummary().getCloseGroupDataSourceErrorCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getCloseGroupDataSourceErrorCount().incrementAndGet();
 			throw exp;
@@ -57,16 +65,25 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getDataSourceSummary().getCloseSingleConnectionErrorCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getCloseSingleConnectionErrorCount().incrementAndGet();
 			throw exp;
+		} catch (RuntimeException exp) {
+			StatContext.getDataSourceSummary().getCloseSingleConnectionErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseSingleConnectionErrorCount().incrementAndGet();
+			throw exp;
 		}
 	}
 
 	@Override public <S> void closeSingleDataSource(JdbcMetaData metaData, S source,
 			FilterActionWithSQLExcption<S> action) throws SQLException {
+
 		try {
 			super.closeSingleDataSource(metaData, source, action);
 			StatContext.getDataSourceSummary().getCloseSingleDataSourceSuccessCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getCloseSingleDataSourceSuccessCount().incrementAndGet();
 		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getCloseSingleDataSourceErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getCloseSingleDataSourceErrorCount().incrementAndGet();
+			throw exp;
+		} catch (RuntimeException exp) {
 			StatContext.getDataSourceSummary().getCloseSingleDataSourceErrorCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getCloseSingleDataSourceErrorCount().incrementAndGet();
 			throw exp;
@@ -93,6 +110,14 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getExecute(metaData).getErrorTime().addAndGet(time);
 			visitNode(metaData, null, exp);
 			throw exp;
+		} catch (RuntimeException exp) {
+			long time = System.currentTimeMillis() - executeStart;
+			StatContext.getExecuteSummary().getErrorTimeRange().increment(time);
+			StatContext.getExecute(metaData).getErrorTimeRange().increment(time);
+			StatContext.getExecuteSummary().getErrorTime().addAndGet(time);
+			StatContext.getExecute(metaData).getErrorTime().addAndGet(time);
+			visitNode(metaData, null, exp);
+			throw exp;
 		}
 	}
 
@@ -107,6 +132,10 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getDataSourceSummary().getGetGroupConnectionErrorCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getGetGroupConnectionErrorCount().incrementAndGet();
 			throw exp;
+		} catch (RuntimeException exp) {
+			StatContext.getDataSourceSummary().getGetGroupConnectionErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getGetGroupConnectionErrorCount().incrementAndGet();
+			throw exp;
 		}
 	}
 
@@ -118,6 +147,10 @@ public class StatFilter extends DefaultJdbcFilter {
 			StatContext.getDataSource(metaData).getGetSingleConnectionSuccessCount().incrementAndGet();
 			return result;
 		} catch (SQLException exp) {
+			StatContext.getDataSourceSummary().getGetSingleConnectionErrorCount().incrementAndGet();
+			StatContext.getDataSource(metaData).getGetSingleConnectionErrorCount().incrementAndGet();
+			throw exp;
+		} catch (RuntimeException exp) {
 			StatContext.getDataSourceSummary().getGetSingleConnectionErrorCount().incrementAndGet();
 			StatContext.getDataSource(metaData).getGetSingleConnectionErrorCount().incrementAndGet();
 			throw exp;

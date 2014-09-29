@@ -37,12 +37,8 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override public <S> void closeSingleDataSource(JdbcMetaData metaData, S source,
 			FilterActionWithSQLExcption<S> action) throws SQLException {
-		try {
-			super.closeSingleDataSource(metaData, source, action);
-			Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
-		} catch (SQLException exp) {
-			throw exp;
-		}
+		super.closeSingleDataSource(metaData, source, action);
+		Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
 	}
 
 	@Override public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
