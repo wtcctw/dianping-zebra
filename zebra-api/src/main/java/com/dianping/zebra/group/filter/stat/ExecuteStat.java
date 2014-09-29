@@ -67,7 +67,7 @@ public class ExecuteStat {
 
 	public ExecuteStat(JdbcMetaData metaData) {
 		this.isBatch = metaData.isBatch();
-		if (metaData.isBatch()) {
+		if (metaData.isBatch() && !metaData.isPrepared()) {
 			this.sql = Arrays.toString(metaData.getBatchedSqls().toArray());
 		} else {
 			this.sql = metaData.getSql();

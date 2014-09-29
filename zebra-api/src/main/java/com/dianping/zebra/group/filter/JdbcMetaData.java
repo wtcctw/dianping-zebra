@@ -33,6 +33,8 @@ public class JdbcMetaData implements Cloneable {
 
 	private boolean isBatch;
 
+	private boolean isPrepared;
+
 	private boolean isTransaction;
 
 	private String jdbcPassword;
@@ -198,6 +200,14 @@ public class JdbcMetaData implements Cloneable {
 
 	public void setBatch(boolean isBatch) {
 		this.isBatch = isBatch;
+	}
+
+	public boolean isPrepared() {
+		return isPrepared;
+	}
+
+	public void setPrepared(boolean isPrepared) {
+		this.isPrepared = isPrepared;
 	}
 
 	public boolean isTransaction() {

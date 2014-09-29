@@ -157,27 +157,39 @@ public class StatFilter extends DefaultJdbcFilter {
 
 	private void visitNode(JdbcMetaData metaData, Object result, Exception exp) {
 		if (!metaData.isBatch()) {
+
 			try {
 				new SqlStatVisitor(metaData, result, exp).visit(metaData.getNode());
 			} catch (StandardException e) {
 			}
+
 		} else {
-			if (metaData.getBatchedNode() == null) {
-				return;
-			}
 			if (!(result instanceof int[])) {
 				return;
 			}
 			int[] intResult = (int[]) result;
-			List<StatementNode> batchedNodes = metaData.getBatchedNode();
-			if (intResult.length != batchedNodes.size()) {
-				return;
-			}
 
-			for (int k = 0; k < intResult.length; k++) {
-				try {
-					new SqlStatVisitor(metaData, intResult[k], exp).visit(batchedNodes.get(k));
-				} catch (StandardException e) {
+			if (metaData.isPrepared()) {
+				for (int k = 0; k < intResult.length; k++) {
+					try {
+						new SqlStatVisitor(metaData, intResult[k], exp).visit(metaData.getNode());
+					} catch (StandardException e) {
+					}
+				}
+			} else {
+				if (metaData.getBatchedNode() == null) {
+					return;
+				}
+				List<StatementNode> batchedNodes = metaData.getBatchedNode();
+				if (intResult.length != batchedNodes.size()) {
+					return;
+				}
+
+				for (int k = 0; k < intResult.length; k++) {
+					try {
+						new SqlStatVisitor(metaData, intResult[k], exp).visit(batchedNodes.get(k));
+					} catch (StandardException e) {
+					}
 				}
 			}
 		}

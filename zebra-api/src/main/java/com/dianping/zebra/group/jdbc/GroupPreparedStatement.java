@@ -42,6 +42,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	public GroupPreparedStatement(GroupConnection connection, String sql, JdbcMetaData metaData, JdbcFilter filter) {
 		super(connection, metaData, filter);
+		metaData.setPrepared(true);
 		this.sql = processSQL(sql);
 		this.metaData.setSql(this.sql);
 	}
