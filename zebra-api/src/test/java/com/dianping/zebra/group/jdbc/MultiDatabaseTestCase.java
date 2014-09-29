@@ -39,12 +39,6 @@ public abstract class MultiDatabaseTestCase extends InnerSingleDatabaseTestCase 
 		}
 	}
 
-	private static final String JDBC_DRIVER = org.h2.Driver.class.getName();
-
-	private static final String PASSWORD = "";
-
-	private static final String USER = "sa";
-
 	private DataSource writeDs;
 
 	private List<DataSource> readDses = new ArrayList<DataSource>();

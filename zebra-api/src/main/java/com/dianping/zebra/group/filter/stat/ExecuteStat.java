@@ -2,6 +2,7 @@ package com.dianping.zebra.group.filter.stat;
 
 import com.dianping.zebra.group.filter.JdbcMetaData;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -33,6 +34,8 @@ public class ExecuteStat {
 
 	private final AtomicLong insertSuccessCount = new AtomicLong();
 
+	private final boolean isBatch;
+
 	private final AtomicLong selectErrorCount = new AtomicLong();
 
 	private final AtomicLong selectRow = new AtomicLong();
@@ -59,10 +62,16 @@ public class ExecuteStat {
 		this.sql = null;
 		this.dataSourceId = null;
 		this.groupDataSourceId = null;
+		this.isBatch = false;
 	}
 
 	public ExecuteStat(JdbcMetaData metaData) {
-		this.sql = metaData.getSql();
+		this.isBatch = metaData.isBatch();
+		if (metaData.isBatch()) {
+			this.sql = Arrays.toString(metaData.getBatchedSqls().toArray());
+		} else {
+			this.sql = metaData.getSql();
+		}
 		this.groupDataSourceId = metaData.getDataSourceId();
 		this.dataSourceId =
 				metaData.getRealJdbcMetaData() == null ? null : metaData.getRealJdbcMetaData().getDataSourceId();
@@ -191,6 +200,7 @@ public class ExecuteStat {
 			resultMap.put("Sql", this.sql);
 		}
 		resultMap.put("T", this.transactionCount.get());
+		resultMap.put("B", this.isBatch);
 		resultMap.put("Avg(S/E)", String.format("%d/%d",
 				this.getSuccessCount().get() == 0 ? 0 : this.getSuccessTime().get() / this.getSuccessCount().get(),
 				this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get() / this.getErrorCount().get()));

@@ -2,6 +2,7 @@ package com.dianping.zebra.group.filter.stat;
 
 import com.dianping.zebra.group.filter.JdbcMetaData;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -63,6 +64,8 @@ public final class StatContext {
 		result = result * 31 + metaData.getSql().hashCode();
 
 		result = result * 31 + new Boolean(metaData.isBatch()).hashCode();
+
+		result = result * 31 + Arrays.toString(metaData.getBatchedSqls().toArray()).hashCode();
 
 		if (metaData.getDataSourceId() != null) {
 			result = result * 31 + metaData.getDataSourceId().hashCode();

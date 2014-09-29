@@ -2,10 +2,14 @@ package com.dianping.zebra.group.filter.stat;
 
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
+import com.google.common.collect.Lists;
 import junit.framework.Assert;
+import org.h2.tools.RunScript;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,18 +18,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class StatFilterTest extends MultiDatabaseTestCase {
 
+	@Before
+	public void createTable() throws SQLException {
+		RunScript.execute("jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1", USER, PASSWORD, getSchema(), "UTF8", false);
+		RunScript.execute("jdbc:h2:mem:test1;MVCC=TRUE;DB_CLOSE_DELAY=-1", USER, PASSWORD, getSchema(), "UTF8", false);
+		RunScript.execute("jdbc:h2:mem:test2;MVCC=TRUE;DB_CLOSE_DELAY=-1", USER, PASSWORD, getSchema(), "UTF8", false);
+	}
+
 	@Override protected String getConfigManagerType() {
 		return Constants.CONFIG_MANAGER_TYPE_LOCAL;
 	}
 
 	@Override
 	protected DataSourceEntry[] getDataSourceEntryArray() {
-		DataSourceEntry[] entries = new DataSourceEntry[3];
-
-		entries[0] = new DataSourceEntry("jdbc:h2:mem:test;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets.xml", true);
-		entries[1] = new DataSourceEntry("jdbc:h2:mem:test1;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets1.xml", false);
-		entries[2] = new DataSourceEntry("jdbc:h2:mem:test2;MVCC=TRUE;DB_CLOSE_DELAY=-1", "datasets2.xml", false);
-
+		DataSourceEntry[] entries = new DataSourceEntry[0];
 		return entries;
 	}
 
@@ -41,17 +47,23 @@ public class StatFilterTest extends MultiDatabaseTestCase {
 
 	@Test
 	public void test_insert_with_batch() throws Exception {
-		final long insertCount = StatContext.getExecuteSummary().getInsertRow().get();
-
 		execute(new StatementCallback() {
 			@Override public Object doInStatement(Statement stmt) throws Exception {
 				stmt.addBatch("insert into PERSON (NAME,LAST_NAME,AGE) values ('a','b',1)");
 				stmt.addBatch("insert into PERSON (NAME,LAST_NAME,AGE) values ('a','b',1)");
+				stmt.addBatch("update PERSON set Name = 'ccc'");
+				stmt.addBatch("update PERSON set Name = 'ccc'");
+				stmt.addBatch("delete from PERSON");
 
 				int[] result = stmt.executeBatch();
 
-				Assert.assertEquals(2, StatContext.getExecuteSummary().getInsertRow().get() - insertCount);
-
+				Assert.assertEquals(2, StatContext.getExecuteSummary().getInsertRow().get());
+				Assert.assertEquals(4, StatContext.getExecuteSummary().getUpdateRow().get());
+				Assert.assertEquals(2, StatContext.getExecuteSummary().getDeleteRow().get());
+				Assert.assertEquals(1, StatContext.getExecute().size());
+				Assert.assertEquals(2, Lists.newArrayList(StatContext.getExecute().values()).get(0).getInsertRow().get());
+				Assert.assertEquals(4, Lists.newArrayList(StatContext.getExecute().values()).get(0).getUpdateRow().get());
+				Assert.assertEquals(2, Lists.newArrayList(StatContext.getExecute().values()).get(0).getDeleteRow().get());
 				return result;
 			}
 		});
