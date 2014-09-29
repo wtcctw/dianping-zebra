@@ -48,12 +48,16 @@ public class DataSourceStat {
 
 	private final AtomicLong refreshGroupDataSourceSuccessCount = new AtomicLong();
 
+	private final String type;
+
 	public DataSourceStat() {
-		dataSourceId = null;
+		this.dataSourceId = null;
+		this.type = null;
 	}
 
 	public DataSourceStat(JdbcMetaData metaData) {
-		dataSourceId = metaData.getDataSourceId();
+		this.dataSourceId = metaData.getDataSourceId();
+		this.type = metaData.getDataSource().getClass().getSimpleName();
 	}
 
 	public AtomicLong getCloseGroupConnectionErrorCount() {
@@ -132,6 +136,10 @@ public class DataSourceStat {
 		return refreshGroupDataSourceSuccessCount;
 	}
 
+	public String getType() {
+		return type;
+	}
+
 	public Map<String, Object> toMap() {
 		return toMap(false);
 	}
@@ -140,6 +148,7 @@ public class DataSourceStat {
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 		if (!isSummary) {
 			resultMap.put("Id", this.dataSourceId);
+			resultMap.put("Type", this.type);
 		}
 		resultMap.put("GetGroupConnection(S/E)", String.format("%d/%d", this.getGroupConnectionSuccessCount.get(),
 				this.getGroupConnectionErrorCount.get()));
