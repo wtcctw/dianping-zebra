@@ -85,7 +85,7 @@ public abstract class MultiDatabaseTestCase extends InnerSingleDatabaseTestCase 
 			if (connection != null) {
 				try {
 					connection.close();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					// ignore it
 				}
 			}

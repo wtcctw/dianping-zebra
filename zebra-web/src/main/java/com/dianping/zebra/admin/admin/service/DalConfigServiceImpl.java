@@ -30,7 +30,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 			m_lionHttpService.createKey(project, driverClass);
 			m_lionHttpService.createKey(project, properties);
 			m_lionHttpService.createKey(project, active);
-		} catch (Throwable ignore) {
+		} catch (Exception ignore) {
 		}
 
 		try {
@@ -73,7 +73,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 					m_lionHttpService.setConfig(env, active, originActive);
 				}
 			}
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			Cat.logError(t);
 			return false;
 		}

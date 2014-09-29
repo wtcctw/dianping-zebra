@@ -202,10 +202,10 @@ public class ExecuteStat {
 			resultMap.put("GId", this.groupDataSourceId);
 			resultMap.put("Id", this.dataSourceId);
 			resultMap.put("Sql", this.sql);
+			resultMap.put("B", this.isBatch ? "T" : "F");
+			resultMap.put("P", this.isPrepared ? "T" : "F");
 		}
 		resultMap.put("T", this.transactionCount.get());
-		resultMap.put("B", this.isBatch ? "T" : "F");
-		resultMap.put("P", this.isPrepared ? "T" : "F");
 		resultMap.put("Avg(S/E)", String.format("%d/%d",
 				this.getSuccessCount().get() == 0 ? 0 : this.getSuccessTime().get() / this.getSuccessCount().get(),
 				this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get() / this.getErrorCount().get()));

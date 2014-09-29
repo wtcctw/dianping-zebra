@@ -2,7 +2,6 @@ package com.dianping.zebra.group.datasources;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import junit.framework.Assert;
 import org.junit.Before;
@@ -87,7 +86,7 @@ public class FailoverDataSourceTest {
 
 	@Test
 	public void test_check_write_data_source_result_readonly() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcMetaData.class),new DefaultJdbcFilter());
+		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcMetaData.class), new DefaultJdbcFilter());
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
@@ -189,7 +188,7 @@ public class FailoverDataSourceTest {
 		private Connection coon;
 
 		@Override
-		public Connection answer(InvocationOnMock invocation) throws Throwable {
+		public Connection answer(InvocationOnMock invocation) throws Exception {
 			return coon;
 		}
 

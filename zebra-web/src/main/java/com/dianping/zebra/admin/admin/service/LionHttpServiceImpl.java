@@ -50,7 +50,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 				return maps;
 			}
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			throw new IOException("cannot get config from lion", t);
 		}
 
@@ -85,7 +85,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 			JsonParser parser = new JsonParser();
 			JsonObject obj = parser.parse(result).getAsJsonObject();
 			return obj.get("result").getAsString();
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			return null;
 		}
 	}
@@ -103,7 +103,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 			} else {
 				return false;
 			}
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			throw new IOException("cannot create key into lion", t);
 		}
 	}

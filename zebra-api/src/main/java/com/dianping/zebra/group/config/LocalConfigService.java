@@ -133,9 +133,9 @@ public class LocalConfigService implements ConfigService {
 						lastModifiedTime.set(newModifiedTime);
 						props.set(newProps);
 					}
-				} catch (Exception throwable) {
+				} catch (Exception exp) {
 					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("fail to reload the datasource config[%s]", resourceFileName), throwable);
+						logger.debug(String.format("fail to reload the datasource config[%s]", resourceFileName), exp);
 					}
 				}
 

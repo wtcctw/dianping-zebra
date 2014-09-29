@@ -33,7 +33,7 @@ public class CmdbServiceImpl implements CmdbService {
 			}
 			
 			return name;
-		} catch (Throwable ignore) {
+		} catch (Exception ignore) {
 			Cat.logError(ignore);
 		}
 

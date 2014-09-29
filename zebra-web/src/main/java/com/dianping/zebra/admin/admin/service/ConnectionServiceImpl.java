@@ -14,14 +14,14 @@ public class ConnectionServiceImpl implements ConnectionService {
 			ds.init();
 
 			return true;
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			Cat.logError(t);
 			return false;
 		} finally {
 			if (ds != null) {
 				try {
 					ds.close();
-				} catch (Throwable ignore) {
+				} catch (Exception ignore) {
 				}
 			}
 		}
@@ -35,14 +35,14 @@ public class ConnectionServiceImpl implements ConnectionService {
 			ds.init();
 
 			return ds.getConfig();
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			Cat.logError(t);
 			return ds.getConfig();
 		} finally {
 			if (ds != null) {
 				try {
 					ds.close();
-				} catch (Throwable ignore) {
+				} catch (Exception ignore) {
 				}
 			}
 		}
