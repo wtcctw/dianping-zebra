@@ -16,13 +16,13 @@ public final class StatContext {
 
 	private final static Lock dataSourceLock = new ReentrantLock();
 
-	private final static DataSourceStat dataSourceSummary = new DataSourceStat();
-
 	private final static Map<Integer, ExecuteStat> execute = new HashMap<Integer, ExecuteStat>();
 
 	private final static Lock executeLock = new ReentrantLock();
 
-	private final static ExecuteStat executeSummary = new ExecuteStat();
+	private volatile static DataSourceStat dataSourceSummary = new DataSourceStat();
+
+	private volatile static ExecuteStat executeSummary = new ExecuteStat();
 
 	private StatContext() {
 	}
@@ -110,5 +110,24 @@ public final class StatContext {
 
 	public static ExecuteStat getExecuteSummary() {
 		return executeSummary;
+	}
+
+	public static void reset() {
+		dataSourceSummary = new DataSourceStat();
+		executeSummary = new ExecuteStat();
+
+		try {
+			dataSourceLock.lock();
+			dataSource.clear();
+		} finally {
+			dataSourceLock.unlock();
+		}
+
+		try {
+			executeLock.lock();
+			execute.clear();
+		} finally {
+			executeLock.unlock();
+		}
 	}
 }
