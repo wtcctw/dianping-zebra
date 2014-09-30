@@ -83,8 +83,31 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		buildGroupConfigMergeProperties(newGroupConfig);
 		buildGroupConfigJdbcUrlExtra(newGroupConfig);
 		buildGroupConfigMergeC3P0Properties(newGroupConfig);
-
+		buildGroupConfigFilter(newGroupConfig);
 		return newGroupConfig;
+	}
+
+	protected void buildGroupConfigFilter(GroupDataSourceConfig newGroupConfig) {
+		String remoteConfig = newGroupConfig.getFilters();
+		String beanConfig = this.filterStr;
+		Set<String> result = new HashSet<String>();
+
+		if (!StringUtils.isBlank(remoteConfig)) {
+			String[] remoteFilters = remoteConfig.split(",");
+			result.addAll(Arrays.asList(remoteFilters));
+		}
+
+		if (!StringUtils.isBlank(beanConfig)) {
+			String[] beanFilters = beanConfig.split(",");
+			for (String beanFilter : beanFilters) {
+				if (beanFilter.startsWith("!") && beanFilter.length() > 1) {
+					result.remove(beanFilter.substring(1));
+				} else {
+					result.add(beanFilter);
+				}
+			}
+		}
+		newGroupConfig.setFilters(StringUtils.joinCollectionToString(result, ","));
 	}
 
 	protected void buildGroupConfigJdbcUrlExtra(GroupDataSourceConfig newGroupConfig) {
@@ -313,8 +336,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.metaData.setDataSourceId(this.jdbcRef);
 		this.metaData.setDataSource(this);
 		this.metaData.setDataSourceProperties(this);
-		this.filter = FilterManagerFactory.getFilterManager()
-				.loadFilter(this.groupConfig.getFilters(), this.filterStr);
+		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
 	}
 
 	private void loadCustomizedReadWriteStrategy() {

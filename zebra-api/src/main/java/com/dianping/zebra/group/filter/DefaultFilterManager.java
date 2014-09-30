@@ -33,28 +33,6 @@ public class DefaultFilterManager implements FilterManager {
 
 	}
 
-	private Set<String> combineFilterNames(String remoteConfig, String beanConfig) {
-		Set<String> result = new HashSet<String>();
-
-		if (!StringUtils.isBlank(remoteConfig)) {
-			String[] remoteFilters = remoteConfig.split(",");
-			result.addAll(Arrays.asList(remoteFilters));
-		}
-
-		if (!StringUtils.isBlank(beanConfig)) {
-			String[] beanFilters = beanConfig.split(",");
-			for (String beanFilter : beanFilters) {
-				if (beanFilter.startsWith("!") && beanFilter.length() > 1) {
-					result.remove(beanFilter.substring(1));
-				} else {
-					result.add(beanFilter);
-				}
-			}
-		}
-
-		return result;
-	}
-
 	public void init() {
 		try {
 			Properties filterProperties = loadFilterConfig();
@@ -94,18 +72,17 @@ public class DefaultFilterManager implements FilterManager {
 		return clazz;
 	}
 
-	@Override public JdbcFilter loadFilter(String remoteConfig, String beanConfig) {
+	@Override public JdbcFilter loadFilter(String strConfig) {
 		List<JdbcFilter> result = new ArrayList<JdbcFilter>();
-
-		Set<String> names = combineFilterNames(remoteConfig, beanConfig);
-
-		for (String name : names) {
-			List<JdbcFilter> filters = loadFilterFromCache(name);
-			if (filters != null && filters.size() > 0) {
-				result.addAll(filters);
+		if (strConfig != null) {
+			for (String name : strConfig.trim().split(",")) {
+				List<JdbcFilter> filters = loadFilterFromCache(name.trim());
+				if (filters != null && filters.size() > 0) {
+					result.addAll(filters);
+				}
 			}
 		}
-		return new FilterWrapper(result);
+		return result.size() > 0 ? new FilterWrapper(result) : new DefaultJdbcFilter();
 	}
 
 	private void loadFilterConfig(Properties filterProperties, ClassLoader classLoader) throws IOException {

@@ -44,6 +44,54 @@ public class GroupDataSourceTest {
 		return groupConfig;
 	}
 
+	@Test
+	public void test_build_group_datasource_config_filter_with_same() {
+		GroupDataSourceConfig config = new GroupDataSourceConfig();
+		GroupDataSource ds = new GroupDataSource();
+		ds.setFilter("stat");
+		config.setFilters("stat");
+		ds.buildGroupConfigFilter(config);
+		Assert.assertEquals("stat", config.getFilters());
+	}
+
+	@Test
+	public void test_build_group_datasource_config_filter_from_config() {
+		GroupDataSourceConfig config = new GroupDataSourceConfig();
+		GroupDataSource ds = new GroupDataSource();
+		config.setFilters("stat");
+		ds.buildGroupConfigFilter(config);
+		Assert.assertEquals("stat", config.getFilters());
+	}
+
+	@Test
+	public void test_build_group_datasource_config_filter_with_bean() {
+		GroupDataSourceConfig config = new GroupDataSourceConfig();
+		GroupDataSource ds = new GroupDataSource();
+		ds.setFilter("stat");
+		ds.buildGroupConfigFilter(config);
+		Assert.assertEquals("stat", config.getFilters());
+	}
+
+	@Test
+	public void test_build_group_datasource_config_filter_with_combine() {
+		GroupDataSourceConfig config = new GroupDataSourceConfig();
+		GroupDataSource ds = new GroupDataSource();
+		ds.setFilter("stat");
+		config.setFilters("cat");
+		ds.buildGroupConfigFilter(config);
+		Assert.assertEquals("cat,stat", config.getFilters());
+	}
+
+	@Test
+	public void test_build_group_datasource_config_filter_with_ignore() {
+		GroupDataSourceConfig config = new GroupDataSourceConfig();
+		GroupDataSource ds = new GroupDataSource();
+		ds.setFilter("stat,!cat");
+		config.setFilters("stat,cat");
+		ds.buildGroupConfigFilter(config);
+		Assert.assertEquals("stat", config.getFilters());
+	}
+
 	private void test_build_group_datasource_config_url_extra(GroupDataSourceConfig config, String extra)
 			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 		GroupDataSource target = new GroupDataSource();

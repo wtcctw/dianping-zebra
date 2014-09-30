@@ -11,36 +11,27 @@ public class DefaultFilterManagerTest {
 
 	@Test
 	public void test_load_by_empty_name() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("", "");
-		Assert.assertTrue(filter instanceof FilterWrapper);
-		Assert.assertEquals(((FilterWrapper) filter).size(), 0);
+		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("");
+		Assert.assertTrue(filter instanceof DefaultJdbcFilter);
 	}
 
 	@Test
 	public void test_load_by_name() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat", "");
+		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat");
 		Assert.assertTrue(filter instanceof FilterWrapper);
 		Assert.assertEquals(((FilterWrapper) filter).size(), 1);
 	}
 
 	@Test
 	public void test_load_by_two_name() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat,no_exist", "");
+		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat,no_exist");
 		Assert.assertTrue(filter instanceof FilterWrapper);
 		Assert.assertEquals(((FilterWrapper) filter).size(), 1);
 	}
 
 	@Test
 	public void test_load_null() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter(null, null);
-		Assert.assertTrue(filter instanceof FilterWrapper);
-		Assert.assertEquals(((FilterWrapper) filter).size(), 0);
-	}
-
-	@Test
-	public void test_load_with_ignore() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat", "!stat");
-		Assert.assertTrue(filter instanceof FilterWrapper);
-		Assert.assertEquals(((FilterWrapper) filter).size(), 0);
+		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter(null);
+		Assert.assertTrue(filter instanceof DefaultJdbcFilter);
 	}
 }

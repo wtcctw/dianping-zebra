@@ -221,6 +221,7 @@ public class JdbcMetaData implements Cloneable {
 			GroupDataSourceMBean ds = (GroupDataSourceMBean) dataSource;
 			properties.put("AllDataSource",
 					StringUtils.joinCollectionToString(ds.getConfig().getDataSourceConfigs().keySet(), ","));
+			properties.put("filters", ds.getConfig().getFilters());
 		} else if (dataSource instanceof SingleDataSourceMBean) {
 			SingleDataSourceMBean ds = (SingleDataSourceMBean) dataSource;
 			properties.put("JdbcUrl", ds.getConfig().getJdbcUrl());
