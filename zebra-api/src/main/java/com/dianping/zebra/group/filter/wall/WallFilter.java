@@ -57,7 +57,7 @@ public class WallFilter extends DefaultJdbcFilter {
             return sqlId;
         }
 
-        sqlId = StringUtils.sha1(sql).substring(MAX_ID_LENGTH);
+        sqlId = StringUtils.sha1(sql).substring(0, MAX_ID_LENGTH);
 
         sqlIdCache.put(sql, sqlId);
 
