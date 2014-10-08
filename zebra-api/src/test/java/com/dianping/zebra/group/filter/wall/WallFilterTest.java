@@ -44,7 +44,8 @@ public class WallFilterTest {
     @Test
     public void test_get_id_from_sql() {
         WallFilter filter = new WallFilter();
-        Assert.assertEquals("7yhgtr45ty", filter.getIdFromSQL("select * from user/*7yhgtr45ty*/"));
-        Assert.assertEquals(null, filter.getIdFromSQL("select * from user/*7yhgtr45ty111*/"));
+        Assert.assertEquals("7yhgtr45ty", filter.getIdFromSQL("select * from user/*z:7yhgtr45ty*/"));
+        Assert.assertEquals(null, filter.getIdFromSQL("select * from user/*z:7yhgtr45ty111*/"));
+        Assert.assertEquals("7yhgtr45ty", filter.getIdFromSQL("select * from user/*z:7yhgtr45ty*/\\r\\n/*xxx*/"));
     }
 }

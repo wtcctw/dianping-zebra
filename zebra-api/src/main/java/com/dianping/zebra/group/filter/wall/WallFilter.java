@@ -16,13 +16,13 @@ import java.util.regex.Pattern;
  * Created by Dozer on 9/24/14.
  */
 public class WallFilter extends DefaultJdbcFilter {
-    protected final static Pattern ID_PATTERN = Pattern.compile("(.*)(\\/\\*)([a-zA-Z0-9]{10})(\\*\\/$)");
+    protected final static Pattern ID_PATTERN = Pattern.compile(".*(\\/\\*z:)([a-zA-Z0-9]{10})(\\*\\/).*");
     private static final int MAX_ID_LENGTH = 10;
     private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60);
 
     protected String addIdToSql(String sql, JdbcMetaData metaData) {
         try {
-            return String.format("%s/*%s*/", sql, generateId(sql));
+            return String.format("%s/*z:%s*/", sql, generateId(sql));
         } catch (NoSuchAlgorithmException e) {
             return sql;
         }
@@ -67,7 +67,7 @@ public class WallFilter extends DefaultJdbcFilter {
     protected String getIdFromSQL(String sql) {
         Matcher matcher = ID_PATTERN.matcher(sql);
         if (matcher.matches()) {
-            return matcher.group(3);
+            return matcher.group(2);
         } else {
             return null;
         }
