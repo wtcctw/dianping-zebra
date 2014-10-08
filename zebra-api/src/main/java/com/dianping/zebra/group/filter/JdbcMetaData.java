@@ -25,7 +25,7 @@ public class JdbcMetaData implements Cloneable {
 
     private static final Logger log = LogManager.getLogger(JdbcMetaData.class);
 
-    private static LRUCache<String, StatementNode> nodeCache = new LRUCache<String, StatementNode>(1024, 60 * 60);
+    private static final LRUCache<String, StatementNode> nodeCache = new LRUCache<String, StatementNode>(1024, 60 * 60);
 
     private List<StatementNode> batchedNode;
 

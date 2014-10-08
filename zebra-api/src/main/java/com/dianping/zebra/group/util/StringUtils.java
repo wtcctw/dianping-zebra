@@ -5,6 +5,8 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -13,452 +15,462 @@ import java.util.Map;
  * @author danson.liu
  */
 public final class StringUtils {
-	private static final String EMPTY = "";
+    private static final String EMPTY = "";
 
-	private static final int PAD_LIMIT = 8192;
+    private static final int PAD_LIMIT = 8192;
 
-	public static boolean endsWithIgnoreCase(String s, String suffix) {
-		return s.toLowerCase().trim().endsWith(suffix.toLowerCase());
-	}
+    public static boolean endsWithIgnoreCase(String s, String suffix) {
+        return s.toLowerCase().trim().endsWith(suffix.toLowerCase());
+    }
 
-	public static boolean equals(String str1, String str2) {
-		return str1 == null ? str2 == null : str1.equals(str2);
-	}
+    public static boolean equals(String str1, String str2) {
+        return str1 == null ? str2 == null : str1.equals(str2);
+    }
 
-	public static boolean isBlank(String str) {
-		int strLen;
-		if (str == null || (strLen = str.length()) == 0) {
-			return true;
-		}
-		for (int i = 0; i < strLen; i++) {
-			if ((Character.isWhitespace(str.charAt(i)) == false)) {
-				return false;
-			}
-		}
-		return true;
-	}
+    public static boolean isBlank(String str) {
+        int strLen;
+        if (str == null || (strLen = str.length()) == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if ((Character.isWhitespace(str.charAt(i)) == false)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	public static boolean isEmpty(String str) {
-		return str == null || str.length() == 0;
-	}
+    public static boolean isEmpty(String str) {
+        return str == null || str.length() == 0;
+    }
 
-	public static boolean isNotBlank(String str) {
-		return !StringUtils.isBlank(str);
-	}
+    public static boolean isNotBlank(String str) {
+        return !StringUtils.isBlank(str);
+    }
 
-	public static boolean isNumeric(String str) {
-		if (str == null) {
-			return false;
-		}
-		int sz = str.length();
-		for (int i = 0; i < sz; i++) {
-			if (Character.isDigit(str.charAt(i)) == false) {
-				return false;
-			}
-		}
-		return true;
-	}
+    public static boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        }
+        int sz = str.length();
+        for (int i = 0; i < sz; i++) {
+            if (Character.isDigit(str.charAt(i)) == false) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	public static <T extends Object> String joinCollectionToString(Collection<T> list, String str) {
-		StringBuffer sb = new StringBuffer(100);
-		for (Object entity : list) {
-			if (sb.length() > 0) {
-				sb.append(str);
-			}
-			sb.append(String.valueOf(entity));
-		}
-		return sb.toString();
-	}
+    public static <T extends Object> String joinCollectionToString(Collection<T> list, String str) {
+        StringBuffer sb = new StringBuffer(100);
+        for (Object entity : list) {
+            if (sb.length() > 0) {
+                sb.append(str);
+            }
+            sb.append(String.valueOf(entity));
+        }
+        return sb.toString();
+    }
 
-	public static String joinMapToString(Map<String, String> map) {
-		StringBuffer sb = new StringBuffer(100);
-		for (Map.Entry<String, String> entity : map.entrySet()) {
-			try {
-				String temp = String.format("%s=%s", URLEncoder.encode(entity.getKey(), "utf-8"),
-						URLEncoder.encode(entity.getValue(), "utf-8"));
-				if (sb.length() > 0) {
-					sb.append("&");
-				}
-				sb.append(temp);
-			} catch (UnsupportedEncodingException e) {
-				continue;
-			}
-		}
-		return sb.toString();
-	}
+    public static String joinMapToString(Map<String, String> map) {
+        StringBuffer sb = new StringBuffer(100);
+        for (Map.Entry<String, String> entity : map.entrySet()) {
+            try {
+                String temp = String.format("%s=%s", URLEncoder.encode(entity.getKey(), "utf-8"),
+                        URLEncoder.encode(entity.getValue(), "utf-8"));
+                if (sb.length() > 0) {
+                    sb.append("&");
+                }
+                sb.append(temp);
+            } catch (UnsupportedEncodingException e) {
+                continue;
+            }
+        }
+        return sb.toString();
+    }
 
-	public static String leftPad(String str, int size, char padChar) {
-		if (str == null) {
-			return null;
-		}
-		int pads = size - str.length();
-		if (pads <= 0) {
-			return str; // returns original String when possible
-		}
-		if (pads > PAD_LIMIT) {
-			return leftPad(str, size, String.valueOf(padChar));
-		}
-		return padding(pads, padChar).concat(str);
-	}
+    public static String leftPad(String str, int size, char padChar) {
+        if (str == null) {
+            return null;
+        }
+        int pads = size - str.length();
+        if (pads <= 0) {
+            return str; // returns original String when possible
+        }
+        if (pads > PAD_LIMIT) {
+            return leftPad(str, size, String.valueOf(padChar));
+        }
+        return padding(pads, padChar).concat(str);
+    }
 
-	public static String leftPad(String str, int size, String padStr) {
-		if (str == null) {
-			return null;
-		}
-		if (isEmpty(padStr)) {
-			padStr = " ";
-		}
-		int padLen = padStr.length();
-		int strLen = str.length();
-		int pads = size - strLen;
-		if (pads <= 0) {
-			return str; // returns original String when possible
-		}
-		if (padLen == 1 && pads <= PAD_LIMIT) {
-			return leftPad(str, size, padStr.charAt(0));
-		}
+    public static String leftPad(String str, int size, String padStr) {
+        if (str == null) {
+            return null;
+        }
+        if (isEmpty(padStr)) {
+            padStr = " ";
+        }
+        int padLen = padStr.length();
+        int strLen = str.length();
+        int pads = size - strLen;
+        if (pads <= 0) {
+            return str; // returns original String when possible
+        }
+        if (padLen == 1 && pads <= PAD_LIMIT) {
+            return leftPad(str, size, padStr.charAt(0));
+        }
 
-		if (pads == padLen) {
-			return padStr.concat(str);
-		} else if (pads < padLen) {
-			return padStr.substring(0, pads).concat(str);
-		} else {
-			char[] padding = new char[pads];
-			char[] padChars = padStr.toCharArray();
-			for (int i = 0; i < pads; i++) {
-				padding[i] = padChars[i % padLen];
-			}
-			return new String(padding).concat(str);
-		}
-	}
+        if (pads == padLen) {
+            return padStr.concat(str);
+        } else if (pads < padLen) {
+            return padStr.substring(0, pads).concat(str);
+        } else {
+            char[] padding = new char[pads];
+            char[] padChars = padStr.toCharArray();
+            for (int i = 0; i < pads; i++) {
+                padding[i] = padChars[i % padLen];
+            }
+            return new String(padding).concat(str);
+        }
+    }
 
-	private static String padding(int repeat, char padChar) throws IndexOutOfBoundsException {
-		if (repeat < 0) {
-			throw new IndexOutOfBoundsException("Cannot pad a negative amount: " + repeat);
-		}
-		final char[] buf = new char[repeat];
-		for (int i = 0; i < buf.length; i++) {
-			buf[i] = padChar;
-		}
-		return new String(buf);
-	}
+    private static String padding(int repeat, char padChar) throws IndexOutOfBoundsException {
+        if (repeat < 0) {
+            throw new IndexOutOfBoundsException("Cannot pad a negative amount: " + repeat);
+        }
+        final char[] buf = new char[repeat];
+        for (int i = 0; i < buf.length; i++) {
+            buf[i] = padChar;
+        }
+        return new String(buf);
+    }
 
-	public static String repeat(String str, int repeat) {
-		StringBuffer buffer = new StringBuffer(repeat * str.length());
-		for (int i = 0; i < repeat; i++) {
-			buffer.append(str);
-		}
-		return buffer.toString();
-	}
+    public static String repeat(String str, int repeat) {
+        StringBuffer buffer = new StringBuffer(repeat * str.length());
+        for (int i = 0; i < repeat; i++) {
+            buffer.append(str);
+        }
+        return buffer.toString();
+    }
 
-	public static void splitStringToMap(Map<String, String> map, String input) {
-		if (StringUtils.isBlank(input) || map == null) {
-			return;
-		}
+    public static String sha1(String input) throws NoSuchAlgorithmException {
+        MessageDigest mDigest = MessageDigest.getInstance("SHA1");
+        byte[] result = mDigest.digest(input.getBytes());
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < result.length; i++) {
+            sb.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        return sb.toString();
+    }
 
-		for (String keyValue : input.split("&")) {
-			String[] keyValueArray = keyValue.split("=");
-			if (keyValueArray.length != 2) {
-				continue;
-			}
-			try {
-				String key = URLDecoder.decode(keyValueArray[0], "utf-8");
-				String value = URLDecoder.decode(keyValueArray[1], "utf-8");
+    public static void splitStringToMap(Map<String, String> map, String input) {
+        if (StringUtils.isBlank(input) || map == null) {
+            return;
+        }
 
-				map.put(key, value);
+        for (String keyValue : input.split("&")) {
+            String[] keyValueArray = keyValue.split("=");
+            if (keyValueArray.length != 2) {
+                continue;
+            }
+            try {
+                String key = URLDecoder.decode(keyValueArray[0], "utf-8");
+                String value = URLDecoder.decode(keyValueArray[1], "utf-8");
 
-			} catch (UnsupportedEncodingException e) {
-				continue;
-			}
-		}
-	}
+                map.put(key, value);
 
-	/**
-	 * <pre>
-	 * Determines whether or not the string 'searchIn' contains the string
-	 * 'searchFor', dis-regarding case starting at 'startAt' Shorthand for a
-	 * String.regionMatch(...)
-	 *
-	 * From mysql connector-j
-	 * </pre>
-	 *
-	 * @param searchIn  the string to search in
-	 * @param startAt   the position to start at
-	 * @param searchFor the string to search for
-	 * @return whether searchIn starts with searchFor, ignoring case
-	 */
-	public static boolean startsWithIgnoreCase(String searchIn, int startAt, String searchFor) {
-		return searchIn.regionMatches(true, startAt, searchFor, 0, searchFor.length());
-	}
+            } catch (UnsupportedEncodingException e) {
+                continue;
+            }
+        }
+    }
 
-	/**
-	 * <pre>
-	 * Determines whether or not the string 'searchIn' contains the string
-	 * 'searchFor', dis-regarding case. Shorthand for a String.regionMatch(...)
-	 *
-	 * From mysql connector-j
-	 * </pre>
-	 *
-	 * @param searchIn  the string to search in
-	 * @param searchFor the string to search for
-	 * @return whether searchIn starts with searchFor, ignoring case
-	 */
-	public static boolean startsWithIgnoreCase(String searchIn, String searchFor) {
-		return startsWithIgnoreCase(searchIn, 0, searchFor);
-	}
+    /**
+     * <pre>
+     * Determines whether or not the string 'searchIn' contains the string
+     * 'searchFor', dis-regarding case starting at 'startAt' Shorthand for a
+     * String.regionMatch(...)
+     *
+     * From mysql connector-j
+     * </pre>
+     *
+     * @param searchIn  the string to search in
+     * @param startAt   the position to start at
+     * @param searchFor the string to search for
+     * @return whether searchIn starts with searchFor, ignoring case
+     */
+    public static boolean startsWithIgnoreCase(String searchIn, int startAt, String searchFor) {
+        return searchIn.regionMatches(true, startAt, searchFor, 0, searchFor.length());
+    }
 
-	/**
-	 * <pre>
-	 * Determines whether or not the sting 'searchIn' contains the string
-	 * 'searchFor', disregarding case and leading whitespace
-	 *
-	 * From mysql connector-j
-	 * </pre>
-	 *
-	 * @param searchIn  the string to search in
-	 * @param searchFor the string to search for
-	 * @return true if the string starts with 'searchFor' ignoring whitespace
-	 */
-	public static boolean startsWithIgnoreCaseAndWs(String searchIn, String searchFor) {
-		return startsWithIgnoreCaseAndWs(searchIn, searchFor, 0);
-	}
+    /**
+     * <pre>
+     * Determines whether or not the string 'searchIn' contains the string
+     * 'searchFor', dis-regarding case. Shorthand for a String.regionMatch(...)
+     *
+     * From mysql connector-j
+     * </pre>
+     *
+     * @param searchIn  the string to search in
+     * @param searchFor the string to search for
+     * @return whether searchIn starts with searchFor, ignoring case
+     */
+    public static boolean startsWithIgnoreCase(String searchIn, String searchFor) {
+        return startsWithIgnoreCase(searchIn, 0, searchFor);
+    }
 
-	/**
-	 * <pre>
-	 * Determines whether or not the sting 'searchIn' contains the string
-	 * 'searchFor', disregarding case and leading whitespace
-	 *
-	 * From mysql connector-j
-	 * </pre>
-	 *
-	 * @param searchIn  the string to search in
-	 * @param searchFor the string to search for
-	 * @param beginPos  where to start searching
-	 * @return true if the string starts with 'searchFor' ignoring whitespace
-	 */
+    /**
+     * <pre>
+     * Determines whether or not the sting 'searchIn' contains the string
+     * 'searchFor', disregarding case and leading whitespace
+     *
+     * From mysql connector-j
+     * </pre>
+     *
+     * @param searchIn  the string to search in
+     * @param searchFor the string to search for
+     * @return true if the string starts with 'searchFor' ignoring whitespace
+     */
+    public static boolean startsWithIgnoreCaseAndWs(String searchIn, String searchFor) {
+        return startsWithIgnoreCaseAndWs(searchIn, searchFor, 0);
+    }
 
-	public static boolean startsWithIgnoreCaseAndWs(String searchIn, String searchFor, int beginPos) {
-		if (searchIn == null) {
-			return searchFor == null;
-		}
+    /**
+     * <pre>
+     * Determines whether or not the sting 'searchIn' contains the string
+     * 'searchFor', disregarding case and leading whitespace
+     *
+     * From mysql connector-j
+     * </pre>
+     *
+     * @param searchIn  the string to search in
+     * @param searchFor the string to search for
+     * @param beginPos  where to start searching
+     * @return true if the string starts with 'searchFor' ignoring whitespace
+     */
 
-		int inLength = searchIn.length();
+    public static boolean startsWithIgnoreCaseAndWs(String searchIn, String searchFor, int beginPos) {
+        if (searchIn == null) {
+            return searchFor == null;
+        }
 
-		for (; beginPos < inLength; beginPos++) {
-			if (!Character.isWhitespace(searchIn.charAt(beginPos))) {
-				break;
-			}
-		}
+        int inLength = searchIn.length();
 
-		return startsWithIgnoreCase(searchIn, beginPos, searchFor);
-	}
+        for (; beginPos < inLength; beginPos++) {
+            if (!Character.isWhitespace(searchIn.charAt(beginPos))) {
+                break;
+            }
+        }
 
-	/**
-	 * <pre>
-	 * Returns the given string, with comments removed
-	 *
-	 * From mysql connector-j
-	 * </pre>
-	 *
-	 * @param src                the source string
-	 * @param stringOpens        characters which delimit the "open" of a string
-	 * @param stringCloses       characters which delimit the "close" of a string, in counterpart order to <code>stringOpens</code>
-	 * @param slashStarComments  strip slash-star type "C" style comments
-	 * @param slashSlashComments strip slash-slash C++ style comments to end-of-line
-	 * @param hashComments       strip #-style comments to end-of-line
-	 * @param dashDashComments   strip "--" style comments to end-of-line
-	 * @return the input string with all comment-delimited data removed
-	 */
-	public static String stripComments(String src, String stringOpens, String stringCloses, boolean slashStarComments,
-			boolean slashSlashComments, boolean hashComments, boolean dashDashComments) {
-		if (src == null) {
-			return null;
-		}
+        return startsWithIgnoreCase(searchIn, beginPos, searchFor);
+    }
 
-		StringBuffer buf = new StringBuffer(src.length());
+    /**
+     * <pre>
+     * Returns the given string, with comments removed
+     *
+     * From mysql connector-j
+     * </pre>
+     *
+     * @param src                the source string
+     * @param stringOpens        characters which delimit the "open" of a string
+     * @param stringCloses       characters which delimit the "close" of a string, in counterpart order to <code>stringOpens</code>
+     * @param slashStarComments  strip slash-star type "C" style comments
+     * @param slashSlashComments strip slash-slash C++ style comments to end-of-line
+     * @param hashComments       strip #-style comments to end-of-line
+     * @param dashDashComments   strip "--" style comments to end-of-line
+     * @return the input string with all comment-delimited data removed
+     */
+    public static String stripComments(String src, String stringOpens, String stringCloses, boolean slashStarComments,
+                                       boolean slashSlashComments, boolean hashComments, boolean dashDashComments) {
+        if (src == null) {
+            return null;
+        }
 
-		// It's just more natural to deal with this as a stream
-		// when parsing..This code is currently only called when
-		// parsing the kind of metadata that developers are strongly
-		// recommended to cache anyways, so we're not worried
-		// about the _1_ extra object allocation if it cleans
-		// up the code
+        StringBuffer buf = new StringBuffer(src.length());
 
-		StringReader sourceReader = new StringReader(src);
+        // It's just more natural to deal with this as a stream
+        // when parsing..This code is currently only called when
+        // parsing the kind of metadata that developers are strongly
+        // recommended to cache anyways, so we're not worried
+        // about the _1_ extra object allocation if it cleans
+        // up the code
 
-		int contextMarker = Character.MIN_VALUE;
-		boolean escaped = false;
-		int markerTypeFound = -1;
+        StringReader sourceReader = new StringReader(src);
 
-		int ind = 0;
+        int contextMarker = Character.MIN_VALUE;
+        boolean escaped = false;
+        int markerTypeFound = -1;
 
-		int currentChar = 0;
+        int ind = 0;
 
-		try {
-			while ((currentChar = sourceReader.read()) != -1) {
+        int currentChar = 0;
 
-				if (markerTypeFound != -1 && currentChar == stringCloses.charAt(markerTypeFound) && !escaped) {
-					contextMarker = Character.MIN_VALUE;
-					markerTypeFound = -1;
-				} else if ((ind = stringOpens.indexOf(currentChar)) != -1 && !escaped
-						&& contextMarker == Character.MIN_VALUE) {
-					markerTypeFound = ind;
-					contextMarker = currentChar;
-				}
+        try {
+            while ((currentChar = sourceReader.read()) != -1) {
 
-				if (contextMarker == Character.MIN_VALUE && currentChar == '/' && (slashSlashComments
-						|| slashStarComments)) {
-					currentChar = sourceReader.read();
-					if (currentChar == '*' && slashStarComments) {
-						int prevChar = 0;
-						while ((currentChar = sourceReader.read()) != '/' || prevChar != '*') {
-							if (currentChar == '\r') {
+                if (markerTypeFound != -1 && currentChar == stringCloses.charAt(markerTypeFound) && !escaped) {
+                    contextMarker = Character.MIN_VALUE;
+                    markerTypeFound = -1;
+                } else if ((ind = stringOpens.indexOf(currentChar)) != -1 && !escaped
+                        && contextMarker == Character.MIN_VALUE) {
+                    markerTypeFound = ind;
+                    contextMarker = currentChar;
+                }
 
-								currentChar = sourceReader.read();
-								if (currentChar == '\n') {
-									currentChar = sourceReader.read();
-								}
-							} else {
-								if (currentChar == '\n') {
+                if (contextMarker == Character.MIN_VALUE && currentChar == '/' && (slashSlashComments
+                        || slashStarComments)) {
+                    currentChar = sourceReader.read();
+                    if (currentChar == '*' && slashStarComments) {
+                        int prevChar = 0;
+                        while ((currentChar = sourceReader.read()) != '/' || prevChar != '*') {
+                            if (currentChar == '\r') {
 
-									currentChar = sourceReader.read();
-								}
-							}
-							if (currentChar < 0) {
-								break;
-							}
-							prevChar = currentChar;
-						}
-						continue;
-					} else if (currentChar == '/' && slashSlashComments) {
-						do {
-							currentChar = sourceReader.read();
-						} while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
-					}
-				} else if (contextMarker == Character.MIN_VALUE && currentChar == '#' && hashComments) {
-					// Slurp up everything until the newline
-					do {
-						currentChar = sourceReader.read();
-					} while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
-				} else if (contextMarker == Character.MIN_VALUE && currentChar == '-' && dashDashComments) {
-					currentChar = sourceReader.read();
+                                currentChar = sourceReader.read();
+                                if (currentChar == '\n') {
+                                    currentChar = sourceReader.read();
+                                }
+                            } else {
+                                if (currentChar == '\n') {
 
-					if (currentChar == -1 || currentChar != '-') {
-						buf.append('-');
+                                    currentChar = sourceReader.read();
+                                }
+                            }
+                            if (currentChar < 0) {
+                                break;
+                            }
+                            prevChar = currentChar;
+                        }
+                        continue;
+                    } else if (currentChar == '/' && slashSlashComments) {
+                        do {
+                            currentChar = sourceReader.read();
+                        } while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
+                    }
+                } else if (contextMarker == Character.MIN_VALUE && currentChar == '#' && hashComments) {
+                    // Slurp up everything until the newline
+                    do {
+                        currentChar = sourceReader.read();
+                    } while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
+                } else if (contextMarker == Character.MIN_VALUE && currentChar == '-' && dashDashComments) {
+                    currentChar = sourceReader.read();
 
-						if (currentChar != -1) {
-							buf.append((char) currentChar);
-						}
+                    if (currentChar == -1 || currentChar != '-') {
+                        buf.append('-');
 
-						continue;
-					}
+                        if (currentChar != -1) {
+                            buf.append((char) currentChar);
+                        }
 
-					// Slurp up everything until the newline
+                        continue;
+                    }
 
-					do {
-						currentChar = sourceReader.read();
-					} while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
-				}
+                    // Slurp up everything until the newline
 
-				if (currentChar != -1) {
-					buf.append((char) currentChar);
-				}
-			}
-		} catch (IOException ioEx) {
-			// we'll never see this from a StringReader
-		}
+                    do {
+                        currentChar = sourceReader.read();
+                    } while (currentChar != '\n' && currentChar != '\r' && currentChar >= 0);
+                }
 
-		return buf.toString();
-	}
+                if (currentChar != -1) {
+                    buf.append((char) currentChar);
+                }
+            }
+        } catch (IOException ioEx) {
+            // we'll never see this from a StringReader
+        }
 
-	public static String substring(String str, int start) {
-		if (str == null) {
-			return null;
-		}
+        return buf.toString();
+    }
 
-		// handle negatives, which means last n characters
-		if (start < 0) {
-			start = str.length() + start; // remember start is negative
-		}
+    public static String substring(String str, int start) {
+        if (str == null) {
+            return null;
+        }
 
-		if (start < 0) {
-			start = 0;
-		}
-		if (start > str.length()) {
-			return EMPTY;
-		}
+        // handle negatives, which means last n characters
+        if (start < 0) {
+            start = str.length() + start; // remember start is negative
+        }
 
-		return str.substring(start);
-	}
+        if (start < 0) {
+            start = 0;
+        }
+        if (start > str.length()) {
+            return EMPTY;
+        }
 
-	public static String substringAfter(String str, String separator) {
-		if (isEmpty(str)) {
-			return str;
-		}
-		if (separator == null) {
-			return EMPTY;
-		}
-		int pos = str.indexOf(separator);
-		if (pos == -1) {
-			return EMPTY;
-		}
-		return str.substring(pos + separator.length());
-	}
+        return str.substring(start);
+    }
 
-	public static String substringAfterLast(String str, String separator) {
-		if (isEmpty(str)) {
-			return str;
-		}
-		if (isEmpty(separator)) {
-			return EMPTY;
-		}
-		int pos = str.lastIndexOf(separator);
-		if (pos == -1 || pos == (str.length() - separator.length())) {
-			return EMPTY;
-		}
-		return str.substring(pos + separator.length());
-	}
+    public static String substringAfter(String str, String separator) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        if (separator == null) {
+            return EMPTY;
+        }
+        int pos = str.indexOf(separator);
+        if (pos == -1) {
+            return EMPTY;
+        }
+        return str.substring(pos + separator.length());
+    }
 
-	public static String substringBefore(String str, String separator) {
-		if (isEmpty(str) || separator == null) {
-			return str;
-		}
-		if (separator.length() == 0) {
-			return EMPTY;
-		}
-		int pos = str.indexOf(separator);
-		if (pos == -1) {
-			return str;
-		}
-		return str.substring(0, pos);
-	}
+    public static String substringAfterLast(String str, String separator) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        if (isEmpty(separator)) {
+            return EMPTY;
+        }
+        int pos = str.lastIndexOf(separator);
+        if (pos == -1 || pos == (str.length() - separator.length())) {
+            return EMPTY;
+        }
+        return str.substring(pos + separator.length());
+    }
 
-	public static String substringBeforeLast(String str, String separator) {
-		if (isEmpty(str) || isEmpty(separator)) {
-			return str;
-		}
-		int pos = str.lastIndexOf(separator);
-		if (pos == -1) {
-			return str;
-		}
-		return str.substring(0, pos);
-	}
+    public static String substringBefore(String str, String separator) {
+        if (isEmpty(str) || separator == null) {
+            return str;
+        }
+        if (separator.length() == 0) {
+            return EMPTY;
+        }
+        int pos = str.indexOf(separator);
+        if (pos == -1) {
+            return str;
+        }
+        return str.substring(0, pos);
+    }
 
-	public static String substringBetween(String str, String open, String close) {
-		if (str == null || open == null || close == null) {
-			return null;
-		}
-		int start = str.indexOf(open);
-		if (start != -1) {
-			int end = str.indexOf(close, start + open.length());
-			if (end != -1) {
-				return str.substring(start + open.length(), end);
-			}
-		}
-		return null;
-	}
+    public static String substringBeforeLast(String str, String separator) {
+        if (isEmpty(str) || isEmpty(separator)) {
+            return str;
+        }
+        int pos = str.lastIndexOf(separator);
+        if (pos == -1) {
+            return str;
+        }
+        return str.substring(0, pos);
+    }
 
-	public static String trimToEmpty(String str) {
-		return str == null ? EMPTY : str.trim();
-	}
+    public static String substringBetween(String str, String open, String close) {
+        if (str == null || open == null || close == null) {
+            return null;
+        }
+        int start = str.indexOf(open);
+        if (start != -1) {
+            int end = str.indexOf(close, start + open.length());
+            if (end != -1) {
+                return str.substring(start + open.length(), end);
+            }
+        }
+        return null;
+    }
+
+    public static String trimToEmpty(String str) {
+        return str == null ? EMPTY : str.trim();
+    }
 }
