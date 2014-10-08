@@ -6,6 +6,7 @@ import com.dianping.zebra.group.util.StringUtils;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.SQLParser;
 import com.foundationdb.sql.parser.StatementNode;
+import jodd.cache.LRUCache;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -22,218 +23,223 @@ import java.util.Map;
  */
 public class JdbcMetaData implements Cloneable {
 
-	private static final Logger log = LogManager.getLogger(JdbcMetaData.class);
+    private static final Logger log = LogManager.getLogger(JdbcMetaData.class);
 
-	private List<StatementNode> batchedNode;
+    private static LRUCache<String, StatementNode> nodeCache = new LRUCache<String, StatementNode>(1024, 60 * 60);
 
-	private List<String> batchedSqls;
+    private List<StatementNode> batchedNode;
 
-	private Connection connection;
+    private List<String> batchedSqls;
 
-	private DataSource dataSource;
+    private Connection connection;
 
-	private String dataSourceId;
+    private DataSource dataSource;
 
-	private boolean isBatch;
+    private String dataSourceId;
 
-	private boolean isPrepared;
+    private boolean isBatch;
 
-	private boolean isTransaction;
+    private boolean isPrepared;
 
-	private String jdbcPassword;
+    private boolean isTransaction;
 
-	private String jdbcUrl;
+    private String jdbcPassword;
 
-	private String jdbcUsername;
+    private String jdbcUrl;
 
-	private StatementNode node;
+    private String jdbcUsername;
 
-	private Object params;
+    private StatementNode node;
 
-	private LinkedHashMap<String, Object> properties = new LinkedHashMap<String, Object>();
+    private Object params;
 
-	private JdbcMetaData realJdbcMetaData;
+    private LinkedHashMap<String, Object> properties = new LinkedHashMap<String, Object>();
 
-	private String sql;
+    private JdbcMetaData realJdbcMetaData;
 
-	public JdbcMetaData clone() {
-		try {
-			JdbcMetaData result = (JdbcMetaData) super.clone();
-			result.properties = (LinkedHashMap<String, Object>) this.properties.clone();
-			return result;
-		} catch (CloneNotSupportedException e) {
-			return null;
-		}
-	}
+    private String sql;
 
-	public List<StatementNode> getBatchedNode() {
-		return batchedNode;
-	}
+    public JdbcMetaData clone() {
+        try {
+            JdbcMetaData result = (JdbcMetaData) super.clone();
+            result.properties = (LinkedHashMap<String, Object>) this.properties.clone();
+            return result;
+        } catch (CloneNotSupportedException e) {
+            return null;
+        }
+    }
 
-	public void setBatchedNode(List<StatementNode> batchedNode) {
-		this.batchedNode = batchedNode;
-	}
+    public List<StatementNode> getBatchedNode() {
+        return batchedNode;
+    }
 
-	public List<String> getBatchedSqls() {
-		return batchedSqls;
-	}
+    public List<String> getBatchedSqls() {
+        return batchedSqls;
+    }
 
-	public void setBatchedSqls(List<String> batchedSqls) {
-		this.batchedSqls = batchedSqls;
-		if (batchedSqls != null) {
-			this.batchedNode = new ArrayList<StatementNode>();
-			StringBuffer sb = new StringBuffer();
-			for (String sql : batchedSqls) {
-				sb.append(sql);
-				if (!sql.endsWith(";")) {
-					sb.append(";");
-				}
-			}
+    public void setBatchedSqls(List<String> batchedSqls) {
+        this.batchedSqls = batchedSqls;
+        if (batchedSqls != null) {
+            this.batchedNode = parseSqls(batchedSqls);
+        }
+    }
 
-			try {
-				this.sql = sb.toString();
-				this.batchedNode = new SQLParser().parseStatements(sb.toString());
-			} catch (StandardException e) {
-			}
-		}
-	}
+    public Connection getConnection() {
+        return connection;
+    }
 
-	public Connection getConnection() {
-		return connection;
-	}
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
 
-	public void setConnection(Connection connection) {
-		this.connection = connection;
-	}
+    public DataSource getDataSource() {
+        return dataSource;
+    }
 
-	public DataSource getDataSource() {
-		return dataSource;
-	}
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
+    public String getDataSourceId() {
+        return dataSourceId;
+    }
 
-	public String getDataSourceId() {
-		return dataSourceId;
-	}
+    public void setDataSourceId(String dataSourceId) {
+        this.dataSourceId = dataSourceId;
+    }
 
-	public void setDataSourceId(String dataSourceId) {
-		this.dataSourceId = dataSourceId;
-	}
+    public String getJdbcPassword() {
+        return jdbcPassword;
+    }
 
-	public String getJdbcPassword() {
-		return jdbcPassword;
-	}
+    public void setJdbcPassword(String jdbcPassword) {
+        this.jdbcPassword = jdbcPassword;
+    }
 
-	public void setJdbcPassword(String jdbcPassword) {
-		this.jdbcPassword = jdbcPassword;
-	}
+    public String getJdbcUrl() {
+        return jdbcUrl;
+    }
 
-	public String getJdbcUrl() {
-		return jdbcUrl;
-	}
+    public void setJdbcUrl(String jdbcUrl) {
+        this.jdbcUrl = jdbcUrl;
+    }
 
-	public void setJdbcUrl(String jdbcUrl) {
-		this.jdbcUrl = jdbcUrl;
-	}
+    public String getJdbcUsername() {
+        return jdbcUsername;
+    }
 
-	public String getJdbcUsername() {
-		return jdbcUsername;
-	}
+    public void setJdbcUsername(String jdbcUsername) {
+        this.jdbcUsername = jdbcUsername;
+    }
 
-	public void setJdbcUsername(String jdbcUsername) {
-		this.jdbcUsername = jdbcUsername;
-	}
+    public StatementNode getNode() {
+        return node;
+    }
 
-	public StatementNode getNode() {
-		return node;
-	}
+    public void setNode(StatementNode node) {
+        this.node = node;
+    }
 
-	public void setNode(StatementNode node) {
-		this.node = node;
-	}
+    public Object getParams() {
+        return params;
+    }
 
-	public Object getParams() {
-		return params;
-	}
+    public void setParams(Object params) {
+        this.params = params;
+    }
 
-	public void setParams(Object params) {
-		this.params = params;
-	}
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
 
-	public Map<String, Object> getProperties() {
-		return properties;
-	}
+    public JdbcMetaData getRealJdbcMetaData() {
+        return realJdbcMetaData;
+    }
 
-	public JdbcMetaData getRealJdbcMetaData() {
-		return realJdbcMetaData;
-	}
+    public void setRealJdbcMetaData(JdbcMetaData realJdbcMetaData) {
+        this.realJdbcMetaData = realJdbcMetaData;
+    }
 
-	public void setRealJdbcMetaData(JdbcMetaData realJdbcMetaData) {
-		this.realJdbcMetaData = realJdbcMetaData;
-	}
+    public String getSql() {
+        return sql;
+    }
 
-	public String getSql() {
-		return sql;
-	}
+    public void setSql(String sql) {
+        this.sql = sql;
+        node = parseSql(sql);
+    }
 
-	public void setSql(String sql) {
-		this.sql = sql;
+    public boolean isBatch() {
+        return isBatch;
+    }
 
-		if (StringUtils.isBlank(sql)) {
-			return;
-		}
+    public void setBatch(boolean isBatch) {
+        this.isBatch = isBatch;
+    }
 
-		try {
-			node = new SQLParser().parseStatement(sql);
-		} catch (StandardException e) {
-			log.warn(e.getMessage(), e);
-		}
-	}
+    public boolean isPrepared() {
+        return isPrepared;
+    }
 
-	public boolean isBatch() {
-		return isBatch;
-	}
+    public void setPrepared(boolean isPrepared) {
+        this.isPrepared = isPrepared;
+    }
 
-	public void setBatch(boolean isBatch) {
-		this.isBatch = isBatch;
-	}
+    public boolean isTransaction() {
+        return isTransaction;
+    }
 
-	public boolean isPrepared() {
-		return isPrepared;
-	}
+    public void setTransaction(boolean isTransaction) {
+        this.isTransaction = isTransaction;
+    }
 
-	public void setPrepared(boolean isPrepared) {
-		this.isPrepared = isPrepared;
-	}
+    private StatementNode parseSql(String sql) {
+        if (StringUtils.isBlank(sql)) {
+            return null;
+        }
 
-	public boolean isTransaction() {
-		return isTransaction;
-	}
+        StatementNode result = nodeCache.get(sql);
 
-	public void setTransaction(boolean isTransaction) {
-		this.isTransaction = isTransaction;
-	}
+        if (result != null) {
+            return result;
+        }
 
-	public void setDataSourceProperties(DataSource dataSource) {
-		if (dataSource instanceof GroupDataSourceMBean) {
-			GroupDataSourceMBean ds = (GroupDataSourceMBean) dataSource;
-			properties.put("AllDataSource",
-					StringUtils.joinCollectionToString(ds.getConfig().getDataSourceConfigs().keySet(), ","));
-			properties.put("filters", ds.getConfig().getFilters());
-		} else if (dataSource instanceof SingleDataSourceMBean) {
-			SingleDataSourceMBean ds = (SingleDataSourceMBean) dataSource;
-			properties.put("JdbcUrl", ds.getConfig().getJdbcUrl());
-			properties.put("Username", ds.getConfig().getUsername());
-			properties.put("Password",
-					ds.getConfig().getPassword() != null ?
-							StringUtils.repeat("*", ds.getConfig().getPassword().length()) :
-							null);
-			properties.put("DriverClass", ds.getConfig().getDriverClass());
-			properties.put("CanRead", ds.getConfig().isCanRead());
-			properties.put("CanWrite", ds.getConfig().isCanWrite());
-			properties.put("Weight", ds.getConfig().getWeight());
-		}
-	}
+        try {
+            result = new SQLParser().parseStatement(sql);
+            nodeCache.put(sql, result);
+        } catch (StandardException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return result;
+    }
+
+    private List<StatementNode> parseSqls(List<String> sqls) {
+        List<StatementNode> result = new ArrayList<StatementNode>();
+        for (String sql : sqls) {
+            result.add(parseSql(sql));
+        }
+        return result;
+    }
+
+    public void setDataSourceProperties(DataSource dataSource) {
+        if (dataSource instanceof GroupDataSourceMBean) {
+            GroupDataSourceMBean ds = (GroupDataSourceMBean) dataSource;
+            properties.put("AllDataSource",
+                    StringUtils.joinCollectionToString(ds.getConfig().getDataSourceConfigs().keySet(), ","));
+            properties.put("filters", ds.getConfig().getFilters());
+        } else if (dataSource instanceof SingleDataSourceMBean) {
+            SingleDataSourceMBean ds = (SingleDataSourceMBean) dataSource;
+            properties.put("JdbcUrl", ds.getConfig().getJdbcUrl());
+            properties.put("Username", ds.getConfig().getUsername());
+            properties.put("Password",
+                    ds.getConfig().getPassword() != null ?
+                            StringUtils.repeat("*", ds.getConfig().getPassword().length()) :
+                            null);
+            properties.put("DriverClass", ds.getConfig().getDriverClass());
+            properties.put("CanRead", ds.getConfig().isCanRead());
+            properties.put("CanWrite", ds.getConfig().isCanWrite());
+            properties.put("Weight", ds.getConfig().getWeight());
+        }
+    }
 }
