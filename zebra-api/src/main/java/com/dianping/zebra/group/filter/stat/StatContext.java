@@ -1,6 +1,5 @@
 package com.dianping.zebra.group.filter.stat;
 
-import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -15,8 +14,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by Dozer on 9/15/14.
  */
 public final class StatContext {
-	private final static int MAX_SQL_COUNT = 1024;
-
 	private final static Map<String, DataSourceStat> dataSource = new HashMap<String, DataSourceStat>();
 
 	private final static Lock dataSourceLock = new ReentrantLock();
@@ -66,12 +63,6 @@ public final class StatContext {
 
 	private static Integer generateExecuteKey(JdbcMetaData metaData) {
 		int result = 0;
-
-		if (execute.size() > MAX_SQL_COUNT) {
-			DalException exp = new DalException("There too many sql in this application!");
-			log.error(exp.getMessage(), exp);
-			return result;
-		}
 
 		if (metaData.getSql() != null) {
 			result = result * 31 + metaData.getSql().hashCode();
