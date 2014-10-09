@@ -4,6 +4,7 @@ package com.dianping.zebra.group.filter.wall;
  * Created by Dozer on 9/24/14.
  */
 
+import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.util.StringUtils;
 import junit.framework.Assert;
@@ -16,14 +17,16 @@ public class WallFilterTest {
     public void generateIdPerformanceTest() throws NoSuchAlgorithmException {
         long startTime = System.currentTimeMillis();
         for (int k = 0; k < 10000; k++) {
-            StringUtils.sha1(String.valueOf(k % 1000));
+            StringUtils.sha1(String.valueOf(k % 10));
         }
         long time1 = System.currentTimeMillis() - startTime;
 
         WallFilter filter = new WallFilter();
         startTime = System.currentTimeMillis();
         for (int k = 0; k < 10000; k++) {
-            filter.generateId(String.valueOf(k % 1000));
+            JdbcMetaData metaData = new JdbcMetaData();
+            metaData.setSql("select * from `Test` where id = " + String.valueOf(k % 10));
+            filter.generateId(metaData);
         }
 
         long time2 = System.currentTimeMillis() - startTime;
@@ -32,6 +35,34 @@ public class WallFilterTest {
         System.out.println(time2);
 
         Assert.assertTrue(time2 < time1);
+    }
+
+    @Test
+    public void test_addId_to_Sql() {
+        WallFilter filter = new WallFilter();
+        JdbcMetaData metaData = new JdbcMetaData();
+        metaData.setSql("select * from test");
+        JdbcMetaData innerMetaData = new JdbcMetaData();
+        innerMetaData.setDataSourceId("test-write-1");
+        metaData.setRealJdbcMetaData(innerMetaData);
+
+        ///*test-write-1*/select * from test
+        Assert.assertEquals("/*z:d1d26296*/select * from test", filter.addIdToSql("select * from test", metaData));
+    }
+
+    @Test
+    public void test_addId_to_Sql_with_avatar() {
+        ExecutionContextHolder.getContext().add("sql_statement_name", "test.select");
+
+        WallFilter filter = new WallFilter();
+        JdbcMetaData metaData = new JdbcMetaData();
+        metaData.setSql("select * from test");
+        JdbcMetaData innerMetaData = new JdbcMetaData();
+        innerMetaData.setDataSourceId("test-write-1");
+        metaData.setRealJdbcMetaData(innerMetaData);
+
+        ///*test-write-1*/select * from test
+        Assert.assertEquals("/*z:ea013b8c*/select * from test", filter.addIdToSql("select * from test", metaData));
     }
 
     @Test

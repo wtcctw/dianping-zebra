@@ -1,5 +1,6 @@
 package com.dianping.zebra.group.filter.wall;
 
+import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcMetaData;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
@@ -17,12 +18,13 @@ import java.util.regex.Pattern;
  */
 public class WallFilter extends DefaultJdbcFilter {
     protected final static Pattern ID_PATTERN = Pattern.compile(".*(\\/\\*z:)([a-zA-Z0-9]{10})(\\*\\/).*");
-    private static final int MAX_ID_LENGTH = 10;
+    private static final int MAX_ID_LENGTH = 8;
+    private static final String SQL_STATEMENT_NAME = "sql_statement_name";
     private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60);
 
     protected String addIdToSql(String sql, JdbcMetaData metaData) {
         try {
-            return String.format("%s/*z:%s*/", sql, generateId(sql));
+            return String.format("/*z:%s*/%s", generateId(metaData), sql);
         } catch (NoSuchAlgorithmException e) {
             return sql;
         }
@@ -46,20 +48,29 @@ public class WallFilter extends DefaultJdbcFilter {
     protected void findLongSqlString(JdbcMetaData metaData) throws SQLException {
     }
 
-    protected String generateId(String sql) throws NoSuchAlgorithmException {
-        if (StringUtils.isBlank(sql)) {
+    protected String generateId(JdbcMetaData metaData) throws NoSuchAlgorithmException {
+        String token = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
+        if (StringUtils.isBlank(token)) {
+            token = metaData.getSql();
+        }
+
+        if (StringUtils.isBlank(token)) {
             return null;
         }
 
-        String sqlId = sqlIdCache.get(sql);
+        if (metaData.getRealJdbcMetaData() != null && metaData.getRealJdbcMetaData().getDataSourceId() != null) {
+            token = String.format("/*%s*/%s", metaData.getRealJdbcMetaData().getDataSourceId(), token);
+        }
+
+        String sqlId = sqlIdCache.get(token);
 
         if (sqlId != null) {
             return sqlId;
         }
 
-        sqlId = StringUtils.sha1(sql).substring(0, MAX_ID_LENGTH);
+        sqlId = StringUtils.sha1(token).substring(0, MAX_ID_LENGTH);
 
-        sqlIdCache.put(sql, sqlId);
+        sqlIdCache.put(token, sqlId);
 
         return sqlId;
     }
