@@ -385,7 +385,7 @@ public class GroupConnection implements Connection {
 	Connection getRealConnection(String sql, boolean forceWriter) throws SQLException {
 		if (forceWriter) {
 			return getWriteConnection();
-		} else if (!autoCommit || StringUtils.trimToEmpty(sql).startsWith(Constants.SQL_FORCE_WRITE_HINT)) {
+		} else if (!autoCommit || StringUtils.trimToEmpty(sql).contains(Constants.SQL_FORCE_WRITE_HINT)) {
 			return getWriteConnection();
 		} else if (customizedReadWriteStrategy != null && customizedReadWriteStrategy.forceReadFromMaster()) {
 			return getWriteConnection();
