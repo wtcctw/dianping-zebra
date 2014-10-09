@@ -30,33 +30,21 @@ public class JdbcMetaData implements Cloneable {
     private List<StatementNode> batchedNode;
 
     private List<String> batchedSqls;
-
     private Connection connection;
-
     private DataSource dataSource;
-
     private String dataSourceId;
-
     private boolean isBatch;
-
     private boolean isPrepared;
-
     private boolean isTransaction;
-
     private String jdbcPassword;
-
     private String jdbcUrl;
-
     private String jdbcUsername;
-
+    private List<String> mergedBatchedSqls;
+    private String mergedSql;
     private StatementNode node;
-
     private Object params;
-
     private LinkedHashMap<String, Object> properties = new LinkedHashMap<String, Object>();
-
     private JdbcMetaData realJdbcMetaData;
-
     private String sql;
 
     public JdbcMetaData clone() {
@@ -130,6 +118,14 @@ public class JdbcMetaData implements Cloneable {
 
     public void setJdbcUsername(String jdbcUsername) {
         this.jdbcUsername = jdbcUsername;
+    }
+
+    public List<String> getMergedBatchedSqls() {
+        return mergedBatchedSqls;
+    }
+
+    public String getMergedSql() {
+        return mergedSql;
     }
 
     public StatementNode getNode() {
