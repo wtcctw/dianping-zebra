@@ -47,8 +47,8 @@
                 <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{ip}}</td>
                 <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{machine.m_version}}</td>
             </tr>
-            <tr ng-repeat="(ip,datasources) in machine.m_datasources">
-                <td>ip</td>
+            <tr ng-repeat="(name,datasources) in machine.m_datasources">
+                <td>{{name}}</td>
                 <td><span title="{{datasources.m_jdbcUrl }}">...</span></td>
                 <td>{{datasources.m_username }}</td>
                 <td>{{datasources.m_type }}</td>
