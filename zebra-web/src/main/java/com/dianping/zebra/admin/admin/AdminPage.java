@@ -5,7 +5,7 @@ import org.unidal.web.mvc.annotation.ModuleMeta;
 
 public enum AdminPage implements Page {
 
-   INDEX("index", "index", "Index", "Index", true),
+   UPDATE("update", "update", "Update", "Update", true),
 
    SERVICE("service", "service", "Service", "Service", true),
 

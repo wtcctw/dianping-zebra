@@ -31,7 +31,7 @@ public abstract class ParamContext implements Serializable {
     }
 
     /**
-     * @return the index
+     * @return the update
      */
     public int getIndex() {
         return index;
@@ -39,7 +39,7 @@ public abstract class ParamContext implements Serializable {
 
     /**
      * @param index
-     *            the index to set
+     *            the update to set
      */
     public void setIndex(int index) {
         this.index = index;

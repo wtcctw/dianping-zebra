@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html ng-app="ZebraWeb">
+<head lang="en">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+</head>
+<body>
+<nav class="navbar navbar-inverse" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Zebra</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-9">
+            <ul class="nav navbar-nav">
+                <li active-link="active"><a href="#/config">Config</a></li>
+                <li active-link="active"><a href="#/black">BlackList</a></li>
+                <li active-link="active"><a href="#/update">Update Status</a></li>
+                <li active-link="active"><a href="#/merge">Merge Config</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid" ui-view>
+</div>
+</body>
+<script src="bower_components/angular/angular.min.js"></script>
+<script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+<script src="app/js/app.js"></script>
+<script src="app/js/controller.js"></script>
+</html>

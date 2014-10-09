@@ -106,26 +106,14 @@
 			<implementation>com.dianping.zebra.admin.admin.AdminModule</implementation>
 		</component>
 		<component>
-			<role>com.dianping.zebra.admin.admin.page.index.Handler</role>
-			<implementation>com.dianping.zebra.admin.admin.page.index.Handler</implementation>
+			<role>com.dianping.zebra.admin.admin.page.update.Handler</role>
+			<implementation>com.dianping.zebra.admin.admin.page.update.Handler</implementation>
 			<requirements>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.index.JspViewer</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
-				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
 				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.zebra.admin.admin.page.index.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.index.JspViewer</implementation>
-			<requirements>
 				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -134,25 +122,13 @@
 			<implementation>com.dianping.zebra.admin.admin.page.service.Handler</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.service.JspViewer</role>
+					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.DalService</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.LogService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.zebra.admin.admin.page.service.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.service.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -161,19 +137,7 @@
 			<implementation>com.dianping.zebra.admin.admin.page.notify.Handler</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.notify.JspViewer</role>
-				</requirement>
-				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.zebra.admin.admin.page.notify.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.notify.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
 				</requirement>
 			</requirements>
 		</component>

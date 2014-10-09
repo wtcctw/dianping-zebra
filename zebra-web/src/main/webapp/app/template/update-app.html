@@ -1,0 +1,64 @@
+<div class="row">
+    <div class="col-xs-12">
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+                <th>GroupDataSource</th>
+                <th>DpdlDataSource</th>
+                <th>C3P0DataSource</th>
+                <th>SingleDataSource</th>
+                <th>OtherDataSource</th>
+                <th>自动替换的C3P0数据源</th>
+                <th>自动替换的DPDL数据源</th>
+                <th>总数据源</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr id="machine-info-{{machine.m_key}}">
+                <td>{{app.m_groupDataSource}}</td>
+                <td>{{app.m_dpdlDataSource}}</td>
+                <td>{{app.m_c3p0DataSource}}</td>
+                <td>{{app.m_singleDataSource}}</td>
+                <td>{{app.m_otherDataSource}}</td>
+                <td>{{app.m_replacedSingleDataSource}}</td>
+                <td>{{app.m_replacedDpdlDataSource}}</td>
+                <td>{{app.m_totalDataSource}}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+                <th>IP</th>
+                <th>DALVersion</th>
+                <th>BeanName</th>
+                <th>JDBC</th>
+                <th>Username</th>
+                <th>Type</th>
+                <th>init</th>
+                <th>max</th>
+                <th>min</th>
+                <th>Update Dal</th>
+            </tr>
+            </thead>
+            <tbody ng-repeat="(ip,machine) in app.m_machines">
+            <tr>
+                <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{ip}}</td>
+                <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{machine.m_version}}</td>
+            </tr>
+            <tr ng-repeat="(ip,datasources) in machine.m_datasources">
+                <td>ip</td>
+                <td><span title="{{datasources.m_jdbcUrl }}">...</span></td>
+                <td>{{datasources.m_username }}</td>
+                <td>{{datasources.m_type }}</td>
+                <td>{{datasources.m_initPoolSize }}</td>
+                <td>{{datasources.m_maxPoolSize }}</td>
+                <td>{{datasources.m_minPoolSize }}</td>
+                <td><span
+                        class="badge alert-{{datasource.m_type.contains('GroupDataSource') || datasource.m_replaced == true ? 'success' : 'danger'}}">{{datasource.m_type.contains('GroupDataSource') || datasource.m_replaced == true ? '是':'否'}}</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

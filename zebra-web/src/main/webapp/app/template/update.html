@@ -1,0 +1,28 @@
+<div class="row">
+    <div class="col-xs-12">
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+                <th>数据库({{report.m_databases | objectCount}})</th>
+                <th>自动替换的数目({{report.m_replacedSingleDataSource}})/所有的C3P0数目({{report.m_c3p0DataSource}})</th>
+                <th>自动替换的数目({{report.m_replacedDpdlDataSource}})/所有的DPDL数目({{report.m_dpdlDataSource}})</th>
+                <th>升级Dal的数目({{report.m_groupDataSource}})</th>
+                <th>总数据源({{report.m_totalDataSource}})</th>
+                <th>测试连接</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="database in report.m_databases" id="database-info-{{database.m_name}}">
+                <td><a href="#/update/database/{{database.m_name}}">{{database.m_name}}</a></td>
+                <td>{{database.m_replacedSingleDataSource}}/{{database.m_c3p0DataSource}}</td>
+                <td>{{database.m_replacedDpdlDataSource}}/{{database.m_dpdlDataSource}}</td>
+                <td>{{database.m_groupDataSource }}</td>
+                <td>
+                    <span class="badge alert-{{database.m_replacedDpdlDataSource == 0 && database.m_groupDataSource == 0?'danger':((database.m_replacedSingleDataSource + database.m_replacedDpdlDataSource + database.m_groupDataSource) == database.m_totalDataSource?'success':'warning')}}">{{database.m_totalDataSource}}</span>
+                </td>
+                <td><a href="?op=connection&database={{database.m_name}}">测试</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

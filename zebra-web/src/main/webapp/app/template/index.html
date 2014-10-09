@@ -1,0 +1,18 @@
+<alert ng-repeat="alert in alerts" type="{{alert.type}}">{{alert.msg}}</alert>
+<div class="row">
+    <div class="col-xs-10 col-xs-offset-1">
+        <span ng-repeat="story in stories">
+            {{story.content}}
+        </span>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-10 col-xs-offset-1">
+        <textarea style="width:100%" ng-model="newStory.content"></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-10 col-xs-offset-1">
+        <button style="width:100%" class="btn btn-primary" ng-click="addStory()">添加故事</button>
+    </div>
+</div>
