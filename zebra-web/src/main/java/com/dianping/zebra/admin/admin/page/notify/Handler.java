@@ -57,10 +57,5 @@ public class Handler implements PageHandler<Context> {
     @Override
     @OutboundActionMeta(name = "notify")
     public void handleOutbound(Context ctx) throws ServletException, IOException {
-//		Model jsonModel = new Model(ctx);
-//
-//		jsonModel.setAction(Action.VIEW);
-//		jsonModel.setPage(AdminPage.NOTIFY);
-//		m_jspViewer.view(ctx, jsonModel);
     }
 }
