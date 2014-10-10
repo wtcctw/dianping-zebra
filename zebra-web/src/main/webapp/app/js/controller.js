@@ -25,12 +25,17 @@ zebraWeb.controller('config-test', function ($scope, name, connectionStatus) {
 });
 
 zebraWeb.controller('config', function ($scope, $stateParams, $http) {
-    $scope.configs = [
-        {name:'xxxx',config:'asdada'},
-        {name:'xxxx',config:'asdada'},
-        {name:'xxxx',config:'asdada'},
-        {name:'xxxx',config:'asdada'},
-        {name:'xxxx',config:'asdada'},
-        {name:'xxxx',config:'asdada'}
-    ];
+    $scope.envs = ['dev', 'alpha', 'qa'];
+    $scope.env = 'dev';
+
+    var load = function () {
+        $http.get('/a/config?op=view&env=' + $scope.env).success(function (data, status, headers, config) {
+            $scope.lionConfigs = data;
+        });
+    }
+    load();
+
+    $scope.$watch('env', function() {
+        load();
+    });
 });

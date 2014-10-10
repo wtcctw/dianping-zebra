@@ -1,17 +1,16 @@
 <div class="row">
     <div class="col-xs-12">
         <form class="form-inline" role="form">
-            <div class="form-group">
-                <input ng-model="searchText" type="text" class="form-control" placeholder="GroupDataSourceId">
-            </div>
-            <button type="button" class="btn btn-primary">Sign in</button>
+            <input class="form-control" ng-model="searchText" type="text" placeholder="GroupDataSourceId">
+            <select class="form-control" ng-model="env" ng-options="env for env in envs">
+            </select>
         </form>
     </div>
 </div>
 <br/>
 <div class="row">
     <div class="col-xs-12">
-        <table class="table table-bordered table-striped table-condensed">
+        <table class="table table-striped table-condensed">
             <thead>
             <tr>
                 <th>Key</th>
@@ -20,9 +19,9 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="config in configs">
-                <td>{{config.name}}</td>
-                <td>{{config.config}}</td>
+            <tr ng-repeat="group in lionConfigs | toArray | filter:searchText">
+                <td>{{group.$key}}</td>
+                <td>{{group.value}}</td>
                 <td><a href="">Edit</a></td>
             </tr>
             </tbody>

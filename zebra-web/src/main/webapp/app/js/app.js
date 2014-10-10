@@ -23,6 +23,10 @@ zebraWeb.filter('toArray', function () {
                 return key;
             }
         }).map(function (key) {
+            if (!(obj[key] instanceof Object)) {
+                obj[key] = {value: obj[key]};
+            }
+
             return Object.defineProperty(obj[key], '$key', {__proto__: null, value: key});
         });
     };

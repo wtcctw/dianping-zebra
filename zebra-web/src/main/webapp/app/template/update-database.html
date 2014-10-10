@@ -1,19 +1,28 @@
 <div class="row">
     <div class="col-xs-12">
-        <input placeholder="Search App" ng-model="searchTest"/>
+        <form class="form-inline" role="form">
+            <input class="form-control" placeholder="Search App" ng-model="searchTest"/>
+        </form>
     </div>
 </div>
 <br/>
 <div class="row">
     <div class="col-xs-12">
-        <table class="table table-bordered table-striped table-condensed">
+        <table class="table table-striped table-condensed">
             <thead>
             <tr>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_name'">App({{database.m_apps | objectCount}})</a></th>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedSingleDataSource'">自动替换的数目({{database.m_replacedSingleDataSource }})</a><span>/</span><a href="" ng-click="reverse=!reverse;predicate='m_c3p0DataSource'">所有的C3P0数目({{database.m_c3p0DataSource }})</a></th>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedDpdlDataSource'">自动替换的数目({{database.m_replacedDpdlDataSource }})</a><span>/</span><a href="" ng-click="reverse=!reverse;predicate='m_dpdlDataSource'">所有的DPDL数目({{database.m_dpdlDataSource }})</a></th>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_groupDataSource'">升级Dal的数目({{database.m_groupDataSource }})</a></th>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_totalDataSource'">总数据源({{database.m_totalDataSource }})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_name'">App({{database.m_apps | objectCount}})</a>
+                </th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedSingleDataSource'">自动替换的数目({{database.m_replacedSingleDataSource
+                    }})</a><span>/</span><a href="" ng-click="reverse=!reverse;predicate='m_c3p0DataSource'">所有的C3P0数目({{database.m_c3p0DataSource
+                    }})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedDpdlDataSource'">自动替换的数目({{database.m_replacedDpdlDataSource
+                    }})</a><span>/</span><a href="" ng-click="reverse=!reverse;predicate='m_dpdlDataSource'">所有的DPDL数目({{database.m_dpdlDataSource
+                    }})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_groupDataSource'">升级Dal的数目({{database.m_groupDataSource
+                    }})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_totalDataSource'">总数据源({{database.m_totalDataSource
+                    }})</a></th>
             </tr>
             </thead>
             <tbody>
