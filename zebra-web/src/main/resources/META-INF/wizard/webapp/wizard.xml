@@ -2,8 +2,8 @@
 <wizard package="com.dianping.zebra.admin">
    <webapp package="com.dianping.zebra.admin" name="admin" webres="true" cat="true" plugin-management="true" jstl="true" layout="bootstrap">
       <module name="admin" path="a" default="true">
-         <page name="index" title="Index" default="true" path="index" template="default">
-            <description>Index</description>
+         <page name="update" title="Update" default="true" path="update" template="default">
+            <description>Updates</description>
          </page>
          <page name="service" title="Service" path="service" template="default">
             <description>Service</description>
