@@ -5,7 +5,7 @@ import com.dianping.zebra.group.config.LocalConfigServiceTest;
 import com.dianping.zebra.group.config.SystemConfigManagerTest;
 import com.dianping.zebra.group.datasources.FailoverDataSourceTest;
 import com.dianping.zebra.group.filter.DefaultFilterManagerTest;
-import com.dianping.zebra.group.filter.JdbcMetaDataTest;
+import com.dianping.zebra.group.filter.JdbcContextTest;
 import com.dianping.zebra.group.jdbc.*;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapperTest;
 import com.dianping.zebra.group.router.DpdlReadWriteStrategyImplTest;
@@ -29,7 +29,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		FailoverDataSourceTest.class,
 
 		//mockedFilter
-		JdbcMetaDataTest.class,
+		JdbcContextTest.class,
 		DefaultFilterManagerTest.class,
 
 		//jdbc
