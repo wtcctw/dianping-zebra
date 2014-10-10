@@ -3,16 +3,21 @@
         <table class="table table-bordered table-striped table-condensed">
             <thead>
             <tr>
-                <th>数据库({{report.m_databases | objectCount}})</th>
-                <th>自动替换的数目({{report.m_replacedSingleDataSource}})/所有的C3P0数目({{report.m_c3p0DataSource}})</th>
-                <th>自动替换的数目({{report.m_replacedDpdlDataSource}})/所有的DPDL数目({{report.m_dpdlDataSource}})</th>
-                <th>升级Dal的数目({{report.m_groupDataSource}})</th>
-                <th>总数据源({{report.m_totalDataSource}})</th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_name'">数据库({{report.m_databases |
+                    objectCount}})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedSingleDataSource'">自动替换的数目({{report.m_replacedSingleDataSource}})</a>
+                    <span>/</span>
+                    <a href="" ng-click="reverse=!reverse;predicate='m_c3p0DataSource'">所有的C3P0数目({{report.m_c3p0DataSource}})</a>
+                </th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedDpdlDataSource'">自动替换的数目({{report.m_replacedDpdlDataSource}})</a><span>/</span>
+                    <a href="" ng-click="reverse=!reverse;predicate='m_dpdlDataSource'">所有的DPDL数目({{report.m_dpdlDataSource}})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_groupDataSource'">升级Dal的数目({{report.m_groupDataSource}})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_totalDataSource'">总数据源({{report.m_totalDataSource}})</a></th>
                 <th>测试连接</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="database in report.m_databases" id="database-info-{{database.m_name}}">
+            <tr ng-repeat="database in report.m_databases | toArray | orderBy:predicate:reverse">
                 <td><a href="#/update/database/{{database.m_name}}">{{database.m_name}}</a></td>
                 <td>{{database.m_replacedSingleDataSource}}/{{database.m_c3p0DataSource}}</td>
                 <td>{{database.m_replacedDpdlDataSource}}/{{database.m_dpdlDataSource}}</td>

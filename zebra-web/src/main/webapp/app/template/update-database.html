@@ -3,15 +3,15 @@
         <table class="table table-bordered table-striped table-condensed">
             <thead>
             <tr>
-                <th>App({{database.m_apps | objectCount}})</th>
-                <th>自动替换的数目({{database.m_replacedSingleDataSource }})/所有的C3P0数目({{database.m_c3p0DataSource }})</th>
-                <th>自动替换的数目({{database.m_replacedDpdlDataSource }})/所有的DPDL数目({{database.m_dpdlDataSource }})</th>
-                <th>升级Dal的数目({{database.m_groupDataSource }})</th>
-                <th>总数据源({{database.m_totalDataSource }})</th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_name'">App({{database.m_apps | objectCount}})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedSingleDataSource'">自动替换的数目({{database.m_replacedSingleDataSource }})</a><span>/</span><a href="" ng-click="reverse=!reverse;predicate='m_c3p0DataSource'">所有的C3P0数目({{database.m_c3p0DataSource }})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedDpdlDataSource'">自动替换的数目({{database.m_replacedDpdlDataSource }})</a><span>/</span><a href="" ng-click="reverse=!reverse;predicate='m_dpdlDataSource'">所有的DPDL数目({{database.m_dpdlDataSource }})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_groupDataSource'">升级Dal的数目({{database.m_groupDataSource }})</a></th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='m_totalDataSource'">总数据源({{database.m_totalDataSource }})</a></th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="app in database.m_apps" id="app-info-{{app.m_name}}">
+            <tr ng-repeat="app in database.m_apps | toArray | orderBy:predicate:reverse">
                 <td><a href="#/update/app/{{app.m_name}}">{{app.m_name}}</a></td>
                 <td>{{app.m_replacedSingleDataSource}}/{{app.m_c3p0DataSource}}</td>
                 <td>{{app.m_replacedDpdlDataSource}}/{{app.m_dpdlDataSource }}</td>
