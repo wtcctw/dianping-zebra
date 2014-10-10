@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.filter.stat;
 
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -68,22 +68,20 @@ public class ExecuteStat {
 		this.isPrepared = false;
 	}
 
-	public ExecuteStat(JdbcMetaData metaData) {
-		this.isBatch = metaData.isBatch();
-		if (metaData.isBatch() && !metaData.isPrepared()) {
-			this.sql = Arrays.toString(metaData.getBatchedSqls().toArray());
+	public ExecuteStat(JdbcContext context) {
+		this.isBatch = context.isBatch();
+		if (context.isBatch() && !context.isPrepared()) {
+			this.sql = Arrays.toString(context.getBatchedSqls().toArray());
 		} else {
-			this.sql = metaData.getSql();
+			this.sql = context.getSql();
 		}
-		this.isPrepared = metaData.isPrepared();
-		this.groupDataSourceId = metaData.getDataSourceId();
-		this.dataSourceId =
-				metaData.getRealJdbcMetaData() == null ? null : metaData.getRealJdbcMetaData().getDataSourceId();
-
+		this.isPrepared = context.isPrepared();
+		this.groupDataSourceId = context.getDataSourceId();
+		this.dataSourceId = context.getRealJdbcContext() == null ? null : context.getRealJdbcContext()
+		      .getDataSourceId();
 	}
 
-	private void convertTimeRange(Map<String, Object> resultMap, String titlePrefix,
-			Map<Long, AtomicLong> resultResult) {
+	private void convertTimeRange(Map<String, Object> resultMap, String titlePrefix, Map<Long, AtomicLong> resultResult) {
 		StringBuffer successKey = new StringBuffer();
 		StringBuffer successValue = new StringBuffer();
 		for (Map.Entry<Long, AtomicLong> entry : resultResult.entrySet()) {
@@ -99,9 +97,7 @@ public class ExecuteStat {
 			successKey.append(entry.getKey());
 			successValue.append(entry.getValue());
 		}
-		resultMap.put(
-				String.format("%s[%s]", titlePrefix, successKey),
-				successValue);
+		resultMap.put(String.format("%s[%s]", titlePrefix, successKey), successValue);
 	}
 
 	public String getDataSourceId() {
@@ -205,9 +201,11 @@ public class ExecuteStat {
 			resultMap.put("IsBatch", this.isBatch);
 			resultMap.put("IsPrepared", this.isPrepared);
 		}
-		resultMap.put("AvgTime(S/E)", String.format("%d/%d",
-				this.getSuccessCount().get() == 0 ? 0 : this.getSuccessTime().get() / this.getSuccessCount().get(),
-				this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get() / this.getErrorCount().get()));
+		resultMap.put(
+		      "AvgTime(S/E)",
+		      String.format("%d/%d", this.getSuccessCount().get() == 0 ? 0 : this.getSuccessTime().get()
+		            / this.getSuccessCount().get(), this.getErrorCount().get() == 0 ? 0 : this.getErrorTime().get()
+		            / this.getErrorCount().get()));
 		resultMap.put("Execute(S/E)", String.format("%d/%d", this.successCount.get(), this.errorCount.get()));
 		resultMap.put("Select(S/E)", String.format("%d/%d", this.selectSuccessCount.get(), this.selectErrorCount.get()));
 		resultMap.put("SelectRows", this.selectRow.get());

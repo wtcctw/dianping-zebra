@@ -1,14 +1,12 @@
 package com.dianping.zebra.group.filter.stat;
 
-import com.dianping.zebra.group.filter.JdbcMetaData;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import com.dianping.zebra.group.filter.JdbcContext;
 
 /**
  * Created by Dozer on 9/15/14.
@@ -16,13 +14,11 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class StatContext {
 	private final static Map<String, DataSourceStat> dataSource = new HashMap<String, DataSourceStat>();
 
-	private final static Lock dataSourceLock = new ReentrantLock();
-
 	private final static Map<Integer, ExecuteStat> execute = new HashMap<Integer, ExecuteStat>();
 
-	private final static Lock executeLock = new ReentrantLock();
+	private final static Lock dataSourceLock = new ReentrantLock();
 
-	private final static Logger log = LogManager.getLogger(StatContext.class);
+	private final static Lock executeLock = new ReentrantLock();
 
 	private volatile static DataSourceStat dataSourceSummary = new DataSourceStat();
 
@@ -31,12 +27,13 @@ public final class StatContext {
 	private StatContext() {
 	}
 
-	private static void checkDataSource(String key, JdbcMetaData metaData) {
+	private static void checkDataSource(String key, JdbcContext context) {
 		if (!dataSource.containsKey(key)) {
+			dataSourceLock.lock();
 			try {
-				dataSourceLock.lock();
 				if (!dataSource.containsKey(key)) {
-					dataSource.put(key, new DataSourceStat(metaData));
+					dataSource.put(key, new DataSourceStat(context.getDataSourceId(), context.getDataSource().getClass()
+					      .getSimpleName(), context.getProperties()));
 				}
 			} finally {
 				dataSourceLock.unlock();
@@ -44,12 +41,12 @@ public final class StatContext {
 		}
 	}
 
-	private static void checkExecute(Integer key, JdbcMetaData metaData) {
+	private static void checkExecute(Integer key, JdbcContext context) {
 		if (!execute.containsKey(key)) {
+			executeLock.lock();
 			try {
-				executeLock.lock();
 				if (!execute.containsKey(key)) {
-					execute.put(key, new ExecuteStat(metaData));
+					execute.put(key, new ExecuteStat(context));
 				}
 			} finally {
 				executeLock.unlock();
@@ -57,39 +54,39 @@ public final class StatContext {
 		}
 	}
 
-	private static String generateDataSourceKey(JdbcMetaData metaData) {
-		return metaData.getDataSourceId();
+	private static String generateDataSourceKey(JdbcContext context) {
+		return context.getDataSourceId();
 	}
 
-	private static Integer generateExecuteKey(JdbcMetaData metaData) {
+	private static Integer generateExecuteKey(JdbcContext context) {
 		int result = 0;
 
-		if (metaData.getSql() != null) {
-			result = result * 31 + metaData.getSql().hashCode();
+		if (context.getSql() != null) {
+			result = result * 31 + context.getSql().hashCode();
 		}
 
-		result = result * 31 + new Boolean(metaData.isBatch()).hashCode();
+		result = result * 31 + new Boolean(context.isBatch()).hashCode();
 
-		result = result * 31 + new Boolean(metaData.isPrepared()).hashCode();
+		result = result * 31 + new Boolean(context.isPrepared()).hashCode();
 
-		if (metaData.getBatchedSqls() != null) {
-			result = result * 31 + Arrays.toString(metaData.getBatchedSqls().toArray()).hashCode();
+		if (context.getBatchedSqls() != null) {
+			result = result * 31 + Arrays.toString(context.getBatchedSqls().toArray()).hashCode();
 		}
 
-		if (metaData.getDataSourceId() != null) {
-			result = result * 31 + metaData.getDataSourceId().hashCode();
+		if (context.getDataSourceId() != null) {
+			result = result * 31 + context.getDataSourceId().hashCode();
 		}
 
-		if (metaData.getRealJdbcMetaData() != null && metaData.getRealJdbcMetaData().getDataSourceId() != null) {
-			result = result * 31 + metaData.getRealJdbcMetaData().getDataSourceId().hashCode();
+		if (context.getRealJdbcContext() != null && context.getRealJdbcContext().getDataSourceId() != null) {
+			result = result * 31 + context.getRealJdbcContext().getDataSourceId().hashCode();
 		}
 
 		return result;
 	}
 
-	public static DataSourceStat getDataSource(JdbcMetaData metaData) {
-		String key = generateDataSourceKey(metaData);
-		checkDataSource(key, metaData);
+	public static DataSourceStat getDataSource(JdbcContext context) {
+		String key = generateDataSourceKey(context);
+		checkDataSource(key, context);
 		return dataSource.get(key);
 	}
 
@@ -101,9 +98,9 @@ public final class StatContext {
 		return dataSourceSummary;
 	}
 
-	public static ExecuteStat getExecute(JdbcMetaData metaData) {
-		Integer key = generateExecuteKey(metaData);
-		checkExecute(key, metaData);
+	public static ExecuteStat getExecute(JdbcContext context) {
+		Integer key = generateExecuteKey(context);
+		checkExecute(key, context);
 		return execute.get(key);
 	}
 
@@ -119,15 +116,15 @@ public final class StatContext {
 		dataSourceSummary = new DataSourceStat();
 		executeSummary = new ExecuteStat();
 
+		dataSourceLock.lock();
 		try {
-			dataSourceLock.lock();
 			dataSource.clear();
 		} finally {
 			dataSourceLock.unlock();
 		}
 
+		executeLock.lock();
 		try {
-			executeLock.lock();
 			execute.clear();
 		} finally {
 			executeLock.unlock();

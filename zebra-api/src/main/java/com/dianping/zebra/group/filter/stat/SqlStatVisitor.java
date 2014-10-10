@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.filter.stat;
 
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.*;
 
@@ -13,12 +13,12 @@ import java.util.concurrent.atomic.AtomicLong;
 public class SqlStatVisitor implements Visitor {
 	private final Exception exception;
 
-	private final JdbcMetaData metaData;
+	private final JdbcContext context;
 
 	private final Object result;
 
-	public SqlStatVisitor(JdbcMetaData metadata, Object result, Exception exp) {
-		this.metaData = metadata;
+	public SqlStatVisitor(JdbcContext context, Object result, Exception exp) {
+		this.context = context;
 		this.exception = exp;
 		this.result = result;
 	}
@@ -34,11 +34,11 @@ public class SqlStatVisitor implements Visitor {
 	public void deleteNode(DeleteNode node) {
 		sqlNode(node);
 		StatContext.getExecuteSummary().getDeleteRow().addAndGet(getResultUpdateRows());
-		StatContext.getExecute(metaData).getDeleteRow().addAndGet(getResultUpdateRows());
-		increment(StatContext.getExecuteSummary().getDeleteSuccessCount(),
-				StatContext.getExecuteSummary().getDeleteErrorCount());
-		increment(StatContext.getExecute(metaData).getDeleteSuccessCount(),
-				StatContext.getExecute(metaData).getDeleteErrorCount());
+		StatContext.getExecute(context).getDeleteRow().addAndGet(getResultUpdateRows());
+		increment(StatContext.getExecuteSummary().getDeleteSuccessCount(), StatContext.getExecuteSummary()
+		      .getDeleteErrorCount());
+		increment(StatContext.getExecute(context).getDeleteSuccessCount(), StatContext.getExecute(context)
+		      .getDeleteErrorCount());
 	}
 
 	private long getResultUpdateRows() {
@@ -62,57 +62,59 @@ public class SqlStatVisitor implements Visitor {
 	public void insertNode(InsertNode node) {
 		sqlNode(node);
 		StatContext.getExecuteSummary().getInsertRow().addAndGet(getResultUpdateRows());
-		StatContext.getExecute(metaData).getInsertRow().addAndGet(getResultUpdateRows());
-		increment(StatContext.getExecuteSummary().getInsertSuccessCount(),
-				StatContext.getExecuteSummary().getInsertErrorCount());
-		increment(StatContext.getExecute(metaData).getInsertSuccessCount(),
-				StatContext.getExecute(metaData).getInsertErrorCount());
+		StatContext.getExecute(context).getInsertRow().addAndGet(getResultUpdateRows());
+		increment(StatContext.getExecuteSummary().getInsertSuccessCount(), StatContext.getExecuteSummary()
+		      .getInsertErrorCount());
+		increment(StatContext.getExecute(context).getInsertSuccessCount(), StatContext.getExecute(context)
+		      .getInsertErrorCount());
 	}
 
 	public void selectNode(SelectNode node) {
 		sqlNode(node);
-		increment(StatContext.getExecuteSummary().getSelectSuccessCount(),
-				StatContext.getExecuteSummary().getSelectErrorCount());
-		increment(StatContext.getExecute(metaData).getSelectSuccessCount(),
-				StatContext.getExecute(metaData).getSelectErrorCount());
+		increment(StatContext.getExecuteSummary().getSelectSuccessCount(), StatContext.getExecuteSummary()
+		      .getSelectErrorCount());
+		increment(StatContext.getExecute(context).getSelectSuccessCount(), StatContext.getExecute(context)
+		      .getSelectErrorCount());
 	}
 
-	@Override public boolean skipChildren(Visitable node) throws StandardException {
+	@Override
+	public boolean skipChildren(Visitable node) throws StandardException {
 		return false;
 	}
 
 	public void sqlNode(Visitable node) {
-		if (this.metaData.isTransaction()) {
+		if (this.context.isTransaction()) {
 			StatContext.getExecuteSummary().getTransactionCount().incrementAndGet();
-			StatContext.getExecute(metaData).getTransactionCount().incrementAndGet();
+			StatContext.getExecute(context).getTransactionCount().incrementAndGet();
 		}
 
 		increment(StatContext.getExecuteSummary().getSuccessCount(), StatContext.getExecuteSummary().getErrorCount());
-		increment(StatContext.getExecute(metaData).getSuccessCount(),
-				StatContext.getExecute(metaData).getErrorCount());
+		increment(StatContext.getExecute(context).getSuccessCount(), StatContext.getExecute(context).getErrorCount());
 	}
 
-	@Override public boolean stopTraversal() {
+	@Override
+	public boolean stopTraversal() {
 		return false;
 	}
 
 	public void updateNode(UpdateNode node) {
 		sqlNode(node);
 		StatContext.getExecuteSummary().getUpdateRow().addAndGet(getResultUpdateRows());
-		StatContext.getExecute(metaData).getUpdateRow().addAndGet(getResultUpdateRows());
-		increment(StatContext.getExecuteSummary().getUpdateSuccessCount(),
-				StatContext.getExecuteSummary().getUpdateErrorCount());
-		increment(StatContext.getExecute(metaData).getUpdateSuccessCount(),
-				StatContext.getExecute(metaData).getUpdateErrorCount());
+		StatContext.getExecute(context).getUpdateRow().addAndGet(getResultUpdateRows());
+		increment(StatContext.getExecuteSummary().getUpdateSuccessCount(), StatContext.getExecuteSummary()
+		      .getUpdateErrorCount());
+		increment(StatContext.getExecute(context).getUpdateSuccessCount(), StatContext.getExecute(context)
+		      .getUpdateErrorCount());
 	}
 
-	private <T extends QueryTreeNode> void visit(QueryTreeNodeList<T> nodes) throws StandardException {
-		for (QueryTreeNode node : nodes) {
-			visit(node);
-		}
-	}
+//	private <T extends QueryTreeNode> void visit(QueryTreeNodeList<T> nodes) throws StandardException {
+//		for (QueryTreeNode node : nodes) {
+//			visit(node);
+//		}
+//	}
 
-	@Override public Visitable visit(Visitable node) throws StandardException {
+	@Override
+	public Visitable visit(Visitable node) throws StandardException {
 		if (node == null) {
 			return node;
 		}
@@ -140,7 +142,8 @@ public class SqlStatVisitor implements Visitor {
 		return node;
 	}
 
-	@Override public boolean visitChildrenFirst(Visitable node) {
+	@Override
+	public boolean visitChildrenFirst(Visitable node) {
 		return false;
 	}
 }

@@ -15,77 +15,87 @@ import java.sql.SQLException;
  * Created by Dozer on 9/2/14.
  */
 public class DefaultJdbcFilter implements JdbcFilter {
-	@Override public <S> void closeGroupConnection(JdbcMetaData metaData, S source,
-			FilterActionWithSQLExcption<S> action)
-			throws SQLException {
+	@Override
+	public <S> void closeGroupConnection(JdbcContext metaData, S source, FilterActionWithSQLExcption<S> action)
+	      throws SQLException {
 		action.execute(source);
 	}
 
-	@Override public <S> void closeGroupDataSource(JdbcMetaData metaData, S source,
-			FilterActionWithSQLExcption<S> action) throws SQLException {
+	@Override
+	public <S> void closeGroupDataSource(JdbcContext metaData, S source, FilterActionWithSQLExcption<S> action)
+	      throws SQLException {
 		action.execute(source);
 	}
 
-	@Override public <S> void closeSingleConnection(JdbcMetaData metaData, S source,
-			FilterActionWithSQLExcption<S> action) throws SQLException {
+	@Override
+	public <S> void closeSingleConnection(JdbcContext metaData, S source, FilterActionWithSQLExcption<S> action)
+	      throws SQLException {
 		action.execute(source);
 	}
 
-	@Override public <S> void closeSingleDataSource(JdbcMetaData metaData, S source,
-			FilterActionWithSQLExcption<S> action)
-			throws SQLException {
+	@Override
+	public <S> void closeSingleDataSource(JdbcContext metaData, S source, FilterActionWithSQLExcption<S> action)
+	      throws SQLException {
 		action.execute(source);
 	}
 
-	@Override public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
-			throws SQLException {
+	@Override
+	public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
+	      throws SQLException {
 		return action.execute(source);
 	}
 
-	@Override public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-			JdbcMetaData metaData, S source,
-			FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
+	@Override
+	public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(JdbcContext metaData,
+	      S source, FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
 		return action.execute(source);
 	}
 
-	@Override public <S> GroupConnection getGroupConnection(JdbcMetaData metaData, S source,
-			FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException {
+	@Override
+	public <S> GroupConnection getGroupConnection(JdbcContext metaData, S source,
+	      FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException {
 		return action.execute(source);
 	}
 
-	@Override public int getOrder() {
-		return this.DEFAULT_ORDER;
+	@Override
+	public int getOrder() {
+		return DEFAULT_ORDER;
 	}
 
-	@Override public <S> SingleConnection getSingleConnection(JdbcMetaData metaData, S source,
-			FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException {
+	@Override
+	public <S> SingleConnection getSingleConnection(JdbcContext metaData, S source,
+	      FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException {
 		return action.execute(source);
 	}
 
-	@Override public <S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {
+	@Override
+	public <S> void initGroupDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
 		action.execute(source);
 	}
 
-	@Override public <S> DataSource initSingleDataSource(JdbcMetaData metaData, S source,
-			FilterFunction<S, DataSource> action) {
+	@Override
+	public <S> DataSource initSingleDataSource(JdbcContext metaData, S source, FilterFunction<S, DataSource> action) {
 		return action.execute(source);
 	}
 
-	@Override public <S> void refreshGroupDataSource(JdbcMetaData metaData, String propertiesName, S source,
-			FilterAction<S> action) {
+	@Override
+	public <S> void refreshGroupDataSource(JdbcContext metaData, String propertiesName, S source, FilterAction<S> action) {
 		action.execute(source);
 	}
 
-	@Override public <S> Boolean resultSetNext(JdbcMetaData metaData, S source,
-			FilterFunctionWithSQLException<S, Boolean> action) throws SQLException {
+	@Override
+	public <S> Boolean resultSetNext(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, Boolean> action)
+	      throws SQLException {
 		return action.execute(source);
 	}
 
-	@Override public <S> String sql(JdbcMetaData metaData, S source, FilterFunction<S, String> action) {
+	@Override
+	public <S> String sql(JdbcContext metaData, S source, FilterFunction<S, String> action) {
 		return action.execute(source);
 	}
 
-	@Override public <S> void switchFailOverDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {
+	@Override
+	public <S> void switchFailOverDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
 		action.execute(source);
 	}
 }

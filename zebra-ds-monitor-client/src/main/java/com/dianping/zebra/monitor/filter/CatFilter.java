@@ -9,7 +9,7 @@ import com.dianping.cat.message.Transaction;
 import com.dianping.cat.status.StatusExtensionRegister;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
@@ -36,14 +36,14 @@ public class CatFilter extends DefaultJdbcFilter {
     private Set<Integer> allSqlSet = new HashSet<Integer>();
 
     @Override
-    public <S> void closeSingleDataSource(JdbcMetaData metaData, S source,
+    public <S> void closeSingleDataSource(JdbcContext metaData, S source,
                                           FilterActionWithSQLExcption<S> action) throws SQLException {
         super.closeSingleDataSource(metaData, source, action);
         Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
     }
 
     @Override
-    public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
+    public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
             throws SQLException {
         String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
         Transaction t;
@@ -62,9 +62,9 @@ public class CatFilter extends DefaultJdbcFilter {
         try {
             T result = super.execute(metaData, source, action);
 
-            if (metaData.getRealJdbcMetaData() != null) {
-                Cat.logEvent("SQL.Database", metaData.getRealJdbcMetaData().getJdbcUrl(), Event.SUCCESS,
-                        metaData.getRealJdbcMetaData().getDataSourceId());
+            if (metaData.getRealJdbcContext() != null) {
+                Cat.logEvent("SQL.Database", metaData.getRealJdbcContext().getJdbcUrl(), Event.SUCCESS,
+                        metaData.getRealJdbcContext().getDataSourceId());
                 Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS,
                         Stringizers.forJson().compact()
                                 .from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
@@ -85,7 +85,7 @@ public class CatFilter extends DefaultJdbcFilter {
 
     @Override
     public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-            JdbcMetaData metaData, S source,
+            JdbcContext metaData, S source,
             FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
         FailOverDataSource.FindMasterDataSourceResult result = super
                 .findMasterFailOverDataSource(metaData, source, action);
@@ -96,7 +96,7 @@ public class CatFilter extends DefaultJdbcFilter {
     }
 
     @Override
-    public <S> void initGroupDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {
+    public <S> void initGroupDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
         super.initGroupDataSource(metaData, source, action);
         if (source instanceof GroupDataSourceMBean) {
             StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor((GroupDataSourceMBean) source));
@@ -104,14 +104,14 @@ public class CatFilter extends DefaultJdbcFilter {
     }
 
     @Override
-    public <S> DataSource initSingleDataSource(JdbcMetaData metaData, S source,
+    public <S> DataSource initSingleDataSource(JdbcContext metaData, S source,
                                                FilterFunction<S, DataSource> action) {
         DataSource result = super.initSingleDataSource(metaData, source, action);
         Cat.logEvent("DataSource.Created", metaData.getDataSourceId());
         return result;
     }
 
-    private boolean isTooManySql(JdbcMetaData metaData) {
+    private boolean isTooManySql(JdbcContext metaData) {
         if (allSqlSet.size() >= 10000) {
             return true;
         } else {
@@ -131,7 +131,7 @@ public class CatFilter extends DefaultJdbcFilter {
     }
 
     @Override
-    public <S> void refreshGroupDataSource(JdbcMetaData metaData, String propertiesName, S source,
+    public <S> void refreshGroupDataSource(JdbcContext metaData, String propertiesName, S source,
                                            FilterAction<S> action) {
         Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Refresh-" + metaData.getDataSourceId());
         Cat.logEvent("DAL.Refresh.Property", propertiesName);
@@ -146,7 +146,7 @@ public class CatFilter extends DefaultJdbcFilter {
     }
 
     @Override
-    public <S> void switchFailOverDataSource(JdbcMetaData metaData, S source, FilterAction<S> action) {
+    public <S> void switchFailOverDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
         Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "FailOver");
         try {
             super.switchFailOverDataSource(metaData, source, action);

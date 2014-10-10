@@ -1,7 +1,7 @@
 package com.dianping.zebra.group.datasources;
 
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 
 import java.sql.*;
@@ -17,9 +17,9 @@ public class SingleConnection implements Connection {
 
 	private JdbcFilter filter;
 
-	private JdbcMetaData metaData;
+	private JdbcContext metaData;
 
-	public SingleConnection(SingleDataSource dataSource, Connection conn, JdbcMetaData metaData, JdbcFilter filter) {
+	public SingleConnection(SingleDataSource dataSource, Connection conn, JdbcContext metaData, JdbcFilter filter) {
 		this.dataSource = dataSource;
 		this.conn = conn;
 
@@ -148,7 +148,7 @@ public class SingleConnection implements Connection {
 		conn.setHoldability(holdability);
 	}
 
-	public JdbcMetaData getJdbcMetaData() {
+	public JdbcContext getJdbcMetaData() {
 		return this.metaData;
 	}
 

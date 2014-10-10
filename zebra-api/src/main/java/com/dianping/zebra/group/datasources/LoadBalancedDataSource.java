@@ -2,7 +2,7 @@ package com.dianping.zebra.group.datasources;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.DataSourceRouter;
@@ -28,12 +28,12 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	private DataSourceRouter router;
 
 	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
-			JdbcMetaData metaData, JdbcFilter filter, int retryTimes) {
+			JdbcContext metaData, JdbcFilter filter, int retryTimes) {
 		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.retryTimes = retryTimes;
 		this.filter = filter;
-		this.metaData = metaData;
+		this.context = metaData;
 	}
 
 	public void close() throws SQLException {
@@ -101,7 +101,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
 
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			SingleDataSource dataSource = dataSourceManager.createDataSource(config, this.metaData.clone(), this.filter);
+			SingleDataSource dataSource = dataSourceManager.createDataSource(config, this.context.clone(), this.filter);
 			this.dataSources.put(config.getId(), dataSource);
 		}
 
@@ -109,6 +109,6 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	}
 
 	private void initFilter() {
-		this.metaData.setDataSource(this);
+		this.context.setDataSource(this);
 	}
 }

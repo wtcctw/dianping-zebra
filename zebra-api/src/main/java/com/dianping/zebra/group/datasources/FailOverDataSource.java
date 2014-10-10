@@ -4,7 +4,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -33,17 +33,17 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private Thread masterDataSourceMonitorThread;
 
-	public FailOverDataSource(Map<String, DataSourceConfig> configs, JdbcMetaData metaData, JdbcFilter filter) {
+	public FailOverDataSource(Map<String, DataSourceConfig> configs, JdbcContext metaData, JdbcFilter filter) {
 		this.configs = configs;
 		this.filter = filter;
-		this.metaData = metaData.clone();
+		this.context = metaData.clone();
 	}
 
 	private void changeMetaData(DataSourceConfig config) {
-		this.metaData.setDataSourceId(config.getId());
-		this.metaData.setJdbcUrl(config.getJdbcUrl());
-		this.metaData.setJdbcUsername(config.getUsername());
-		this.metaData.setJdbcPassword(
+		this.context.setDataSourceId(config.getId());
+		this.context.setJdbcUrl(config.getJdbcUrl());
+		this.context.setJdbcUsername(config.getUsername());
+		this.context.setJdbcPassword(
 				config.getPassword() == null ? null : StringUtils.repeat("*", config.getPassword().length()));
 	}
 
@@ -96,7 +96,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 
 		return SingleDataSourceManagerFactory.getDataSourceManager()
-				.createDataSource(config, this.metaData.clone(), this.filter);
+				.createDataSource(config, this.context.clone(), this.filter);
 	}
 
 	@Override
@@ -134,7 +134,7 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	private void initFilter() {
-		this.metaData.setDataSource(this);
+		this.context.setDataSource(this);
 	}
 
 	private boolean setMasterDb(DataSourceConfig config) {
@@ -238,7 +238,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		public FindMasterDataSourceResult findMasterDataSource() throws FailOverDataSourceGCException {
 			return getWeakFailOverDataSource().filter
-					.findMasterFailOverDataSource(getWeakFailOverDataSource().metaData.clone(), this,
+					.findMasterFailOverDataSource(getWeakFailOverDataSource().context.clone(), this,
 							new FilterFunction<MasterDataSourceMonitor, FindMasterDataSourceResult>() {
 								@Override public FindMasterDataSourceResult execute(
 										MasterDataSourceMonitor source) {

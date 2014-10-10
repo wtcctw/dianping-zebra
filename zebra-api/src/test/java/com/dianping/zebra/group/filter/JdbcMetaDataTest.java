@@ -10,10 +10,10 @@ import org.junit.Test;
 public class JdbcMetaDataTest {
     @Test
     public void test_clone() {
-        JdbcMetaData metaData = new JdbcMetaData();
+        JdbcContext metaData = new JdbcContext();
         metaData.setJdbcUrl("abcd");
 
-        JdbcMetaData clone = metaData.clone();
+        JdbcContext clone = metaData.clone();
 
         Assert.assertEquals(clone.getJdbcUrl(), metaData.getJdbcUrl());
         Assert.assertTrue(clone != metaData);
@@ -23,7 +23,7 @@ public class JdbcMetaDataTest {
     @Test
     @Ignore
     public void test_merge_sql() {
-        JdbcMetaData metaData = new JdbcMetaData();
+        JdbcContext metaData = new JdbcContext();
         metaData.setSql("select * from test where id = 1");
         Assert.assertEquals("select * from test where id = ?", metaData.getMergedSql());
     }

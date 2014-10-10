@@ -5,7 +5,7 @@ package com.dianping.zebra.group.filter.wall;
  */
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.util.StringUtils;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -24,7 +24,7 @@ public class WallFilterTest {
         WallFilter filter = new WallFilter();
         startTime = System.currentTimeMillis();
         for (int k = 0; k < 10000; k++) {
-            JdbcMetaData metaData = new JdbcMetaData();
+            JdbcContext metaData = new JdbcContext();
             metaData.setSql("select * from `Test` where id = " + String.valueOf(k % 10));
             filter.generateId(metaData);
         }
@@ -40,11 +40,11 @@ public class WallFilterTest {
     @Test
     public void test_addId_to_Sql() {
         WallFilter filter = new WallFilter();
-        JdbcMetaData metaData = new JdbcMetaData();
+        JdbcContext metaData = new JdbcContext();
         metaData.setSql("select * from test");
-        JdbcMetaData innerMetaData = new JdbcMetaData();
+        JdbcContext innerMetaData = new JdbcContext();
         innerMetaData.setDataSourceId("test-write-1");
-        metaData.setRealJdbcMetaData(innerMetaData);
+        metaData.setRealJdbcContext(innerMetaData);
 
         ///*test-write-1*/select * from test
         Assert.assertEquals("/*z:d1d26296*/select * from test", filter.addIdToSql("select * from test", metaData));
@@ -55,11 +55,11 @@ public class WallFilterTest {
         ExecutionContextHolder.getContext().add("sql_statement_name", "test.select");
 
         WallFilter filter = new WallFilter();
-        JdbcMetaData metaData = new JdbcMetaData();
+        JdbcContext metaData = new JdbcContext();
         metaData.setSql("select * from test");
-        JdbcMetaData innerMetaData = new JdbcMetaData();
+        JdbcContext innerMetaData = new JdbcContext();
         innerMetaData.setDataSourceId("test-write-1");
-        metaData.setRealJdbcMetaData(innerMetaData);
+        metaData.setRealJdbcContext(innerMetaData);
 
         ///*test-write-1*/select * from test
         Assert.assertEquals("/*z:ea013b8c*/select * from test", filter.addIdToSql("select * from test", metaData));
@@ -68,7 +68,7 @@ public class WallFilterTest {
     @Test
     public void test_add_id_to_sql() {
         WallFilter filter = new WallFilter();
-        JdbcMetaData metaData = new JdbcMetaData();
+        JdbcContext metaData = new JdbcContext();
         filter.addIdToSql("select * from user", metaData);
     }
 

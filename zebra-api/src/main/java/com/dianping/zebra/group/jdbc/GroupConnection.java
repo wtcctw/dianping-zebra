@@ -3,7 +3,7 @@ package com.dianping.zebra.group.jdbc;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
@@ -26,7 +26,7 @@ public class GroupConnection implements Connection {
 
 	private JdbcFilter filter;
 
-	private JdbcMetaData metaData;
+	private JdbcContext context;
 
 	private Set<Statement> openedStatements = new HashSet<Statement>();
 
@@ -44,13 +44,13 @@ public class GroupConnection implements Connection {
 
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
 			CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType,
-			JdbcMetaData metaData, JdbcFilter filter) {
+			JdbcContext context, JdbcFilter filter) {
 		super();
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
 		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
 		this.filter = filter;
-		this.metaData = metaData;
+		this.context = context;
 		this.routerType = routerType;
 	}
 
@@ -95,7 +95,7 @@ public class GroupConnection implements Connection {
 		final List<SQLException> exceptions = new LinkedList<SQLException>();
 
 		try {
-			this.filter.closeGroupConnection(this.metaData.clone(), this, new FilterActionWithSQLExcption<GroupConnection>() {
+			this.filter.closeGroupConnection(this.context.clone(), this, new FilterActionWithSQLExcption<GroupConnection>() {
 				@Override public void execute(GroupConnection source) {
 					for (Statement stmt : openedStatements) {
 						try {
@@ -204,7 +204,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
-		Statement stmt = new GroupStatement(this, this.metaData.clone(), this.filter);
+		Statement stmt = new GroupStatement(this, this.context.clone(), this.filter);
 		openedStatements.add(stmt);
 		return stmt;
 	}
@@ -271,7 +271,6 @@ public class GroupConnection implements Connection {
 		if (this.wConnection != null) {
 			this.wConnection.setAutoCommit(autoCommit);
 		}
-
 	}
 
 	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
@@ -589,7 +588,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
-		PreparedStatement pstmt = new GroupPreparedStatement(this, sql, this.metaData.clone(), this.filter);
+		PreparedStatement pstmt = new GroupPreparedStatement(this, sql, this.context.clone(), this.filter);
 		openedStatements.add(pstmt);
 		return pstmt;
 	}

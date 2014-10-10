@@ -5,7 +5,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
@@ -38,12 +38,12 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;
 
-	public SingleDataSource(DataSourceConfig config, JdbcMetaData metaData, JdbcFilter filter) {
+	public SingleDataSource(DataSourceConfig config, JdbcContext metaData, JdbcFilter filter) {
 		this.dsId = config.getId();
 		this.config = config;
 		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());
 
-		this.metaData = metaData;
+		this.context = metaData;
 		this.filter = filter;
 		initFilters();
 
@@ -59,7 +59,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	@Override
 	public void close() throws SQLException {
 		this.filter
-				.closeSingleDataSource(this.metaData.clone(), this, new FilterActionWithSQLExcption<SingleDataSource>() {
+				.closeSingleDataSource(this.context.clone(), this, new FilterActionWithSQLExcption<SingleDataSource>() {
 					@Override public void execute(SingleDataSource source) throws SQLException {
 						if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
 							if (source.state == DataSourceState.UP) {
@@ -104,7 +104,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	public Connection getConnection(String username, String password) throws SQLException {
 		checkState();
 
-		return this.filter.getSingleConnection(this.metaData.clone(), this,
+		return this.filter.getSingleConnection(this.context.clone(), this,
 				new FilterFunctionWithSQLException<SingleDataSource, SingleConnection>() {
 					@Override public SingleConnection execute(SingleDataSource source) throws SQLException {
 						Connection conn;
@@ -119,7 +119,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 							state = DataSourceState.UP;
 						}
 
-						return new SingleConnection(source, conn, source.metaData.clone(), source.filter);
+						return new SingleConnection(source, conn, source.context.clone(), source.filter);
 					}
 				});
 	}
@@ -254,7 +254,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private DataSource initDataSource(final DataSourceConfig value) {
 		return this.filter.initSingleDataSource(
-				this.metaData.clone(), this,
+				this.context.clone(), this,
 				new FilterFunction<SingleDataSource, DataSource>() {
 					@Override public DataSource execute(SingleDataSource source) {
 						try {
@@ -288,9 +288,9 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	}
 
 	private void initFilters() {
-		this.metaData.setDataSource(this);
-		this.metaData.setDataSourceId(this.dsId);
-		this.metaData.setDataSourceProperties(this);
+		this.context.setDataSource(this);
+		this.context.setDataSourceId(this.dsId);
+		this.context.setDataSourceProperties(this);
 	}
 
 	public boolean isAvailable() {

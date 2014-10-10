@@ -18,7 +18,7 @@ public class FilterWrapperTest {
 		final AtomicInteger counter = new AtomicInteger();
 
 		JdbcFilter filter1 = new DefaultJdbcFilter() {
-			@Override public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
+			@Override public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
 					throws SQLException {
 				Assert.assertEquals(3, counter.incrementAndGet());
 				T executeResult = super.execute(metaData, source, action);
@@ -32,7 +32,7 @@ public class FilterWrapperTest {
 		};
 
 		JdbcFilter filter2 = new DefaultJdbcFilter() {
-			@Override public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
+			@Override public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
 					throws SQLException {
 				Assert.assertEquals(2, counter.incrementAndGet());
 				T executeResult = super.execute(metaData, source, action);
@@ -46,7 +46,7 @@ public class FilterWrapperTest {
 		};
 
 		JdbcFilter filter3 = new DefaultJdbcFilter() {
-			@Override public <S, T> T execute(JdbcMetaData metaData, S source, FilterFunctionWithSQLException<S, T> action)
+			@Override public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
 					throws SQLException {
 				Assert.assertEquals(1, counter.incrementAndGet());
 				T executeResult = super.execute(metaData, source, action);

@@ -1,7 +1,5 @@
 package com.dianping.zebra.group.filter.stat;
 
-import com.dianping.zebra.group.filter.JdbcMetaData;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -37,15 +35,13 @@ public class DataSourceStat {
 	private final String type;
 
 	public DataSourceStat() {
-		this.dataSourceId = null;
-		this.type = null;
-		this.properties = null;
+		this(null,null,null);
 	}
 
-	public DataSourceStat(JdbcMetaData metaData) {
-		this.dataSourceId = metaData.getDataSourceId();
-		this.properties = metaData.getProperties();
-		this.type = metaData.getDataSource().getClass().getSimpleName();
+	public DataSourceStat(String dataSourceId, String type, Map<String, Object> properties) {
+		this.dataSourceId = dataSourceId;
+		this.type = type;
+		this.properties = properties;
 	}
 
 	public AtomicLong getCloseConnectionErrorCount() {
@@ -106,16 +102,16 @@ public class DataSourceStat {
 			resultMap.put("Id", this.dataSourceId);
 			resultMap.put("Type", this.type);
 		}
-		resultMap.put("GetConnection(S/E)", String.format("%d/%d", this.getConnectionSuccessCount.get(),
-				this.getConnectionErrorCount.get()));
-		resultMap.put("CloseConnection(S/E)", String.format("%d/%d", this.closeConnectionSuccessCount.get(),
-				this.closeConnectionErrorCount.get()));
-		resultMap.put("RefreshDataSource(S/E)", String.format("%d/%d", this.refreshDataSourceSuccessCount.get(),
-				this.refreshDataSourceErrorCount.get()));
-		resultMap.put("InitDataSource(S/E)", String.format("%d/%d", this.initDataSourceSuccessCount.get(),
-				this.initDataSourceErrorCount.get()));
-		resultMap.put("CloseDataSource(S/E)", String.format("%d/%d", this.closeDataSourceSuccessCount.get(),
-				this.closeDataSourceErrorCount.get()));
+		resultMap.put("GetConnection(S/E)",
+		      String.format("%d/%d", this.getConnectionSuccessCount.get(), this.getConnectionErrorCount.get()));
+		resultMap.put("CloseConnection(S/E)",
+		      String.format("%d/%d", this.closeConnectionSuccessCount.get(), this.closeConnectionErrorCount.get()));
+		resultMap.put("RefreshDataSource(S/E)",
+		      String.format("%d/%d", this.refreshDataSourceSuccessCount.get(), this.refreshDataSourceErrorCount.get()));
+		resultMap.put("InitDataSource(S/E)",
+		      String.format("%d/%d", this.initDataSourceSuccessCount.get(), this.initDataSourceErrorCount.get()));
+		resultMap.put("CloseDataSource(S/E)",
+		      String.format("%d/%d", this.closeDataSourceSuccessCount.get(), this.closeDataSourceErrorCount.get()));
 
 		for (Map.Entry<String, Object> entity : this.properties.entrySet()) {
 			resultMap.put(entity.getKey(), entity.getValue());

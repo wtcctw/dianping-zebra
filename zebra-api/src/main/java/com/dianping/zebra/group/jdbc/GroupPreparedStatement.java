@@ -8,7 +8,7 @@ package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.jdbc.param.*;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
@@ -40,11 +40,11 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
     private String sql;
 
-    public GroupPreparedStatement(GroupConnection connection, String sql, JdbcMetaData metaData, JdbcFilter filter) {
-        super(connection, metaData, filter);
-        metaData.setPrepared(true);
+    public GroupPreparedStatement(GroupConnection connection, String sql, JdbcContext context, JdbcFilter filter) {
+        super(connection, context, filter);
+        context.setPrepared(true);
         this.sql = sql;
-        this.metaData.setSql(this.sql);
+        this.context.setSql(this.sql);
     }
 
     /*
@@ -173,7 +173,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
         sql = processSQL(sql);
         PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
         setParams(pstmt);
-        this.currentResultSet = new GroupResultSet(this.metaData.clone(), this.filter, pstmt.executeQuery());
+        this.currentResultSet = new GroupResultSet(this.context.clone(), this.filter, pstmt.executeQuery());
         return this.currentResultSet;
     }
 

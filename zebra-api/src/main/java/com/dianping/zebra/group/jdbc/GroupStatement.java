@@ -9,7 +9,7 @@ package com.dianping.zebra.group.jdbc;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.exception.DalNotSupportException;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
@@ -39,7 +39,7 @@ public class GroupStatement implements Statement {
 
     protected int maxRows;
 
-    protected JdbcMetaData metaData;
+    protected JdbcContext context;
 
     protected boolean moreResults = false;
 
@@ -55,9 +55,9 @@ public class GroupStatement implements Statement {
 
     protected int updateCount;
 
-    public GroupStatement(GroupConnection connection, JdbcMetaData metaData, JdbcFilter filter) {
+    public GroupStatement(GroupConnection connection, JdbcContext context, JdbcFilter filter) {
         this.dpGroupConnection = connection;
-        this.metaData = metaData;
+        this.context = context;
         this.filter = filter;
     }
 
@@ -307,7 +307,7 @@ public class GroupStatement implements Statement {
     private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
         sql = processSQL(sql);
         Statement stmt = createStatementInternal(conn, false);
-        currentResultSet = new GroupResultSet(this.metaData.clone(), this.filter, stmt.executeQuery(sql));
+        currentResultSet = new GroupResultSet(this.context.clone(), this.filter, stmt.executeQuery(sql));
         return currentResultSet;
     }
 
@@ -396,15 +396,15 @@ public class GroupStatement implements Statement {
                                       boolean isBatch
             , final boolean forceWriter) throws SQLException {
 
-        this.metaData.setSql(sql);
-        this.metaData.setBatch(isBatch);
-        this.metaData.setParams(params);
-        this.metaData.setTransaction(!this.dpGroupConnection.getAutoCommit());
-        this.metaData.setBatchedSqls(batchedSqls);
+        this.context.setSql(sql);
+        this.context.setBatch(isBatch);
+        this.context.setParams(params);
+        this.context.setTransaction(!this.dpGroupConnection.getAutoCommit());
+        this.context.setBatchedSqls(batchedSqls);
         final Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-        this.metaData.setRealJdbcMetaData(getRealJdbcMetaData(conn));
+        this.context.setRealJdbcContext(getRealJdbcMetaData(conn));
 
-        return this.filter.execute(this.metaData.clone(), this, new FilterFunctionWithSQLException<GroupStatement, T>() {
+        return this.filter.execute(this.context.clone(), this, new FilterFunctionWithSQLException<GroupStatement, T>() {
             @Override
             public T execute(GroupStatement source) throws SQLException {
                 T result = callback.doAction(conn);
@@ -471,7 +471,7 @@ public class GroupStatement implements Statement {
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         if (this.openedStatement != null) {
-            return new GroupResultSet(this.metaData.clone(), this.filter, this.openedStatement.getGeneratedKeys());
+            return new GroupResultSet(this.context.clone(), this.filter, this.openedStatement.getGeneratedKeys());
         } else {
             throw new SQLException("No update operations executed before getGeneratedKeys");
         }
@@ -557,7 +557,7 @@ public class GroupStatement implements Statement {
         this.queryTimeout = queryTimeout;
     }
 
-    private JdbcMetaData getRealJdbcMetaData(Connection conn) {
+    private JdbcContext getRealJdbcMetaData(Connection conn) {
         if (conn instanceof SingleConnection) {
             return ((SingleConnection) conn).getJdbcMetaData();
         }
@@ -685,7 +685,7 @@ public class GroupStatement implements Statement {
     }
 
     protected String processSQL(final String sql) {
-        return filter.sql(this.metaData.clone(), this, new FilterFunction<GroupStatement, String>() {
+        return filter.sql(this.context.clone(), this, new FilterFunction<GroupStatement, String>() {
             @Override
             public String execute(GroupStatement source) {
                 return sql;

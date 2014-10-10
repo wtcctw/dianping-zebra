@@ -13,7 +13,7 @@ import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
-import com.dianping.zebra.group.filter.JdbcMetaData;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
@@ -167,9 +167,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void close(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
-
-		this.filter.closeGroupDataSource(this.metaData.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
-			@Override public void execute(GroupDataSource source) throws SQLException {
+		this.filter.closeGroupDataSource(this.context.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
+			@Override
+			public void execute(GroupDataSource source) throws SQLException {
 
 				List<SQLException> exps = new ArrayList<SQLException>();
 
@@ -216,15 +216,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return filter
-				.getGroupConnection(this.metaData.clone(), this,
-						new FilterFunctionWithSQLException<GroupDataSource, GroupConnection>() {
-							@Override public GroupConnection execute(GroupDataSource source) throws SQLException {
-								return new GroupConnection(source.readDataSource, source.writeDataSource,
-										source.customizedReadWriteStrategy,
-										source.routerType, source.metaData.clone(), source.filter);
-							}
-						});
+		return filter.getGroupConnection(this.context.clone(), this,
+		      new FilterFunctionWithSQLException<GroupDataSource, GroupConnection>() {
+			      @Override
+			      public GroupConnection execute(GroupDataSource source) throws SQLException {
+				      return new GroupConnection(source.readDataSource, source.writeDataSource,
+				            source.customizedReadWriteStrategy, source.routerType, source.context.clone(), source.filter);
+			      }
+		      });
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -294,14 +293,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
 
 		this.initFilters();
 
-		this.filter.initGroupDataSource(this.metaData.clone(), this, new FilterAction<GroupDataSource>() {
-			@Override public void execute(GroupDataSource source) {
+		this.filter.initGroupDataSource(this.context.clone(), this, new FilterAction<GroupDataSource>() {
+			@Override
+			public void execute(GroupDataSource source) {
 				source.initDataSources();
 				source.loadCustomizedReadWriteStrategy();
 			}
@@ -313,13 +313,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void initDataSources() {
 		try {
-			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(
-					groupConfig.getDataSourceConfigs()),
-					this.metaData.clone(), this.filter,
-					systemConfigManager.getSystemConfig().getRetryTimes());
+			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
+			      this.context.clone(), this.filter, systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
-					this.metaData.clone(), this.filter);
+			      this.context.clone(), this.filter);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -332,10 +330,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void initFilters() {
-		this.metaData = new JdbcMetaData();
-		this.metaData.setDataSourceId(this.jdbcRef);
-		this.metaData.setDataSource(this);
-		this.metaData.setDataSourceProperties(this);
+		this.context = new JdbcContext();
+		this.context.setDataSourceId(this.jdbcRef);
+		this.context.setDataSource(this);
+		this.context.setDataSourceProperties(this);
 		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
 	}
 
@@ -361,12 +359,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			final GroupDataSourceConfig newGroupConfig = buildGroupConfig();
 
 			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
-				filter.refreshGroupDataSource(this.metaData.clone(), propertyToChange, this,
-						new FilterAction<GroupDataSource>() {
-							@Override public void execute(GroupDataSource source) {
-								refreshIntenal(newGroupConfig);
-							}
-						});
+				filter.refreshGroupDataSource(this.context.clone(), propertyToChange, this,
+				      new FilterAction<GroupDataSource>() {
+					      @Override
+					      public void execute(GroupDataSource source) {
+						      refreshIntenal(newGroupConfig);
+					      }
+				      });
 			}
 		}
 	}
@@ -379,12 +378,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-					getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()),
-					this.metaData.clone(), this.filter,
-					systemConfigManager.getSystemConfig().getRetryTimes());
+			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.context.clone(), this.filter,
+			      systemConfigManager.getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
-					this.metaData.clone(), this.filter);
+			      this.context.clone(), this.filter);
 			newWriteDataSource.init(false);
 
 			preparedSwitch = true;

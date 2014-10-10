@@ -20,7 +20,8 @@ public class DefaultFilterManager implements FilterManager {
 
 	private final ConcurrentHashMap<String, List<JdbcFilter>> cachedFilterMap = new ConcurrentHashMap<String, List<JdbcFilter>>();
 
-	@Override public void addFilter(String name, JdbcFilter filter) {
+	@Override
+	public void addFilter(String name, JdbcFilter filter) {
 		List<JdbcFilter> filters;
 		if (cachedFilterMap.containsKey(name)) {
 			filters = cachedFilterMap.get(name);
@@ -30,7 +31,6 @@ public class DefaultFilterManager implements FilterManager {
 		}
 
 		filters.add(filter);
-
 	}
 
 	public void init() {
@@ -72,7 +72,8 @@ public class DefaultFilterManager implements FilterManager {
 		return clazz;
 	}
 
-	@Override public JdbcFilter loadFilter(String strConfig) {
+	@Override
+	public JdbcFilter loadFilter(String strConfig) {
 		List<JdbcFilter> result = new ArrayList<JdbcFilter>();
 		if (strConfig != null) {
 			for (String name : strConfig.trim().split(",")) {
@@ -85,12 +86,21 @@ public class DefaultFilterManager implements FilterManager {
 		return result.size() > 0 ? new FilterWrapper(result) : new DefaultJdbcFilter();
 	}
 
+	private Properties loadFilterConfig() throws IOException {
+		Properties filterProperties = new Properties();
+
+		loadFilterConfig(filterProperties, ClassLoader.getSystemClassLoader());
+		loadFilterConfig(filterProperties, Thread.currentThread().getContextClassLoader());
+
+		return filterProperties;
+	}
+
 	private void loadFilterConfig(Properties filterProperties, ClassLoader classLoader) throws IOException {
 		if (classLoader == null) {
 			return;
 		}
 
-		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements(); ) {
+		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements();) {
 			URL url = e.nextElement();
 
 			Properties property = new Properties();
@@ -109,15 +119,6 @@ public class DefaultFilterManager implements FilterManager {
 		}
 	}
 
-	private Properties loadFilterConfig() throws IOException {
-		Properties filterProperties = new Properties();
-
-		loadFilterConfig(filterProperties, ClassLoader.getSystemClassLoader());
-		loadFilterConfig(filterProperties, Thread.currentThread().getContextClassLoader());
-
-		return filterProperties;
-	}
-
 	private List<JdbcFilter> loadFilterFromCache(String filterName) {
 		List<JdbcFilter> result = cachedFilterMap.get(filterName);
 		if (result != null) {
@@ -132,6 +133,7 @@ public class DefaultFilterManager implements FilterManager {
 
 		result = new ArrayList<JdbcFilter>();
 
+		//TODO: 不需要逗号分隔
 		for (String filterClassName : filterClassNames.split(",")) {
 			Class<?> filterClass = loadClass(filterClassName);
 			if (filterClass == null) {
@@ -142,8 +144,7 @@ public class DefaultFilterManager implements FilterManager {
 			try {
 				filter = (JdbcFilter) filterClass.newInstance();
 				result.add(filter);
-			} catch (InstantiationException e) {
-			} catch (IllegalAccessException e) {
+			} catch (Exception ignore) {
 			}
 		}
 
