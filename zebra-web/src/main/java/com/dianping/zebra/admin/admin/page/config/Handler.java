@@ -1,34 +1,39 @@
 package com.dianping.zebra.admin.admin.page.config;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-
-import com.dianping.zebra.admin.admin.AdminPage;
+import com.dianping.zebra.admin.admin.service.LionHttpService;
+import com.google.gson.Gson;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 public class Handler implements PageHandler<Context> {
-	@Inject
-	private JspViewer m_jspViewer;
+    private Gson gson = new Gson();
 
-	@Override
-	@PayloadMeta(Payload.class)
-	@InboundActionMeta(name = "config")
-	public void handleInbound(Context ctx) throws ServletException, IOException {
-		// display only, no action here
-	}
+    @Inject
+    private LionHttpService m_lionHttpService;
 
-	@Override
-	@OutboundActionMeta(name = "config")
-	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		Model model = new Model(ctx);
+    @Override
+    @PayloadMeta(Payload.class)
+    @InboundActionMeta(name = "config")
+    public void handleInbound(Context ctx) throws ServletException, IOException {
+        // display only, no action here
+    }
 
-		model.setAction(Action.VIEW);
-		model.setPage(AdminPage.CONFIG);
-		m_jspViewer.view(ctx, model);
-	}
+    @Override
+    @OutboundActionMeta(name = "config")
+    public void handleOutbound(Context ctx) throws ServletException, IOException {
+        Payload payload = ctx.getPayload();
+        HttpServletResponse response = ctx.getHttpServletResponse();
+        response.setContentType("application/json");
+        response.getWriter().write(gson.toJson(m_lionHttpService.getConfigByProject(payload.getEnv(), "groupds")));
+        response.getWriter().flush();
+        response.getWriter().close();
+        ctx.stopProcess();
+    }
 }

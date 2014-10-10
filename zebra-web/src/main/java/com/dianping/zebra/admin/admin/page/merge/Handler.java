@@ -12,9 +12,6 @@ import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
 public class Handler implements PageHandler<Context> {
-	@Inject
-	private JspViewer m_jspViewer;
-
 	@Override
 	@PayloadMeta(Payload.class)
 	@InboundActionMeta(name = "merge")
@@ -25,10 +22,5 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "merge")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		Model model = new Model(ctx);
-
-		model.setAction(Action.VIEW);
-		model.setPage(AdminPage.MERGE);
-		m_jspViewer.view(ctx, model);
 	}
 }

@@ -115,18 +115,6 @@
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
 				</requirement>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.config.JspViewer</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.zebra.admin.admin.page.config.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.config.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
 			</requirements>
 		</component>
 		<component>
@@ -156,45 +144,17 @@
 		<component>
 			<role>com.dianping.zebra.admin.admin.page.blacklist.Handler</role>
 			<implementation>com.dianping.zebra.admin.admin.page.blacklist.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.blacklist.JspViewer</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.zebra.admin.admin.page.blacklist.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.blacklist.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.page.merge.Handler</role>
 			<implementation>com.dianping.zebra.admin.admin.page.merge.Handler</implementation>
-			<requirements>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.merge.JspViewer</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.zebra.admin.admin.page.merge.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.merge.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
-				</requirement>
-			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.page.config.Handler</role>
 			<implementation>com.dianping.zebra.admin.admin.page.config.Handler</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.config.JspViewer</role>
+					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
 				</requirement>
 			</requirements>
 		</component>

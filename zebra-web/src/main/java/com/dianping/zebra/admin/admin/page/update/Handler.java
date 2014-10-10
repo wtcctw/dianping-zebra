@@ -23,8 +23,6 @@ public class Handler implements PageHandler<Context> {
     private ConnectionService m_connectionService;
     @Inject
     private ReportService m_heartbeatService;
-    @Inject
- 	private JspViewer m_jspViewer;
 
     @Override
     @PayloadMeta(Payload.class)

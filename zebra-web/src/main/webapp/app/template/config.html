@@ -1,1 +1,32 @@
-<p>这里是配置页面</p>
+<div class="row">
+    <div class="col-xs-12">
+        <form class="form-inline" role="form">
+            <div class="form-group">
+                <input ng-model="searchText" type="text" class="form-control" placeholder="GroupDataSourceId">
+            </div>
+            <button type="button" class="btn btn-primary">Sign in</button>
+        </form>
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="col-xs-12">
+        <table class="table table-bordered table-striped table-condensed">
+            <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="config in configs">
+                <td>{{config.name}}</td>
+                <td>{{config.config}}</td>
+                <td><a href="">Edit</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<br/>

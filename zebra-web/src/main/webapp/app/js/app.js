@@ -18,7 +18,11 @@ zebraWeb.filter('toArray', function () {
             return obj;
         }
 
-        return Object.keys(obj).filter(function(key){if(key.charAt(0) !== "$") {return key;}}).map(function (key) {
+        return Object.keys(obj).filter(function (key) {
+            if (key.charAt(0) !== "$") {
+                return key;
+            }
+        }).map(function (key) {
             return Object.defineProperty(obj[key], '$key', {__proto__: null, value: key});
         });
     };
@@ -62,7 +66,8 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise("/config");
     $stateProvider.state('config', {
         url: '/config',
-        templateUrl: 'app/template/config.html'
+        templateUrl: 'app/template/config.html',
+        controller: 'config'
     }).state('black', {
         url: '/black',
         templateUrl: 'app/template/black.html'
