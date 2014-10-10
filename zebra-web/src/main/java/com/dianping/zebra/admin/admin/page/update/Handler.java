@@ -1,18 +1,20 @@
 package com.dianping.zebra.admin.admin.page.update;
 
+import com.dianping.zebra.admin.admin.page.config.JspViewer;
 import com.dianping.zebra.admin.admin.service.ConnectionService;
 import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
 import com.dianping.zebra.admin.admin.service.ReportService;
 import com.google.gson.Gson;
+
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
-import org.unidal.web.mvc.view.BaseJspViewer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 public class Handler implements PageHandler<Context> {
@@ -22,7 +24,7 @@ public class Handler implements PageHandler<Context> {
     @Inject
     private ReportService m_heartbeatService;
     @Inject
-    private BaseJspViewer viewer;
+ 	private JspViewer m_jspViewer;
 
     @Override
     @PayloadMeta(Payload.class)

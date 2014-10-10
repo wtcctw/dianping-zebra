@@ -11,6 +11,15 @@
          <page name="notify" title="Notify" path="notify" template="default">
             <description>Notify</description>
          </page>
+         <page name="blacklist" title="Blacklist" path="blacklist" template="default">
+            <description>Blacklist</description>
+         </page>
+         <page name="merge" title="Merge" path="merge" template="default">
+            <description>Merge</description>
+         </page>
+         <page name="config" title="Config" path="config" template="default">
+            <description>Config</description>
+         </page>
       </module>
    </webapp>
 </wizard>

@@ -11,7 +11,13 @@ com.dianping.zebra.admin.admin.page.update.Handler.class,
 
 com.dianping.zebra.admin.admin.page.service.Handler.class,
 
-com.dianping.zebra.admin.admin.page.notify.Handler.class
+com.dianping.zebra.admin.admin.page.notify.Handler.class,
+
+com.dianping.zebra.admin.admin.page.blacklist.Handler.class,
+
+com.dianping.zebra.admin.admin.page.merge.Handler.class,
+
+com.dianping.zebra.admin.admin.page.config.Handler.class
 })
 public class AdminModule extends AbstractModule {
 
