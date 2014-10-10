@@ -20,7 +20,7 @@
                 <td>
                     <span class="badge alert-{{database.m_replacedDpdlDataSource == 0 && database.m_groupDataSource == 0?'danger':((database.m_replacedSingleDataSource + database.m_replacedDpdlDataSource + database.m_groupDataSource) == database.m_totalDataSource?'success':'warning')}}">{{database.m_totalDataSource}}</span>
                 </td>
-                <td><a href="?op=connection&database={{database.m_name}}">测试</a></td>
+                <td><a href="" ng-click="test(database.m_name)">测试</a></td>
             </tr>
             </tbody>
         </table>

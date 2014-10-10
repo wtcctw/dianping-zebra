@@ -1,6 +1,7 @@
 package com.dianping.zebra.admin.admin.page.update;
 
 import com.dianping.zebra.admin.admin.service.ConnectionService;
+import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
 import com.dianping.zebra.admin.admin.service.ReportService;
 import com.google.gson.Gson;
 import org.unidal.lookup.annotation.Inject;
@@ -46,17 +47,15 @@ public class Handler implements PageHandler<Context> {
             case APP:
                 responseObject = m_heartbeatService.getApp(payload.getApp());
                 break;
-//            case CONNECTION:
-//                model.setAction(Action.CONNECTION);
-//                String jdbcRef = payload.getDatabase().toLowerCase();
-//                ConnectionStatus connectionstatus = new ConnectionStatus();
-//                if (jdbcRef.toLowerCase().equals("dpreview")) {
-//                    jdbcRef = "DPReview"; //hack
-//                }
-//                connectionstatus.setConnected(m_connectionService.canConnect(jdbcRef));
-//                connectionstatus.setConfig(m_connectionService.getConfig(jdbcRef).toString());
-//                model.setConnectionStatus(connectionstatus);
-//                break;
+            case CONNECTION:
+                String jdbcRef = payload.getDatabase().toLowerCase();
+                ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
+                if (jdbcRef.toLowerCase().equals("dpreview")) {
+                    jdbcRef = "DPReview"; //hack
+                }
+                connectionstatus.setConnected(m_connectionService.canConnect(jdbcRef));
+                connectionstatus.setConfig(m_connectionService.getConfig(jdbcRef).toString());
+                responseObject = connectionstatus;
         }
 
         HttpServletResponse response = ctx.getHttpServletResponse();
