@@ -30,6 +30,7 @@ public class StatFilter extends DefaultJdbcFilter {
 		} catch (SQLException exp) {
 			StatContext.getDataSourceSummary().getCloseConnectionErrorCount().incrementAndGet();
 			StatContext.getDataSource(context).getCloseConnectionErrorCount().incrementAndGet();
+            throw exp;
 		}
 	}
 
