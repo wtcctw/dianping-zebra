@@ -1,16 +1,15 @@
 package com.dianping.zebra.group.jdbc;
 
-import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.MockFilterHelper;
-import com.dianping.zebra.group.filter.stat.StatContext;
 import org.dbunit.IDatabaseTester;
 import org.dbunit.JdbcDatabaseTester;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.h2.tools.RunScript;
-import org.junit.After;
 import org.junit.Before;
+
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.MockFilterHelper;
 
 public abstract class H2DatabaseTestCase {
 	protected static final String JDBC_DRIVER = org.h2.Driver.class.getName();
