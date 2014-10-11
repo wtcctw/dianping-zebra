@@ -32,17 +32,20 @@ zebraWeb.filter('toArray', function () {
     };
 });
 
-zebraWeb.directive('snippet', function ($timeout, $interpolate) {
+zebraWeb.directive('snippet', function () {
     return {
         restrict: 'E',
-        template: '<pre><code ng-transclude></code></pre>',
+        template: '<pre><div class="hidden code" ng-transclude></div><code></code></pre>',
         replace: true,
         transclude: true,
         link: function (scope, elm, attrs) {
-            var tmp = $interpolate(elm.find('code').text())(scope);
-            $timeout(function () {
-                elm.find('code').html(hljs.highlightAuto(tmp).value);
-            }, 0);
+            scope.$watch(function () {
+                return elm.find('.code').text();
+            }, function (newValue, oldValue) {
+                if (newValue != oldValue) {
+                    elm.find('code').html(hljs.highlightAuto(newValue).value);
+                }
+            });
         }
     };
 });

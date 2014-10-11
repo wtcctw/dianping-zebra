@@ -3,7 +3,7 @@ zebraWeb.controller('update', function ($scope, $http, configService) {
         $scope.predicate = 'm_name';
         $scope.report = data;
     });
-    $scope.test = configService.test;
+    $scope.test = configService.openTestModal;
 });
 
 zebraWeb.controller('update-database', function ($scope, $stateParams, $http) {
@@ -19,9 +19,12 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http) {
     });
 });
 
-zebraWeb.controller('config-test', function ($scope, name, connectionStatus) {
+zebraWeb.controller('config-test', function ($scope, $http, name) {
     $scope.name = name;
-    $scope.connectionStatus = connectionStatus;
+
+    $http.get('/a/update?op=connection&database=' + name).success(function (data, status, headers, config) {
+        $scope.connectionStatus = data;
+    });
 });
 
 zebraWeb.controller('config', function ($scope, $stateParams, $http) {
@@ -35,7 +38,7 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http) {
     }
     load();
 
-    $scope.$watch('env', function() {
+    $scope.$watch('env', function () {
         load();
     });
 });
