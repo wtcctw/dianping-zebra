@@ -27,9 +27,14 @@ zebraWeb.controller('config-test', function ($scope, $http, name) {
     });
 });
 
-zebraWeb.controller('config', function ($scope, $stateParams, $http) {
+zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
     $scope.envs = ['dev', 'alpha', 'qa'];
     $scope.env = 'dev';
+
+    $scope.test = function (key) {
+        key = key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
+        configService.openTestModal(key);
+    };
 
     var load = function () {
         $http.get('/a/config?op=view&env=' + $scope.env).success(function (data, status, headers, config) {

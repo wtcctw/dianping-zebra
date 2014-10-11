@@ -24,7 +24,9 @@
             <tr ng-repeat="group in lionConfigs | toArray | filter:{$key:'.mapping'} | filter:{$key:searchText}">
                 <td>{{group.$key}}</td>
                 <td>{{group.value}}</td>
-                <td><a href="">Edit</a></td>
+                <td>
+                    <button class="btn btn-xs btn-primary">Edit</button>
+                    <button class="btn btn-xs btn-warning" ng-click="test(group.$key)">Test</button></td>
             </tr>
             </tbody>
         </table>
