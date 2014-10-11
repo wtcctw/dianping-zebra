@@ -156,6 +156,9 @@
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
 				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
+				</requirement>
 			</requirements>
 		</component>
 	</components>
