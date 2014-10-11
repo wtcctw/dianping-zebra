@@ -92,66 +92,6 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			return String.format("%s.%s.jdbc.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsId, key);
 		}
 
-		Map<String, ReadOrWriteRole> parseConfig(String config) {
-			Map<String, ReadOrWriteRole> dataSources = new LinkedHashMap<String, ReadOrWriteRole>();
-
-			StringBuilder name = new StringBuilder(20);
-			StringBuilder role = new StringBuilder(5);
-
-			boolean isName = false;
-			for (int i = 0; i < config.length(); i++) {
-				char c = config.charAt(i);
-
-				if (c == '(') {
-					isName = true;
-				} else if (c == ')') {
-					setNameAndRole(dataSources, name, role);
-
-					isName = false;
-					name.setLength(0);
-					role.setLength(0);
-				} else if (c == ':') {
-					isName = false;
-				} else if (c == ',') {
-					if (name.length() > 0) {
-						setNameAndRole(dataSources, name, role);
-
-						isName = true;
-						name.setLength(0);
-						role.setLength(0);
-					} else {
-						isName = false;
-					}
-				} else {
-					if (isName) {
-						name.append(c);
-					} else {
-						role.append(c);
-					}
-				}
-			}
-
-			return dataSources;
-		}
-
-		private void setNameAndRole(Map<String, ReadOrWriteRole> dataSources, StringBuilder name, StringBuilder role) {
-			String key = name.toString().trim();
-			String value = role.toString().trim();
-
-			ReadOrWriteRole readOrWrite = dataSources.get(key);
-			if (readOrWrite == null) {
-				readOrWrite = new ReadOrWriteRole();
-				dataSources.put(key, readOrWrite);
-			}
-
-			if (value.length() > 0) {
-				readOrWrite.setRead(true);
-				readOrWrite.setWeight(Integer.parseInt(value));
-			} else {
-				readOrWrite.setWrite(true);
-			}
-		}
-
 		@Override
 		public void visitDataSourceConfig(DataSourceConfig dsConfig) {
 			String dsId = dsConfig.getId();
@@ -201,7 +141,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			}
 
 			if (config != null && config.length() > 0) {
-				Map<String, ReadOrWriteRole> pairs = parseConfig(config);
+				Map<String, ReadOrWriteRole> pairs = ReadOrWriteRole.parseConfig(config);
 
 				for (Entry<String, ReadOrWriteRole> pair : pairs.entrySet()) {
 					String key = pair.getKey();
@@ -222,7 +162,67 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	class ReadOrWriteRole {
+	static public class ReadOrWriteRole {
+		public static Map<String, ReadOrWriteRole> parseConfig(String config) {
+			Map<String, ReadOrWriteRole> dataSources = new LinkedHashMap<String, ReadOrWriteRole>();
+
+			StringBuilder name = new StringBuilder(20);
+			StringBuilder role = new StringBuilder(5);
+
+			boolean isName = false;
+			for (int i = 0; i < config.length(); i++) {
+				char c = config.charAt(i);
+
+				if (c == '(') {
+					isName = true;
+				} else if (c == ')') {
+					setNameAndRole(dataSources, name, role);
+
+					isName = false;
+					name.setLength(0);
+					role.setLength(0);
+				} else if (c == ':') {
+					isName = false;
+				} else if (c == ',') {
+					if (name.length() > 0) {
+						setNameAndRole(dataSources, name, role);
+
+						isName = true;
+						name.setLength(0);
+						role.setLength(0);
+					} else {
+						isName = false;
+					}
+				} else {
+					if (isName) {
+						name.append(c);
+					} else {
+						role.append(c);
+					}
+				}
+			}
+
+			return dataSources;
+		}
+
+		private static void setNameAndRole(Map<String, ReadOrWriteRole> dataSources, StringBuilder name, StringBuilder role) {
+			String key = name.toString().trim();
+			String value = role.toString().trim();
+
+			ReadOrWriteRole readOrWrite = dataSources.get(key);
+			if (readOrWrite == null) {
+				readOrWrite = new ReadOrWriteRole();
+				dataSources.put(key, readOrWrite);
+			}
+
+			if (value.length() > 0) {
+				readOrWrite.setRead(true);
+				readOrWrite.setWeight(Integer.parseInt(value));
+			} else {
+				readOrWrite.setWrite(true);
+			}
+		}
+
 		private boolean isRead;
 
 		private boolean isWrite;

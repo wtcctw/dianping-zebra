@@ -20,7 +20,7 @@ public class DataSourceConfigManagerTest {
 
 		GroupDataSourceConfigBuilder groupDataSourceConfigBuilder = dataSourceConfigManager.new GroupDataSourceConfigBuilder();
 
-		Map<String, ReadOrWriteRole> parseConfig = groupDataSourceConfigBuilder.parseConfig(config);
+		Map<String, ReadOrWriteRole> parseConfig = ReadOrWriteRole.parseConfig(config);
 
 		System.out.println(parseConfig);
 		Assert.assertEquals(expected, parseConfig.toString());
