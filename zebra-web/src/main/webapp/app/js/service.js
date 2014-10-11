@@ -11,4 +11,20 @@ zebraWeb.service('configService', function ($modal) {
             }
         });
     };
+
+    this.openEditModal = function (name, env) {
+        $modal.open({
+            templateUrl: 'app/template/config-edit.html',
+            controller: 'config-edit',
+            size: 'lg',
+            resolve: {
+                name: function () {
+                    return name;
+                },
+                env: function () {
+                    return env;
+                }
+            }
+        });
+    };
 });

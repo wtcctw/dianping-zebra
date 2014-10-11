@@ -27,13 +27,28 @@ zebraWeb.controller('config-test', function ($scope, $http, name) {
     });
 });
 
+zebraWeb.controller('config-edit', function ($scope, $http, name, env) {
+    $scope.name = name;
+    $http.get('/a/config?op=viewDs&key=' + name + '&env=' + env).success(function (data, status, headers, config) {
+        $scope.data = data;
+        console.log(data);
+    });
+});
+
 zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
     $scope.envs = ['dev', 'alpha', 'qa'];
     $scope.env = 'dev';
 
+    var convertKey = function (key) {
+        return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
+    }
+
+    $scope.edit = function (key) {
+        configService.openEditModal(convertKey(key), $scope.env);
+    };
+
     $scope.test = function (key) {
-        key = key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
-        configService.openTestModal(key);
+        configService.openTestModal(convertKey(key));
     };
 
     var load = function () {
