@@ -167,31 +167,32 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void close(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
-		this.filter.closeGroupDataSource(this.context.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
-			@Override
-			public void execute(GroupDataSource source) throws SQLException {
+		this.filter
+			.closeGroupDataSource(this.context.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
+				@Override
+				public void execute(GroupDataSource source) throws SQLException {
 
-				List<SQLException> exps = new ArrayList<SQLException>();
+					List<SQLException> exps = new ArrayList<SQLException>();
 
-				try {
-					if (read != null) {
-						read.close();
+					try {
+						if (read != null) {
+							read.close();
+						}
+					} catch (SQLException e) {
+						exps.add(e);
 					}
-				} catch (SQLException e) {
-					exps.add(e);
-				}
 
-				try {
-					if (write != null) {
-						write.close();
+					try {
+						if (write != null) {
+							write.close();
+						}
+					} catch (SQLException e) {
+						exps.add(e);
 					}
-				} catch (SQLException e) {
-					exps.add(e);
-				}
 
-				JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
-			}
-		});
+					JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
+				}
+			});
 	}
 
 	private Any findAny(List<Any> all, String name) {
@@ -217,13 +218,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return filter.getGroupConnection(this.context.clone(), this,
-		      new FilterFunctionWithSQLException<GroupDataSource, GroupConnection>() {
-			      @Override
-			      public GroupConnection execute(GroupDataSource source) throws SQLException {
-				      return new GroupConnection(source.readDataSource, source.writeDataSource,
-				            source.customizedReadWriteStrategy, source.routerType, source.context.clone(), source.filter);
-			      }
-		      });
+			new FilterFunctionWithSQLException<GroupDataSource, GroupConnection>() {
+				@Override
+				public GroupConnection execute(GroupDataSource source) throws SQLException {
+					return new GroupConnection(source.readDataSource, source.writeDataSource,
+						source.customizedReadWriteStrategy, source.routerType, source.context.clone(),
+						source.filter);
+				}
+			});
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -293,7 +295,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+			Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
 
@@ -314,10 +316,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-			      this.context.clone(), this.filter, systemConfigManager.getSystemConfig().getRetryTimes());
+				this.context.clone(), this.filter, systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
-			      this.context.clone(), this.filter);
+				this.context.clone(), this.filter);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -360,12 +362,12 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
 				filter.refreshGroupDataSource(this.context.clone(), propertyToChange, this,
-				      new FilterAction<GroupDataSource>() {
-					      @Override
-					      public void execute(GroupDataSource source) {
-						      refreshIntenal(newGroupConfig);
-					      }
-				      });
+					new FilterAction<GroupDataSource>() {
+						@Override
+						public void execute(GroupDataSource source) {
+							refreshIntenal(newGroupConfig);
+						}
+					});
 			}
 		}
 	}
@@ -378,11 +380,12 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.context.clone(), this.filter,
-			      systemConfigManager.getSystemConfig().getRetryTimes());
+				getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.context.clone(),
+				this.filter,
+				systemConfigManager.getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
-			      this.context.clone(), this.filter);
+				this.context.clone(), this.filter);
 			newWriteDataSource.init(false);
 
 			preparedSwitch = true;
@@ -635,6 +638,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
+			if (evt.getNewValue().equals(evt.getOldValue())) {
+				return;
+			}
+
 			if (evt.getPropertyName().endsWith(userKey)) {
 				atomicRefresh.setUser(evt.getNewValue().toString());
 				if (atomicRefresh.needToRefresh()) {
