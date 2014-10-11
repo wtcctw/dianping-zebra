@@ -29,9 +29,28 @@ public class Handler implements PageHandler<Context> {
     @OutboundActionMeta(name = "config")
     public void handleOutbound(Context ctx) throws ServletException, IOException {
         Payload payload = ctx.getPayload();
+        Object responseObject = null;
+
+        switch (payload.getAction()) {
+            case CREATE: {
+                String project = payload.getProject();
+                if (project.equals("groupds")) {
+                    String key = String.format("groupds.%s.mapping", payload.getKey());
+                    m_lionHttpService.createKey("groupds", key);
+                    m_lionHttpService.removeUnset(key);
+                } else if (project.equals("ds")) {
+
+                }
+                break;
+            }
+            default: {
+                responseObject = m_lionHttpService.getConfigByProject(payload.getEnv(), "groupds");
+            }
+        }
+
         HttpServletResponse response = ctx.getHttpServletResponse();
         response.setContentType("application/json");
-        response.getWriter().write(gson.toJson(m_lionHttpService.getConfigByProject(payload.getEnv(), "groupds")));
+        response.getWriter().write(gson.toJson(responseObject));
         response.getWriter().flush();
         response.getWriter().close();
         ctx.stopProcess();

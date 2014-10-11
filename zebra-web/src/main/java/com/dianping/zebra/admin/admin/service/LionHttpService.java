@@ -5,11 +5,13 @@ import java.util.HashMap;
 
 public interface LionHttpService {
 
-	public boolean createKey(String project, String key) throws IOException;
+    boolean createKey(String project, String key) throws IOException;
 
-	public boolean setConfig(String env, String key, String value);
+    String getConfig(String env, String key) throws IOException;
 
-	public String getConfig(String env, String key) throws IOException;
+    HashMap<String, String> getConfigByProject(String env, String project) throws IOException;
 
-	public HashMap<String, String> getConfigByProject(String env, String project) throws IOException;
+    void removeUnset(String key);
+
+    boolean setConfig(String env, String key, String value);
 }

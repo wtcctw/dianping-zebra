@@ -1,9 +1,11 @@
 <div class="row">
     <div class="col-xs-12">
         <form class="form-inline" role="form">
-            <input class="form-control" ng-model="searchText" type="text" placeholder="Search">
             <select class="form-control" ng-model="env" ng-options="env for env in envs">
             </select>
+            <input class="form-control" ng-model="searchText" type="text" placeholder="Search">
+            <input class="form-control" ng-model="addText" type="text" placeholder="Group Id">
+            <button ng-click="createGroupDs()" class="btn btn-primary">Create</button>
         </form>
     </div>
 </div>
@@ -19,7 +21,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="group in lionConfigs | toArray | filter:{$key:'.mapping'} | filter:searchText">
+            <tr ng-repeat="group in lionConfigs | toArray | filter:{$key:'.mapping'} | filter:{$key:searchText}">
                 <td>{{group.$key}}</td>
                 <td>{{group.value}}</td>
                 <td><a href="">Edit</a></td>

@@ -26,7 +26,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="app in database.m_apps | toArray | filter:searchTest | orderBy:predicate:reverse">
+            <tr ng-repeat="app in database.m_apps | toArray  | filter:searchTest | orderBy:predicate:reverse">
                 <td><a href="#/update/app/{{app.m_name}}">{{app.m_name}}</a></td>
                 <td>{{app.m_replacedSingleDataSource}}/{{app.m_c3p0DataSource}}</td>
                 <td>{{app.m_replacedDpdlDataSource}}/{{app.m_dpdlDataSource }}</td>

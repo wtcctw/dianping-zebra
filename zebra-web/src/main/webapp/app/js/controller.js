@@ -41,4 +41,12 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http) {
     $scope.$watch('env', function () {
         load();
     });
+
+    $scope.createGroupDs = function () {
+        if ($scope.addText) {
+            $http.get('/a/config?op=create&project=groupds&key=' + $scope.addText).success(function (data, status, headers, config) {
+                load();
+            });
+        }
+    }
 });

@@ -10,7 +10,11 @@ public class Payload implements ActionPayload<AdminPage, Action> {
     private Action m_action;
     @FieldMeta("env")
     private String m_env;
+    @FieldMeta("key")
+    private String m_key;
     private AdminPage m_page;
+    @FieldMeta("project")
+    private String m_project;
 
     @Override
     public Action getAction() {
@@ -29,6 +33,14 @@ public class Payload implements ActionPayload<AdminPage, Action> {
         this.m_env = env;
     }
 
+    public String getKey() {
+        return this.m_key;
+    }
+
+    public void setKey(String key) {
+        this.m_key = key;
+    }
+
     @Override
     public AdminPage getPage() {
         return m_page;
@@ -37,6 +49,14 @@ public class Payload implements ActionPayload<AdminPage, Action> {
     @Override
     public void setPage(String page) {
         m_page = AdminPage.getByName(page, AdminPage.CONFIG);
+    }
+
+    public String getProject() {
+        return m_project;
+    }
+
+    public void setProject(String project) {
+        this.m_project = project;
     }
 
     @Override
