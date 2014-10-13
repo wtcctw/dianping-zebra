@@ -5,8 +5,12 @@
 <div class="modal-body">
     <div>{{data.config}}</div>
     <hr/>
+    <form class="form-inline" role="form">
+        <input class="form-control" ng-model="searchText" type="text" placeholder="Search">
+    </form>
+    <hr/>
     <table class="table table-striped table-bordered table-condensed">
-        <tr ng-repeat="config in data.configs | orderBy:config.id">
+        <tr ng-repeat="config in data.configs | filter:searchText | orderBy:config.id">
             <td>
                 <table class="table">
                     <tr>
