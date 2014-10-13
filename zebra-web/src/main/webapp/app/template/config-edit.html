@@ -34,7 +34,7 @@
                     <tr ng-repeat="ds in config.properties">
                         <td>{{ds.key}}</td>
                         <td ng-class="{'has-warning':ds.newValue != ds.value}">
-                            <input ng-model="ds.newValue"
+                            <input ng-disabled="ds.isDelete" ng-model="ds.newValue"
                                    class="form-control input-sm"/>
                         </td>
                         <td>

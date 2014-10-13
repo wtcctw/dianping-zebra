@@ -3,6 +3,7 @@ package com.dianping.zebra.admin.admin.page.config;
 import com.dianping.zebra.admin.admin.service.DalConfigService;
 import com.dianping.zebra.admin.admin.service.LionHttpService;
 import com.google.gson.Gson;
+import jodd.util.URLDecoder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -11,7 +12,6 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
 
 public class Handler implements PageHandler<Context> {
@@ -42,17 +42,9 @@ public class Handler implements PageHandler<Context> {
 			break;
 		}
 		case UPDATEDS: {
-			BufferedReader reader = ctx.getHttpServletRequest().getReader();
-			StringBuffer sb = new StringBuffer();
-			String readTemp;
-
-			readTemp = reader.readLine();
-			while (readTemp != null) {
-				sb.append(readTemp);
-				reader.readLine();
-			}
-
-			//			m_dalConfigService.updateDsConfig()
+			m_dalConfigService
+				.updateDsConfig(
+					gson.fromJson(URLDecoder.decode(payload.getDsConfigs()), DalConfigService.GroupConfigModel.class));
 			break;
 		}
 		case CREATE: {
