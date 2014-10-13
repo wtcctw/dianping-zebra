@@ -26,19 +26,18 @@
                             </form>
                         </td>
                         <td>
-                            <button title="Remove DataSource" ng-click="removeDs()" class="btn btn-sm btn-danger">
-                                <span class="glyphicon glyphicon-minus"></span>
-                            </button>
                         </td>
                     </tr>
                     <tr ng-repeat="ds in config.properties">
                         <td>{{ds.key}}</td>
-                        <td ng-class="{'has-warning':ds.newValue != ds.value}">
-                            <input ng-disabled="ds.isDelete" ng-model="ds.newValue"
+                        <td ng-class="{'has-warning':(ds.newValue != ds.value || ds.isDelete) }">
+                            <input ng-disabled="ds.isDelete" style="{{ds.isDelete?'text-decoration:line-through':''}}"
+                                   ng-model="ds.newValue"
                                    class="form-control input-sm"/>
                         </td>
                         <td>
-                            <button title="Remove Property" ng-click="removeProperty(config.properties,ds)"
+                            <button ng-class="{active : ds.isDelete}" title="Remove Property"
+                                    ng-click="ds.isDelete = !ds.isDelete"
                                     class="btn btn-sm btn-danger">
                                 <span class="glyphicon glyphicon-minus"></span>
                             </button>
@@ -62,6 +61,10 @@
     </table>
 </div>
 <div class="modal-footer">
-    <button class="btn btn-success" ng-click="save()">Save</button>
-    <button class="btn btn-danger" ng-click="close()">Close</button>
+    <form class="form-inline" role="form">
+        <input class="form-control" placeholder="DataSource Id" ng-model="newDsName"/>
+        <button class="btn btn-success" ng-click="addDs()">Add DataSource</button>
+        <button class="btn btn-primary" ng-click="save()">Save All</button>
+        <button class="btn btn-danger" ng-click="close()">Cancel</button>
+    </form>
 </div>

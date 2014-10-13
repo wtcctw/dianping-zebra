@@ -38,7 +38,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 			HashMap<String, String> configs = m_lionHttpService.getConfigByProject(env, "ds");
 			List<String> keys = Lists.newArrayList(Iterables.filter(configs.keySet(), new Predicate<String>() {
 				@Override public boolean apply(String input) {
-					return input.matches("^ds\\." + groupId + "[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
+					return input.matches("^ds\\." + groupId + "\\-[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
 				}
 			}));
 			Map<String, DsConfigModel> dsConfigMap = new HashMap<String, DsConfigModel>();

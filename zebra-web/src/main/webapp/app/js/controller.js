@@ -31,6 +31,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
     $scope.name = name;
     $http.get('/a/config?op=viewDs&key=' + name + '&env=' + env).success(function (data, status, headers, config) {
         $scope.data = data;
+        console.log(data);
     });
 
     var calGroupPrevoew = function () {
@@ -46,7 +47,10 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
             if (config.role.isWrite) {
                 writeList += writeList ? ',' + config.id : config.id;
             }
-            if (config.role.isRead && config.role.weight) {
+            if (config.role.isRead) {
+                if (!config.role.weight) {
+                    config.role.weight = 1;
+                }
                 var temp = config.id + ':' + config.role.weight;
                 readList += readList ? ',' + temp : temp;
             }
@@ -56,6 +60,23 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
 
     $scope.close = function () {
         close();
+    }
+
+    $scope.addDs = function () {
+        if ($scope.newDsName.indexOf($scope.name) != 0) {
+            alert('请以' + $scope.name + '开头！');
+            return;
+        }
+        $scope.data.configs.push({
+            id: $scope.newDsName,
+            role: {
+                isWrite: false,
+                isRead: false,
+                weight: 1
+            },
+            properties: []
+        });
+        $scope.newDsName = '';
     }
 
     $scope.save = function () {
@@ -69,13 +90,6 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
     $scope.$watch(function () {
         calGroupPrevoew();
     })
-
-    $scope.removeProperty = function (list, item) {
-        var index = list.indexOf(item);
-        if (index > -1) {
-            list.splice(index, 1);
-        }
-    }
 
     $scope.addProperty = function (list, id, key, value) {
         list.push({
