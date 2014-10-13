@@ -95,7 +95,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
 
     $scope.addProperty = function (list, id, key, value) {
         list.push({
-            key: id + '.' + key,
+            key: 'ds.' + id + '.jdbc.' + key,
             value: '',
             newValue: value
         });

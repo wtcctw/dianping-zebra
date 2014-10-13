@@ -14,9 +14,6 @@ import java.util.Map;
 
 public class DalConfigServiceImpl implements DalConfigService {
 
-	private final String[] envs = new String[] { "dev", "alpha", "qa", "prelease", "product", "performance",
-		"product-hm" };
-
 	private String project = "ds";
 
 	@Inject
@@ -37,6 +34,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 						continue;
 					}
 					if (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue())) {
+						m_lionHttpService.createKey("ds", prop.getKey());
 						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
 					}
 				}
@@ -118,7 +116,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 		}
 
 		try {
-			for (String env : envs) {
+			for (String env : m_lionHttpService.getAllEnv()) {
 				String originUrl = m_lionHttpService.getConfig(env, url);
 				if (originUrl == null || originUrl.length() == 0) {
 					m_lionHttpService.setConfig(env, url, "jdbc:mysql://{ip}:{port}/{database}?characterEncoding=UTF8");
