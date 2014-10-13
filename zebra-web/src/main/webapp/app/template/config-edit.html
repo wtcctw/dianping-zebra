@@ -25,7 +25,8 @@
                                        style="width: 75px"/>
                             </form>
                         </td>
-                        <td><button title="Remove DataSource" ng-click="removeDs()" class="btn btn-xs btn-danger">x
+                        <td><button title="Remove DataSource" ng-click="removeDs()" class="btn btn-sm btn-danger">
+                            <span class="glyphicon glyphicon-minus"></span>
                         </button></td>
                     </tr>
                     <tr ng-repeat="ds in config.properties">
@@ -35,7 +36,8 @@
                                    class="form-control input-sm"/>
                         </td>
                         <td>
-                            <button title="Remove Property" ng-click="removeProperty(config.properties,ds)" class="btn btn-xs btn-danger">x
+                            <button title="Remove Property" ng-click="removeProperty(config.properties,ds)" class="btn btn-sm btn-danger">
+                                <span class="glyphicon glyphicon-minus"></span>
                             </button>
                         </td>
                     </tr>
@@ -46,7 +48,7 @@
                                    class="form-control input-sm"/></td>
                         <td>
                             <button title="Add Property" ng-click="addProperty(config.properties,config.id,config.properties.newKey,config.properties.newValue)"
-                                    class="btn btn-xs btn-success">+
+                                    class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span>
                             </button>
                         </td>
                     </tr>
