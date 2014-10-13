@@ -11,6 +11,7 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
 
 public class Handler implements PageHandler<Context> {
@@ -38,6 +39,20 @@ public class Handler implements PageHandler<Context> {
 		switch (payload.getAction()) {
 		case VIEWDS: {
 			responseObject = m_dalConfigService.getDsConfig(payload.getEnv(), payload.getKey());
+			break;
+		}
+		case UPDATEDS: {
+			BufferedReader reader = ctx.getHttpServletRequest().getReader();
+			StringBuffer sb = new StringBuffer();
+			String readTemp;
+
+			readTemp = reader.readLine();
+			while (readTemp != null) {
+				sb.append(readTemp);
+				reader.readLine();
+			}
+
+			//			m_dalConfigService.updateDsConfig()
 			break;
 		}
 		case CREATE: {

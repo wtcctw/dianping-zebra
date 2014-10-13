@@ -22,9 +22,14 @@ public class DalConfigServiceImpl implements DalConfigService {
 	@Inject
 	private LionHttpService m_lionHttpService;
 
+	public void updateDsConfig(GroupConfigModel modal) {
+
+	}
+
 	public GroupConfigModel getDsConfig(String env, final String groupId) {
 		try {
 			GroupConfigModel result = new GroupConfigModel();
+			result.setEnv(env);
 			result.setId(groupId);
 			result.setConfig(m_lionHttpService.getConfig(env, String.format("groupds.%s.mapping", groupId)));
 			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole

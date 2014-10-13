@@ -59,7 +59,9 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
     }
 
     $scope.save = function () {
-        close();
+        $http.post('/a/config?op=updateDs', $scope.data,{responseType:'json'}).success(function (data, status, headers, config) {
+            close();
+        });
     }
 
     $scope.$watch(function () {

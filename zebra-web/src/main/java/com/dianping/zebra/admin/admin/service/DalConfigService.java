@@ -10,10 +10,22 @@ public interface DalConfigService {
 
 	GroupConfigModel getDsConfig(String env, final String groupId);
 
+	void updateDsConfig(GroupConfigModel modal);
+
 	// for test purpose
 	public void setProject(String project);
 
 	public static class GroupConfigModel {
+		private String env;
+
+		public String getEnv() {
+			return env;
+		}
+
+		public void setEnv(String env) {
+			this.env = env;
+		}
+
 		private String id;
 
 		private String config;

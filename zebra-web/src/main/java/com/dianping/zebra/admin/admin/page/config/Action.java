@@ -3,6 +3,7 @@ package com.dianping.zebra.admin.admin.page.config;
 public enum Action implements org.unidal.web.mvc.Action {
     VIEW("view"),
 	VIEWDS("viewDs"),
+	UPDATEDS("updateDs"),
     CREATE("create");
 
     private String m_name;
