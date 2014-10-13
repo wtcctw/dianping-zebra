@@ -1,7 +1,11 @@
 package com.dianping.zebra.admin.admin.page.config;
 
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.zebra.admin.admin.service.ConnectionService;
+import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
 import com.dianping.zebra.admin.admin.service.DalConfigService;
 import com.dianping.zebra.admin.admin.service.LionHttpService;
+import com.dianping.zebra.group.util.StringUtils;
 import com.google.gson.Gson;
 import jodd.util.URLDecoder;
 import org.unidal.lookup.annotation.Inject;
@@ -13,12 +17,17 @@ import org.unidal.web.mvc.annotation.PayloadMeta;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Handler implements PageHandler<Context> {
 	private Gson gson = new Gson();
 
 	@Inject
 	private LionHttpService m_lionHttpService;
+
+	@Inject
+	private ConnectionService m_connectionService;
 
 	@Inject
 	private DalConfigService m_dalConfigService;
@@ -37,17 +46,26 @@ public class Handler implements PageHandler<Context> {
 		Object responseObject = null;
 
 		switch (payload.getAction()) {
-		case VIEWDS: {
+		case VIEWDS:
 			responseObject = m_dalConfigService.getDsConfig(payload.getEnv(), payload.getKey());
 			break;
-		}
-		case UPDATEDS: {
+		case UPDATEDS:
 			m_dalConfigService
 				.updateDsConfig(
 					gson.fromJson(URLDecoder.decode(payload.getDsConfigs()), DalConfigService.GroupConfigModel.class));
 			break;
-		}
-		case CREATE: {
+		case TEST:
+			String jdbcRef = payload.getKey();
+			String env = payload.getEnv();
+			if (StringUtils.isBlank(env)) {
+				env = EnvZooKeeperConfig.getEnv();
+			}
+			ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
+			connectionstatus.setConnected(m_connectionService.canConnect(jdbcRef, getConfigByGroupId(env, jdbcRef)));
+			connectionstatus.setConfig(m_connectionService.getConfig(jdbcRef).toString());
+			responseObject = connectionstatus;
+			break;
+		case CREATE:
 			String project = payload.getProject();
 			if (project.equals("groupds")) {
 				String key = String.format("groupds.%s.mapping", payload.getKey());
@@ -57,10 +75,9 @@ public class Handler implements PageHandler<Context> {
 
 			}
 			break;
-		}
-		default: {
+		default:
 			responseObject = m_lionHttpService.getConfigByProject(payload.getEnv(), "groupds");
-		}
+			break;
 		}
 
 		HttpServletResponse response = ctx.getHttpServletResponse();
@@ -69,5 +86,17 @@ public class Handler implements PageHandler<Context> {
 		response.getWriter().flush();
 		response.getWriter().close();
 		ctx.stopProcess();
+	}
+
+	private Map<String, String> getConfigByGroupId(String env, String groupId) {
+		Map<String, String> result = new HashMap<String, String>();
+		DalConfigService.GroupConfigModel groupConfig = m_dalConfigService.getDsConfig(env, groupId);
+		result.put(String.format("groupds.%s.mapping", groupId), groupConfig.getConfig());
+		for (DalConfigService.DsConfigModel ds : groupConfig.getConfigs()) {
+			for (DalConfigService.ConfigProperty prop : ds.getProperties()) {
+				result.put(prop.getKey(), prop.getValue());
+			}
+		}
+		return result;
 	}
 }

@@ -19,10 +19,10 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http) {
     });
 });
 
-zebraWeb.controller('config-test', function ($scope, $http, name) {
+zebraWeb.controller('config-test', function ($scope, $http, name, env) {
     $scope.name = name;
 
-    $http.get('/a/update?op=connection&database=' + name).success(function (data, status, headers, config) {
+    $http.get('/a/config?op=test&key=' + name + '&env=' + env).success(function (data, status, headers, config) {
         $scope.connectionStatus = data;
     });
 });
@@ -65,8 +65,8 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
         if (!$scope.newDsName) {
             return;
         }
-        if ($scope.newDsName.indexOf($scope.name) != 0) {
-            alert('请以' + $scope.name + '开头！');
+        if ($scope.newDsName.indexOf('ds.' + $scope.name) != 0) {
+            alert('请以 ds.' + $scope.name + ' 开头！');
             return;
         }
         $scope.data.configs.push({

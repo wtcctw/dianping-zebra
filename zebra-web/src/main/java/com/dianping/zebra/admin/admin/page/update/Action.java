@@ -5,9 +5,7 @@ public enum Action implements org.unidal.web.mvc.Action {
 
 	DATABASE("database"),
 
-	APP("app"),
-	
-	CONNECTION("connection");
+	APP("app");
 
 	private String m_name;
 

@@ -2,6 +2,7 @@ package com.dianping.zebra.admin.admin.page.config;
 
 public enum Action implements org.unidal.web.mvc.Action {
     VIEW("view"),
+	TEST("test"),
 	VIEWDS("viewDs"),
 	UPDATEDS("updateDs"),
     CREATE("create");
