@@ -31,9 +31,49 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env) {
     $scope.name = name;
     $http.get('/a/config?op=viewDs&key=' + name + '&env=' + env).success(function (data, status, headers, config) {
         $scope.data = data;
-        console.log(data);
     });
-});
+
+    var calGroupPrevoew = function () {
+        if (!$scope.data) {
+            return;
+        }
+        var writeList = '';
+        var readList = '';
+        $scope.data.configs.forEach(function (config) {
+            if (!config.role) {
+                return;
+            }
+            if (config.role.isWrite) {
+                writeList += writeList ? ',' + config.id : config.id;
+            }
+            if (config.role.isRead && config.role.weight) {
+                var temp = config.id + ':' + config.role.weight;
+                readList += readList ? ',' + temp : temp;
+            }
+        });
+        $scope.groupPreview = '(' + readList + '),(' + writeList + ')';
+    }
+
+    $scope.$watch(function () {
+        calGroupPrevoew();
+    })
+
+    $scope.removeProperty = function (list, item) {
+        var index = list.indexOf(item);
+        if (index > -1) {
+            list.splice(index, 1);
+        }
+    }
+
+    $scope.addProperty = function (list, id, key, value) {
+        list.push({
+            key: id + '.' + key,
+            value: '',
+            newValue: value
+        });
+    }
+})
+;
 
 zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
     $scope.envs = ['dev', 'alpha', 'qa'];

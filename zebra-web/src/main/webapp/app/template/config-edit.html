@@ -3,42 +3,55 @@
     </h4>
 </div>
 <div class="modal-body">
-    <table class="table table-striped table-condensed">
-        <thead>
-        <tr>
-            <th>Id</th>
-            <th>Config</th>
-            <th>Properties</th>
-        </tr>
-        </thead>
-        <tbody>
+    <div>{{groupPreview}}</div>
+    <hr/>
+    <table class="table table-striped table-bordered table-condensed">
         <tr ng-repeat="config in data.configs">
-            <td>{{config.id}}</td>
             <td>
-                <form class="form-inline" role="form">
-                    <div class="btn-group">
-                        <label ng-class="{'btn-success':config.role.isRead,'btn-danger':!config.role.isRead}"
-                               class="btn btn-sm" ng-model="config.role.isRead" btn-checkbox>R</label>
-                        <label ng-class="{'btn-success':config.role.isWrite,'btn-danger':!config.role.isWrite}"
-                               class="btn btn-sm" ng-model="config.role.isWrite" btn-checkbox>W</label>
-                    </div>
-                    <input ng- placeholder="weight" class="form-control input-sm" ng-model="config.role.weight"
-                           type="number"
-                           style="width: 75px"/>
-                </form>
-            </td>
-            <td>
-                <table class="table table-striped table-condensed">
+                <table class="table">
+                    <tr>
+                        <td>{{config.id}}</td>
+                        <td>
+                            <form class="form-inline" role="form">
+                                <div class="btn-group">
+                                    <label ng-class="{'btn-success':config.role.isRead,'btn-danger':!config.role.isRead}"
+                                           class="btn btn-sm" ng-model="config.role.isRead" btn-checkbox>Read</label>
+                                    <label ng-class="{'btn-success':config.role.isWrite,'btn-danger':!config.role.isWrite}"
+                                           class="btn btn-sm" ng-model="config.role.isWrite" btn-checkbox>Write</label>
+                                </div>
+                                <input ng- placeholder="weight" class="form-control input-sm"
+                                       ng-model="config.role.weight"
+                                       type="number"
+                                       style="width: 75px"/>
+                            </form>
+                        </td>
+                        <td><button title="Remove DataSource" ng-click="removeDs()" class="btn btn-xs btn-danger">x
+                        </button></td>
+                    </tr>
                     <tr ng-repeat="ds in config.properties">
                         <td>{{ds.key}}</td>
                         <td ng-class="{'has-warning':ds.newValue != ds.value}">
                             <input ng-model="ds.newValue"
                                    class="form-control input-sm"/>
                         </td>
+                        <td>
+                            <button title="Remove Property" ng-click="removeProperty(config.properties,ds)" class="btn btn-xs btn-danger">x
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><input placeholder="jdbc.xxxx" ng-model="config.properties.newKey"
+                                   class="form-control input-sm" style="width: 200px"/></td>
+                        <td><input placeholder="value" ng-model="config.properties.newValue"
+                                   class="form-control input-sm"/></td>
+                        <td>
+                            <button title="Add Property" ng-click="addProperty(config.properties,config.id,config.properties.newKey,config.properties.newValue)"
+                                    class="btn btn-xs btn-success">+
+                            </button>
+                        </td>
                     </tr>
                 </table>
             </td>
         </tr>
-        </tbody>
     </table>
 </div>
