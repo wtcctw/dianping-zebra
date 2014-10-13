@@ -31,7 +31,6 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
     $scope.name = name;
     $http.get('/a/config?op=viewDs&key=' + name + '&env=' + env).success(function (data, status, headers, config) {
         $scope.data = data;
-        console.log(data);
     });
 
     var calGroupPrevoew = function () {
@@ -63,6 +62,9 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
     }
 
     $scope.addDs = function () {
+        if (!$scope.newDsName) {
+            return;
+        }
         if ($scope.newDsName.indexOf($scope.name) != 0) {
             alert('请以' + $scope.name + '开头！');
             return;

@@ -23,7 +23,22 @@ public class DalConfigServiceImpl implements DalConfigService {
 	private LionHttpService m_lionHttpService;
 
 	public void updateDsConfig(GroupConfigModel modal) {
+		m_lionHttpService.setConfig(modal.getEnv(), getGroupDataSourceKeyById(modal.getId()), modal.getConfig());
+		for (DsConfigModel ds : modal.getConfigs()) {
+			for (ConfigProperty prop : ds.getProperties()) {
+				if (prop.isDelete()) {
+					m_lionHttpService.removeUnset(prop.getKey());
+					continue;
+				}
+				if (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue())) {
+					m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
+				}
+			}
+		}
+	}
 
+	private String getGroupDataSourceKeyById(String groupId) {
+		return String.format("groupds.%s.mapping", groupId);
 	}
 
 	public GroupConfigModel getDsConfig(String env, final String groupId) {
@@ -31,7 +46,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 			GroupConfigModel result = new GroupConfigModel();
 			result.setEnv(env);
 			result.setId(groupId);
-			result.setConfig(m_lionHttpService.getConfig(env, String.format("groupds.%s.mapping", groupId)));
+			result.setConfig(m_lionHttpService.getConfig(env, getGroupDataSourceKeyById(groupId)));
 			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
 				.parseConfig(result.getConfig());
 
