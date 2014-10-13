@@ -14,26 +14,53 @@ import java.util.Map;
 
 public class DalConfigServiceImpl implements DalConfigService {
 
-	private final String[] envs = new String[] { "dev", "alpha", "qa", "prelease", "product", "performance",
-		"product-hm" };
-
 	private String project = "ds";
 
 	@Inject
 	private LionHttpService m_lionHttpService;
 
+	public void updateDsConfig(GroupConfigModel modal) {
+		try {
+			String groupKey = getGroupDataSourceKeyById(modal.getId());
+
+			String oldConfig = m_lionHttpService.getConfig(modal.getEnv(), groupKey);
+			if (!modal.getConfig().equals(oldConfig)) {
+				m_lionHttpService.setConfig(modal.getEnv(), groupKey, modal.getConfig());
+			}
+			for (DsConfigModel ds : modal.getConfigs()) {
+				for (ConfigProperty prop : ds.getProperties()) {
+					if (prop.isDelete()) {
+						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), "");
+						continue;
+					}
+					if (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue())) {
+						m_lionHttpService.createKey("ds", prop.getKey());
+						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
+					}
+				}
+			}
+		} catch (IOException e) {
+			Cat.logError(e);
+		}
+	}
+
+	private String getGroupDataSourceKeyById(String groupId) {
+		return String.format("groupds.%s.mapping", groupId);
+	}
+
 	public GroupConfigModel getDsConfig(String env, final String groupId) {
 		try {
 			GroupConfigModel result = new GroupConfigModel();
+			result.setEnv(env);
 			result.setId(groupId);
-			result.setConfig(m_lionHttpService.getConfig(env, String.format("groupds.%s.mapping", groupId)));
+			result.setConfig(m_lionHttpService.getConfig(env, getGroupDataSourceKeyById(groupId)));
 			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
 				.parseConfig(result.getConfig());
 
 			HashMap<String, String> configs = m_lionHttpService.getConfigByProject(env, "ds");
 			List<String> keys = Lists.newArrayList(Iterables.filter(configs.keySet(), new Predicate<String>() {
 				@Override public boolean apply(String input) {
-					return input.matches("^ds\\." + groupId + "[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
+					return input.matches("^ds\\." + groupId + "\\-[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
 				}
 			}));
 			Map<String, DsConfigModel> dsConfigMap = new HashMap<String, DsConfigModel>();
@@ -89,7 +116,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 		}
 
 		try {
-			for (String env : envs) {
+			for (String env : m_lionHttpService.getAllEnv()) {
 				String originUrl = m_lionHttpService.getConfig(env, url);
 				if (originUrl == null || originUrl.length() == 0) {
 					m_lionHttpService.setConfig(env, url, "jdbc:mysql://{ip}:{port}/{database}?characterEncoding=UTF8");

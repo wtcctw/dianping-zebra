@@ -15,107 +15,118 @@ import java.util.Map;
 
 public class LionHttpServiceImpl implements LionHttpService {
 
-    private static final String[] ALL_ENV = new String[]{"dev", "alpha", "qa"};
-    private static final String ID = "2";
-    private String createKeyUrl = "http://lionapi.dp:8080/config2/create?id=%s&project=%s&key=%s&desc=%s";
-    private String getConfigUrl = "http://lionapi.dp:8080/config2/get?env=%s&key=%s&id=%s";
-    private String getProjectConfigUrl = "http://lionapi.dp:8080/config2/get?env=%s&project=%s&id=%s";
-    private String setConfigUrl = "http://lionapi.dp:8080/config2/set?env=%s&id=%s&key=%s&value=%s";
+	private static final String[] ALL_ENV = new String[] { "dev", "alpha", "qa", "prelease", "product", "performance",
+		"product-hm" };
 
-    private String callLionHttpApi(String url) throws IOException {
-        InputStream inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
+	private static final String ID = "2";
 
-        return Files.forIO().readFrom(inputStream, "utf-8");
-    }
+	private String createKeyUrl = "http://lionapi.dp:8080/config2/create?id=%s&project=%s&key=%s&desc=%s";
 
-    @Override
-    public boolean createKey(String project, String key) throws IOException {
-        String url = String.format(createKeyUrl, ID, project, key, key);
-        String result = callLionHttpApi(url);
+	private String getConfigUrl = "http://lionapi.dp:8080/config2/get?env=%s&key=%s&id=%s";
 
-        try {
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(result).getAsJsonObject();
-            if (obj.get("status").getAsString().equals("success")) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (Exception t) {
-            throw new IOException("cannot create key into lion", t);
-        }
-    }
+	private String getProjectConfigUrl = "http://lionapi.dp:8080/config2/get?env=%s&project=%s&id=%s";
 
-    @Override
-    public String getConfig(String env, String key) throws IOException {
-        String url = String.format(getConfigUrl, env, key, ID);
-        String result = callLionHttpApi(url);
+	private String setConfigUrl = "http://lionapi.dp:8080/config2/set?env=%s&id=%s&key=%s&value=%s";
 
-        try {
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(result).getAsJsonObject();
-            return obj.get("result").getAsString();
-        } catch (Exception t) {
-            return null;
-        }
-    }
+	private String callLionHttpApi(String url) throws IOException {
+		InputStream inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
 
-    @Override
-    public HashMap<String, String> getConfigByProject(String env, String project) throws IOException {
-        String url = String.format(getProjectConfigUrl, env, project, ID);
-        String result = callLionHttpApi(url);
+		return Files.forIO().readFrom(inputStream, "utf-8");
+	}
 
-        try {
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(result).getAsJsonObject();
-            HashMap<String, String> maps = new HashMap<String, String>();
+	@Override
+	public String[] getAllEnv(){
+		return ALL_ENV;
+	}
 
-            if (obj.get("status").getAsString().equals("success")) {
-                JsonObject asJsonObject = obj.get("result").getAsJsonObject();
+	@Override
+	public boolean createKey(String project, String key) throws IOException {
+		String url = String.format(createKeyUrl, ID, project, key, key);
+		String result = callLionHttpApi(url);
 
-                for (Map.Entry<String, JsonElement> entry : asJsonObject.entrySet()) {
-                    maps.put(entry.getKey(), entry.getValue().getAsString());
-                }
+		try {
+			JsonParser parser = new JsonParser();
+			JsonObject obj = parser.parse(result).getAsJsonObject();
+			if (obj.get("status").getAsString().equals("success")) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception t) {
+			throw new IOException("cannot create key into lion", t);
+		}
+	}
 
-                return maps;
-            }
-        } catch (Exception t) {
-            throw new IOException("cannot get config from lion", t);
-        }
+	@Override
+	public String getConfig(String env, String key) throws IOException {
+		String url = String.format(getConfigUrl, env, key, ID);
+		String result = callLionHttpApi(url);
 
-        throw new IOException("cannot get config from lion");
-    }
+		try {
+			JsonParser parser = new JsonParser();
+			JsonObject obj = parser.parse(result).getAsJsonObject();
+			return obj.get("result").getAsString();
+		} catch (Exception t) {
+			return null;
+		}
+	}
 
-    @Override
-    public void removeUnset(String key) {
-        try {
-            for (String env : ALL_ENV) {
-                String value = getConfig(env, key);
-                if (StringUtils.isBlank(value)) {
-                    setConfig(env, key, "");
-                }
-            }
-        } catch (IOException e) {
-            Cat.logError(e);
-        }
-    }
+	@Override
+	public HashMap<String, String> getConfigByProject(String env, String project) throws IOException {
+		String url = String.format(getProjectConfigUrl, env, project, ID);
+		String result = callLionHttpApi(url);
 
-    @Override
-    public boolean setConfig(String env, String key, String value) {
-        try {
-            String result = callLionHttpApi(String.format(setConfigUrl, env, ID, key, value));
+		try {
+			JsonParser parser = new JsonParser();
+			JsonObject obj = parser.parse(result).getAsJsonObject();
+			HashMap<String, String> maps = new HashMap<String, String>();
 
-            JsonParser parser = new JsonParser();
-            JsonObject obj = parser.parse(result).getAsJsonObject();
+			if (obj.get("status").getAsString().equals("success")) {
+				JsonObject asJsonObject = obj.get("result").getAsJsonObject();
 
-            if (obj.get("status").getAsString().equals("success")) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (IOException e) {
-            Cat.logError(e);
-            return false;
-        }
-    }
+				for (Map.Entry<String, JsonElement> entry : asJsonObject.entrySet()) {
+					maps.put(entry.getKey(), entry.getValue().getAsString());
+				}
+
+				return maps;
+			}
+		} catch (Exception t) {
+			throw new IOException("cannot get config from lion", t);
+		}
+
+		throw new IOException("cannot get config from lion");
+	}
+
+	@Override
+	public void removeUnset(String key) {
+		try {
+			for (String env : ALL_ENV) {
+				String value = getConfig(env, key);
+				if (StringUtils.isBlank(value)) {
+					setConfig(env, key, "");
+				}
+			}
+		} catch (IOException e) {
+			Cat.logError(e);
+		}
+	}
+
+	@Override
+	public boolean setConfig(String env, String key, String value) {
+		try {
+			String result = callLionHttpApi(String.format(setConfigUrl, env, ID, key, value));
+
+			JsonParser parser = new JsonParser();
+			JsonObject obj = parser.parse(result).getAsJsonObject();
+
+			if (obj.get("status").getAsString().equals("success")) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (IOException e) {
+			Cat.logError(e);
+			return false;
+		}
+	}
 }

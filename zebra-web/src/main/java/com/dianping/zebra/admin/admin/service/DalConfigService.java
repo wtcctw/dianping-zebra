@@ -10,15 +10,27 @@ public interface DalConfigService {
 
 	GroupConfigModel getDsConfig(String env, final String groupId);
 
+	void updateDsConfig(GroupConfigModel modal);
+
 	// for test purpose
 	public void setProject(String project);
 
 	public static class GroupConfigModel {
+		private String env;
+
 		private String id;
 
 		private String config;
 
 		private List<DsConfigModel> configs;
+
+		public String getEnv() {
+			return env;
+		}
+
+		public void setEnv(String env) {
+			this.env = env;
+		}
 
 		public String getConfig() {
 			return config;
@@ -83,6 +95,16 @@ public interface DalConfigService {
 		private String value;
 
 		private String newValue;
+
+		private boolean isDelete;
+
+		public boolean isDelete() {
+			return isDelete;
+		}
+
+		public void setDelete(boolean isDelete) {
+			this.isDelete = isDelete;
+		}
 
 		public String getNewValue() {
 			return newValue;

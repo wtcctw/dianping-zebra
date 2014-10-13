@@ -1,10 +1,7 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
-import com.dianping.zebra.group.config.SystemConfigManager;
-import com.dianping.zebra.group.config.SystemConfigManagerFactory;
+import com.dianping.zebra.group.config.*;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
@@ -56,6 +53,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private String jdbcRef;
 
+	private ConfigService customerConfigService;
+
 	private String jdbcUrlExtra;
 
 	private LoadBalancedDataSource readDataSource;
@@ -71,6 +70,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public GroupDataSource(String jdbcRef) {
 		this.jdbcRef = jdbcRef;
+	}
+
+	public void setConfigService(ConfigService configService) {
+		this.customerConfigService = configService;
 	}
 
 	protected GroupDataSourceConfig buildGroupConfig() {
@@ -291,7 +294,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
+		this.dataSourceConfigManager = customerConfigService != null ?
+			DataSourceConfigManagerFactory.getConfigManager(customerConfigService, jdbcRef) :
+			DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,

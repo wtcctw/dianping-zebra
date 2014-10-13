@@ -11,16 +11,11 @@ import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
-import com.dianping.zebra.admin.admin.service.ConnectionService;
-import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
 import com.dianping.zebra.admin.admin.service.ReportService;
 import com.google.gson.Gson;
 
 public class Handler implements PageHandler<Context> {
 	private Gson gson = new Gson();
-
-	@Inject
-	private ConnectionService m_connectionService;
 
 	@Inject
 	private ReportService m_reportService;
@@ -48,15 +43,6 @@ public class Handler implements PageHandler<Context> {
 		case APP:
 			responseObject = m_reportService.getApp(payload.getApp(), false);
 			break;
-		case CONNECTION:
-			String jdbcRef = payload.getDatabase().toLowerCase();
-			ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
-			if (jdbcRef.toLowerCase().equals("dpreview")) {
-				jdbcRef = "DPReview"; // hack
-			}
-			connectionstatus.setConnected(m_connectionService.canConnect(jdbcRef));
-			connectionstatus.setConfig(m_connectionService.getConfig(jdbcRef).toString());
-			responseObject = connectionstatus;
 		}
 
 		HttpServletResponse response = ctx.getHttpServletResponse();

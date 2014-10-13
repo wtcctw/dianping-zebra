@@ -122,9 +122,6 @@
 			<implementation>com.dianping.zebra.admin.admin.page.update.Handler</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
-				</requirement>
-				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
 				</requirement>
 			</requirements>
@@ -167,6 +164,9 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>

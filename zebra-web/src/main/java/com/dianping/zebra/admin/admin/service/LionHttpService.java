@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public interface LionHttpService {
+	String[] getAllEnv();
 
-    boolean createKey(String project, String key) throws IOException;
+	boolean createKey(String project, String key) throws IOException;
 
-    String getConfig(String env, String key) throws IOException;
+	String getConfig(String env, String key) throws IOException;
 
-    HashMap<String, String> getConfigByProject(String env, String project) throws IOException;
+	HashMap<String, String> getConfigByProject(String env, String project) throws IOException;
 
-    void removeUnset(String key);
+	void removeUnset(String key);
 
-    boolean setConfig(String env, String key, String value);
+	boolean setConfig(String env, String key, String value);
 }
