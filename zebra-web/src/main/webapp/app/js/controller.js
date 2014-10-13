@@ -104,7 +104,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
 ;
 
 zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
-    $scope.envs = ['dev', 'alpha', 'qa'];
+    $scope.envs = [ "dev", "alpha", "qa", "prelease", "product", "performance", "product-hm" ];
     $scope.env = 'dev';
 
     var convertKey = function (key) {

@@ -23,17 +23,26 @@ public class DalConfigServiceImpl implements DalConfigService {
 	private LionHttpService m_lionHttpService;
 
 	public void updateDsConfig(GroupConfigModel modal) {
-		m_lionHttpService.setConfig(modal.getEnv(), getGroupDataSourceKeyById(modal.getId()), modal.getConfig());
-		for (DsConfigModel ds : modal.getConfigs()) {
-			for (ConfigProperty prop : ds.getProperties()) {
-				if (prop.isDelete()) {
-					m_lionHttpService.removeUnset(prop.getKey());
-					continue;
-				}
-				if (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue())) {
-					m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
+		try {
+			String groupKey = getGroupDataSourceKeyById(modal.getId());
+
+			String oldConfig = m_lionHttpService.getConfig(modal.getEnv(), groupKey);
+			if (!modal.getConfig().equals(oldConfig)) {
+				m_lionHttpService.setConfig(modal.getEnv(), groupKey, modal.getConfig());
+			}
+			for (DsConfigModel ds : modal.getConfigs()) {
+				for (ConfigProperty prop : ds.getProperties()) {
+					if (prop.isDelete()) {
+						m_lionHttpService.removeUnset(prop.getKey());
+						continue;
+					}
+					if (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue())) {
+						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
+					}
 				}
 			}
+		} catch (IOException e) {
+			Cat.logError(e);
 		}
 	}
 

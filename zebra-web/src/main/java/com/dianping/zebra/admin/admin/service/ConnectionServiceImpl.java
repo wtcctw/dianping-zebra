@@ -1,6 +1,7 @@
 package com.dianping.zebra.admin.admin.service;
 
 import com.dianping.cat.Cat;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
@@ -15,6 +16,8 @@ public class ConnectionServiceImpl implements ConnectionService {
 
     @Override
     public boolean canConnect(String jdbcRef) {
+//	    DataSourceConfigManagerFactory
+
         GroupDataSource ds = null;
         try {
             ds = new GroupDataSource(jdbcRef);
