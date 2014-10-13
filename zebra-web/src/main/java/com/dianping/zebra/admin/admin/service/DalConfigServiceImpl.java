@@ -33,7 +33,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 			for (DsConfigModel ds : modal.getConfigs()) {
 				for (ConfigProperty prop : ds.getProperties()) {
 					if (prop.isDelete()) {
-						m_lionHttpService.removeUnset(prop.getKey());
+						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), "");
 						continue;
 					}
 					if (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue())) {
