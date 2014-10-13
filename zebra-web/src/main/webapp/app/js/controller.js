@@ -27,7 +27,7 @@ zebraWeb.controller('config-test', function ($scope, $http, name) {
     });
 });
 
-zebraWeb.controller('config-edit', function ($scope, $http, name, env) {
+zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
     $scope.name = name;
     $http.get('/a/config?op=viewDs&key=' + name + '&env=' + env).success(function (data, status, headers, config) {
         $scope.data = data;
@@ -51,7 +51,15 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env) {
                 readList += readList ? ',' + temp : temp;
             }
         });
-        $scope.groupPreview = '(' + readList + '),(' + writeList + ')';
+        $scope.data.config = '(' + readList + '),(' + writeList + ')';
+    }
+
+    $scope.close = function () {
+        close();
+    }
+
+    $scope.save = function () {
+        close();
     }
 
     $scope.$watch(function () {
@@ -84,28 +92,28 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
     }
 
     $scope.edit = function (key) {
-        configService.openEditModal(convertKey(key), $scope.env);
+        configService.openEditModal(convertKey(key), $scope.env, $scope.load);
     };
 
     $scope.test = function (key) {
         configService.openTestModal(convertKey(key));
     };
 
-    var load = function () {
+    $scope.load = function () {
         $http.get('/a/config?op=view&env=' + $scope.env).success(function (data, status, headers, config) {
             $scope.lionConfigs = data;
         });
     }
-    load();
+    $scope.load();
 
     $scope.$watch('env', function () {
-        load();
+        $scope.load();
     });
 
     $scope.createGroupDs = function () {
         if ($scope.addText) {
             $http.get('/a/config?op=create&project=groupds&key=' + $scope.addText).success(function (data, status, headers, config) {
-                load();
+                $scope.load();
             });
         }
     }
