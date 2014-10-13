@@ -28,7 +28,6 @@ public class Handler implements PageHandler<Context> {
     @InboundActionMeta(name = "service")
     public void handleInbound(Context ctx) throws ServletException, IOException {
         // display only, no action here
-
     }
 
     @Override

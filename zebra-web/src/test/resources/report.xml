@@ -1,12 +1,12 @@
 <report group-data-source="1" dpdl-data-source="3" c3p0-data-source="3" single-data-source="3"
-		other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10">
+		other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10" update-status="0">
 	<database name="tuangou2010" group-data-source="1"
 		dpdl-data-source="3" c3p0-data-source="3" single-data-source="3"
-		other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10">
+		other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10" update-status="0">
 		<app name="tuangou-service" group-data-source="1"
 			dpdl-data-source="3"  c3p0-data-source="3" single-data-source="3"
-			other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10">
-			<machine ip="192.168.1.1" version="2.5.4">
+			other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10" update-status="0">
+			<machine ip="192.168.1.1" version="2.5.4" update-status="0" intergrate-with-dal="true">
 				<datasource jdbc-url="jdbc:mysql//localhost:3306/tuangou2010" username="sga"
 					init-pool-size="1" max-pool-size="2" min-pool-size="1" bean-name="tuangou2010-master"
 					type="GroupDataSource" replaced="true">

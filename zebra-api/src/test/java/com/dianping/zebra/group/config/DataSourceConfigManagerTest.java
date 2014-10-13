@@ -1,25 +1,20 @@
 package com.dianping.zebra.group.config;
 
-import com.dianping.zebra.group.config.DefaultDataSourceConfigManager.GroupDataSourceConfigBuilder;
-import com.dianping.zebra.group.config.DefaultDataSourceConfigManager.ReadOrWriteRole;
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
-import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
+import java.io.IOException;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.util.Map;
+import com.dianping.zebra.group.config.DefaultDataSourceConfigManager.ReadOrWriteRole;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.config.datasource.transform.DefaultSaxParser;
 
 public class DataSourceConfigManagerTest {
 
 	public void testAssert(String config, String expected) {
-		DefaultDataSourceConfigManager dataSourceConfigManager = (DefaultDataSourceConfigManager) DataSourceConfigManagerFactory
-				.getConfigManager("local", "sample.ds.v2");
-
-		GroupDataSourceConfigBuilder groupDataSourceConfigBuilder = dataSourceConfigManager.new GroupDataSourceConfigBuilder();
-
 		Map<String, ReadOrWriteRole> parseConfig = ReadOrWriteRole.parseConfig(config);
 
 		System.out.println(parseConfig);

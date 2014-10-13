@@ -34,7 +34,7 @@
                 <td>{{database.m_replacedDpdlDataSource}}/{{database.m_dpdlDataSource}}</td>
                 <td>{{database.m_groupDataSource }}</td>
                 <td>
-                    <span class="badge alert-{{database.m_replacedDpdlDataSource == 0 && database.m_groupDataSource == 0?'danger':((database.m_replacedSingleDataSource + database.m_replacedDpdlDataSource + database.m_groupDataSource) == database.m_totalDataSource?'success':'warning')}}">{{database.m_totalDataSource}}</span>
+                    <span class="badge alert-{{database.m_updateStatus == -1?'danger':(database.m_updateStatus == 0 ?'success':'warning')}}">{{database.m_totalDataSource}}</span>
                 </td>
                 <td><button class="btn btn-xs btn-warning" ng-click="test(database.m_name)">Test</button></td>
             </tr>

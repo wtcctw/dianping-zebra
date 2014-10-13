@@ -15,6 +15,8 @@ import com.dianping.zebra.admin.admin.service.DalConfigService;
 import com.dianping.zebra.admin.admin.service.DalConfigServiceImpl;
 import com.dianping.zebra.admin.admin.service.DalService;
 import com.dianping.zebra.admin.admin.service.DalServiceImpl;
+import com.dianping.zebra.admin.admin.service.DatabaseRealtimeService;
+import com.dianping.zebra.admin.admin.service.DatabaseRealtimeServiceImpl;
 import com.dianping.zebra.admin.admin.service.LionHttpService;
 import com.dianping.zebra.admin.admin.service.LionHttpServiceImpl;
 import com.dianping.zebra.admin.admin.service.LocalLogService;
@@ -31,10 +33,12 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(LionHttpService.class, LionHttpServiceImpl.class));
 		all.add(C(LogService.class, LocalLogService.class));
 		all.add(C(CmdbService.class, CmdbServiceImpl.class));
+		all.add(C(DatabaseRealtimeService.class, DatabaseRealtimeServiceImpl.class).req(CmdbService.class));
 		all.add(C(DalConfigService.class, DalConfigServiceImpl.class).req(LionHttpService.class));
 		all.add(C(DalService.class, DalServiceImpl.class).req(LionHttpService.class));
-		all.add(C(ReportService.class, ReportServiceImpl.class).req(HeartbeatDao.class, CmdbService.class));
-		all.add(C(ConnectionService.class,ConnectionServiceImpl.class));
+		all.add(C(ReportService.class, ReportServiceImpl.class).req(HeartbeatDao.class, CmdbService.class,
+		      DatabaseRealtimeService.class));
+		all.add(C(ConnectionService.class, ConnectionServiceImpl.class));
 
 		// move following line to top-level project if necessary
 		all.add(C(JdbcDataSourceConfigurationManager.class));

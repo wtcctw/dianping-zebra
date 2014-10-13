@@ -13,6 +13,15 @@
 			<implementation>com.dianping.zebra.admin.admin.service.CmdbServiceImpl</implementation>
 		</component>
 		<component>
+			<role>com.dianping.zebra.admin.admin.service.DatabaseRealtimeService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.DatabaseRealtimeServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.CmdbService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
 			<implementation>com.dianping.zebra.admin.admin.service.DalConfigServiceImpl</implementation>
 			<requirements>
@@ -39,6 +48,9 @@
 				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.CmdbService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.DatabaseRealtimeService</role>
 				</requirement>
 			</requirements>
 		</component>

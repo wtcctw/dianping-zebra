@@ -9,10 +9,10 @@ public interface ReportService {
 
 	public void createOrUpdate(Heartbeat heartbeat);
 
-	public Report getReport();
-	
-	public App getApp(String app);
-	
-	public Database getDatabase(String database);
+	public Report getReport(boolean hasExtraInfo);
+
+	public App getApp(String app, boolean hasExtraInfo);
+
+	public Database getDatabase(String database, boolean hasExtraInfo);
 
 }
