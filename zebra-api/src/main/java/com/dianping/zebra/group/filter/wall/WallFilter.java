@@ -10,6 +10,8 @@ import jodd.cache.LRUCache;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +25,8 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
+	private static final List<String> blackList = new ArrayList<String>();
+
 	private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60);
 
 	protected String addIdToSql(String sql, JdbcContext metaData) {
@@ -33,22 +37,27 @@ public class WallFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	protected void analyticsExecute(JdbcContext sql, long executeTime) {
+	@Override public void init() {
+		super.init();
+		this.initBlackList();
+	}
 
+	private void initBlackList() {
+	}
+
+	protected void checkBlackList(JdbcContext context) throws SQLException {
+		if (!StringUtils.isBlank(getIdFromSQL(context.getSql())) &&
+			  blackList.contains(getIdFromSQL(context.getSql()))) {
+			throw new SQLException("This SQL is in blacklist. Please check it from dba! SQL:" + context.getSql());
+		}
 	}
 
 	@Override
 	public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
-	      throws SQLException {
-		findLongSqlString(metaData);
-		long executeStart = System.currentTimeMillis();
+		  throws SQLException {
+		checkBlackList(metaData);
 		T result = super.execute(metaData, source, action);
-		long executeTime = System.currentTimeMillis() - executeStart;
-		analyticsExecute(metaData, executeTime);
 		return result;
-	}
-
-	protected void findLongSqlString(JdbcContext metaData) throws SQLException {
 	}
 
 	protected String generateId(JdbcContext metaData) throws NoSuchAlgorithmException {

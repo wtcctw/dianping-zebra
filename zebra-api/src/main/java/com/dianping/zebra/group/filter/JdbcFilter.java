@@ -21,25 +21,27 @@ public interface JdbcFilter {
 
 	int MIN_ORDER = Integer.MIN_VALUE;
 
+	void init();
+
 	<S> void closeGroupConnection(JdbcContext context, S source, FilterActionWithSQLExcption<S> action)
-	      throws SQLException;
+		throws SQLException;
 
 	<S> void closeGroupDataSource(JdbcContext context, S source, FilterActionWithSQLExcption<S> action)
-	      throws SQLException;
+		throws SQLException;
 
 	<S> void closeSingleConnection(JdbcContext context, S source, FilterActionWithSQLExcption<S> action)
-	      throws SQLException;
+		throws SQLException;
 
 	<S> void closeSingleDataSource(JdbcContext context, S source, FilterActionWithSQLExcption<S> action)
-	      throws SQLException;
+		throws SQLException;
 
 	<S, T> T execute(JdbcContext context, S source, FilterFunctionWithSQLException<S, T> action) throws SQLException;
 
 	<S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(JdbcContext context, S source,
-	      FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action);
+		FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action);
 
 	<S> GroupConnection getGroupConnection(JdbcContext context, S source,
-	      FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException;
+		FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException;
 
 	/**
 	 * filter_with_order_3_start filter_with_order_2_start filter_with_order_1_start targer_start filter_with_order_1_finish
@@ -50,7 +52,7 @@ public interface JdbcFilter {
 	int getOrder();
 
 	<S> SingleConnection getSingleConnection(JdbcContext context, S source,
-	      FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException;
+		FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException;
 
 	<S> void initGroupDataSource(JdbcContext context, S source, FilterAction<S> action);
 
@@ -59,7 +61,7 @@ public interface JdbcFilter {
 	<S> void refreshGroupDataSource(JdbcContext context, String propertiesName, S source, FilterAction<S> action);
 
 	<S> Boolean resultSetNext(JdbcContext context, S source, FilterFunctionWithSQLException<S, Boolean> action)
-	      throws SQLException;
+		throws SQLException;
 
 	<S> String sql(JdbcContext context, S source, FilterFunction<S, String> action);
 

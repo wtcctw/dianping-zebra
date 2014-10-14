@@ -3,6 +3,7 @@ package com.dianping.zebra.group.datasources;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
+import com.dianping.zebra.group.exception.WeakReferenceGCException;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
@@ -123,7 +124,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			} else {
 				logger.info("FailOverDataSource find master success!");
 			}
-		} catch (FailOverDataSourceGCException e) {
+		} catch (WeakReferenceGCException e) {
 			logger.error("should never be here!", e);
 		}
 
@@ -158,15 +159,6 @@ public class FailOverDataSource extends AbstractDataSource {
 		public int getValue() {
 			return value;
 		}
-	}
-
-	static class FailOverDataSourceGCException extends RuntimeException {
-
-		/**
-		 *
-		 */
-		private static final long serialVersionUID = -8241429431083896757L;
-
 	}
 
 	public static class FindMasterDataSourceResult {
@@ -208,7 +200,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			this.ref = new WeakReference<FailOverDataSource>(dsRef);
 		}
 
-		private void checkIfFailOverDataSourceHasGC() throws FailOverDataSourceGCException {
+		private void checkIfFailOverDataSourceHasGC() throws WeakReferenceGCException {
 			getWeakFailOverDataSource();
 		}
 
@@ -236,7 +228,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			cachedConnection.clear();
 		}
 
-		public FindMasterDataSourceResult findMasterDataSource() throws FailOverDataSourceGCException {
+		public FindMasterDataSourceResult findMasterDataSource() throws WeakReferenceGCException {
 			return getWeakFailOverDataSource().filter
 					.findMasterFailOverDataSource(getWeakFailOverDataSource().context.clone(), this,
 							new FilterFunction<MasterDataSourceMonitor, FindMasterDataSourceResult>() {
@@ -279,15 +271,15 @@ public class FailOverDataSource extends AbstractDataSource {
 			return atomicSleepTimes.get();
 		}
 
-		private FailOverDataSource getWeakFailOverDataSource() throws FailOverDataSourceGCException {
+		private FailOverDataSource getWeakFailOverDataSource() throws WeakReferenceGCException {
 			FailOverDataSource weak = ref.get();
 			if (weak == null) {
-				throw new FailOverDataSourceGCException();
+				throw new WeakReferenceGCException();
 			}
 			return weak;
 		}
 
-		private void increaseTransactionTryTimes() throws FailOverDataSourceGCException {
+		private void increaseTransactionTryTimes() throws WeakReferenceGCException {
 			transactionTryLimits++;
 			if (transactionTryLimits >= maxTransactionTryLimits) {
 				transactionTryLimits = 0;
@@ -359,7 +351,7 @@ public class FailOverDataSource extends AbstractDataSource {
 							}
 						}
 					}
-				} catch (FailOverDataSourceGCException e) {
+				} catch (WeakReferenceGCException e) {
 					logger.error("FailOverDataSource has be GC", e);
 					break;
 				} catch (InterruptedException ignore) {

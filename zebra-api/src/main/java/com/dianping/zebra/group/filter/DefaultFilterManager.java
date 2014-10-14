@@ -100,7 +100,7 @@ public class DefaultFilterManager implements FilterManager {
 			return;
 		}
 
-		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements();) {
+		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements(); ) {
 			URL url = e.nextElement();
 
 			Properties property = new Properties();
@@ -143,6 +143,7 @@ public class DefaultFilterManager implements FilterManager {
 			JdbcFilter filter;
 			try {
 				filter = (JdbcFilter) filterClass.newInstance();
+				filter.init();
 				result.add(filter);
 			} catch (Exception ignore) {
 			}
