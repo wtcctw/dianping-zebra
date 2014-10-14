@@ -81,6 +81,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 	protected void onPropertyUpdated(PropertyChangeEvent evt) {
 		String key = evt.getPropertyName();
 		Object newValue = evt.getNewValue();
+		String appBlackListKey = getAppSqlBlackListKey();
 
 		synchronized (this.systemConfig) {
 			SystemConfig config = this.systemConfig.get();
@@ -99,8 +100,13 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 				config.setEncryptSeed((String) newValue);
 			} else if (key.equals(getKey(Constants.ELEMENT_COOKIE_EXPIRED_TIME))) {
 				config.setCookieExpiredTime(Integer.parseInt((String) newValue));
+			} else if (key.equals(appBlackListKey)) {
+				config.setAppBlackList((String) newValue);
 			} else if (key.equals(getGlobalSqlBlackListKey())) {
 				config.setGlobalBlackList((String) newValue);
+				if (!StringUtils.isBlank(appBlackListKey)) {
+					config.setAppBlackList(getProperty(getAppSqlBlackListKey(), config.getAppBlackList()));
+				}
 			}
 		}
 	}
