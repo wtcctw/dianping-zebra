@@ -1,5 +1,5 @@
 zebraWeb.service('configService', function ($modal) {
-    this.openTestModal = function (name, env) {
+    this.openTestModal = function (name) {
         $modal.open({
             templateUrl: 'app/template/config-test.html',
             controller: 'config-test',
@@ -7,12 +7,6 @@ zebraWeb.service('configService', function ($modal) {
             resolve: {
                 name: function () {
                     return name;
-                },
-                env: function () {
-                    if (!env) {
-                        env = '';
-                    }
-                    return env;
                 }
             }
         });

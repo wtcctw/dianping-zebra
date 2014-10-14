@@ -6,6 +6,22 @@ zebraWeb.controller('update', function ($scope, $http, configService) {
     $scope.test = configService.openTestModal;
 });
 
+zebraWeb.controller('black', function ($scope, $http) {
+    $http.get('/a/blacklist?op=view&env=' + $scope.config.env).success(function (data, status, headers, config) {
+        $scope.blackList = data;
+    });
+
+    $scope.remove = function (id) {
+        if (confirm('确山删除？')) {
+
+        }
+    }
+
+    $scope.add = function(){
+        
+    }
+});
+
 zebraWeb.controller('update-database', function ($scope, $stateParams, $http) {
     $http.get('/a/update?op=database&database=' + $stateParams.name).success(function (data, status, headers, config) {
         $scope.predicate = 'm_name';
@@ -19,10 +35,9 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http) {
     });
 });
 
-zebraWeb.controller('config-test', function ($scope, $http, name, env) {
+zebraWeb.controller('config-test', function ($scope, $http, name) {
     $scope.name = name;
-
-    $http.get('/a/config?op=test&key=' + name + '&env=' + env).success(function (data, status, headers, config) {
+    $http.get('/a/config?op=test&key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
         $scope.connectionStatus = data;
     });
 });
