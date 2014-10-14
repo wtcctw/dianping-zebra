@@ -34,7 +34,7 @@ public class Handler extends JsonHandler<Context> {
 				responseObject = m_blackListService.getAllBlackList(payload.getEnv());
 				break;
 			case ADD:
-				responseObject = m_blackListService.getAllBlackList(payload.getEnv());
+				m_blackListService.addItem(payload.getEnv(), payload.getIp(), payload.getId());
 				break;
 			case DELETE:
 				m_blackListService.deleteItem(payload.getEnv(), payload.getKey(), payload.getId());

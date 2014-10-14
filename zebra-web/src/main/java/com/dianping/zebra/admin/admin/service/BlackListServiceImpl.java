@@ -13,6 +13,9 @@ import java.util.Map;
  * Created by Dozer on 10/14/14.
  */
 public class BlackListServiceImpl implements BlackListService {
+
+	private final static String PROJECT_NAME = "zebra-sql-blacklist";
+
 	@Inject
 	private LionHttpService m_lionHttpService;
 
@@ -21,11 +24,39 @@ public class BlackListServiceImpl implements BlackListService {
 
 	public Map<String, List<String>> getAllBlackList(String env) throws IOException {
 		Map<String, List<String>> result = new HashMap<String, List<String>>();
-		Map<String, String> lionResult = m_lionHttpService.getConfigByProject(env, "zebra-sql-blacklist");
+		Map<String, String> lionResult = m_lionHttpService.getConfigByProject(env, PROJECT_NAME);
 		for (Map.Entry<String, String> config : lionResult.entrySet()) {
+			if (StringUtils.isBlank(config.getValue())) {
+				continue;
+			}
 			result.put(config.getKey(), Lists.newArrayList(config.getValue().split(",")));
 		}
 		return result;
+	}
+
+	public void addItem(String env, String ip, String item) throws IOException {
+		String key;
+		if (StringUtils.isBlank(ip)) {
+			key = String.format("%s.global.id", PROJECT_NAME);
+		} else {
+			String appName = m_cmdbService.getAppName(ip);
+			if (StringUtils.isBlank(appName) || StringUtils.isBlank(item)) {
+				return;
+			}
+			key = String.format("%s.app.%s.id", PROJECT_NAME, appName);
+		}
+
+		String config = m_lionHttpService.getConfig(env, key);
+		if (StringUtils.isBlank(config)) {
+			m_lionHttpService.createKey(PROJECT_NAME, key);
+			config = "";
+		}
+		List<String> result = Lists.newArrayList(config.split(","));
+		if (!result.contains(item)) {
+			result.add(item);
+		}
+
+		m_lionHttpService.setConfig(env, key, StringUtils.joinCollectionToString(result, ","));
 	}
 
 	public void deleteItem(String env, String key, String item) throws IOException {
