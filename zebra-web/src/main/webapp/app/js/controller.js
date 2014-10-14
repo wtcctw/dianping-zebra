@@ -24,12 +24,14 @@ zebraWeb.controller('black', function ($scope, $http) {
     }
 
     $scope.add = function () {
-        $http.get('/a/blacklist?op=add&env=' + $scope.config.env + '&ip=' + $scope.addIp + '&id=' + $scope.addId)
-            .success(function (data, status, headers, config) {
-                $scope.load();
-                $scope.addId = '';
-                $scope.addIp = '';
-            });
+        if (confirm('确山添加？')) {
+            $http.get('/a/blacklist?op=add&env=' + $scope.config.env + '&ip=' + $scope.addIp + '&id=' + $scope.addId)
+                .success(function (data, status, headers, config) {
+                    $scope.load();
+                    $scope.addId = '';
+                    $scope.addIp = '';
+                });
+        }
     }
 
     $scope.$watch('config.env', $scope.load);
