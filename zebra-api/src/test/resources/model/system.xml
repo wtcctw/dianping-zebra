@@ -1,9 +1,11 @@
 <system-config>
-	<health-check-interval>10</health-check-interval>
-	<max-error-counter>3</max-error-counter>
-	<retry-times>0</retry-times>
-	<cookie-domain>.dianping.com</cookie-domain>
-	<cookie-name>zebra</cookie-name>
-	<encrypt-seed>2123174217368174103</encrypt-seed>
-	<cookie-expired-time>2</cookie-expired-time>
+    <health-check-interval>10</health-check-interval>
+    <max-error-counter>3</max-error-counter>
+    <retry-times>0</retry-times>
+    <cookie-domain>.dianping.com</cookie-domain>
+    <cookie-name>zebra</cookie-name>
+    <encrypt-seed>2123174217368174103</encrypt-seed>
+    <cookie-expired-time>2</cookie-expired-time>
+    <global-black-list>aaa,bbb</global-black-list>
+    <app-black-list>aaa,bbb</app-black-list>
 </system-config>
