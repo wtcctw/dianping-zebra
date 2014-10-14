@@ -27,11 +27,18 @@ zebraWeb.controller('config-test', function ($scope, $http, name, env) {
     });
 });
 
-zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
+zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
     $scope.name = name;
-    $http.get('/a/config?op=viewDs&key=' + name + '&env=' + env).success(function (data, status, headers, config) {
-        $scope.data = data;
-    });
+    $scope.load = function () {
+        if ($scope.config && $scope.config.env) {
+            $http.get('/a/config?op=viewDs&key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+                $scope.data = data;
+            });
+        }
+    }
+
+    $scope.watch('config.env', $scope.load);
+    $scope.load();
 
     var calGroupPrevoew = function () {
         if (!$scope.data) {
@@ -100,19 +107,22 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, env, close) {
             newValue: value
         });
     }
-})
-;
+});
 
+
+zebraWeb.controller('header', function ($rootScope, $scope) {
+    $rootScope.config = {
+        envs: [ "dev", "alpha", "qa", "prelease", "product", "performance", "product-hm" ],
+        env: 'dev'
+    }
+});
 zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
-    $scope.envs = [ "dev", "alpha", "qa", "prelease", "product", "performance", "product-hm" ];
-    $scope.env = 'dev';
-
     var convertKey = function (key) {
         return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
     }
 
     $scope.edit = function (key) {
-        configService.openEditModal(convertKey(key), $scope.env, $scope.load);
+        configService.openEditModal(convertKey(key), $scope.load);
     };
 
     $scope.test = function (key) {
@@ -120,15 +130,14 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
     };
 
     $scope.load = function () {
-        $http.get('/a/config?op=view&env=' + $scope.env).success(function (data, status, headers, config) {
-            $scope.lionConfigs = data;
-        });
+        if ($scope.config && $scope.config.env) {
+            $http.get('/a/config?op=view&env=' + $scope.config.env).success(function (data, status, headers, config) {
+                $scope.lionConfigs = data;
+            });
+        }
     }
+    $scope.$watch('config.env', $scope.load);
     $scope.load();
-
-    $scope.$watch('env', function () {
-        $scope.load();
-    });
 
     $scope.createGroupDs = function () {
         if ($scope.addText) {

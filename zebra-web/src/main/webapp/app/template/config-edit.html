@@ -6,6 +6,8 @@
     <div>{{data.config}}</div>
     <hr/>
     <form class="form-inline" role="form">
+        <select class="form-control" ng-model="config.env" ng-options="env for env in config.envs">
+        </select>
         <input class="form-control" ng-model="searchText" type="text" placeholder="Search">
     </form>
     <hr/>
