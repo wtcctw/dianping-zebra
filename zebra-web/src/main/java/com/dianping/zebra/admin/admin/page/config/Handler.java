@@ -50,15 +50,18 @@ public class Handler implements PageHandler<Context> {
 			responseObject = m_dalConfigService.getDsConfig(payload.getEnv(), payload.getKey());
 			break;
 		case UPDATEDS:
-			m_dalConfigService
-				.updateDsConfig(
-					gson.fromJson(URLDecoder.decode(payload.getDsConfigs()), DalConfigService.GroupConfigModel.class));
+			m_dalConfigService.updateDsConfig(gson.fromJson(URLDecoder.decode(payload.getDsConfigs()),
+			      DalConfigService.GroupConfigModel.class));
 			break;
 		case TEST:
 			String jdbcRef = payload.getKey();
 			String env = payload.getEnv();
 			if (StringUtils.isBlank(env)) {
 				env = EnvZooKeeperConfig.getEnv();
+			}
+			
+			if(jdbcRef.toLowerCase().equals("dpreview")){
+				jdbcRef = "DPReview";
 			}
 			ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
 			connectionstatus.setConnected(m_connectionService.canConnect(jdbcRef, getConfigByGroupId(env, jdbcRef)));
