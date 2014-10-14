@@ -33,7 +33,14 @@ public class Handler extends JsonHandler<Context> {
 			case VIEW:
 				responseObject = m_blackListService.getAllBlackList(payload.getEnv());
 				break;
+			case ADD:
+				responseObject = m_blackListService.getAllBlackList(payload.getEnv());
+				break;
+			case DELETE:
+				m_blackListService.deleteItem(payload.getEnv(), payload.getKey(), payload.getId());
+				break;
 			}
+
 			success(ctx, responseObject);
 		} catch (Exception exp) {
 			error(ctx, exp.getMessage());

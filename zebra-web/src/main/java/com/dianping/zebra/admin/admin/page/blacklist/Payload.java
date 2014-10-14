@@ -11,8 +11,25 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	@FieldMeta("op")
 	private Action m_action;
 
+	@FieldMeta("key")
+	private String m_key;
+
+	@FieldMeta("ip")
+	private String m_ip;
+
 	@FieldMeta("env")
 	private String m_env;
+
+	@FieldMeta("id")
+	private String m_id;
+
+	public String getId() {
+		return m_id;
+	}
+
+	public void setId(String id) {
+		this.m_id = id;
+	}
 
 	public String getEnv() {
 		return m_env;
@@ -29,6 +46,22 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 
 	public void setAction(String action) {
 		m_action = Action.getByName(action, Action.VIEW);
+	}
+
+	public String getIp() {
+		return m_ip;
+	}
+
+	public void setIp(String ip) {
+		this.m_ip = ip;
+	}
+
+	public String getKey() {
+		return this.m_key;
+	}
+
+	public void setKey(String key) {
+		this.m_key = key;
 	}
 
 	@Override

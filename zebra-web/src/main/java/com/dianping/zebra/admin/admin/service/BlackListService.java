@@ -9,4 +9,6 @@ import java.util.Map;
  */
 public interface BlackListService {
 	Map<String, List<String>> getAllBlackList(String env) throws IOException;
+
+	void deleteItem(String env, String key, String item) throws IOException;
 }

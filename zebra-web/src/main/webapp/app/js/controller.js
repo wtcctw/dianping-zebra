@@ -7,18 +7,24 @@ zebraWeb.controller('update', function ($scope, $http, configService) {
 });
 
 zebraWeb.controller('black', function ($scope, $http) {
-    $http.get('/a/blacklist?op=view&env=' + $scope.config.env).success(function (data, status, headers, config) {
-        $scope.blackList = data;
-    });
+    $scope.load = function () {
+        $http.get('/a/blacklist?op=view&env=' + $scope.config.env).success(function (data, status, headers, config) {
+            $scope.blackList = data;
+        });
+    }
+    $scope.load();
 
-    $scope.remove = function (id) {
+    $scope.remove = function (key, id) {
         if (confirm('确山删除？')) {
-
+            $http.get('/a/blacklist?op=delete&env=' + $scope.config.env + '&id=' + id + '&key=' + key)
+                .success(function (data, status, headers, config) {
+                    $scope.load();
+                });
         }
     }
 
-    $scope.add = function(){
-        
+    $scope.add = function () {
+
     }
 });
 

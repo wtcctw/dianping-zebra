@@ -17,7 +17,7 @@
                 <td>
                     <div style="margin-right: 10px;" class="btn-group btn-group-xs" ng-repeat="id in config">
                         <button type="button" class="btn active btn-default">{{id}}</button>
-                        <button ng-click="remove(id)" type="button" title="Remove" class="btn btn-danger">
+                        <button ng-click="remove(config.$key,id)" type="button" title="Remove" class="btn btn-danger">
                             <span class="glyphicon glyphicon-remove"></span>
                         </button>
                     </div>

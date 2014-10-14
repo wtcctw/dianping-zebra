@@ -1,7 +1,7 @@
 package com.dianping.zebra.admin.admin.page.blacklist;
 
 public enum Action implements org.unidal.web.mvc.Action {
-	VIEW("view");
+	VIEW("view"), ADD("add"), DELETE("delete");
 
 	private String m_name;
 
