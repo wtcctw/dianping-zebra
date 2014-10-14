@@ -72,7 +72,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 
 		config.setGlobalBlackList(getProperty(getGlobalSqlBlackListKey(), config.getGlobalBlackList()));
 		String appBlackListKey = getAppSqlBlackListKey();
-		if(!StringUtils.isBlank(appBlackListKey)) {
+		if (!StringUtils.isBlank(appBlackListKey)) {
 			config.setAppBlackList(getProperty(getAppSqlBlackListKey(), config.getAppBlackList()));
 		}
 		return config;
@@ -99,6 +99,8 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 				config.setEncryptSeed((String) newValue);
 			} else if (key.equals(getKey(Constants.ELEMENT_COOKIE_EXPIRED_TIME))) {
 				config.setCookieExpiredTime(Integer.parseInt((String) newValue));
+			} else if (key.equals(getGlobalSqlBlackListKey())) {
+				config.setGlobalBlackList((String) newValue);
 			}
 		}
 	}
