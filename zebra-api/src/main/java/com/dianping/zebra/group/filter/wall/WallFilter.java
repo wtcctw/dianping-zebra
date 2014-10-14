@@ -21,11 +21,11 @@ import java.util.regex.Pattern;
 public class WallFilter extends DefaultJdbcFilter {
 	protected final static Pattern ID_PATTERN = Pattern.compile(".*(\\/\\*z:)([a-zA-Z0-9]{10})(\\*\\/).*");
 
+	protected static final List<String> blackList = new ArrayList<String>();
+
 	private static final int MAX_ID_LENGTH = 8;
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
-
-	protected static final List<String> blackList = new ArrayList<String>();
 
 	private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60);
 
@@ -46,9 +46,22 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	protected void checkBlackList(JdbcContext context) throws SQLException {
-		if (!StringUtils.isBlank(getIdFromSQL(context.getSql())) &&
-			  blackList.contains(getIdFromSQL(context.getSql()))) {
-			throw new SQLException("This SQL is in blacklist. Please check it from dba! SQL:" + context.getSql());
+		if (context.isBatch()) {
+			if (context.getBatchedSqls() == null) {
+				return;
+			}
+			for (String sql : context.getBatchedSqls()) {
+				if (!StringUtils.isBlank(getIdFromSQL(sql)) &&
+					  blackList.contains(getIdFromSQL(sql))) {
+					throw new SQLException(
+						  "This SQL is in blacklist. Please check it from dba! SQL:" + context.getSql());
+				}
+			}
+		} else {
+			if (!StringUtils.isBlank(getIdFromSQL(context.getSql())) &&
+				  blackList.contains(getIdFromSQL(context.getSql()))) {
+				throw new SQLException("This SQL is in blacklist. Please check it from dba! SQL:" + context.getSql());
+			}
 		}
 	}
 
@@ -88,6 +101,9 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	protected String getIdFromSQL(String sql) {
+		if (StringUtils.isNotBlank(sql)) {
+			return null;
+		}
 		Matcher matcher = ID_PATTERN.matcher(sql);
 		if (matcher.matches()) {
 			return matcher.group(2);

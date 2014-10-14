@@ -8,7 +8,6 @@ package com.dianping.zebra.group;
 
 /**
  * @author Leo Liang, Dozer
- *
  */
 public final class Constants {
 	public static final String ZEBRA_VERSION = "2.5.9";
@@ -24,6 +23,8 @@ public final class Constants {
 	public static final String DEFAULT_DATASOURCE_GROUP_PRFIX = "groupds";
 
 	public static final String DEFAULT_DATASOURCE_ZEBRA_PRFIX = "zebra";
+
+	public static final String DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX = "zebra-sql-blacklist";
 
 	public static final String ZEBRA_FILTER_PRFIX = "zebra.filter.";
 
