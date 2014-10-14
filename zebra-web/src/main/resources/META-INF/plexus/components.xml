@@ -59,6 +59,18 @@
 			<implementation>com.dianping.zebra.admin.admin.service.ConnectionServiceImpl</implementation>
 		</component>
 		<component>
+			<role>com.dianping.zebra.admin.admin.service.BlackListService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.BlackListServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.CmdbService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</role>
 			<implementation>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</implementation>
 		</component>
@@ -153,6 +165,11 @@
 		<component>
 			<role>com.dianping.zebra.admin.admin.page.blacklist.Handler</role>
 			<implementation>com.dianping.zebra.admin.admin.page.blacklist.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.BlackListService</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.page.merge.Handler</role>

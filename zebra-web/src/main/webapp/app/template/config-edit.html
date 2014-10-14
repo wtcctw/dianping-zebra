@@ -50,9 +50,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><input placeholder="" ng-model="config.properties.newKey"
+                        <td><input required placeholder="" ng-model="config.properties.newKey"
                                    class="form-control input-sm" style="width: 200px"/></td>
-                        <td><input placeholder="value" ng-model="config.properties.newValue"
+                        <td><input required placeholder="value" ng-model="config.properties.newValue"
                                    class="form-control input-sm"/></td>
                         <td>
                             <button title="Add Property"
@@ -68,7 +68,7 @@
 </div>
 <div class="modal-footer">
     <form class="form-inline" role="form">
-        <input class="form-control" placeholder="DataSource Id" ng-model="newDsName"/>
+        <input required class="form-control" placeholder="DataSource Id" ng-model="newDsName"/>
         <button class="btn btn-success" ng-click="addDs()">Add DataSource</button>
         <button class="btn btn-primary" ng-click="save()">Save All</button>
         <button class="btn btn-danger" ng-click="close()">Cancel</button>

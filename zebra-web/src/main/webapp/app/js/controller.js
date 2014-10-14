@@ -37,7 +37,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
         }
     }
 
-    $scope.watch('config.env', $scope.load);
+    $scope.$watch('config.env', $scope.load);
     $scope.load();
 
     var calGroupPrevoew = function () {

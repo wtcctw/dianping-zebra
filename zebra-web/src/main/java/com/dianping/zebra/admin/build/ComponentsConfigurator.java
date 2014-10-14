@@ -1,31 +1,19 @@
 package com.dianping.zebra.admin.build;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.dianping.zebra.admin.admin.service.*;
+import com.dianping.zebra.web.dal.stat.HeartbeatDao;
 import org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
-import com.dianping.zebra.admin.admin.service.CmdbService;
-import com.dianping.zebra.admin.admin.service.CmdbServiceImpl;
-import com.dianping.zebra.admin.admin.service.ConnectionService;
-import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
-import com.dianping.zebra.admin.admin.service.DalConfigService;
-import com.dianping.zebra.admin.admin.service.DalConfigServiceImpl;
-import com.dianping.zebra.admin.admin.service.DalService;
-import com.dianping.zebra.admin.admin.service.DalServiceImpl;
-import com.dianping.zebra.admin.admin.service.DatabaseRealtimeService;
-import com.dianping.zebra.admin.admin.service.DatabaseRealtimeServiceImpl;
-import com.dianping.zebra.admin.admin.service.LionHttpService;
-import com.dianping.zebra.admin.admin.service.LionHttpServiceImpl;
-import com.dianping.zebra.admin.admin.service.LocalLogService;
-import com.dianping.zebra.admin.admin.service.LogService;
-import com.dianping.zebra.admin.admin.service.ReportService;
-import com.dianping.zebra.admin.admin.service.ReportServiceImpl;
-import com.dianping.zebra.web.dal.stat.HeartbeatDao;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
+	public static void main(String[] args) {
+		generatePlexusComponentsXmlFile(new ComponentsConfigurator());
+	}
+
 	@Override
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
@@ -37,8 +25,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.add(C(DalConfigService.class, DalConfigServiceImpl.class).req(LionHttpService.class));
 		all.add(C(DalService.class, DalServiceImpl.class).req(LionHttpService.class));
 		all.add(C(ReportService.class, ReportServiceImpl.class).req(HeartbeatDao.class, CmdbService.class,
-		      DatabaseRealtimeService.class));
+			DatabaseRealtimeService.class));
 		all.add(C(ConnectionService.class, ConnectionServiceImpl.class));
+		all.add(C(BlackListService.class, BlackListServiceImpl.class).req(LionHttpService.class, CmdbService.class));
 
 		// move following line to top-level project if necessary
 		all.add(C(JdbcDataSourceConfigurationManager.class));
@@ -48,9 +37,5 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		all.addAll(new WebComponentConfigurator().defineComponents());
 
 		return all;
-	}
-
-	public static void main(String[] args) {
-		generatePlexusComponentsXmlFile(new ComponentsConfigurator());
 	}
 }

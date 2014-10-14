@@ -1,17 +1,19 @@
 package com.dianping.zebra.admin.admin.page.blacklist;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-
-import com.dianping.zebra.admin.admin.AdminPage;
+import com.dianping.zebra.admin.admin.page.JsonHandler;
+import com.dianping.zebra.admin.admin.service.BlackListService;
 import org.unidal.lookup.annotation.Inject;
-import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
-public class Handler implements PageHandler<Context> {
+import javax.servlet.ServletException;
+import java.io.IOException;
+
+public class Handler extends JsonHandler<Context> {
+
+	@Inject
+	private BlackListService m_blackListService;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -23,5 +25,18 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "blacklist")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
+		try {
+			Payload payload = ctx.getPayload();
+			Object responseObject = null;
+
+			switch (payload.getAction()) {
+			case VIEW:
+				responseObject = m_blackListService.getAllBlackList(payload.getEnv());
+				break;
+			}
+			success(ctx, responseObject);
+		} catch (Exception exp) {
+			error(ctx, exp.getMessage());
+		}
 	}
 }

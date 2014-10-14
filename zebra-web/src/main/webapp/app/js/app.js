@@ -59,7 +59,7 @@ zebraWeb.directive('activeLink', ['$location', function (location) {
             path = path.substring(1);
             scope.location = location;
             scope.$watch('location.path()', function (newPath) {
-                if (newPath.contains(path)) {
+                if (newPath.indexOf(path) > -1) {
                     element.addClass(clazz);
                 } else {
                     element.removeClass(clazz);
