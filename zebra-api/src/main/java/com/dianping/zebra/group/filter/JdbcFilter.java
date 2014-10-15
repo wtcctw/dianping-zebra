@@ -63,7 +63,7 @@ public interface JdbcFilter {
 	<S> Boolean resultSetNext(JdbcContext context, S source, FilterFunctionWithSQLException<S, Boolean> action)
 		throws SQLException;
 
-	<S> String sql(JdbcContext context, S source, FilterFunction<S, String> action);
+	<S> String sql(JdbcContext context, S source, FilterFunctionWithSQLException<S, String> action) throws SQLException;
 
 	<S> void switchFailOverDataSource(JdbcContext context, S source, FilterAction<S> action);
 }

@@ -39,7 +39,7 @@ public class WallFilterTest {
 	}
 
 	@Test
-	public void test_addId_to_Sql() {
+	public void test_addId_to_Sql() throws SQLException {
 		WallFilter filter = new WallFilter();
 		JdbcContext metaData = new JdbcContext();
 		metaData.setSql("select * from test");
@@ -52,7 +52,7 @@ public class WallFilterTest {
 	}
 
 	@Test
-	public void test_addId_to_Sql_with_avatar() {
+	public void test_addId_to_Sql_with_avatar() throws SQLException {
 		ExecutionContextHolder.getContext().add("sql_statement_name", "test.select");
 
 		WallFilter filter = new WallFilter();
@@ -67,7 +67,7 @@ public class WallFilterTest {
 	}
 
 	@Test
-	public void test_add_id_to_sql() {
+	public void test_add_id_to_sql() throws SQLException {
 		WallFilter filter = new WallFilter();
 		JdbcContext metaData = new JdbcContext();
 		filter.addIdToSql("select * from user", metaData);
@@ -85,18 +85,15 @@ public class WallFilterTest {
 	public void test_sql_in_blackList() throws SQLException {
 		WallFilter filter = new WallFilter();
 		WallFilter.blackList.add("7yhgtr45ty");
-		JdbcContext context = new JdbcContext();
-		context.setSql("select * from Test/*z:7yhgtr45ty*/");
-		filter.checkBlackList(context);
+		filter.checkBlackList("select * from Test", "7yhgtr45ty");
 	}
 
 	@Test
 	public void test_sql_not_in_blackList() throws SQLException {
 		WallFilter filter = new WallFilter();
 		WallFilter.blackList.add("7yhgtr45ty");
-		JdbcContext context = new JdbcContext();
-		context.setSql("select * from Test/*z:7yhg5ty*/");
-		filter.checkBlackList(context);
+		filter.checkBlackList("select * from Test", "asdad2");
+
 	}
 
 	@Test
@@ -104,7 +101,7 @@ public class WallFilterTest {
 		WallFilter filter = new WallFilter();
 		filter.configManagerType = "local";
 		filter.init();
-		Assert.assertEquals(WallFilter.blackList.size(),3);
+		Assert.assertEquals(WallFilter.blackList.size(), 3);
 		Assert.assertTrue(WallFilter.blackList.contains("aaa"));
 		Assert.assertTrue(WallFilter.blackList.contains("bbb"));
 		Assert.assertTrue(WallFilter.blackList.contains("ccc"));

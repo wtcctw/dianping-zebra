@@ -47,7 +47,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> void closeGroupConnection(final JdbcContext context, final S source,
-		final FilterActionWithSQLExcption<S> action) throws SQLException {
+		  final FilterActionWithSQLExcption<S> action) throws SQLException {
 		FilterActionWithSQLExcption<S> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterActionWithSQLExcption<S> finalTodo = todo;
@@ -63,7 +63,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> void closeGroupDataSource(final JdbcContext context, final S source,
-		final FilterActionWithSQLExcption<S> action) throws SQLException {
+		  final FilterActionWithSQLExcption<S> action) throws SQLException {
 		FilterActionWithSQLExcption<S> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterActionWithSQLExcption<S> finalTodo = todo;
@@ -79,7 +79,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> void closeSingleConnection(final JdbcContext context, final S source,
-		final FilterActionWithSQLExcption<S> action) throws SQLException {
+		  final FilterActionWithSQLExcption<S> action) throws SQLException {
 		FilterActionWithSQLExcption<S> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterActionWithSQLExcption<S> finalTodo = todo;
@@ -95,7 +95,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> void closeSingleDataSource(final JdbcContext context, final S source,
-		final FilterActionWithSQLExcption<S> action) throws SQLException {
+		  final FilterActionWithSQLExcption<S> action) throws SQLException {
 		FilterActionWithSQLExcption<S> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterActionWithSQLExcption<S> finalTodo = todo;
@@ -111,8 +111,8 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S, T> T execute(final JdbcContext context, final S source,
-		final FilterFunctionWithSQLException<S, T> action)
-		throws SQLException {
+		  final FilterFunctionWithSQLException<S, T> action)
+		  throws SQLException {
 
 		FilterFunctionWithSQLException<S, T> todo = action;
 		for (final JdbcFilter filter : filters) {
@@ -129,7 +129,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(final JdbcContext context,
-		S source, FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
+		  S source, FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
 		FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> finalTodo = todo;
@@ -145,7 +145,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> GroupConnection getGroupConnection(final JdbcContext context, S source,
-		FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException {
+		  FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException {
 		FilterFunctionWithSQLException<S, GroupConnection> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterFunctionWithSQLException<S, GroupConnection> finalTodo = todo;
@@ -166,7 +166,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> SingleConnection getSingleConnection(final JdbcContext context, S source,
-		FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException {
+		  FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException {
 		FilterFunctionWithSQLException<S, SingleConnection> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterFunctionWithSQLException<S, SingleConnection> finalTodo = todo;
@@ -198,7 +198,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> DataSource initSingleDataSource(final JdbcContext context, S source,
-		FilterFunction<S, DataSource> action) {
+		  FilterFunction<S, DataSource> action) {
 		FilterFunction<S, DataSource> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterFunction<S, DataSource> finalTodo = todo;
@@ -214,7 +214,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> void refreshGroupDataSource(final JdbcContext metaData, final String propertiesName, S source,
-		FilterAction<S> action) {
+		  FilterAction<S> action) {
 
 		FilterAction<S> todo = action;
 		for (final JdbcFilter filter : filters) {
@@ -231,7 +231,7 @@ public class FilterWrapper implements JdbcFilter {
 
 	@Override
 	public <S> Boolean resultSetNext(final JdbcContext context, S source,
-		FilterFunctionWithSQLException<S, Boolean> action) throws SQLException {
+		  FilterFunctionWithSQLException<S, Boolean> action) throws SQLException {
 		FilterFunctionWithSQLException<S, Boolean> todo = action;
 		for (final JdbcFilter filter : filters) {
 			final FilterFunctionWithSQLException<S, Boolean> finalTodo = todo;
@@ -250,13 +250,14 @@ public class FilterWrapper implements JdbcFilter {
 	}
 
 	@Override
-	public <S> String sql(final JdbcContext context, S source, FilterFunction<S, String> action) {
-		FilterFunction<S, String> todo = action;
+	public <S> String sql(final JdbcContext context, S source, FilterFunctionWithSQLException<S, String> action)
+		  throws SQLException {
+		FilterFunctionWithSQLException<S, String> todo = action;
 		for (final JdbcFilter filter : filters) {
-			final FilterFunction<S, String> finalTodo = todo;
-			todo = new FilterFunction<S, String>() {
+			final FilterFunctionWithSQLException<S, String> finalTodo = todo;
+			todo = new FilterFunctionWithSQLException<S, String>() {
 				@Override
-				public String execute(S source) {
+				public String execute(S source) throws SQLException {
 					return filter.sql(context, source, finalTodo);
 				}
 			};

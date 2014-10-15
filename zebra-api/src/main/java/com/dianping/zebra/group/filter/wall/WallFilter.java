@@ -7,7 +7,6 @@ import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcContext;
-import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.spring.SpringBeanHelper;
 import com.dianping.zebra.group.util.StringUtils;
@@ -42,9 +41,11 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	private SystemConfigManager systemConfigManager;
 
-	protected String addIdToSql(String sql, JdbcContext metaData) {
+	protected String addIdToSql(String sql, JdbcContext metaData) throws SQLException {
 		try {
-			return String.format("/*z:%s*/%s", generateId(metaData), sql);
+			String id = generateId(metaData);
+			checkBlackList(sql, id);
+			return String.format("/*z:%s*/%s", id, sql);
 		} catch (NoSuchAlgorithmException e) {
 			return sql;
 		}
@@ -90,30 +91,15 @@ public class WallFilter extends DefaultJdbcFilter {
 		blackList = newblackList;
 	}
 
-	protected void checkBlackList(JdbcContext context) throws SQLException {
-		if (context.isBatch()) {
-			if (context.getBatchedSqls() == null) {
-				return;
-			}
-			for (String sql : context.getBatchedSqls()) {
-				if (!StringUtils.isBlank(getIdFromSQL(sql)) &&
-					  blackList.contains(getIdFromSQL(sql))) {
-					throw new SQLException(
-						  "This SQL is in blacklist. Please check it from dba! SQL:" + context.getSql());
-				}
-			}
-		} else {
-			if (!StringUtils.isBlank(getIdFromSQL(context.getSql())) &&
-				  blackList.contains(getIdFromSQL(context.getSql()))) {
-				throw new SQLException("This SQL is in blacklist. Please check it from dba! SQL:" + context.getSql());
-			}
+	protected void checkBlackList(String sql, String id) throws SQLException {
+		if (StringUtils.isNotBlank(id) && blackList.contains(id)) {
+			throw new SQLException("This SQL is in blacklist. Please check it from dba! SQL:" + sql);
 		}
 	}
 
 	@Override
 	public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
 		  throws SQLException {
-		checkBlackList(metaData);
 		T result = super.execute(metaData, source, action);
 		return result;
 	}
@@ -162,7 +148,8 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	@Override
-	public <S> String sql(JdbcContext metaData, S source, FilterFunction<S, String> action) {
+	public <S> String sql(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, String> action)
+		  throws SQLException {
 		String result = super.sql(metaData, source, action);
 		result = addIdToSql(result, metaData);
 		return result;
