@@ -4,17 +4,23 @@ import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
+import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.spring.SpringBeanHelper;
 import com.dianping.zebra.group.util.StringUtils;
 import jodd.cache.LRUCache;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,17 +30,17 @@ import java.util.regex.Pattern;
 public class WallFilter extends DefaultJdbcFilter {
 	protected final static Pattern ID_PATTERN = Pattern.compile(".*(\\/\\*z:)([a-zA-Z0-9]{10})(\\*\\/).*");
 
-	protected static final List<String> blackList = new ArrayList<String>();
-
 	private static final int MAX_ID_LENGTH = 8;
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
 	private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60);
 
-	private SystemConfigManager systemConfigManager;
+	protected volatile static Set<String> blackList = new HashSet<String>();
 
 	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+
+	private SystemConfigManager systemConfigManager;
 
 	protected String addIdToSql(String sql, JdbcContext metaData) {
 		try {
@@ -46,12 +52,42 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	@Override public void init() {
 		super.init();
+		this.initWallFilter();
 		this.initBlackList();
+	}
+
+	private void initWallFilter() {
+		Map<String, WallFilterConfig> configs = SpringBeanHelper.getBeanByClass(WallFilterConfig.class);
+		for (WallFilterConfig config : configs.values()) {
+			this.configManagerType = config.getConfigManagerType();
+		}
 	}
 
 	private void initBlackList() {
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
 			  Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+
+		buildBlackListFromSystemConfig(this.systemConfigManager.getSystemConfig());
+
+		this.systemConfigManager.addListerner(new PropertyChangeListener() {
+			@Override public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+				if (propertyChangeEvent.getPropertyName()
+					  .startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)) {
+					buildBlackListFromSystemConfig(systemConfigManager.getSystemConfig());
+				}
+			}
+		});
+	}
+
+	private synchronized void buildBlackListFromSystemConfig(SystemConfig config) {
+		Set<String> newblackList = new HashSet<String>();
+		if (StringUtils.isNotBlank(config.getGlobalBlackList())) {
+			newblackList.addAll(Arrays.asList(config.getGlobalBlackList().split(",")));
+		}
+		if (StringUtils.isNotBlank(config.getAppBlackList())) {
+			newblackList.addAll(Arrays.asList(config.getAppBlackList().split(",")));
+		}
+		blackList = newblackList;
 	}
 
 	protected void checkBlackList(JdbcContext context) throws SQLException {

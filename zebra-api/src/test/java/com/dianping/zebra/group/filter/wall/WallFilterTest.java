@@ -98,4 +98,15 @@ public class WallFilterTest {
 		context.setSql("select * from Test/*z:7yhg5ty*/");
 		filter.checkBlackList(context);
 	}
+
+	@Test
+	public void test_load_blackList_from_config() throws SQLException {
+		WallFilter filter = new WallFilter();
+		filter.configManagerType = "local";
+		filter.init();
+		Assert.assertEquals(WallFilter.blackList.size(),3);
+		Assert.assertTrue(WallFilter.blackList.contains("aaa"));
+		Assert.assertTrue(WallFilter.blackList.contains("bbb"));
+		Assert.assertTrue(WallFilter.blackList.contains("ccc"));
+	}
 }
