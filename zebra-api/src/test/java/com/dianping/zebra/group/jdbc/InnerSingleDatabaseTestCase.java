@@ -22,7 +22,7 @@ public abstract class InnerSingleDatabaseTestCase extends H2DatabaseTestCase {
 			if (connection != null) {
 				try {
 					connection.close();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					// ignore it
 				}
 			}
@@ -41,14 +41,14 @@ public abstract class InnerSingleDatabaseTestCase extends H2DatabaseTestCase {
 			if (statement != null) {
 				try {
 					statement.close();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					// ignore it
 				}
 			}
 			if (connection != null) {
 				try {
 					connection.close();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					// ignore it
 				}
 			}

@@ -6,14 +6,10 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.dianping.cat.Cat;
-
 public class SmoothReloadTest {
 
 	@Test
 	public void test_smooth_reload() {
-		Cat.logEvent("DAL", "InitCat");
-
 		Random rnd = new Random();
 		long maxTime = rnd.nextInt(1000);
 

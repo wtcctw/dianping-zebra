@@ -10,11 +10,6 @@ public interface DataSourceConfigManager {
 
 	public GroupDataSourceConfig getGroupDataSourceConfig();
 
-	public String getRouterStrategy();
-
 	public void init();
 
-	public boolean isTransactionForceWrite();
-
-	public boolean isWriteFirst();
 }

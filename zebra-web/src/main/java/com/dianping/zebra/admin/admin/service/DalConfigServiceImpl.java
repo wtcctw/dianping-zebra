@@ -1,18 +1,100 @@
 package com.dianping.zebra.admin.admin.service;
 
+import com.dianping.cat.Cat;
+import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.unidal.lookup.annotation.Inject;
 
-import com.dianping.cat.Cat;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DalConfigServiceImpl implements DalConfigService {
 
 	private String project = "ds";
 
-	private final String[] envs = new String[] { "dev", "alpha", "qa", "prelease", "product", "performance",
-	      "product-hm" };
-
 	@Inject
 	private LionHttpService m_lionHttpService;
+
+	public void updateDsConfig(GroupConfigModel modal) {
+		try {
+			String groupKey = getGroupDataSourceKeyById(modal.getId());
+
+			String oldConfig = m_lionHttpService.getConfig(modal.getEnv(), groupKey);
+			if (!modal.getConfig().equals(oldConfig)) {
+				m_lionHttpService.setConfig(modal.getEnv(), groupKey, modal.getConfig());
+			}
+			for (DsConfigModel ds : modal.getConfigs()) {
+				for (ConfigProperty prop : ds.getProperties()) {
+					if (prop.isDelete()) {
+						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), "");
+						continue;
+					}
+					if (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue())) {
+						m_lionHttpService.createKey("ds", prop.getKey());
+						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
+					}
+				}
+			}
+		} catch (IOException e) {
+			Cat.logError(e);
+		}
+	}
+
+	private String getGroupDataSourceKeyById(String groupId) {
+		return String.format("groupds.%s.mapping", groupId);
+	}
+
+	public GroupConfigModel getDsConfig(String env, final String groupId) {
+		try {
+			GroupConfigModel result = new GroupConfigModel();
+			result.setEnv(env);
+			result.setId(groupId);
+			result.setConfig(m_lionHttpService.getConfig(env, getGroupDataSourceKeyById(groupId)));
+			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
+				.parseConfig(result.getConfig());
+
+			HashMap<String, String> configs = m_lionHttpService.getConfigByProject(env, "ds");
+			List<String> keys = Lists.newArrayList(Iterables.filter(configs.keySet(), new Predicate<String>() {
+				@Override public boolean apply(String input) {
+					return input.matches("^ds\\." + groupId + "\\-[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
+				}
+			}));
+			Map<String, DsConfigModel> dsConfigMap = new HashMap<String, DsConfigModel>();
+
+			for (String key : keys) {
+				String dsKey = getDsIdFromKey(key);
+				if (!dsConfigMap.containsKey(dsKey)) {
+					DsConfigModel ds = new DsConfigModel();
+					ds.setId(dsKey);
+					dsConfigMap.put(dsKey, ds);
+				}
+
+				DsConfigModel ds = dsConfigMap.get(dsKey);
+				ConfigProperty config = new ConfigProperty();
+				config.setKey(key);
+				config.setValue(configs.get(key));
+				config.setNewValue(configs.get(key));
+				ds.getProperties().add(config);
+
+				ds.setRole(groupConfig.get(dsKey));
+			}
+
+			result.setConfigs(Lists.newArrayList(dsConfigMap.values()));
+			return result;
+		} catch (IOException e) {
+			Cat.logError(e);
+			return null;
+		}
+	}
+
+	private String getDsIdFromKey(String key) {
+		String result = key.substring(key.indexOf(".") + 1);
+		return result.substring(0, result.indexOf("."));
+	}
 
 	@Override
 	public boolean generateConfig(String name) {
@@ -30,11 +112,11 @@ public class DalConfigServiceImpl implements DalConfigService {
 			m_lionHttpService.createKey(project, driverClass);
 			m_lionHttpService.createKey(project, properties);
 			m_lionHttpService.createKey(project, active);
-		} catch (Throwable ignore) {
+		} catch (Exception ignore) {
 		}
 
 		try {
-			for (String env : envs) {
+			for (String env : m_lionHttpService.getAllEnv()) {
 				String originUrl = m_lionHttpService.getConfig(env, url);
 				if (originUrl == null || originUrl.length() == 0) {
 					m_lionHttpService.setConfig(env, url, "jdbc:mysql://{ip}:{port}/{database}?characterEncoding=UTF8");
@@ -73,7 +155,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 					m_lionHttpService.setConfig(env, active, originActive);
 				}
 			}
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			Cat.logError(t);
 			return false;
 		}

@@ -27,7 +27,7 @@ public class TestServer extends JettyServer {
 
    @Override
    protected String getContextPath() {
-      return "/admin";
+      return "";
    }
 
    @Override
@@ -43,7 +43,7 @@ public class TestServer extends JettyServer {
    @Test
    public void startWebapp() throws Exception {
       // open the page in the default browser
-      display("/admin/a");
+      display("/a");
       waitForAnyKey();
    }
 }

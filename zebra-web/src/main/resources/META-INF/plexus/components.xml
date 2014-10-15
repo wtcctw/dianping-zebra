@@ -13,6 +13,15 @@
 			<implementation>com.dianping.zebra.admin.admin.service.CmdbServiceImpl</implementation>
 		</component>
 		<component>
+			<role>com.dianping.zebra.admin.admin.service.DatabaseRealtimeService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.DatabaseRealtimeServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.CmdbService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
 			<implementation>com.dianping.zebra.admin.admin.service.DalConfigServiceImpl</implementation>
 			<requirements>
@@ -40,11 +49,26 @@
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.CmdbService</role>
 				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.DatabaseRealtimeService</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
 			<implementation>com.dianping.zebra.admin.admin.service.ConnectionServiceImpl</implementation>
+		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.service.BlackListService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.BlackListServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.CmdbService</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</role>
@@ -97,36 +121,20 @@
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
 			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
 			<configuration>
-				<modules>
-					<module default="true">com.dianping.zebra.admin.admin.AdminModule</module>
-				</modules>
+				<defaultModule>com.dianping.zebra.admin.admin.AdminModule</defaultModule>
 			</configuration>
 		</component>
 		<component>
-			<role>com.dianping.zebra.admin.admin.AdminModule</role>
+			<role>org.unidal.web.mvc.Module</role>
+			<role-hint>com.dianping.zebra.admin.admin.AdminModule</role-hint>
 			<implementation>com.dianping.zebra.admin.admin.AdminModule</implementation>
 		</component>
 		<component>
-			<role>com.dianping.zebra.admin.admin.page.index.Handler</role>
-			<implementation>com.dianping.zebra.admin.admin.page.index.Handler</implementation>
+			<role>com.dianping.zebra.admin.admin.page.update.Handler</role>
+			<implementation>com.dianping.zebra.admin.admin.page.update.Handler</implementation>
 			<requirements>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.index.JspViewer</role>
-				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.zebra.admin.admin.page.index.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.index.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -135,25 +143,13 @@
 			<implementation>com.dianping.zebra.admin.admin.page.service.Handler</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.service.JspViewer</role>
+					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.DalService</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.LogService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
-				</requirement>
-			</requirements>
-		</component>
-		<component>
-			<role>com.dianping.zebra.admin.admin.page.service.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.service.JspViewer</implementation>
-			<requirements>
-				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
 				</requirement>
 			</requirements>
 		</component>
@@ -162,19 +158,35 @@
 			<implementation>com.dianping.zebra.admin.admin.page.notify.Handler</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.zebra.admin.admin.page.notify.JspViewer</role>
-				</requirement>
-				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.ReportService</role>
 				</requirement>
 			</requirements>
 		</component>
 		<component>
-			<role>com.dianping.zebra.admin.admin.page.notify.JspViewer</role>
-			<implementation>com.dianping.zebra.admin.admin.page.notify.JspViewer</implementation>
+			<role>com.dianping.zebra.admin.admin.page.blacklist.Handler</role>
+			<implementation>com.dianping.zebra.admin.admin.page.blacklist.Handler</implementation>
 			<requirements>
 				<requirement>
-					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+					<role>com.dianping.zebra.admin.admin.service.BlackListService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.page.merge.Handler</role>
+			<implementation>com.dianping.zebra.admin.admin.page.merge.Handler</implementation>
+		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.page.config.Handler</role>
+			<implementation>com.dianping.zebra.admin.admin.page.config.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
 				</requirement>
 			</requirements>
 		</component>

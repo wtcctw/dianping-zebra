@@ -4,18 +4,18 @@
     <parent>
         <artifactId>zebra-all</artifactId>
         <groupId>com.dianping.zebra</groupId>
-        <version>2.5.9</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>zebra-environment</name>
     <artifactId>zebra-environment</artifactId>
-    <version>2.5.9</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
             <groupId>com.dianping.zebra</groupId>
             <artifactId>zebra-api</artifactId>
-            <version>2.5.9</version>
+            <version>3.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -24,6 +24,11 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

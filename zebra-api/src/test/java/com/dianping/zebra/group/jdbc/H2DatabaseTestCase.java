@@ -8,6 +8,9 @@ import org.dbunit.operation.DatabaseOperation;
 import org.h2.tools.RunScript;
 import org.junit.Before;
 
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.MockFilterHelper;
+
 public abstract class H2DatabaseTestCase {
 	protected static final String JDBC_DRIVER = org.h2.Driver.class.getName();
 
@@ -17,8 +20,10 @@ public abstract class H2DatabaseTestCase {
 
 	protected static final String USER = "sa";
 
+	protected JdbcFilter mockedFilter;
+
 	protected void cleanlyInsert(String driver, String jdbcUrl, String user, String password, IDataSet dataSet)
-	      throws Exception {
+			throws Exception {
 		IDatabaseTester databaseTester = new JdbcDatabaseTester(driver, jdbcUrl, user, password);
 		databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
 		databaseTester.setDataSet(dataSet);
@@ -34,6 +39,12 @@ public abstract class H2DatabaseTestCase {
 	protected abstract String getDataSets();
 
 	protected abstract String getSchema();
+
+	@Before
+	public void mockFilter() {
+		MockFilterHelper.injectMockFilter();
+		mockedFilter = MockFilterHelper.getMockedFilter();
+	}
 
 	private IDataSet readDataSet() throws Exception {
 		return new FlatXmlDataSetBuilder().build(getClass().getClassLoader().getResource(getDataSets()));

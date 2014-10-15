@@ -5,11 +5,17 @@ import org.unidal.web.mvc.annotation.ModuleMeta;
 
 public enum AdminPage implements Page {
 
-   INDEX("index", "index", "Index", "Index", true),
+   UPDATE("update", "update", "Update", "Updates", true),
 
    SERVICE("service", "service", "Service", "Service", true),
 
-   NOTIFY("notify", "notify", "Notify", "Notify", true);
+   NOTIFY("notify", "notify", "Notify", "Notify", true),
+
+   BLACKLIST("blacklist", "blacklist", "Blacklist", "Blacklist", true),
+
+   MERGE("merge", "merge", "Merge", "Merge", true),
+
+   CONFIG("config", "config", "Config", "Config", true);
 
    private String m_name;
 

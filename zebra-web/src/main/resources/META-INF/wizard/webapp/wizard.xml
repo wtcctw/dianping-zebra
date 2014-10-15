@@ -2,14 +2,23 @@
 <wizard package="com.dianping.zebra.admin">
    <webapp package="com.dianping.zebra.admin" name="admin" webres="true" cat="true" plugin-management="true" jstl="true" layout="bootstrap">
       <module name="admin" path="a" default="true">
-         <page name="index" title="Index" default="true" path="index" template="default">
-            <description>Index</description>
+         <page name="update" title="Update" default="true" path="update" template="default">
+            <description>Updates</description>
          </page>
          <page name="service" title="Service" path="service" template="default">
             <description>Service</description>
          </page>
          <page name="notify" title="Notify" path="notify" template="default">
             <description>Notify</description>
+         </page>
+         <page name="blacklist" title="Blacklist" path="blacklist" template="default">
+            <description>Blacklist</description>
+         </page>
+         <page name="merge" title="Merge" path="merge" template="default">
+            <description>Merge</description>
+         </page>
+         <page name="config" title="Config" path="config" template="default">
+            <description>Config</description>
          </page>
       </module>
    </webapp>
