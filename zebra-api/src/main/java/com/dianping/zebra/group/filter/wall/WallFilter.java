@@ -1,6 +1,9 @@
 package com.dianping.zebra.group.filter.wall;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.config.SystemConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
@@ -29,6 +32,10 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60);
 
+	private SystemConfigManager systemConfigManager;
+
+	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+
 	protected String addIdToSql(String sql, JdbcContext metaData) {
 		try {
 			return String.format("/*z:%s*/%s", generateId(metaData), sql);
@@ -43,6 +50,8 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	private void initBlackList() {
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
+			  Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 	}
 
 	protected void checkBlackList(JdbcContext context) throws SQLException {
