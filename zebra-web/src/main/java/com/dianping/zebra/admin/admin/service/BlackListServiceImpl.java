@@ -36,8 +36,9 @@ public class BlackListServiceImpl implements BlackListService {
 
 	public void addItem(String env, String ip, String item) throws IOException {
 		String key;
+		String globalKey = String.format("%s.global.id", PROJECT_NAME);
 		if (StringUtils.isBlank(ip)) {
-			key = String.format("%s.global.id", PROJECT_NAME);
+			key = globalKey;
 		} else {
 			String appName = m_cmdbService.getAppName(ip);
 			if (StringUtils.isBlank(appName) || StringUtils.isBlank(item)) {
@@ -57,6 +58,10 @@ public class BlackListServiceImpl implements BlackListService {
 		}
 
 		m_lionHttpService.setConfig(env, key, StringUtils.joinCollectionToString(result, ","));
+		if (!key.equals(globalKey)) {
+			//修改了App配置后，触发glbal配置的事件。因为App配置不存在，不会被触发
+			m_lionHttpService.setConfig(env, globalKey, m_lionHttpService.getConfig(env, globalKey));
+		}
 	}
 
 	public void deleteItem(String env, String key, String item) throws IOException {
