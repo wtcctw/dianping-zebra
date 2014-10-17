@@ -21,12 +21,12 @@ public class RangeCounterTest {
 		targer.increment(5500);
 		targer.increment(Integer.MAX_VALUE);
 
-		Assert.assertEquals(targer.getResult().size(), 5);
-		Assert.assertEquals(targer.getResult().get(0).get(), 1);
-		Assert.assertEquals(targer.getResult().get(10).get(), 1);
-		Assert.assertEquals(targer.getResult().get(1000).get(), 2);
-		Assert.assertEquals(targer.getResult().get(5000).get(), 2);
-		Assert.assertEquals(targer.getResult().get(Integer.MAX_VALUE).get(), 2);
+		Assert.assertEquals(targer.getResult().size(), 5l);
+		Assert.assertEquals(targer.getResult().get(0l).get(), 1l);
+		Assert.assertEquals(targer.getResult().get(10l).get(), 1l);
+		Assert.assertEquals(targer.getResult().get(1000l).get(), 2l);
+		Assert.assertEquals(targer.getResult().get(5000l).get(), 2l);
+		Assert.assertEquals(targer.getResult().get(Long.MAX_VALUE).get(), 2l);
 
 	}
 
