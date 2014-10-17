@@ -56,7 +56,7 @@ public class PerformanceTest {
 		ds.getConfig();
 
 		List<Thread> threads = new ArrayList<Thread>();
-		for (int k = 0; k < 1000; k++) {
+		for (int k = 0; k < 100; k++) {
 			threads.add(new Thread(new Executer()));
 		}
 

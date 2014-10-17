@@ -27,9 +27,10 @@ import java.util.regex.Pattern;
  * Created by Dozer on 9/24/14.
  */
 public class WallFilter extends DefaultJdbcFilter {
-	protected final static Pattern ID_PATTERN = Pattern.compile(".*(\\/\\*z:)([a-zA-Z0-9]{10})(\\*\\/).*");
-
 	private static final int MAX_ID_LENGTH = 8;
+
+	protected final static Pattern ID_PATTERN = Pattern
+		  .compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH + "})(\\*\\/).*");
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
@@ -132,7 +133,7 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	protected String getIdFromSQL(String sql) {
-		if (StringUtils.isNotBlank(sql)) {
+		if (StringUtils.isBlank(sql)) {
 			return null;
 		}
 		Matcher matcher = ID_PATTERN.matcher(sql);
