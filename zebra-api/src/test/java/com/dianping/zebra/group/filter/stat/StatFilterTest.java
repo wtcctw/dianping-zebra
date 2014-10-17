@@ -103,7 +103,6 @@ public class StatFilterTest extends MultiDatabaseTestCase {
 
 	@Test
 	public void test_statment_with_batch() throws Exception {
-
 		execute(new StatementCallback() {
 			@Override public Object doInStatement(Statement stmt) throws Exception {
 				stmt.executeUpdate("delete from PERSON");
