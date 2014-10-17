@@ -132,6 +132,10 @@
             <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.foundationdb</groupId>
+            <artifactId>fdb-sql-parser</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

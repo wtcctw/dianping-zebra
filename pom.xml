@@ -159,6 +159,11 @@
                 <version>1.5.5</version>
             </dependency>
             <dependency>
+                <groupId>com.foundationdb</groupId>
+                <artifactId>fdb-sql-parser</artifactId>
+                <version>1.4.0</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jodd</groupId>
                 <artifactId>jodd-core</artifactId>
                 <version>3.5.2</version>
