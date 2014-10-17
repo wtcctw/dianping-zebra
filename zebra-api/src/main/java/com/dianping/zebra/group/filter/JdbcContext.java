@@ -230,7 +230,8 @@ public class JdbcContext implements Cloneable {
 
 		try {
 			result = new SQLParser().parseStatement(sql);
-			nodeCache.put(mergeSql(result), result);
+			mergeSql(result);
+			nodeCache.put(sql, result);
 		} catch (StandardException e) {
 			log.error(e.getMessage(), e);
 			final String errorMsg = e.getMessage();
@@ -246,7 +247,7 @@ public class JdbcContext implements Cloneable {
 		return result;
 	}
 
-	private String mergeSql(StatementNode result) throws StandardException {
+	private void mergeSql(StatementNode result) throws StandardException {
 		if (result.getUserData() == null || !(result.getUserData() instanceof String)) {
 			MergeSqlVisitor visitor = new MergeSqlVisitor();
 			visitor.visit(result);
@@ -254,9 +255,6 @@ public class JdbcContext implements Cloneable {
 			NodeToString merged = new NodeToString();
 			String sql = merged.toString(result);
 			result.setUserData(sql);
-			return sql;
-		} else {
-			return (String) result.getUserData();
 		}
 	}
 
