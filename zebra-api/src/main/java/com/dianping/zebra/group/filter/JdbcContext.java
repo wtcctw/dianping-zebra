@@ -223,11 +223,12 @@ public class JdbcContext implements Cloneable {
 		} catch (StandardException e) {
 			log.error(e.getMessage(), e);
 			final String errorMsg = e.getMessage();
-			nodeCache.put(sql, new StatementNode() {
+			result = new StatementNode() {
 				@Override public String statementToString() {
 					return errorMsg;
 				}
-			});
+			};
+			nodeCache.put(sql, result);
 		}
 
 		return result;
