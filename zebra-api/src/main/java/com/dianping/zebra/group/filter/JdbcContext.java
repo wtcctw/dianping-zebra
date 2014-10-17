@@ -1,11 +1,13 @@
 package com.dianping.zebra.group.filter;
 
+import com.dianping.zebra.group.filter.visitor.MergeSqlVisitor;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.StringUtils;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.SQLParser;
 import com.foundationdb.sql.parser.StatementNode;
+import com.foundationdb.sql.unparser.NodeToString;
 import jodd.cache.LRUCache;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -86,6 +88,12 @@ public class JdbcContext implements Cloneable {
 		this.batchedSqls = batchedSqls;
 		if (batchedSqls != null) {
 			this.batchedNode = parseSqls(batchedSqls);
+		}
+		if (this.batchedNode != null) {
+			this.mergedBatchedSqls = new ArrayList<String>();
+			for (StatementNode node : this.batchedNode) {
+				this.mergedBatchedSqls.add((String) node.getUserData());
+			}
 		}
 	}
 
@@ -179,7 +187,10 @@ public class JdbcContext implements Cloneable {
 
 	public void setSql(String sql) {
 		this.sql = sql;
-		node = parseSql(sql);
+		this.node = parseSql(sql);
+		if (this.node != null) {
+			this.mergedSql = (String) this.node.getUserData();
+		}
 	}
 
 	public boolean isBatch() {
@@ -219,7 +230,7 @@ public class JdbcContext implements Cloneable {
 
 		try {
 			result = new SQLParser().parseStatement(sql);
-			nodeCache.put(sql, result);
+			nodeCache.put(mergeSql(result), result);
 		} catch (StandardException e) {
 			log.error(e.getMessage(), e);
 			final String errorMsg = e.getMessage();
@@ -228,10 +239,25 @@ public class JdbcContext implements Cloneable {
 					return errorMsg;
 				}
 			};
+			result.setUserData(sql);
 			nodeCache.put(sql, result);
 		}
 
 		return result;
+	}
+
+	private String mergeSql(StatementNode result) throws StandardException {
+		if (result.getUserData() == null || !(result.getUserData() instanceof String)) {
+			MergeSqlVisitor visitor = new MergeSqlVisitor();
+			visitor.visit(result);
+
+			NodeToString merged = new NodeToString();
+			String sql = merged.toString(result);
+			result.setUserData(sql);
+			return sql;
+		} else {
+			return (String) result.getUserData();
+		}
 	}
 
 	private List<StatementNode> parseSqls(List<String> sqls) {
