@@ -45,6 +45,8 @@ public class StatFilterTest extends MultiDatabaseTestCase {
 
 	@Test
 	public void test_insert_with_generate_key() throws Exception {
+		StatContext.reset();
+
 		final AtomicInteger key1 = new AtomicInteger();
 		final AtomicInteger key2 = new AtomicInteger();
 
@@ -76,6 +78,7 @@ public class StatFilterTest extends MultiDatabaseTestCase {
 
 	@Test
 	public void test_preparedstatment__with_batch() throws Exception {
+		StatContext.reset();
 		execute(new ConnectionCallback() {
 			@Override public Object doInConnection(Connection conn) throws Exception {
 				PreparedStatement pre = conn.prepareStatement("insert into PERSON (NAME,LAST_NAME,AGE) values (?,?,?)");
@@ -100,6 +103,7 @@ public class StatFilterTest extends MultiDatabaseTestCase {
 
 	@Test
 	public void test_statment_with_batch() throws Exception {
+		StatContext.reset();
 		execute(new StatementCallback() {
 			@Override public Object doInStatement(Statement stmt) throws Exception {
 				stmt.addBatch("insert into PERSON (NAME,LAST_NAME,AGE) values ('a','b',1)");
