@@ -34,7 +34,7 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
-	private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60);
+	private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60 * 1000);
 
 	protected volatile static Set<String> blackList = new HashSet<String>();
 

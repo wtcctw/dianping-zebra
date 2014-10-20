@@ -27,7 +27,8 @@ public class JdbcContext implements Cloneable {
 
 	private static final Logger log = LogManager.getLogger(JdbcContext.class);
 
-	private static final LRUCache<String, StatementNode> nodeCache = new LRUCache<String, StatementNode>(1024, 60 * 60);
+	private static final LRUCache<String, StatementNode> nodeCache = new LRUCache<String, StatementNode>(1024,
+		  60 * 60 * 1000);
 
 	private List<StatementNode> batchedNode;
 
