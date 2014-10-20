@@ -1,22 +1,21 @@
 package com.dianping.zebra.admin.admin.service;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.unidal.lookup.annotation.Inject;
+
 import com.dianping.cat.Cat;
 import com.dianping.zebra.group.util.StringUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.unidal.helper.Files;
-import org.unidal.helper.Urls;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class LionHttpServiceImpl implements LionHttpService {
 
 	private static final String[] ALL_ENV = new String[] { "dev", "alpha", "qa", "prelease", "product", "performance",
-		"product-hm" };
+	      "product-hm" };
 
 	private static final String ID = "2";
 
@@ -28,21 +27,18 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	private String setConfigUrl = "http://lionapi.dp:8080/config2/set?env=%s&id=%s&key=%s&value=%s";
 
-	private String callLionHttpApi(String url) throws IOException {
-		InputStream inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
-
-		return Files.forIO().readFrom(inputStream, "utf-8");
-	}
+	@Inject
+	private HttpService httpService;
 
 	@Override
-	public String[] getAllEnv(){
+	public String[] getAllEnv() {
 		return ALL_ENV;
 	}
 
 	@Override
 	public boolean createKey(String project, String key) throws IOException {
 		String url = String.format(createKeyUrl, ID, project, key, key);
-		String result = callLionHttpApi(url);
+		String result = httpService.sendGet(url);
 
 		try {
 			JsonParser parser = new JsonParser();
@@ -60,7 +56,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 	@Override
 	public String getConfig(String env, String key) throws IOException {
 		String url = String.format(getConfigUrl, env, key, ID);
-		String result = callLionHttpApi(url);
+		String result = httpService.sendGet(url);
 
 		try {
 			JsonParser parser = new JsonParser();
@@ -74,7 +70,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 	@Override
 	public HashMap<String, String> getConfigByProject(String env, String project) throws IOException {
 		String url = String.format(getProjectConfigUrl, env, project, ID);
-		String result = callLionHttpApi(url);
+		String result = httpService.sendGet(url);
 
 		try {
 			JsonParser parser = new JsonParser();
@@ -113,9 +109,9 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	@Override
 	public boolean setConfig(String env, String key, String value) {
-		try {
-			String result = callLionHttpApi(String.format(setConfigUrl, env, ID, key, value));
+		String result = httpService.sendGet(String.format(setConfigUrl, env, ID, key, value));
 
+		if (result != null && result.length() > 0) {
 			JsonParser parser = new JsonParser();
 			JsonObject obj = parser.parse(result).getAsJsonObject();
 
@@ -124,8 +120,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 			} else {
 				return false;
 			}
-		} catch (IOException e) {
-			Cat.logError(e);
+		} else {
 			return false;
 		}
 	}
