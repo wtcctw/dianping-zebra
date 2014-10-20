@@ -67,10 +67,22 @@ public class JdbcContext implements Cloneable {
 	private String sql;
 
 	public List<String> getMergedBatchedSql() {
-		return mergedBatchedSql;
+		if (this.mergedBatchedSql == null && getBatchedSql() != null && getBatchedSql() != null) {
+			this.mergedBatchedSql = new ArrayList<String>();
+			for (int k = 0; k < getBatchedSql().size(); k++) {
+				this.mergedBatchedSql.add(mergeSql(getBatchedSql().get(k), getBatchedNode().get(k)));
+			}
+		}
+		return this.mergedBatchedSql;
 	}
 
 	public List<StatementNode> getBatchedNode() {
+		if (batchedNode == null && this.getBatchedSql() != null) {
+			batchedNode = new ArrayList<StatementNode>();
+			for (String tempSql : this.getBatchedSql()) {
+				batchedNode.add(parseSql(tempSql));
+			}
+		}
 		return batchedNode;
 	}
 
@@ -90,21 +102,7 @@ public class JdbcContext implements Cloneable {
 	}
 
 	public void setBatchedSqls(List<String> inputSql) {
-		batchedSql = new ArrayList<String>();
-		batchedNode = new ArrayList<StatementNode>();
-		mergedBatchedSql = new ArrayList<String>();
-
-		if (inputSql == null) {
-			return;
-		}
-
-		for (String tempSql : inputSql) {
-			StatementNode tempNode = parseSql(tempSql);
-			String tempMergedSql = mergeSql(tempSql, tempNode);
-			batchedSql.add(tempSql);
-			batchedNode.add(tempNode);
-			mergedBatchedSql.add(tempMergedSql);
-		}
+		batchedSql = inputSql;
 	}
 
 	public Connection getConnection() {
@@ -156,15 +154,17 @@ public class JdbcContext implements Cloneable {
 	}
 
 	public String getMergedSql() {
+		if (mergedSql == null && this.getSql() != null && this.getNode() != null) {
+			this.mergedSql = mergeSql(this.getSql(), this.getNode());
+		}
 		return mergedSql;
 	}
 
 	public StatementNode getNode() {
-		return node;
-	}
-
-	public void setNode(StatementNode node) {
-		this.node = node;
+		if (this.node == null) {
+			this.node = parseSql(this.sql);
+		}
+		return this.node;
 	}
 
 	public Object getParams() {
@@ -193,10 +193,6 @@ public class JdbcContext implements Cloneable {
 
 	public void setSql(String sql) {
 		this.sql = sql;
-		this.node = parseSql(sql);
-		if (this.sql != null && this.node != null) {
-			this.mergedSql = mergeSql(this.sql, this.node);
-		}
 	}
 
 	public boolean isBatch() {
