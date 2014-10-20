@@ -53,7 +53,7 @@ public class TestServer extends JettyServer {
 		execute("select 1");
 		execute("select * from `not_exist`");
 		execute("select 1");
-
+		execute("select from user"); //error sql
 		ds.setMaxPoolSize(100);
 		ds.setMaxPoolSize(101);
 

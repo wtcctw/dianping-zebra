@@ -71,9 +71,9 @@ public class ExecuteStat {
 	public ExecuteStat(JdbcContext context) {
 		this.isBatch = context.isBatch();
 		if (context.isBatch() && !context.isPrepared()) {
-			this.sql = Arrays.toString(context.getBatchedSqls().toArray());
+			this.sql = Arrays.toString(context.getMergedBatchedSqls().toArray());
 		} else {
-			this.sql = context.getSql();
+			this.sql = context.getMergedSql();
 		}
 		this.isPrepared = context.isPrepared();
 		this.groupDataSourceId = context.getDataSourceId();

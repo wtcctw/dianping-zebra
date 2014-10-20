@@ -1,12 +1,12 @@
 package com.dianping.zebra.group.filter.stat;
 
+import com.dianping.zebra.group.filter.JdbcContext;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.dianping.zebra.group.filter.JdbcContext;
 
 /**
  * Created by Dozer on 9/15/14.
@@ -33,7 +33,7 @@ public final class StatContext {
 			try {
 				if (!dataSource.containsKey(key)) {
 					dataSource.put(key, new DataSourceStat(context.getDataSourceId(), context.getDataSource().getClass()
-					      .getSimpleName(), context.getProperties()));
+						  .getSimpleName(), context.getProperties()));
 				}
 			} finally {
 				dataSourceLock.unlock();
@@ -61,16 +61,16 @@ public final class StatContext {
 	private static Integer generateExecuteKey(JdbcContext context) {
 		int result = 0;
 
-		if (context.getSql() != null) {
-			result = result * 31 + context.getSql().hashCode();
+		if (context.getMergedSql() != null) {
+			result = result * 31 + context.getMergedSql().hashCode();
 		}
 
 		result = result * 31 + new Boolean(context.isBatch()).hashCode();
 
 		result = result * 31 + new Boolean(context.isPrepared()).hashCode();
 
-		if (context.getBatchedSqls() != null) {
-			result = result * 31 + Arrays.toString(context.getBatchedSqls().toArray()).hashCode();
+		if (context.getMergedBatchedSqls() != null) {
+			result = result * 31 + Arrays.toString(context.getMergedBatchedSqls().toArray()).hashCode();
 		}
 
 		if (context.getDataSourceId() != null) {
