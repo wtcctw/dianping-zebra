@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <file path="lion-codegen.xml" />
+  <file path="lion-dal.xml" />
+</manifest>
+

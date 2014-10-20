@@ -34,6 +34,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		// move following line to top-level project if necessary
 		all.add(C(JdbcDataSourceConfigurationManager.class));
 		all.addAll(new ZebraDatabaseConfigurator().defineComponents());
+		all.addAll(new LionDatabaseConfigurator().defineComponents());
 
 		// Please keep it as last
 		all.addAll(new WebComponentConfigurator().defineComponents());

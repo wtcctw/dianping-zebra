@@ -135,6 +135,68 @@
 			</requirements>
 		</component>
 		<component>
+			<role>org.unidal.dal.jdbc.datasource.DataSource</role>
+			<role-hint>lion</role-hint>
+			<implementation>com.dianping.zebra.admin.datasource.JdbcDataSource</implementation>
+			<configuration>
+				<id>zebra</id>
+				<maximum-pool-size>3</maximum-pool-size>
+				<connection-timeout>1s</connection-timeout>
+				<idle-timeout>10m</idle-timeout>
+				<statement-cache-size>1000</statement-cache-size>
+				<properties>
+					<driver>com.mysql.jdbc.Driver</driver>
+					<URL>${zebra.lion.jdbc.url}</URL>
+					<user>${zebra.lion.jdbc.username}</user>
+					<password>${zebra.lion.jdbc.password}</password>
+					<connectionProperties><![CDATA[useUnicode=true&characterEncoding=UTF-8&autoReconnect=true]]></connectionProperties>
+				</properties>
+			</configuration>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>config</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>config</logical-table-name>
+				<physical-table-name>config</physical-table-name>
+				<data-source-name>lion</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>org.unidal.dal.jdbc.mapping.TableProvider</role>
+			<role-hint>config-instance</role-hint>
+			<implementation>org.unidal.dal.jdbc.mapping.SimpleTableProvider</implementation>
+			<configuration>
+				<logical-table-name>config-instance</logical-table-name>
+				<physical-table-name>config_instance</physical-table-name>
+				<data-source-name>lion</data-source-name>
+			</configuration>
+		</component>
+		<component>
+			<role>com.dianping.zebra.web.dal.lion.ConfigDao</role>
+			<implementation>com.dianping.zebra.web.dal.lion.ConfigDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.zebra.web.dal.lion.ConfigInstanceDao</role>
+			<implementation>com.dianping.zebra.web.dal.lion.ConfigInstanceDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>org.unidal.web.mvc.model.ModuleRegistry</role>
 			<implementation>org.unidal.web.mvc.model.ModuleRegistry</implementation>
 			<configuration>
