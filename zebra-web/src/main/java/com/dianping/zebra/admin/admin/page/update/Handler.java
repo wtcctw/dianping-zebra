@@ -11,6 +11,7 @@ import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
+import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.zebra.admin.admin.service.ReportService;
 import com.google.gson.Gson;
 
@@ -32,16 +33,17 @@ public class Handler implements PageHandler<Context> {
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
 		Payload payload = ctx.getPayload();
 		Object responseObject = null;
+		boolean isProduct = EnvZooKeeperConfig.getEnv().equals("product");
 
 		switch (payload.getAction()) {
 		case VIEW:
-			responseObject = m_reportService.getReport(false);
+			responseObject = m_reportService.getReport(isProduct);
 			break;
 		case DATABASE:
-			responseObject = m_reportService.getDatabase(payload.getDatabase(), false);
+			responseObject = m_reportService.getDatabase(payload.getDatabase(), isProduct);
 			break;
 		case APP:
-			responseObject = m_reportService.getApp(payload.getApp(), false);
+			responseObject = m_reportService.getApp(payload.getApp(), isProduct);
 			break;
 		}
 

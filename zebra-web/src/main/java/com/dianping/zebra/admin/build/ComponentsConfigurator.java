@@ -18,14 +18,16 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
-		all.add(C(LionHttpService.class, LionHttpServiceImpl.class));
+		all.add(C(LionHttpService.class, LionHttpServiceImpl.class).req(HttpService.class));
 		all.add(C(LogService.class, LocalLogService.class));
-		all.add(C(CmdbService.class, CmdbServiceImpl.class));
-		all.add(C(DatabaseRealtimeService.class, DatabaseRealtimeServiceImpl.class).req(CmdbService.class));
+		all.add(C(CmdbService.class, CmdbServiceImpl.class).req(HttpService.class));
+		all.add(C(HttpService.class, HttpServiceImpl.class));
+		all.add(C(DatabaseRealtimeService.class, DatabaseRealtimeServiceImpl.class).req(CmdbService.class,
+		      HttpService.class));
 		all.add(C(DalConfigService.class, DalConfigServiceImpl.class).req(LionHttpService.class));
 		all.add(C(DalService.class, DalServiceImpl.class).req(LionHttpService.class));
 		all.add(C(ReportService.class, ReportServiceImpl.class).req(HeartbeatDao.class, CmdbService.class,
-			DatabaseRealtimeService.class));
+		      DatabaseRealtimeService.class));
 		all.add(C(ConnectionService.class, ConnectionServiceImpl.class));
 		all.add(C(BlackListService.class, BlackListServiceImpl.class).req(LionHttpService.class, CmdbService.class));
 

@@ -3,6 +3,11 @@
 		<component>
 			<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
 			<implementation>com.dianping.zebra.admin.admin.service.LionHttpServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.HttpService</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.service.LogService</role>
@@ -11,6 +16,15 @@
 		<component>
 			<role>com.dianping.zebra.admin.admin.service.CmdbService</role>
 			<implementation>com.dianping.zebra.admin.admin.service.CmdbServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.HttpService</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.service.HttpService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.HttpServiceImpl</implementation>
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.service.DatabaseRealtimeService</role>
@@ -18,6 +32,9 @@
 			<requirements>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.CmdbService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.HttpService</role>
 				</requirement>
 			</requirements>
 		</component>

@@ -13,14 +13,17 @@ import java.util.Map;
 public final class ApplicationContextProvider implements ApplicationContextAware {
 	private static ApplicationContext applicationContext = null;
 
-	public static <T> Map<String, T> getBeanByClass(Class<T> clazz) {
+	@SuppressWarnings("unchecked")
+   public static <T> Map<String, T> getBeanByClass(Class<T> clazz) {
 		if (applicationContext == null) {
 			return new HashMap<String, T>();
 		}
 		return applicationContext.getBeansOfType(clazz);
+		
 	}
 
-	@Override
+	@SuppressWarnings("static-access")
+   @Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}

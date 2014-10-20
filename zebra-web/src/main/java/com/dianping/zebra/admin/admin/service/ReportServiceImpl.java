@@ -87,7 +87,7 @@ public class ReportServiceImpl implements ReportService {
 	}
 
 	@Override
-	public App getApp(String appName, boolean hasExtraInfo) {
+	public App getApp(String appName, boolean isProduct) {
 		App app = new App(appName);
 
 		try {
@@ -101,7 +101,7 @@ public class ReportServiceImpl implements ReportService {
 			Cat.logError(e);
 		}
 
-		if (hasExtraInfo) {
+		if (isProduct) {
 			new ConnectionInfoVisitor2().visitApp(app);
 		}
 		new StatisticsVisitor().visitApp(app);
@@ -110,24 +110,26 @@ public class ReportServiceImpl implements ReportService {
 	}
 
 	@Override
-	public Database getDatabase(String database, boolean hasExtraInfo) {
+	public Database getDatabase(String database, boolean isProduct) {
 		Database database2 = getReportInternal().getDatabases().get(database);
 
-		if (hasExtraInfo) {
+		if (isProduct) {
 			new ConnectionInfoVisitor().visitDatabase(database2);
 		}
+		
 		new StatisticsVisitor().visitDatabase(database2);
 
 		return database2;
 	}
 
 	@Override
-	public Report getReport(boolean hasExtraInfo) {
+	public Report getReport(boolean isProduct) {
 		Report report = getReportInternal();
 
-		if (hasExtraInfo) {
+		if (isProduct) {
 			new ConnectionInfoVisitor().visitReport(report);
 		}
+
 		new StatisticsVisitor().visitReport(report);
 
 		return report;
