@@ -2,11 +2,24 @@
 <entities do-package="com.dianping.zebra.web.dal.lion" gen="true">
   <entity name="config" table="config" alias="c">
     <query-defs>
-      <query name="find-by-Project-Id" type="SELECT">
-      	 <param name="key-id" />
+      <query name="find-by-Project-Id" type="SELECT" multiple="true">
+      	 <param name="project-id" />
          <statement><![CDATA[SELECT <FIELDS/>
          FROM <TABLE/>
-         WHERE <FIELD name='projectId'/> = ${key-id}]]></statement>
+         WHERE <FIELD name='project-id'/> = ${project-id}]]></statement>
+      </query>
+    </query-defs>
+  </entity>
+   <entity name="config-instance" table="config_instance" alias="ci">
+    <var name="config-ids" value-type="int[]"/>
+    <query-defs>
+      <query name="find-by-ConfigId-And-EnvId" type="SELECT" multiple="true">
+        <param name="config-ids" />
+        <param name="env-id" />
+        <statement><![CDATA[SELECT <FIELDS/>
+        FROM <TABLE/>
+        WHERE <FIELD name='config-id'/> in <IN>${config-ids}</IN>
+        AND <FIELD name='env-id'/> = ${env-id}]]></statement>
       </query>
     </query-defs>
   </entity>
