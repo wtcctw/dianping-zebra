@@ -26,8 +26,6 @@ import java.util.Map;
 
 public class JdbcContext implements Cloneable {
 
-	private static final Logger log = LogManager.getLogger(JdbcContext.class);
-
 	private static final LRUCache<String, StatementNode> nodeCache = new LRUCache<String, StatementNode>(1024,
 		  60 * 60 * 1000);
 
@@ -242,7 +240,6 @@ public class JdbcContext implements Cloneable {
 			result = new SQLParser().parseStatement(sql);
 			nodeCache.put(sql, result);
 		} catch (StandardException e) {
-			log.error(e.getMessage(), e);
 			final String errorMsg = e.getMessage();
 			result = new StatementNode() {
 				@Override public String statementToString() {
