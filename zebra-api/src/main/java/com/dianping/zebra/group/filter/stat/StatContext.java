@@ -69,8 +69,8 @@ public final class StatContext {
 
 		result = result * 31 + new Boolean(context.isPrepared()).hashCode();
 
-		if (context.getMergedBatchedSqls() != null) {
-			result = result * 31 + Arrays.toString(context.getMergedBatchedSqls().toArray()).hashCode();
+		if (context.getMergedBatchedSql() != null) {
+			result = result * 31 + Arrays.toString(context.getMergedBatchedSql().toArray()).hashCode();
 		}
 
 		if (context.getDataSourceId() != null) {

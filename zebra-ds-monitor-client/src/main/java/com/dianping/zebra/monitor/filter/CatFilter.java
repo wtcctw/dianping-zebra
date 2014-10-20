@@ -29,134 +29,134 @@ import java.util.Set;
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends DefaultJdbcFilter {
-    private static final String DAL_CAT_TYPE = "DAL";
+	private static final String DAL_CAT_TYPE = "DAL";
 
-    private static final String SQL_STATEMENT_NAME = "sql_statement_name";
+	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
-    private Set<Integer> allSqlSet = new HashSet<Integer>();
+	private Set<Integer> allSqlSet = new HashSet<Integer>();
 
-    @Override
-    public <S> void closeSingleDataSource(JdbcContext metaData, S source,
-                                          FilterActionWithSQLExcption<S> action) throws SQLException {
-        super.closeSingleDataSource(metaData, source, action);
-        Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
-    }
+	@Override
+	public <S> void closeSingleDataSource(JdbcContext metaData, S source,
+		  FilterActionWithSQLExcption<S> action) throws SQLException {
+		super.closeSingleDataSource(metaData, source, action);
+		Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
+	}
 
-    @Override
-    public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
-            throws SQLException {
-        String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
-        Transaction t;
-        if (StringUtils.isBlank(sqlName)) {
-            t = Cat.newTransaction("SQL", isTooManySql(metaData) ? null : metaData.getSql());
-            if (metaData.isBatch()) {
-                t.addData(Stringizers.forJson().compact().from(metaData.getBatchedSqls()));
-            } else {
-                t.addData(metaData.getSql());
-            }
-        } else {
-            t = Cat.newTransaction("SQL", sqlName);
-            t.addData(metaData.getSql());
-        }
+	@Override
+	public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
+		  throws SQLException {
+		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
+		Transaction t;
+		if (StringUtils.isBlank(sqlName)) {
+			t = Cat.newTransaction("SQL", isTooManySql(metaData) ? null : metaData.getSql());
+			if (metaData.isBatch()) {
+				t.addData(Stringizers.forJson().compact().from(metaData.getBatchedSql()));
+			} else {
+				t.addData(metaData.getSql());
+			}
+		} else {
+			t = Cat.newTransaction("SQL", sqlName);
+			t.addData(metaData.getSql());
+		}
 
-        try {
-            T result = super.execute(metaData, source, action);
+		try {
+			T result = super.execute(metaData, source, action);
 
-            if (metaData.getRealJdbcContext() != null) {
-                Cat.logEvent("SQL.Database", metaData.getRealJdbcContext().getJdbcUrl(), Event.SUCCESS,
-                        metaData.getRealJdbcContext().getDataSourceId());
-                Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS,
-                        Stringizers.forJson().compact()
-                                .from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
-            }
+			if (metaData.getRealJdbcContext() != null) {
+				Cat.logEvent("SQL.Database", metaData.getRealJdbcContext().getJdbcUrl(), Event.SUCCESS,
+					  metaData.getRealJdbcContext().getDataSourceId());
+				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS,
+					  Stringizers.forJson().compact()
+							.from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
+			}
 
-            t.setStatus(Transaction.SUCCESS);
-            return result;
-        } catch (SQLException exp) {
-            t.setStatus(exp);
-            throw exp;
-        } catch (RuntimeException exp) {
-            t.setStatus(exp);
-            throw exp;
-        } finally {
-            t.complete();
-        }
-    }
+			t.setStatus(Transaction.SUCCESS);
+			return result;
+		} catch (SQLException exp) {
+			t.setStatus(exp);
+			throw exp;
+		} catch (RuntimeException exp) {
+			t.setStatus(exp);
+			throw exp;
+		} finally {
+			t.complete();
+		}
+	}
 
-    @Override
-    public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-            JdbcContext metaData, S source,
-            FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
-        FailOverDataSource.FindMasterDataSourceResult result = super
-                .findMasterFailOverDataSource(metaData, source, action);
-        if (result != null && result.isChangedMaster()) {
-            Cat.logEvent("DAL.Master", "Found-" + metaData.getDataSourceId());
-        }
-        return result;
-    }
+	@Override
+	public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
+		  JdbcContext metaData, S source,
+		  FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
+		FailOverDataSource.FindMasterDataSourceResult result = super
+			  .findMasterFailOverDataSource(metaData, source, action);
+		if (result != null && result.isChangedMaster()) {
+			Cat.logEvent("DAL.Master", "Found-" + metaData.getDataSourceId());
+		}
+		return result;
+	}
 
-    @Override
-    public <S> void initGroupDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
-        super.initGroupDataSource(metaData, source, action);
-        if (source instanceof GroupDataSourceMBean) {
-            StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor((GroupDataSourceMBean) source));
-        }
-    }
+	@Override
+	public <S> void initGroupDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
+		super.initGroupDataSource(metaData, source, action);
+		if (source instanceof GroupDataSourceMBean) {
+			StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor((GroupDataSourceMBean) source));
+		}
+	}
 
-    @Override
-    public <S> DataSource initSingleDataSource(JdbcContext metaData, S source,
-                                               FilterFunction<S, DataSource> action) {
-        DataSource result = super.initSingleDataSource(metaData, source, action);
-        Cat.logEvent("DataSource.Created", metaData.getDataSourceId());
-        return result;
-    }
+	@Override
+	public <S> DataSource initSingleDataSource(JdbcContext metaData, S source,
+		  FilterFunction<S, DataSource> action) {
+		DataSource result = super.initSingleDataSource(metaData, source, action);
+		Cat.logEvent("DataSource.Created", metaData.getDataSourceId());
+		return result;
+	}
 
-    private boolean isTooManySql(JdbcContext metaData) {
-        if (allSqlSet.size() >= 10000) {
-            return true;
-        } else {
-            if (metaData.getSql() != null) {
-                allSqlSet.add(metaData.getSql().hashCode());
-            }
-            if (metaData.getBatchedSqls() != null) {
-                for (String sql : metaData.getBatchedSqls()) {
-                    if (sql == null) {
-                        continue;
-                    }
-                    allSqlSet.add(sql.hashCode());
-                }
-            }
-            return false;
-        }
-    }
+	private boolean isTooManySql(JdbcContext metaData) {
+		if (allSqlSet.size() >= 10000) {
+			return true;
+		} else {
+			if (metaData.getSql() != null) {
+				allSqlSet.add(metaData.getSql().hashCode());
+			}
+			if (metaData.getBatchedSql() != null) {
+				for (String sql : metaData.getBatchedSql()) {
+					if (sql == null) {
+						continue;
+					}
+					allSqlSet.add(sql.hashCode());
+				}
+			}
+			return false;
+		}
+	}
 
-    @Override
-    public <S> void refreshGroupDataSource(JdbcContext metaData, String propertiesName, S source,
-                                           FilterAction<S> action) {
-        Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Refresh-" + metaData.getDataSourceId());
-        Cat.logEvent("DAL.Refresh.Property", propertiesName);
-        try {
-            super.refreshGroupDataSource(metaData, propertiesName, source, action);
-            t.setStatus(Message.SUCCESS);
-        } catch (RuntimeException exp) {
-            t.setStatus(exp);
-        } finally {
-            t.complete();
-        }
-    }
+	@Override
+	public <S> void refreshGroupDataSource(JdbcContext metaData, String propertiesName, S source,
+		  FilterAction<S> action) {
+		Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Refresh-" + metaData.getDataSourceId());
+		Cat.logEvent("DAL.Refresh.Property", propertiesName);
+		try {
+			super.refreshGroupDataSource(metaData, propertiesName, source, action);
+			t.setStatus(Message.SUCCESS);
+		} catch (RuntimeException exp) {
+			t.setStatus(exp);
+		} finally {
+			t.complete();
+		}
+	}
 
-    @Override
-    public <S> void switchFailOverDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
-        Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "FailOver");
-        try {
-            super.switchFailOverDataSource(metaData, source, action);
-            Cat.logEvent("DAL.FailOver", "Success");
-            t.setStatus(Message.SUCCESS);
-        } catch (RuntimeException exp) {
-            Cat.logEvent("DAL.FailOver", "Failed");
-            t.setStatus("Fail to find any master database");
-        } finally {
-            t.complete();
-        }
-    }
+	@Override
+	public <S> void switchFailOverDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
+		Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "FailOver");
+		try {
+			super.switchFailOverDataSource(metaData, source, action);
+			Cat.logEvent("DAL.FailOver", "Success");
+			t.setStatus(Message.SUCCESS);
+		} catch (RuntimeException exp) {
+			Cat.logEvent("DAL.FailOver", "Failed");
+			t.setStatus("Fail to find any master database");
+		} finally {
+			t.complete();
+		}
+	}
 }

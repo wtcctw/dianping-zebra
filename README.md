@@ -10,6 +10,7 @@
 6. 集成Phoenix Inspect页面，方便看到DataSource的实时信息
 7. DBA可以更加方便的进行数据库维护，如写库切换，读库上线下线，用户名密码变更等操作
 8. 兼容老的DPDL
+9. 支持SQL黑名单功能，DBA可以在后台禁止指定SQL语句的执行
 
 ## 使用说明
 ### POM依赖
@@ -20,7 +21,7 @@
     	<version>${version}</version>
 	</dependency>
 
-目前的最新版本为`2.5.9`
+目前的最新版本为`2.6.0`
 
 ### 数据库监控功能
 
@@ -33,7 +34,7 @@
 `version`和`zebra-api`保持一致
     
 ### 其他依赖
-* 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.0.5`版本，`dpsf-net`升级到`2.1.21`版本以上。
+* 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.1.3`版本，`dpsf-net`升级到`2.1.21`版本以上。
 
 ## Spring 配置
 
@@ -85,6 +86,12 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 * 写库数据源是`mysql`
 
 ## 更新说明
+### 2.6.0
+* [+] 增加了`filter`功能
+* [+] 利用`filter`，增加了SQL黑名单功能
+* [+] 利用`filter`，增加了SQL统计功能
+* [/] 利用`filter`，重构了`CAT`监控的代码
+
 ### 2.5.9
 * [/] 修复了transaction潜在的bug
 
@@ -112,7 +119,7 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 ### 2.5.1
 * [/] 将`Lion`中的用户名的配置从`user`改成`username`
 
-#### 2.5.0
+### 2.5.0
 * [+] 支持`Spring`方式配置`GroupDataSource`
 * [+] 支持`Spring`方式配置`SingleDataSource`
 * [+] 通过升级`zebra-ds-monitor`,老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
