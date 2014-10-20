@@ -5,6 +5,7 @@ import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.StringUtils;
 import com.foundationdb.sql.StandardException;
+import com.foundationdb.sql.parser.QueryTreeNode;
 import com.foundationdb.sql.parser.SQLParser;
 import com.foundationdb.sql.parser.StatementNode;
 import com.foundationdb.sql.unparser.NodeToString;
@@ -30,9 +31,8 @@ public class JdbcContext implements Cloneable {
 	private static final LRUCache<String, StatementNode> nodeCache = new LRUCache<String, StatementNode>(1024,
 		  60 * 60 * 1000);
 
-	private List<StatementNode> batchedNode;
-
-	private List<String> batchedSqls;
+	private static final LRUCache<String, String> mergedSqlCache = new LRUCache<String, String>(1024,
+		  60 * 60 * 1000);
 
 	private Connection connection;
 
@@ -52,7 +52,11 @@ public class JdbcContext implements Cloneable {
 
 	private String jdbcUsername;
 
-	private List<String> mergedBatchedSqls;
+	private List<String> batchedSql;
+
+	private List<StatementNode> batchedNode;
+
+	private List<String> mergedBatchedSql;
 
 	private String mergedSql;
 
@@ -66,6 +70,18 @@ public class JdbcContext implements Cloneable {
 
 	private String sql;
 
+	public List<String> getMergedBatchedSql() {
+		return mergedBatchedSql;
+	}
+
+	public List<StatementNode> getBatchedNode() {
+		return batchedNode;
+	}
+
+	public List<String> getBatchedSql() {
+		return batchedSql;
+	}
+
 	@SuppressWarnings("unchecked")
 	public JdbcContext clone() {
 		try {
@@ -77,24 +93,21 @@ public class JdbcContext implements Cloneable {
 		}
 	}
 
-	public List<StatementNode> getBatchedNode() {
-		return batchedNode;
-	}
+	public void setBatchedSqls(List<String> inputSql) {
+		batchedSql = new ArrayList<String>();
+		batchedNode = new ArrayList<StatementNode>();
+		mergedBatchedSql = new ArrayList<String>();
 
-	public List<String> getBatchedSqls() {
-		return batchedSqls;
-	}
-
-	public void setBatchedSqls(List<String> batchedSqls) {
-		this.batchedSqls = batchedSqls;
-		if (batchedSqls != null) {
-			this.batchedNode = parseSqls(batchedSqls);
+		if (inputSql == null) {
+			return;
 		}
-		if (this.batchedNode != null) {
-			this.mergedBatchedSqls = new ArrayList<String>();
-			for (StatementNode node : this.batchedNode) {
-				this.mergedBatchedSqls.add((String) node.getUserData());
-			}
+
+		for (String tempSql : inputSql) {
+			StatementNode tempNode = parseSql(tempSql);
+			String tempMergedSql = mergeSql(tempSql, tempNode);
+			batchedSql.add(tempSql);
+			batchedNode.add(tempNode);
+			mergedBatchedSql.add(tempMergedSql);
 		}
 	}
 
@@ -146,10 +159,6 @@ public class JdbcContext implements Cloneable {
 		this.jdbcUsername = jdbcUsername;
 	}
 
-	public List<String> getMergedBatchedSqls() {
-		return mergedBatchedSqls;
-	}
-
 	public String getMergedSql() {
 		return mergedSql;
 	}
@@ -189,8 +198,8 @@ public class JdbcContext implements Cloneable {
 	public void setSql(String sql) {
 		this.sql = sql;
 		this.node = parseSql(sql);
-		if (this.node != null) {
-			this.mergedSql = (String) this.node.getUserData();
+		if (this.sql != null && this.node != null) {
+			this.mergedSql = mergeSql(this.sql, this.node);
 		}
 	}
 
@@ -231,7 +240,6 @@ public class JdbcContext implements Cloneable {
 
 		try {
 			result = new SQLParser().parseStatement(sql);
-			mergeSql(result);
 			nodeCache.put(sql, result);
 		} catch (StandardException e) {
 			log.error(e.getMessage(), e);
@@ -248,15 +256,27 @@ public class JdbcContext implements Cloneable {
 		return result;
 	}
 
-	private void mergeSql(StatementNode result) throws StandardException {
-		if (result.getUserData() == null || !(result.getUserData() instanceof String)) {
-			MergeSqlVisitor visitor = new MergeSqlVisitor();
-			visitor.visit(result);
+	private String mergeSql(String sql, StatementNode result) {
+		String mergedSql = mergedSqlCache.get(sql);
 
-			NodeToString merged = new NodeToString();
-			String sql = merged.toString(result);
-			result.setUserData(sql);
+		try {
+			if (mergedSql == null) {
+				SQLParser parser = new SQLParser();
+				QueryTreeNode deepCopy = null;
+				deepCopy = parser.getNodeFactory().copyNode(result, parser);
+
+				MergeSqlVisitor visitor = new MergeSqlVisitor();
+				visitor.visit(deepCopy);
+				NodeToString merged = new NodeToString();
+				mergedSql = merged.toString(result);
+				mergedSqlCache.put(sql, mergedSql);
+			}
+		} catch (StandardException e) {
+			mergedSql = sql;
+			mergedSqlCache.put(sql, mergedSql);
 		}
+
+		return mergedSql;
 	}
 
 	private List<StatementNode> parseSqls(List<String> sqls) {
