@@ -10,8 +10,6 @@ import com.foundationdb.sql.parser.SQLParser;
 import com.foundationdb.sql.parser.StatementNode;
 import com.foundationdb.sql.unparser.NodeToString;
 import jodd.cache.LRUCache;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -259,13 +257,11 @@ public class JdbcContext implements Cloneable {
 		try {
 			if (mergedSql == null) {
 				SQLParser parser = new SQLParser();
-				QueryTreeNode deepCopy = null;
-				deepCopy = parser.getNodeFactory().copyNode(result, parser);
-
+				QueryTreeNode deepCopy = parser.getNodeFactory().copyNode(result, parser);
 				MergeSqlVisitor visitor = new MergeSqlVisitor();
 				visitor.visit(deepCopy);
 				NodeToString merged = new NodeToString();
-				mergedSql = merged.toString(result);
+				mergedSql = merged.toString(deepCopy);
 				mergedSqlCache.put(sql, mergedSql);
 			}
 		} catch (StandardException e) {
