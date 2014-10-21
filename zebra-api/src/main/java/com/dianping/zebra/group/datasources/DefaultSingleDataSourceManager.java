@@ -1,25 +1,28 @@
 package com.dianping.zebra.group.datasources;
 
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcContext;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.DalException;
 
 public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
 	private Thread dataSourceMonitor;
 
-	private BlockingQueue<InnerSingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<InnerSingleDataSource>();
+	private BlockingQueue<SingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<SingleDataSource>();
 
 	@Override
-	public synchronized InnerSingleDataSource createDataSource(DataSourceConfig config) {
-		return new InnerSingleDataSource(config);
+	public synchronized SingleDataSource createDataSource(DataSourceConfig config, JdbcContext metaData,
+			JdbcFilter filter) {
+		return new SingleDataSource(config, metaData, filter);
 	}
 
 	@Override
-	public synchronized void destoryDataSource(InnerSingleDataSource dataSource) {
+	public synchronized void destoryDataSource(SingleDataSource dataSource) {
 		if (dataSource != null) {
 			this.toBeClosedDataSource.offer(dataSource);
 		}
@@ -40,7 +43,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 		@Override
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
-				InnerSingleDataSource dataSource = null;
+				SingleDataSource dataSource = null;
 				try {
 					dataSource = toBeClosedDataSource.take();
 					dataSource.close();

@@ -8,10 +8,9 @@ package com.dianping.zebra.group;
 
 /**
  * @author Leo Liang, Dozer
- *
  */
 public final class Constants {
-	public static final String ZEBRA_VERSION = "2.5.9";
+	public static final String ZEBRA_VERSION = "2.6.0";
 
 	public static final String SQL_FORCE_WRITE_HINT = "/*+zebra:w*/";
 
@@ -22,8 +21,12 @@ public final class Constants {
 	public static final String CONFIG_MANAGER_TYPE_LOCAL = "local";
 
 	public static final String DEFAULT_DATASOURCE_GROUP_PRFIX = "groupds";
-	
+
 	public static final String DEFAULT_DATASOURCE_ZEBRA_PRFIX = "zebra";
+
+	public static final String DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX = "zebra-sql-blacklist";
+
+	public static final String ZEBRA_FILTER_PRFIX = "zebra.filter.";
 
 	public static final String DEFAULT_DATASOURCE_SINGLE_PRFIX = "ds";
 

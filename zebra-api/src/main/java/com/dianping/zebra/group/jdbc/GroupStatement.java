@@ -1,76 +1,68 @@
 /**
  * Project: zebra-client
- * 
+ *
  * File Created at Feb 19, 2014
- * 
+ *
  */
 package com.dianping.zebra.group.jdbc;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
-import com.dianping.cat.message.Event;
-import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.exception.DalNotSupportException;
+import com.dianping.zebra.group.filter.JdbcContext;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
-import com.site.helper.Stringizers;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Leo Liang
- * 
  */
 public class GroupStatement implements Statement {
 
-	protected GroupConnection dpGroupConnection;
-
-	protected int resultSetType = ResultSet.TYPE_FORWARD_ONLY;;
-
-	protected int resultSetConcurrency = ResultSet.CONCUR_READ_ONLY;
-
-	protected int resultSetHoldability = -1;
+	protected List<String> batchedSqls;
 
 	protected boolean closed = false;
 
-	protected ResultSet currentResultSet = null;
+	protected GroupResultSet currentResultSet = null;
+
+	protected GroupConnection dpGroupConnection;
+
+	protected int fetchSize;
+
+	protected JdbcFilter filter;
+
+	protected int maxRows;
+
+	protected JdbcContext context;
+
+	protected boolean moreResults = false;
 
 	protected Statement openedStatement = null;
 
 	protected int queryTimeout = 0;
 
-	protected int fetchSize;
+	protected int resultSetConcurrency = ResultSet.CONCUR_READ_ONLY;
 
-	protected int maxRows;
+	protected int resultSetHoldability = -1;
+
+	protected int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
 	protected int updateCount;
 
-	protected boolean moreResults = false;
-
-	protected List<String> batchedSqls;
-
-	private static final String CAT_LOGGED = "cat_log";
-
-	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
-
-	private static final String BATCH = "batch";
-
-	public GroupStatement(GroupConnection connection) {
+	public GroupStatement(GroupConnection connection, JdbcContext context, JdbcFilter filter) {
 		this.dpGroupConnection = connection;
+		this.context = context;
+		this.filter = filter;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#addBatch(java.lang.String)
 	 */
 	@Override
@@ -87,7 +79,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#cancel()
 	 */
 	@Override
@@ -103,7 +95,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#clearBatch()
 	 */
 	@Override
@@ -116,7 +108,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#clearWarnings()
 	 */
 	@Override
@@ -129,7 +121,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#close()
 	 */
 	@Override
@@ -195,7 +187,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#execute(java.lang.String)
 	 */
 	@Override
@@ -205,7 +197,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#execute(java.lang.String, int)
 	 */
 	@Override
@@ -215,7 +207,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#execute(java.lang.String, int[])
 	 */
 	@Override
@@ -225,7 +217,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#execute(java.lang.String, java.lang.String[])
 	 */
 	@Override
@@ -235,7 +227,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#executeBatch()
 	 */
 	@Override
@@ -248,30 +240,30 @@ public class GroupStatement implements Statement {
 				return new int[0];
 			}
 
-			return executeWithCat(new JDBCOperationCallback<int[]>() {
-
+			return executeWithFilter(new JDBCOperationCallback<int[]>() {
 				@Override
 				public int[] doAction(Connection conn) throws SQLException {
 					return executeBatchOnConnection(conn, batchedSqls);
 				}
-
-			}, BATCH, null, true);
+			}, null, null, true, true);
 		} finally {
-			if (batchedSqls != null)
+			if (batchedSqls != null) {
 				batchedSqls.clear();
+			}
 		}
 	}
 
 	private int[] executeBatchOnConnection(final Connection conn, final List<String> batchedSqls) throws SQLException {
+
 		Statement stmt = createStatementInternal(conn, true);
 		for (String sql : batchedSqls) {
-			stmt.addBatch(sql);
+			stmt.addBatch(processSQL(sql));
 		}
 		return stmt.executeBatch();
 	}
 
 	private boolean executeInternal(String sql, int autoGeneratedKeys, int[] columnIndexes, String[] columnNames)
-	      throws SQLException {
+		  throws SQLException {
 		SqlType sqlType = SqlUtils.getSqlType(sql);
 		if (sqlType.isQuery()) {
 			executeQuery(sql);
@@ -295,7 +287,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#executeQuery(java.lang.String)
 	 */
 	@Override
@@ -303,24 +295,24 @@ public class GroupStatement implements Statement {
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeWithCat(new JDBCOperationCallback<ResultSet>() {
-
+		return executeWithFilter(new JDBCOperationCallback<ResultSet>() {
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
 			}
-		}, sql, null, false);
+		}, sql, null, false, false);
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
+		sql = processSQL(sql);
 		Statement stmt = createStatementInternal(conn, false);
-		currentResultSet = stmt.executeQuery(sql);
+		currentResultSet = new GroupResultSet(this.context.clone(), this.filter, stmt.executeQuery(sql));
 		return currentResultSet;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#executeUpdate(java.lang.String)
 	 */
 	@Override
@@ -330,7 +322,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#executeUpdate(java.lang.String, int)
 	 */
 	@Override
@@ -340,7 +332,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#executeUpdate(java.lang.String, int[])
 	 */
 	@Override
@@ -350,7 +342,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#executeUpdate(java.lang.String, java.lang.String[])
 	 */
 	@Override
@@ -359,12 +351,12 @@ public class GroupStatement implements Statement {
 	}
 
 	private int executeUpdateInternal(final String sql, final int autoGeneratedKeys, final int[] columnIndexes,
-	      final String[] columnNames) throws SQLException {
+		  final String[] columnNames) throws SQLException {
+
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeWithCat(new JDBCOperationCallback<Integer>() {
-
+		return executeWithFilter(new JDBCOperationCallback<Integer>() {
 			@Override
 			public Integer doAction(Connection conn) throws SQLException {
 				try {
@@ -373,18 +365,17 @@ public class GroupStatement implements Statement {
 					if (conn instanceof SingleConnection) {
 						((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
 					}
-
 					JDBCExceptionUtils.throwWrappedSQLException(e);
 				}
-
 				return updateCount;
 			}
-
-		}, sql, null, true);
+		}, sql, null, false, true);
 	}
 
 	private int executeUpdateOnConnection(Connection conn, String sql, int autoGeneratedKeys, int[] columnIndexes,
-	      String[] columnNames) throws SQLException {
+		  String[] columnNames) throws SQLException {
+		sql = processSQL(sql);
+
 		Statement stmt = createStatementInternal(conn, false);
 
 		if (autoGeneratedKeys == -1 && columnIndexes == null && columnNames == null) {
@@ -400,49 +391,30 @@ public class GroupStatement implements Statement {
 		}
 	}
 
-	protected <T> T executeWithCat(JDBCOperationCallback<T> callback, String sql, Object params, boolean forceWriter)
-	      throws SQLException {
-		String isLogged = ExecutionContextHolder.getContext().get(CAT_LOGGED);
-		if (isLogged == null) {
-			String sqlName = (String) ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
-			Transaction t = Cat.newTransaction("SQL", sqlName);
+	protected <T> T executeWithFilter(final JDBCOperationCallback<T> callback, final String sql, Object params,
+		  boolean isBatch
+		  , final boolean forceWriter) throws SQLException {
 
-			if (sql.equals(BATCH)) {
-				t.addData(Stringizers.forJson().compact().from(this.batchedSqls));
-			} else {
-				t.addData(sql);
+		this.context.setSql(sql);
+		this.context.setBatch(isBatch);
+		this.context.setParams(params);
+		this.context.setTransaction(!this.dpGroupConnection.getAutoCommit());
+		this.context.setBatchedSqls(batchedSqls);
+		final Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
+		this.context.setRealJdbcContext(getRealJdbcMetaData(conn));
+
+		return this.filter.execute(this.context.clone(), this, new FilterFunctionWithSQLException<GroupStatement, T>() {
+			@Override
+			public T execute(GroupStatement source) throws SQLException {
+				T result = callback.doAction(conn);
+				return result;
 			}
-
-			try {
-				Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-				String id = ((SingleConnection) conn).getDataSource().getId();
-				String parameters = Stringizers.forJson().compact()
-				      .from(params, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
-
-				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, id);
-				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, parameters);
-				t.setStatus(Transaction.SUCCESS);
-				ExecutionContextHolder.getContext().add(CAT_LOGGED, "Logged");
-
-				return callback.doAction(conn);
-			} catch (SQLException e) {
-				Cat.logError(e);
-				t.setStatus(e);
-				throw e;
-			} finally {
-				t.complete();
-				ExecutionContextHolder.getContext().clear(CAT_LOGGED);
-			}
-		} else {
-			Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-
-			return callback.doAction(conn);
-		}
+		});
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getConnection()
 	 */
 	@Override
@@ -452,7 +424,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getFetchDirection()
 	 */
 	@Override
@@ -462,7 +434,17 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Statement#setFetchDirection(int)
+	 */
+	@Override
+	public void setFetchDirection(int direction) throws SQLException {
+		throw new UnsupportedOperationException("setFetchDirection");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Statement#getFetchSize()
 	 */
 	@Override
@@ -472,13 +454,23 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Statement#setFetchSize(int)
+	 */
+	@Override
+	public void setFetchSize(int fetchSize) throws SQLException {
+		this.fetchSize = fetchSize;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Statement#getGeneratedKeys()
 	 */
 	@Override
 	public ResultSet getGeneratedKeys() throws SQLException {
 		if (this.openedStatement != null) {
-			return this.openedStatement.getGeneratedKeys();
+			return new GroupResultSet(this.context.clone(), this.filter, this.openedStatement.getGeneratedKeys());
 		} else {
 			throw new SQLException("No update operations executed before getGeneratedKeys");
 		}
@@ -486,7 +478,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getMaxFieldSize()
 	 */
 	@Override
@@ -496,7 +488,17 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Statement#setMaxFieldSize(int)
+	 */
+	@Override
+	public void setMaxFieldSize(int max) throws SQLException {
+		throw new UnsupportedOperationException("setMaxFieldSize");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Statement#getMaxRows()
 	 */
 	@Override
@@ -506,7 +508,17 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Statement#setMaxRows(int)
+	 */
+	@Override
+	public void setMaxRows(int maxRows) throws SQLException {
+		this.maxRows = maxRows;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Statement#getMoreResults()
 	 */
 	@Override
@@ -516,7 +528,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getMoreResults(int)
 	 */
 	@Override
@@ -526,7 +538,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getQueryTimeout()
 	 */
 	@Override
@@ -536,7 +548,24 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
+	 * @see java.sql.Statement#setQueryTimeout(int)
+	 */
+	@Override
+	public void setQueryTimeout(int queryTimeout) throws SQLException {
+		this.queryTimeout = queryTimeout;
+	}
+
+	private JdbcContext getRealJdbcMetaData(Connection conn) {
+		if (conn instanceof SingleConnection) {
+			return ((SingleConnection) conn).getJdbcMetaData();
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see java.sql.Statement#getResultSet()
 	 */
 	@Override
@@ -546,7 +575,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getResultSetConcurrency()
 	 */
 	@Override
@@ -554,9 +583,13 @@ public class GroupStatement implements Statement {
 		return this.resultSetConcurrency;
 	}
 
+	public void setResultSetConcurrency(int resultSetConcurrency) {
+		this.resultSetConcurrency = resultSetConcurrency;
+	}
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getResultSetHoldability()
 	 */
 	@Override
@@ -564,9 +597,13 @@ public class GroupStatement implements Statement {
 		return this.resultSetHoldability;
 	}
 
+	public void setResultSetHoldability(int resultSetHoldability) {
+		this.resultSetHoldability = resultSetHoldability;
+	}
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getResultSetType()
 	 */
 	@Override
@@ -574,9 +611,13 @@ public class GroupStatement implements Statement {
 		return this.resultSetType;
 	}
 
+	public void setResultSetType(int resultSetType) {
+		this.resultSetType = resultSetType;
+	}
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getUpdateCount()
 	 */
 	@Override
@@ -586,7 +627,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#getWarnings()
 	 */
 	@Override
@@ -598,9 +639,13 @@ public class GroupStatement implements Statement {
 		return null;
 	}
 
+	public boolean isCloseOnCompletion() throws SQLException {
+		throw new DalNotSupportException();
+	}
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#isClosed()
 	 */
 	@Override
@@ -608,13 +653,9 @@ public class GroupStatement implements Statement {
 		return closed;
 	}
 
-	public boolean isCloseOnCompletion() throws SQLException {
-		throw new DalNotSupportException();
-	}
-
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#isPoolable()
 	 */
 	@Override
@@ -624,77 +665,7 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
-	 */
-	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		return this.getClass().isAssignableFrom(iface);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Statement#setCursorName(java.lang.String)
-	 */
-	@Override
-	public void setCursorName(String name) throws SQLException {
-		throw new UnsupportedOperationException("setCursorName");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Statement#setEscapeProcessing(boolean)
-	 */
-	@Override
-	public void setEscapeProcessing(boolean enable) throws SQLException {
-		throw new UnsupportedOperationException("setEscapeProcessing");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Statement#setFetchDirection(int)
-	 */
-	@Override
-	public void setFetchDirection(int direction) throws SQLException {
-		throw new UnsupportedOperationException("setFetchDirection");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Statement#setFetchSize(int)
-	 */
-	@Override
-	public void setFetchSize(int fetchSize) throws SQLException {
-		this.fetchSize = fetchSize;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Statement#setMaxFieldSize(int)
-	 */
-	@Override
-	public void setMaxFieldSize(int max) throws SQLException {
-		throw new UnsupportedOperationException("setMaxFieldSize");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Statement#setMaxRows(int)
-	 */
-	@Override
-	public void setMaxRows(int maxRows) throws SQLException {
-		this.maxRows = maxRows;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Statement#setPoolable(boolean)
 	 */
 	@Override
@@ -704,12 +675,41 @@ public class GroupStatement implements Statement {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Statement#setQueryTimeout(int)
+	 *
+	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
 	 */
 	@Override
-	public void setQueryTimeout(int queryTimeout) throws SQLException {
-		this.queryTimeout = queryTimeout;
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+		return this.getClass().isAssignableFrom(iface);
+	}
+
+	protected String processSQL(final String sql) throws SQLException {
+		return filter.sql(this.context.clone(), this, new FilterFunctionWithSQLException<GroupStatement, String>() {
+			@Override
+			public String execute(GroupStatement source) {
+				return sql;
+			}
+		});
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see java.sql.Statement#setCursorName(java.lang.String)
+	 */
+	@Override
+	public void setCursorName(String name) throws SQLException {
+		throw new UnsupportedOperationException("setCursorName");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see java.sql.Statement#setEscapeProcessing(boolean)
+	 */
+	@Override
+	public void setEscapeProcessing(boolean enable) throws SQLException {
+		throw new UnsupportedOperationException("setEscapeProcessing");
 	}
 
 	void setRealStatement(Statement realStatement) {
@@ -723,21 +723,9 @@ public class GroupStatement implements Statement {
 		this.openedStatement = realStatement;
 	}
 
-	public void setResultSetConcurrency(int resultSetConcurrency) {
-		this.resultSetConcurrency = resultSetConcurrency;
-	}
-
-	public void setResultSetHoldability(int resultSetHoldability) {
-		this.resultSetHoldability = resultSetHoldability;
-	}
-
-	public void setResultSetType(int resultSetType) {
-		this.resultSetType = resultSetType;
-	}
-
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.sql.Wrapper#unwrap(java.lang.Class)
 	 */
 	@SuppressWarnings("unchecked")

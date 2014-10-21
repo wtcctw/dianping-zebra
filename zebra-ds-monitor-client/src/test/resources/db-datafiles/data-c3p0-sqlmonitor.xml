@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<dataset>
-	<person id="0" name="lucy0" age="23" gender="female" height="170"/>
-	<person id="1" name="lucy1" age="22" gender="male" height="171"/>
-	<person id="2" name="lucy2" age="21" gender="female" height="172"/>
-	<person id="3" name="lucy3" age="20" gender="male" height="173"/>
-	<person id="4" name="lucy4" age="19" gender="male" height="174"/>
-	<person id="5" name="lucy5" age="18" gender="female" height="175"/>
-</dataset>

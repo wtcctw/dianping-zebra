@@ -7,7 +7,12 @@ public class NavigationBar {
    public Page[] getVisiblePages() {
       return new Page[] {
    
-      AdminPage.INDEX
+      AdminPage.UPDATE,
+      AdminPage.SERVICE,
+      AdminPage.NOTIFY,
+      AdminPage.BLACKLIST,
+      AdminPage.CONFIG,
+      AdminPage.MERGE
 
 		};
    }

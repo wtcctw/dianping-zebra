@@ -10,10 +10,6 @@ public class JspViewer extends BaseJspViewer<AdminPage, Action, Context, Model> 
 
 		switch (action) {
 		case VIEW:
-		case MARKDOWN:
-		case MARKUP:
-		case NOTIFY_IP:
-		case INIT_DS:
 			return JspFile.VIEW.getPath();
 		}
 

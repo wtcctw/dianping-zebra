@@ -1,43 +1,43 @@
 package com.dianping.zebra.group.datasources;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.DataSourceRouter;
-import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.router.RouterContext;
+import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.router.WeightDataSourceRouter;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+
 public class LoadBalancedDataSource extends AbstractDataSource {
-
-	private int retryTimes;
-
-	private Map<String, DataSourceConfig> loadBalancedConfigMap;
-
-	private DataSourceRouter router;
-
-	private Map<String, InnerSingleDataSource> dataSources;
 
 	private SingleDataSourceManager dataSourceManager;
 
-	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap, int retryTimes) {
-		this.dataSources = new HashMap<String, InnerSingleDataSource>();
+	private Map<String, SingleDataSource> dataSources;
+
+	private Map<String, DataSourceConfig> loadBalancedConfigMap;
+
+	private int retryTimes;
+
+	private DataSourceRouter router;
+
+	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
+			JdbcContext metaData, JdbcFilter filter, int retryTimes) {
+		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.retryTimes = retryTimes;
+		this.filter = filter;
+		this.context = metaData;
 	}
 
 	public void close() throws SQLException {
-		for (InnerSingleDataSource ds : dataSources.values()) {
+		for (SingleDataSource ds : dataSources.values()) {
 			dataSourceManager.destoryDataSource(ds);
 		}
 	}
@@ -51,7 +51,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	public Connection getConnection(String username, String password) throws SQLException {
 		RouterContext context = new RouterContext();
 
-		for (InnerSingleDataSource dataSource : this.dataSources.values()) {
+		for (SingleDataSource dataSource : this.dataSources.values()) {
 			if (dataSource.isDown() || dataSource.isClosed()) {
 				context.addExcludeTarget(dataSource.getId());
 			}
@@ -96,13 +96,19 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	}
 
 	public void init() {
+		initFilter();
+
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
 
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			InnerSingleDataSource dataSource = dataSourceManager.createDataSource(config);
+			SingleDataSource dataSource = dataSourceManager.createDataSource(config, this.context.clone(), this.filter);
 			this.dataSources.put(config.getId(), dataSource);
 		}
 
 		this.router = new WeightDataSourceRouter(loadBalancedConfigMap);
+	}
+
+	private void initFilter() {
+		this.context.setDataSource(this);
 	}
 }

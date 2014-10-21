@@ -1,10 +1,13 @@
 package com.dianping.zebra.admin.service;
 
+import java.util.Map.Entry;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.zebra.admin.admin.service.ReportService;
+import com.dianping.zebra.admin.report.entity.Database;
 import com.dianping.zebra.admin.report.entity.Report;
 import com.dianping.zebra.web.dal.stat.Heartbeat;
 import com.dianping.zebra.web.dal.stat.HeartbeatDao;
@@ -45,8 +48,10 @@ public class ReportServiceTest extends ComponentTestCase {
 	
 	@Test
 	public void testGetReport(){
-		Report report = m_reportService.getReport();
+		Report report = m_reportService.getReport(false);
 		
-		System.out.println(report);
+		for(Entry<String,Database> entry : report.getDatabases().entrySet()){
+			System.out.println(entry.getKey() + " status : " + entry.getValue().getUpdateStatus());
+		}
 	}
 }

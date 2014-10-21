@@ -363,7 +363,7 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 			if (conn != null) {
 				try {
 					conn.close();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					// ignore it
 				}
 			}
@@ -401,7 +401,7 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 			if (conn != null) {
 				try {
 					conn.close();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					// ignore it
 				}
 			}

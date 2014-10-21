@@ -1,14 +1,7 @@
 package com.dianping.zebra.group.jdbc;
 
-import com.dianping.cat.Cat;
-import com.dianping.cat.message.Message;
-import com.dianping.cat.message.Transaction;
-import com.dianping.cat.status.StatusExtensionRegister;
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
-import com.dianping.zebra.group.config.SystemConfigManager;
-import com.dianping.zebra.group.config.SystemConfigManagerFactory;
+import com.dianping.zebra.group.config.*;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
@@ -16,8 +9,12 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.filter.FilterManagerFactory;
+import com.dianping.zebra.group.filter.JdbcContext;
+import com.dianping.zebra.group.filter.delegate.FilterAction;
+import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
+import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
-import com.dianping.zebra.group.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapper;
@@ -48,17 +45,21 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private DataSourceConfigManager dataSourceConfigManager;
 
+	private String filterStr;
+
 	private GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
 	private volatile boolean init = false;
 
 	private String jdbcRef;
 
+	private ConfigService customerConfigService;
+
 	private String jdbcUrlExtra;
 
-	private RouterType routerType = RouterType.ROUND_ROBIN;
-
 	private LoadBalancedDataSource readDataSource;
+
+	private RouterType routerType = RouterType.ROUND_ROBIN;
 
 	private SystemConfigManager systemConfigManager;
 
@@ -71,6 +72,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.jdbcRef = jdbcRef;
 	}
 
+	public void setConfigService(ConfigService configService) {
+		this.customerConfigService = configService;
+	}
+
 	protected GroupDataSourceConfig buildGroupConfig() {
 		GroupDataSourceConfig newGroupConfig = this.dataSourceConfigManager.getGroupDataSourceConfig();
 
@@ -81,8 +86,31 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		buildGroupConfigMergeProperties(newGroupConfig);
 		buildGroupConfigJdbcUrlExtra(newGroupConfig);
 		buildGroupConfigMergeC3P0Properties(newGroupConfig);
-
+		buildGroupConfigFilter(newGroupConfig);
 		return newGroupConfig;
+	}
+
+	protected void buildGroupConfigFilter(GroupDataSourceConfig newGroupConfig) {
+		String remoteConfig = newGroupConfig.getFilters();
+		String beanConfig = this.filterStr;
+		Set<String> result = new HashSet<String>();
+
+		if (!StringUtils.isBlank(remoteConfig)) {
+			String[] remoteFilters = remoteConfig.split(",");
+			result.addAll(Arrays.asList(remoteFilters));
+		}
+
+		if (!StringUtils.isBlank(beanConfig)) {
+			String[] beanFilters = beanConfig.split(",");
+			for (String beanFilter : beanFilters) {
+				if (beanFilter.startsWith("!") && beanFilter.length() > 1) {
+					result.remove(beanFilter.substring(1));
+				} else {
+					result.add(beanFilter);
+				}
+			}
+		}
+		newGroupConfig.setFilters(StringUtils.joinCollectionToString(result, ","));
 	}
 
 	protected void buildGroupConfigJdbcUrlExtra(GroupDataSourceConfig newGroupConfig) {
@@ -141,26 +169,33 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.close(this.readDataSource, this.writeDataSource);
 	}
 
-	private void close(LoadBalancedDataSource readDataSource, FailOverDataSource writeDataSource) throws SQLException {
-		List<SQLException> exps = new ArrayList<SQLException>();
+	private void close(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
+		this.filter
+			.closeGroupDataSource(this.context.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
+				@Override
+				public void execute(GroupDataSource source) throws SQLException {
 
-		try {
-			if (readDataSource != null) {
-				readDataSource.close();
-			}
-		} catch (SQLException e) {
-			exps.add(e);
-		}
+					List<SQLException> exps = new ArrayList<SQLException>();
 
-		try {
-			if (writeDataSource != null) {
-				writeDataSource.close();
-			}
-		} catch (SQLException e) {
-			exps.add(e);
-		}
+					try {
+						if (read != null) {
+							read.close();
+						}
+					} catch (SQLException e) {
+						exps.add(e);
+					}
 
-		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
+					try {
+						if (write != null) {
+							write.close();
+						}
+					} catch (SQLException e) {
+						exps.add(e);
+					}
+
+					JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
+				}
+			});
 	}
 
 	private Any findAny(List<Any> all, String name) {
@@ -185,7 +220,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy, this.routerType);
+		return filter.getGroupConnection(this.context.clone(), this,
+			new FilterFunctionWithSQLException<GroupDataSource, GroupConnection>() {
+				@Override
+				public GroupConnection execute(GroupDataSource source) throws SQLException {
+					return new GroupConnection(source.readDataSource, source.writeDataSource,
+						source.customizedReadWriteStrategy, source.routerType, source.context.clone(),
+						source.filter);
+				}
+			});
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -205,6 +248,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public String getJdbcUrlExtra() {
 		return jdbcUrlExtra;
+	}
+
+	public void setJdbcUrlExtra(String jdbcUrlExtra) {
+		this.jdbcUrlExtra = jdbcUrlExtra;
 	}
 
 	private Map<String, DataSourceConfig> getLoadBalancedConfig(Map<String, DataSourceConfig> configs) {
@@ -247,18 +294,25 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
+		this.dataSourceConfigManager = customerConfigService != null ?
+			DataSourceConfigManagerFactory.getConfigManager(customerConfigService, jdbcRef) :
+			DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+			Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
 
-		this.initDataSources();
-		this.loadCustomizedReadWriteStrategy();
+		this.initFilters();
 
-		StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(this));
+		this.filter.initGroupDataSource(this.context.clone(), this, new FilterAction<GroupDataSource>() {
+			@Override
+			public void execute(GroupDataSource source) {
+				source.initDataSources();
+				source.loadCustomizedReadWriteStrategy();
+			}
+		});
 
 		this.init = true;
 		logger.info(String.format("GroupDataSource(%s) successfully initialized.", jdbcRef));
@@ -267,9 +321,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-			      systemConfigManager.getSystemConfig().getRetryTimes());
+				this.context.clone(), this.filter, systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
-			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()));
+			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
+				this.context.clone(), this.filter);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -279,6 +334,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 			throw new DalException("fail to initialize group dataSource [" + jdbcRef + "]", e);
 		}
+	}
+
+	private void initFilters() {
+		this.context = new JdbcContext();
+		this.context.setDataSourceId(this.jdbcRef);
+		this.context.setDataSource(this);
+		this.context.setDataSourceProperties(this);
+		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
 	}
 
 	private void loadCustomizedReadWriteStrategy() {
@@ -300,22 +363,16 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void refresh(String propertyToChange) {
 		if (this.init) {
-			GroupDataSourceConfig newGroupConfig = buildGroupConfig();
+			final GroupDataSourceConfig newGroupConfig = buildGroupConfig();
 
 			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
-				Transaction t = Cat.newTransaction("DAL", "DataSource.Refresh-" + jdbcRef);
-
-				Cat.logEvent("DAL.Refresh.Property", propertyToChange);
-
-				try {
-					refreshIntenal(newGroupConfig);
-					t.setStatus(Message.SUCCESS);
-				} catch (Exception e) {
-					Cat.logError(e);
-					t.setStatus(e);
-				} finally {
-					t.complete();
-				}
+				filter.refreshGroupDataSource(this.context.clone(), propertyToChange, this,
+					new FilterAction<GroupDataSource>() {
+						@Override
+						public void execute(GroupDataSource source) {
+							refreshIntenal(newGroupConfig);
+						}
+					});
 			}
 		}
 	}
@@ -328,15 +385,16 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), systemConfigManager
-			            .getSystemConfig().getRetryTimes());
+				getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.context.clone(),
+				this.filter,
+				systemConfigManager.getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
-			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()));
+			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
+				this.context.clone(), this.filter);
 			newWriteDataSource.init(false);
 
 			preparedSwitch = true;
 		} catch (Exception e) {
-			Cat.logError("error when create new dataSources", e);
 			try {
 				close(newReadDataSource, newWriteDataSource);
 			} catch (Exception ignore) {
@@ -357,7 +415,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			try {
 				this.close(tmpReadDataSource, tmpWriteDataSource);
 			} catch (Exception e) {
-				Cat.logError("error when destroy old dataSources", e);
+				logger.error(e.getMessage(), e);
 			}
 
 			logger.info(String.format("refresh the dataSources(%s) successfully!", jdbcRef));
@@ -435,6 +493,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("factoryClassLocation", factoryClassLocation);
 	}
 
+	public void setFilter(String filter) {
+		this.filterStr = filter;
+	}
+
 	public synchronized void setForceIgnoreUnresolvedTransactions(boolean forceIgnoreUnresolvedTransactions) {
 		setProperty("forceIgnoreUnresolvedTransactions", String.valueOf(forceIgnoreUnresolvedTransactions));
 	}
@@ -449,10 +511,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public void setJdbcRef(String jdbcRef) {
 		this.jdbcRef = jdbcRef;
-	}
-
-	public void setJdbcUrlExtra(String jdbcUrlExtra) {
-		this.jdbcUrlExtra = jdbcUrlExtra;
 	}
 
 	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
@@ -585,6 +643,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
+			if (evt.getNewValue().equals(evt.getOldValue())) {
+				return;
+			}
+
 			if (evt.getPropertyName().endsWith(userKey)) {
 				atomicRefresh.setUser(evt.getNewValue().toString());
 				if (atomicRefresh.needToRefresh()) {

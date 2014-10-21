@@ -42,7 +42,8 @@ public class LionConfigService implements ConfigService {
 				@Override
 				public void onChange(String key, String value) {
 					if (key.startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
-					      || key.startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)
+						  || key.startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)
+						  || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)
 					      || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX)) {
 						PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
 						for (PropertyChangeListener listener : listeners) {

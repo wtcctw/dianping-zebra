@@ -1,17 +1,16 @@
 package com.dianping.zebra.admin.tools;
 
-import java.io.File;
-import java.io.InputStream;
-
-import org.junit.Test;
-import org.unidal.webres.helper.Files;
-
 import com.dianping.zebra.admin.query.entity.Hits;
 import com.dianping.zebra.admin.query.entity.Query;
 import com.dianping.zebra.admin.query.transform.DefaultJsonParser;
 import com.dianping.zebra.admin.sqlMap.entity.Insert;
 import com.dianping.zebra.admin.sqlMap.entity.SqlMap;
 import com.dianping.zebra.group.util.SqlUtils;
+import org.junit.Test;
+import org.unidal.webres.helper.Files;
+
+import java.io.File;
+import java.io.InputStream;
 
 public class SqlAnalyzer {
 
@@ -41,7 +40,7 @@ public class SqlAnalyzer {
 						if (insert.getDynamicElements().size() > 1) {
 							try {
 								SqlUtils.getSqlType(insert.toString());
-							} catch (Throwable t) {
+							} catch (Exception t) {
 								// System.err.println(insert);
 							}
 							insertSb.append(insert);
@@ -51,7 +50,7 @@ public class SqlAnalyzer {
 					for (String update : parse.getUpdates()) {
 						try {
 							SqlUtils.getSqlType(update);
-						} catch (Throwable t) {
+						} catch (Exception t) {
 							// System.err.println(update);
 						}
 						updateSb.append(update);
@@ -60,7 +59,7 @@ public class SqlAnalyzer {
 					for (String delete : parse.getDeletes()) {
 						try {
 							SqlUtils.getSqlType(delete.trim());
-						} catch (Throwable t) {
+						} catch (Exception t) {
 							// System.err.println(delete);
 						}
 						deleteSb.append(delete);
@@ -71,12 +70,12 @@ public class SqlAnalyzer {
 							if (!select.trim().toLowerCase().startsWith("order by")) {
 								SqlUtils.getSqlType(select.trim());
 							}
-						} catch (Throwable t) {
+						} catch (Exception t) {
 							System.err.println(select.trim());
 						}
 						selectSb.append(select);
 					}
-				} catch (Throwable e) {
+				} catch (Exception e) {
 				}
 			}
 		}
