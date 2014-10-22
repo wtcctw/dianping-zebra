@@ -1,6 +1,33 @@
 <plexus>
 	<components>
 		<component>
+			<role>com.dianping.zebra.admin.datasource.TransactionManagerWrapper</role>
+			<implementation>com.dianping.zebra.admin.datasource.TransactionManagerWrapper</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.transaction.TransactionManager</role>
+				</requirement>
+				<requirement>
+					<role>org.unidal.dal.jdbc.entity.EntityInfoManager</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.service.MergeConfigService</role>
+			<implementation>com.dianping.zebra.admin.admin.service.MergeConfigServiceImpl</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.web.dal.lion.ConfigDao</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.web.dal.lion.ConfigInstanceDao</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.datasource.TransactionManagerWrapper</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
 			<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
 			<implementation>com.dianping.zebra.admin.admin.service.LionHttpServiceImpl</implementation>
 			<requirements>
