@@ -40,5 +40,27 @@ public interface MergeConfigService {
 		public int getValue() {
 			return env;
 		}
+		
+		public static Env getEnv(String env){
+			if(env == null || env.length() == 0){
+				return null;
+			}
+			
+			if(env.equals("dev")){
+				return DEV;
+			}else if(env.equals("alpha")){
+				return ALPHA;
+			}else if(env.equals("qa")){
+				return BETA;
+			}else if(env.equals("prelease")){
+				return PRELEASE;
+			}else if(env.equals("product")){
+				return PRODUCT;
+			}else if(env.endsWith("product-hm")){
+				return Env.PRODUCT_HM;
+			}else{
+				return null;
+			}
+		}
 	}
 }

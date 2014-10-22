@@ -1,9 +1,14 @@
-zebraWeb.controller('update', function ($scope, $http, configService) {
+zebraWeb.controller('merge',function($scope,$http){
+	$http.get('/a/merge').success(function (data,status,headers,config){
+		
+	});
+});
+
+zebraWeb.controller('update', function ($scope, $http) {
     $http.get('/a/update/view').success(function (data, status, headers, config) {
         $scope.predicate = 'm_name';
         $scope.report = data;
     });
-    $scope.test = configService.openTestModal;
 });
 
 zebraWeb.controller('black', function ($scope, $http) {
@@ -146,13 +151,17 @@ zebraWeb.controller('header', function ($rootScope, $scope) {
         env: 'dev'
     }
 });
-zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
+zebraWeb.controller('config', function ($scope, $stateParams, $http,configService,mergeService) {
     var convertKey = function (key) {
         return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
     }
 
     $scope.edit = function (key) {
         configService.openEditModal(convertKey(key), $scope.load);
+    };
+    
+    $scope.merge = function (key) {
+    	mergeService.openEditModal(convertKey(key), $scope.load);
     };
 
     $scope.test = function (key) {
@@ -177,5 +186,73 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
                 alert('添加成功！')
             });
         }
+    }
+});
+
+zebraWeb.controller('merge-edit', function ($scope, $http, $log, name, close) {
+    $scope.name = name;
+    $scope.load = function () {
+        if ($scope.config && $scope.config.env) {
+            $http.get('/a/config?op=viewDs&key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+                $scope.data = data;
+            });
+        }
+    }
+
+    $scope.$watch('config.env', $scope.load);
+    $scope.load();
+
+    $scope.close = function () {
+        close();
+    }
+    
+    $scope.onChange = function(selectedConfig) {
+    	if(selectedConfig.isMerged){
+    		$scope.data.configs.forEach(function (config) {
+        		if(config.id != selectedConfig.id && config.isMerged){
+        			config.isMerged = !config.isMerged;
+        		}
+        	});
+    		
+    		$scope.data.configs.forEach(function (config) {
+    			config.isDelete = false;
+    			if(config.selected){
+    				if(!config.isMerged){
+    					config.isDelete = true;
+    				}
+    			}
+    		});
+    	}else{
+    		$scope.data.configs.forEach(function (config) {
+    			config.isDelete = false;
+    		});
+    	}
+	};
+    
+    $scope.merge = function () {
+    	var from = "";
+    	var to = "";
+    	if ($scope.config && $scope.config.env){
+    		var first = true;
+    		$scope.data.configs.forEach(function (config) {
+    			if(config.selected){
+    				if(first){
+    					from += config.id;
+    					first = false;
+    				}else{
+    					from += ",";
+    					from += config.id;
+    				}
+    				
+    				if(config.isMerged){
+    					to = config.id;
+    				}
+    			}
+    		});
+    		
+			 $http.get('/a/merge?op=merge&from=' + from + '&to=' + to + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+	             $scope.data = data;
+	         });
+    	}
     }
 });

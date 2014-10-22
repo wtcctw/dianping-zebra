@@ -36,3 +36,29 @@ zebraWeb.service('configService', function ($modal) {
         });
     };
 });
+
+zebraWeb.service('mergeService',function ($modal){
+	this.openEditModal = function (name, onClose) {
+        var modal = $modal.open({
+            templateUrl: 'app/template/merge-edit.html',
+            controller: 'merge-edit',
+            size: 'lg',
+            backdrop: false,
+            resolve: {
+                name: function () {
+                    return name;
+                },
+                close: function () {
+                    return function () {
+                        if (modal) {
+                            modal.close();
+                        }
+                        if (onClose) {
+                            onClose();
+                        }
+                    };
+                }
+            }
+        });
+    };
+});

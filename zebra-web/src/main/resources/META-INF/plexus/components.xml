@@ -280,6 +280,11 @@
 		<component>
 			<role>com.dianping.zebra.admin.admin.page.merge.Handler</role>
 			<implementation>com.dianping.zebra.admin.admin.page.merge.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.MergeConfigService</role>
+				</requirement>
+			</requirements>
 		</component>
 		<component>
 			<role>com.dianping.zebra.admin.admin.page.config.Handler</role>

@@ -59,6 +59,12 @@ public interface DalConfigService {
 
 	public static class DsConfigModel {
 		private String id;
+		
+		private boolean selected = false;
+		
+		private boolean isMerged = false;
+		
+		private boolean isDelete = false;
 
 		private DefaultDataSourceConfigManager.ReadOrWriteRole role;
 
@@ -79,7 +85,31 @@ public interface DalConfigService {
 		public void setId(String id) {
 			this.id = id;
 		}
+		
+		public boolean getSelected(){
+			return selected;
+		}
+		
+		public void setSelected(boolean selected){
+			this.selected = selected;
+		}
 
+		public boolean getIsMerged(){
+			return isMerged;
+		}
+		
+		public void setIsMerged(boolean isMerged){
+			this.isMerged = isMerged;
+		}
+		
+		public boolean getIsDelete(){
+			return isDelete;
+		}
+		
+		public void setIsDelete(boolean isDelete){
+			this.isDelete = isDelete;
+		}
+		
 		public List<ConfigProperty> getProperties() {
 			return properties;
 		}

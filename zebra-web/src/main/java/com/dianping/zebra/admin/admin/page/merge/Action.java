@@ -1,7 +1,9 @@
 package com.dianping.zebra.admin.admin.page.merge;
 
 public enum Action implements org.unidal.web.mvc.Action {
-	VIEW("view");
+	VIEW("view"),
+	
+	MERGE("merge");
 
 	private String m_name;
 

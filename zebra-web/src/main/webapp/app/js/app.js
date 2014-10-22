@@ -1,4 +1,4 @@
-var zebraWeb = angular.module('ZebraWeb', ['ui.bootstrap', 'ui.router']);
+var zebraWeb = angular.module('ZebraWeb', ['ui.bootstrap', 'ui.router', 'ui.checkbox']);
 
 zebraWeb.filter('objectCount', function () {
     return function (input) {

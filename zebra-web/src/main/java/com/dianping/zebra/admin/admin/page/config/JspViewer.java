@@ -11,6 +11,16 @@ public class JspViewer extends BaseJspViewer<AdminPage, Action, Context, Model> 
 		switch (action) {
 		case VIEW:
 			return JspFile.VIEW.getPath();
+		case CREATE:
+			break;
+		case TEST:
+			break;
+		case UPDATEDS:
+			break;
+		case VIEWDS:
+			break;
+		default:
+			break;
 		}
 
 		throw new RuntimeException("Unknown action: " + action);
