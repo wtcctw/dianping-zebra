@@ -1,9 +1,3 @@
-zebraWeb.controller('merge',function($scope,$http){
-	$http.get('/a/merge').success(function (data,status,headers,config){
-		
-	});
-});
-
 zebraWeb.controller('update', function ($scope, $http) {
     $http.get('/a/update/view').success(function (data, status, headers, config) {
         $scope.predicate = 'm_name';
@@ -151,7 +145,7 @@ zebraWeb.controller('header', function ($rootScope, $scope) {
         env: 'dev'
     }
 });
-zebraWeb.controller('config', function ($scope, $stateParams, $http,configService,mergeService) {
+zebraWeb.controller('config', function ($scope, $stateParams, $http,configService) {
     var convertKey = function (key) {
         return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
     }
@@ -161,7 +155,7 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http,configServic
     };
     
     $scope.merge = function (key) {
-    	mergeService.openEditModal(convertKey(key), $scope.load);
+    	configService.openMergeModal(convertKey(key), $scope.load);
     };
 
     $scope.test = function (key) {
@@ -251,8 +245,8 @@ zebraWeb.controller('merge-edit', function ($scope, $http, $log, name, close) {
     		});
     		
 			 $http.get('/a/merge?op=merge&from=' + from + '&to=' + to + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
-	             $scope.data = data;
-	         });
+				 close();
+			 });
     	}
     }
 });

@@ -35,10 +35,8 @@ zebraWeb.service('configService', function ($modal) {
             }
         });
     };
-});
-
-zebraWeb.service('mergeService',function ($modal){
-	this.openEditModal = function (name, onClose) {
+    
+    this.openMergeModal = function (name, onClose) {
         var modal = $modal.open({
             templateUrl: 'app/template/merge-edit.html',
             controller: 'merge-edit',

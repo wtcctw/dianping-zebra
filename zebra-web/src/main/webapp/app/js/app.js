@@ -79,9 +79,6 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/black',
         controller: 'black',
         templateUrl: 'app/template/black.html'
-    }).state('merge', {
-        url: '/merge',
-        templateUrl: 'app/template/merge.html'
     }).state('update', {
         url: '/update',
         templateUrl: 'app/template/update.html',
