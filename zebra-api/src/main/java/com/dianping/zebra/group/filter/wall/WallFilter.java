@@ -10,7 +10,6 @@ import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.spring.SpringBeanHelper;
 import com.dianping.zebra.group.util.StringUtils;
-import jodd.cache.LRUCache;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -33,8 +32,6 @@ public class WallFilter extends DefaultJdbcFilter {
 		  .compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH + "})(\\*\\/).*");
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
-
-	private static final LRUCache<String, String> sqlIdCache = new LRUCache<String, String>(1024, 60 * 60 * 1000);
 
 	protected volatile static Set<String> blackList = new HashSet<String>();
 
@@ -119,17 +116,7 @@ public class WallFilter extends DefaultJdbcFilter {
 			token = String.format("/*%s*/%s", metaData.getRealJdbcContext().getDataSourceId(), token);
 		}
 
-		String sqlId = sqlIdCache.get(token);
-
-		if (sqlId != null) {
-			return sqlId;
-		}
-
-		sqlId = StringUtils.sha1(token).substring(0, MAX_ID_LENGTH);
-
-		sqlIdCache.put(token, sqlId);
-
-		return sqlId;
+		return StringUtils.sha1(token).substring(0, MAX_ID_LENGTH);
 	}
 
 	protected String getIdFromSQL(String sql) {
