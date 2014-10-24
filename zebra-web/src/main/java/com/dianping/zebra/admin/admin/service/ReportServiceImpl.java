@@ -69,19 +69,22 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public void createOrUpdate(Heartbeat heartbeat) {
 		try {
-			updateAppNameIfNeeded(heartbeat);
+			if (heartbeat.getAppName().equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME) && heartbeat.getIp() != null) {
+				String name = m_cmdbService.getAppName(heartbeat.getIp());
+
+				if (!name.equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME)) {
+					heartbeat.setAppName(name);
+				}
+			}
 
 			Heartbeat h = m_heartbeatDao.exists(heartbeat.getAppName(), heartbeat.getIp(),
 			      heartbeat.getDatasourceBeanName(), HeartbeatEntity.READSET_FULL);
-
 			heartbeat.setId(h.getId());
-
 			m_heartbeatDao.updateByPK(heartbeat, HeartbeatEntity.UPDATESET_FULL);
 		} catch (DalException e) {
 			try {
 				m_heartbeatDao.insert(heartbeat);
-			} catch (DalException e1) {
-				Cat.logError(e1);
+			} catch (DalException ignore) {
 			}
 		}
 	}
@@ -94,7 +97,16 @@ public class ReportServiceImpl implements ReportService {
 			List<Heartbeat> all = m_heartbeatDao.findByAppName(appName, HeartbeatEntity.READSET_FULL);
 
 			for (Heartbeat hb : all) {
-				updateAppNameIfNeeded(hb);
+				if (hb.getAppName().equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME) && hb.getIp() != null) {
+					String name = m_cmdbService.getAppName(hb.getIp());
+
+					if (!name.equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME)) {
+						hb.setAppName(name);
+
+						m_heartbeatDao.updateByPK(hb, HeartbeatEntity.UPDATESET_FULL);
+					}
+				}
+
 				buildApp(app, hb);
 			}
 		} catch (DalException e) {
@@ -116,7 +128,7 @@ public class ReportServiceImpl implements ReportService {
 		if (isProduct) {
 			new ConnectionInfoVisitor().visitDatabase(database2);
 		}
-		
+
 		new StatisticsVisitor().visitDatabase(database2);
 
 		return database2;
@@ -156,14 +168,6 @@ public class ReportServiceImpl implements ReportService {
 		}
 
 		return report;
-	}
-
-	private void updateAppNameIfNeeded(Heartbeat hb) throws DalException {
-		if (hb.getAppName().equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME) && hb.getIp() != null) {
-			hb.setAppName(m_cmdbService.getAppName(hb.getIp()));
-
-			m_heartbeatDao.updateByPK(hb, HeartbeatEntity.UPDATESET_FULL);
-		}
 	}
 
 	public class ConnectionInfoVisitor extends BaseVisitor {
