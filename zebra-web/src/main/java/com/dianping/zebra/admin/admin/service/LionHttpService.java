@@ -2,9 +2,14 @@ package com.dianping.zebra.admin.admin.service;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 
 public interface LionHttpService {
-	String[] getAllEnv();
+	Set<String> getAllEnv();
+
+	boolean isProduct();
+
+	boolean isDev();
 
 	boolean createKey(String project, String key) throws IOException;
 

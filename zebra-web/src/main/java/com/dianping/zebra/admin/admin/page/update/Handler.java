@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dianping.zebra.admin.admin.service.LionHttpService;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
@@ -21,6 +22,9 @@ public class Handler implements PageHandler<Context> {
 	@Inject
 	private ReportService m_reportService;
 
+	@Inject
+	private LionHttpService m_lionHttpService;
+
 	@Override
 	@PayloadMeta(Payload.class)
 	@InboundActionMeta(name = "update")
@@ -33,7 +37,7 @@ public class Handler implements PageHandler<Context> {
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
 		Payload payload = ctx.getPayload();
 		Object responseObject = null;
-		boolean isProduct = EnvZooKeeperConfig.getEnv().equals("product");
+		boolean isProduct = m_lionHttpService.isProduct();
 
 		switch (payload.getAction()) {
 		case VIEW:
