@@ -249,11 +249,28 @@ public class ReportServiceImpl implements ReportService {
 		@Override
 		public void visitApp(App app) {
 			m_app = app;
+			boolean hasNotIntegratedWithDal = false;
+
 			for (Machine machine : app.getMachines().values()) {
 				if (machine.getIntergrateWithDal()) {
 					visitMachine(machine);
 				} else {
+
+					hasNotIntegratedWithDal = true;
 					app.setUpdateStatus(2);
+				}
+			}
+
+			if (hasNotIntegratedWithDal) {
+				app.setUpdateStatus(2);
+			} else {
+				if (app.getReplacedDpdlDataSource() == 0 && app.getGroupDataSource() == 0) {
+					app.setUpdateStatus(-1);
+				} else if ((app.getReplacedSingleDataSource() + app.getReplacedDpdlDataSource() + app.getGroupDataSource()) == app
+				      .getTotalDataSource()) {
+					app.setUpdateStatus(0);
+				} else {
+					app.setUpdateStatus(1);
 				}
 			}
 		}
