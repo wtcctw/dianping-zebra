@@ -1,13 +1,40 @@
 package com.dianping.zebra.admin.build;
 
-import com.dianping.zebra.admin.admin.service.*;
-import com.dianping.zebra.web.dal.stat.HeartbeatDao;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager;
+import org.unidal.dal.jdbc.entity.EntityInfoManager;
+import org.unidal.dal.jdbc.transaction.TransactionManager;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.dianping.zebra.admin.admin.service.BlackListService;
+import com.dianping.zebra.admin.admin.service.BlackListServiceImpl;
+import com.dianping.zebra.admin.admin.service.CmdbService;
+import com.dianping.zebra.admin.admin.service.CmdbServiceImpl;
+import com.dianping.zebra.admin.admin.service.ConnectionService;
+import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
+import com.dianping.zebra.admin.admin.service.DalConfigService;
+import com.dianping.zebra.admin.admin.service.DalConfigServiceImpl;
+import com.dianping.zebra.admin.admin.service.DalService;
+import com.dianping.zebra.admin.admin.service.DalServiceImpl;
+import com.dianping.zebra.admin.admin.service.DatabaseRealtimeService;
+import com.dianping.zebra.admin.admin.service.DatabaseRealtimeServiceImpl;
+import com.dianping.zebra.admin.admin.service.HttpService;
+import com.dianping.zebra.admin.admin.service.HttpServiceImpl;
+import com.dianping.zebra.admin.admin.service.LionHttpService;
+import com.dianping.zebra.admin.admin.service.LionHttpServiceImpl;
+import com.dianping.zebra.admin.admin.service.LocalLogService;
+import com.dianping.zebra.admin.admin.service.LogService;
+import com.dianping.zebra.admin.admin.service.MergeConfigService;
+import com.dianping.zebra.admin.admin.service.MergeConfigServiceImpl;
+import com.dianping.zebra.admin.admin.service.ReportService;
+import com.dianping.zebra.admin.admin.service.ReportServiceImpl;
+import com.dianping.zebra.admin.datasource.TransactionManagerWrapper;
+import com.dianping.zebra.web.dal.lion.ConfigDao;
+import com.dianping.zebra.web.dal.lion.ConfigInstanceDao;
+import com.dianping.zebra.web.dal.stat.HeartbeatDao;
 
 public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	public static void main(String[] args) {
@@ -18,6 +45,9 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
+		all.add(C(TransactionManagerWrapper.class).req(TransactionManager.class, EntityInfoManager.class));
+		all.add(C(MergeConfigService.class, MergeConfigServiceImpl.class).req(ConfigDao.class, ConfigInstanceDao.class,
+		      TransactionManagerWrapper.class));
 		all.add(C(LionHttpService.class, LionHttpServiceImpl.class).req(HttpService.class));
 		all.add(C(LogService.class, LocalLogService.class));
 		all.add(C(CmdbService.class, CmdbServiceImpl.class).req(HttpService.class));

@@ -135,9 +135,7 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Ini
 						}
 					}
 
-					System.out.println("database begin : " + entry.getKey());
 					result.put(entry.getKey(), databaseMaping);
-					System.out.println("database end : " + entry.getKey());
 				}
 
 				m_allConnectedIps = result;

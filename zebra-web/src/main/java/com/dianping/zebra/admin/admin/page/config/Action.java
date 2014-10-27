@@ -7,7 +7,9 @@ public enum Action implements org.unidal.web.mvc.Action {
 	
 	VIEWDS("viewDs"), 
 	
-	UPDATEDS("updateDs"), 
+	UPDATEDS("updateDs"),
+
+	ENV("env"),
 	
 	CREATE("create");
 

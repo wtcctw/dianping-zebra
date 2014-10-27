@@ -20,10 +20,10 @@
                         <td>
                             <form class="form-inline" role="form">
                                 <div class="btn-group">
-                                    <label ng-class="{'btn-success':config.role.isRead,'btn-danger':!config.role.isRead}"
-                                           class="btn btn-sm" ng-model="config.role.isRead" btn-checkbox>Read</label>
                                     <label ng-class="{'btn-success':config.role.isWrite,'btn-danger':!config.role.isWrite}"
                                            class="btn btn-sm" ng-model="config.role.isWrite" btn-checkbox>Write</label>
+                                    <label ng-class="{'btn-success':config.role.isRead,'btn-danger':!config.role.isRead}"
+                                           class="btn btn-sm" ng-model="config.role.isRead" btn-checkbox>Read</label>
                                 </div>
                                 <input ng- placeholder="weight" class="form-control input-sm"
                                        ng-model="config.role.weight"

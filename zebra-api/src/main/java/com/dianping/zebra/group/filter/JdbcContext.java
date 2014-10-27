@@ -9,7 +9,6 @@ import com.foundationdb.sql.parser.QueryTreeNode;
 import com.foundationdb.sql.parser.SQLParser;
 import com.foundationdb.sql.parser.StatementNode;
 import com.foundationdb.sql.unparser.NodeToString;
-import jodd.cache.LRUCache;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -23,12 +22,6 @@ import java.util.Map;
  */
 
 public class JdbcContext implements Cloneable {
-
-	private static final LRUCache<String, StatementNode> nodeCache = new LRUCache<String, StatementNode>(1024,
-		  60 * 60 * 1000);
-
-	private static final LRUCache<String, String> mergedSqlCache = new LRUCache<String, String>(1024,
-		  60 * 60 * 1000);
 
 	private Connection connection;
 
@@ -224,71 +217,53 @@ public class JdbcContext implements Cloneable {
 			return null;
 		}
 
-		StatementNode result = nodeCache.get(sql);
-
-		if (result != null) {
-			return result;
-		}
-
 		try {
-			result = new SQLParser().parseStatement(sql);
-			nodeCache.put(sql, result);
+			return new SQLParser().parseStatement(sql);
 		} catch (StandardException e) {
 			final String errorMsg = e.getMessage();
-			result = new StatementNode() {
-				@Override public String statementToString() {
+			return new StatementNode() {
+				@Override
+				public String statementToString() {
 					return errorMsg;
 				}
 			};
-			result.setUserData(sql);
-			nodeCache.put(sql, result);
 		}
-
-		return result;
 	}
 
 	private String mergeSql(String sql, StatementNode result) {
-		String mergedSql = mergedSqlCache.get(sql);
-
 		try {
-			if (mergedSql == null) {
-				SQLParser parser = new SQLParser();
-				QueryTreeNode deepCopy = parser.getNodeFactory().copyNode(result, parser);
-				MergeSqlVisitor visitor = new MergeSqlVisitor();
-				visitor.visit(deepCopy);
-				NodeToString merged = new NodeToString();
-				mergedSql = merged.toString(deepCopy);
-				mergedSqlCache.put(sql, mergedSql);
-			}
+			SQLParser parser = new SQLParser();
+			QueryTreeNode deepCopy = parser.getNodeFactory().copyNode(result, parser);
+			MergeSqlVisitor visitor = new MergeSqlVisitor();
+			visitor.visit(deepCopy);
+			NodeToString merged = new NodeToString();
+			return merged.toString(deepCopy);
 		} catch (StandardException e) {
-			mergedSql = sql;
-			mergedSqlCache.put(sql, mergedSql);
+			return sql;
 		}
-
-		return mergedSql;
 	}
 
-	private List<StatementNode> parseSqls(List<String> sqls) {
-		List<StatementNode> result = new ArrayList<StatementNode>();
-		for (String sql : sqls) {
-			result.add(parseSql(sql));
-		}
-		return result;
-	}
+//	private List<StatementNode> parseSqls(List<String> sqls) {
+//		List<StatementNode> result = new ArrayList<StatementNode>();
+//		for (String sql : sqls) {
+//			result.add(parseSql(sql));
+//		}
+//		return result;
+//	}
 
 	public void setDataSourceProperties(DataSource dataSource) {
 		if (dataSource instanceof GroupDataSourceMBean) {
 			GroupDataSourceMBean ds = (GroupDataSourceMBean) dataSource;
 			properties.put("AllDataSource",
-				  StringUtils.joinCollectionToString(ds.getConfig().getDataSourceConfigs().keySet(), ","));
+			      StringUtils.joinCollectionToString(ds.getConfig().getDataSourceConfigs().keySet(), ","));
 			properties.put("filters", ds.getConfig().getFilters());
 		} else if (dataSource instanceof SingleDataSourceMBean) {
 			SingleDataSourceMBean ds = (SingleDataSourceMBean) dataSource;
 			properties.put("JdbcUrl", ds.getConfig().getJdbcUrl());
 			properties.put("Username", ds.getConfig().getUsername());
 			properties.put("Password",
-				  ds.getConfig().getPassword() != null ? StringUtils.repeat("*", ds.getConfig().getPassword().length())
-						: null);
+			      ds.getConfig().getPassword() != null ? StringUtils.repeat("*", ds.getConfig().getPassword().length())
+			            : null);
 			properties.put("DriverClass", ds.getConfig().getDriverClass());
 			properties.put("CanRead", ds.getConfig().isCanRead());
 			properties.put("CanWrite", ds.getConfig().isCanWrite());
