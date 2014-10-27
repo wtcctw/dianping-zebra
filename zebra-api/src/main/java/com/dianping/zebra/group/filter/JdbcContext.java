@@ -222,7 +222,8 @@ public class JdbcContext implements Cloneable {
 		} catch (StandardException e) {
 			final String errorMsg = e.getMessage();
 			return new StatementNode() {
-				@Override public String statementToString() {
+				@Override
+				public String statementToString() {
 					return errorMsg;
 				}
 			};
@@ -242,27 +243,27 @@ public class JdbcContext implements Cloneable {
 		}
 	}
 
-	private List<StatementNode> parseSqls(List<String> sqls) {
-		List<StatementNode> result = new ArrayList<StatementNode>();
-		for (String sql : sqls) {
-			result.add(parseSql(sql));
-		}
-		return result;
-	}
+//	private List<StatementNode> parseSqls(List<String> sqls) {
+//		List<StatementNode> result = new ArrayList<StatementNode>();
+//		for (String sql : sqls) {
+//			result.add(parseSql(sql));
+//		}
+//		return result;
+//	}
 
 	public void setDataSourceProperties(DataSource dataSource) {
 		if (dataSource instanceof GroupDataSourceMBean) {
 			GroupDataSourceMBean ds = (GroupDataSourceMBean) dataSource;
 			properties.put("AllDataSource",
-				  StringUtils.joinCollectionToString(ds.getConfig().getDataSourceConfigs().keySet(), ","));
+			      StringUtils.joinCollectionToString(ds.getConfig().getDataSourceConfigs().keySet(), ","));
 			properties.put("filters", ds.getConfig().getFilters());
 		} else if (dataSource instanceof SingleDataSourceMBean) {
 			SingleDataSourceMBean ds = (SingleDataSourceMBean) dataSource;
 			properties.put("JdbcUrl", ds.getConfig().getJdbcUrl());
 			properties.put("Username", ds.getConfig().getUsername());
 			properties.put("Password",
-				  ds.getConfig().getPassword() != null ? StringUtils.repeat("*", ds.getConfig().getPassword().length())
-						: null);
+			      ds.getConfig().getPassword() != null ? StringUtils.repeat("*", ds.getConfig().getPassword().length())
+			            : null);
 			properties.put("DriverClass", ds.getConfig().getDriverClass());
 			properties.put("CanRead", ds.getConfig().isCanRead());
 			properties.put("CanWrite", ds.getConfig().isCanWrite());
