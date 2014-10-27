@@ -1,23 +1,18 @@
 package com.dianping.zebra.admin.admin.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.Cat;
-import com.dianping.zebra.admin.report.entity.App;
-import com.dianping.zebra.admin.report.entity.Database;
-import com.dianping.zebra.admin.report.entity.Datasource;
-import com.dianping.zebra.admin.report.entity.Machine;
-import com.dianping.zebra.admin.report.entity.Report;
+import com.dianping.zebra.admin.report.entity.*;
 import com.dianping.zebra.admin.report.transform.BaseVisitor;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.web.dal.stat.Heartbeat;
 import com.dianping.zebra.web.dal.stat.HeartbeatDao;
 import com.dianping.zebra.web.dal.stat.HeartbeatEntity;
+import org.unidal.dal.jdbc.DalException;
+import org.unidal.lookup.annotation.Inject;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * updateStatus:
@@ -33,9 +28,8 @@ import com.dianping.zebra.web.dal.stat.HeartbeatEntity;
  * <p>
  * 2 = 没有接入dal，所以没有被dal监控到
  * </p>
- * 
- * @author damonzhu
  *
+ * @author damonzhu
  */
 public class ReportServiceImpl implements ReportService {
 
@@ -78,7 +72,7 @@ public class ReportServiceImpl implements ReportService {
 			}
 
 			Heartbeat h = m_heartbeatDao.exists(heartbeat.getAppName(), heartbeat.getIp(),
-			      heartbeat.getDatasourceBeanName(), HeartbeatEntity.READSET_FULL);
+				  heartbeat.getDatasourceBeanName(), HeartbeatEntity.READSET_FULL);
 			heartbeat.setId(h.getId());
 			m_heartbeatDao.updateByPK(heartbeat, HeartbeatEntity.UPDATESET_FULL);
 		} catch (DalException e) {
@@ -264,10 +258,13 @@ public class ReportServiceImpl implements ReportService {
 			if (hasNotIntegratedWithDal) {
 				app.setUpdateStatus(2);
 			} else {
-				if (app.getReplacedDpdlDataSource() == 0 && app.getGroupDataSource() == 0) {
+				if (app.getGroupDataSource() == 0 && app.getReplacedSingleDataSource() == 0 &&
+					  app.getReplacedDpdlDataSource() == 0 &&
+					  (app.getC3p0DataSource() != 0 || app.getDpdlDataSource() != 0)) {
 					app.setUpdateStatus(-1);
-				} else if ((app.getReplacedSingleDataSource() + app.getReplacedDpdlDataSource() + app.getGroupDataSource()) == app
-				      .getTotalDataSource()) {
+				} else if (
+					  (app.getReplacedSingleDataSource() + app.getReplacedDpdlDataSource() + app.getGroupDataSource())
+							== app.getTotalDataSource()) {
 					app.setUpdateStatus(0);
 				} else {
 					app.setUpdateStatus(1);
@@ -299,10 +296,12 @@ public class ReportServiceImpl implements ReportService {
 			if (hasNotIntegratedWithDal) {
 				database.setUpdateStatus(2);
 			} else {
-				if (database.getReplacedDpdlDataSource() == 0 && database.getGroupDataSource() == 0) {
+				if (database.getGroupDataSource() == 0 && database.getReplacedSingleDataSource() == 0 &&
+					  database.getReplacedDpdlDataSource() == 0 &&
+					  (database.getC3p0DataSource() != 0 || database.getDpdlDataSource() != 0)) {
 					database.setUpdateStatus(-1);
 				} else if ((database.getReplacedSingleDataSource() + database.getReplacedDpdlDataSource() + database
-				      .getGroupDataSource()) == database.getTotalDataSource()) {
+					  .getGroupDataSource()) == database.getTotalDataSource()) {
 					database.setUpdateStatus(0);
 				} else {
 					database.setUpdateStatus(1);
@@ -358,10 +357,12 @@ public class ReportServiceImpl implements ReportService {
 			if (hasNotIntegratedWithDal) {
 				report.setUpdateStatus(2);
 			} else {
-				if (report.getReplacedDpdlDataSource() == 0 && report.getGroupDataSource() == 0) {
+				if (report.getGroupDataSource() == 0 && report.getReplacedSingleDataSource() == 0 &&
+					  report.getReplacedDpdlDataSource() == 0 &&
+					  (report.getC3p0DataSource() != 0 || report.getDpdlDataSource() != 0)) {
 					report.setUpdateStatus(-1);
 				} else if ((report.getReplacedSingleDataSource() + report.getReplacedDpdlDataSource() + report
-				      .getGroupDataSource()) == report.getTotalDataSource()) {
+					  .getGroupDataSource()) == report.getTotalDataSource()) {
 					report.setUpdateStatus(0);
 				} else {
 					report.setUpdateStatus(1);
