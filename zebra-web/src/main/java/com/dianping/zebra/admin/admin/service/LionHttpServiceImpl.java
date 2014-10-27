@@ -57,6 +57,20 @@ public class LionHttpServiceImpl implements LionHttpService {
 		return result;
 	}
 
+	@Override
+	public Set<String> getDevEnv() {
+		Set<String> result = new LinkedHashSet<String>();
+		result.addAll(DEV_ENV);
+		return result;
+	}
+
+	@Override
+	public Set<String> getProductEnv() {
+		Set<String> result = new LinkedHashSet<String>();
+		result.addAll(PRODUCT_ENV);
+		return result;
+	}
+
 	@Override public boolean isProduct() {
 		return PRODUCT_ENV.contains(EnvZooKeeperConfig.getEnv());
 	}

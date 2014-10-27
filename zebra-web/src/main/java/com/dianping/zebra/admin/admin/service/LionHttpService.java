@@ -7,6 +7,10 @@ import java.util.Set;
 public interface LionHttpService {
 	Set<String> getAllEnv();
 
+	Set<String> getProductEnv();
+
+	Set<String> getDevEnv();
+
 	boolean isProduct();
 
 	boolean isDev();

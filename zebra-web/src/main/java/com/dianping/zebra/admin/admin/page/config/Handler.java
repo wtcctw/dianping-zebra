@@ -67,7 +67,11 @@ public class Handler extends JsonHandler<Context> {
 				responseObject = connectionstatus;
 				break;
 			case ENV:
-				responseObject = m_lionHttpService.getAllEnv();
+				if (m_lionHttpService.isDev()) {
+					responseObject = m_lionHttpService.getDevEnv();
+				} else {
+					responseObject = m_lionHttpService.getAllEnv();
+				}
 				break;
 			case CREATE:
 				String project = payload.getProject();
