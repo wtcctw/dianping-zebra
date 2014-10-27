@@ -3,7 +3,6 @@ package com.dianping.zebra.admin.admin.service;
 import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.zebra.group.util.StringUtils;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -11,7 +10,7 @@ import org.unidal.lookup.annotation.Inject;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,16 +36,25 @@ public class LionHttpServiceImpl implements LionHttpService {
 	private HttpService httpService;
 
 	static {
-		PRODUCT_ENV = Sets.newHashSet("prelease", "product", "product-hm");
-		DEV_ENV = Sets.newHashSet("dev", "alpha", "qa", "prelease", "performance");
-		ALL_ENV = new HashSet<String>();
-		ALL_ENV.addAll(PRODUCT_ENV);
+		PRODUCT_ENV = new LinkedHashSet<String>();
+		PRODUCT_ENV.add("prelease");
+		PRODUCT_ENV.add("product");
+		PRODUCT_ENV.add("product-hm");
+		DEV_ENV = new LinkedHashSet<String>();
+		DEV_ENV.add("dev");
+		DEV_ENV.add("alpha");
+		DEV_ENV.add("qa");
+		DEV_ENV.add("performance");
+		ALL_ENV = new LinkedHashSet<String>();
 		ALL_ENV.addAll(DEV_ENV);
+		ALL_ENV.addAll(PRODUCT_ENV);
 	}
 
 	@Override
 	public Set<String> getAllEnv() {
-		return Sets.newHashSet(ALL_ENV);
+		Set<String> result = new LinkedHashSet<String>();
+		result.addAll(ALL_ENV);
+		return result;
 	}
 
 	@Override public boolean isProduct() {

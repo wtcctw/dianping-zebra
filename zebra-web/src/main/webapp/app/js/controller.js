@@ -139,13 +139,16 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
 });
 
 
-zebraWeb.controller('header', function ($rootScope, $scope) {
-    $rootScope.config = {
-        envs: [ "dev", "alpha", "qa", "prelease", "product", "performance", "product-hm" ],
-        env: 'dev'
-    }
+zebraWeb.controller('header', function ($rootScope, $scope, $http) {
+
+    $http.get('/a/config?op=env').success(function (data, status, headers, config) {
+        $rootScope.config = {
+            envs: data,
+            env: data[0]
+        }
+    });
 });
-zebraWeb.controller('config', function ($scope, $stateParams, $http,configService) {
+zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
     var convertKey = function (key) {
         return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
     }
@@ -153,9 +156,9 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http,configServic
     $scope.edit = function (key) {
         configService.openEditModal(convertKey(key), $scope.load);
     };
-    
+
     $scope.merge = function (key) {
-    	configService.openMergeModal(convertKey(key), $scope.load);
+        configService.openMergeModal(convertKey(key), $scope.load);
     };
 
     $scope.test = function (key) {
@@ -199,54 +202,54 @@ zebraWeb.controller('merge-edit', function ($scope, $http, $log, name, close) {
     $scope.close = function () {
         close();
     }
-    
-    $scope.onChange = function(selectedConfig) {
-    	if(selectedConfig.isMerged){
-    		$scope.data.configs.forEach(function (config) {
-        		if(config.id != selectedConfig.id && config.isMerged){
-        			config.isMerged = !config.isMerged;
-        		}
-        	});
-    		
-    		$scope.data.configs.forEach(function (config) {
-    			config.isDelete = false;
-    			if(config.selected){
-    				if(!config.isMerged){
-    					config.isDelete = true;
-    				}
-    			}
-    		});
-    	}else{
-    		$scope.data.configs.forEach(function (config) {
-    			config.isDelete = false;
-    		});
-    	}
-	};
-    
+
+    $scope.onChange = function (selectedConfig) {
+        if (selectedConfig.isMerged) {
+            $scope.data.configs.forEach(function (config) {
+                if (config.id != selectedConfig.id && config.isMerged) {
+                    config.isMerged = !config.isMerged;
+                }
+            });
+
+            $scope.data.configs.forEach(function (config) {
+                config.isDelete = false;
+                if (config.selected) {
+                    if (!config.isMerged) {
+                        config.isDelete = true;
+                    }
+                }
+            });
+        } else {
+            $scope.data.configs.forEach(function (config) {
+                config.isDelete = false;
+            });
+        }
+    };
+
     $scope.merge = function () {
-    	var from = "";
-    	var to = "";
-    	if ($scope.config && $scope.config.env){
-    		var first = true;
-    		$scope.data.configs.forEach(function (config) {
-    			if(config.selected){
-    				if(first){
-    					from += config.id;
-    					first = false;
-    				}else{
-    					from += ",";
-    					from += config.id;
-    				}
-    				
-    				if(config.isMerged){
-    					to = config.id;
-    				}
-    			}
-    		});
-    		
-			 $http.get('/a/merge?op=merge&from=' + from + '&to=' + to + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
-				 close();
-			 });
-    	}
+        var from = "";
+        var to = "";
+        if ($scope.config && $scope.config.env) {
+            var first = true;
+            $scope.data.configs.forEach(function (config) {
+                if (config.selected) {
+                    if (first) {
+                        from += config.id;
+                        first = false;
+                    } else {
+                        from += ",";
+                        from += config.id;
+                    }
+
+                    if (config.isMerged) {
+                        to = config.id;
+                    }
+                }
+            });
+
+            $http.get('/a/merge?op=merge&from=' + from + '&to=' + to + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+                close();
+            });
+        }
     }
 });

@@ -48,7 +48,7 @@ public class Handler extends JsonHandler<Context> {
 				break;
 			case UPDATEDS:
 				m_dalConfigService.updateDsConfig(gson.fromJson(URLDecoder.decode(payload.getDsConfigs()),
-					DalConfigService.GroupConfigModel.class));
+					  DalConfigService.GroupConfigModel.class));
 				break;
 			case TEST:
 				String jdbcRef = payload.getKey();
@@ -62,9 +62,12 @@ public class Handler extends JsonHandler<Context> {
 				}
 				ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
 				connectionstatus
-					.setConnected(m_connectionService.canConnect(jdbcRef, getConfigByGroupId(env, jdbcRef)));
+					  .setConnected(m_connectionService.canConnect(jdbcRef, getConfigByGroupId(env, jdbcRef)));
 				connectionstatus.setConfig(m_connectionService.getConfig(jdbcRef).toString());
 				responseObject = connectionstatus;
+				break;
+			case ENV:
+				responseObject = m_lionHttpService.getAllEnv();
 				break;
 			case CREATE:
 				String project = payload.getProject();
