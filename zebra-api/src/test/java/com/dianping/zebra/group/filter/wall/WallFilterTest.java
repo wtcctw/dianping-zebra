@@ -15,30 +15,6 @@ import java.sql.SQLException;
 
 public class WallFilterTest {
 	@Test
-	public void generateIdPerformanceTest() throws NoSuchAlgorithmException {
-		long startTime = System.currentTimeMillis();
-		for (int k = 0; k < 10000; k++) {
-			StringUtils.sha1(String.valueOf(k % 10));
-		}
-		long time1 = System.currentTimeMillis() - startTime;
-
-		WallFilter filter = new WallFilter();
-		startTime = System.currentTimeMillis();
-		for (int k = 0; k < 10000; k++) {
-			JdbcContext metaData = new JdbcContext();
-			metaData.setSql("select * from `Test` where id = " + String.valueOf(k % 10));
-			filter.generateId(metaData);
-		}
-
-		long time2 = System.currentTimeMillis() - startTime;
-
-		System.out.println(time1);
-		System.out.println(time2);
-
-		Assert.assertTrue(time2 < time1);
-	}
-
-	@Test
 	public void test_addId_to_Sql() throws SQLException {
 		WallFilter filter = new WallFilter();
 		JdbcContext metaData = new JdbcContext();
@@ -48,7 +24,7 @@ public class WallFilterTest {
 		metaData.setRealJdbcContext(innerMetaData);
 
 		///*test-write-1*/select * from test
-		Assert.assertEquals("/*z:d1d26296*/select * from test", filter.addIdToSql("select * from test", metaData));
+		Assert.assertEquals("/*z:ec262bf8*/select * from test", filter.addIdToSql("select * from test", metaData));
 	}
 
 	@Test
@@ -63,7 +39,7 @@ public class WallFilterTest {
 		metaData.setRealJdbcContext(innerMetaData);
 
 		///*test-write-1*/select * from test
-		Assert.assertEquals("/*z:ea013b8c*/select * from test", filter.addIdToSql("select * from test", metaData));
+		Assert.assertEquals("/*z:89f7fec5*/select * from test", filter.addIdToSql("select * from test", metaData));
 	}
 
 	@Test
