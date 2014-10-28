@@ -116,7 +116,7 @@ public class WallFilter extends DefaultJdbcFilter {
 			token = String.format("/*%s*/%s", metaData.getRealJdbcContext().getDataSourceId(), token);
 		}
 
-		return StringUtils.sha1(token).substring(0, MAX_ID_LENGTH);
+		return StringUtils.md5(token).substring(0, MAX_ID_LENGTH);
 	}
 
 	protected String getIdFromSQL(String sql) {
