@@ -17,7 +17,9 @@ com.dianping.zebra.admin.admin.page.blacklist.Handler.class,
 
 com.dianping.zebra.admin.admin.page.merge.Handler.class,
 
-com.dianping.zebra.admin.admin.page.config.Handler.class
+com.dianping.zebra.admin.admin.page.config.Handler.class,
+
+com.dianping.zebra.admin.admin.page.login.Handler.class
 })
 public class AdminModule extends AbstractModule {
 

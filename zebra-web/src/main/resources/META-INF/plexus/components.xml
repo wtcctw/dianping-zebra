@@ -304,5 +304,23 @@
 				</requirement>
 			</requirements>
 		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.page.login.Handler</role>
+			<implementation>com.dianping.zebra.admin.admin.page.login.Handler</implementation>
+			<requirements>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.page.login.JspViewer</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.zebra.admin.admin.page.login.JspViewer</role>
+			<implementation>com.dianping.zebra.admin.admin.page.login.JspViewer</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.web.mvc.view.model.ModelHandler</role>
+				</requirement>
+			</requirements>
+		</component>
 	</components>
 </plexus>
