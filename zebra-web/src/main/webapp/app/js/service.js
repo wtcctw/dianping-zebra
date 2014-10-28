@@ -35,7 +35,7 @@ zebraWeb.service('configService', function ($modal) {
             }
         });
     };
-    
+
     this.openMergeModal = function (name, onClose) {
         var modal = $modal.open({
             templateUrl: 'app/template/merge-edit.html',
@@ -55,6 +55,26 @@ zebraWeb.service('configService', function ($modal) {
                             onClose();
                         }
                     };
+                }
+            }
+        });
+    };
+});
+
+
+zebraWeb.service('loginService', function ($modal, $rootScope) {
+    this.login = function (callback) {
+        if ($rootScope.isLogin) {
+            return;
+        }
+
+        $rootScope.isLogin = true;
+        $modal.open({
+            templateUrl: 'app/template/login.html',
+            controller: 'login',
+            resolve: {
+                callback: function () {
+                    return callback;
                 }
             }
         });
