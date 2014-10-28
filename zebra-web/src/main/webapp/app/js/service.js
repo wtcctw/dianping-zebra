@@ -63,7 +63,7 @@ zebraWeb.service('configService', function ($modal) {
 
 
 zebraWeb.service('loginService', function ($modal, $rootScope) {
-    this.login = function (callback) {
+    this.login = function () {
         if ($rootScope.isLogin) {
             return;
         }
@@ -71,12 +71,7 @@ zebraWeb.service('loginService', function ($modal, $rootScope) {
         $rootScope.isLogin = true;
         $modal.open({
             templateUrl: 'app/template/login.html',
-            controller: 'login',
-            resolve: {
-                callback: function () {
-                    return callback;
-                }
-            }
+            controller: 'login'
         });
     };
 });

@@ -1,17 +1,15 @@
 package com.dianping.zebra.admin.admin.page.login;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-
-import com.dianping.zebra.admin.admin.AdminPage;
+import com.dianping.zebra.admin.admin.page.JsonHandler;
 import org.unidal.lookup.annotation.Inject;
-import org.unidal.web.mvc.PageHandler;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
-public class Handler implements PageHandler<Context> {
+import javax.servlet.ServletException;
+import java.io.IOException;
+
+public class Handler extends JsonHandler<Context> {
 	@Inject
 	private JspViewer m_jspViewer;
 
@@ -25,10 +23,19 @@ public class Handler implements PageHandler<Context> {
 	@Override
 	@OutboundActionMeta(name = "login")
 	public void handleOutbound(Context ctx) throws ServletException, IOException {
-		Model model = new Model(ctx);
-
-		model.setAction(Action.VIEW);
-		model.setPage(AdminPage.LOGIN);
-		m_jspViewer.view(ctx, model);
+		try {
+			Payload payload = ctx.getPayload();
+			switch (payload.getAction()) {
+			case VIEW:
+				if ("zebra".equals(payload.getUsername()) && "zebra".equals(payload.getPassword())) {
+					ctx.getHttpServletRequest().getSession().setAttribute("AuthorizationFilter", true);
+					success(ctx, null);
+				} else {
+					error(ctx, null);
+				}
+			}
+		} catch (Exception exp) {
+			error(ctx, exp.getMessage());
+		}
 	}
 }

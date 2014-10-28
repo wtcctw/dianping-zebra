@@ -149,7 +149,7 @@ zebraWeb.controller('header', function ($rootScope, $scope, $http, loginService)
             }
         }).error(function (data, status, headers, config) {
             if (status == 401) {
-                loginService.login($scope.load);
+                loginService.login();
             }
         });
     }
@@ -196,6 +196,19 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
 
 zebraWeb.controller('login', function ($rootScope, $scope, $http) {
     $scope.login = function () {
+        $http.post('/a/login?op=view', $.param({
+                username: encodeURIComponent($scope.username),
+                password: encodeURIComponent($scope.password)
+            }),
+            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+            .success(function (data, status, headers, config) {
+                alert('登陆成功!')
+                location.reload();
+            }).error(function () {
+                alert('登陆失败!')
+                $scope.username = '';
+                $scope.password = '';
+            });
     }
 });
 
