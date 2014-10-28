@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,8 @@ public class WallFilter extends DefaultJdbcFilter {
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
 	protected volatile static Set<String> blackList = new HashSet<String>();
+
+	private static Map<String, String> generatedIdCache = new ConcurrentHashMap<String, String>();
 
 	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
@@ -116,7 +119,33 @@ public class WallFilter extends DefaultJdbcFilter {
 			token = String.format("/*%s*/%s", metaData.getRealJdbcContext().getDataSourceId(), token);
 		}
 
-		return StringUtils.md5(token).substring(0, MAX_ID_LENGTH);
+		return generateId(token);
+	}
+
+	private String generateId(String token) throws NoSuchAlgorithmException {
+		String result;
+		boolean needToCache = true;
+		if (token != null && token.length() > 1024) {
+			needToCache = false;
+		}
+		if (generatedIdCache.size() > 1024) {
+			needToCache = false;
+		}
+
+		if (needToCache) {
+			result = generatedIdCache.get(token);
+			if (result != null) {
+				return result;
+			}
+		}
+
+		result = StringUtils.md5(token).substring(0, MAX_ID_LENGTH);
+
+		if (needToCache) {
+			generatedIdCache.put(token, result);
+		}
+
+		return result;
 	}
 
 	protected String getIdFromSQL(String sql) {
