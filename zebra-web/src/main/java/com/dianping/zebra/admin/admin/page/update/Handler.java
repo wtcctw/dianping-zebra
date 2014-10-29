@@ -40,13 +40,13 @@ public class Handler implements PageHandler<Context> {
 
 		switch (payload.getAction()) {
 		case VIEW:
-			responseObject = m_reportService.getReport(true);
+			responseObject = m_reportService.getReport(isProduct);
 			break;
 		case DATABASE:
-			responseObject = m_reportService.getDatabase(payload.getDatabase(), true);
+			responseObject = m_reportService.getDatabase(payload.getDatabase(), isProduct);
 			break;
 		case APP:
-			responseObject = m_reportService.getApp(payload.getApp(), true);
+			responseObject = m_reportService.getApp(payload.getApp(), isProduct);
 			break;
 		}
 
