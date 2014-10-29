@@ -139,15 +139,23 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
 });
 
 
-zebraWeb.controller('header', function ($rootScope, $scope, $http) {
+zebraWeb.controller('header', function ($rootScope, $scope, $http, loginService) {
 
-    $http.get('/a/config?op=env').success(function (data, status, headers, config) {
-        $rootScope.config = {
-            envs: data,
-            env: data[0]
-        }
-    });
+    $scope.load = function () {
+        $http.get('/a/config?op=env').success(function (data, status, headers, config) {
+            $rootScope.config = {
+                envs: data,
+                env: data[0]
+            }
+        }).error(function (data, status, headers, config) {
+            if (status == 401) {
+                loginService.login();
+            }
+        });
+    }
+    $scope.load();
 });
+
 zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
     var convertKey = function (key) {
         return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
@@ -183,6 +191,24 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
                 alert('添加成功！')
             });
         }
+    }
+});
+
+zebraWeb.controller('login', function ($rootScope, $scope, $http) {
+    $scope.login = function () {
+        $http.post('/a/login?op=view', $.param({
+                username: encodeURIComponent($scope.username),
+                password: encodeURIComponent($scope.password)
+            }),
+            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+            .success(function (data, status, headers, config) {
+                alert('登陆成功!')
+                location.reload();
+            }).error(function () {
+                alert('登陆失败!')
+                $scope.username = '';
+                $scope.password = '';
+            });
     }
 });
 

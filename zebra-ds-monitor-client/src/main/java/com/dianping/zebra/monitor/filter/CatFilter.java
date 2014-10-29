@@ -48,7 +48,7 @@ public class CatFilter extends DefaultJdbcFilter {
 		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
-			t = Cat.newTransaction("SQL", isTooManySql(metaData) ? null : metaData.getSql());
+			t = Cat.newTransaction("SQL", getSqlName(metaData));
 			if (metaData.isBatch()) {
 				t.addData(Stringizers.forJson().compact().from(metaData.getBatchedSql()));
 			} else {
@@ -111,22 +111,22 @@ public class CatFilter extends DefaultJdbcFilter {
 		return result;
 	}
 
-	private boolean isTooManySql(JdbcContext metaData) {
-		if (allSqlSet.size() >= 10000) {
-			return true;
+	private String getSqlName(JdbcContext metaData) {
+		if (!metaData.isBatch()) {
+			if (metaData.getSql() == null) {
+				return null;
+			}
+			int hash = metaData.getSql().hashCode();
+			if (!allSqlSet.contains(hash) && allSqlSet.size() > 1000) {
+				return null;
+			}
+			allSqlSet.add(hash);
+			return metaData.getSql();
 		} else {
-			if (metaData.getSql() != null) {
-				allSqlSet.add(metaData.getSql().hashCode());
+			if (metaData.getBatchedSql() == null) {
+				return null;
 			}
-			if (metaData.getBatchedSql() != null) {
-				for (String sql : metaData.getBatchedSql()) {
-					if (sql == null) {
-						continue;
-					}
-					allSqlSet.add(sql.hashCode());
-				}
-			}
-			return false;
+			return "batched";
 		}
 	}
 

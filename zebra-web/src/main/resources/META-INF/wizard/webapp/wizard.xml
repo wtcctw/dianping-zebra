@@ -20,6 +20,9 @@
          <page name="config" title="Config" path="config" template="default">
             <description>Config</description>
          </page>
+         <page name="login" title="Login" path="login" template="default">
+            <description>Login</description>
+         </page>
       </module>
    </webapp>
 </wizard>

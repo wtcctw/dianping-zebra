@@ -15,7 +15,9 @@ public enum AdminPage implements Page {
 
    MERGE("merge", "merge", "Merge", "Merge", true),
 
-   CONFIG("config", "config", "Config", "Config", true);
+   CONFIG("config", "config", "Config", "Config", true),
+
+   LOGIN("login", "login", "Login", "Login", true);
 
    private String m_name;
 

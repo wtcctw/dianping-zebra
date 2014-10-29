@@ -14,21 +14,10 @@ public final class DataSourceConfigManagerFactory {
 	}
 
 	public static DataSourceConfigManager getConfigManager(ConfigService configService, String name) {
-		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name));
-
-		if (dataSourceConfigManager == null) {
-			synchronized (dataSourceConfigManagers) {
-				dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name));
-
-				if (dataSourceConfigManager == null) {
-					configService.init();
-					dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
-					dataSourceConfigManager.init();
-					dataSourceConfigManagers.put(getFormattedName(name), dataSourceConfigManager);
-				}
-			}
-		}
-
+		configService.init();
+		DefaultDataSourceConfigManager dataSourceConfigManager = new DefaultDataSourceConfigManager(name,
+			  configService);
+		dataSourceConfigManager.init();
 		return dataSourceConfigManager;
 	}
 
@@ -50,7 +39,7 @@ public final class DataSourceConfigManagerFactory {
 						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
 					} else {
 						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
-							configManagerType));
+							  configManagerType));
 					}
 					dataSourceConfigManager.init();
 					dataSourceConfigManagers.put(getFormattedName(name), dataSourceConfigManager);
