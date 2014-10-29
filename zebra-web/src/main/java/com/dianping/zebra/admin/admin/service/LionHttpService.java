@@ -24,4 +24,6 @@ public interface LionHttpService {
 	void removeUnset(String key);
 
 	boolean setConfig(String env, String key, String value);
+
+	boolean save(String env, String key);
 }

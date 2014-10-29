@@ -1,18 +1,19 @@
 package com.dianping.zebra.admin.admin.service;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.unidal.lookup.annotation.Inject;
+
 import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.zebra.group.util.StringUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.unidal.lookup.annotation.Inject;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class LionHttpServiceImpl implements LionHttpService {
 
@@ -81,6 +82,8 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	@Override
 	public boolean createKey(String project, String key) throws IOException {
+		Cat.logEvent("LionAPI-CreateKey", key);
+
 		String url = String.format(createKeyUrl, ID, project, key, key);
 		String result = httpService.sendGet(url);
 
@@ -99,6 +102,8 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	@Override
 	public String getConfig(String env, String key) throws IOException {
+		Cat.logEvent("LionAPI-GetConfig", key);
+
 		String url = String.format(getConfigUrl, env, key, ID);
 		String result = httpService.sendGet(url);
 
@@ -113,6 +118,8 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	@Override
 	public HashMap<String, String> getConfigByProject(String env, String project) throws IOException {
+		Cat.logEvent("LionAPI-GetConfigByProject", project);
+
 		String url = String.format(getProjectConfigUrl, env, project, ID);
 		String result = httpService.sendGet(url);
 
@@ -153,6 +160,8 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	@Override
 	public boolean setConfig(String env, String key, String value) {
+		Cat.logEvent("LionAPI-SetConfig", key);
+
 		String result = httpService.sendGet(String.format(setConfigUrl, env, ID, key, value));
 
 		if (result != null && result.length() > 0) {
@@ -168,4 +177,14 @@ public class LionHttpServiceImpl implements LionHttpService {
 			return false;
 		}
 	}
+
+	@Override
+   public boolean save(String env, String key) {
+		try {
+	      return setConfig(env,key,getConfig(env,key));
+      } catch (IOException e) {
+      	Cat.logError(e);
+      	return false;
+      }
+   }
 }

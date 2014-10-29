@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.admin.datasource.TransactionManagerWrapper;
 import com.dianping.zebra.web.dal.lion.Config;
 import com.dianping.zebra.web.dal.lion.ConfigDao;
@@ -27,6 +31,9 @@ public class MergeConfigServiceImpl implements MergeConfigService {
 
 	@Inject
 	private TransactionManagerWrapper transactionManager;
+
+	@Inject
+	private LionHttpService lionHttpService;
 
 	private final int PROJECT_DS = 100;
 
@@ -71,6 +78,8 @@ public class MergeConfigServiceImpl implements MergeConfigService {
 	}
 
 	public boolean merge(List<String> from, String to, Env env) {
+		Transaction tran = Cat.newTransaction("LionMerge", formatName(from, to, env));
+
 		try {
 			transactionManager.startTransaction(ConfigInstanceEntity.UPDATE_BY_PKS, configInstanceDao.createLocal());
 			// merge reference
@@ -82,19 +91,82 @@ public class MergeConfigServiceImpl implements MergeConfigService {
 			deleteConfigInstance(from, to, env);
 
 			// update groupds key
-			updateGroupDs(from, to, env);
+			List<ConfigEntry> updatedConfigEntries = updateGroupDs(from, to, env);
 
 			transactionManager.commitTransaction(ConfigInstanceEntity.UPDATE_BY_PKS, configInstanceDao.createLocal());
+
+			updateZookeeper(to, env, updatedConfigEntries);
+
+			tran.setStatus(Message.SUCCESS);
 		} catch (DalException e) {
 			try {
 				transactionManager.rollbackTransaction(ConfigInstanceEntity.UPDATE_BY_PKS, configInstanceDao.createLocal());
 			} catch (DalException e1) {
 			}
 
+			tran.setStatus(e);
 			return false;
+		} finally {
+			tran.complete();
 		}
 
 		return true;
+	}
+
+	private String formatName(List<String> from, String to, Env env) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("env=");
+		sb.append(env.getStringEnv());
+		sb.append("&from=");
+		boolean isFirst = true;
+		for (String item : from) {
+			if (isFirst) {
+				sb.append(item);
+				isFirst = false;
+			} else {
+				sb.append(",");
+				sb.append(item);
+			}
+		}
+		sb.append("&to=");
+		sb.append(to);
+		return sb.toString();
+	}
+
+	private String formatName2(List<ConfigEntry> from, String to, Env env) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("env=");
+		sb.append(env.getStringEnv());
+		sb.append("&ds=");
+		sb.append(to);
+		sb.append("&groupds=");
+		boolean isFirst = true;
+		for (ConfigEntry item : from) {
+			if (isFirst) {
+				sb.append(item.getKey());
+				isFirst = false;
+			} else {
+				sb.append(",");
+				sb.append(item.getKey());
+			}
+		}
+
+		return sb.toString();
+	}
+
+	private void updateZookeeper(String to, Env env, List<ConfigEntry> updatedConfigEntries) {
+		Transaction tran = Cat.newTransaction("FlushZookeeper", formatName2(updatedConfigEntries, to, env));
+		try {
+			lionHttpService.save(env.getStringEnv(), String.format("ds.%s.jdbc.url", to));
+			lionHttpService.save(env.getStringEnv(), String.format("ds.%s.jdbc.username", to));
+			lionHttpService.save(env.getStringEnv(), String.format("ds.%s.jdbc.password", to));
+			for (ConfigEntry entry : updatedConfigEntries) {
+				lionHttpService.setConfig(env.getStringEnv(), entry.getKey(), entry.getNewValue());
+			}
+		} finally {
+			tran.setStatus(Message.SUCCESS);
+			tran.complete();
+		}
 	}
 
 	private void mergeInternal(List<String> from, String to, String key, Env env) throws DalException {
@@ -103,38 +175,36 @@ public class MergeConfigServiceImpl implements MergeConfigService {
 		for (String fromItem : from) {
 			if (!fromItem.equals(to)) {
 				String dsKey = "%${ds." + fromItem + ".jdbc." + key + "}%";
-				List<ConfigInstance> partTargets = configInstanceDao.findByDs(dsKey, env.getValue(),
-				      ConfigInstanceEntity.READSET_FULL);
-
-				for (ConfigInstance config : partTargets) {
-					targets.add(config);
-				}
+				targets = configInstanceDao.findByDs(dsKey, env.getValue(), ConfigInstanceEntity.READSET_FULL);
 			}
 		}
 
 		// change them refer to new to
-		int[] configInstanceIds = new int[targets.size()];
-		int i = 0;
-		for (ConfigInstance entry : targets) {
-			configInstanceIds[i] = entry.getId();
-			i++;
+		if (targets != null && targets.size() > 0) {
+			int[] configInstanceIds = new int[targets.size()];
+			int i = 0;
+			for (ConfigInstance entry : targets) {
+				configInstanceIds[i++] = entry.getId();
+			}
+
+			ConfigInstance ins = configInstanceDao.createLocal();
+			ins.setConfigIds(configInstanceIds);
+			ins.setValue("${ds." + to + ".jdbc." + key + "}");
+
+			configInstanceDao.updateByPKs(ins, ConfigInstanceEntity.UPDATESET_REFERENCE);
 		}
-
-		ConfigInstance ins = configInstanceDao.createLocal();
-		ins.setConfigIds(configInstanceIds);
-		ins.setValue("${ds." + to + ".jdbc." + key + "}");
-
-		configInstanceDao.updateByPKs(ins, ConfigInstanceEntity.UPDATESET_REFERENCE);
 	}
 
-	private void updateGroupDs(List<String> from, String to, Env env) throws DalException {
+	private List<ConfigEntry> updateGroupDs(List<String> from, String to, Env env) throws DalException {
 		Set<ConfigInstance> targets = new HashSet<ConfigInstance>();
-		List<ConfigInstance> targets_ = new ArrayList<ConfigInstance>();
-		HashMap<Integer, String> origin = new HashMap<Integer, String>();
+		List<ConfigEntry> results = new ArrayList<ConfigEntry>();
 		List<Config> configs = configDao.findByProjectId(PROJECT_GROUPDS, ConfigEntity.READSET_FULL);
+		Map<Integer, String> keyMap = new HashMap<Integer, String>();
 		int[] ids = new int[configs.size()];
 		for (int i = 0; i < configs.size(); i++) {
-			ids[i] = configs.get(i).getId();
+			int id = configs.get(i).getId();
+			ids[i] = id;
+			keyMap.put(id, configs.get(i).getKey());
 		}
 
 		List<ConfigInstance> configIns = configInstanceDao.findByConfigIdAndEnvId(ids, env.getValue(),
@@ -145,7 +215,6 @@ public class MergeConfigServiceImpl implements MergeConfigService {
 				String groupds = ins.getValue();
 				if (groupds.contains(ds) && !ds.equals(to)) {
 					ins.setValue(groupds.replace(ds, to));
-					origin.put(ins.getId(), groupds);
 					targets.add(ins);
 				}
 			}
@@ -153,11 +222,28 @@ public class MergeConfigServiceImpl implements MergeConfigService {
 
 		for (ConfigInstance ins : targets) {
 			configInstanceDao.updateByPK(ins, ConfigInstanceEntity.UPDATESET_REFERENCE);
+			results.add(new ConfigEntry(keyMap.get(ins.getConfigId()), ins.getValue()));
 		}
 
-		for (ConfigInstance ins : targets) {
-			ins.setValue(origin.get(ins.getId()));
-			targets_.add(ins);
+		return results;
+	}
+
+	public static class ConfigEntry {
+		private String key;
+
+		private String newValue;
+
+		public ConfigEntry(String key, String newValue) {
+			this.key = key;
+			this.newValue = newValue;
+		}
+
+		public String getKey() {
+			return key;
+		}
+
+		public String getNewValue() {
+			return newValue;
 		}
 	}
 }
