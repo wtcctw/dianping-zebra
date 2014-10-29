@@ -27,7 +27,7 @@ import com.google.gson.JsonParser;
 
 public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Initializable, Task {
 
-	private final String IP_FILTER_LION_KEY = "zebra.ip.prefix";
+	private final String IP_FILTER_LION_KEY = "zebra.web.ip.prefix";
 
 	private final String URL_DB = "http://tools.dba.dp/get_useiplist_of_db.php?dbname=%s";
 
