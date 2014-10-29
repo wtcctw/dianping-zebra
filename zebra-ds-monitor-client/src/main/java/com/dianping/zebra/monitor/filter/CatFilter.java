@@ -21,6 +21,7 @@ import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.site.helper.Stringizers;
 
 import javax.sql.DataSource;
+
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,26 +30,30 @@ import java.util.Set;
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends DefaultJdbcFilter {
+	private static final int MAX_LENGTH_PER_SQL = 1024 * 10; // about 10k
+
+	private static final int MAX_CACHED_SQL = 2000;
+
 	private static final String DAL_CAT_TYPE = "DAL";
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
-	private Set<Integer> allSqlSet = new HashSet<Integer>();
+	private Set<String> cachedSqlSet = new HashSet<String>();
 
 	@Override
-	public <S> void closeSingleDataSource(JdbcContext metaData, S source,
-		  FilterActionWithSQLExcption<S> action) throws SQLException {
+	public <S> void closeSingleDataSource(JdbcContext metaData, S source, FilterActionWithSQLExcption<S> action)
+	      throws SQLException {
 		super.closeSingleDataSource(metaData, source, action);
 		Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
 	}
 
 	@Override
 	public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
-		  throws SQLException {
+	      throws SQLException {
 		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
-			t = Cat.newTransaction("SQL", getSqlName(metaData));
+			t = Cat.newTransaction("SQL", getCachedSqlName(metaData));
 			if (metaData.isBatch()) {
 				t.addData(Stringizers.forJson().compact().from(metaData.getBatchedSql()));
 			} else {
@@ -63,11 +68,11 @@ public class CatFilter extends DefaultJdbcFilter {
 			T result = super.execute(metaData, source, action);
 
 			if (metaData.getRealJdbcContext() != null) {
-				Cat.logEvent("SQL.Database", metaData.getRealJdbcContext().getJdbcUrl(), Event.SUCCESS,
-					  metaData.getRealJdbcContext().getDataSourceId());
-				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS,
-					  Stringizers.forJson().compact()
-							.from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
+				Cat.logEvent("SQL.Database", metaData.getRealJdbcContext().getJdbcUrl(), Event.SUCCESS, metaData
+				      .getRealJdbcContext().getDataSourceId());
+				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS, Stringizers
+				      .forJson().compact()
+				      .from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
 			}
 
 			t.setStatus(Transaction.SUCCESS);
@@ -84,15 +89,42 @@ public class CatFilter extends DefaultJdbcFilter {
 	}
 
 	@Override
-	public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-		  JdbcContext metaData, S source,
-		  FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
-		FailOverDataSource.FindMasterDataSourceResult result = super
-			  .findMasterFailOverDataSource(metaData, source, action);
+	public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(JdbcContext metaData,
+	      S source, FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
+		FailOverDataSource.FindMasterDataSourceResult result = super.findMasterFailOverDataSource(metaData, source,
+		      action);
 		if (result != null && result.isChangedMaster()) {
 			Cat.logEvent("DAL.Master", "Found-" + metaData.getDataSourceId());
 		}
 		return result;
+	}
+
+	private String getCachedSqlName(JdbcContext metaData) {
+		if (!metaData.isBatch()) {
+			String sql = metaData.getSql();
+			if (sql == null) {
+				return null;
+			} else {
+				int len = sql.length();
+
+				if (len > MAX_LENGTH_PER_SQL) {
+					sql = sql.substring(0, MAX_LENGTH_PER_SQL);
+				}
+
+				if (!cachedSqlSet.contains(sql) && cachedSqlSet.size() > MAX_CACHED_SQL) {
+					return null;
+				} else {
+					cachedSqlSet.add(sql);
+					return sql;
+				}
+			}
+		} else {
+			if (metaData.getBatchedSql() == null) {
+				return null;
+			} else {
+				return "batched";
+			}
+		}
 	}
 
 	@Override
@@ -104,35 +136,14 @@ public class CatFilter extends DefaultJdbcFilter {
 	}
 
 	@Override
-	public <S> DataSource initSingleDataSource(JdbcContext metaData, S source,
-		  FilterFunction<S, DataSource> action) {
+	public <S> DataSource initSingleDataSource(JdbcContext metaData, S source, FilterFunction<S, DataSource> action) {
 		DataSource result = super.initSingleDataSource(metaData, source, action);
 		Cat.logEvent("DataSource.Created", metaData.getDataSourceId());
 		return result;
 	}
 
-	private String getSqlName(JdbcContext metaData) {
-		if (!metaData.isBatch()) {
-			if (metaData.getSql() == null) {
-				return null;
-			}
-			int hash = metaData.getSql().hashCode();
-			if (!allSqlSet.contains(hash) && allSqlSet.size() > 1000) {
-				return null;
-			}
-			allSqlSet.add(hash);
-			return metaData.getSql();
-		} else {
-			if (metaData.getBatchedSql() == null) {
-				return null;
-			}
-			return "batched";
-		}
-	}
-
 	@Override
-	public <S> void refreshGroupDataSource(JdbcContext metaData, String propertiesName, S source,
-		  FilterAction<S> action) {
+	public <S> void refreshGroupDataSource(JdbcContext metaData, String propertiesName, S source, FilterAction<S> action) {
 		Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Refresh-" + metaData.getDataSourceId());
 		Cat.logEvent("DAL.Refresh.Property", propertiesName);
 		try {
