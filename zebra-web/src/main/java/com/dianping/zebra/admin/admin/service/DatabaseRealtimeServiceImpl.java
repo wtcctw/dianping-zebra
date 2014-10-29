@@ -49,7 +49,7 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Ini
 		try {
 			String property = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(IP_FILTER_LION_KEY);
 
-			ipFilter = Splitters.by(',').trim().noEmptyItem().split(property);
+			ipFilter = Splitters.by('|').trim().noEmptyItem().split(property);
 		} catch (LionException e) {
 			Cat.logError(e);
 		}
