@@ -218,12 +218,12 @@ public class ReportServiceImpl implements ReportService {
 		@Override
 		public void visitDatabase(Database database) {
 			this.database = database;
-
-			if (connectedAllIps != null) {
-				connectedIps = connectedAllIps.get(database.getName());
-			} else {
-				connectedIps = m_databaseRealtimeService.getConnectedIps(database.getName());
+			
+			if(connectedAllIps == null){
+				connectedAllIps = m_databaseRealtimeService.getAllConnectedIps();
 			}
+
+			connectedIps = connectedAllIps.get(database.getName());
 
 			for (App app : database.getApps().values()) {
 				visitApp(app);
