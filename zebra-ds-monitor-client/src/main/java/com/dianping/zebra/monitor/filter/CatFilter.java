@@ -112,7 +112,7 @@ public class CatFilter extends DefaultJdbcFilter {
 	}
 
 	private String getSqlName(JdbcContext metaData) {
-		if (metaData.isBatch()) {
+		if (!metaData.isBatch()) {
 			if (metaData.getSql() == null) {
 				return null;
 			}
