@@ -15,11 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractConfigManager {
 
+	private static final Logger logger = LogManager.getLogger(AbstractConfigManager.class);
+
 	protected final ConfigService configService;
 
 	protected final String jdbcRef;
-
-	private final Logger logger = LogManager.getLogger(this.getClass());
 
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
