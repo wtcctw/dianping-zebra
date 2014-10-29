@@ -52,7 +52,7 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Ini
 			for (int i = 0; i < ipArray.size(); i++) {
 				String ip = ipArray.get(i).getAsString();
 
-				if (ip.startsWith("10.1") || ip.startsWith("10.2")) {
+				if (ip.startsWith("10.1.") || ip.startsWith("10.2.") || ip.startsWith("10.101.")) {
 					ips.add(ip);
 				}
 			}

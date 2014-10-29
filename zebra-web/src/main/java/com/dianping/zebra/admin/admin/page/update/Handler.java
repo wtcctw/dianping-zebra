@@ -12,7 +12,6 @@ import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
-import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.zebra.admin.admin.service.ReportService;
 import com.google.gson.Gson;
 
@@ -41,13 +40,13 @@ public class Handler implements PageHandler<Context> {
 
 		switch (payload.getAction()) {
 		case VIEW:
-			responseObject = m_reportService.getReport(isProduct);
+			responseObject = m_reportService.getReport(true);
 			break;
 		case DATABASE:
-			responseObject = m_reportService.getDatabase(payload.getDatabase(), isProduct);
+			responseObject = m_reportService.getDatabase(payload.getDatabase(), true);
 			break;
 		case APP:
-			responseObject = m_reportService.getApp(payload.getApp(), isProduct);
+			responseObject = m_reportService.getApp(payload.getApp(), true);
 			break;
 		}
 
