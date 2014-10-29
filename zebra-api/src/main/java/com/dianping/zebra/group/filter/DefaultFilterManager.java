@@ -100,7 +100,7 @@ public class DefaultFilterManager implements FilterManager {
 			return;
 		}
 
-		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements(); ) {
+		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements();) {
 			URL url = e.nextElement();
 
 			Properties property = new Properties();
@@ -133,7 +133,7 @@ public class DefaultFilterManager implements FilterManager {
 
 		result = new ArrayList<JdbcFilter>();
 
-		//TODO: 不需要逗号分隔
+		// TODO: 不需要逗号分隔
 		for (String filterClassName : filterClassNames.split(",")) {
 			Class<?> filterClass = loadClass(filterClassName);
 			if (filterClass == null) {
