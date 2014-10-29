@@ -68,7 +68,9 @@ public class Handler extends JsonHandler<Context> {
 				break;
 			case ENV:
 				if (m_lionHttpService.isDev()) {
-					responseObject = m_lionHttpService.getDevEnv();
+					responseObject = new String[] { "dev" };
+				} else if (EnvZooKeeperConfig.getEnv().equals("prelease")) {
+					responseObject = new String[] { "prelease" };
 				} else {
 					responseObject = m_lionHttpService.getAllEnv();
 				}

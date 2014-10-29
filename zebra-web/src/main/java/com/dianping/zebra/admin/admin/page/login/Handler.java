@@ -7,6 +7,7 @@ import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import java.io.IOException;
 
 public class Handler extends JsonHandler<Context> {
@@ -28,7 +29,9 @@ public class Handler extends JsonHandler<Context> {
 			switch (payload.getAction()) {
 			case VIEW:
 				if ("zebra".equals(payload.getUsername()) && "zebra".equals(payload.getPassword())) {
-					ctx.getHttpServletRequest().getSession().setAttribute("AuthorizationFilter", true);
+					Cookie cookie = new Cookie("AuthorizationFilter", "");
+					cookie.setMaxAge(60 * 30);
+					ctx.getHttpServletResponse().addCookie(cookie);
 					success(ctx, null);
 				} else {
 					error(ctx, null);
