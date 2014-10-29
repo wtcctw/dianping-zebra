@@ -33,7 +33,7 @@
                 <td>{{database.m_replacedDpdlDataSource}}/{{database.m_dpdlDataSource}}</td>
                 <td>{{database.m_groupDataSource }}</td>
                 <td>
-                    <span class="badge alert-{{database.m_updateStatus == -1?'danger':(database.m_updateStatus == 0 ?'success':'warning')}}">{{database.m_totalDataSource}}</span>
+                    <span class="badge alert-{{database.m_updateStatus == -1?'danger':(database.m_updateStatus == 0 ?'success': (database.m_updateStatus == 2 ? 'info' : 'warning'))}}">{{database.m_totalDataSource}}</span>
                 </td>
             </tr>
             </tbody>

@@ -1,12 +1,14 @@
 package com.dianping.zebra.admin.admin.service;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.admin.report.entity.*;
 import com.dianping.zebra.admin.report.transform.BaseVisitor;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.web.dal.stat.Heartbeat;
 import com.dianping.zebra.web.dal.stat.HeartbeatDao;
 import com.dianping.zebra.web.dal.stat.HeartbeatEntity;
+
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
 
@@ -72,7 +74,7 @@ public class ReportServiceImpl implements ReportService {
 			}
 
 			Heartbeat h = m_heartbeatDao.exists(heartbeat.getAppName(), heartbeat.getIp(),
-				  heartbeat.getDatasourceBeanName(), HeartbeatEntity.READSET_FULL);
+			      heartbeat.getDatasourceBeanName(), HeartbeatEntity.READSET_FULL);
 			heartbeat.setId(h.getId());
 			m_heartbeatDao.updateByPK(heartbeat, HeartbeatEntity.UPDATESET_FULL);
 		} catch (DalException e) {
@@ -86,6 +88,8 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public App getApp(String appName, boolean isProduct) {
 		App app = new App(appName);
+		
+		Transaction transaction = Cat.newTransaction("Test", "app");
 
 		try {
 			List<Heartbeat> all = m_heartbeatDao.findByAppName(appName, HeartbeatEntity.READSET_FULL);
@@ -112,11 +116,14 @@ public class ReportServiceImpl implements ReportService {
 		}
 		new StatisticsVisitor().visitApp(app);
 
+		transaction.complete();
 		return app;
 	}
 
 	@Override
 	public Database getDatabase(String database, boolean isProduct) {
+		Transaction transaction = Cat.newTransaction("Test", "database");
+
 		Database database2 = getReportInternal().getDatabases().get(database);
 
 		if (isProduct) {
@@ -124,12 +131,16 @@ public class ReportServiceImpl implements ReportService {
 		}
 
 		new StatisticsVisitor().visitDatabase(database2);
+		
+		transaction.complete();
 
 		return database2;
 	}
 
 	@Override
 	public Report getReport(boolean isProduct) {
+		Transaction transaction = Cat.newTransaction("Test", "report");
+
 		Report report = getReportInternal();
 
 		if (isProduct) {
@@ -137,7 +148,8 @@ public class ReportServiceImpl implements ReportService {
 		}
 
 		new StatisticsVisitor().visitReport(report);
-
+		
+		transaction.complete();
 		return report;
 	}
 
@@ -170,6 +182,8 @@ public class ReportServiceImpl implements ReportService {
 
 		private Map<String, Map<String, String>> connectedAllIps;
 
+		private Database database;
+
 		@Override
 		public void visitReport(Report report) {
 			connectedAllIps = m_databaseRealtimeService.getAllConnectedIps();
@@ -192,6 +206,9 @@ public class ReportServiceImpl implements ReportService {
 						if (machine == null) {
 							machine = app.findOrCreateMachine(ip);
 							machine.setIntergrateWithDal(false);
+							machine.setVersion("N/A");
+
+							Cat.logEvent(database.getName(), ip);
 						}
 					}
 				}
@@ -200,11 +217,13 @@ public class ReportServiceImpl implements ReportService {
 
 		@Override
 		public void visitDatabase(Database database) {
-			if (connectedAllIps != null) {
-				connectedIps = connectedAllIps.get(database.getName());
-			} else {
-				connectedIps = m_databaseRealtimeService.getConnectedIps(database.getName());
+			this.database = database;
+			
+			if(connectedAllIps == null){
+				connectedAllIps = m_databaseRealtimeService.getAllConnectedIps();
 			}
+
+			connectedIps = connectedAllIps.get(database.getName());
 
 			for (App app : database.getApps().values()) {
 				visitApp(app);
@@ -258,13 +277,12 @@ public class ReportServiceImpl implements ReportService {
 			if (hasNotIntegratedWithDal) {
 				app.setUpdateStatus(2);
 			} else {
-				if (app.getGroupDataSource() == 0 && app.getReplacedSingleDataSource() == 0 &&
-					  app.getReplacedDpdlDataSource() == 0 &&
-					  (app.getC3p0DataSource() != 0 || app.getDpdlDataSource() != 0)) {
+				if (app.getGroupDataSource() == 0 && app.getReplacedSingleDataSource() == 0
+				      && app.getReplacedDpdlDataSource() == 0
+				      && (app.getC3p0DataSource() != 0 || app.getDpdlDataSource() != 0)) {
 					app.setUpdateStatus(-1);
-				} else if (
-					  (app.getReplacedSingleDataSource() + app.getReplacedDpdlDataSource() + app.getGroupDataSource())
-							== app.getTotalDataSource()) {
+				} else if ((app.getReplacedSingleDataSource() + app.getReplacedDpdlDataSource() + app.getGroupDataSource()) == app
+				      .getTotalDataSource()) {
 					app.setUpdateStatus(0);
 				} else {
 					app.setUpdateStatus(1);
@@ -296,12 +314,12 @@ public class ReportServiceImpl implements ReportService {
 			if (hasNotIntegratedWithDal) {
 				database.setUpdateStatus(2);
 			} else {
-				if (database.getGroupDataSource() == 0 && database.getReplacedSingleDataSource() == 0 &&
-					  database.getReplacedDpdlDataSource() == 0 &&
-					  (database.getC3p0DataSource() != 0 || database.getDpdlDataSource() != 0)) {
+				if (database.getGroupDataSource() == 0 && database.getReplacedSingleDataSource() == 0
+				      && database.getReplacedDpdlDataSource() == 0
+				      && (database.getC3p0DataSource() != 0 || database.getDpdlDataSource() != 0)) {
 					database.setUpdateStatus(-1);
 				} else if ((database.getReplacedSingleDataSource() + database.getReplacedDpdlDataSource() + database
-					  .getGroupDataSource()) == database.getTotalDataSource()) {
+				      .getGroupDataSource()) == database.getTotalDataSource()) {
 					database.setUpdateStatus(0);
 				} else {
 					database.setUpdateStatus(1);
@@ -357,12 +375,12 @@ public class ReportServiceImpl implements ReportService {
 			if (hasNotIntegratedWithDal) {
 				report.setUpdateStatus(2);
 			} else {
-				if (report.getGroupDataSource() == 0 && report.getReplacedSingleDataSource() == 0 &&
-					  report.getReplacedDpdlDataSource() == 0 &&
-					  (report.getC3p0DataSource() != 0 || report.getDpdlDataSource() != 0)) {
+				if (report.getGroupDataSource() == 0 && report.getReplacedSingleDataSource() == 0
+				      && report.getReplacedDpdlDataSource() == 0
+				      && (report.getC3p0DataSource() != 0 || report.getDpdlDataSource() != 0)) {
 					report.setUpdateStatus(-1);
 				} else if ((report.getReplacedSingleDataSource() + report.getReplacedDpdlDataSource() + report
-					  .getGroupDataSource()) == report.getTotalDataSource()) {
+				      .getGroupDataSource()) == report.getTotalDataSource()) {
 					report.setUpdateStatus(0);
 				} else {
 					report.setUpdateStatus(1);

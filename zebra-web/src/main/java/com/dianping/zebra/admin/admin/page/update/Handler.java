@@ -12,7 +12,6 @@ import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
-import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.zebra.admin.admin.service.ReportService;
 import com.google.gson.Gson;
 

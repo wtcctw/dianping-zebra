@@ -13,6 +13,7 @@
 9. 支持SQL黑名单功能，DBA可以在后台禁止指定SQL语句的执行
 
 ## 使用说明
+
 ### POM依赖
 
 	<dependency>
@@ -34,11 +35,13 @@
 `version`和`zebra-api`保持一致
     
 ### 其他依赖
+
 * 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.1.3`版本，`dpsf-net`升级到`2.1.21`版本以上。
 
 ## Spring 配置
 
 ### 在 Spring 中 DataSource 的配置
+
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="tuangou2010" />
 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
@@ -56,11 +59,13 @@
 	</bean>
 
 ### 在 Spring 中使用默认 DataSource 的配置
+
     <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="tuangou2010" /> 
     </bean>
 
 ### 配置说明
+
 其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，一般是数据库名的全小写，`zebra`会自动根据这个名字到`Lion`上查找`jdbcUrl`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
 1. C3P0参数是在`bean`中直接定义的，那么C3P0的参数将不具有动态刷新的功能。
 2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
@@ -72,6 +77,7 @@ Q：为什么要加`init-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ## 老业务兼容情况
+
 通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.9`以上，`Zebra`会自动替换满足条件的`DataSource`。
 
 #### 没有使用`dpdl`的`ComboPooledDataSource`
@@ -86,6 +92,7 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 * 写库数据源是`mysql`
 
 ## 更新说明
+
 ### 2.6.0
 * [+] 增加了`filter`功能
 * [+] 利用`filter`，增加了SQL黑名单功能
