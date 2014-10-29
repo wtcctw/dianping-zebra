@@ -3,9 +3,9 @@ package com.dianping.zebra.admin.filter;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import javax.servlet.*;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -21,13 +21,19 @@ public class AuthorizationFilter implements Filter {
 		  throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse rsp = (HttpServletResponse) response;
-		HttpSession session = req.getSession();
+		Cookie[] cookies = req.getCookies();
 
-		if (session.getAttribute("AuthorizationFilter") == null) {
-			rsp.setStatus(HttpResponseStatus.UNAUTHORIZED.getCode());
-		} else {
-			chain.doFilter(request, response);
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals("AuthorizationFilter")) {
+					cookie.setMaxAge(60 * 30);
+					rsp.addCookie(cookie);
+					chain.doFilter(request, response);
+					return;
+				}
+			}
 		}
+		rsp.setStatus(HttpResponseStatus.UNAUTHORIZED.getCode());
 	}
 
 	@Override public void destroy() {
