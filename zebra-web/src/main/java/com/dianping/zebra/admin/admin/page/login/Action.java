@@ -1,17 +1,7 @@
-package com.dianping.zebra.admin.admin.page.config;
+package com.dianping.zebra.admin.admin.page.login;
 
 public enum Action implements org.unidal.web.mvc.Action {
-	VIEW("view"), 
-	
-	TEST("test"), 
-	
-	VIEWDS("viewDs"), 
-	
-	UPDATEDS("updateDs"),
-
-	ENV("env"),
-	
-	CREATE("create");
+	VIEW("view");
 
 	private String m_name;
 
