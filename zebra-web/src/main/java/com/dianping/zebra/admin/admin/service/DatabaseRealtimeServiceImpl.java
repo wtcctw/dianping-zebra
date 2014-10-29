@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
@@ -36,7 +35,7 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Ini
 	@Inject
 	private HttpService m_httpService;
 
-	private Map<String, Map<String, String>> m_allConnectedIps = new ConcurrentHashMap<String, Map<String, String>>();;
+	private volatile Map<String, Map<String, String>> m_allConnectedIps = new HashMap<String, Map<String, String>>();;
 
 	@Override
 	public Map<String, Map<String, String>> getAllConnectedIps() {
@@ -157,7 +156,7 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Ini
 			}
 
 			try {
-				TimeUnit.HOURS.sleep(1);
+				TimeUnit.SECONDS.sleep(60);
 			} catch (InterruptedException e) {
 			}
 		}
