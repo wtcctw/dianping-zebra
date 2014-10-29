@@ -16,7 +16,7 @@ import com.google.gson.JsonParser;
 
 public class CmdbServiceImpl implements CmdbService{
 
-	private final String URL = "http://api.cmdb.dp/api/v0.1/ci/s?q=_type:(server;vserver),private_ip:%s&fl=hostname";
+	private final String URL = "http://api.cmdb.dp/api/v0.1/ip/%s/projects";
 
 	private final String URL_BATCH = "http://api.cmdb.dp/api/v0.1/projects/by_ips";
 
@@ -36,15 +36,9 @@ public class CmdbServiceImpl implements CmdbService{
 			String result = httpService.sendGet(url);
 			JsonParser parser = new JsonParser();
 			JsonObject obj = parser.parse(result).getAsJsonObject();
-			JsonArray array = obj.get("result").getAsJsonArray();
+			JsonArray array = obj.get("projects").getAsJsonArray();
 			if (array.size() > 0) {
-				String name = array.get(0).getAsJsonObject().get("hostname").getAsString();
-
-				int pos = name.indexOf(".");
-
-				if (pos > 2) {
-					name = name.substring(0, pos - 2);
-				}
+				String name = array.get(0).getAsJsonObject().get("project_name").getAsString();
 
 				return name;
 			}

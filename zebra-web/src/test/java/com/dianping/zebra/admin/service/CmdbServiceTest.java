@@ -20,7 +20,7 @@ public class CmdbServiceTest extends ComponentTestCase {
 
 	@Test
 	public void test() {
-		System.out.println(m_cmdbService.getAppName("192.168.211.190"));
+		System.out.println(m_cmdbService.getAppName("10.101.6.64"));
 	}
 
 	@Test
