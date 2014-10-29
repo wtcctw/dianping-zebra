@@ -59,14 +59,15 @@ public class JdbcContext implements Cloneable {
 
 	private String sql;
 
-	public List<String> getMergedBatchedSql() {
-		if (this.mergedBatchedSql == null && getBatchedSql() != null && getBatchedSql() != null) {
-			this.mergedBatchedSql = new ArrayList<String>();
-			for (int k = 0; k < getBatchedSql().size(); k++) {
-				this.mergedBatchedSql.add(mergeSql(getBatchedSql().get(k), getBatchedNode().get(k)));
-			}
+	@SuppressWarnings("unchecked")
+	public JdbcContext clone() {
+		try {
+			JdbcContext result = (JdbcContext) super.clone();
+			result.properties = (LinkedHashMap<String, Object>) this.properties.clone();
+			return result;
+		} catch (CloneNotSupportedException e) {
+			return null;
 		}
-		return this.mergedBatchedSql;
 	}
 
 	public List<StatementNode> getBatchedNode() {
@@ -83,67 +84,38 @@ public class JdbcContext implements Cloneable {
 		return batchedSql;
 	}
 
-	@SuppressWarnings("unchecked")
-	public JdbcContext clone() {
-		try {
-			JdbcContext result = (JdbcContext) super.clone();
-			result.properties = (LinkedHashMap<String, Object>) this.properties.clone();
-			return result;
-		} catch (CloneNotSupportedException e) {
-			return null;
-		}
-	}
-
-	public void setBatchedSqls(List<String> inputSql) {
-		batchedSql = inputSql;
-	}
-
 	public Connection getConnection() {
 		return connection;
-	}
-
-	public void setConnection(Connection connection) {
-		this.connection = connection;
 	}
 
 	public DataSource getDataSource() {
 		return dataSource;
 	}
 
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
 	public String getDataSourceId() {
 		return dataSourceId;
-	}
-
-	public void setDataSourceId(String dataSourceId) {
-		this.dataSourceId = dataSourceId;
 	}
 
 	public String getJdbcPassword() {
 		return jdbcPassword;
 	}
 
-	public void setJdbcPassword(String jdbcPassword) {
-		this.jdbcPassword = jdbcPassword;
-	}
-
 	public String getJdbcUrl() {
 		return jdbcUrl;
-	}
-
-	public void setJdbcUrl(String jdbcUrl) {
-		this.jdbcUrl = jdbcUrl;
 	}
 
 	public String getJdbcUsername() {
 		return jdbcUsername;
 	}
 
-	public void setJdbcUsername(String jdbcUsername) {
-		this.jdbcUsername = jdbcUsername;
+	public List<String> getMergedBatchedSql() {
+		if (this.mergedBatchedSql == null && getBatchedSql() != null && getBatchedSql() != null) {
+			this.mergedBatchedSql = new ArrayList<String>();
+			for (int k = 0; k < getBatchedSql().size(); k++) {
+				this.mergedBatchedSql.add(mergeSql(getBatchedSql().get(k), getBatchedNode().get(k)));
+			}
+		}
+		return this.mergedBatchedSql;
 	}
 
 	public String getMergedSql() {
@@ -164,10 +136,6 @@ public class JdbcContext implements Cloneable {
 		return params;
 	}
 
-	public void setParams(Object params) {
-		this.params = params;
-	}
-
 	public Map<String, Object> getProperties() {
 		return properties;
 	}
@@ -176,40 +144,33 @@ public class JdbcContext implements Cloneable {
 		return realJdbcContext;
 	}
 
-	public void setRealJdbcContext(JdbcContext realJdbcContext) {
-		this.realJdbcContext = realJdbcContext;
-	}
-
 	public String getSql() {
 		return sql;
-	}
-
-	public void setSql(String sql) {
-		this.sql = sql;
 	}
 
 	public boolean isBatch() {
 		return isBatch;
 	}
 
-	public void setBatch(boolean isBatch) {
-		this.isBatch = isBatch;
-	}
-
 	public boolean isPrepared() {
 		return isPrepared;
-	}
-
-	public void setPrepared(boolean isPrepared) {
-		this.isPrepared = isPrepared;
 	}
 
 	public boolean isTransaction() {
 		return isTransaction;
 	}
 
-	public void setTransaction(boolean isTransaction) {
-		this.isTransaction = isTransaction;
+	private String mergeSql(String sql, StatementNode result) {
+		try {
+			SQLParser parser = new SQLParser();
+			QueryTreeNode deepCopy = parser.getNodeFactory().copyNode(result, parser);
+			MergeSqlVisitor visitor = new MergeSqlVisitor();
+			visitor.visit(deepCopy);
+			NodeToString merged = new NodeToString();
+			return merged.toString(deepCopy);
+		} catch (StandardException e) {
+			return sql;
+		}
 	}
 
 	private StatementNode parseSql(String sql) {
@@ -230,26 +191,25 @@ public class JdbcContext implements Cloneable {
 		}
 	}
 
-	private String mergeSql(String sql, StatementNode result) {
-		try {
-			SQLParser parser = new SQLParser();
-			QueryTreeNode deepCopy = parser.getNodeFactory().copyNode(result, parser);
-			MergeSqlVisitor visitor = new MergeSqlVisitor();
-			visitor.visit(deepCopy);
-			NodeToString merged = new NodeToString();
-			return merged.toString(deepCopy);
-		} catch (StandardException e) {
-			return sql;
-		}
+	public void setBatch(boolean isBatch) {
+		this.isBatch = isBatch;
 	}
 
-//	private List<StatementNode> parseSqls(List<String> sqls) {
-//		List<StatementNode> result = new ArrayList<StatementNode>();
-//		for (String sql : sqls) {
-//			result.add(parseSql(sql));
-//		}
-//		return result;
-//	}
+	public void setBatchedSqls(List<String> inputSql) {
+		batchedSql = inputSql;
+	}
+
+	public void setConnection(Connection connection) {
+		this.connection = connection;
+	}
+
+	public void setDataSource(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	public void setDataSourceId(String dataSourceId) {
+		this.dataSourceId = dataSourceId;
+	}
 
 	public void setDataSourceProperties(DataSource dataSource) {
 		if (dataSource instanceof GroupDataSourceMBean) {
@@ -269,5 +229,45 @@ public class JdbcContext implements Cloneable {
 			properties.put("CanWrite", ds.getConfig().isCanWrite());
 			properties.put("Weight", ds.getConfig().getWeight());
 		}
+	}
+
+	public void setJdbcPassword(String jdbcPassword) {
+		this.jdbcPassword = jdbcPassword;
+	}
+
+	public void setJdbcUrl(String jdbcUrl) {
+		this.jdbcUrl = jdbcUrl;
+	}
+
+	public void setJdbcUsername(String jdbcUsername) {
+		this.jdbcUsername = jdbcUsername;
+	}
+
+	public void setParams(Object params) {
+		this.params = params;
+	}
+
+	public void setPrepared(boolean isPrepared) {
+		this.isPrepared = isPrepared;
+	}
+
+	public void setRealJdbcContext(JdbcContext realJdbcContext) {
+		this.realJdbcContext = realJdbcContext;
+	}
+
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
+
+//	private List<StatementNode> parseSqls(List<String> sqls) {
+//		List<StatementNode> result = new ArrayList<StatementNode>();
+//		for (String sql : sqls) {
+//			result.add(parseSql(sql));
+//		}
+//		return result;
+//	}
+
+	public void setTransaction(boolean isTransaction) {
+		this.isTransaction = isTransaction;
 	}
 }

@@ -58,36 +58,36 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	@Override
 	public void close() throws SQLException {
-		this.filter
-				.closeSingleDataSource(this.context.clone(), this, new FilterActionWithSQLExcption<SingleDataSource>() {
-					@Override public void execute(SingleDataSource source) throws SQLException {
-						if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-							if (source.state == DataSourceState.UP) {
-								PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
-								if (poolBackedDataSource.getNumBusyConnections() == 0) {
-									logger.info("closing old datasource [" + source.dsId + "]");
+		this.filter.closeSingleDataSource(this.context.clone(), this,
+		      new FilterActionWithSQLExcption<SingleDataSource>() {
+			      @Override
+			      public void execute(SingleDataSource source) throws SQLException {
+				      if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
+					      if (source.state == DataSourceState.UP) {
+						      PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
+						      if (poolBackedDataSource.getNumBusyConnections() == 0) {
+							      logger.info("closing old datasource [" + source.dsId + "]");
 
-									poolBackedDataSource.close();
+							      poolBackedDataSource.close();
 
-									logger.info("old datasource [" + source.dsId + "] closed");
-									source.state = DataSourceState.CLOSED;
-								} else {
-									DalException exp = new DalException(
-											String.format("Cannot close dataSource[%s] since there are busy connections.",
-													dsId));
-									throw exp;
-								}
-							} else {
-								source.state = DataSourceState.CLOSED;
-							}
+							      logger.info("old datasource [" + source.dsId + "] closed");
+							      source.state = DataSourceState.CLOSED;
+						      } else {
+							      DalException exp = new DalException(String.format(
+							            "Cannot close dataSource[%s] since there are busy connections.", dsId));
+							      throw exp;
+						      }
+					      } else {
+						      source.state = DataSourceState.CLOSED;
+					      }
 
-						} else {
-							Exception exp = new DalException(
-									"fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
-							logger.warn(exp.getMessage(), exp);
-						}
-					}
-				});
+				      } else {
+					      Exception exp = new DalException(
+					            "fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
+					      logger.warn(exp.getMessage(), exp);
+				      }
+			      }
+		      });
 	}
 
 	public synchronized DataSourceConfig getConfig() {
@@ -105,23 +105,24 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		checkState();
 
 		return this.filter.getSingleConnection(this.context.clone(), this,
-				new FilterFunctionWithSQLException<SingleDataSource, SingleConnection>() {
-					@Override public SingleConnection execute(SingleDataSource source) throws SQLException {
-						Connection conn;
-						try {
-							conn = source.dataSource.getConnection();
-						} catch (SQLException e) {
-							punisher.countAndPunish(e);
-							throw e;
-						}
+		      new FilterFunctionWithSQLException<SingleDataSource, SingleConnection>() {
+			      @Override
+			      public SingleConnection execute(SingleDataSource source) throws SQLException {
+				      Connection conn;
+				      try {
+					      conn = source.dataSource.getConnection();
+				      } catch (SQLException e) {
+					      punisher.countAndPunish(e);
+					      throw e;
+				      }
 
-						if (state == DataSourceState.INITIAL) {
-							state = DataSourceState.UP;
-						}
+				      if (state == DataSourceState.INITIAL) {
+					      state = DataSourceState.UP;
+				      }
 
-						return new SingleConnection(source, conn, source.context.clone(), source.filter);
-					}
-				});
+				      return new SingleConnection(source, conn, source.context.clone(), source.filter);
+			      }
+		      });
 	}
 
 	@Override
@@ -253,38 +254,37 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	}
 
 	private DataSource initDataSource(final DataSourceConfig value) {
-		return this.filter.initSingleDataSource(
-				this.context.clone(), this,
-				new FilterFunction<SingleDataSource, DataSource>() {
-					@Override public DataSource execute(SingleDataSource source) {
-						try {
-							JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
+		return this.filter.initSingleDataSource(this.context.clone(), this,
+		      new FilterFunction<SingleDataSource, DataSource>() {
+			      @Override
+			      public DataSource execute(SingleDataSource source) {
+				      try {
+					      JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 
-							DataSource unPooledDataSource = DataSources
-									.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
-											value.getPassword());
+					      DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(),
+					            value.getUsername(), value.getPassword());
 
-							Map<String, Object> props = new HashMap<String, Object>();
+					      Map<String, Object> props = new HashMap<String, Object>();
 
-							props.put("driverClass", value.getDriverClass());
+					      props.put("driverClass", value.getDriverClass());
 
-							for (Any any : value.getProperties()) {
-								props.put(any.getName(), any.getValue());
-							}
+					      for (Any any : value.getProperties()) {
+						      props.put(any.getName(), any.getValue());
+					      }
 
-							PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
-									unPooledDataSource, props);
+					      PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
+					            unPooledDataSource, props);
 
-							logger.info(String.format("New dataSource [%s] created.", value.getId()));
-							return pooledDataSource;
-						} catch (IllegalConfigException e) {
-							throw e;
-						} catch (Exception e) {
-							throw new IllegalConfigException(e);
-						} finally {
-						}
-					}
-				});
+					      logger.info(String.format("New dataSource [%s] created.", value.getId()));
+					      return pooledDataSource;
+				      } catch (IllegalConfigException e) {
+					      throw e;
+				      } catch (Exception e) {
+					      throw new IllegalConfigException(e);
+				      } finally {
+				      }
+			      }
+		      });
 	}
 
 	private void initFilters() {

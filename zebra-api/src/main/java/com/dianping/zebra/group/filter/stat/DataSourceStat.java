@@ -8,34 +8,36 @@ import java.util.concurrent.atomic.AtomicLong;
  * Created by Dozer on 9/15/14.
  */
 public class DataSourceStat {
+	private final String type;
+
+	private final String dataSourceId;
+
+	private final Map<String, Object> properties;
+
+	// connection
 	private final AtomicLong closeConnectionErrorCount = new AtomicLong();
 
 	private final AtomicLong closeConnectionSuccessCount = new AtomicLong();
-
-	private final AtomicLong closeDataSourceErrorCount = new AtomicLong();
-
-	private final AtomicLong closeDataSourceSuccessCount = new AtomicLong();
-
-	private final String dataSourceId;
 
 	private final AtomicLong getConnectionErrorCount = new AtomicLong();
 
 	private final AtomicLong getConnectionSuccessCount = new AtomicLong();
 
+	// datasource
+	private final AtomicLong closeDataSourceErrorCount = new AtomicLong();
+
+	private final AtomicLong closeDataSourceSuccessCount = new AtomicLong();
+
 	private final AtomicLong initDataSourceErrorCount = new AtomicLong();
 
 	private final AtomicLong initDataSourceSuccessCount = new AtomicLong();
-
-	private final Map<String, Object> properties;
 
 	private final AtomicLong refreshDataSourceErrorCount = new AtomicLong();
 
 	private final AtomicLong refreshDataSourceSuccessCount = new AtomicLong();
 
-	private final String type;
-
 	public DataSourceStat() {
-		this(null,null,null);
+		this(null, null, null);
 	}
 
 	public DataSourceStat(String dataSourceId, String type, Map<String, Object> properties) {
