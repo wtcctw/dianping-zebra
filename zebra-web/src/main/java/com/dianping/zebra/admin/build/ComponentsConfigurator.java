@@ -47,7 +47,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 
 		all.add(C(TransactionManagerWrapper.class).req(TransactionManager.class, EntityInfoManager.class));
 		all.add(C(MergeConfigService.class, MergeConfigServiceImpl.class).req(ConfigDao.class, ConfigInstanceDao.class,
-		      TransactionManagerWrapper.class));
+		      TransactionManagerWrapper.class, LionHttpService.class));
 		all.add(C(LionHttpService.class, LionHttpServiceImpl.class).req(HttpService.class));
 		all.add(C(LogService.class, LocalLogService.class));
 		all.add(C(CmdbService.class, CmdbServiceImpl.class).req(HttpService.class));

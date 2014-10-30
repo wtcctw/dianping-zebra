@@ -1,20 +1,25 @@
 package com.dianping.zebra.admin.admin.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.unidal.dal.jdbc.DalException;
+import org.unidal.lookup.annotation.Inject;
+
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import com.dianping.zebra.admin.report.entity.*;
+import com.dianping.zebra.admin.report.entity.App;
+import com.dianping.zebra.admin.report.entity.Database;
+import com.dianping.zebra.admin.report.entity.Datasource;
+import com.dianping.zebra.admin.report.entity.Machine;
+import com.dianping.zebra.admin.report.entity.Report;
 import com.dianping.zebra.admin.report.transform.BaseVisitor;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.web.dal.stat.Heartbeat;
 import com.dianping.zebra.web.dal.stat.HeartbeatDao;
 import com.dianping.zebra.web.dal.stat.HeartbeatEntity;
-
-import org.unidal.dal.jdbc.DalException;
-import org.unidal.lookup.annotation.Inject;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * updateStatus:
@@ -88,8 +93,8 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public App getApp(String appName, boolean isProduct) {
 		App app = new App(appName);
-		
-		Transaction transaction = Cat.newTransaction("Test", "app");
+
+		Transaction transaction = Cat.newTransaction("Performance", "app");
 
 		try {
 			List<Heartbeat> all = m_heartbeatDao.findByAppName(appName, HeartbeatEntity.READSET_FULL);
@@ -116,13 +121,14 @@ public class ReportServiceImpl implements ReportService {
 		}
 		new StatisticsVisitor().visitApp(app);
 
+		transaction.setStatus(Message.SUCCESS);
 		transaction.complete();
 		return app;
 	}
 
 	@Override
 	public Database getDatabase(String database, boolean isProduct) {
-		Transaction transaction = Cat.newTransaction("Test", "database");
+		Transaction transaction = Cat.newTransaction("Performance", "database");
 
 		Database database2 = getReportInternal().getDatabases().get(database);
 
@@ -131,15 +137,15 @@ public class ReportServiceImpl implements ReportService {
 		}
 
 		new StatisticsVisitor().visitDatabase(database2);
-		
-		transaction.complete();
 
+		transaction.setStatus(Message.SUCCESS);
+		transaction.complete();
 		return database2;
 	}
 
 	@Override
 	public Report getReport(boolean isProduct) {
-		Transaction transaction = Cat.newTransaction("Test", "report");
+		Transaction transaction = Cat.newTransaction("Performance", "report");
 
 		Report report = getReportInternal();
 
@@ -148,7 +154,8 @@ public class ReportServiceImpl implements ReportService {
 		}
 
 		new StatisticsVisitor().visitReport(report);
-		
+
+		transaction.setStatus(Message.SUCCESS);
 		transaction.complete();
 		return report;
 	}
@@ -182,8 +189,6 @@ public class ReportServiceImpl implements ReportService {
 
 		private Map<String, Map<String, String>> connectedAllIps;
 
-		private Database database;
-
 		@Override
 		public void visitReport(Report report) {
 			connectedAllIps = m_databaseRealtimeService.getAllConnectedIps();
@@ -206,9 +211,6 @@ public class ReportServiceImpl implements ReportService {
 						if (machine == null) {
 							machine = app.findOrCreateMachine(ip);
 							machine.setIntergrateWithDal(false);
-							machine.setVersion("N/A");
-
-							Cat.logEvent(database.getName(), ip);
 						}
 					}
 				}
@@ -217,9 +219,7 @@ public class ReportServiceImpl implements ReportService {
 
 		@Override
 		public void visitDatabase(Database database) {
-			this.database = database;
-			
-			if(connectedAllIps == null){
+			if (connectedAllIps == null) {
 				connectedAllIps = m_databaseRealtimeService.getAllConnectedIps();
 			}
 

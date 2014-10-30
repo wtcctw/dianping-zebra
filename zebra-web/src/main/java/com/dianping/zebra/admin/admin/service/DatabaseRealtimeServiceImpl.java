@@ -12,10 +12,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
+import org.unidal.helper.Splitters;
 import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.LionException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,11 +27,15 @@ import com.google.gson.JsonParser;
 
 public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Initializable, Task {
 
+	private final String IP_FILTER_LION_KEY = "zebra.web.ip.prefix";
+
 	private final String URL_DB = "http://tools.dba.dp/get_useiplist_of_db.php?dbname=%s";
 
 	private final String URL_ALL = "http://tools.dba.dp/get_useiplist_of_db.php?type=all";
 
 	private volatile boolean shutdown = false;
+
+	private List<String> ipFilter = new ArrayList<String>();
 
 	@Inject
 	private CmdbService m_cmdbService;
@@ -36,6 +44,16 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Ini
 	private HttpService m_httpService;
 
 	private volatile Map<String, Map<String, String>> m_allConnectedIps = new HashMap<String, Map<String, String>>();;
+
+	public DatabaseRealtimeServiceImpl() {
+		try {
+			String property = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(IP_FILTER_LION_KEY);
+
+			ipFilter = Splitters.by('|').trim().noEmptyItem().split(property);
+		} catch (LionException e) {
+			Cat.logError(e);
+		}
+	}
 
 	@Override
 	public Map<String, Map<String, String>> getAllConnectedIps() {
@@ -51,8 +69,13 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Ini
 			for (int i = 0; i < ipArray.size(); i++) {
 				String ip = ipArray.get(i).getAsString();
 
-				if (ip.startsWith("10.1.") || ip.startsWith("10.2.") || ip.startsWith("10.101.")) {
-					ips.add(ip);
+				if (ipFilter != null && ipFilter.size() > 0) {
+					for (String prefix : ipFilter) {
+						if (ip.startsWith(prefix)) {
+							ips.add(ip);
+							break;
+						}
+					}
 				}
 			}
 		}

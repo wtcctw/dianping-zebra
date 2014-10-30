@@ -25,6 +25,9 @@
 				<requirement>
 					<role>com.dianping.zebra.admin.datasource.TransactionManagerWrapper</role>
 				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
