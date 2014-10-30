@@ -28,12 +28,21 @@
    <entity name="config-instance" table="config_instance" alias="ci">
     <var name="config-ids" value-type="int[]"/>
     <var name="ds" value-type="String"/>
+    <var name="key" value-type="String"/>
     <updatesets>
       <updateset name="REFERENCE">
       	<member name="value"/>
       </updateset>
     </updatesets>
     <query-defs>
+      <query name="find-by-ConfigKey-And-EnvId" type="SELECT">
+      	<param name="key"/>
+      	<param name="env-id" />
+      	<statement><![CDATA[SELECT <FIELDS/> 
+      	FROM <TABLE/>
+      	WHERE <FIELD name='config-id'/> in (SELECT id from config c where c.key = ${key})
+      	AND <FIELD name='env-id'/> = ${env-id}]]></statement>
+      </query>
       <query name="find-by-ConfigId-And-EnvId" type="SELECT" multiple="true">
         <param name="config-ids" />
         <param name="env-id" />

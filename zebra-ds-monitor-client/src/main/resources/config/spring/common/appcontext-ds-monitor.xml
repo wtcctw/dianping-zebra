@@ -2,7 +2,5 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-    <bean class="com.dianping.zebra.group.filter.wall.WallFilterConfig">
-        <property name="configManagerType" value="local"/>
-    </bean>
+    <bean class="com.dianping.zebra.monitor.spring.DataSourceAutoMonitor"/>
 </beans>

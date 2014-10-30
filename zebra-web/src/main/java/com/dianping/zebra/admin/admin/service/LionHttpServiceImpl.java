@@ -72,11 +72,13 @@ public class LionHttpServiceImpl implements LionHttpService {
 		return result;
 	}
 
-	@Override public boolean isProduct() {
+	@Override
+	public boolean isProduct() {
 		return PRODUCT_ENV.contains(EnvZooKeeperConfig.getEnv());
 	}
 
-	@Override public boolean isDev() {
+	@Override
+	public boolean isDev() {
 		return DEV_ENV.contains(EnvZooKeeperConfig.getEnv());
 	}
 
@@ -160,7 +162,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	@Override
 	public boolean setConfig(String env, String key, String value) {
-		Cat.logEvent("LionAPI-SetConfig", key);
+		Cat.logEvent("LionAPI-SetConfig", key + "=" + value);
 
 		String result = httpService.sendGet(String.format(setConfigUrl, env, ID, key, value));
 
@@ -177,14 +179,4 @@ public class LionHttpServiceImpl implements LionHttpService {
 			return false;
 		}
 	}
-
-	@Override
-   public boolean save(String env, String key) {
-		try {
-	      return setConfig(env,key,getConfig(env,key));
-      } catch (IOException e) {
-      	Cat.logError(e);
-      	return false;
-      }
-   }
 }

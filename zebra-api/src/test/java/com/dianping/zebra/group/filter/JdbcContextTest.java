@@ -21,10 +21,9 @@ public class JdbcContextTest {
     }
 
     @Test
-    @Ignore
     public void test_merge_sql() {
         JdbcContext context = new JdbcContext();
         context.setSql("select * from test where id = 1");
-        Assert.assertEquals("select * from test where id = ?", context.getMergedSql());
+        Assert.assertEquals("SELECT * FROM test WHERE id = $1", context.getMergedSql());
     }
 }

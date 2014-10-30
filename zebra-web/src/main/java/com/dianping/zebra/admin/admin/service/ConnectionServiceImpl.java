@@ -8,18 +8,17 @@ import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.util.StringUtils;
 
 import java.beans.PropertyChangeListener;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Map;
 
 public class ConnectionServiceImpl implements ConnectionService {
-
 	@Override
-	public boolean canConnect(String jdbcRef, final Map<String, String> configs) {
+	public ConnectionResult getConnectionResult(String jdbcRef, final Map<String, String> configs) {
+		ConnectionResult result = new ConnectionResult();
+
 		GroupDataSource ds = null;
 		try {
 			ds = new GroupDataSource(jdbcRef);
+			ds.setFilter("stat");
 			ds.setConfigService(new ConfigService() {
 				@Override public void init() {
 
@@ -35,10 +34,10 @@ public class ConnectionServiceImpl implements ConnectionService {
 			});
 			ds.init();
 
-			return true;
+			result.setCanConnect(true);
 		} catch (Exception t) {
 			Cat.logError(t);
-			return false;
+			result.setCanConnect(false);
 		} finally {
 			if (ds != null) {
 				try {
@@ -47,62 +46,18 @@ public class ConnectionServiceImpl implements ConnectionService {
 				}
 			}
 		}
-	}
 
-	@Override
-	public GroupDataSourceConfig getConfig(String jdbcRef) {
-		GroupDataSource ds = null;
-		Connection conn = null;
-		Statement stmt = null;
-		ResultSet result = null;
-		try {
-			ds = new GroupDataSource(jdbcRef);
-			ds.init();
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			result = stmt.executeQuery("select 1");
-			result.next();
-			result.getInt(1);
+		hidePassword(ds.getConfig());
+		result.setConfig(ds.getConfig());
 
-			hidePassword(ds.getConfig());
-			return ds.getConfig();
-		} catch (Exception t) {
-			Cat.logError(t);
-			hidePassword(ds.getConfig());
-			return ds.getConfig();
-		} finally {
-			if (result != null) {
-				try {
-					result.close();
-				} catch (Exception ignore) {
-				}
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (Exception ignore) {
-				}
-			}
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Exception ignore) {
-				}
-			}
-			if (ds != null) {
-				try {
-					ds.close();
-				} catch (Exception ignore) {
-				}
-			}
-		}
+		return result;
 	}
 
 	public void hidePassword(GroupDataSourceConfig configs) {
 		for (Map.Entry<String, DataSourceConfig> config : configs.getDataSourceConfigs().entrySet()) {
 			config.getValue().setPassword(config.getValue().getPassword() != null ?
-				StringUtils.repeat("*", config.getValue().getPassword().length()) :
-				null);
+				  StringUtils.repeat("*", config.getValue().getPassword().length()) :
+				  null);
 		}
 	}
 

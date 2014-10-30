@@ -157,15 +157,25 @@ public class MergeConfigServiceImpl implements MergeConfigService {
 	private void updateZookeeper(String to, Env env, List<ConfigEntry> updatedConfigEntries) {
 		Transaction tran = Cat.newTransaction("FlushZookeeper", formatName2(updatedConfigEntries, to, env));
 		try {
-			lionHttpService.save(env.getStringEnv(), String.format("ds.%s.jdbc.url", to));
-			lionHttpService.save(env.getStringEnv(), String.format("ds.%s.jdbc.username", to));
-			lionHttpService.save(env.getStringEnv(), String.format("ds.%s.jdbc.password", to));
+			updateKey(String.format("ds.%s.jdbc.url", to), env);
+			updateKey(String.format("ds.%s.jdbc.username", to), env);
+			updateKey(String.format("ds.%s.jdbc.password", to), env);
+
 			for (ConfigEntry entry : updatedConfigEntries) {
 				lionHttpService.setConfig(env.getStringEnv(), entry.getKey(), entry.getNewValue());
 			}
 		} finally {
 			tran.setStatus(Message.SUCCESS);
 			tran.complete();
+		}
+	}
+
+	private void updateKey(String key, Env env) {
+		try {
+			ConfigInstance ci = configInstanceDao.findByConfigKeyAndEnvId(key, env.getValue(),
+			      ConfigInstanceEntity.READSET_FULL);
+			lionHttpService.setConfig(env.getStringEnv(), key, ci.getValue());
+		} catch (DalException e) {
 		}
 	}
 
