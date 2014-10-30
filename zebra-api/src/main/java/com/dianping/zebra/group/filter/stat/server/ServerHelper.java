@@ -1,7 +1,10 @@
 package com.dianping.zebra.group.filter.stat.server;
 
 import com.dianping.zebra.group.filter.stat.StatFilterConfig;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 
 /**
@@ -18,7 +21,20 @@ public class ServerHelper {
 			@Override public void run() {
 				try {
 					Server server = new Server(StatFilterConfig.getServerPort());
-					server.setHandler(getResourceHandler());
+
+					ContextHandler context0 = new ContextHandler();
+					context0.setContextPath("/");
+					context0.setHandler(getResourceHandler());
+
+					ContextHandler context1 = new ContextHandler();
+					context1.setContextPath("/api");
+					context1.setHandler(new RestFulHandler());
+
+					ContextHandlerCollection contexts = new ContextHandlerCollection();
+					contexts.setHandlers(new Handler[] { context0, context1 });
+
+					server.setHandler(contexts);
+
 					server.start();
 					server.join();
 				} catch (Exception e) {
