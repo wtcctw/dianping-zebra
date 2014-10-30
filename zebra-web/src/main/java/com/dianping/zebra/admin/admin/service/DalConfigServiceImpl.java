@@ -1,6 +1,8 @@
 package com.dianping.zebra.admin.admin.service;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -20,27 +22,37 @@ public class DalConfigServiceImpl implements DalConfigService {
 	private LionHttpService m_lionHttpService;
 
 	public void updateDsConfig(GroupConfigModel modal) {
+		Transaction tran = Cat.newTransaction("DsConfigUpdate", modal.getId());
 		try {
 			String groupKey = getGroupDataSourceKeyById(modal.getId());
 
 			String oldConfig = m_lionHttpService.getConfig(modal.getEnv(), groupKey);
-			if (!modal.getConfig().equals(oldConfig)) {
-				m_lionHttpService.setConfig(modal.getEnv(), groupKey, modal.getConfig());
-			}
+
+			m_lionHttpService.setConfig(modal.getEnv(), groupKey, modal.getConfig());
+			Cat.logEvent("GroupDsConfigUpdate", String.format("env:%s key:%s from:%s to:%s",
+				  modal.getEnv(), groupKey, oldConfig, modal.getConfig()));
+
 			for (DsConfigModel ds : modal.getConfigs()) {
 				for (ConfigProperty prop : ds.getProperties()) {
 					if (prop.isDelete()) {
 						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), "");
+						Cat.logEvent("DsConfigRemove", String.format("env:%s key:%s ",
+							  modal.getEnv(), prop.getKey()));
 						continue;
 					}
-					if (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue())) {
-						m_lionHttpService.createKey("ds", prop.getKey());
-						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
-					}
+					m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
+
+					Cat.logEvent("DsConfigUpdate", String.format("env:%s key:%s from:%s to:%s",
+						  modal.getEnv(), prop.getKey(), prop.getValue(), prop.getNewValue()));
 				}
 			}
+
+			tran.setStatus(Message.SUCCESS);
 		} catch (IOException e) {
 			Cat.logError(e);
+			tran.setStatus(e);
+		} finally {
+			tran.complete();
 		}
 	}
 
@@ -55,7 +67,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 			result.setId(groupId);
 			result.setConfig(m_lionHttpService.getConfig(env, getGroupDataSourceKeyById(groupId)));
 			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
-				.parseConfig(result.getConfig());
+				  .parseConfig(result.getConfig());
 
 			HashMap<String, String> configs = m_lionHttpService.getConfigByProject(env, "ds");
 			List<String> keys = Lists.newArrayList(Iterables.filter(configs.keySet(), new Predicate<String>() {
