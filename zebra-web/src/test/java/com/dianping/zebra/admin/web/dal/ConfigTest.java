@@ -54,7 +54,15 @@ public class ConfigTest extends ComponentTestCase {
 		List<ConfigInstance> configIns = configInstanceDao.findByConfigIdAndEnvId(configIds, 1,
 		      ConfigInstanceEntity.READSET_FULL);
 
+		
 		System.out.println(configIns.size());
+	}
+	
+	@Test
+	public void tt() throws DalException{
+		ConfigInstance ci = configInstanceDao.findByConfigKeyAndEnvId("ds.tuangou2010-s1-read.jdbc.password", 1, ConfigInstanceEntity.READSET_FULL);
+	
+		System.out.println(ci.getValue());
 	}
 
 	@Test
