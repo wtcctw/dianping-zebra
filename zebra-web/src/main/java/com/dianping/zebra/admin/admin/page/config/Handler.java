@@ -61,9 +61,12 @@ public class Handler extends JsonHandler<Context> {
 					jdbcRef = "DPReview";
 				}
 				ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
-				connectionstatus
-					  .setConnected(m_connectionService.canConnect(jdbcRef, getConfigByGroupId(env, jdbcRef)));
-				connectionstatus.setConfig(m_connectionService.getConfig(jdbcRef).toString());
+
+				ConnectionService.ConnectionResult result = m_connectionService
+					  .getConnectionResult(jdbcRef, getConfigByGroupId(env, jdbcRef));
+
+				connectionstatus.setConnected(result.isCanConnect());
+				connectionstatus.setConfig(result.getConfig().toString());
 				responseObject = connectionstatus;
 				break;
 			case ENV:
