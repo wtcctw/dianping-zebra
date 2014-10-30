@@ -1,5 +1,6 @@
 package com.dianping.zebra.group.filter.stat.server;
 
+import com.dianping.zebra.group.filter.stat.StatFilterConfig;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 
@@ -16,16 +17,8 @@ public class ServerHelper {
 		serverThread = new Thread(new Runnable() {
 			@Override public void run() {
 				try {
-					Server server = new Server(8181);
-
-					ResourceHandler resourceHandler = new ResourceHandler();
-					resourceHandler.setWelcomeFiles(new String[] { "index.html" });
-
-					String path = ServerHelper.class.getClassLoader()
-						  .getResource("filter/stat/server").toExternalForm();
-					resourceHandler.setResourceBase(path);
-					server.setHandler(resourceHandler);
-
+					Server server = new Server(StatFilterConfig.getServerPort());
+					server.setHandler(getResourceHandler());
 					server.start();
 					server.join();
 				} catch (Exception e) {
@@ -36,5 +29,14 @@ public class ServerHelper {
 		serverThread.setDaemon(true);
 		serverThread.setName("zebra-statfilter-server");
 		serverThread.start();
+	}
+
+	private static ResourceHandler getResourceHandler() {
+		ResourceHandler resourceHandler = new ResourceHandler();
+		resourceHandler.setWelcomeFiles(new String[] { "index.html" });
+		String path = ServerHelper.class.getClassLoader()
+			  .getResource("filter/stat/server").toExternalForm();
+		resourceHandler.setResourceBase(path);
+		return resourceHandler;
 	}
 }

@@ -8,7 +8,6 @@ import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
-import com.dianping.zebra.group.spring.SpringBeanHelper;
 import com.dianping.zebra.group.util.StringUtils;
 
 import java.beans.PropertyChangeEvent;
@@ -59,9 +58,9 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	private void initWallFilter() {
-		Map<String, WallFilterConfig> configs = SpringBeanHelper.getBeanByClass(WallFilterConfig.class);
-		for (WallFilterConfig config : configs.values()) {
-			this.configManagerType = config.getConfigManagerType();
+		String configManagerType = WallFilterConfig.getConfigManagerType();
+		if (StringUtils.isNotBlank(configManagerType)) {
+			this.configManagerType = configManagerType;
 		}
 	}
 
