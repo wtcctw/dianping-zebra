@@ -34,7 +34,6 @@
 		<dependency>
 			<groupId>com.dianping.lion</groupId>
 			<artifactId>lion-client</artifactId>
-			<version>0.4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.unidal.framework</groupId>
