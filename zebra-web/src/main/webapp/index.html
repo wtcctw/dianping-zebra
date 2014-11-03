@@ -21,8 +21,11 @@
                 <li active-link="active"><a href="#/black">SQL黑名单</a></li>
                 <li active-link="active"><a href="#/update">升级进度</a></li>
             </ul>
+
             <form class="navbar-form navbar-right">
                 <div class="form-group" role="form">
+                    <a class="btn btn-default" href="http://zebra-web01.beta:8080">DEV</a>
+                    <a class="btn btn-default" href="http://zebra.dp">PRD</a>
                     <select class="form-control" ng-model="config.env" ng-options="env for env in config.envs">
                     </select>
                 </div>

@@ -18,7 +18,7 @@ public class ConnectionServiceImpl implements ConnectionService {
 		GroupDataSource ds = null;
 		try {
 			ds = new GroupDataSource(jdbcRef);
-			ds.setFilter("stat");
+			ds.setFilter("stat,cat");
 			ds.setConfigService(new ConfigService() {
 				@Override public void init() {
 
