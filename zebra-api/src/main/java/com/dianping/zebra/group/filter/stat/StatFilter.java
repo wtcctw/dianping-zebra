@@ -22,8 +22,8 @@ import java.util.List;
 public class StatFilter extends DefaultJdbcFilter {
 	@Override
 	public void init() {
-		ServerHelper.start();
-		super.init();
+//		ServerHelper.start();
+//		super.init();
 	}
 
 	@Override
