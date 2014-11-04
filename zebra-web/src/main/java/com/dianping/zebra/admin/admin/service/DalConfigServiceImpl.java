@@ -40,6 +40,9 @@ public class DalConfigServiceImpl implements DalConfigService {
 							  modal.getEnv(), prop.getKey()));
 						continue;
 					}
+					if (prop.isCreate()) {
+						m_lionHttpService.createKey("ds", prop.getKey());
+					}
 					m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
 
 					Cat.logEvent("DsConfigUpdate", String.format("env:%s key:%s from:%s to:%s",

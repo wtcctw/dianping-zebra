@@ -133,6 +133,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
         list.push({
             key: 'ds.' + id + '.jdbc.' + key,
             value: '',
+            isCreate: true,
             newValue: value
         });
     }
