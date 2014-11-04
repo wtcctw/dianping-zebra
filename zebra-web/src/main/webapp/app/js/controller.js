@@ -24,7 +24,7 @@ zebraWeb.controller('black', function ($scope, $http) {
 
     $scope.add = function () {
         if (confirm('确山添加？')) {
-            $http.get('/a/blacklist?op=add&env=' + $scope.config.env + '&ip=' + $scope.addIp + '&id=' + $scope.addId)
+            $http.get('/a/blacklist?op=add&env=' + $scope.config.env + '&ip=' + ($scope.addIp ? $scope.addIp : '') + '&id=' + ($scope.addId ? $scope.addId : ''))
                 .success(function (data, status, headers, config) {
                     $scope.load();
                     $scope.addId = '';
