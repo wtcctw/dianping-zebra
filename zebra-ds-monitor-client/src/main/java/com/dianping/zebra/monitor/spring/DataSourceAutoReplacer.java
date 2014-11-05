@@ -104,12 +104,12 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			return null;
 		}
 		return tempValue instanceof TypedStringValue ?
-				((TypedStringValue) tempValue).getValue() :
-				String.valueOf(tempValue);
+			  ((TypedStringValue) tempValue).getValue() :
+			  String.valueOf(tempValue);
 	}
 
 	private Set<PropertyValue> getC3P0PropertyValues(BeanDefinition c3p0BeanDefinition, DataSourceInfo info,
-			RouterType routerType) {
+		  RouterType routerType) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
 		if (!c3p0BeanDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
@@ -160,7 +160,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private BeanDefinition getDpdlWriteDsBean(BeanDefinition dataSourceDefinition) {
 		String writeDsBeanName = getBeanPropertyStringValue(
-				dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS").getValue());
+			  dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS").getValue());
 
 		c3p0Ds.remove(writeDsBeanName);
 		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsBeanName);
@@ -253,7 +253,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		for (String beanDefinitionName : beanDefinitionNames) {
 			try {
 				AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) listableBeanFactory
-						.getBeanDefinition(beanDefinitionName);
+					  .getBeanDefinition(beanDefinitionName);
 				Class<?> beanClazz = beanDefinition.resolveBeanClass(ClassUtils.getDefaultClassLoader());
 				if (beanClazz != null && DataSource.class.isAssignableFrom(beanClazz)) {
 					if (beanClazz.getName().equals(C3P0_CLASS_NAME)) {
@@ -277,7 +277,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			@Override
 			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 				Set<PropertyValue> properties = getC3P0PropertyValues(dataSourceDefinition, info,
-						getRouterTypeFromBeans(dataSourceDefinition, null));
+					  getRouterTypeFromBeans(dataSourceDefinition, null));
 
 				if (properties.size() > 0) {
 					setGroupDataSourceProperties(dataSourceDefinition, info, properties);
@@ -298,7 +298,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				List<BeanDefinition> dpdlReadDsBean = getDpdlReadDsBean(dataSourceDefinition);
 
 				Set<PropertyValue> properties = getC3P0PropertyValues(dpdlWriteDsBean, info,
-						getRouterTypeFromBeans(dpdlWriteDsBean, dpdlReadDsBean));
+					  getRouterTypeFromBeans(dpdlWriteDsBean, dpdlReadDsBean));
 
 				if (properties.size() > 0) {
 					setGroupDataSourceProperties(dataSourceDefinition, info, properties);
@@ -321,7 +321,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				Object tempValue;
 				if (propertyValue == null) {
 					ConstructorArgumentValues.ValueHolder valueHolder = (ValueHolder) dataSourceDefinition
-							.getConstructorArgumentValues().getGenericArgumentValues().get(0);
+						  .getConstructorArgumentValues().getGenericArgumentValues().get(0);
 					tempValue = valueHolder.getValue();
 				} else {
 					tempValue = propertyValue.getValue();
@@ -329,14 +329,19 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 				jdbcRef = getBeanPropertyStringValue(tempValue);
 
-				if (!StringUtils.isBlank(jdbcRef)) {
-					DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
-							Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
-					GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
-					if (config.getDataSourceConfigs().size() > 0) {
-						DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
-						getJdbcUrlInfo(info, dsConfig.getJdbcUrl());
-						info.setUsername(dsConfig.getUsername());
+				if (StringUtils.isNotBlank(jdbcRef)) {
+					if (LionUtil.isLionKey(jdbcRef)) {
+						jdbcRef = LionUtil.getLionConfig(LionUtil.trimLionKey(jdbcRef));
+					}
+					if (StringUtils.isNotBlank(jdbcRef)) {
+						DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
+							  Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
+						GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
+						if (config.getDataSourceConfigs().size() > 0) {
+							DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
+							getJdbcUrlInfo(info, dsConfig.getJdbcUrl());
+							info.setUsername(dsConfig.getUsername());
+						}
 					}
 				}
 			}
@@ -360,7 +365,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void setGroupDataSourceProperties(BeanDefinition dataSourceDefinition, DataSourceInfo info,
-			Set<PropertyValue> properties) {
+		  Set<PropertyValue> properties) {
 		dataSourceDefinition.setBeanClassName(GroupDataSource.class.getName());
 		for (PropertyValue p : dataSourceDefinition.getPropertyValues().getPropertyValues()) {
 			dataSourceDefinition.getPropertyValues().removePropertyValue(p);
@@ -403,8 +408,9 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				try {
 					template.process(dataSourceDefinition, beanName, info);
 				} catch (Exception e) {
-					String msg = String.format("DataSourceProcesser Error! bean:%s  class:%s", info.getDataSourceBeanName(),
-							info.getDataSourceBeanClass());
+					String msg = String
+						  .format("DataSourceProcesser Error! bean:%s  class:%s", info.getDataSourceBeanName(),
+								info.getDataSourceBeanClass());
 					Exception exp = new DalException(e);
 					logger.warn(msg, exp);
 				}
