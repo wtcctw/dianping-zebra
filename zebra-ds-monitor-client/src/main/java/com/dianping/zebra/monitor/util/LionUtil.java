@@ -22,11 +22,11 @@ public final class LionUtil {
 		}
 	}
 
-	private static boolean isLionKey(String key) {
+	public static boolean isLionKey(String key) {
 		return key.startsWith("${") && key.endsWith("}");
 	}
 
-	private static String trimLionKey(String key) {
+	public static String trimLionKey(String key) {
 		return isLionKey(key) ? key.substring(2, key.length() - 1) : key;
 	}
 
