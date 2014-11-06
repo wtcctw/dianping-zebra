@@ -63,7 +63,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 		return String.format("groupds.%s.mapping", groupId);
 	}
 
-	public GroupConfigModel getDsConfig(String env, final String groupId) {
+	public GroupConfigModel getDsConfig(String env, String groupId) {
 		try {
 			GroupConfigModel result = new GroupConfigModel();
 			result.setEnv(env);
@@ -72,10 +72,12 @@ public class DalConfigServiceImpl implements DalConfigService {
 			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
 				  .parseConfig(result.getConfig());
 
+			final String originGroupId = groupId.split("\\.")[0];
+
 			HashMap<String, String> configs = m_lionHttpService.getConfigByProject(env, "ds");
 			List<String> keys = Lists.newArrayList(Iterables.filter(configs.keySet(), new Predicate<String>() {
 				@Override public boolean apply(String input) {
-					return input.matches("^ds\\." + groupId + "\\-[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
+					return input.matches("^ds\\." + originGroupId + "\\-[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
 				}
 			}));
 			Map<String, DsConfigModel> dsConfigMap = new HashMap<String, DsConfigModel>();
