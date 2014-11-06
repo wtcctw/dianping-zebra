@@ -11,6 +11,37 @@ import java.beans.PropertyChangeListener;
 import java.util.Map;
 
 public class ConnectionServiceImpl implements ConnectionService {
+	
+	@Override
+   public ConnectionResult getConnectionResult(String jdbcRef) {
+		ConnectionResult result = new ConnectionResult();
+
+		GroupDataSource ds = null;
+		try {
+			ds = new GroupDataSource(jdbcRef);
+			ds.setFilter("stat,cat");
+			ds.init();
+
+			result.setCanConnect(true);
+		} catch (Exception t) {
+			Cat.logError(t);
+			result.setCanConnect(false);
+		} finally {
+			if (ds != null) {
+				try {
+					ds.close();
+				} catch (Exception ignore) {
+				}
+			}
+		}
+
+		hidePassword(ds.getConfig());
+		result.setConfig(ds.getConfig());
+
+		return result;
+	}
+	
+	
 	@Override
 	public ConnectionResult getConnectionResult(String jdbcRef, final Map<String, String> configs) {
 		ConnectionResult result = new ConnectionResult();

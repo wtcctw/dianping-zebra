@@ -60,6 +60,18 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window
 
 zebraWeb.controller('config-test', function ($scope, $http, name) {
     $scope.name = name;
+    var host = "";
+    
+    if($scope.config.env == "alpha"){
+    	host = "http://192.168.214.228:8080/";
+    }else if($scope.config.env == "qa"){
+    	host = "http://192.168.217.69:8080/";
+    }else if($scope.config.env == "prelease"){
+    	host = "http://10.2.8.65:8080/";
+    }else if($scope.config.env == "product"){
+    	host = "";
+    }
+    
     $http.get('/a/config?op=test&key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
         $scope.connectionStatus = data;
     });
@@ -69,7 +81,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
     $scope.name = name;
     $scope.load = function () {
         if ($scope.config && $scope.config.env) {
-            $http.get('/a/config?op=viewDs&key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+            $http.get(host + '/a/config?op=viewDs&key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
                 $scope.data = data;
             });
         }

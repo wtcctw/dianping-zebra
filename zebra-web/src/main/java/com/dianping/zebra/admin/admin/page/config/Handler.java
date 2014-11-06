@@ -1,5 +1,16 @@
 package com.dianping.zebra.admin.admin.page.config;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+
+import jodd.util.URLDecoder;
+
+import org.unidal.lookup.annotation.Inject;
+import org.unidal.web.mvc.annotation.InboundActionMeta;
+import org.unidal.web.mvc.annotation.OutboundActionMeta;
+import org.unidal.web.mvc.annotation.PayloadMeta;
+
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.zebra.admin.admin.page.JsonHandler;
 import com.dianping.zebra.admin.admin.service.ConnectionService;
@@ -7,16 +18,6 @@ import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
 import com.dianping.zebra.admin.admin.service.DalConfigService;
 import com.dianping.zebra.admin.admin.service.LionHttpService;
 import com.dianping.zebra.group.util.StringUtils;
-import jodd.util.URLDecoder;
-import org.unidal.lookup.annotation.Inject;
-import org.unidal.web.mvc.annotation.InboundActionMeta;
-import org.unidal.web.mvc.annotation.OutboundActionMeta;
-import org.unidal.web.mvc.annotation.PayloadMeta;
-
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Handler extends JsonHandler<Context> {
 	@Inject
@@ -48,7 +49,7 @@ public class Handler extends JsonHandler<Context> {
 				break;
 			case UPDATEDS:
 				m_dalConfigService.updateDsConfig(gson.fromJson(URLDecoder.decode(payload.getDsConfigs()),
-					  DalConfigService.GroupConfigModel.class));
+				      DalConfigService.GroupConfigModel.class));
 				break;
 			case TEST:
 				String jdbcRef = payload.getKey();
@@ -62,8 +63,9 @@ public class Handler extends JsonHandler<Context> {
 				}
 				ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
 
-				ConnectionService.ConnectionResult result = m_connectionService
-					  .getConnectionResult(jdbcRef, getConfigByGroupId(env, jdbcRef));
+				// ConnectionService.ConnectionResult result = m_connectionService
+				// .getConnectionResult(jdbcRef, getConfigByGroupId(env, jdbcRef));
+				ConnectionService.ConnectionResult result = m_connectionService.getConnectionResult(jdbcRef);
 
 				connectionstatus.setConnected(result.isCanConnect());
 				connectionstatus.setConfig(result.getConfig().toString());
@@ -101,15 +103,15 @@ public class Handler extends JsonHandler<Context> {
 		}
 	}
 
-	private Map<String, String> getConfigByGroupId(String env, String groupId) {
-		Map<String, String> result = new HashMap<String, String>();
-		DalConfigService.GroupConfigModel groupConfig = m_dalConfigService.getDsConfig(env, groupId);
-		result.put(String.format("groupds.%s.mapping", groupId), groupConfig.getConfig());
-		for (DalConfigService.DsConfigModel ds : groupConfig.getConfigs()) {
-			for (DalConfigService.ConfigProperty prop : ds.getProperties()) {
-				result.put(prop.getKey(), prop.getValue());
-			}
-		}
-		return result;
-	}
+//	private Map<String, String> getConfigByGroupId(String env, String groupId) {
+//		Map<String, String> result = new HashMap<String, String>();
+//		DalConfigService.GroupConfigModel groupConfig = m_dalConfigService.getDsConfig(env, groupId);
+//		result.put(String.format("groupds.%s.mapping", groupId), groupConfig.getConfig());
+//		for (DalConfigService.DsConfigModel ds : groupConfig.getConfigs()) {
+//			for (DalConfigService.ConfigProperty prop : ds.getProperties()) {
+//				result.put(prop.getKey(), prop.getValue());
+//			}
+//		}
+//		return result;
+//	}
 }
