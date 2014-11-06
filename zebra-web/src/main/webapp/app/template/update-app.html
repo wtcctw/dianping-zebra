@@ -45,22 +45,34 @@
             </thead>
             <tbody ng-repeat="(ip,machine) in app.m_machines">
             <tr>
-                <td rowspan="{{(machine.m_datasources | objectCount)+1}}"><a href="http://web.cmdb.dp/#menu=search;ip={{ip}};page=1;" target="_blank">{{ip}}</a></td>
+                <td rowspan="{{(machine.m_datasources | objectCount)+1}}"><a
+                        href="http://web.cmdb.dp/#menu=search;ip={{ip}};page=1;" target="_blank">{{ip}}</a></td>
                 <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{machine.m_version}}</td>
             </tr>
             <tr ng-repeat="(name,datasources) in machine.m_datasources">
                 <td>{{name}}</td>
-                <td><span title="{{datasources.m_jdbcUrl }}">...</span></td>
+                <td>
+                    <button type="button" class="url-button btn btn-default btn-xs" popover-trigger="mouseenter"
+                            popover="{{datasources.m_jdbcUrl }}">查看
+                    </button>
+                </td>
                 <td>{{datasources.m_username }}</td>
                 <td>{{datasources.m_type }}</td>
                 <td>{{datasources.m_initPoolSize }}</td>
                 <td>{{datasources.m_maxPoolSize }}</td>
                 <td>{{datasources.m_minPoolSize }}</td>
                 <td><span
-                     class="badge alert-{{datasources.m_type.indexOf('GroupDataSource') >= 0 || datasources.m_replaced ? 'success' : 'warning'}}">{{datasources.m_type.indexOf('GroupDataSource') >= 0  || datasources.m_replaced == true ? '是':'否'}}</span>
+                        class="badge alert-{{datasources.m_type.indexOf('GroupDataSource') >= 0 || datasources.m_replaced ? 'success' : 'warning'}}">{{datasources.m_type.indexOf('GroupDataSource') >= 0  || datasources.m_replaced == true ? '是':'否'}}</span>
                 </td>
-                <td><button class="btn btn-danger" ng-click="deleteInfo(ip,name)">删除</button></td>
+                <td>
+                    <button class="btn btn-danger btn-xs" ng-click="deleteInfo(ip,name)">删除</button>
+                </td>
             </tr>
         </table>
     </div>
 </div>
+<style type="text/css">
+    .url-button + .popover {
+        max-width: 100%;
+    }
+</style>
