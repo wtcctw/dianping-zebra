@@ -5,13 +5,13 @@ package com.dianping.zebra.group.filter.wall;
  */
 public class WallFilterConfig {
 
-	private String configManagerType;
+	private static volatile String configManagerType;
 
-	public String getConfigManagerType() {
-		return configManagerType;
+	public static String getConfigManagerType() {
+		return WallFilterConfig.configManagerType;
 	}
 
-	public void setConfigManagerType(String configManagerType) {
-		this.configManagerType = configManagerType;
+	public static void setConfigManagerType(String configManagerType) {
+		WallFilterConfig.configManagerType = configManagerType;
 	}
 }

@@ -61,16 +61,21 @@ public class Handler extends JsonHandler<Context> {
 					jdbcRef = "DPReview";
 				}
 				ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
-				connectionstatus
-					  .setConnected(m_connectionService.canConnect(jdbcRef, getConfigByGroupId(env, jdbcRef)));
-				connectionstatus.setConfig(m_connectionService.getConfig(jdbcRef).toString());
+
+				ConnectionService.ConnectionResult result = m_connectionService
+					  .getConnectionResult(jdbcRef, getConfigByGroupId(env, jdbcRef));
+
+				connectionstatus.setConnected(result.isCanConnect());
+				connectionstatus.setConfig(result.getConfig().toString());
 				responseObject = connectionstatus;
 				break;
 			case ENV:
-				if (m_lionHttpService.isDev()) {
-					responseObject = new String[] { "dev" };
+				if (EnvZooKeeperConfig.getEnv().equals("qa")) {
+					responseObject = m_lionHttpService.getDevEnv();
 				} else if (EnvZooKeeperConfig.getEnv().equals("prelease")) {
 					responseObject = new String[] { "prelease" };
+				} else if (m_lionHttpService.isDev()) {
+					responseObject = new String[] { "dev" };
 				} else {
 					responseObject = m_lionHttpService.getAllEnv();
 				}

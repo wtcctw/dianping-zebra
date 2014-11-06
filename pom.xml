@@ -5,7 +5,7 @@
     <groupId>com.dianping.zebra</groupId>
     <artifactId>zebra-all</artifactId>
     <packaging>pom</packaging>
-    <version>2.6.0</version>
+    <version>2.6.0-SNAPSHOT</version>
     <name>zebra-all</name>
     <organization>
         <name>dianping</name>
@@ -110,7 +110,7 @@
                         <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
-                <version>0.4.3</version>
+                <version>0.4.5</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -202,6 +202,11 @@
                 <groupId>org.unidal.framework</groupId>
                 <artifactId>web-framework</artifactId>
                 <version>2.1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>7.6.15.v20140411</version>
             </dependency>
             <dependency>
                 <groupId>org.unidal.webres</groupId>
