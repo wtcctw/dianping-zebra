@@ -56,7 +56,7 @@
                 <td>{{datasources.m_maxPoolSize }}</td>
                 <td>{{datasources.m_minPoolSize }}</td>
                 <td><span
-                        class="badge alert-{{datasource.m_type.contains('GroupDataSource') || datasource.m_replaced == true ? 'success' : (database.m_updateStatus == 2 ? 'info' : 'warning')}}">{{datasource.m_type.contains('GroupDataSource') || datasource.m_replaced == true ? '是':'否'}}</span>
+                     class="badge alert-{{datasources.m_type.indexOf('GroupDataSource') >= 0 || datasources.m_replaced ? 'success' : 'warning'}}">{{datasources.m_type.indexOf('GroupDataSource') >= 0  || datasources.m_replaced == true ? '是':'否'}}</span>
                 </td>
             </tr>
         </table>
