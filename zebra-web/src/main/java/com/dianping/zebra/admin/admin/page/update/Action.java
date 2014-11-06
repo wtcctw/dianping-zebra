@@ -5,7 +5,9 @@ public enum Action implements org.unidal.web.mvc.Action {
 
 	DATABASE("database"),
 
-	APP("app");
+	APP("app"),
+	
+	DELETE_MACHINE("delete_info");
 
 	private String m_name;
 

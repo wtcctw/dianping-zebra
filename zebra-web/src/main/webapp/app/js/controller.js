@@ -3,6 +3,7 @@ zebraWeb.controller('update', function ($scope, $http) {
         $scope.predicate = 'm_name';
         $scope.report = data;
     });
+    
 });
 
 zebraWeb.controller('black', function ($scope, $http) {
@@ -43,10 +44,18 @@ zebraWeb.controller('update-database', function ($scope, $stateParams, $http) {
     });
 });
 
-zebraWeb.controller('update-app', function ($scope, $stateParams, $http) {
+zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window) {
     $http.get('/a/update?op=app&app=' + $stateParams.name).success(function (data, status, headers, config) {
         $scope.app = data;
     });
+    
+    $scope.deleteInfo = function(ip,beanName){
+    	$http.get('/a/update?op=delete_info&app=' + $stateParams.name + '&ip=' + ip + '&beanName=' + beanName).success(function(data){
+    		if(data == "true"){
+    			$window.location.reload();
+    		}
+    	});
+    }
 });
 
 zebraWeb.controller('config-test', function ($scope, $http, name) {

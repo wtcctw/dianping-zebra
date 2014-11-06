@@ -31,6 +31,19 @@
         FROM <TABLE/>
         WHERE <FIELD name='database-name'/> = ${database-name}]]></statement>
       </query>
+      <query name="delete-by-info" type="DELETE">
+        <param name="app-name" />
+        <param name="ip" />
+        <param name="datasource-bean-name" />
+        <statement><![CDATA[DELETE FROM <TABLE/>
+        WHERE <FIELD name='app-name'/> = ${app-name}
+        <IF type='NOT_NULL' field='ip'>
+			AND <FIELD name='ip'/> = ${ip} 
+		</IF>
+		<IF type='NOT_NULL' field='datasource-bean-name'>
+			AND <FIELD name='datasource-bean-name'/> = ${datasource-bean-name} 
+		</IF>]]></statement>
+      </query>
     </query-defs>
   </entity>
 </entities>

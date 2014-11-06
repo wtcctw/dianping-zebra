@@ -248,6 +248,18 @@
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
 				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.web.dal.stat.HeartbeatDao</role>
+				</requirement>
+			</requirements>
+		</component>
+		<component>
+			<role>com.dianping.zebra.web.dal.stat.HeartbeatDao</role>
+			<implementation>com.dianping.zebra.web.dal.stat.HeartbeatDao</implementation>
+			<requirements>
+				<requirement>
+					<role>org.unidal.dal.jdbc.QueryEngine</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>

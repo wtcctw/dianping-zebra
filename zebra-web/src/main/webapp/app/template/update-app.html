@@ -40,11 +40,12 @@
                 <th>max</th>
                 <th>min</th>
                 <th>Update Dal</th>
+                <th>Delete</th>
             </tr>
             </thead>
             <tbody ng-repeat="(ip,machine) in app.m_machines">
             <tr>
-                <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{ip}}</td>
+                <td rowspan="{{(machine.m_datasources | objectCount)+1}}"><a href="http://web.cmdb.dp/#menu=search;ip={{ip}};page=1;" target="_blank">{{ip}}</a></td>
                 <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{machine.m_version}}</td>
             </tr>
             <tr ng-repeat="(name,datasources) in machine.m_datasources">
@@ -58,6 +59,7 @@
                 <td><span
                      class="badge alert-{{datasources.m_type.indexOf('GroupDataSource') >= 0 || datasources.m_replaced ? 'success' : 'warning'}}">{{datasources.m_type.indexOf('GroupDataSource') >= 0  || datasources.m_replaced == true ? '是':'否'}}</span>
                 </td>
+                <td><button class="btn btn-danger" ng-click="deleteInfo(ip,name)">删除</button></td>
             </tr>
         </table>
     </div>

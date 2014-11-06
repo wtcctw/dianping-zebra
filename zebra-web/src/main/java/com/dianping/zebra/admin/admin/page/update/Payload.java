@@ -17,6 +17,12 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	@FieldMeta("database")
 	private String m_database;
 
+	@FieldMeta("ip")
+	private String m_ip;
+	
+	@FieldMeta("beanName")
+	private String m_beanName;
+	
 	public void setAction(String action) {
 		m_action = Action.getByName(action, Action.VIEW);
 	}
@@ -57,5 +63,21 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 		if (m_action == null) {
 			m_action = Action.VIEW;
 		}
+	}
+	
+	public String getIp(){
+		return m_ip;
+	}
+	
+	public void setIp(String ip){
+		m_ip = ip;
+	}
+	
+	public String getBeanName(){
+		return m_beanName;
+	}
+
+	public void setBeanName(String beanName){
+		m_beanName = beanName;
 	}
 }
