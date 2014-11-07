@@ -16,9 +16,9 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 	private BlockingQueue<SingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<SingleDataSource>();
 
 	@Override
-	public synchronized SingleDataSource createDataSource(DataSourceConfig config, JdbcContext metaData,
+	public synchronized SingleDataSource createDataSource(DataSourceConfig config, JdbcContext context,
 			JdbcFilter filter) {
-		return new SingleDataSource(config, metaData, filter);
+		return new SingleDataSource(config, context, filter);
 	}
 
 	@Override

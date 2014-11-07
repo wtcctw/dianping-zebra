@@ -37,15 +37,8 @@ public class FailOverDataSource extends AbstractDataSource {
 	public FailOverDataSource(Map<String, DataSourceConfig> configs, JdbcContext context, JdbcFilter filter) {
 		this.configs = configs;
 		this.filter = filter;
-		this.context = context.clone();
-	}
-
-	private void changeMetaData(DataSourceConfig config) {
-		this.context.setDataSourceId(config.getId());
-		this.context.setJdbcUrl(config.getJdbcUrl());
-		this.context.setJdbcUsername(config.getUsername());
-		this.context.setJdbcPassword(config.getPassword() == null ? null : StringUtils.repeat("*", config.getPassword()
-		      .length()));
+		this.context = context;
+		this.context.setDataSource(this);
 	}
 
 	@Override
@@ -140,7 +133,6 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private boolean setMasterDb(DataSourceConfig config) {
 		if (master == null || !master.getId().equals(config.getId())) {
-			changeMetaData(config);
 			master = getDataSource(config);
 			return true;
 		}
@@ -264,7 +256,6 @@ public class FailOverDataSource extends AbstractDataSource {
 					      for (DataSourceConfig config : source.getWeakFailOverDataSource().configs.values()) {
 						      CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
 						      if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
-
 							      result.setChangedMaster(source.getWeakFailOverDataSource().setMasterDb(config));
 							      result.setMasterExist(true);
 
@@ -273,6 +264,12 @@ public class FailOverDataSource extends AbstractDataSource {
 							      result.setException(checkResult.getException());
 						      }
 					      }
+
+					      if (result.isMasterExist()) {
+						      // reset the exception if has any
+						      result.setException(null);
+					      }
+
 					      return result;
 				      }
 			      });
@@ -334,6 +331,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 				CheckMasterDataSourceResult result = CheckMasterDataSourceResult.ERROR;
 				result.setException(e);
+
 				return result;
 			} finally {
 				if (rs != null) {

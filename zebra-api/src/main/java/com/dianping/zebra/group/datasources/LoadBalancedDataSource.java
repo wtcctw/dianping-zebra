@@ -27,13 +27,13 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private DataSourceRouter router;
 
-	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
-			JdbcContext metaData, JdbcFilter filter, int retryTimes) {
+	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap, JdbcContext context,
+	      JdbcFilter filter, int retryTimes) {
 		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.retryTimes = retryTimes;
 		this.filter = filter;
-		this.context = metaData;
+		this.context = context;
 	}
 
 	public void close() throws SQLException {

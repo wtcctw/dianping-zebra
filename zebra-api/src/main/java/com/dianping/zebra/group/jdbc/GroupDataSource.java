@@ -626,9 +626,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
-		private String passwordKey = ".jdbc." + Constants.ELEMENT_PASSWORD;
+		private static final String PASSWORD_KEY = ".jdbc." + Constants.ELEMENT_PASSWORD;
 
-		private String userKey = ".jdbc." + Constants.ELEMENT_USER;
+		private static final String USERNAME_KEY = ".jdbc." + Constants.ELEMENT_USER;
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
@@ -636,7 +636,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				return;
 			}
 
-			if (evt.getPropertyName().endsWith(userKey)) {
+			if (evt.getPropertyName().endsWith(USERNAME_KEY)) {
 				atomicRefresh.setUser(evt.getNewValue().toString());
 				if (atomicRefresh.needToRefresh()) {
 					refreshUserAndPassword();
@@ -644,7 +644,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				return;
 			}
 
-			if (evt.getPropertyName().endsWith(passwordKey)) {
+			if (evt.getPropertyName().endsWith(PASSWORD_KEY)) {
 				atomicRefresh.setPassword(evt.getNewValue().toString());
 				if (atomicRefresh.needToRefresh()) {
 					refreshUserAndPassword();
