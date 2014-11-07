@@ -259,14 +259,6 @@ public class JdbcContext implements Cloneable {
 		this.sql = sql;
 	}
 
-//	private List<StatementNode> parseSqls(List<String> sqls) {
-//		List<StatementNode> result = new ArrayList<StatementNode>();
-//		for (String sql : sqls) {
-//			result.add(parseSql(sql));
-//		}
-//		return result;
-//	}
-
 	public void setTransaction(boolean isTransaction) {
 		this.isTransaction = isTransaction;
 	}
