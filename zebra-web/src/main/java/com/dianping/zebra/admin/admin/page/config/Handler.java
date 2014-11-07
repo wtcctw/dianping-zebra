@@ -92,7 +92,7 @@ public class Handler extends JsonHandler<Context> {
 					if (host.length() > 0) {
 						String url = host + "/a/config?op=test&key=" + jdbcRef + "&env=" + env;
 						responseObject = m_httpService.sendGet(url);
-						success(ctx, (String) responseObject);
+						successJson(ctx, (String) responseObject);
 					} else {
 						success(ctx, responseObject);
 					}

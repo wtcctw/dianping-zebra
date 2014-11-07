@@ -28,7 +28,9 @@ public class AuthorizationFilter implements Filter {
 		String uri = req.getRequestURI();
 		String op = req.getParameter("op");
 
-		if (!("/a/config".equalsIgnoreCase(uri) && "test".equalsIgnoreCase(op))) {
+		if ("/a/config".equalsIgnoreCase(uri) && "test".equalsIgnoreCase(op)) {
+			chain.doFilter(request, response);
+		} else {
 			Cookie[] cookies = req.getCookies();
 
 			if (cookies != null) {
@@ -42,10 +44,7 @@ public class AuthorizationFilter implements Filter {
 				}
 			}
 			rsp.setStatus(HttpResponseStatus.UNAUTHORIZED.getCode());
-		}else{
-			chain.doFilter(request, response);
 		}
-
 	}
 
 	@Override

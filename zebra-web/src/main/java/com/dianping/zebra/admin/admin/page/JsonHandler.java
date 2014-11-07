@@ -32,7 +32,7 @@ public abstract class JsonHandler<T extends ActionContext<?>> implements PageHan
 		ctx.stopProcess();
 	}
 	
-	protected void success(T ctx, String jsonString) throws IOException {
+	protected void successJson(T ctx, String jsonString) throws IOException {
 		HttpServletResponse response = ctx.getHttpServletResponse();
 		response.setContentType("application/json");
 		response.getWriter().write(jsonString);
