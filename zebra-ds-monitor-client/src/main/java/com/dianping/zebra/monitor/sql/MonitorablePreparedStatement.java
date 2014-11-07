@@ -289,8 +289,8 @@ public class MonitorablePreparedStatement extends MonitorableStatement implement
 		prepareStatement.setAsciiStream(parameterIndex, x, length);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@Deprecated
 	public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
 		setParameter(parameterIndex, "[unicode-stream]");
 		prepareStatement.setUnicodeStream(parameterIndex, x, length);

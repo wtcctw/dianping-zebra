@@ -113,8 +113,8 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 		return prepareCall.getDouble(parameterIndex);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@Deprecated
 	public BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException {
 		return prepareCall.getBigDecimal(parameterIndex, scale);
 	}
