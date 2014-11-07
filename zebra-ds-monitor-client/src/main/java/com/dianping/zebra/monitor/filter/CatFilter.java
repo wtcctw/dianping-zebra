@@ -21,7 +21,6 @@ import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.site.helper.Stringizers;
 
 import javax.sql.DataSource;
-
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,18 +37,20 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
+	private static final int[] SQL_LENGTH_RANGE = new int[] { 0, 10, 100, 1000, 10000, 100000, 1000000, 10000000 };
+
 	private Set<String> cachedSqlSet = new HashSet<String>();
 
 	@Override
 	public <S> void closeSingleDataSource(JdbcContext metaData, S source, FilterActionWithSQLExcption<S> action)
-	      throws SQLException {
+		  throws SQLException {
 		super.closeSingleDataSource(metaData, source, action);
 		Cat.logEvent("DataSource.Destoryed", metaData.getDataSourceId());
 	}
 
 	@Override
 	public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
-	      throws SQLException {
+		  throws SQLException {
 		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
@@ -69,10 +70,23 @@ public class CatFilter extends DefaultJdbcFilter {
 
 			if (metaData.getRealJdbcContext() != null) {
 				Cat.logEvent("SQL.Database", metaData.getRealJdbcContext().getJdbcUrl(), Event.SUCCESS, metaData
-				      .getRealJdbcContext().getDataSourceId());
-				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS, Stringizers
-				      .forJson().compact()
-				      .from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
+					  .getRealJdbcContext().getDataSourceId());
+			}
+
+			String params = Stringizers.forJson().compact()
+				  .from(metaData.getParams(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
+			if (metaData.isBatch()) {
+				if (metaData.getBatchedSql() != null) {
+					for (String sql : metaData.getBatchedSql()) {
+						Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, params);
+						logSqlLengthEvent(sql, params);
+					}
+				}
+			} else {
+				if (metaData.getSql() != null) {
+					Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(metaData.getSql()), Transaction.SUCCESS, params);
+					logSqlLengthEvent(metaData.getSql(), params);
+				}
 			}
 
 			t.setStatus(Transaction.SUCCESS);
@@ -90,9 +104,9 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public <S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(JdbcContext metaData,
-	      S source, FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
+		  S source, FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action) {
 		FailOverDataSource.FindMasterDataSourceResult result = super.findMasterFailOverDataSource(metaData, source,
-		      action);
+			  action);
 		if (result != null && result.isChangedMaster()) {
 			Cat.logEvent("DAL.Master", "Found-" + metaData.getDataSourceId());
 		}
@@ -143,7 +157,8 @@ public class CatFilter extends DefaultJdbcFilter {
 	}
 
 	@Override
-	public <S> void refreshGroupDataSource(JdbcContext metaData, String propertiesName, S source, FilterAction<S> action) {
+	public <S> void refreshGroupDataSource(JdbcContext metaData, String propertiesName, S source,
+		  FilterAction<S> action) {
 		Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Refresh-" + metaData.getDataSourceId());
 		Cat.logEvent("DAL.Refresh.Property", propertiesName);
 		try {
@@ -169,5 +184,18 @@ public class CatFilter extends DefaultJdbcFilter {
 		} finally {
 			t.complete();
 		}
+	}
+
+	private void logSqlLengthEvent(String sql, String params) {
+		int length = sql == null ? 0 : sql.length();
+
+		for (int k = 0; k < SQL_LENGTH_RANGE.length; k++) {
+			if (length <= SQL_LENGTH_RANGE[k]) {
+				Cat.logEvent("SQL.Length", "<=" + SQL_LENGTH_RANGE[k], Transaction.SUCCESS, params);
+				return;
+			}
+		}
+
+		Cat.logEvent("SQL.Length", ">" + SQL_LENGTH_RANGE[SQL_LENGTH_RANGE.length - 1], Transaction.SUCCESS, params);
 	}
 }
