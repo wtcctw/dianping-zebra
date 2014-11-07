@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,6 +35,13 @@ public class FailoverDataSourceTest {
 	ResultSet result = mock(ResultSet.class);
 
 	Statement state = mock(Statement.class);
+
+	@Test
+	public void length() throws UnsupportedEncodingException {
+		System.out.println("ab".getBytes("UTF-8").length);
+		System.out.println("ab一".getBytes("UTF-8").length);
+		System.out.println("一".getBytes("UTF-8").length);
+	}
 
 	@Before
 	public void init() throws SQLException {

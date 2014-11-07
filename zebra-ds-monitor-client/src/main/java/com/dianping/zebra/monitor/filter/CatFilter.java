@@ -23,6 +23,8 @@ import com.site.helper.Stringizers;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,7 +39,17 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
-	private static final int[] SQL_LENGTH_RANGE = new int[] { 0, 10, 100, 1000, 10000, 100000, 1000000, 10000000 };
+	private static final Map<Integer, String> SQL_LENGTH_RANGE = new LinkedHashMap<Integer, String>();
+
+	static {
+		SQL_LENGTH_RANGE.put(1024, "<= 1K");
+		SQL_LENGTH_RANGE.put(10240, "<= 10K");
+		SQL_LENGTH_RANGE.put(102400, "<= 100K");
+		SQL_LENGTH_RANGE.put(1024 * 1024, "<= 1M");
+		SQL_LENGTH_RANGE.put(10240 * 1024, "<= 10M");
+		SQL_LENGTH_RANGE.put(102400 * 1024, "<= 100M");
+		SQL_LENGTH_RANGE.put(Integer.MAX_VALUE, "> 100M");
+	}
 
 	private Set<String> cachedSqlSet = new HashSet<String>();
 
@@ -189,13 +201,11 @@ public class CatFilter extends DefaultJdbcFilter {
 	private void logSqlLengthEvent(String sql, String params) {
 		int length = sql == null ? 0 : sql.length();
 
-		for (int k = 0; k < SQL_LENGTH_RANGE.length; k++) {
-			if (length <= SQL_LENGTH_RANGE[k]) {
-				Cat.logEvent("SQL.Length", "<=" + SQL_LENGTH_RANGE[k], Transaction.SUCCESS, params);
+		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
+			if (length <= item.getKey()) {
+				Cat.logEvent("SQL.Length", item.getValue(), Transaction.SUCCESS, params);
 				return;
 			}
 		}
-
-		Cat.logEvent("SQL.Length", ">" + SQL_LENGTH_RANGE[SQL_LENGTH_RANGE.length - 1], Transaction.SUCCESS, params);
 	}
 }
