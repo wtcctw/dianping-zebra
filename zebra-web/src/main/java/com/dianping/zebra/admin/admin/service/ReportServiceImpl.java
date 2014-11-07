@@ -268,9 +268,7 @@ public class ReportServiceImpl implements ReportService {
 				if (machine.getIntergrateWithDal()) {
 					visitMachine(machine);
 				} else {
-
 					hasNotIntegratedWithDal = true;
-					app.setUpdateStatus(2);
 				}
 			}
 
