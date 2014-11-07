@@ -25,9 +25,10 @@ public class AuthorizationFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse rsp = (HttpServletResponse) response;
 
-		StringBuffer url = req.getRequestURL();
+		String uri = req.getRequestURI();
+		String op = req.getParameter("op");
 
-		if (!url.toString().contains("/config?op=test")) {
+		if (!("/a/config".equalsIgnoreCase(uri) && "test".equalsIgnoreCase(op))) {
 			Cookie[] cookies = req.getCookies();
 
 			if (cookies != null) {
@@ -41,6 +42,8 @@ public class AuthorizationFilter implements Filter {
 				}
 			}
 			rsp.setStatus(HttpResponseStatus.UNAUTHORIZED.getCode());
+		}else{
+			chain.doFilter(request, response);
 		}
 
 	}
