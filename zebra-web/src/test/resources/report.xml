@@ -1,5 +1,6 @@
 <report group-data-source="1" dpdl-data-source="3" c3p0-data-source="3" single-data-source="3"
-		other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10" update-status="0">
+		other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10"
+		success-database="1" half-done-database="1" failure-database="1">
 	<database name="tuangou2010" group-data-source="1"
 		dpdl-data-source="3" c3p0-data-source="3" single-data-source="3"
 		other-data-source="1" total-data-source="10" replaced-single-data-source="10" replaced-dpdl-data-source="10" update-status="0">

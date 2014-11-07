@@ -351,8 +351,6 @@ public class ReportServiceImpl implements ReportService {
 
 		@Override
 		public void visitReport(Report report) {
-			boolean hasNotIntegratedWithDal = false;
-
 			for (Database database : report.getDatabases().values()) {
 				visitDatabase(database);
 
@@ -365,23 +363,15 @@ public class ReportServiceImpl implements ReportService {
 				report.incReplacedDpdlDataSource(database.getReplacedDpdlDataSource());
 				report.incTotalDataSource(database.getTotalDataSource());
 
-				if (database.getUpdateStatus() == 2) {
-					hasNotIntegratedWithDal = true;
-				}
-			}
-
-			if (hasNotIntegratedWithDal) {
-				report.setUpdateStatus(2);
-			} else {
-				if (report.getGroupDataSource() == 0 && report.getReplacedSingleDataSource() == 0
-				      && report.getReplacedDpdlDataSource() == 0
-				      && (report.getC3p0DataSource() != 0 || report.getDpdlDataSource() != 0)) {
-					report.setUpdateStatus(-1);
-				} else if ((report.getReplacedSingleDataSource() + report.getReplacedDpdlDataSource() + report
-				      .getGroupDataSource()) == report.getTotalDataSource()) {
-					report.setUpdateStatus(0);
-				} else {
-					report.setUpdateStatus(1);
+				switch (database.getUpdateStatus()) {
+				case -1:
+					report.incFailureDatabase();
+					break;
+				case 0:
+					report.incSuccessDatabase();
+					break;
+				default:
+					report.incHalfDoneDatabase();
 				}
 			}
 		}

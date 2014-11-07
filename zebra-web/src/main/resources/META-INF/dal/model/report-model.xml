@@ -9,7 +9,9 @@
 	    <attribute name="total-data-source" value-type="int" primitive="true" method-inc="true"/>
 		<attribute name="replaced-single-data-source" value-type="int" primitive="true" method-inc="true"/>
 	    <attribute name="replaced-dpdl-data-source" value-type="int" primitive="true" method-inc="true"/>
-	   	<attribute name="update-status" value-type="int" primitive="true"/>
+	    <attribute name="success-database" value-type="int" primitive="true" method-inc="true"/>
+	    <attribute name="half-done-database" value-type="int" primitive="true" method-inc="true"/>
+	    <attribute name="failure-database" value-type="int" primitive="true" method-inc="true"/>
 		<entity-ref name="database" type="map" names="databases" method-find-or-create="true"/>
 	</entity>
 	<entity name="database">

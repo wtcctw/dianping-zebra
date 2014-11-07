@@ -158,7 +158,6 @@ public class MonitorablePreparedStatement extends MonitorableStatement implement
 		notPlainBatchSize++;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public int[] executeBatch() throws SQLException {
 		return executeWithCat(new JDBCOperationCallback<int[]>() {
