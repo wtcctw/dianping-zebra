@@ -31,4 +31,13 @@ public abstract class JsonHandler<T extends ActionContext<?>> implements PageHan
 		response.getWriter().close();
 		ctx.stopProcess();
 	}
+	
+	protected void success(T ctx, String jsonString) throws IOException {
+		HttpServletResponse response = ctx.getHttpServletResponse();
+		response.setContentType("application/json");
+		response.getWriter().write(jsonString);
+		response.getWriter().flush();
+		response.getWriter().close();
+		ctx.stopProcess();
+	}
 }

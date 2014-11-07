@@ -60,21 +60,9 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window
 
 zebraWeb.controller('config-test', function ($scope, $http, name) {
     $scope.name = name;
-    var host = "";
+    var url = '/a/config?op=test&key=' + name + '&env=' + $scope.config.env;
     
-    if($scope.config.env == "alpha"){
-    	host = "http://192.168.214.228:8080";
-    }else if($scope.config.env == "qa"){
-    	host = "http://zebra-web01.beta:8080";
-    }else if($scope.config.env == "prelease"){
-    	host = "http://10.2.8.65:8080";
-    }else if($scope.config.env == "product"){
-    	host = "";
-    }
-    
-    var url = host + '/a/config?op=test&key=' + name + '&env=' + $scope.config.env + "&callback=JSON_CALLBACK";
-    
-    $http.jsonp(url).success(function (data, status, headers, config) {
+    $http.get(url).success(function (data, status, headers, config) {
         $scope.connectionStatus = data;
     });
 });

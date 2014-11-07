@@ -16,12 +16,16 @@ import com.dianping.zebra.admin.admin.page.JsonHandler;
 import com.dianping.zebra.admin.admin.service.ConnectionService;
 import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
 import com.dianping.zebra.admin.admin.service.DalConfigService;
+import com.dianping.zebra.admin.admin.service.HttpService;
 import com.dianping.zebra.admin.admin.service.LionHttpService;
 import com.dianping.zebra.group.util.StringUtils;
 
 public class Handler extends JsonHandler<Context> {
 	@Inject
 	private LionHttpService m_lionHttpService;
+
+	@Inject
+	private HttpService m_httpService;
 
 	@Inject
 	private ConnectionService m_connectionService;
@@ -42,6 +46,7 @@ public class Handler extends JsonHandler<Context> {
 		try {
 			Payload payload = ctx.getPayload();
 			Object responseObject = null;
+			String currentEnv = EnvZooKeeperConfig.getEnv();
 
 			switch (payload.getAction()) {
 			case VIEWDS:
@@ -61,20 +66,43 @@ public class Handler extends JsonHandler<Context> {
 				if (jdbcRef.toLowerCase().equals("dpreview")) {
 					jdbcRef = "DPReview";
 				}
-				ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
 
-				// ConnectionService.ConnectionResult result = m_connectionService
-				// .getConnectionResult(jdbcRef, getConfigByGroupId(env, jdbcRef));
-				ConnectionService.ConnectionResult result = m_connectionService.getConnectionResult(jdbcRef);
+				if (env.equalsIgnoreCase(currentEnv)) {
+					ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
+					ConnectionService.ConnectionResult result = m_connectionService.getConnectionResult(jdbcRef);
 
-				connectionstatus.setConnected(result.isCanConnect());
-				connectionstatus.setConfig(result.getConfig().toString());
-				responseObject = connectionstatus;
-				break;
+					connectionstatus.setConnected(result.isCanConnect());
+					connectionstatus.setConfig(result.getConfig().toString());
+					responseObject = connectionstatus;
+					break;
+				} else {
+					String host = "";
+					if ("alpha".equals(env)) {
+						host = "http://192.168.214.228:8080";
+					} else if ("qa".equals(env)) {
+						host = "http://zebra-web01.beta:8080";
+					} else if ("prelease".equals(env)) {
+						host = "http://10.2.8.65:8080";
+					} else if ("product".equals(env)) {
+						host = "http://zebra.dp";
+					} else {
+						responseObject = "Error: unrecognized lion env!";
+					}
+
+					if (host.length() > 0) {
+						String url = host + "/a/config?op=test&key=" + jdbcRef + "&env=" + env;
+						responseObject = m_httpService.sendGet(url);
+						success(ctx, (String) responseObject);
+					} else {
+						success(ctx, responseObject);
+					}
+
+					return;
+				}
 			case ENV:
-				if (EnvZooKeeperConfig.getEnv().equals("qa")) {
+				if ("qa".equals(currentEnv)) {
 					responseObject = m_lionHttpService.getDevEnv();
-				} else if (EnvZooKeeperConfig.getEnv().equals("prelease")) {
+				} else if ("prelease".equals(currentEnv)) {
 					responseObject = new String[] { "prelease" };
 				} else if (m_lionHttpService.isDev()) {
 					responseObject = new String[] { "dev" };
@@ -103,15 +131,15 @@ public class Handler extends JsonHandler<Context> {
 		}
 	}
 
-//	private Map<String, String> getConfigByGroupId(String env, String groupId) {
-//		Map<String, String> result = new HashMap<String, String>();
-//		DalConfigService.GroupConfigModel groupConfig = m_dalConfigService.getDsConfig(env, groupId);
-//		result.put(String.format("groupds.%s.mapping", groupId), groupConfig.getConfig());
-//		for (DalConfigService.DsConfigModel ds : groupConfig.getConfigs()) {
-//			for (DalConfigService.ConfigProperty prop : ds.getProperties()) {
-//				result.put(prop.getKey(), prop.getValue());
-//			}
-//		}
-//		return result;
-//	}
+	// private Map<String, String> getConfigByGroupId(String env, String groupId) {
+	// Map<String, String> result = new HashMap<String, String>();
+	// DalConfigService.GroupConfigModel groupConfig = m_dalConfigService.getDsConfig(env, groupId);
+	// result.put(String.format("groupds.%s.mapping", groupId), groupConfig.getConfig());
+	// for (DalConfigService.DsConfigModel ds : groupConfig.getConfigs()) {
+	// for (DalConfigService.ConfigProperty prop : ds.getProperties()) {
+	// result.put(prop.getKey(), prop.getValue());
+	// }
+	// }
+	// return result;
+	// }
 }
