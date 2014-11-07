@@ -6,11 +6,9 @@ package com.dianping.zebra.group.filter.wall;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.filter.JdbcContext;
-import com.dianping.zebra.group.util.StringUtils;
 import junit.framework.Assert;
 import org.junit.Test;
 
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 
 public class WallFilterTest {

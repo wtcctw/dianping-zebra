@@ -7,7 +7,6 @@ import com.dianping.zebra.group.filter.delegate.FilterAction;
 import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
-import com.dianping.zebra.group.filter.stat.server.ServerHelper;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.foundationdb.sql.StandardException;
 import com.foundationdb.sql.parser.StatementNode;
