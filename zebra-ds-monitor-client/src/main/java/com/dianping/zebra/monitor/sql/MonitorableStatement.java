@@ -15,6 +15,8 @@
  */
 package com.dianping.zebra.monitor.sql;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.sql.*;
 
 /**
@@ -265,6 +267,14 @@ public class MonitorableStatement implements Statement {
 	@Override
 	public void setPoolable(boolean poolable) throws SQLException {
 		innerStatement.setPoolable(poolable);
+	}
+
+	public void closeOnCompletion() throws SQLException {
+		throw new NotImplementedException();
+	}
+
+	public boolean isCloseOnCompletion() throws SQLException {
+		throw new NotImplementedException();
 	}
 
 	@Override

@@ -15,10 +15,14 @@
  */
 package com.dianping.zebra.monitor.sql;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 /**
  * 该<code>DataSource</code>用于收集各底层DataSource的执行信息，包括sql, sql params, sql destination, 执行耗时等信息
@@ -59,6 +63,10 @@ public class MonitorableDataSource implements DataSource {
 	@Override
 	public int getLoginTimeout() throws SQLException {
 		return innerDataSource.getLoginTimeout();
+	}
+
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		throw new NotImplementedException();
 	}
 
 	@Override

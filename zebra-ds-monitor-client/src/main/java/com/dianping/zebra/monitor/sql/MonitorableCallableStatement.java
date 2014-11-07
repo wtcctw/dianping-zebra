@@ -1,9 +1,9 @@
 /**
  * Project: zebra-sql-monitor-client
- * 
+ *
  * File Created at 2011-10-28
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -15,35 +15,25 @@
  */
 package com.dianping.zebra.monitor.sql;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Clob;
-import java.sql.Date;
-import java.sql.NClob;
-import java.sql.Ref;
-import java.sql.RowId;
-import java.sql.SQLException;
-import java.sql.SQLXML;
-import java.sql.Time;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.Calendar;
 import java.util.Map;
 
 /**
  * @author danson.liu
- *
  */
 public class MonitorableCallableStatement extends MonitorablePreparedStatement implements CallableStatement {
 
 	private final CallableStatement prepareCall;
 
 	public MonitorableCallableStatement(CallableStatement prepareCall, String sql,
-	      MonitorableConnection monitorableConnection) {
+		  MonitorableConnection monitorableConnection) {
 		super(prepareCall, sql, monitorableConnection);
 		this.prepareCall = prepareCall;
 	}
@@ -602,5 +592,13 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	@Override
 	public void setNClob(String parameterName, Reader reader) throws SQLException {
 		prepareCall.setNClob(parameterName, reader);
+	}
+
+	public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
+		throw new NotImplementedException();
+	}
+
+	public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
+		throw new NotImplementedException();
 	}
 }

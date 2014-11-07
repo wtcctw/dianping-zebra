@@ -1,9 +1,9 @@
 /**
  * Project: zebra-sql-monitor-client
- * 
+ *
  * File Created at 2011-10-27
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -15,29 +15,17 @@
  */
 package com.dianping.zebra.monitor.sql;
 
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.SQLClientInfoException;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.SQLXML;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.Struct;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.sql.*;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
 /**
  * 对于实际<code>Connection</code>的包装，提供monitor功能
- * @author danson.liu
  *
+ * @author danson.liu
  */
 public class MonitorableConnection implements Connection {
 
@@ -53,8 +41,10 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
-	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		return new MonitorableStatement(innerConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);
+	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+		  throws SQLException {
+		return new MonitorableStatement(
+			  innerConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability), this);
 	}
 
 	@Override
@@ -63,8 +53,11 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		return new MonitorablePreparedStatement(innerConnection.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql, this);
+	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
+		  int resultSetHoldability) throws SQLException {
+		return new MonitorablePreparedStatement(
+			  innerConnection.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql,
+			  this);
 	}
 
 	@Override
@@ -88,13 +81,17 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-		return new MonitorablePreparedStatement(innerConnection.prepareStatement(sql, resultSetType, resultSetConcurrency), sql, this);
+	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+		  throws SQLException {
+		return new MonitorablePreparedStatement(
+			  innerConnection.prepareStatement(sql, resultSetType, resultSetConcurrency), sql, this);
 	}
 
 	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		return new MonitorableCallableStatement(innerConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql, this);
+	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
+		  int resultSetHoldability) throws SQLException {
+		return new MonitorableCallableStatement(
+			  innerConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql, this);
 	}
 
 	@Override
@@ -104,7 +101,8 @@ public class MonitorableConnection implements Connection {
 
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-		return new MonitorableCallableStatement(innerConnection.prepareCall(sql, resultSetType, resultSetConcurrency), sql, this);
+		return new MonitorableCallableStatement(innerConnection.prepareCall(sql, resultSetType, resultSetConcurrency),
+			  sql, this);
 	}
 
 	@Override
@@ -123,13 +121,13 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
-	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		innerConnection.setAutoCommit(autoCommit);
+	public boolean getAutoCommit() throws SQLException {
+		return innerConnection.getAutoCommit();
 	}
 
 	@Override
-	public boolean getAutoCommit() throws SQLException {
-		return innerConnection.getAutoCommit();
+	public void setAutoCommit(boolean autoCommit) throws SQLException {
+		innerConnection.setAutoCommit(autoCommit);
 	}
 
 	@Override
@@ -158,18 +156,13 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
-	public void setReadOnly(boolean readOnly) throws SQLException {
-		innerConnection.setReadOnly(readOnly);
-	}
-
-	@Override
 	public boolean isReadOnly() throws SQLException {
 		return innerConnection.isReadOnly();
 	}
 
 	@Override
-	public void setCatalog(String catalog) throws SQLException {
-		innerConnection.setCatalog(catalog);
+	public void setReadOnly(boolean readOnly) throws SQLException {
+		innerConnection.setReadOnly(readOnly);
 	}
 
 	@Override
@@ -178,13 +171,18 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
-	public void setTransactionIsolation(int level) throws SQLException {
-		innerConnection.setTransactionIsolation(level);
+	public void setCatalog(String catalog) throws SQLException {
+		innerConnection.setCatalog(catalog);
 	}
 
 	@Override
 	public int getTransactionIsolation() throws SQLException {
 		return innerConnection.getTransactionIsolation();
+	}
+
+	@Override
+	public void setTransactionIsolation(int level) throws SQLException {
+		innerConnection.setTransactionIsolation(level);
 	}
 
 	@Override
@@ -208,13 +206,13 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
-	public void setHoldability(int holdability) throws SQLException {
-		innerConnection.setHoldability(holdability);
+	public int getHoldability() throws SQLException {
+		return innerConnection.getHoldability();
 	}
 
 	@Override
-	public int getHoldability() throws SQLException {
-		return innerConnection.getHoldability();
+	public void setHoldability(int holdability) throws SQLException {
+		innerConnection.setHoldability(holdability);
 	}
 
 	@Override
@@ -268,11 +266,6 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
-	public void setClientInfo(Properties properties) throws SQLClientInfoException {
-		innerConnection.setClientInfo(properties);
-	}
-
-	@Override
 	public String getClientInfo(String name) throws SQLException {
 		return innerConnection.getClientInfo(name);
 	}
@@ -283,6 +276,11 @@ public class MonitorableConnection implements Connection {
 	}
 
 	@Override
+	public void setClientInfo(Properties properties) throws SQLClientInfoException {
+		innerConnection.setClientInfo(properties);
+	}
+
+	@Override
 	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
 		return innerConnection.createArrayOf(typeName, elements);
 	}
@@ -290,6 +288,26 @@ public class MonitorableConnection implements Connection {
 	@Override
 	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
 		return innerConnection.createStruct(typeName, attributes);
+	}
+
+	public String getSchema() throws SQLException {
+		throw new NotImplementedException();
+	}
+
+	public void setSchema(String schema) throws SQLException {
+		throw new NotImplementedException();
+	}
+
+	public void abort(Executor executor) throws SQLException {
+		throw new NotImplementedException();
+	}
+
+	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+		throw new NotImplementedException();
+	}
+
+	public int getNetworkTimeout() throws SQLException {
+		throw new NotImplementedException();
 	}
 
 	public Connection getInnerConnection() {
