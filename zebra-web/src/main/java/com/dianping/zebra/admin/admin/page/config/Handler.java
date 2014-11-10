@@ -1,24 +1,17 @@
 package com.dianping.zebra.admin.admin.page.config;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.zebra.admin.admin.page.JsonHandler;
+import com.dianping.zebra.admin.admin.service.*;
+import com.dianping.zebra.group.util.StringUtils;
 import jodd.util.URLDecoder;
-
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
 import org.unidal.web.mvc.annotation.PayloadMeta;
 
-import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.zebra.admin.admin.page.JsonHandler;
-import com.dianping.zebra.admin.admin.service.ConnectionService;
-import com.dianping.zebra.admin.admin.service.ConnectionServiceImpl;
-import com.dianping.zebra.admin.admin.service.DalConfigService;
-import com.dianping.zebra.admin.admin.service.HttpService;
-import com.dianping.zebra.admin.admin.service.LionHttpService;
-import com.dianping.zebra.group.util.StringUtils;
+import javax.servlet.ServletException;
+import java.io.IOException;
 
 public class Handler extends JsonHandler<Context> {
 	@Inject
@@ -54,7 +47,7 @@ public class Handler extends JsonHandler<Context> {
 				break;
 			case UPDATEDS:
 				m_dalConfigService.updateDsConfig(gson.fromJson(URLDecoder.decode(payload.getDsConfigs()),
-				      DalConfigService.GroupConfigModel.class));
+					  DalConfigService.GroupConfigModel.class));
 				break;
 			case TEST:
 				String jdbcRef = payload.getKey();
@@ -113,9 +106,15 @@ public class Handler extends JsonHandler<Context> {
 			case CREATE:
 				String project = payload.getProject();
 				if (project.equals("groupds")) {
-					String key = String.format("groupds.%s.mapping", payload.getKey());
+					if (StringUtils.isBlank(payload.getKey())) {
+						throw new NullPointerException("key");
+					}
+					String key = String.format("groupds.%s.mapping", payload.getKey().toLowerCase());
+
 					m_lionHttpService.createKey("groupds", key);
+
 					m_lionHttpService.removeUnset(key);
+
 				} else if (project.equals("ds")) {
 
 				}
