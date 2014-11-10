@@ -3,7 +3,7 @@ zebraWeb.controller('update', function ($scope, $http) {
         $scope.predicate = 'm_name';
         $scope.report = data;
     });
-    
+
 });
 
 zebraWeb.controller('black', function ($scope, $http) {
@@ -48,20 +48,20 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window
     $http.get('/a/update?op=app&app=' + $stateParams.name).success(function (data, status, headers, config) {
         $scope.app = data;
     });
-    
-    $scope.deleteInfo = function(ip,beanName){
-    	$http.get('/a/update?op=delete_info&app=' + $stateParams.name + '&ip=' + ip + '&beanName=' + beanName).success(function(data){
-    		if(data == "true"){
-    			$window.location.reload();
-    		}
-    	});
+
+    $scope.deleteInfo = function (ip, beanName) {
+        $http.get('/a/update?op=delete_info&app=' + $stateParams.name + '&ip=' + ip + '&beanName=' + beanName).success(function (data) {
+            if (data == "true") {
+                $window.location.reload();
+            }
+        });
     }
 });
 
 zebraWeb.controller('config-test', function ($scope, $http, name) {
     $scope.name = name;
     var url = '/a/config?op=test&key=' + name + '&env=' + $scope.config.env;
-    
+
     $http.get(url).success(function (data, status, headers, config) {
         $scope.connectionStatus = data;
     });
@@ -151,13 +151,18 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
 });
 
 
-zebraWeb.controller('header', function ($rootScope, $scope, $http, loginService) {
+zebraWeb.controller('header', function ($rootScope, $scope, $cookies, $http, loginService) {
+    $scope.$watch('config.env', function () {
+        if ($scope.config && $scope.config.env) {
+            $cookies.env = $scope.config.env;
+        }
+    });
 
     $scope.load = function () {
         $http.get('/a/config?op=env').success(function (data, status, headers, config) {
             $rootScope.config = {
                 envs: data,
-                env: data[0]
+                env: $cookies.env ? $cookies.env : data[0]
             }
         }).error(function (data, status, headers, config) {
             if (status == 401) {
