@@ -558,7 +558,7 @@ public class GroupStatement implements Statement {
 
 	private JdbcContext getRealJdbcMetaData(Connection conn) {
 		if (conn instanceof SingleConnection) {
-			return ((SingleConnection) conn).getJdbcMetaData();
+			return ((SingleConnection) conn).getJdbcContext();
 		}
 		return null;
 	}

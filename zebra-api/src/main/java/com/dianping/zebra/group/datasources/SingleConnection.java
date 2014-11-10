@@ -17,16 +17,14 @@ public class SingleConnection implements Connection {
 
 	private JdbcFilter filter;
 
-	private JdbcContext metaData;
+	private JdbcContext context;
 
-	public SingleConnection(SingleDataSource dataSource, Connection conn, JdbcContext metaData, JdbcFilter filter) {
+	public SingleConnection(SingleDataSource dataSource, Connection conn, JdbcContext context, JdbcFilter filter) {
 		this.dataSource = dataSource;
 		this.conn = conn;
-
-		this.metaData = metaData;
 		this.filter = filter;
-
-		initFilters();
+		this.context = context;
+		this.context.setConnection(this);
 	}
 
 	public void abort(Executor executor) throws SQLException {
@@ -40,7 +38,7 @@ public class SingleConnection implements Connection {
 
 	@Override
 	public void close() throws SQLException {
-		this.filter.closeSingleConnection(this.metaData.clone(), this,
+		this.filter.closeSingleConnection(this.context.clone(), this,
 				new FilterActionWithSQLExcption<SingleConnection>() {
 					@Override public void execute(SingleConnection source) throws SQLException {
 						conn.close();
@@ -148,8 +146,8 @@ public class SingleConnection implements Connection {
 		conn.setHoldability(holdability);
 	}
 
-	public JdbcContext getJdbcMetaData() {
-		return this.metaData;
+	public JdbcContext getJdbcContext() {
+		return this.context;
 	}
 
 	@Override
@@ -192,10 +190,6 @@ public class SingleConnection implements Connection {
 	@Override
 	public SQLWarning getWarnings() throws SQLException {
 		return conn.getWarnings();
-	}
-
-	private void initFilters() {
-		this.metaData.setConnection(this);
 	}
 
 	@Override

@@ -30,7 +30,9 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author danson.liu
@@ -55,6 +57,29 @@ public class MonitorablePreparedStatement extends MonitorableStatement implement
 	private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 
 	private int notPlainBatchSize;
+	
+	private static final Map<Integer, String> SQL_LENGTH_RANGE = new LinkedHashMap<Integer, String>();
+
+	static {
+		SQL_LENGTH_RANGE.put(1024, "<= 1K");
+		SQL_LENGTH_RANGE.put(10240, "<= 10K");
+		SQL_LENGTH_RANGE.put(102400, "<= 100K");
+		SQL_LENGTH_RANGE.put(1024 * 1024, "<= 1M");
+		SQL_LENGTH_RANGE.put(10240 * 1024, "<= 10M");
+		SQL_LENGTH_RANGE.put(102400 * 1024, "<= 100M");
+		SQL_LENGTH_RANGE.put(Integer.MAX_VALUE, "> 100M");
+	}
+	
+	private void logSqlLengthEvent(String sql) {
+		int length = sql == null ? 0 : sql.length();
+
+		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
+			if (length <= item.getKey()) {
+				Cat.logEvent("SQL.Length", item.getValue());
+				return;
+			}
+		}
+	}
 
 	public MonitorablePreparedStatement(PreparedStatement prepareStatement, String sql,
 		  MonitorableConnection monitorableConnection) {
@@ -91,9 +116,11 @@ public class MonitorablePreparedStatement extends MonitorableStatement implement
 			Transaction t = cat.newTransaction("SQL", stateName);
 			t.addData(sql);
 			try {
+				cat.logEvent("SQL.Database", monitorableConnection.getMetaData().getURL());
 				cat.logEvent("SQL.Method", buildSqlType(sql),
 					  Transaction.SUCCESS, Stringizers.forJson().compact()
 							.from(getParamList(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
+				logSqlLengthEvent(sql);
 				t.setStatus(Transaction.SUCCESS);
 				ExecutionContextHolder.getContext().add(CAT_LOGED, "Loged");
 				return callback.doAction();

@@ -13,12 +13,15 @@ import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
 import com.dianping.zebra.group.util.JdbcDriverClassHelper;
+import com.dianping.zebra.group.util.StringUtils;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -38,14 +41,13 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;
 
-	public SingleDataSource(DataSourceConfig config, JdbcContext metaData, JdbcFilter filter) {
+	public SingleDataSource(DataSourceConfig config, JdbcContext context, JdbcFilter filter) {
 		this.dsId = config.getId();
 		this.config = config;
 		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());
-
-		this.context = metaData;
 		this.filter = filter;
-		initFilters();
+		
+		initContext(context);
 
 		this.dataSource = initDataSource(config);
 	}
@@ -287,9 +289,15 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		      });
 	}
 
-	private void initFilters() {
+	private void initContext(JdbcContext context) {
+		this.context = context;
+
 		this.context.setDataSource(this);
 		this.context.setDataSourceId(this.dsId);
+		this.context.setJdbcUrl(config.getJdbcUrl());
+		this.context.setJdbcUsername(config.getUsername());
+		this.context.setJdbcPassword(config.getPassword() == null ? null : StringUtils.repeat("*", config.getPassword()
+		      .length()));
 		this.context.setDataSourceProperties(this);
 	}
 

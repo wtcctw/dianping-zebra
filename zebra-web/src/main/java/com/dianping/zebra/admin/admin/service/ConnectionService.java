@@ -2,12 +2,8 @@ package com.dianping.zebra.admin.admin.service;
 
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 
-import java.util.Map;
-
 public interface ConnectionService {
 
-	public ConnectionResult getConnectionResult(String jdbcRef, Map<String, String> configs);
-	
 	public ConnectionResult getConnectionResult(String jdbcRef);
 
 	public static class ConnectionResult {

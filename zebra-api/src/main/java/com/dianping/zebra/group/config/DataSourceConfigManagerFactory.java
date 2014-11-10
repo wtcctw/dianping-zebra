@@ -13,14 +13,6 @@ public final class DataSourceConfigManagerFactory {
 	private DataSourceConfigManagerFactory() {
 	}
 
-	public static DataSourceConfigManager getConfigManager(ConfigService configService, String name) {
-		configService.init();
-		DefaultDataSourceConfigManager dataSourceConfigManager = new DefaultDataSourceConfigManager(name,
-			  configService);
-		dataSourceConfigManager.init();
-		return dataSourceConfigManager;
-	}
-
 	public static DataSourceConfigManager getConfigManager(String configManagerType, String name) {
 		DataSourceConfigManager dataSourceConfigManager = dataSourceConfigManagers.get(getFormattedName(name));
 

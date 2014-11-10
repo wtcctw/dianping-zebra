@@ -6,7 +6,7 @@ import com.dianping.zebra.group.filter.JdbcContext;
 
 public interface SingleDataSourceManager {
 
-	public SingleDataSource createDataSource(DataSourceConfig config, JdbcContext metaData, JdbcFilter filter);
+	public SingleDataSource createDataSource(DataSourceConfig config, JdbcContext context, JdbcFilter filter);
 
 	public void destoryDataSource(SingleDataSource dataSource);
 
