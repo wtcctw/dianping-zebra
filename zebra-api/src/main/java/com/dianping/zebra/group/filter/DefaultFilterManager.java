@@ -74,7 +74,7 @@ public class DefaultFilterManager implements FilterManager {
 
 	@Override
 	public JdbcFilter loadFilter(String strConfig) {
-		List<JdbcFilter> result = new ArrayList<JdbcFilter>();
+		List<JdbcFilter> result = new LinkedList<JdbcFilter>();
 		if (strConfig != null) {
 			for (String name : strConfig.trim().split(",")) {
 				List<JdbcFilter> filters = loadFilterFromCache(name.trim());
@@ -84,6 +84,20 @@ public class DefaultFilterManager implements FilterManager {
 			}
 		}
 		return result.size() > 0 ? new FilterWrapper(result) : new DefaultJdbcFilter();
+	}
+
+	@Override
+	public List<JdbcFilter> loadFilters(String strConfig) {
+		List<JdbcFilter> result = new LinkedList<JdbcFilter>();
+		if (strConfig != null) {
+			for (String name : strConfig.trim().split(",")) {
+				List<JdbcFilter> filters = loadFilterFromCache(name.trim());
+				if (filters != null && filters.size() > 0) {
+					result.addAll(filters);
+				}
+			}
+		}
+		return result;
 	}
 
 	private Properties loadFilterConfig() throws IOException {
@@ -100,7 +114,7 @@ public class DefaultFilterManager implements FilterManager {
 			return;
 		}
 
-		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements();) {
+		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements(); ) {
 			URL url = e.nextElement();
 
 			Properties property = new Properties();
