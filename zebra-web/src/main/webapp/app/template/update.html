@@ -1,27 +1,29 @@
 <div class="row">
     <div class="col-xs-12">
+        <div class="progress">
+            <div popover="完全升级:{{report.m_successDatabase}}" popover-trigger="mouseenter"
+                 class="progress-bar progress-bar-success progress-bar-striped"
+                 style="width: {{report.m_successDatabase * 100 / (report.m_successDatabase + report.m_halfDoneDatabase + report.m_failureDatabase)}}%">
+            </div>
+            <div popover="部分升级:{{report.m_halfDoneDatabase}}" popover-trigger="mouseenter"
+                 class="progress-bar progress-bar-warning progress-bar-striped"
+                 style="width: {{report.m_halfDoneDatabase * 100 / (report.m_successDatabase + report.m_halfDoneDatabase + report.m_failureDatabase)}}%">
+            </div>
+            <div popover="未升级:{{report.m_failureDatabase}}" popover-trigger="mouseenter"
+                 class="progress-bar progress-bar-danger progress-bar-striped"
+                 style="width: {{report.m_failureDatabase * 100 / (report.m_successDatabase + report.m_halfDoneDatabase + report.m_failureDatabase)}}%">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
         <form class="form-inline" role="form">
             <input class="form-control" placeholder="Search DataBase" ng-model="searchTest"/>
         </form>
     </div>
 </div>
 <br/>
-<div class="row">
-    <div class="col-xs-12">
-    	<table class="table table-striped table-condensed">
-    		<thead>
-    			<th>完全升级</th>
-    			<th>部分升级</th>
-    			<th>未升级</th>
-    		</thead>
-    		<tbody>
-    			<th>{{report.m_successDatabase}}</th>
-    			<th>{{report.m_halfDoneDatabase}}</th>
-    			<th>{{report.m_failureDatabase}}</th>
-    		</tbody>
-    	</table>
-    </div>
-</div>
 <br/>
 <div class="row">
     <div class="col-xs-12">
