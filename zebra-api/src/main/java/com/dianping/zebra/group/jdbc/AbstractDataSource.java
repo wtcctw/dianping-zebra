@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class AbstractDataSource implements DataSource {
@@ -21,6 +22,8 @@ public abstract class AbstractDataSource implements DataSource {
 	protected String configManagerType = REMOTE;
 
 	protected JdbcFilter filter;
+
+	protected volatile List<JdbcFilter> filters;
 
 	protected JdbcContext context;
 

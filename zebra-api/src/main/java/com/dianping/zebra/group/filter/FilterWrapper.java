@@ -7,6 +7,7 @@ import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.jdbc.GroupConnection;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -46,6 +47,10 @@ public class FilterWrapper implements JdbcFilter {
 	public void init() {
 	}
 
+	@Override public <S> void closeGroupConnection(S source, JdbcFilter chain) throws SQLException {
+
+	}
+
 	@Override
 	public <S> void closeGroupConnection(final JdbcContext context, final S source,
 	      final FilterActionWithSQLExcption<S> action) throws SQLException {
@@ -62,20 +67,8 @@ public class FilterWrapper implements JdbcFilter {
 		todo.execute(source);
 	}
 
-	@Override
-	public <S> void closeGroupDataSource(final JdbcContext context, final S source,
-	      final FilterActionWithSQLExcption<S> action) throws SQLException {
-		FilterActionWithSQLExcption<S> todo = action;
-		for (final JdbcFilter filter : filters) {
-			final FilterActionWithSQLExcption<S> finalTodo = todo;
-			todo = new FilterActionWithSQLExcption<S>() {
-				@Override
-				public void execute(S source) throws SQLException {
-					filter.closeGroupDataSource(context, source, finalTodo);
-				}
-			};
-		}
-		todo.execute(source);
+	@Override public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
+
 	}
 
 	@Override
@@ -180,20 +173,8 @@ public class FilterWrapper implements JdbcFilter {
 		return todo.execute(source);
 	}
 
-	@Override
-	public <S> void initGroupDataSource(final JdbcContext context, final S source, final FilterAction<S> action) {
+	@Override public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
 
-		FilterAction<S> todo = action;
-		for (final JdbcFilter filter : filters) {
-			final FilterAction<S> finalTodo = todo;
-			todo = new FilterAction<S>() {
-				@Override
-				public void execute(S source) {
-					filter.initGroupDataSource(context, source, finalTodo);
-				}
-			};
-		}
-		todo.execute(source);
 	}
 
 	@Override

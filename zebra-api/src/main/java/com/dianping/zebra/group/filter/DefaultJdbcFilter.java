@@ -7,6 +7,7 @@ import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
 import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
 import com.dianping.zebra.group.jdbc.GroupConnection;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -21,10 +22,8 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		action.execute(source);
 	}
 
-	@Override
-	public <S> void closeGroupDataSource(JdbcContext metaData, S source, FilterActionWithSQLExcption<S> action)
-		  throws SQLException {
-		action.execute(source);
+	@Override public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
+		chain.closeGroupDataSource(source, chain);
 	}
 
 	@Override
@@ -74,8 +73,13 @@ public class DefaultJdbcFilter implements JdbcFilter {
 	}
 
 	@Override
-	public <S> void initGroupDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
-		action.execute(source);
+	public <S> void closeGroupConnection(S source, JdbcFilter chain) throws SQLException {
+		chain.closeGroupConnection(source, chain);
+	}
+
+	@Override
+	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
+		chain.initGroupDataSource(source, chain);
 	}
 
 	@Override
