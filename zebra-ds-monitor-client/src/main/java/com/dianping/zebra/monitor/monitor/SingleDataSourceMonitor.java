@@ -1,11 +1,11 @@
 package com.dianping.zebra.monitor.monitor;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import com.dianping.cat.status.StatusExtension;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class SingleDataSourceMonitor implements StatusExtension {
 
