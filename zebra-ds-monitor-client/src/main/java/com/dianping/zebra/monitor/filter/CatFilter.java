@@ -28,13 +28,11 @@ import java.util.*;
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends DefaultJdbcFilter {
-	private static final int MAX_LENGTH_PER_SQL = 1024 * 10; // about 10k
+	private static final String DAL_CAT_TYPE = "DAL";
 
 	private static final int MAX_CACHED_SQL = 2000;
 
-	private static final String DAL_CAT_TYPE = "DAL";
-
-	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
+	private static final int MAX_LENGTH_PER_SQL = 1024 * 10; // about 10k
 
 	private static final Map<Integer, String> SQL_LENGTH_RANGE = new LinkedHashMap<Integer, String>();
 
@@ -47,6 +45,8 @@ public class CatFilter extends DefaultJdbcFilter {
 		SQL_LENGTH_RANGE.put(102400 * 1024, "<= 100M");
 		SQL_LENGTH_RANGE.put(Integer.MAX_VALUE, "> 100M");
 	}
+
+	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
 	private Set<String> cachedSqlSet = new HashSet<String>();
 
@@ -151,8 +151,17 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
-		chain.initGroupDataSource(source, chain);
-		StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
+		Transaction transaction = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Init-" + source.getJdbcRef());
+		try {
+			chain.initGroupDataSource(source, chain);
+			StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
+			transaction.setStatus(Message.SUCCESS);
+		} catch (RuntimeException e) {
+			transaction.setStatus(e);
+			throw e;
+		} finally {
+			transaction.complete();
+		}
 	}
 
 	@Override
@@ -160,6 +169,17 @@ public class CatFilter extends DefaultJdbcFilter {
 		DataSource result = chain.initSingleDataSource(source, chain);
 		Cat.logEvent("DataSource.Created", source.getConfig().getId());
 		return result;
+	}
+
+	private void logSqlLengthEvent(String sql, String params) {
+		int length = sql == null ? 0 : sql.length();
+
+		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
+			if (length <= item.getKey()) {
+				Cat.logEvent("SQL.Length", item.getValue(), Transaction.SUCCESS, params);
+				return;
+			}
+		}
 	}
 
 	@Override
@@ -188,17 +208,6 @@ public class CatFilter extends DefaultJdbcFilter {
 			t.setStatus("Fail to find any master database");
 		} finally {
 			t.complete();
-		}
-	}
-
-	private void logSqlLengthEvent(String sql, String params) {
-		int length = sql == null ? 0 : sql.length();
-
-		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
-			if (length <= item.getKey()) {
-				Cat.logEvent("SQL.Length", item.getValue(), Transaction.SUCCESS, params);
-				return;
-			}
 		}
 	}
 }

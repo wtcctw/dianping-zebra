@@ -6,9 +6,13 @@ import java.util.List;
 import org.unidal.dal.jdbc.datasource.JdbcDataSourceConfigurationManager;
 import org.unidal.dal.jdbc.entity.EntityInfoManager;
 import org.unidal.dal.jdbc.transaction.TransactionManager;
+import org.unidal.initialization.DefaultModuleManager;
+import org.unidal.initialization.Module;
+import org.unidal.initialization.ModuleManager;
 import org.unidal.lookup.configuration.AbstractResourceConfigurator;
 import org.unidal.lookup.configuration.Component;
 
+import com.dianping.zebra.admin.ZebraHomeModule;
 import com.dianping.zebra.admin.admin.service.BlackListService;
 import com.dianping.zebra.admin.admin.service.BlackListServiceImpl;
 import com.dianping.zebra.admin.admin.service.CmdbService;
@@ -21,6 +25,8 @@ import com.dianping.zebra.admin.admin.service.DalService;
 import com.dianping.zebra.admin.admin.service.DalServiceImpl;
 import com.dianping.zebra.admin.admin.service.DatabaseRealtimeService;
 import com.dianping.zebra.admin.admin.service.DatabaseRealtimeServiceImpl;
+import com.dianping.zebra.admin.admin.service.HeartbeatUpdateService;
+import com.dianping.zebra.admin.admin.service.HeartbeatUpdateServiceImpl;
 import com.dianping.zebra.admin.admin.service.HttpService;
 import com.dianping.zebra.admin.admin.service.HttpServiceImpl;
 import com.dianping.zebra.admin.admin.service.LionHttpService;
@@ -45,12 +51,19 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 	public List<Component> defineComponents() {
 		List<Component> all = new ArrayList<Component>();
 
+		all.add(C(Module.class, ZebraHomeModule.ID, ZebraHomeModule.class));
+
+		all.add(C(ModuleManager.class, DefaultModuleManager.class) //
+		      .config(E("topLevelModules").value(ZebraHomeModule.ID)));
+
 		all.add(C(TransactionManagerWrapper.class).req(TransactionManager.class, EntityInfoManager.class));
 		all.add(C(MergeConfigService.class, MergeConfigServiceImpl.class).req(ConfigDao.class, ConfigInstanceDao.class,
 		      TransactionManagerWrapper.class, LionHttpService.class));
 		all.add(C(LionHttpService.class, LionHttpServiceImpl.class).req(HttpService.class));
 		all.add(C(LogService.class, LocalLogService.class));
 		all.add(C(CmdbService.class, CmdbServiceImpl.class).req(HttpService.class));
+		all.add(C(HeartbeatUpdateService.class, HeartbeatUpdateServiceImpl.class).req(CmdbService.class,
+		      HeartbeatDao.class));
 		all.add(C(HttpService.class, HttpServiceImpl.class));
 		all.add(C(DatabaseRealtimeService.class, DatabaseRealtimeServiceImpl.class).req(CmdbService.class,
 		      HttpService.class));

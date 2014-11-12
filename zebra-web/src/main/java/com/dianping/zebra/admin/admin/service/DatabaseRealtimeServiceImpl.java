@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.unidal.helper.Splitters;
 import org.unidal.helper.Threads.Task;
@@ -25,7 +24,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Initializable, Task {
+public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Task {
 
 	private final String IP_FILTER_LION_KEY = "zebra.web.ip.prefix";
 
@@ -124,10 +123,9 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Ini
 
 	@Override
 	public String getName() {
-		return "Dal-IP-Name-Thread";
+		return DatabaseRealtimeServiceImpl.class.getSimpleName();
 	}
 
-	@Override
 	public void initialize() throws InitializationException {
 		try {
 			String content = m_httpService.sendGet(URL_ALL);
