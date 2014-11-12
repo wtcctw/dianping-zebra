@@ -73,20 +73,6 @@ public class DefaultFilterManager implements FilterManager {
 	}
 
 	@Override
-	public JdbcFilter loadFilter(String strConfig) {
-		List<JdbcFilter> result = new LinkedList<JdbcFilter>();
-		if (strConfig != null) {
-			for (String name : strConfig.trim().split(",")) {
-				List<JdbcFilter> filters = loadFilterFromCache(name.trim());
-				if (filters != null && filters.size() > 0) {
-					result.addAll(filters);
-				}
-			}
-		}
-		return result.size() > 0 ? new FilterWrapper(result) : new DefaultJdbcFilter();
-	}
-
-	@Override
 	public List<JdbcFilter> loadFilters(String strConfig) {
 		List<JdbcFilter> result = new LinkedList<JdbcFilter>();
 		if (strConfig != null) {
@@ -97,6 +83,15 @@ public class DefaultFilterManager implements FilterManager {
 				}
 			}
 		}
+
+		Collections.sort(result, new Comparator<JdbcFilter>() {
+			@Override
+			public int compare(JdbcFilter o1, JdbcFilter o2) {
+				int x = o1.getOrder();
+				int y = o2.getOrder();
+				return (x > y) ? -1 : ((x == y) ? 0 : 1);
+			}
+		});
 		return result;
 	}
 

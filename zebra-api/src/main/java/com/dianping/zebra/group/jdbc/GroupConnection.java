@@ -1,9 +1,9 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcContext;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
@@ -24,7 +24,7 @@ public class GroupConnection implements Connection {
 
 	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
-	private JdbcFilter filter;
+	private List<JdbcFilter> filters;
 
 	private JdbcContext context;
 
@@ -43,13 +43,13 @@ public class GroupConnection implements Connection {
 	private DataSource writeDataSource;
 
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
-			CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType,
-			JdbcContext context, JdbcFilter filter) {
+		  CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType,
+		  JdbcContext context, List<JdbcFilter> filters) {
 		super();
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
 		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
-		this.filter = filter;
+		this.filters = filters;
 		this.context = context;
 		this.routerType = routerType;
 	}
@@ -85,8 +85,8 @@ public class GroupConnection implements Connection {
 	 * 
 	 * @see java.sql.Connection#close()
 	 */
-	@Override
-	public void close() throws SQLException {
+
+	private void closeOrigin() throws SQLException {
 		if (closed) {
 			return;
 		}
@@ -95,31 +95,27 @@ public class GroupConnection implements Connection {
 		final List<SQLException> exceptions = new LinkedList<SQLException>();
 
 		try {
-			this.filter.closeGroupConnection(this.context.clone(), this, new FilterActionWithSQLExcption<GroupConnection>() {
-				@Override public void execute(GroupConnection source) {
-					for (Statement stmt : openedStatements) {
-						try {
-							stmt.close();
-						} catch (SQLException e) {
-							exceptions.add(e);
-						}
-					}
-					try {
-						if (rConnection != null && !rConnection.isClosed()) {
-							rConnection.close();
-						}
-					} catch (SQLException e) {
-						exceptions.add(e);
-					}
-					try {
-						if (wConnection != null && !wConnection.isClosed()) {
-							wConnection.close();
-						}
-					} catch (SQLException e) {
-						exceptions.add(e);
-					}
+			for (Statement stmt : openedStatements) {
+				try {
+					stmt.close();
+				} catch (SQLException e) {
+					exceptions.add(e);
 				}
-			});
+			}
+			try {
+				if (rConnection != null && !rConnection.isClosed()) {
+					rConnection.close();
+				}
+			} catch (SQLException e) {
+				exceptions.add(e);
+			}
+			try {
+				if (wConnection != null && !wConnection.isClosed()) {
+					wConnection.close();
+				}
+			} catch (SQLException e) {
+				exceptions.add(e);
+			}
 		} finally {
 			openedStatements.clear();
 			rConnection = null;
@@ -127,6 +123,25 @@ public class GroupConnection implements Connection {
 		}
 
 		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
+	}
+
+	@Override
+	public void close() throws SQLException {
+		if (filters != null && filters.size() > 0) {
+			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+				@Override public void closeGroupConnection(GroupConnection source, JdbcFilter chain)
+					  throws SQLException {
+					if (index < filters.size()) {
+						filters.get(index++).closeGroupConnection(source, chain);
+					} else {
+						source.closeOrigin();
+					}
+				}
+			};
+			chain.closeGroupConnection(this, chain);
+		} else {
+			closeOrigin();
+		}
 	}
 
 	/*
@@ -204,7 +219,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
-		Statement stmt = new GroupStatement(this, this.context.clone(), this.filter);
+		Statement stmt = new GroupStatement(this, this.context.clone(), this.filters);
 		openedStatements.add(stmt);
 		return stmt;
 	}
@@ -229,7 +244,7 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-			throws SQLException {
+		  throws SQLException {
 		GroupStatement stmt = (GroupStatement) createStatement(resultSetType, resultSetConcurrency);
 		stmt.setResultSetHoldability(resultSetHoldability);
 		return stmt;
@@ -274,7 +289,7 @@ public class GroupConnection implements Connection {
 	}
 
 	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
-			int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		  int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		if (resultSetType == Integer.MIN_VALUE) {
 			return conn.prepareCall(sql);
 		} else if (resultSetHoldability == Integer.MIN_VALUE) {
@@ -569,7 +584,7 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability) throws SQLException {
+		  int resultSetHoldability) throws SQLException {
 		checkClosed();
 		CallableStatement cstmt = null;
 		// 存储过程强制走写库
@@ -588,7 +603,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
-		PreparedStatement pstmt = new GroupPreparedStatement(this, sql, this.context.clone(), this.filter);
+		PreparedStatement pstmt = new GroupPreparedStatement(this, sql, this.context.clone(), this.filters);
 		openedStatements.add(pstmt);
 		return pstmt;
 	}
@@ -612,7 +627,7 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-			throws SQLException {
+		  throws SQLException {
 		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
 		pstmt.setResultSetType(resultSetType);
 		pstmt.setResultSetConcurrency(resultSetConcurrency);
@@ -626,9 +641,9 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability) throws SQLException {
+		  int resultSetHoldability) throws SQLException {
 		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType,
-				resultSetConcurrency);
+			  resultSetConcurrency);
 		pstmt.setResultSetHoldability(resultSetHoldability);
 		return pstmt;
 	}

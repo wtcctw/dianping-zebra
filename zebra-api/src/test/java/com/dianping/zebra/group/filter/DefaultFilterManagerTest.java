@@ -7,31 +7,31 @@ package com.dianping.zebra.group.filter;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.util.List;
+
 public class DefaultFilterManagerTest {
 
 	@Test
 	public void test_load_by_empty_name() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("");
-		Assert.assertTrue(filter instanceof DefaultJdbcFilter);
+		List<JdbcFilter> filters = FilterManagerFactory.getFilterManager().loadFilters("");
+		Assert.assertEquals(filters.size(), 0);
 	}
 
 	@Test
 	public void test_load_by_name() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat");
-		Assert.assertTrue(filter instanceof FilterWrapper);
-		Assert.assertEquals(((FilterWrapper) filter).size(), 1);
+		List<JdbcFilter> filters  = FilterManagerFactory.getFilterManager().loadFilters("wall");
+		Assert.assertEquals(filters.size(), 1);
 	}
 
 	@Test
 	public void test_load_by_two_name() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter("stat,no_exist");
-		Assert.assertTrue(filter instanceof FilterWrapper);
-		Assert.assertEquals(((FilterWrapper) filter).size(), 1);
+		List<JdbcFilter> filters = FilterManagerFactory.getFilterManager().loadFilters("wall,no_exist");
+		Assert.assertEquals(filters.size(), 1);
 	}
 
 	@Test
 	public void test_load_null() {
-		JdbcFilter filter = FilterManagerFactory.getFilterManager().loadFilter(null);
-		Assert.assertTrue(filter instanceof DefaultJdbcFilter);
+		List<JdbcFilter> filters = FilterManagerFactory.getFilterManager().loadFilters(null);
+		Assert.assertEquals(filters.size(), 0);
 	}
 }

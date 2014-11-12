@@ -28,11 +28,11 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	private DataSourceRouter router;
 
 	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap, JdbcContext context,
-	      JdbcFilter filter, int retryTimes) {
+	      List<JdbcFilter> filters, int retryTimes) {
 		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.retryTimes = retryTimes;
-		this.filter = filter;
+//		this.filter = filters;
 		this.context = context;
 	}
 
@@ -101,7 +101,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
 
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
-			SingleDataSource dataSource = dataSourceManager.createDataSource(config, this.context.clone(), this.filter);
+			SingleDataSource dataSource = dataSourceManager.createDataSource(config, this.context.clone(), this.filters);
 			this.dataSources.put(config.getId(), dataSource);
 		}
 

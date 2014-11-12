@@ -10,7 +10,5 @@ public interface FilterManager {
 
 	void init();
 
-	JdbcFilter loadFilter(String strConfig);
-
 	List<JdbcFilter> loadFilters(String strConfig);
 }

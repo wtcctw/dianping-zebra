@@ -21,8 +21,6 @@ public abstract class AbstractDataSource implements DataSource {
 
 	protected String configManagerType = REMOTE;
 
-	protected JdbcFilter filter;
-
 	protected volatile List<JdbcFilter> filters;
 
 	protected JdbcContext context;

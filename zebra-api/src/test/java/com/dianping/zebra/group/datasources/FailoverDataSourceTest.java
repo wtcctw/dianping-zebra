@@ -1,7 +1,6 @@
 package com.dianping.zebra.group.datasources;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcContext;
 import junit.framework.Assert;
 import org.junit.Before;
@@ -69,7 +68,7 @@ public class FailoverDataSourceTest {
 
 	@Test
 	public void test_check_write_data_source_result_error() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcContext.class), new DefaultJdbcFilter());
+		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcContext.class), null);
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		Connection errorCoon = mock(Connection.class);
@@ -77,35 +76,35 @@ public class FailoverDataSourceTest {
 
 		doReturn(errorCoon).when(monitor).getConnection(any(DataSourceConfig.class));
 		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-				FailOverDataSource.CheckMasterDataSourceResult.ERROR);
+			  FailOverDataSource.CheckMasterDataSourceResult.ERROR);
 		verify(errorCoon, atLeastOnce()).createStatement();
 	}
 
 	@Test
 	public void test_check_write_data_source_result_ok() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcContext.class), new DefaultJdbcFilter());
+		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcContext.class), null);
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
 		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-				FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
+			  FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
 		verify(coon, atLeastOnce()).createStatement();
 	}
 
 	@Test
 	public void test_check_write_data_source_result_readonly() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcContext.class), new DefaultJdbcFilter());
+		FailOverDataSource ds = new FailOverDataSource(configs, mock(JdbcContext.class), null);
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
 		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-				FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
+			  FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
 		verify(readOnlyCoon, atLeastOnce()).createStatement();
 	}
 
 	@Test
 	public void test_find_write_data_source1() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcContext(), new DefaultJdbcFilter());
+		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcContext(), null);
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
@@ -118,7 +117,7 @@ public class FailoverDataSourceTest {
 
 	@Test
 	public void test_find_write_data_source2() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcContext(), new DefaultJdbcFilter());
+		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcContext(), null);
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		doReturn(readOnlyCoon).when(monitor).getConnection(configs.get("db1"));
@@ -134,7 +133,7 @@ public class FailoverDataSourceTest {
 
 	@Test(timeout = 30000)
 	public void test_hot_switch() throws SQLException, InterruptedException {
-		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcContext(), new DefaultJdbcFilter());
+		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcContext(), null);
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		ConnectionAnswer connectionAnswer = new ConnectionAnswer();
@@ -167,7 +166,7 @@ public class FailoverDataSourceTest {
 
 	@Test(timeout = 5000)
 	public void test_thread_auto_close() throws Exception {
-		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcContext(), new DefaultJdbcFilter());
+		FailOverDataSource ds = new FailOverDataSource(configs, new JdbcContext(), null);
 		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
 
 		FailOverDataSource.FindMasterDataSourceResult result = new FailOverDataSource.FindMasterDataSourceResult();
@@ -175,7 +174,7 @@ public class FailoverDataSourceTest {
 
 		doReturn(result).when(monitor).findMasterDataSource();
 		doReturn(FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE).when(monitor)
-				.isMasterDataSource(any(DataSourceConfig.class));
+			  .isMasterDataSource(any(DataSourceConfig.class));
 
 		Thread t = new Thread(monitor);
 		t.start();

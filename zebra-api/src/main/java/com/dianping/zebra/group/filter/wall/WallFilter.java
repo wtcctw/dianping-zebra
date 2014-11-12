@@ -5,9 +5,9 @@ import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
+import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
-import com.dianping.zebra.group.filter.JdbcContext;
-import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.util.StringUtils;
 
 import java.beans.PropertyChangeEvent;
@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -40,16 +39,6 @@ public class WallFilter extends DefaultJdbcFilter {
 	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
 	private SystemConfigManager systemConfigManager;
-
-	protected String addIdToSql(String sql, JdbcContext metaData) throws SQLException {
-		try {
-			String id = generateId(metaData);
-			checkBlackList(sql, id);
-			return String.format("/*z:%s*/%s", id, sql);
-		} catch (NoSuchAlgorithmException e) {
-			return sql;
-		}
-	}
 
 	@Override public void init() {
 		super.init();
@@ -97,25 +86,18 @@ public class WallFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	@Override
-	public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
-		  throws SQLException {
-		T result = super.execute(metaData, source, action);
-		return result;
-	}
-
-	protected String generateId(JdbcContext metaData) throws NoSuchAlgorithmException {
+	protected String generateId(SingleConnection conn, String sql) throws NoSuchAlgorithmException {
 		String token = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		if (StringUtils.isBlank(token)) {
-			token = metaData.getSql();
+			token = sql;
 		}
 
 		if (StringUtils.isBlank(token)) {
 			return null;
 		}
 
-		if (metaData.getRealJdbcContext() != null && metaData.getRealJdbcContext().getDataSourceId() != null) {
-			token = String.format("/*%s*/%s", metaData.getRealJdbcContext().getDataSourceId(), token);
+		if (conn != null && StringUtils.isNotBlank(conn.getDsId())) {
+			token = String.format("/*%s*/%s", conn.getDsId(), token);
 		}
 
 		return generateId(token);
@@ -147,27 +129,25 @@ public class WallFilter extends DefaultJdbcFilter {
 		return result;
 	}
 
-	protected String getIdFromSQL(String sql) {
-		if (StringUtils.isBlank(sql)) {
-			return null;
-		}
-		Matcher matcher = ID_PATTERN.matcher(sql);
-		if (matcher.matches()) {
-			return matcher.group(2);
-		} else {
-			return null;
-		}
-	}
-
 	public int getOrder() {
 		return MIN_ORDER;
 	}
 
-	@Override
-	public <S> String sql(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, String> action)
-		  throws SQLException {
-		String result = super.sql(metaData, source, action);
-		result = addIdToSql(result, metaData);
-		return result;
+	@Override public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
+		if (chain != null) {
+			sql = chain.sql(conn, sql, chain);
+		}
+
+		if (StringUtils.isBlank(sql)) {
+			return sql;
+		}
+
+		try {
+			String id = generateId(conn, sql);
+			checkBlackList(sql, id);
+			return String.format("/*z:%s*/%s", id, sql);
+		} catch (NoSuchAlgorithmException e) {
+			return sql;
+		}
 	}
 }

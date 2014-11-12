@@ -1,30 +1,38 @@
 package com.dianping.zebra.group.datasources;
 
-import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcContext;
-import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
+import com.dianping.zebra.group.filter.JdbcFilter;
 
 import java.sql.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
 public class SingleConnection implements Connection {
 
-	private Connection conn;
+	private final Connection conn;
 
-	private SingleDataSource dataSource;
+	private final SingleDataSource dataSource;
 
-	private JdbcFilter filter;
+	private final List<JdbcFilter> filters;
+
+	private final String dsId;
 
 	private JdbcContext context;
 
-	public SingleConnection(SingleDataSource dataSource, Connection conn, JdbcContext context, JdbcFilter filter) {
+	public SingleConnection(SingleDataSource dataSource, String dsId, Connection conn, JdbcContext context,
+		  List<JdbcFilter> filters) {
 		this.dataSource = dataSource;
 		this.conn = conn;
-		this.filter = filter;
+		this.filters = filters;
 		this.context = context;
-		this.context.setConnection(this);
+		this.dsId = dsId;
+	}
+
+	public String getDsId() {
+		return dsId;
 	}
 
 	public void abort(Executor executor) throws SQLException {
@@ -36,14 +44,27 @@ public class SingleConnection implements Connection {
 		conn.clearWarnings();
 	}
 
+	private void closeOrigin() throws SQLException {
+		conn.close();
+	}
+
 	@Override
 	public void close() throws SQLException {
-		this.filter.closeSingleConnection(this.context.clone(), this,
-				new FilterActionWithSQLExcption<SingleConnection>() {
-					@Override public void execute(SingleConnection source) throws SQLException {
-						conn.close();
+		if (filters != null && filters.size() > 0) {
+			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+				@Override
+				public void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException {
+					if (index < filters.size()) {
+						filters.get(index++).closeSingleConnection(source, chain);
+					} else {
+						source.closeOrigin();
 					}
-				});
+				}
+			};
+			chain.closeSingleConnection(this, chain);
+		} else {
+			closeOrigin();
+		}
 	}
 
 	@Override
@@ -88,7 +109,7 @@ public class SingleConnection implements Connection {
 
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-			throws SQLException {
+		  throws SQLException {
 		return conn.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
@@ -234,7 +255,7 @@ public class SingleConnection implements Connection {
 
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability) throws SQLException {
+		  int resultSetHoldability) throws SQLException {
 		return conn.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
@@ -245,13 +266,13 @@ public class SingleConnection implements Connection {
 
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-			throws SQLException {
+		  throws SQLException {
 		return conn.prepareStatement(sql, resultSetType, resultSetConcurrency);
 	}
 
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability) throws SQLException {
+		  int resultSetHoldability) throws SQLException {
 		return conn.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 

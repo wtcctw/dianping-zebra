@@ -5,6 +5,7 @@ import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.JdbcContext;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -17,8 +18,8 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
 	@Override
 	public synchronized SingleDataSource createDataSource(DataSourceConfig config, JdbcContext context,
-			JdbcFilter filter) {
-		return new SingleDataSource(config, context, filter);
+			List<JdbcFilter> filters) {
+		return new SingleDataSource(config, context, filters);
 	}
 
 	@Override

@@ -2,12 +2,11 @@ package com.dianping.zebra.group.filter;
 
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.filter.delegate.FilterAction;
-import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
-import com.dianping.zebra.group.filter.delegate.FilterFunction;
-import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.datasources.SingleDataSource;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.group.jdbc.GroupResultSet;
+import com.dianping.zebra.group.jdbc.GroupStatement;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -24,26 +23,20 @@ public interface JdbcFilter {
 
 	void init();
 
-	<S> void closeGroupConnection(S source, JdbcFilter chain) throws SQLException;
-
-	<S> void closeGroupConnection(JdbcContext context, S source, FilterActionWithSQLExcption<S> action)
-		  throws SQLException;
+	void closeGroupConnection(GroupConnection source, JdbcFilter chain) throws SQLException;
 
 	void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException;
 
-	<S> void closeSingleConnection(JdbcContext context, S source, FilterActionWithSQLExcption<S> action)
-		  throws SQLException;
+	void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException;
 
-	<S> void closeSingleDataSource(JdbcContext context, S source, FilterActionWithSQLExcption<S> action)
-		  throws SQLException;
+	void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException;
 
-	<S, T> T execute(JdbcContext context, S source, FilterFunctionWithSQLException<S, T> action) throws SQLException;
+	<T> T execute(GroupStatement source, JdbcFilter chain) throws SQLException;
 
-	<S> FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(JdbcContext context, S source,
-		  FilterFunction<S, FailOverDataSource.FindMasterDataSourceResult> action);
+	FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
+		  FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain);
 
-	<S> GroupConnection getGroupConnection(JdbcContext context, S source,
-		  FilterFunctionWithSQLException<S, GroupConnection> action) throws SQLException;
+	GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException;
 
 	/**
 	 * filter_with_order_3_start filter_with_order_2_start filter_with_order_1_start targer_start filter_with_order_1_finish
@@ -53,19 +46,17 @@ public interface JdbcFilter {
 	 */
 	int getOrder();
 
-	<S> SingleConnection getSingleConnection(JdbcContext context, S source,
-		  FilterFunctionWithSQLException<S, SingleConnection> action) throws SQLException;
+	SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain) throws SQLException;
 
 	void initGroupDataSource(GroupDataSource source, JdbcFilter chain);
 
-	<S> DataSource initSingleDataSource(JdbcContext context, S source, FilterFunction<S, DataSource> action);
+	DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain);
 
-	<S> void refreshGroupDataSource(JdbcContext context, String propertiesName, S source, FilterAction<S> action);
+	void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain);
 
-	<S> Boolean resultSetNext(JdbcContext context, S source, FilterFunctionWithSQLException<S, Boolean> action)
-		  throws SQLException;
+	boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException;
 
-	<S> String sql(JdbcContext context, S source, FilterFunctionWithSQLException<S, String> action) throws SQLException;
+	String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException;
 
-	<S> void switchFailOverDataSource(JdbcContext context, S source, FilterAction<S> action);
+	void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain);
 }
