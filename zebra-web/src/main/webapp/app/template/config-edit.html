@@ -70,7 +70,16 @@
     <form class="form-inline" role="form">
         <input required class="form-control" placeholder="DataSource Id" ng-model="newDsName"/>
         <button type="submit" class="btn btn-success" ng-click="addDs()">Add DataSource</button>
-        <button type="button" class="btn btn-primary" ng-click="save()">Save All</button>
+        <div class="btn-group" dropdown>
+            <button type="button" class="btn btn-primary" ng-click="save()">Save</button>
+            <button type="button" class="btn btn-primary dropdown-toggle">
+                <span class="caret"></span>
+                <span class="sr-only">Split button!</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a ng-click="save(true)">Force Save</a></li>
+            </ul>
+        </div>
         <button type="button" class="btn btn-danger" ng-click="close()">Cancel</button>
     </form>
 </div>

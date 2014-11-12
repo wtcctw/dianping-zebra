@@ -128,8 +128,9 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
         $scope.newDsName = '';
     }
 
-    $scope.save = function () {
-        $http.post('/a/config?op=updateDs', $.param({dsConfigs: encodeURIComponent(angular.toJson($scope.data))}),
+    $scope.save = function (force) {
+        force = !!force;
+        $http.post('/a/config?op=updateDs&force=' + force, $.param({dsConfigs: encodeURIComponent(angular.toJson($scope.data))}),
             {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
             .success(function (data, status, headers, config) {
                 close();

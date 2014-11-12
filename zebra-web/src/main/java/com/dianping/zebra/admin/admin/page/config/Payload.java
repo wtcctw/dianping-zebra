@@ -15,6 +15,9 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	@FieldMeta("env")
 	private String m_env;
 
+	@FieldMeta("force")
+	private boolean m_force;
+
 	@FieldMeta("key")
 	private String m_key;
 
@@ -46,6 +49,14 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 
 	public void setEnv(String env) {
 		this.m_env = env;
+	}
+
+	public boolean getForce() {
+		return m_force;
+	}
+
+	public void setForce(boolean force) {
+		m_force = force;
 	}
 
 	public String getKey() {

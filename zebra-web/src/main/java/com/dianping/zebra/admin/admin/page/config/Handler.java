@@ -15,16 +15,16 @@ import java.io.IOException;
 
 public class Handler extends JsonHandler<Context> {
 	@Inject
-	private LionHttpService m_lionHttpService;
+	private ConnectionService m_connectionService;
+
+	@Inject
+	private DalConfigService m_dalConfigService;
 
 	@Inject
 	private HttpService m_httpService;
 
 	@Inject
-	private ConnectionService m_connectionService;
-
-	@Inject
-	private DalConfigService m_dalConfigService;
+	private LionHttpService m_lionHttpService;
 
 	@Override
 	@PayloadMeta(Payload.class)
@@ -47,7 +47,7 @@ public class Handler extends JsonHandler<Context> {
 				break;
 			case UPDATEDS:
 				m_dalConfigService.updateDsConfig(gson.fromJson(URLDecoder.decode(payload.getDsConfigs()),
-					  DalConfigService.GroupConfigModel.class));
+						DalConfigService.GroupConfigModel.class), payload.getForce());
 				break;
 			case TEST:
 				String jdbcRef = payload.getKey();

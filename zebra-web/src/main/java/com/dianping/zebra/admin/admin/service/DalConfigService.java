@@ -10,7 +10,7 @@ public interface DalConfigService {
 
 	GroupConfigModel getDsConfig(String env, final String groupId);
 
-	void updateDsConfig(GroupConfigModel modal);
+	void updateDsConfig(GroupConfigModel modal,boolean isForce);
 
 	// for test purpose
 	public void setProject(String project);
