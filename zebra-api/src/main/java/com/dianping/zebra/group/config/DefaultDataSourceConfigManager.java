@@ -39,7 +39,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			this.builder = new GroupDataSourceConfigBuilder();
 		} catch (Exception e) {
 			throw new IllegalConfigException(String.format(
-			      "Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
+					"Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
 		}
 	}
 
@@ -71,7 +71,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 		if (readNum < 1 || writeNum < 1) {
 			throw new IllegalConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
-			      readNum, writeNum));
+					readNum, writeNum));
 		}
 	}
 
@@ -127,7 +127,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 
 		private static void setNameAndRole(Map<String, ReadOrWriteRole> dataSources, StringBuilder name,
-		      StringBuilder role) {
+				StringBuilder role) {
 			String key = name.toString().trim();
 			String value = role.toString().trim();
 
@@ -209,23 +209,25 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			String dsId = dsConfig.getId();
 
 			dsConfig.setId(dsId);
-			dsConfig.setActive(getProperty(getSingleDataSourceKey(Constants.ELEMENT_ACTIVE, dsId), dsConfig.getActive()));
+			dsConfig.setActive(
+					getProperty(getSingleDataSourceKey(Constants.ELEMENT_ACTIVE, dsId), dsConfig.getActive()));
 			dsConfig.setTestReadOnlySql(getProperty(getSingleDataSourceKey(Constants.ELEMENT_TEST_READONLY_SQL, dsId),
-			      dsConfig.getTestReadOnlySql()));
+					dsConfig.getTestReadOnlySql()));
 			dsConfig.setPunishLimit(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PUNISH_LIMIT, dsId),
-			      dsConfig.getPunishLimit()));
+					dsConfig.getPunishLimit()));
 			dsConfig.setTimeWindow(getProperty(getSingleDataSourceKey(Constants.ELEMENT_TIME_WINDOW, dsId),
-			      dsConfig.getTimeWindow()));
+					dsConfig.getTimeWindow()));
 			dsConfig.setDriverClass(getProperty(getSingleDataSourceKey(Constants.ELEMENT_DRIVER_CLASS, dsId),
-			      dsConfig.getDriverClass()));
+					dsConfig.getDriverClass()));
 			dsConfig.setJdbcUrl(getProperty(getSingleDataSourceKey(Constants.ELEMENT_JDBC_URL, dsId),
-			      dsConfig.getJdbcUrl()));
+					dsConfig.getJdbcUrl()));
 			dsConfig.setPassword(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PASSWORD, dsId),
-			      dsConfig.getPassword()));
+					dsConfig.getPassword()));
 			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),
-			      dsConfig.getWarmupTime()));
+					dsConfig.getWarmupTime()));
 			dsConfig
-			      .setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
+					.setUsername(
+							getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
 
 			String properies = getProperty(getSingleDataSourceKey(Constants.ELEMENT_PROPERTIES, dsId), null);
 
@@ -270,7 +272,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			}
 
 			groupDsConfig.setFilters(getProperty(
-			      String.format("%s.default.filters", Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX), null));
+					String.format("%s.default.filters", Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX), null));
 		}
 	}
 }

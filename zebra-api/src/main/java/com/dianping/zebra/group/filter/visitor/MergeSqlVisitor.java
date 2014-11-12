@@ -11,62 +11,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MergeSqlVisitor implements Visitor {
 	public final AtomicInteger parameterNodeIndex = new AtomicInteger();
 
-	public void cursorNode(CursorNode node) throws StandardException {
-		visit(node.getResultSetNode());
-	}
-
-	public void subQueryNode(SubqueryNode node) throws StandardException {
-		visit(node.getLeftOperand());
-		visit(node.getResultSet());
-	}
-
-	public void resultColumnList(ResultColumnList node) throws StandardException {
-		for (ResultColumn n : node) {
-			visit(n);
-		}
-	}
-
-	public void resultColumn(ResultColumn node) throws StandardException {
-		if (node.getExpression() instanceof ConstantNode) {
-			node.setExpression(getNewParameterNode());
-		}
-		visit(node.getExpression());
-	}
-
-	public void selectNode(SelectNode node) throws StandardException {
-		visit(node.getWhereClause());
-		visit(node.getResultColumns());
-	}
-
 	public void andNode(AndNode node) throws StandardException {
 		visit(node.getLeftOperand());
 		visit(node.getRightOperand());
-	}
-
-	public void orNode(OrNode node) throws StandardException {
-		visit(node.getLeftOperand());
-		visit(node.getRightOperand());
-	}
-
-	public void notNode(NotNode node) throws StandardException {
-		visit(node.getOperand());
-	}
-
-	public void inListOperatorNode(InListOperatorNode node) throws StandardException {
-		ValueNodeList list = node.getRightOperandList().getNodeList();
-		if (list.size() > 0) {
-			list.clear();
-			ParameterNode newNode = getNewParameterNode();
-			list.add(newNode);
-		}
-
-		visit(list);
-	}
-
-	public void valueNodeList(ValueNodeList node) throws StandardException {
-		for (ValueNode n : node) {
-			visit(n);
-		}
 	}
 
 	public void binaryOperatorNode(BinaryOperatorNode node) throws StandardException {
@@ -80,17 +27,7 @@ public class MergeSqlVisitor implements Visitor {
 		visit(node.getRightOperand());
 	}
 
-	private ParameterNode getNewParameterNode() {
-		ParameterNode newNode = new ParameterNode();
-		newNode.setNodeType(NodeTypes.PARAMETER_NODE);
-		return newNode;
-	}
-
-	private void parameterNode(ParameterNode node) {
-		node.init(parameterNodeIndex.getAndIncrement(), null);
-	}
-
-	private void updateNode(UpdateNode node) throws StandardException {
+	public void cursorNode(CursorNode node) throws StandardException {
 		visit(node.getResultSetNode());
 	}
 
@@ -98,12 +35,85 @@ public class MergeSqlVisitor implements Visitor {
 		visit(node.getResultSetNode());
 	}
 
+	private ParameterNode getNewParameterNode() {
+		ParameterNode newNode = new ParameterNode();
+		newNode.setNodeType(NodeTypes.PARAMETER_NODE);
+		return newNode;
+	}
+
+	public void inListOperatorNode(InListOperatorNode node) throws StandardException {
+		ValueNodeList list = node.getRightOperandList().getNodeList();
+		if (list.size() > 0) {
+			list.clear();
+			ParameterNode newNode = getNewParameterNode();
+			list.add(newNode);
+		}
+
+		visit(list);
+	}
+
 	private void insertNode(InsertNode node) throws StandardException {
 		visit(node.getResultSetNode());
 	}
 
+	public void notNode(NotNode node) throws StandardException {
+		visit(node.getOperand());
+	}
+
+	public void orNode(OrNode node) throws StandardException {
+		visit(node.getLeftOperand());
+		visit(node.getRightOperand());
+	}
+
+	private void parameterNode(ParameterNode node) {
+		node.init(parameterNodeIndex.getAndIncrement(), null);
+	}
+
+	public void resultColumn(ResultColumn node) throws StandardException {
+		if (node.getExpression() instanceof ConstantNode) {
+			node.setExpression(getNewParameterNode());
+		}
+		visit(node.getExpression());
+	}
+
+	public void resultColumnList(ResultColumnList node) throws StandardException {
+		for (ResultColumn n : node) {
+			visit(n);
+		}
+	}
+
 	private void rowResultSetNode(RowResultSetNode node) throws StandardException {
 		visit(node.getResultColumns());
+	}
+
+	public void selectNode(SelectNode node) throws StandardException {
+		visit(node.getWhereClause());
+		visit(node.getResultColumns());
+	}
+
+	@Override
+	public boolean skipChildren(Visitable node) throws StandardException {
+		return false;
+	}
+
+	@Override
+	public boolean stopTraversal() {
+		return false;
+	}
+
+	public void subQueryNode(SubqueryNode node) throws StandardException {
+		visit(node.getLeftOperand());
+		visit(node.getResultSet());
+	}
+
+	private void updateNode(UpdateNode node) throws StandardException {
+		visit(node.getResultSetNode());
+	}
+
+	public void valueNodeList(ValueNodeList node) throws StandardException {
+		for (ValueNode n : node) {
+			visit(n);
+		}
 	}
 
 	@Override
@@ -177,16 +187,6 @@ public class MergeSqlVisitor implements Visitor {
 
 	@Override
 	public boolean visitChildrenFirst(Visitable node) {
-		return false;
-	}
-
-	@Override
-	public boolean stopTraversal() {
-		return false;
-	}
-
-	@Override
-	public boolean skipChildren(Visitable node) throws StandardException {
 		return false;
 	}
 }

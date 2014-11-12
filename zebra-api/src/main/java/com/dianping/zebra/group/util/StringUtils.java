@@ -78,7 +78,7 @@ public final class StringUtils {
 		for (Map.Entry<String, String> entity : map.entrySet()) {
 			try {
 				String temp = String.format("%s=%s", URLEncoder.encode(entity.getKey(), "utf-8"),
-					  URLEncoder.encode(entity.getValue(), "utf-8"));
+						URLEncoder.encode(entity.getValue(), "utf-8"));
 				if (sb.length() > 0) {
 					sb.append("&");
 				}
@@ -294,7 +294,7 @@ public final class StringUtils {
 	 * @return the input string with all comment-delimited data removed
 	 */
 	public static String stripComments(String src, String stringOpens, String stringCloses, boolean slashStarComments,
-		  boolean slashSlashComments, boolean hashComments, boolean dashDashComments) {
+			boolean slashSlashComments, boolean hashComments, boolean dashDashComments) {
 		if (src == null) {
 			return null;
 		}
@@ -325,13 +325,13 @@ public final class StringUtils {
 					contextMarker = Character.MIN_VALUE;
 					markerTypeFound = -1;
 				} else if ((ind = stringOpens.indexOf(currentChar)) != -1 && !escaped
-					  && contextMarker == Character.MIN_VALUE) {
+						&& contextMarker == Character.MIN_VALUE) {
 					markerTypeFound = ind;
 					contextMarker = currentChar;
 				}
 
 				if (contextMarker == Character.MIN_VALUE && currentChar == '/' && (slashSlashComments
-					  || slashStarComments)) {
+						|| slashStarComments)) {
 					currentChar = sourceReader.read();
 					if (currentChar == '*' && slashStarComments) {
 						int prevChar = 0;

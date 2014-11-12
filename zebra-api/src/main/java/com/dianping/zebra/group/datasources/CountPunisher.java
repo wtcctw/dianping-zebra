@@ -22,7 +22,7 @@ public class CountPunisher {
 
 	/**
 	 * timeWindow之内，超时（或其他意义）次数超过limit，则标识为punish, 这个punish标志resetTime过后自动复位
-	 * 
+	 *
 	 * @param smoothValve
 	 * @param timeWindow
 	 * @param limit

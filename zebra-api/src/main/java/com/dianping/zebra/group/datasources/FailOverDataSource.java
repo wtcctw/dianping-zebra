@@ -4,9 +4,8 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.exception.WeakReferenceGCException;
-import com.dianping.zebra.group.filter.JdbcContext;
+import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.delegate.FilterFunction;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.JdbcDriverClassHelper;
@@ -17,6 +16,7 @@ import org.apache.log4j.Logger;
 import java.lang.ref.WeakReference;
 import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,19 +34,9 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private Thread masterDataSourceMonitorThread;
 
-	public FailOverDataSource(Map<String, DataSourceConfig> configs, JdbcContext context, JdbcFilter filter) {
+	public FailOverDataSource(Map<String, DataSourceConfig> configs, List<JdbcFilter> filters) {
 		this.configs = configs;
-		this.filter = filter;
-		this.context = context;
-		this.context.setDataSource(this);
-	}
-
-	private void changeMetaData(DataSourceConfig config) {
-		this.context.setDataSourceId(config.getId());
-		this.context.setJdbcUrl(config.getJdbcUrl());
-		this.context.setJdbcUsername(config.getUsername());
-		this.context.setJdbcPassword(config.getPassword() == null ? null : StringUtils.repeat("*", config.getPassword()
-			  .length()));
+		this.filters = filters;
 	}
 
 	@Override
@@ -65,13 +55,14 @@ public class FailOverDataSource extends AbstractDataSource {
 
 		for (Map.Entry<String, DataSourceConfig> config : configs.entrySet()) {
 			sb.append(
-				  String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s,properties=%s]", config
-							  .getValue().getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(),
-						StringUtils
-							  .repeat("*", config.getValue().getPassword() == null ?
-									0 :
-									config.getValue().getPassword().length()),
-						config.getValue().getDriverClass(), config.getValue().getProperties()));
+					String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s,properties=%s]", config
+									.getValue().getId(), config.getValue().getJdbcUrl(),
+							config.getValue().getUsername(),
+							StringUtils
+									.repeat("*", config.getValue().getPassword() == null ?
+											0 :
+											config.getValue().getPassword().length()),
+							config.getValue().getDriverClass(), config.getValue().getProperties()));
 		}
 
 		return sb.toString();
@@ -100,8 +91,8 @@ public class FailOverDataSource extends AbstractDataSource {
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}
 
-		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config, this.context.clone(),
-			  this.filter);
+		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config,
+				this.filters);
 	}
 
 	@Override
@@ -110,15 +101,13 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	public void init(boolean forceCheckMaster) {
-		initFilter();
-
 		MasterDataSourceMonitor monitor = new MasterDataSourceMonitor(this);
 
 		try {
 			FindMasterDataSourceResult result = monitor.findMasterDataSource();
 			if (!result.isMasterExist()) {
 				String error_message = String
-					  .format("Cannot find any master dataSource. Configs=%s", getConfigSummary());
+						.format("Cannot find any master dataSource. Configs=%s", getConfigSummary());
 
 				if (forceCheckMaster) {
 					MasterDsNotFoundException exp = new MasterDsNotFoundException(error_message, result.getException());
@@ -140,14 +129,9 @@ public class FailOverDataSource extends AbstractDataSource {
 		masterDataSourceMonitorThread.start();
 	}
 
-	private void initFilter() {
-		this.context.setDataSource(this);
-	}
-
 	private boolean setMasterDb(DataSourceConfig config) {
 		if (master == null || !master.getId().equals(config.getId())) {
 			master = getDataSource(config);
-			changeMetaData(config);
 			return true;
 		}
 		return false;
@@ -178,11 +162,21 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	public static class FindMasterDataSourceResult {
+		private String dsId;
+
 		private boolean changedMaster;
 
 		private boolean masterExist;
 
 		private Exception exception;
+
+		public String getDsId() {
+			return dsId;
+		}
+
+		public void setDsId(String dsId) {
+			this.dsId = dsId;
+		}
 
 		public Exception getException() {
 			return exception;
@@ -209,7 +203,7 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 	}
 
-	static class MasterDataSourceMonitor implements Runnable {
+	public static class MasterDataSourceMonitor implements Runnable {
 		private final Logger logger = LogManager.getLogger(this.getClass());
 
 		private final int maxTransactionTryLimits = 60 * 10; // 10 minute
@@ -254,46 +248,60 @@ public class FailOverDataSource extends AbstractDataSource {
 			cachedConnection.clear();
 		}
 
+		private FindMasterDataSourceResult findMasterDataSourceOrigin() throws WeakReferenceGCException {
+			FindMasterDataSourceResult result = new FindMasterDataSourceResult();
+
+			if (getWeakFailOverDataSource().configs.values().size() == 0) {
+				Exception exp = new IllegalConfigException("zero writer data source in config!");
+				logger.warn(exp.getMessage(), exp);
+			}
+
+			for (DataSourceConfig config : getWeakFailOverDataSource().configs.values()) {
+				CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
+				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
+					result.setChangedMaster(getWeakFailOverDataSource().setMasterDb(config));
+					result.setMasterExist(true);
+					result.setDsId(config.getId());
+					break;
+				} else if (checkResult == CheckMasterDataSourceResult.ERROR) {
+					result.setException(checkResult.getException());
+				}
+			}
+
+			if (result.isMasterExist()) {
+				// reset the exception if has any
+				result.setException(null);
+			}
+
+			return result;
+		}
+
 		public FindMasterDataSourceResult findMasterDataSource() throws WeakReferenceGCException {
-			return getWeakFailOverDataSource().filter.findMasterFailOverDataSource(
-				  getWeakFailOverDataSource().context.clone(), this,
-				  new FilterFunction<MasterDataSourceMonitor, FindMasterDataSourceResult>() {
-					  @Override
-					  public FindMasterDataSourceResult execute(MasterDataSourceMonitor source) {
-						  FindMasterDataSourceResult result = new FindMasterDataSourceResult();
+			List<JdbcFilter> filters = getWeakFailOverDataSource().filters;
 
-						  if (source.getWeakFailOverDataSource().configs.values().size() == 0) {
-							  Exception exp = new IllegalConfigException("zero writer data source in config!");
-							  logger.warn(exp.getMessage(), exp);
-						  }
-
-						  for (DataSourceConfig config : source.getWeakFailOverDataSource().configs.values()) {
-							  CheckMasterDataSourceResult checkResult = isMasterDataSource(config);
-							  if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
-								  result.setChangedMaster(source.getWeakFailOverDataSource().setMasterDb(config));
-								  result.setMasterExist(true);
-
-								  break;
-							  } else if (checkResult == CheckMasterDataSourceResult.ERROR) {
-								  result.setException(checkResult.getException());
-							  }
-						  }
-
-						  if (result.isMasterExist()) {
-							  // reset the exception if has any
-							  result.setException(null);
-						  }
-
-						  return result;
-					  }
-				  });
+			if (filters != null && filters.size() > 0) {
+				JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+					@Override
+					public FindMasterDataSourceResult findMasterFailOverDataSource(MasterDataSourceMonitor source,
+							JdbcFilter chain) {
+						if (index < filters.size()) {
+							return filters.get(index++).findMasterFailOverDataSource(source, chain);
+						} else {
+							return source.findMasterDataSourceOrigin();
+						}
+					}
+				};
+				return chain.findMasterFailOverDataSource(this, chain);
+			} else {
+				return findMasterDataSourceOrigin();
+			}
 		}
 
 		protected Connection getConnection(DataSourceConfig config) throws SQLException {
 			if (!cachedConnection.containsKey(config.getId())) {
 				JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 				cachedConnection.put(config.getId(),
-					  DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
+						DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
 			}
 
 			return cachedConnection.get(config.getId());
@@ -379,8 +387,8 @@ public class FailOverDataSource extends AbstractDataSource {
 							sleepForSeconds(5);
 
 							if (isMasterDataSource(
-								  getWeakFailOverDataSource().configs.get(getWeakFailOverDataSource().master
-										.getId())) != CheckMasterDataSourceResult.READ_WRITE) {
+									getWeakFailOverDataSource().configs.get(getWeakFailOverDataSource().master
+											.getId())) != CheckMasterDataSourceResult.READ_WRITE) {
 								closeConnections();
 								break;
 							}

@@ -72,20 +72,6 @@ public class DefaultFilterManager implements FilterManager {
 		return clazz;
 	}
 
-	@Override
-	public JdbcFilter loadFilter(String strConfig) {
-		List<JdbcFilter> result = new ArrayList<JdbcFilter>();
-		if (strConfig != null) {
-			for (String name : strConfig.trim().split(",")) {
-				List<JdbcFilter> filters = loadFilterFromCache(name.trim());
-				if (filters != null && filters.size() > 0) {
-					result.addAll(filters);
-				}
-			}
-		}
-		return result.size() > 0 ? new FilterWrapper(result) : new DefaultJdbcFilter();
-	}
-
 	private Properties loadFilterConfig() throws IOException {
 		Properties filterProperties = new Properties();
 
@@ -100,7 +86,7 @@ public class DefaultFilterManager implements FilterManager {
 			return;
 		}
 
-		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements();) {
+		for (Enumeration<URL> e = classLoader.getResources(FILTER_PROPERTY_NAME); e.hasMoreElements(); ) {
 			URL url = e.nextElement();
 
 			Properties property = new Properties();
@@ -133,7 +119,6 @@ public class DefaultFilterManager implements FilterManager {
 
 		result = new ArrayList<JdbcFilter>();
 
-		// TODO: 不需要逗号分隔
 		for (String filterClassName : filterClassNames.split(",")) {
 			Class<?> filterClass = loadClass(filterClassName);
 			if (filterClass == null) {
@@ -150,6 +135,29 @@ public class DefaultFilterManager implements FilterManager {
 		}
 
 		cachedFilterMap.put(filterName, result);
+		return result;
+	}
+
+	@Override
+	public List<JdbcFilter> loadFilters(String strConfig) {
+		List<JdbcFilter> result = new LinkedList<JdbcFilter>();
+		if (strConfig != null) {
+			for (String name : strConfig.trim().split(",")) {
+				List<JdbcFilter> filters = loadFilterFromCache(name.trim());
+				if (filters != null && filters.size() > 0) {
+					result.addAll(filters);
+				}
+			}
+		}
+
+		Collections.sort(result, new Comparator<JdbcFilter>() {
+			@Override
+			public int compare(JdbcFilter o1, JdbcFilter o2) {
+				int x = o1.getOrder();
+				int y = o2.getOrder();
+				return (x > y) ? -1 : ((x == y) ? 0 : 1);
+			}
+		});
 		return result;
 	}
 }

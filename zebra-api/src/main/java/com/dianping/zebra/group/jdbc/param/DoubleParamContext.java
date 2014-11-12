@@ -1,9 +1,9 @@
 /**
  * Project: zebra-client
- * 
+ *
  * File Created at 2011-6-19
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -20,9 +20,8 @@ import java.sql.SQLException;
 
 /**
  * TODO Comment of DoubleParamContext
- * 
+ *
  * @author Leo Liang
- * 
  */
 public class DoubleParamContext extends ParamContext {
 

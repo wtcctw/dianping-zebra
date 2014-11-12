@@ -5,9 +5,9 @@ import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
+import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
-import com.dianping.zebra.group.filter.JdbcContext;
-import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.util.StringUtils;
 
 import java.beans.PropertyChangeEvent;
@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -29,7 +28,7 @@ public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
 
 	protected final static Pattern ID_PATTERN = Pattern
-		  .compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH + "})(\\*\\/).*");
+			.compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH + "})(\\*\\/).*");
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
@@ -40,45 +39,6 @@ public class WallFilter extends DefaultJdbcFilter {
 	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
 	private SystemConfigManager systemConfigManager;
-
-	protected String addIdToSql(String sql, JdbcContext metaData) throws SQLException {
-		try {
-			String id = generateId(metaData);
-			checkBlackList(sql, id);
-			return String.format("/*z:%s*/%s", id, sql);
-		} catch (NoSuchAlgorithmException e) {
-			return sql;
-		}
-	}
-
-	@Override public void init() {
-		super.init();
-		this.initWallFilter();
-		this.initBlackList();
-	}
-
-	private void initWallFilter() {
-		String configManagerType = WallFilterConfig.getConfigManagerType();
-		if (StringUtils.isNotBlank(configManagerType)) {
-			this.configManagerType = configManagerType;
-		}
-	}
-
-	private void initBlackList() {
-		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-			  Constants.DEFAULT_SYSTEM_RESOURCE_ID);
-
-		buildBlackListFromSystemConfig(this.systemConfigManager.getSystemConfig());
-
-		this.systemConfigManager.addListerner(new PropertyChangeListener() {
-			@Override public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-				if (propertyChangeEvent.getPropertyName()
-					  .startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)) {
-					buildBlackListFromSystemConfig(systemConfigManager.getSystemConfig());
-				}
-			}
-		});
-	}
 
 	private synchronized void buildBlackListFromSystemConfig(SystemConfig config) {
 		Set<String> newblackList = new HashSet<String>();
@@ -97,25 +57,18 @@ public class WallFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	@Override
-	public <S, T> T execute(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, T> action)
-		  throws SQLException {
-		T result = super.execute(metaData, source, action);
-		return result;
-	}
-
-	protected String generateId(JdbcContext metaData) throws NoSuchAlgorithmException {
+	protected String generateId(SingleConnection conn, String sql) throws NoSuchAlgorithmException {
 		String token = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		if (StringUtils.isBlank(token)) {
-			token = metaData.getSql();
+			token = sql;
 		}
 
 		if (StringUtils.isBlank(token)) {
 			return null;
 		}
 
-		if (metaData.getRealJdbcContext() != null && metaData.getRealJdbcContext().getDataSourceId() != null) {
-			token = String.format("/*%s*/%s", metaData.getRealJdbcContext().getDataSourceId(), token);
+		if (conn != null && conn.getConfig() != null && StringUtils.isNotBlank(conn.getConfig().getId())) {
+			token = String.format("/*%s*/%s", conn.getConfig().getId(), token);
 		}
 
 		return generateId(token);
@@ -147,27 +100,57 @@ public class WallFilter extends DefaultJdbcFilter {
 		return result;
 	}
 
-	protected String getIdFromSQL(String sql) {
-		if (StringUtils.isBlank(sql)) {
-			return null;
-		}
-		Matcher matcher = ID_PATTERN.matcher(sql);
-		if (matcher.matches()) {
-			return matcher.group(2);
-		} else {
-			return null;
-		}
-	}
-
 	public int getOrder() {
 		return MIN_ORDER;
 	}
 
 	@Override
-	public <S> String sql(JdbcContext metaData, S source, FilterFunctionWithSQLException<S, String> action)
-		  throws SQLException {
-		String result = super.sql(metaData, source, action);
-		result = addIdToSql(result, metaData);
-		return result;
+	public void init() {
+		super.init();
+		this.initWallFilter();
+		this.initBlackList();
+	}
+
+	private void initBlackList() {
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
+				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+
+		buildBlackListFromSystemConfig(this.systemConfigManager.getSystemConfig());
+
+		this.systemConfigManager.addListerner(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+				if (propertyChangeEvent.getPropertyName()
+						.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)) {
+					buildBlackListFromSystemConfig(systemConfigManager.getSystemConfig());
+				}
+			}
+		});
+	}
+
+	private void initWallFilter() {
+		String configManagerType = WallFilterConfig.getConfigManagerType();
+		if (StringUtils.isNotBlank(configManagerType)) {
+			this.configManagerType = configManagerType;
+		}
+	}
+
+	@Override
+	public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
+		if (chain != null) {
+			sql = chain.sql(conn, sql, chain);
+		}
+
+		if (StringUtils.isBlank(sql)) {
+			return sql;
+		}
+
+		try {
+			String id = generateId(conn, sql);
+			checkBlackList(sql, id);
+			return String.format("/*z:%s*/%s", id, sql);
+		} catch (NoSuchAlgorithmException e) {
+			return sql;
+		}
 	}
 }

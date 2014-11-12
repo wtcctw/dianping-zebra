@@ -17,7 +17,7 @@ public class CustomizedReadWriteStrategyWrapper implements CustomizedReadWriteSt
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 }

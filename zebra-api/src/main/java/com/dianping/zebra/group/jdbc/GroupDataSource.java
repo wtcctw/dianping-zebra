@@ -1,7 +1,10 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.*;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.zebra.group.config.SystemConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
@@ -9,11 +12,9 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
-import com.dianping.zebra.group.filter.JdbcContext;
-import com.dianping.zebra.group.filter.delegate.FilterAction;
-import com.dianping.zebra.group.filter.delegate.FilterActionWithSQLExcption;
-import com.dianping.zebra.group.filter.delegate.FilterFunctionWithSQLException;
+import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
@@ -163,32 +164,44 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.close(this.readDataSource, this.writeDataSource);
 	}
 
-	private void close(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
-		this.filter.closeGroupDataSource(this.context.clone(), this, new FilterActionWithSQLExcption<GroupDataSource>() {
-			@Override
-			public void execute(GroupDataSource source) throws SQLException {
+	private void closeOrigin(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
+		List<SQLException> exps = new ArrayList<SQLException>();
 
-				List<SQLException> exps = new ArrayList<SQLException>();
-
-				try {
-					if (read != null) {
-						read.close();
-					}
-				} catch (SQLException e) {
-					exps.add(e);
-				}
-
-				try {
-					if (write != null) {
-						write.close();
-					}
-				} catch (SQLException e) {
-					exps.add(e);
-				}
-
-				JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
+		try {
+			if (read != null) {
+				read.close();
 			}
-		});
+		} catch (SQLException e) {
+			exps.add(e);
+		}
+
+		try {
+			if (write != null) {
+				write.close();
+			}
+		} catch (SQLException e) {
+			exps.add(e);
+		}
+
+		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
+	}
+
+	private void close(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
+		if (filters != null && filters.size() > 0) {
+			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+				@Override
+				public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
+					if (index < filters.size()) {
+						filters.get(index++).closeGroupDataSource(source, chain);
+					} else {
+						source.closeOrigin(read, write);
+					}
+				}
+			};
+			chain.closeGroupDataSource(this, chain);
+		} else {
+			closeOrigin(read, write);
+		}
 	}
 
 	private Any findAny(List<Any> all, String name) {
@@ -212,15 +225,28 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	@Override
-	public Connection getConnection(String username, String password) throws SQLException {
-		return filter.getGroupConnection(this.context.clone(), this,
-		      new FilterFunctionWithSQLException<GroupDataSource, GroupConnection>() {
-			      @Override
-			      public GroupConnection execute(GroupDataSource source) throws SQLException {
-				      return new GroupConnection(source.readDataSource, source.writeDataSource,
-				            source.customizedReadWriteStrategy, source.routerType, source.context.clone(), source.filter);
-			      }
-		      });
+	public Connection getConnection(final String username, final String password) throws SQLException {
+		if (filters != null && filters.size() > 0) {
+			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+				@Override
+				public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain)
+						throws SQLException {
+					if (index < filters.size()) {
+						return filters.get(index++).getGroupConnection(source, chain);
+					} else {
+						return source.getConnectionOrigin(username, password);
+					}
+				}
+			};
+			return chain.getGroupConnection(this, chain);
+		} else {
+			return getConnectionOrigin(username, password);
+		}
+	}
+
+	private GroupConnection getConnectionOrigin(String username, String password) {
+		return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy,
+				routerType, filters);
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -290,31 +316,45 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 
 		SingleDataSourceManagerFactory.getDataSourceManager().init();
 
 		this.initFilters();
 
-		this.filter.initGroupDataSource(this.context.clone(), this, new FilterAction<GroupDataSource>() {
-			@Override
-			public void execute(GroupDataSource source) {
-				source.initDataSources();
-				source.loadCustomizedReadWriteStrategy();
-			}
-		});
+		if (filters != null && filters.size() > 0) {
+			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+				@Override
+				public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
+					if (index < filters.size()) {
+						filters.get(index++).initGroupDataSource(source, chain);
+					} else {
+						source.initOrigin();
+					}
+				}
+			};
+			chain.initGroupDataSource(this, chain);
+		} else {
+			initOrigin();
+		}
 
 		this.init = true;
+
 		logger.info(String.format("GroupDataSource(%s) successfully initialized.", jdbcRef));
+	}
+
+	private void initOrigin() {
+		initDataSources();
+		loadCustomizedReadWriteStrategy();
 	}
 
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-			      this.context.clone(), this.filter, systemConfigManager.getSystemConfig().getRetryTimes());
+					this.filters, systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
-			      this.context.clone(), this.filter);
+					this.filters);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -327,11 +367,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void initFilters() {
-		this.context = new JdbcContext();
-		this.context.setDataSourceId(this.jdbcRef);
-		this.context.setDataSource(this);
-		this.context.setDataSourceProperties(this);
-		this.filter = FilterManagerFactory.getFilterManager().loadFilter(this.groupConfig.getFilters());
+		this.filters = FilterManagerFactory.getFilterManager().loadFilters(this.groupConfig.getFilters());
 	}
 
 	private void loadCustomizedReadWriteStrategy() {
@@ -352,18 +388,31 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void refresh(String propertyToChange) {
-		if (this.init) {
-			final GroupDataSourceConfig newGroupConfig = buildGroupConfig();
+		if (!this.init) {
+			return;
+		}
 
-			if (!groupConfig.toString().equals(newGroupConfig.toString())) {
-				filter.refreshGroupDataSource(this.context.clone(), propertyToChange, this,
-				      new FilterAction<GroupDataSource>() {
-					      @Override
-					      public void execute(GroupDataSource source) {
-						      refreshIntenal(newGroupConfig);
-					      }
-				      });
-			}
+		final GroupDataSourceConfig newGroupConfig = buildGroupConfig();
+
+		if (groupConfig.toString().equals(newGroupConfig.toString())) {
+			return;
+		}
+
+		if (filters != null && filters.size() > 0) {
+			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+				@Override
+				public void refreshGroupDataSource(GroupDataSource source, String propertyToChange,
+						JdbcFilter chain) {
+					if (index < filters.size()) {
+						filters.get(index++).refreshGroupDataSource(source, propertyToChange, chain);
+					} else {
+						source.refreshIntenal(newGroupConfig);
+					}
+				}
+			};
+			chain.refreshGroupDataSource(this, propertyToChange, chain);
+		} else {
+			refreshIntenal(newGroupConfig);
 		}
 	}
 
@@ -375,11 +424,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.context.clone(), this.filter,
-			      systemConfigManager.getSystemConfig().getRetryTimes());
+					getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.filters,
+					systemConfigManager.getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
-			      this.context.clone(), this.filter);
+					this.filters);
 			newWriteDataSource.init(false);
 
 			preparedSwitch = true;
@@ -496,10 +545,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public synchronized void setInitialPoolSize(int initialPoolSize) {
 		setProperty("initialPoolSize", String.valueOf(initialPoolSize));
-	}
-
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
 	}
 
 	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
@@ -625,6 +670,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		refresh("writeFirst");
 	}
 
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
+	}
+
 	class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
 		private static final String PASSWORD_KEY = ".jdbc." + Constants.ELEMENT_PASSWORD;
 
@@ -632,10 +685,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
-			if (evt.getNewValue().equals(evt.getOldValue())) {
-				return;
-			}
-
 			if (evt.getPropertyName().endsWith(USERNAME_KEY)) {
 				atomicRefresh.setUser(evt.getNewValue().toString());
 				if (atomicRefresh.needToRefresh()) {

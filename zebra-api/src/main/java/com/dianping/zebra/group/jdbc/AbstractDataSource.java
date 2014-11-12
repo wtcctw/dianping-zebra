@@ -3,13 +3,13 @@ package com.dianping.zebra.group.jdbc;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class AbstractDataSource implements DataSource {
@@ -20,9 +20,7 @@ public abstract class AbstractDataSource implements DataSource {
 
 	protected String configManagerType = REMOTE;
 
-	protected JdbcFilter filter;
-
-	protected JdbcContext context;
+	protected volatile List<JdbcFilter> filters;
 
 	private int loginTimeout = 0;
 

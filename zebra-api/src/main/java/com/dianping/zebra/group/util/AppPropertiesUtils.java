@@ -1,11 +1,11 @@
 package com.dianping.zebra.group.util;
 
+import com.dianping.zebra.group.Constants;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
-
-import com.dianping.zebra.group.Constants;
 
 public class AppPropertiesUtils {
 

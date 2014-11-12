@@ -5,7 +5,10 @@ package com.dianping.zebra.group.filter.wall;
  */
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.group.filter.JdbcContext;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.datasources.SingleConnection;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.junit.Test;
 
@@ -15,14 +18,14 @@ public class WallFilterTest {
 	@Test
 	public void test_addId_to_Sql() throws SQLException {
 		WallFilter filter = new WallFilter();
-		JdbcContext metaData = new JdbcContext();
-		metaData.setSql("select * from test");
-		JdbcContext innerMetaData = new JdbcContext();
-		innerMetaData.setDataSourceId("test-write-1");
-		metaData.setRealJdbcContext(innerMetaData);
+		String sql = "select * from test";
+		DataSourceConfig config = new DataSourceConfig();
+		config.setId("test-write-1");
+		SingleConnection conn = new SingleConnection(null, config, null,
+			  Lists.<JdbcFilter>newArrayList(filter));
 
 		///*test-write-1*/select * from test
-		Assert.assertEquals("/*z:ec262bf8*/select * from test", filter.addIdToSql("select * from test", metaData));
+		Assert.assertEquals("/*z:ec262bf8*/select * from test", filter.sql(conn, "select * from test", null));
 	}
 
 	@Test
@@ -30,29 +33,14 @@ public class WallFilterTest {
 		ExecutionContextHolder.getContext().add("sql_statement_name", "test.select");
 
 		WallFilter filter = new WallFilter();
-		JdbcContext metaData = new JdbcContext();
-		metaData.setSql("select * from test");
-		JdbcContext innerMetaData = new JdbcContext();
-		innerMetaData.setDataSourceId("test-write-1");
-		metaData.setRealJdbcContext(innerMetaData);
+		String sql = "select * from test";
+		DataSourceConfig config = new DataSourceConfig();
+		config.setId("test-write-1");
+		SingleConnection conn = new SingleConnection(null, config, null,
+			  Lists.<JdbcFilter>newArrayList(filter));
 
 		///*test-write-1*/select * from test
-		Assert.assertEquals("/*z:89f7fec5*/select * from test", filter.addIdToSql("select * from test", metaData));
-	}
-
-	@Test
-	public void test_add_id_to_sql() throws SQLException {
-		WallFilter filter = new WallFilter();
-		JdbcContext metaData = new JdbcContext();
-		filter.addIdToSql("select * from user", metaData);
-	}
-
-	@Test
-	public void test_get_id_from_sql() {
-		WallFilter filter = new WallFilter();
-		Assert.assertEquals(filter.getIdFromSQL("select * from user/*z:7yhgtr45*/"), "7yhgtr45");
-		Assert.assertEquals(filter.getIdFromSQL("select * from user/*z:7yhgtr45ty111*/"), null);
-		Assert.assertEquals(filter.getIdFromSQL("select * from user/*z:7yhgtr45*/\\r\\n/*xxx*/"), "7yhgtr45");
+		Assert.assertEquals("/*z:89f7fec5*/select * from test", filter.sql(conn, "select * from test", null));
 	}
 
 	@Test(expected = SQLException.class)
