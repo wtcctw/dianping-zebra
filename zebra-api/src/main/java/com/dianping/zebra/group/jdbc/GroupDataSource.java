@@ -388,25 +388,31 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void refresh(String propertyToChange) {
-		if (this.init) {
-			final GroupDataSourceConfig newGroupConfig = buildGroupConfig();
+		if (!this.init) {
+			return;
+		}
 
-			if (filters != null && filters.size() > 0) {
-				JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
-					@Override
-					public void refreshGroupDataSource(GroupDataSource source, String propertyToChange,
-						  JdbcFilter chain) {
-						if (index < filters.size()) {
-							filters.get(index++).refreshGroupDataSource(source, propertyToChange, chain);
-						} else {
-							source.refreshIntenal(newGroupConfig);
-						}
+		final GroupDataSourceConfig newGroupConfig = buildGroupConfig();
+
+		if (groupConfig.toString().equals(newGroupConfig.toString())) {
+			return;
+		}
+
+		if (filters != null && filters.size() > 0) {
+			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+				@Override
+				public void refreshGroupDataSource(GroupDataSource source, String propertyToChange,
+					  JdbcFilter chain) {
+					if (index < filters.size()) {
+						filters.get(index++).refreshGroupDataSource(source, propertyToChange, chain);
+					} else {
+						source.refreshIntenal(newGroupConfig);
 					}
-				};
-				chain.refreshGroupDataSource(this, propertyToChange, chain);
-			} else {
-				refreshIntenal(newGroupConfig);
-			}
+				}
+			};
+			chain.refreshGroupDataSource(this, propertyToChange, chain);
+		} else {
+			refreshIntenal(newGroupConfig);
 		}
 	}
 
