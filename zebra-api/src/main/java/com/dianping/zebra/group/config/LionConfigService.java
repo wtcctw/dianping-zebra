@@ -1,19 +1,18 @@
 package com.dianping.zebra.group.config;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.IllegalConfigException;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LionConfigService implements ConfigService {
 	private final Logger logger = LogManager.getLogger(this.getClass());
@@ -42,9 +41,9 @@ public class LionConfigService implements ConfigService {
 				@Override
 				public void onChange(String key, String value) {
 					if (key.startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
-						  || key.startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)
-						  || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)
-					      || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX)) {
+							|| key.startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)
+							|| key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)
+							|| key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX)) {
 						PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
 						for (PropertyChangeListener listener : listeners) {
 							listener.propertyChange(event);

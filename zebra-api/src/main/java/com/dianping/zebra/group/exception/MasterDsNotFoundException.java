@@ -2,7 +2,7 @@ package com.dianping.zebra.group.exception;
 
 public class MasterDsNotFoundException extends DalException {
 
-   private static final long serialVersionUID = -1726616148252641312L;
+	private static final long serialVersionUID = -1726616148252641312L;
 
 	public MasterDsNotFoundException() {
 		super();

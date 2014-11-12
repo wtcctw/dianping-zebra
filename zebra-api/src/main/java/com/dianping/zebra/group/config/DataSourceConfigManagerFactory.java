@@ -31,7 +31,7 @@ public final class DataSourceConfigManagerFactory {
 						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
 					} else {
 						throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]",
-							  configManagerType));
+								configManagerType));
 					}
 					dataSourceConfigManager.init();
 					dataSourceConfigManagers.put(getFormattedName(name), dataSourceConfigManager);
