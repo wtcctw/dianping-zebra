@@ -28,7 +28,7 @@ public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
 
 	protected final static Pattern ID_PATTERN = Pattern
-		  .compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH + "})(\\*\\/).*");
+			.compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH + "})(\\*\\/).*");
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
@@ -39,35 +39,6 @@ public class WallFilter extends DefaultJdbcFilter {
 	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
 	private SystemConfigManager systemConfigManager;
-
-	@Override public void init() {
-		super.init();
-		this.initWallFilter();
-		this.initBlackList();
-	}
-
-	private void initWallFilter() {
-		String configManagerType = WallFilterConfig.getConfigManagerType();
-		if (StringUtils.isNotBlank(configManagerType)) {
-			this.configManagerType = configManagerType;
-		}
-	}
-
-	private void initBlackList() {
-		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-			  Constants.DEFAULT_SYSTEM_RESOURCE_ID);
-
-		buildBlackListFromSystemConfig(this.systemConfigManager.getSystemConfig());
-
-		this.systemConfigManager.addListerner(new PropertyChangeListener() {
-			@Override public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-				if (propertyChangeEvent.getPropertyName()
-					  .startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)) {
-					buildBlackListFromSystemConfig(systemConfigManager.getSystemConfig());
-				}
-			}
-		});
-	}
 
 	private synchronized void buildBlackListFromSystemConfig(SystemConfig config) {
 		Set<String> newblackList = new HashSet<String>();
@@ -133,7 +104,39 @@ public class WallFilter extends DefaultJdbcFilter {
 		return MIN_ORDER;
 	}
 
-	@Override public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
+	@Override
+	public void init() {
+		super.init();
+		this.initWallFilter();
+		this.initBlackList();
+	}
+
+	private void initBlackList() {
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
+				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+
+		buildBlackListFromSystemConfig(this.systemConfigManager.getSystemConfig());
+
+		this.systemConfigManager.addListerner(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+				if (propertyChangeEvent.getPropertyName()
+						.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)) {
+					buildBlackListFromSystemConfig(systemConfigManager.getSystemConfig());
+				}
+			}
+		});
+	}
+
+	private void initWallFilter() {
+		String configManagerType = WallFilterConfig.getConfigManagerType();
+		if (StringUtils.isNotBlank(configManagerType)) {
+			this.configManagerType = configManagerType;
+		}
+	}
+
+	@Override
+	public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
 		if (chain != null) {
 			sql = chain.sql(conn, sql, chain);
 		}

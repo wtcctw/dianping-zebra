@@ -18,70 +18,86 @@ import java.util.List;
  */
 public class DefaultJdbcFilter implements JdbcFilter {
 
-	@Override public void init() {
-
-	}
-
-	@Override public void closeGroupConnection(GroupConnection source, JdbcFilter chain) throws SQLException {
+	@Override
+	public void closeGroupConnection(GroupConnection source, JdbcFilter chain) throws SQLException {
 		chain.closeGroupConnection(source, chain);
 	}
 
-	@Override public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
+	@Override
+	public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
 		chain.closeGroupDataSource(source, chain);
 	}
 
-	@Override public void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException {
+	@Override
+	public void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException {
 		chain.closeSingleConnection(source, chain);
 	}
 
-	@Override public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
+	@Override
+	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
 		chain.closeSingleDataSource(source, chain);
 	}
 
-	@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
-		  boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
+	@Override
+	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 		return chain.execute(source, conn, sql, batchedSql, isBatched, autoCommit, params, chain);
 	}
 
-	@Override public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-		  FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+	@Override
+	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
+			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
 		return chain.findMasterFailOverDataSource(source, chain);
 	}
 
-	@Override public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException {
+	@Override
+	public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException {
 		return chain.getGroupConnection(source, chain);
 	}
 
-	@Override public int getOrder() {
+	@Override
+	public int getOrder() {
 		return 0;
 	}
 
-	@Override public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain)
-		  throws SQLException {
+	@Override
+	public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain)
+			throws SQLException {
 		return chain.getSingleConnection(source, chain);
 	}
 
-	@Override public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
+	@Override
+	public void init() {
+
+	}
+
+	@Override
+	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
 		chain.initGroupDataSource(source, chain);
 	}
 
-	@Override public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
+	@Override
+	public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
 		return chain.initSingleDataSource(source, chain);
 	}
 
-	@Override public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
+	@Override
+	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
 		chain.refreshGroupDataSource(source, propertiesName, chain);
 	}
 
-	@Override public boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException {
+	@Override
+	public boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException {
 		return chain.resultSetNext(source, chain);
 	}
 
-	@Override public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
+	@Override
+	public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
 		return chain.sql(conn, sql, chain);
 	}
 
-	@Override public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
+	@Override
+	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
 		chain.switchFailOverDataSource(source, chain);
 	}
 }
