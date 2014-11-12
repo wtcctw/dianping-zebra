@@ -21,7 +21,7 @@ public class WallFilterTest {
 		String sql = "select * from test";
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
-		SingleConnection conn = new SingleConnection(null, config, null, null,
+		SingleConnection conn = new SingleConnection(null, config, null,
 			  Lists.<JdbcFilter>newArrayList(filter));
 
 		///*test-write-1*/select * from test
@@ -36,7 +36,7 @@ public class WallFilterTest {
 		String sql = "select * from test";
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
-		SingleConnection conn = new SingleConnection(null, config, null, null,
+		SingleConnection conn = new SingleConnection(null, config, null,
 			  Lists.<JdbcFilter>newArrayList(filter));
 
 		///*test-write-1*/select * from test

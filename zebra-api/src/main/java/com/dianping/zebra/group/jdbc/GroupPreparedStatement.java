@@ -7,7 +7,6 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.param.*;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
@@ -40,12 +39,10 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	private String sql;
 
-	public GroupPreparedStatement(GroupConnection connection, String sql, JdbcContext context,
+	public GroupPreparedStatement(GroupConnection connection, String sql,
 		  List<JdbcFilter> filters) {
-		super(connection, context, filters);
-		context.setPrepared(true);
+		super(connection, filters);
 		this.sql = sql;
-		this.context.setSql(this.sql);
 	}
 
 	/*
@@ -171,10 +168,10 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
-		sql = processSQL(conn,sql);
+		sql = processSQL(conn, sql);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 		setParams(pstmt);
-		this.currentResultSet = new GroupResultSet(this.context.clone(), this.filters, pstmt.executeQuery());
+		this.currentResultSet = new GroupResultSet(this.filters, pstmt.executeQuery());
 		return this.currentResultSet;
 	}
 
@@ -205,7 +202,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	}
 
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {
-		sql = processSQL(conn,sql);
+		sql = processSQL(conn, sql);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 
 		setParams(pstmt);

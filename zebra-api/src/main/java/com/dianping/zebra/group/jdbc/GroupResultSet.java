@@ -1,6 +1,5 @@
 package com.dianping.zebra.group.jdbc;
 
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 
@@ -17,16 +16,13 @@ import java.util.Map;
  * Created by Dozer on 9/1/14.
  */
 public class GroupResultSet implements ResultSet {
-	private final JdbcContext context;
-
 	private final List<JdbcFilter> filters;
 
 	private final ResultSet innerResultSet;
 
-	public GroupResultSet(JdbcContext context, List<JdbcFilter> filters, ResultSet resultSet) {
+	public GroupResultSet(List<JdbcFilter> filters, ResultSet resultSet) {
 		this.innerResultSet = resultSet;
 		this.filters = filters;
-		this.context = context;
 	}
 
 	@Override

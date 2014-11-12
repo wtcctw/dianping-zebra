@@ -2,10 +2,8 @@ package com.dianping.zebra.group.datasources;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
 
-import javax.activation.DataSource;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
@@ -22,14 +20,11 @@ public class SingleConnection implements Connection {
 
 	private final DataSourceConfig config;
 
-	private JdbcContext context;
-
-	public SingleConnection(SingleDataSource dataSource, DataSourceConfig config, Connection conn, JdbcContext context,
+	public SingleConnection(SingleDataSource dataSource, DataSourceConfig config, Connection conn,
 		  List<JdbcFilter> filters) {
 		this.dataSource = dataSource;
 		this.conn = conn;
 		this.filters = filters;
-		this.context = context;
 		this.config = config;
 	}
 
@@ -167,10 +162,6 @@ public class SingleConnection implements Connection {
 	@Override
 	public void setHoldability(int holdability) throws SQLException {
 		conn.setHoldability(holdability);
-	}
-
-	public JdbcContext getJdbcContext() {
-		return this.context;
 	}
 
 	@Override

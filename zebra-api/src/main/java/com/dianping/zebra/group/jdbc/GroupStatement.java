@@ -9,7 +9,6 @@ package com.dianping.zebra.group.jdbc;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.exception.DalNotSupportException;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
@@ -38,8 +37,6 @@ public class GroupStatement implements Statement {
 
 	protected int maxRows;
 
-	protected JdbcContext context;
-
 	protected boolean moreResults = false;
 
 	protected Statement openedStatement = null;
@@ -54,9 +51,8 @@ public class GroupStatement implements Statement {
 
 	protected int updateCount;
 
-	public GroupStatement(GroupConnection connection, JdbcContext context, List<JdbcFilter> filters) {
+	public GroupStatement(GroupConnection connection, List<JdbcFilter> filters) {
 		this.dpGroupConnection = connection;
-		this.context = context;
 		this.filters = filters;
 	}
 
@@ -306,7 +302,7 @@ public class GroupStatement implements Statement {
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
 		sql = processSQL(conn, sql);
 		Statement stmt = createStatementInternal(conn, false);
-		currentResultSet = new GroupResultSet(this.context.clone(), this.filters, stmt.executeQuery(sql));
+		currentResultSet = new GroupResultSet(this.filters, stmt.executeQuery(sql));
 		return currentResultSet;
 	}
 
@@ -481,7 +477,7 @@ public class GroupStatement implements Statement {
 	@Override
 	public ResultSet getGeneratedKeys() throws SQLException {
 		if (this.openedStatement != null) {
-			return new GroupResultSet(this.context.clone(), this.filters, this.openedStatement.getGeneratedKeys());
+			return new GroupResultSet(this.filters, this.openedStatement.getGeneratedKeys());
 		} else {
 			throw new SQLException("No update operations executed before getGeneratedKeys");
 		}
@@ -565,13 +561,6 @@ public class GroupStatement implements Statement {
 	@Override
 	public void setQueryTimeout(int queryTimeout) throws SQLException {
 		this.queryTimeout = queryTimeout;
-	}
-
-	private JdbcContext getRealJdbcMetaData(Connection conn) {
-		if (conn instanceof SingleConnection) {
-			return ((SingleConnection) conn).getJdbcContext();
-		}
-		return null;
 	}
 
 	/*

@@ -3,7 +3,6 @@ package com.dianping.zebra.group.datasources;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcContext;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -17,9 +16,9 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 	private BlockingQueue<SingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<SingleDataSource>();
 
 	@Override
-	public synchronized SingleDataSource createDataSource(DataSourceConfig config, JdbcContext context,
-			List<JdbcFilter> filters) {
-		return new SingleDataSource(config, context, filters);
+	public synchronized SingleDataSource createDataSource(DataSourceConfig config,
+		  List<JdbcFilter> filters) {
+		return new SingleDataSource(config, filters);
 	}
 
 	@Override

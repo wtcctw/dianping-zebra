@@ -1,9 +1,8 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.filter.JdbcContext;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
+import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
@@ -26,8 +25,6 @@ public class GroupConnection implements Connection {
 
 	private List<JdbcFilter> filters;
 
-	private JdbcContext context;
-
 	private Set<Statement> openedStatements = new HashSet<Statement>();
 
 	private Connection rConnection;
@@ -44,13 +41,12 @@ public class GroupConnection implements Connection {
 
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
 		  CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType,
-		  JdbcContext context, List<JdbcFilter> filters) {
+		  List<JdbcFilter> filters) {
 		super();
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
 		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
 		this.filters = filters;
-		this.context = context;
 		this.routerType = routerType;
 	}
 
@@ -219,7 +215,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
-		Statement stmt = new GroupStatement(this, this.context.clone(), this.filters);
+		Statement stmt = new GroupStatement(this, this.filters);
 		openedStatements.add(stmt);
 		return stmt;
 	}
@@ -603,7 +599,7 @@ public class GroupConnection implements Connection {
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
-		PreparedStatement pstmt = new GroupPreparedStatement(this, sql, this.context.clone(), this.filters);
+		PreparedStatement pstmt = new GroupPreparedStatement(this, sql, this.filters);
 		openedStatements.add(pstmt);
 		return pstmt;
 	}

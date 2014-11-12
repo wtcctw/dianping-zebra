@@ -14,7 +14,6 @@ import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -247,7 +246,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private GroupConnection getConnectionOrigin(String username, String password) {
 		return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy,
-			  routerType, context.clone(), filters);
+			  routerType, filters);
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -352,10 +351,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-				  this.context.clone(), this.filters, systemConfigManager.getSystemConfig().getRetryTimes());
+				  this.filters, systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
-				  this.context.clone(), this.filters);
+				  this.filters);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -368,10 +367,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void initFilters() {
-		this.context = new JdbcContext();
-		this.context.setDataSourceId(this.jdbcRef);
-		this.context.setDataSource(this);
-		this.context.setDataSourceProperties(this);
 		this.filters = FilterManagerFactory.getFilterManager().loadFilters(this.groupConfig.getFilters());
 	}
 
@@ -423,12 +418,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-				  getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.context.clone(),
-				  this.filters,
+				  getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.filters,
 				  systemConfigManager.getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
-				  this.context.clone(), this.filters);
+				  this.filters);
 			newWriteDataSource.init(false);
 
 			preparedSwitch = true;

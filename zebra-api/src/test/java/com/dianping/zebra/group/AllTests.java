@@ -10,7 +10,6 @@ import com.dianping.zebra.group.config.SystemConfigManagerTest;
 import com.dianping.zebra.group.datasources.FailoverDataSourceTest;
 import com.dianping.zebra.group.filter.DefaultFilterManagerTest;
 import com.dianping.zebra.group.filter.FilterChainTest;
-import com.dianping.zebra.group.filter.JdbcContextTest;
 import com.dianping.zebra.group.filter.visitor.MergeSqlVisitorTest;
 import com.dianping.zebra.group.filter.wall.WallFilterTest;
 import com.dianping.zebra.group.jdbc.DPGroupConnectionTestCase;
@@ -37,7 +36,6 @@ import com.dianping.zebra.group.util.SqlUtilsTest;
 	  FailoverDataSourceTest.class,
 
 	  //filter
-	  JdbcContextTest.class,
 	  DefaultFilterManagerTest.class,
 	  FilterChainTest.class,
 	  WallFilterTest.class,

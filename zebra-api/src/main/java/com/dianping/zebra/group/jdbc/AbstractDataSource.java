@@ -3,7 +3,6 @@ package com.dianping.zebra.group.jdbc;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -22,8 +21,6 @@ public abstract class AbstractDataSource implements DataSource {
 	protected String configManagerType = REMOTE;
 
 	protected volatile List<JdbcFilter> filters;
-
-	protected JdbcContext context;
 
 	private int loginTimeout = 0;
 

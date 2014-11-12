@@ -5,7 +5,6 @@ import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.exception.WeakReferenceGCException;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -35,19 +34,9 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private Thread masterDataSourceMonitorThread;
 
-	public FailOverDataSource(Map<String, DataSourceConfig> configs, JdbcContext context, List<JdbcFilter> filters) {
+	public FailOverDataSource(Map<String, DataSourceConfig> configs, List<JdbcFilter> filters) {
 		this.configs = configs;
 		this.filters = filters;
-		this.context = context;
-		this.context.setDataSource(this);
-	}
-
-	private void changeMetaData(DataSourceConfig config) {
-		this.context.setDataSourceId(config.getId());
-		this.context.setJdbcUrl(config.getJdbcUrl());
-		this.context.setJdbcUsername(config.getUsername());
-		this.context.setJdbcPassword(config.getPassword() == null ? null : StringUtils.repeat("*", config.getPassword()
-			  .length()));
 	}
 
 	@Override
@@ -101,7 +90,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}
 
-		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config, this.context.clone(),
+		return SingleDataSourceManagerFactory.getDataSourceManager().createDataSource(config,
 			  this.filters);
 	}
 
@@ -111,8 +100,6 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	public void init(boolean forceCheckMaster) {
-		initFilter();
-
 		MasterDataSourceMonitor monitor = new MasterDataSourceMonitor(this);
 
 		try {
@@ -141,14 +128,9 @@ public class FailOverDataSource extends AbstractDataSource {
 		masterDataSourceMonitorThread.start();
 	}
 
-	private void initFilter() {
-		this.context.setDataSource(this);
-	}
-
 	private boolean setMasterDb(DataSourceConfig config) {
 		if (master == null || !master.getId().equals(config.getId())) {
 			master = getDataSource(config);
-			changeMetaData(config);
 			return true;
 		}
 		return false;

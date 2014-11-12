@@ -5,7 +5,6 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
-import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -38,14 +37,11 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;
 
-	public SingleDataSource(DataSourceConfig config, JdbcContext context, List<JdbcFilter> filters) {
+	public SingleDataSource(DataSourceConfig config, List<JdbcFilter> filters) {
 		this.dsId = config.getId();
 		this.config = config;
 		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());
 		this.filters = filters;
-
-		initContext(context);
-
 		this.dataSource = initDataSource(config);
 	}
 
@@ -125,7 +121,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			state = DataSourceState.UP;
 		}
 
-		return new SingleConnection(this, this.config, conn, this.context.clone(), this.filters);
+		return new SingleConnection(this, this.config, conn, this.filters);
 	}
 
 	@Override
@@ -320,18 +316,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		} else {
 			return initDataSourceOrigin(value);
 		}
-	}
-
-	private void initContext(JdbcContext context) {
-		this.context = context;
-
-		this.context.setDataSource(this);
-		this.context.setDataSourceId(this.dsId);
-		this.context.setJdbcUrl(config.getJdbcUrl());
-		this.context.setJdbcUsername(config.getUsername());
-		this.context.setJdbcPassword(config.getPassword() == null ? null : StringUtils.repeat("*", config.getPassword()
-			  .length()));
-		this.context.setDataSourceProperties(this);
 	}
 
 	public boolean isAvailable() {
