@@ -155,9 +155,18 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public <S> void initGroupDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
-		super.initGroupDataSource(metaData, source, action);
-		if (source instanceof GroupDataSourceMBean) {
-			StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor((GroupDataSourceMBean) source));
+		Transaction transaction = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Init-" + metaData.getDataSourceId());
+		try {
+			super.initGroupDataSource(metaData, source, action);
+			if (source instanceof GroupDataSourceMBean) {
+				StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor((GroupDataSourceMBean) source));
+			}
+			transaction.setStatus(Message.SUCCESS);
+		} catch (RuntimeException e) {
+			transaction.setStatus(e);
+			throw e;
+		} finally {
+			transaction.complete();
 		}
 	}
 
