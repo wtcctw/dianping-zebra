@@ -8,9 +8,9 @@ package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.exception.DalNotSupportException;
+import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
@@ -395,26 +395,25 @@ public class GroupStatement implements Statement {
 		  boolean isBatch
 		  , final boolean forceWriter) throws SQLException {
 
-		this.context.setSql(sql);
-		this.context.setBatch(isBatch);
-		this.context.setParams(params);
-		this.context.setTransaction(!this.dpGroupConnection.getAutoCommit());
-		this.context.setBatchedSqls(batchedSqls);
 		final Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
-		this.context.setRealJdbcContext(getRealJdbcMetaData(conn));
 
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
 				@Override
-				public T execute(GroupStatement source, JdbcFilter chain) throws SQLException {
+				public T execute(GroupStatement source, Connection conn, String sql,
+					  List batchedSql,
+					  boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 					if (index < filters.size()) {
-						return filters.get(index++).execute(source, chain);
+						return filters.get(index++)
+							  .execute(source, conn, sql, (List<String>) batchedSql, isBatched, autoCommit, params,
+									chain);
 					} else {
 						return source.executeWithFilterOrigin(callback, conn);
 					}
 				}
 			};
-			return chain.execute(this, chain);
+			return chain.execute(this, conn, sql, batchedSqls, isBatch, this.dpGroupConnection.getAutoCommit(), params,
+				  chain);
 		} else {
 			return executeWithFilterOrigin(callback, conn);
 		}

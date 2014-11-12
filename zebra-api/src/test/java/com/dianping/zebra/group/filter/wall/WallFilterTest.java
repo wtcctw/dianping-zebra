@@ -5,6 +5,7 @@ package com.dianping.zebra.group.filter.wall;
  */
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.google.common.collect.Lists;
@@ -14,16 +15,18 @@ import org.junit.Test;
 import java.sql.SQLException;
 
 public class WallFilterTest {
-		@Test
-		public void test_addId_to_Sql() throws SQLException {
-			WallFilter filter = new WallFilter();
-			String sql = "select * from test";
-			SingleConnection conn = new SingleConnection(null, "test-write-1", null, null,
-				  Lists.<JdbcFilter>newArrayList(filter));
+	@Test
+	public void test_addId_to_Sql() throws SQLException {
+		WallFilter filter = new WallFilter();
+		String sql = "select * from test";
+		DataSourceConfig config = new DataSourceConfig();
+		config.setId("test-write-1");
+		SingleConnection conn = new SingleConnection(null, config, null, null,
+			  Lists.<JdbcFilter>newArrayList(filter));
 
-			///*test-write-1*/select * from test
-			Assert.assertEquals("/*z:ec262bf8*/select * from test", filter.sql(conn,"select * from test", null));
-		}
+		///*test-write-1*/select * from test
+		Assert.assertEquals("/*z:ec262bf8*/select * from test", filter.sql(conn, "select * from test", null));
+	}
 
 	@Test
 	public void test_addId_to_Sql_with_avatar() throws SQLException {
@@ -31,11 +34,13 @@ public class WallFilterTest {
 
 		WallFilter filter = new WallFilter();
 		String sql = "select * from test";
-		SingleConnection conn = new SingleConnection(null, "test-write-1", null, null,
+		DataSourceConfig config = new DataSourceConfig();
+		config.setId("test-write-1");
+		SingleConnection conn = new SingleConnection(null, config, null, null,
 			  Lists.<JdbcFilter>newArrayList(filter));
 
 		///*test-write-1*/select * from test
-		Assert.assertEquals("/*z:89f7fec5*/select * from test", filter.sql(conn,"select * from test", null));
+		Assert.assertEquals("/*z:89f7fec5*/select * from test", filter.sql(conn, "select * from test", null));
 	}
 
 	@Test(expected = SQLException.class)

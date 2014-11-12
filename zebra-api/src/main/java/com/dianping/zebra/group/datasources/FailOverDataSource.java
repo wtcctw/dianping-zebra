@@ -4,9 +4,9 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.exception.WeakReferenceGCException;
+import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.JdbcDriverClassHelper;
@@ -179,11 +179,21 @@ public class FailOverDataSource extends AbstractDataSource {
 	}
 
 	public static class FindMasterDataSourceResult {
+		private String dsId;
+
 		private boolean changedMaster;
 
 		private boolean masterExist;
 
 		private Exception exception;
+
+		public String getDsId() {
+			return dsId;
+		}
+
+		public void setDsId(String dsId) {
+			this.dsId = dsId;
+		}
 
 		public Exception getException() {
 			return exception;
@@ -268,7 +278,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				if (checkResult == CheckMasterDataSourceResult.READ_WRITE) {
 					result.setChangedMaster(getWeakFailOverDataSource().setMasterDb(config));
 					result.setMasterExist(true);
-
+					result.setDsId(config.getId());
 					break;
 				} else if (checkResult == CheckMasterDataSourceResult.ERROR) {
 					result.setException(checkResult.getException());

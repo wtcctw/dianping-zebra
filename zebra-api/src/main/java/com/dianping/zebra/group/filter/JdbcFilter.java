@@ -9,7 +9,9 @@ import com.dianping.zebra.group.jdbc.GroupResultSet;
 import com.dianping.zebra.group.jdbc.GroupStatement;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by Dozer on 9/2/14.
@@ -31,7 +33,10 @@ public interface JdbcFilter {
 
 	void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException;
 
-	<T> T execute(GroupStatement source, JdbcFilter chain) throws SQLException;
+	<T> T execute(GroupStatement source, Connection conn,
+		  String sql, List<String> batchedSql,
+		  boolean isBatched, boolean autoCommit,
+		  Object params, JdbcFilter chain) throws SQLException;
 
 	FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
 		  FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain);

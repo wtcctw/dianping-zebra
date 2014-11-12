@@ -11,6 +11,7 @@ import com.dianping.zebra.group.jdbc.GroupStatement;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -49,7 +50,8 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 
 	}
 
-	@Override public <T> T execute(GroupStatement source, JdbcFilter chain) throws SQLException {
+	@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+		  boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 		throw new NotImplementedException();
 	}
 

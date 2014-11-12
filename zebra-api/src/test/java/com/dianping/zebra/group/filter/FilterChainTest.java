@@ -8,6 +8,7 @@ import com.dianping.zebra.group.jdbc.GroupStatement;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,9 +19,11 @@ public class FilterChainTest {
 		final AtomicInteger counter = new AtomicInteger();
 
 		JdbcFilter filter1 = new DefaultJdbcFilter() {
-			@Override public <T> T execute(GroupStatement source, JdbcFilter chain) throws SQLException {
+			@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+				  boolean isBatched,
+				  boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 				Assert.assertEquals(3, counter.incrementAndGet());
-				T executeResult = chain.execute(source, chain);
+				T executeResult = chain.execute(source, null, null, null, false, false, null, chain);
 				Assert.assertEquals(5, counter.incrementAndGet());
 				return executeResult;
 			}
@@ -31,10 +34,12 @@ public class FilterChainTest {
 		};
 
 		JdbcFilter filter2 = new DefaultJdbcFilter() {
-			@Override public <T> T execute(GroupStatement source, JdbcFilter chain) throws SQLException {
+			@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+				  boolean isBatched,
+				  boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 
 				Assert.assertEquals(2, counter.incrementAndGet());
-				T executeResult = chain.execute(source, chain);
+				T executeResult = chain.execute(source, null, null, null, false, false, null, chain);
 				Assert.assertEquals(6, counter.incrementAndGet());
 				return executeResult;
 			}
@@ -45,10 +50,12 @@ public class FilterChainTest {
 		};
 
 		JdbcFilter filter3 = new DefaultJdbcFilter() {
-			@Override public <T> T execute(GroupStatement source, JdbcFilter chain) throws SQLException {
+			@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+				  boolean isBatched,
+				  boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 
 				Assert.assertEquals(1, counter.incrementAndGet());
-				T executeResult = chain.execute(source, chain);
+				T executeResult = chain.execute(source, null, null, null, false, false, null, chain);
 				Assert.assertEquals(7, counter.incrementAndGet());
 				return executeResult;
 			}
@@ -64,15 +71,18 @@ public class FilterChainTest {
 
 		List<JdbcFilter> filters = FilterManagerFactory.getFilterManager().loadFilters("1,2,3");
 		JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
-			@Override public <T> T execute(GroupStatement source, JdbcFilter chain) throws SQLException {
+			@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+				  boolean isBatched,
+				  boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 				if (index < filters.size()) {
-					return filters.get(index++).execute(source, chain);
+					return filters.get(index++)
+						  .execute(source, conn, sql, batchedSql, isBatched, autoCommit, params, chain);
 				} else {
 					Assert.assertEquals(4, counter.incrementAndGet());
 					return null;
 				}
 			}
 		};
-		chain.execute(null, chain);
+		chain.execute(null, null, null, null, false, false, null, chain);
 	}
 }

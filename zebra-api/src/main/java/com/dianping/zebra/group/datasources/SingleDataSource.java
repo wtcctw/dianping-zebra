@@ -125,7 +125,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			state = DataSourceState.UP;
 		}
 
-		return new SingleConnection(this, this.dsId, conn, this.context.clone(), this.filters);
+		return new SingleConnection(this, this.config, conn, this.context.clone(), this.filters);
 	}
 
 	@Override

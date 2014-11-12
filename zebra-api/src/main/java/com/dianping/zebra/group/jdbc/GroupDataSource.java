@@ -12,10 +12,10 @@ import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
 import com.dianping.zebra.group.datasources.SingleDataSourceManagerFactory;
 import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.FilterManagerFactory;
 import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
@@ -547,10 +547,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("initialPoolSize", String.valueOf(initialPoolSize));
 	}
 
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
-	}
-
 	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
 		setProperty("maxAdministrativeTaskTime", String.valueOf(maxAdministrativeTaskTime));
 	}
@@ -672,6 +668,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	public void setWriteFirst(boolean writeFirst) {
 		this.groupConfig.setWriteFirst(writeFirst);
 		refresh("writeFirst");
+	}
+
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
 	}
 
 	class GroupDataSourceConfigChangedListener implements PropertyChangeListener {

@@ -1,9 +1,11 @@
 package com.dianping.zebra.group.datasources;
 
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcContext;
 import com.dianping.zebra.group.filter.JdbcFilter;
 
+import javax.activation.DataSource;
 import java.sql.*;
 import java.util.List;
 import java.util.Map;
@@ -18,21 +20,21 @@ public class SingleConnection implements Connection {
 
 	private final List<JdbcFilter> filters;
 
-	private final String dsId;
+	private final DataSourceConfig config;
 
 	private JdbcContext context;
 
-	public SingleConnection(SingleDataSource dataSource, String dsId, Connection conn, JdbcContext context,
+	public SingleConnection(SingleDataSource dataSource, DataSourceConfig config, Connection conn, JdbcContext context,
 		  List<JdbcFilter> filters) {
 		this.dataSource = dataSource;
 		this.conn = conn;
 		this.filters = filters;
 		this.context = context;
-		this.dsId = dsId;
+		this.config = config;
 	}
 
-	public String getDsId() {
-		return dsId;
+	public DataSourceConfig getConfig() {
+		return config;
 	}
 
 	public void abort(Executor executor) throws SQLException {

@@ -96,8 +96,8 @@ public class WallFilter extends DefaultJdbcFilter {
 			return null;
 		}
 
-		if (conn != null && StringUtils.isNotBlank(conn.getDsId())) {
-			token = String.format("/*%s*/%s", conn.getDsId(), token);
+		if (conn != null && conn.getConfig() != null && StringUtils.isNotBlank(conn.getConfig().getId())) {
+			token = String.format("/*%s*/%s", conn.getConfig().getId(), token);
 		}
 
 		return generateId(token);
