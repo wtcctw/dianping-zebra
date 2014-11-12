@@ -679,10 +679,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
-			if (evt.getNewValue().equals(evt.getOldValue())) {
-				return;
-			}
-
 			if (evt.getPropertyName().endsWith(USERNAME_KEY)) {
 				atomicRefresh.setUser(evt.getNewValue().toString());
 				if (atomicRefresh.needToRefresh()) {
