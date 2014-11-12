@@ -25,9 +25,6 @@ public class CmdbServiceImpl implements CmdbService{
 	@Inject
 	private HttpService httpService;
 	
-	@Inject
-	private DatabaseRealtimeService databaseService;
-
 	@Override
 	public String getAppName(String ip) {
 		String url = String.format(URL, ip);

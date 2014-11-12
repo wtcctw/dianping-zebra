@@ -1,5 +1,15 @@
 package com.dianping.zebra.monitor.filter;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.sql.DataSource;
+
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -14,15 +24,11 @@ import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupStatement;
+import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.util.SqlUtils;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.site.helper.Stringizers;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
 
 /**
  * Created by Dozer on 9/5/14.
@@ -56,8 +62,9 @@ public class CatFilter extends DefaultJdbcFilter {
 		Cat.logEvent("DataSource.Destoryed", source.getConfig().getId());
 	}
 
-	@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
-		  boolean isBatched, boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
+	@Override
+	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
+	      boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
 		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
@@ -78,11 +85,11 @@ public class CatFilter extends DefaultJdbcFilter {
 			SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
 
 			if (singleConnection != null) {
-				Cat.logEvent("SQL.Database", singleConnection.getConfig().getJdbcUrl(), Event.SUCCESS,
-					  singleConnection.getConfig().getId());
+				Cat.logEvent("SQL.Database", singleConnection.getConfig().getJdbcUrl(), Event.SUCCESS, singleConnection
+				      .getConfig().getId());
 			}
 			String params = Stringizers.forJson().compact()
-				  .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
+			      .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
 			if (isBatched) {
 				if (batchedSql != null) {
 					for (String bSql : batchedSql) {
@@ -110,8 +117,9 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	@Override public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-		  FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+	@Override
+	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
+	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
 		FailOverDataSource.FindMasterDataSourceResult result = chain.findMasterFailOverDataSource(source, chain);
 
 		if (result != null && result.isChangedMaster()) {
@@ -147,18 +155,31 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	@Override public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
-		chain.initGroupDataSource(source, chain);
-		StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
+	public <S> void initGroupDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
+		Transaction transaction = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Init-" + metaData.getDataSourceId());
+		try {
+			super.initGroupDataSource(metaData, source, action);
+			if (source instanceof GroupDataSourceMBean) {
+				StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor((GroupDataSourceMBean) source));
+			}
+			transaction.setStatus(Message.SUCCESS);
+		} catch (RuntimeException e) {
+			transaction.setStatus(e);
+			throw e;
+		} finally {
+			transaction.complete();
+		}
 	}
 
-	@Override public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
+	@Override
+	public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
 		DataSource result = chain.initSingleDataSource(source, chain);
 		Cat.logEvent("DataSource.Created", source.getConfig().getId());
 		return result;
 	}
 
-	@Override public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
+	@Override
+	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
 		Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Refresh-" + source.getJdbcRef());
 		Cat.logEvent("DAL.Refresh.Property", propertiesName);
 		try {
@@ -171,7 +192,8 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	@Override public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
+	@Override
+	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
 		Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "FailOver");
 		try {
 			chain.switchFailOverDataSource(source, chain);
