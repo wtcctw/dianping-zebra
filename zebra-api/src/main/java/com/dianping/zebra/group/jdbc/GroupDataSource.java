@@ -320,11 +320,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
-		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
-		this.groupConfig = buildGroupConfig();
-		this.systemConfigManager = SystemConfigManagerFactory
-				.getConfigManger(configManagerType, Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+		this.initConfig();
 		this.initFilters();
 
 		if (filters != null && filters.size() > 0) {
@@ -342,6 +338,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		} else {
 			initOrigin();
 		}
+	}
+
+	protected void initConfig() {
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
+		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
+		this.groupConfig = buildGroupConfig();
+		this.systemConfigManager = SystemConfigManagerFactory
+				.getConfigManger(configManagerType, Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 	}
 
 	private void initDataSources() {
