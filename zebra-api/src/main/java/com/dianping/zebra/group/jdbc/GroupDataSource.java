@@ -164,6 +164,24 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.close(this.readDataSource, this.writeDataSource);
 	}
 
+	private void close(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
+		if (filters != null && filters.size() > 0) {
+			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
+				@Override
+				public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
+					if (index < filters.size()) {
+						filters.get(index++).closeGroupDataSource(source, chain);
+					} else {
+						source.closeOrigin(read, write);
+					}
+				}
+			};
+			chain.closeGroupDataSource(this, chain);
+		} else {
+			closeOrigin(read, write);
+		}
+	}
+
 	private void closeOrigin(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
 		List<SQLException> exps = new ArrayList<SQLException>();
 
@@ -184,24 +202,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 
 		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
-	}
-
-	private void close(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
-		if (filters != null && filters.size() > 0) {
-			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
-				@Override
-				public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
-					if (index < filters.size()) {
-						filters.get(index++).closeGroupDataSource(source, chain);
-					} else {
-						source.closeOrigin(read, write);
-					}
-				}
-			};
-			chain.closeGroupDataSource(this, chain);
-		} else {
-			closeOrigin(read, write);
-		}
 	}
 
 	private Any findAny(List<Any> all, String name) {
@@ -264,6 +264,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		return failoverConfigMap;
 	}
 
+	public String getJdbcRef() {
+		return jdbcRef;
+	}
+
+	public void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
+	}
+
 	public String getJdbcUrlExtra() {
 		return jdbcUrlExtra;
 	}
@@ -307,7 +315,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		return this.writeDataSource.getCurrentDataSourceMBean();
 	}
 
-	public void init() {
+	public synchronized void init() {
 		if (StringUtils.isBlank(jdbcRef)) {
 			throw new DalException("jdbcRef cannot be empty");
 		}
@@ -315,11 +323,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
 		this.groupConfig = buildGroupConfig();
-		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
-
-		SingleDataSourceManagerFactory.getDataSourceManager().init();
-
+		this.systemConfigManager = SystemConfigManagerFactory
+				.getConfigManger(configManagerType, Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 		this.initFilters();
 
 		if (filters != null && filters.size() > 0) {
@@ -337,15 +342,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		} else {
 			initOrigin();
 		}
-
-		this.init = true;
-
-		logger.info(String.format("GroupDataSource(%s) successfully initialized.", jdbcRef));
-	}
-
-	private void initOrigin() {
-		initDataSources();
-		loadCustomizedReadWriteStrategy();
 	}
 
 	private void initDataSources() {
@@ -368,6 +364,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void initFilters() {
 		this.filters = FilterManagerFactory.getFilterManager().loadFilters(this.groupConfig.getFilters());
+	}
+
+	private void initOrigin() {
+		SingleDataSourceManagerFactory.getDataSourceManager().init();
+		initDataSources();
+		loadCustomizedReadWriteStrategy();
+		this.init = true;
+		logger.info(String.format("GroupDataSource(%s) successfully initialized.", jdbcRef));
 	}
 
 	private void loadCustomizedReadWriteStrategy() {
@@ -418,6 +422,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void refreshIntenal(GroupDataSourceConfig groupDataSourceConfig) {
 		logger.info(String.format("start to refresh the dataSources(%s)...", jdbcRef));
+
+		initFilters();
 
 		LoadBalancedDataSource newReadDataSource = null;
 		FailOverDataSource newWriteDataSource = null;
@@ -531,8 +537,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("factoryClassLocation", factoryClassLocation);
 	}
 
-	public void setFilter(String filter) {
+	public synchronized void setFilter(String filter) {
 		this.filterStr = filter;
+		refresh("filter");
 	}
 
 	public synchronized void setForceIgnoreUnresolvedTransactions(boolean forceIgnoreUnresolvedTransactions) {
@@ -668,14 +675,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	public void setWriteFirst(boolean writeFirst) {
 		this.groupConfig.setWriteFirst(writeFirst);
 		refresh("writeFirst");
-	}
-
-	public String getJdbcRef() {
-		return jdbcRef;
-	}
-
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
 	}
 
 	class GroupDataSourceConfigChangedListener implements PropertyChangeListener {

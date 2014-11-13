@@ -333,16 +333,16 @@
 			<implementation>com.dianping.zebra.admin.admin.page.config.Handler</implementation>
 			<requirements>
 				<requirement>
-					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
+					<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
+				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
 				</requirement>
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.HttpService</role>
 				</requirement>
 				<requirement>
-					<role>com.dianping.zebra.admin.admin.service.ConnectionService</role>
-				</requirement>
-				<requirement>
-					<role>com.dianping.zebra.admin.admin.service.DalConfigService</role>
+					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
 				</requirement>
 			</requirements>
 		</component>
