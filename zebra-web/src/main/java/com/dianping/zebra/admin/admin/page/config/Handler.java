@@ -99,7 +99,7 @@ public class Handler extends JsonHandler<Context> {
 						if (payload.getDsConfigs() == null) {
 							responseObject = m_httpService.sendGet(url);
 						} else {
-							responseObject = m_httpService.sendPost(url, payload.getDsConfigs());
+							responseObject = m_httpService.sendPost(url, "dsConfigs=" + payload.getDsConfigs());
 						}
 						successJson(ctx, (String) responseObject);
 					} else {
