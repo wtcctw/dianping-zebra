@@ -83,6 +83,8 @@ public class Handler extends JsonHandler<Context> {
 						host = "http://192.168.214.228:8080";
 					} else if ("qa".equals(env)) {
 						host = "http://zebra-web01.beta:8080";
+					} else if ("dev".equals(env)) {
+						host = "http://localhost:8080";
 					} else if ("prelease".equals(env)) {
 						host = "http://10.2.8.65:8080";
 					} else if ("product".equals(env)) {
@@ -93,7 +95,12 @@ public class Handler extends JsonHandler<Context> {
 
 					if (host.length() > 0) {
 						String url = host + "/a/config?op=test&key=" + jdbcRef + "&env=" + env;
-						responseObject = m_httpService.sendGet(url);
+
+						if (payload.getDsConfigs() == null) {
+							responseObject = m_httpService.sendGet(url);
+						} else {
+							responseObject = m_httpService.sendPost(url, payload.getDsConfigs());
+						}
 						successJson(ctx, (String) responseObject);
 					} else {
 						success(ctx, responseObject);
