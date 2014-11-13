@@ -4,20 +4,12 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 
 public interface ConnectionService {
 
-	public ConnectionResult getConnectionResult(String jdbcRef);
+	public ConnectionResult getConnectionResult(String jdbcRef, DalConfigService.GroupConfigModel modal);
 
 	public static class ConnectionResult {
 		private boolean canConnect;
 
 		private GroupDataSourceConfig config;
-
-		public boolean isCanConnect() {
-			return canConnect;
-		}
-
-		public void setCanConnect(boolean canConnect) {
-			this.canConnect = canConnect;
-		}
 
 		public GroupDataSourceConfig getConfig() {
 			return config;
@@ -25,6 +17,14 @@ public interface ConnectionService {
 
 		public void setConfig(GroupDataSourceConfig config) {
 			this.config = config;
+		}
+
+		public boolean isCanConnect() {
+			return canConnect;
+		}
+
+		public void setCanConnect(boolean canConnect) {
+			this.canConnect = canConnect;
 		}
 	}
 }

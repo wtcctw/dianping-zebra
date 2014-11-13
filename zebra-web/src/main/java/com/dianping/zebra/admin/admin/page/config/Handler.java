@@ -56,13 +56,21 @@ public class Handler extends JsonHandler<Context> {
 					env = EnvZooKeeperConfig.getEnv();
 				}
 
-				if (jdbcRef.toLowerCase().equals("dpreview")) {
+				if (StringUtils.isNotBlank(jdbcRef) && jdbcRef.toLowerCase().equals("dpreview")) {
 					jdbcRef = "DPReview";
 				}
 
 				if (env.equalsIgnoreCase(currentEnv)) {
 					ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
-					ConnectionService.ConnectionResult result = m_connectionService.getConnectionResult(jdbcRef);
+
+					ConnectionService.ConnectionResult result;
+					if (payload.getDsConfigs() == null) {
+						result = m_connectionService.getConnectionResult(jdbcRef, null);
+					} else {
+						result = m_connectionService
+								.getConnectionResult(jdbcRef, gson.fromJson(URLDecoder.decode(payload.getDsConfigs()),
+										DalConfigService.GroupConfigModel.class));
+					}
 
 					connectionstatus.setConnected(result.isCanConnect());
 					connectionstatus.setConfig(result.getConfig().toString());

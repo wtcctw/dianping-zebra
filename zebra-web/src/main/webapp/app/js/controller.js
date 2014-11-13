@@ -45,7 +45,7 @@ zebraWeb.controller('update-database', function ($scope, $stateParams, $http) {
 });
 
 zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window) {
-    $scope.load = function(){
+    $scope.load = function () {
         $http.get('/a/update?op=app&app=' + $stateParams.name).success(function (data, status, headers, config) {
             $scope.app = data;
         });
@@ -62,16 +62,20 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window
     }
 });
 
-zebraWeb.controller('config-test', function ($scope, $http, name) {
+zebraWeb.controller('config-test', function ($scope, $http, name, configs) {
     $scope.name = name;
     var url = '/a/config?op=test&key=' + name + '&env=' + $scope.config.env;
 
-    $http.get(url).success(function (data, status, headers, config) {
-        $scope.connectionStatus = data;
-    });
+    if (configs) {
+        $scope.connectionStatus = configs;
+    } else {
+        $http.get(url).success(function (data, status, headers, config) {
+            $scope.connectionStatus = data;
+        });
+    }
 });
 
-zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
+zebraWeb.controller('config-edit', function ($scope, $http, name, close, configService) {
     $scope.name = name;
     $scope.load = function () {
         if ($scope.config && $scope.config.env) {
@@ -138,6 +142,14 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
             {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
             .success(function (data, status, headers, config) {
                 close();
+            });
+    }
+
+    $scope.test = function () {
+        $http.post('/a/config?op=test&env=' + $scope.config.env, $.param({dsConfigs: encodeURIComponent(angular.toJson($scope.data))}),
+            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+            .success(function (data, status, headers, config) {
+                configService.openTestModal("", data);
             });
     }
 
