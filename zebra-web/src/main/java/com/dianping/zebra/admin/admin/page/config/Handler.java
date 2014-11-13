@@ -60,7 +60,7 @@ public class Handler extends JsonHandler<Context> {
 					jdbcRef = "DPReview";
 				}
 
-				if (env.equalsIgnoreCase(currentEnv)) {
+				if (payload.getDsConfigs() != null || env.equalsIgnoreCase(currentEnv)) {
 					ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
 
 					ConnectionService.ConnectionResult result;
