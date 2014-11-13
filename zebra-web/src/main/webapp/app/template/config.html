@@ -21,11 +21,13 @@
             <tbody>
             <tr ng-repeat="group in lionConfigs | toArray | filter:{$key:'.mapping'} | filter:{$key:searchText}">
                 <td>{{group.$key}}</td>
-                <td>{{group.value}}</td>
+                <td><span popover-trigger="mouseenter" popover="{{(group.value && group.value.length>60)?group.value:''}}">{{(group.value && group.value.length>60)?group.value.substring(0,60-3) + '...':group.value }}</span>
+                </td>
                 <td>
                     <button class="btn btn-xs btn-primary" ng-click="edit(group.$key)">Edit</button>
                     <button class="btn btn-xs btn-warning" ng-click="merge(group.$key)">Merge</button>
-                    <button class="btn btn-xs btn-success" ng-click="test(group.$key)">Test</button></td>
+                    <button class="btn btn-xs btn-success" ng-click="test(group.$key)">Test</button>
+                </td>
             </tr>
             </tbody>
         </table>
