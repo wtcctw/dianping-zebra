@@ -205,7 +205,7 @@ public class ReportServiceImpl implements ReportService {
 					String ip = entry.getKey();
 					String appName = entry.getValue();
 
-					if (appName.toLowerCase().equals(app.getName().toLowerCase())) {
+					if (appName.equalsIgnoreCase(app.getName())) {
 						Machine machine = app.findMachine(ip);
 
 						if (machine == null) {
@@ -240,7 +240,7 @@ public class ReportServiceImpl implements ReportService {
 					Map<String, String> connections = entry.getValue();
 
 					for (Entry<String, String> entry2 : connections.entrySet()) {
-						if (entry2.getValue().toLowerCase().equals(app.getName().toLowerCase())) {
+						if (entry2.getValue().equalsIgnoreCase(app.getName())) {
 							String ip = entry2.getKey();
 							Machine machine = app.findMachine(ip);
 

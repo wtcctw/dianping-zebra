@@ -18,7 +18,7 @@ public class WallFilterTest {
 	@Test
 	public void test_addId_to_Sql() throws SQLException {
 		WallFilter filter = new WallFilter();
-		String sql = "select * from test";
+//		String sql = "select * from test";
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
 		SingleConnection conn = new SingleConnection(null, config, null,
@@ -33,7 +33,7 @@ public class WallFilterTest {
 		ExecutionContextHolder.getContext().add("sql_statement_name", "test.select");
 
 		WallFilter filter = new WallFilter();
-		String sql = "select * from test";
+//		String sql = "select * from test";
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
 		SingleConnection conn = new SingleConnection(null, config, null,
