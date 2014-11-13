@@ -11,25 +11,41 @@ import java.net.URLConnection;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.Transaction;
+
 public class HttpServiceImpl implements HttpService {
 
 	@Override
 	public String sendGet(String url) {
+		Transaction transaction = Cat.newTransaction("Http", "Get");
+
 		InputStream inputStream;
 		try {
+			Cat.logEvent("Url", url);
 			inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
+			transaction.setStatus(Message.SUCCESS);
 			return Files.forIO().readFrom(inputStream, "utf-8");
 		} catch (IOException e) {
+			Cat.logError(e);
+			transaction.setStatus(e);
 			return "";
+		} finally {
+			transaction.complete();
 		}
 	}
 
 	@Override
 	public String sendPost(String url, String params) {
+		Transaction transaction = Cat.newTransaction("Http", "Post");
+
 		PrintWriter out = null;
 		BufferedReader in = null;
 		String result = "";
 		try {
+			Cat.logEvent("Url", url);
+			Cat.logEvent("Params", params);
 			URL realUrl = new URL(url);
 			// 打开和URL之间的连接
 			URLConnection conn = realUrl.openConnection();
@@ -61,9 +77,11 @@ public class HttpServiceImpl implements HttpService {
 					result += "\n" + line;
 				}
 			}
+
+			transaction.setStatus(Message.SUCCESS);
 		} catch (Exception e) {
-			System.out.println("发送POST请求出现异常！" + e);
-			e.printStackTrace();
+			transaction.setStatus(e);
+			Cat.logError(e);
 		}
 		// 使用finally块来关闭输出流、输入流
 		finally {
@@ -77,8 +95,10 @@ public class HttpServiceImpl implements HttpService {
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
+
+			transaction.complete();
 		}
+
 		return result;
 	}
-
 }

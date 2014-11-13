@@ -71,7 +71,7 @@ public class HeartbeatUpdateServiceImpl implements HeartbeatUpdateService, Task 
 			update();
 
 			try {
-				TimeUnit.HOURS.sleep(1);
+				TimeUnit.MINUTES.sleep(30);
 			} catch (InterruptedException e) {
 			}
 		}
