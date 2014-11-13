@@ -45,14 +45,18 @@ zebraWeb.controller('update-database', function ($scope, $stateParams, $http) {
 });
 
 zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window) {
-    $http.get('/a/update?op=app&app=' + $stateParams.name).success(function (data, status, headers, config) {
-        $scope.app = data;
-    });
+    $scope.load = function(){
+        $http.get('/a/update?op=app&app=' + $stateParams.name).success(function (data, status, headers, config) {
+            $scope.app = data;
+        });
+    }
+
+    $scope.load();
 
     $scope.deleteInfo = function (ip, beanName) {
         $http.get('/a/update?op=delete_info&app=' + $stateParams.name + '&ip=' + ip + '&beanName=' + beanName).success(function (data) {
-            if (data == "true") {
-                $window.location.reload();
+            if (!!data) {
+                $scope.load();
             }
         });
     }
