@@ -74,6 +74,7 @@ public class Handler extends JsonHandler<Context> {
 
 					connectionstatus.setConnected(result.isCanConnect());
 					connectionstatus.setConfig(result.getConfig().toString());
+					connectionstatus.setException(result.getException());
 					responseObject = connectionstatus;
 					break;
 				} else {

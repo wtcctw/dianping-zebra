@@ -11,12 +11,22 @@ public interface ConnectionService {
 
 		private GroupDataSourceConfig config;
 
+		private String exception;
+
 		public GroupDataSourceConfig getConfig() {
 			return config;
 		}
 
 		public void setConfig(GroupDataSourceConfig config) {
 			this.config = config;
+		}
+
+		public String getException() {
+			return exception;
+		}
+
+		public void setException(String exception) {
+			this.exception = exception;
 		}
 
 		public boolean isCanConnect() {

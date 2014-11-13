@@ -69,6 +69,16 @@ public class ConnectionServiceImpl implements ConnectionService {
 		} catch (Exception t) {
 			Cat.logError(t);
 			result.setCanConnect(false);
+
+			StringBuffer sb = new StringBuffer();
+			Throwable exp = t;
+			while (exp != null) {
+				sb.append(exp.getMessage());
+				sb.append("\r\n");
+				exp = exp.getCause();
+			}
+
+			result.setException(sb.toString());
 		} finally {
 			if (ds != null) {
 				try {
@@ -113,6 +123,8 @@ public class ConnectionServiceImpl implements ConnectionService {
 	public static class ConnectionStatus {
 		private String config;
 
+		private String exception;
+
 		private boolean isConnected;
 
 		public String getConfig() {
@@ -121,6 +133,14 @@ public class ConnectionServiceImpl implements ConnectionService {
 
 		public void setConfig(String config) {
 			this.config = config;
+		}
+
+		public String getException() {
+			return exception;
+		}
+
+		public void setException(String exception) {
+			this.exception = exception;
 		}
 
 		public boolean isConnected() {

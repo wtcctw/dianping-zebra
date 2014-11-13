@@ -71,6 +71,7 @@ zebraWeb.controller('config-test', function ($scope, $http, name, configs) {
     } else {
         $http.get(url).success(function (data, status, headers, config) {
             $scope.connectionStatus = data;
+            console.log(data);
         });
     }
 });
