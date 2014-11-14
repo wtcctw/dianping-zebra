@@ -170,7 +170,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 					if (prop.isCreate()) {
 						m_lionHttpService.createKey("ds", prop.getKey());
 					}
-					if ((prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue()))
+					if (prop.isCreate() || (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue()))
 							|| isForce) {
 						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
 					}
