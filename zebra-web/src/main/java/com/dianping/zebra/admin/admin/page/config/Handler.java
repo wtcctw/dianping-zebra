@@ -60,7 +60,7 @@ public class Handler extends JsonHandler<Context> {
 					jdbcRef = "DPReview";
 				}
 
-				if (env.equalsIgnoreCase(currentEnv)) {
+				if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
 					ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
 
 					ConnectionService.ConnectionResult result;
@@ -83,8 +83,6 @@ public class Handler extends JsonHandler<Context> {
 						host = "http://192.168.214.228:8080";
 					} else if ("qa".equals(env)) {
 						host = "http://zebra-web01.beta:8080";
-					} else if ("dev".equals(env)) {
-						host = "http://localhost:8080";
 					} else if ("prelease".equals(env)) {
 						host = "http://10.2.8.65:8080";
 					} else if ("product".equals(env)) {
