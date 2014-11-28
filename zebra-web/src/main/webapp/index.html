@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="app/css/app.css"/>
 </head>
 <body>
-<nav class="navbar navbar-inverse" role="navigation" ng-controller="header">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="header">
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="#">Zebra</a>
@@ -25,16 +25,14 @@
 
             <form class="navbar-form navbar-right">
                 <div class="form-group" role="form">
-                   <!--  <a class="btn btn-default" href="http://zebra-web01.beta:8080">DEV</a>
-                    <a class="btn btn-default" href="http://zebra.dp">PRD</a> -->
-                    <select class="form-control" ng-model="config.env" ng-options="env for env in config.envs">
+                    <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs">
                     </select>
                 </div>
             </form>
         </div>
     </div>
 </nav>
-<div class="container-fluid" ui-view>
+<div id="main-container" class="container-fluid" ui-view>
 </div>
 </body>
 <script src="bower_components/jquery/dist/jquery.min.js"></script>

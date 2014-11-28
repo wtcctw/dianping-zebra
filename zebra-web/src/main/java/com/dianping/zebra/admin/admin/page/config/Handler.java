@@ -56,16 +56,25 @@ public class Handler extends JsonHandler<Context> {
 					env = EnvZooKeeperConfig.getEnv();
 				}
 
-				if (jdbcRef.toLowerCase().equals("dpreview")) {
+				if (StringUtils.isNotBlank(jdbcRef) && jdbcRef.toLowerCase().equals("dpreview")) {
 					jdbcRef = "DPReview";
 				}
 
-				if (env.equalsIgnoreCase(currentEnv)) {
+				if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
 					ConnectionServiceImpl.ConnectionStatus connectionstatus = new ConnectionServiceImpl.ConnectionStatus();
-					ConnectionService.ConnectionResult result = m_connectionService.getConnectionResult(jdbcRef);
+
+					ConnectionService.ConnectionResult result;
+					if (payload.getDsConfigs() == null) {
+						result = m_connectionService.getConnectionResult(jdbcRef, null);
+					} else {
+						result = m_connectionService
+								.getConnectionResult(jdbcRef, gson.fromJson(URLDecoder.decode(payload.getDsConfigs()),
+										DalConfigService.GroupConfigModel.class));
+					}
 
 					connectionstatus.setConnected(result.isCanConnect());
 					connectionstatus.setConfig(result.getConfig().toString());
+					connectionstatus.setException(result.getException());
 					responseObject = connectionstatus;
 					break;
 				} else {
@@ -84,7 +93,12 @@ public class Handler extends JsonHandler<Context> {
 
 					if (host.length() > 0) {
 						String url = host + "/a/config?op=test&key=" + jdbcRef + "&env=" + env;
-						responseObject = m_httpService.sendGet(url);
+
+						if (payload.getDsConfigs() == null) {
+							responseObject = m_httpService.sendGet(url);
+						} else {
+							responseObject = m_httpService.sendPost(url, "dsConfigs=" + payload.getDsConfigs());
+						}
 						successJson(ctx, (String) responseObject);
 					} else {
 						success(ctx, responseObject);

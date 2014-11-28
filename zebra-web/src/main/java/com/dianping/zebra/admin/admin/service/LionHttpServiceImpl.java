@@ -1,37 +1,34 @@
 package com.dianping.zebra.admin.admin.service;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.unidal.lookup.annotation.Inject;
-
 import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.zebra.group.util.StringUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.unidal.lookup.annotation.Inject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class LionHttpServiceImpl implements LionHttpService {
 
-	private static final Set<String> PRODUCT_ENV;
+	private static final Set<String> ALL_ENV;
 
 	private static final Set<String> DEV_ENV;
 
-	private static final Set<String> ALL_ENV;
-
 	private static final String ID = "2";
+
+	private static final Set<String> PRODUCT_ENV;
 
 	private String createKeyUrl = "http://lionapi.dp:8080/config2/create?id=%s&project=%s&key=%s&desc=%s";
 
 	private String getConfigUrl = "http://lionapi.dp:8080/config2/get?env=%s&key=%s&id=%s";
 
 	private String getProjectConfigUrl = "http://lionapi.dp:8080/config2/get?env=%s&project=%s&id=%s";
-
-	private String setConfigUrl = "http://lionapi.dp:8080/config2/set?env=%s&id=%s&key=%s&value=%s";
 
 	@Inject
 	private HttpService httpService;
@@ -51,36 +48,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 		ALL_ENV.addAll(PRODUCT_ENV);
 	}
 
-	@Override
-	public Set<String> getAllEnv() {
-		Set<String> result = new LinkedHashSet<String>();
-		result.addAll(ALL_ENV);
-		return result;
-	}
-
-	@Override
-	public Set<String> getDevEnv() {
-		Set<String> result = new LinkedHashSet<String>();
-		result.addAll(DEV_ENV);
-		return result;
-	}
-
-	@Override
-	public Set<String> getProductEnv() {
-		Set<String> result = new LinkedHashSet<String>();
-		result.addAll(PRODUCT_ENV);
-		return result;
-	}
-
-	@Override
-	public boolean isProduct() {
-		return PRODUCT_ENV.contains(EnvZooKeeperConfig.getEnv());
-	}
-
-	@Override
-	public boolean isDev() {
-		return DEV_ENV.contains(EnvZooKeeperConfig.getEnv());
-	}
+	private String setConfigUrl = "http://lionapi.dp:8080/config2/set?env=%s&id=%s&key=%s&value=%s";
 
 	@Override
 	public boolean createKey(String project, String key) throws IOException {
@@ -100,6 +68,13 @@ public class LionHttpServiceImpl implements LionHttpService {
 		} catch (Exception t) {
 			throw new IOException("cannot create key into lion", t);
 		}
+	}
+
+	@Override
+	public Set<String> getAllEnv() {
+		Set<String> result = new LinkedHashSet<String>();
+		result.addAll(ALL_ENV);
+		return result;
 	}
 
 	@Override
@@ -147,6 +122,30 @@ public class LionHttpServiceImpl implements LionHttpService {
 	}
 
 	@Override
+	public Set<String> getDevEnv() {
+		Set<String> result = new LinkedHashSet<String>();
+		result.addAll(DEV_ENV);
+		return result;
+	}
+
+	@Override
+	public Set<String> getProductEnv() {
+		Set<String> result = new LinkedHashSet<String>();
+		result.addAll(PRODUCT_ENV);
+		return result;
+	}
+
+	@Override
+	public boolean isDev() {
+		return DEV_ENV.contains(EnvZooKeeperConfig.getEnv());
+	}
+
+	@Override
+	public boolean isProduct() {
+		return PRODUCT_ENV.contains(EnvZooKeeperConfig.getEnv());
+	}
+
+	@Override
 	public void removeUnset(String key) {
 		try {
 			for (String env : ALL_ENV) {
@@ -162,6 +161,9 @@ public class LionHttpServiceImpl implements LionHttpService {
 
 	@Override
 	public boolean setConfig(String env, String key, String value) {
+		if (value == null) {
+			value = "";
+		}
 		Cat.logEvent("LionAPI-SetConfig", key + "=" + value);
 
 		String result = httpService.sendGet(String.format(setConfigUrl, env, ID, key, value));

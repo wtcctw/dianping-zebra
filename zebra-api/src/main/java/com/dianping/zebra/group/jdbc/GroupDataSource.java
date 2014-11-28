@@ -36,33 +36,33 @@ import java.util.Map.Entry;
 
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
 
-	private final Logger logger = LogManager.getLogger(this.getClass());
+	protected final Logger logger = LogManager.getLogger(this.getClass());
 
-	private AtomicRefresh atomicRefresh = new AtomicRefresh();
+	protected AtomicRefresh atomicRefresh = new AtomicRefresh();
 
-	private DataSourceConfig c3p0Config = new DataSourceConfig();
+	protected DataSourceConfig c3p0Config = new DataSourceConfig();
 
-	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
+	protected CustomizedReadWriteStrategy customizedReadWriteStrategy;
 
-	private DataSourceConfigManager dataSourceConfigManager;
+	protected DataSourceConfigManager dataSourceConfigManager;
 
-	private String filterStr;
+	protected String filterStr;
 
-	private GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
+	protected GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
-	private volatile boolean init = false;
+	protected volatile boolean init = false;
 
-	private String jdbcRef;
+	protected String jdbcRef;
 
-	private String jdbcUrlExtra;
+	protected String jdbcUrlExtra;
 
-	private LoadBalancedDataSource readDataSource;
+	protected LoadBalancedDataSource readDataSource;
 
-	private RouterType routerType = RouterType.ROUND_ROBIN;
+	protected RouterType routerType = RouterType.ROUND_ROBIN;
 
-	private SystemConfigManager systemConfigManager;
+	protected SystemConfigManager systemConfigManager;
 
-	private FailOverDataSource writeDataSource;
+	protected FailOverDataSource writeDataSource;
 
 	public GroupDataSource() {
 	}
@@ -320,11 +320,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			throw new DalException("jdbcRef cannot be empty");
 		}
 
-		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
-		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
-		this.groupConfig = buildGroupConfig();
-		this.systemConfigManager = SystemConfigManagerFactory
-				.getConfigManger(configManagerType, Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+		this.initConfig();
 		this.initFilters();
 
 		if (filters != null && filters.size() > 0) {
@@ -342,6 +338,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		} else {
 			initOrigin();
 		}
+	}
+
+	protected void initConfig() {
+		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
+		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
+		this.groupConfig = buildGroupConfig();
+		this.systemConfigManager = SystemConfigManagerFactory
+				.getConfigManger(configManagerType, Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 	}
 
 	private void initDataSources() {
@@ -677,7 +681,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		refresh("writeFirst");
 	}
 
-	class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
+	public class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
 		private static final String PASSWORD_KEY = ".jdbc." + Constants.ELEMENT_PASSWORD;
 
 		private static final String USERNAME_KEY = ".jdbc." + Constants.ELEMENT_USER;
