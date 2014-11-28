@@ -1,20 +1,19 @@
 package com.dianping.zebra.monitor.inspect;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.servlet.ServletContext;
-import javax.sql.DataSource;
-
 import com.dianping.phoenix.status.AbstractComponentStatus;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.util.DataSourceState;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
+import com.dianping.zebra.group.util.DataSourceState;
+
+import javax.servlet.ServletContext;
+import javax.sql.DataSource;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class DataSourceStatus extends AbstractComponentStatus {
 
@@ -31,7 +30,7 @@ public class DataSourceStatus extends AbstractComponentStatus {
 
 		configTable.caption("DataSource Config");
 		configTable.header("Name", "Type", "Url", "Username", "InitialPoolSize", "MaxPoolSize", "MinPoolSize",
-			  "CheckoutTimeout", "DalVersion");
+				"CheckoutTimeout", "DalVersion");
 		statusTable.caption("DataSource Connections");
 		statusTable.header("Name", "Url", "BusyConnection", "IdleConnection", "IsMaster", "Weight", "Status");
 
@@ -61,32 +60,35 @@ public class DataSourceStatus extends AbstractComponentStatus {
 					try {
 						SingleDataSourceMBean masterBean = ((GroupDataSourceMBean) ds).getWriteSingleDataSourceMBean();
 						DataSourceConfig config = masterBean.getConfig();
-						configTable.row(name, GroupDataSource.class.getName(), config.getJdbcUrl(), config.getUsername(),
-							  findByKey(config.getProperties(), "InitialPoolSize"),
-							  findByKey(config.getProperties(), "MaxPoolSize"),
-							  findByKey(config.getProperties(), "MinPoolSize"),
-							  findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
+						configTable
+								.row(name, GroupDataSource.class.getName(), config.getJdbcUrl(), config.getUsername(),
+										findByKey(config.getProperties(), "InitialPoolSize"),
+										findByKey(config.getProperties(), "MaxPoolSize"),
+										findByKey(config.getProperties(), "MinPoolSize"),
+										findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
 						statusTable.row(name, config.getJdbcUrl(),
-							  masterBean.getState() == DataSourceState.UP ? masterBean.getNumBusyConnection() : 0,
-							  masterBean.getState() == DataSourceState.UP ? masterBean.getNumIdleConnection() : 0, "Yes",
-							  null, masterBean.getState());
+								masterBean.getState() == DataSourceState.UP ? masterBean.getNumBusyConnection() : 0,
+								masterBean.getState() == DataSourceState.UP ? masterBean.getNumIdleConnection() : 0,
+								"Yes",
+								null, masterBean.getState());
 
 						for (SingleDataSourceMBean mbean : ((GroupDataSourceMBean) ds).getReaderSingleDataSourceMBean()
-							  .values()) {
+								.values()) {
 							config = mbean.getConfig();
 							configTable.row(null, null, config.getJdbcUrl(), config.getUsername(),
-								  findByKey(config.getProperties(), "InitialPoolSize"),
-								  findByKey(config.getProperties(), "MaxPoolSize"),
-								  findByKey(config.getProperties(), "MinPoolSize"),
-								  findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
+									findByKey(config.getProperties(), "InitialPoolSize"),
+									findByKey(config.getProperties(), "MaxPoolSize"),
+									findByKey(config.getProperties(), "MinPoolSize"),
+									findByKey(config.getProperties(), "CheckoutTimeout"), Constants.ZEBRA_VERSION);
 							statusTable.row(null, config.getJdbcUrl(),
-								  mbean.getState() == DataSourceState.UP ? mbean.getNumBusyConnection() : 0,
-								  mbean.getState() == DataSourceState.UP ? mbean.getNumIdleConnection() : 0, "No", mbean
-										.getConfig().getWeight(), mbean.getState());
+									mbean.getState() == DataSourceState.UP ? mbean.getNumBusyConnection() : 0,
+									mbean.getState() == DataSourceState.UP ? mbean.getNumIdleConnection() : 0, "No",
+									mbean
+											.getConfig().getWeight(), mbean.getState());
 						}
 					} catch (Exception e) {
 						configTable.row(name, GroupDataSource.class.getName(), null, null, null, null, null, null, null,
-							  "Not-Initilized", Constants.ZEBRA_VERSION);
+								"Not-Initilized", Constants.ZEBRA_VERSION);
 						setState(State.ERROR);
 					}
 				}

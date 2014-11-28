@@ -1,5 +1,11 @@
 package com.dianping.zebra.group.config;
 
+import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.group.util.FileUtils;
+import com.dianping.zebra.group.util.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -13,12 +19,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.dianping.zebra.group.exception.IllegalConfigException;
-import com.dianping.zebra.group.util.FileUtils;
-import com.dianping.zebra.group.util.StringUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 
 public class LocalConfigService implements ConfigService {
 
@@ -91,7 +91,8 @@ public class LocalConfigService implements ConfigService {
 			inputStream = new FileInputStream(this.resourceFile);
 			prop.load(inputStream);
 		} catch (Exception e) {
-			throw new IllegalConfigException(String.format("fail to read properties file[%s]", this.resourceFileName), e);
+			throw new IllegalConfigException(String.format("fail to read properties file[%s]", this.resourceFileName),
+					e);
 		} finally {
 			FileUtils.closeQuietly(inputStream);
 		}

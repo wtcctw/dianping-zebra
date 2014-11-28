@@ -1,13 +1,12 @@
 package com.dianping.zebra.monitor.model;
 
-import java.beans.PropertyDescriptor;
-import java.net.URLEncoder;
-
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.util.AppPropertiesUtils;
 import org.springframework.beans.BeanUtils;
 import org.unidal.net.Networks;
 
-import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.util.AppPropertiesUtils;
+import java.beans.PropertyDescriptor;
+import java.net.URLEncoder;
 
 /**
  * Created by Dozer on 8/13/14.

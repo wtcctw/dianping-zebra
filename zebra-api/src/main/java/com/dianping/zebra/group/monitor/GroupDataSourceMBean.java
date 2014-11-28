@@ -1,8 +1,8 @@
 package com.dianping.zebra.group.monitor;
 
-import java.util.Map;
-
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+
+import java.util.Map;
 
 public interface GroupDataSourceMBean {
 

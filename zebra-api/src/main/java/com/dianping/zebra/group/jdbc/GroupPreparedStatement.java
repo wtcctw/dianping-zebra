@@ -40,7 +40,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	private String sql;
 
 	public GroupPreparedStatement(GroupConnection connection, String sql,
-		  List<JdbcFilter> filters) {
+			List<JdbcFilter> filters) {
 		super(connection, filters);
 		this.sql = sql;
 	}

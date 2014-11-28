@@ -22,7 +22,7 @@ public class RouterContext {
 		this.sql = sql;
 		this.excludeTargets = excludeTargets;
 	}
-	
+
 	public RouterContext(Set<RouterTarget> excludeTargets) {
 		super();
 		this.excludeTargets = excludeTargets;
@@ -35,8 +35,8 @@ public class RouterContext {
 	public Set<RouterTarget> getExcludeTargets() {
 		return excludeTargets;
 	}
-	
-	public void addExcludeTarget(String dsId){
+
+	public void addExcludeTarget(String dsId) {
 		this.excludeTargets.add(new RouterTarget(dsId));
 	}
 }

@@ -37,8 +37,8 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 			return null;
 		}
 		return String.format("%s.app.%s.id",
-			  Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX,
-			  appName);
+				Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX,
+				appName);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 			this.systemConfig.set(initSystemConfig());
 		} catch (Exception e) {
 			throw new IllegalConfigException(String.format(
-				  "Fail to initialize DefaultSystemConfigManager with config file[%s].", this.jdbcRef), e);
+					"Fail to initialize DefaultSystemConfigManager with config file[%s].", this.jdbcRef), e);
 		}
 	}
 
@@ -61,14 +61,14 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 
 		config.setCookieDomain(getProperty(getKey(Constants.ELEMENT_COOKIE_DOMAIN), config.getCookieDomain()));
 		config.setHealthCheckInterval(getProperty(getKey(Constants.ELEMENT_HEALTH_CHECK_INTERVAL),
-			  config.getHealthCheckInterval()));
+				config.getHealthCheckInterval()));
 		config.setMaxErrorCounter(
-			  getProperty(getKey(Constants.ELEMENT_MAX_ERROR_COUNTER), config.getMaxErrorCounter()));
+				getProperty(getKey(Constants.ELEMENT_MAX_ERROR_COUNTER), config.getMaxErrorCounter()));
 		config.setRetryTimes(getProperty(getKey(Constants.ELEMENT_RETRY_TIMES), config.getMaxErrorCounter()));
 		config.setCookieName(getProperty(getKey(Constants.ELEMENT_COOKIE_NAME), config.getCookieName()));
 		config.setEncryptSeed(getProperty(getKey(Constants.ELEMENT_ENCRYPT_SEED), config.getEncryptSeed()));
 		config.setCookieExpiredTime(getProperty(getKey(Constants.ELEMENT_COOKIE_EXPIRED_TIME),
-			  config.getCookieExpiredTime()));
+				config.getCookieExpiredTime()));
 
 		config.setGlobalBlackList(getProperty(getGlobalSqlBlackListKey(), config.getGlobalBlackList()));
 		String appBlackListKey = getAppSqlBlackListKey();

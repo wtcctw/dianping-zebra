@@ -17,7 +17,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
 	@Override
 	public synchronized SingleDataSource createDataSource(DataSourceConfig config,
-		  List<JdbcFilter> filters) {
+			List<JdbcFilter> filters) {
 		return new SingleDataSource(config, filters);
 	}
 

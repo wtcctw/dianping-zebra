@@ -6,7 +6,7 @@ import com.dianping.zebra.group.util.DataSourceState;
 public interface SingleDataSourceMBean {
 
 	public String getId();
-	
+
 	public DataSourceState getState();
 
 	public DataSourceConfig getConfig();

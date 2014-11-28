@@ -24,7 +24,6 @@ import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupStatement;
-import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.util.SqlUtils;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
@@ -34,13 +33,11 @@ import com.site.helper.Stringizers;
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends DefaultJdbcFilter {
-	private static final int MAX_LENGTH_PER_SQL = 1024 * 10; // about 10k
+	private static final String DAL_CAT_TYPE = "DAL";
 
 	private static final int MAX_CACHED_SQL = 2000;
 
-	private static final String DAL_CAT_TYPE = "DAL";
-
-	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
+	private static final int MAX_LENGTH_PER_SQL = 1024 * 10; // about 10k
 
 	private static final Map<Integer, String> SQL_LENGTH_RANGE = new LinkedHashMap<Integer, String>();
 
@@ -54,6 +51,8 @@ public class CatFilter extends DefaultJdbcFilter {
 		SQL_LENGTH_RANGE.put(Integer.MAX_VALUE, "> 100M");
 	}
 
+	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
+
 	private Set<String> cachedSqlSet = new HashSet<String>();
 
 	@Override
@@ -63,8 +62,8 @@ public class CatFilter extends DefaultJdbcFilter {
 	}
 
 	@Override
-	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
-	      boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
+	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+			boolean isBatched, boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
 		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
@@ -85,11 +84,11 @@ public class CatFilter extends DefaultJdbcFilter {
 			SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
 
 			if (singleConnection != null) {
-				Cat.logEvent("SQL.Database", singleConnection.getConfig().getJdbcUrl(), Event.SUCCESS, singleConnection
-				      .getConfig().getId());
+				Cat.logEvent("SQL.Database", singleConnection.getConfig().getJdbcUrl(), Event.SUCCESS,
+						singleConnection.getConfig().getId());
 			}
 			String params = Stringizers.forJson().compact()
-			      .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
+					.from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
 			if (isBatched) {
 				if (batchedSql != null) {
 					for (String bSql : batchedSql) {
@@ -119,7 +118,7 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
 		FailOverDataSource.FindMasterDataSourceResult result = chain.findMasterFailOverDataSource(source, chain);
 
 		if (result != null && result.isChangedMaster()) {
@@ -155,13 +154,12 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 	}
 
-	public <S> void initGroupDataSource(JdbcContext metaData, S source, FilterAction<S> action) {
-		Transaction transaction = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Init-" + metaData.getDataSourceId());
+	@Override
+	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
+		Transaction transaction = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Init-" + source.getJdbcRef());
 		try {
-			super.initGroupDataSource(metaData, source, action);
-			if (source instanceof GroupDataSourceMBean) {
-				StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor((GroupDataSourceMBean) source));
-			}
+			chain.initGroupDataSource(source, chain);
+			StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
 			transaction.setStatus(Message.SUCCESS);
 		} catch (RuntimeException e) {
 			transaction.setStatus(e);
@@ -176,6 +174,17 @@ public class CatFilter extends DefaultJdbcFilter {
 		DataSource result = chain.initSingleDataSource(source, chain);
 		Cat.logEvent("DataSource.Created", source.getConfig().getId());
 		return result;
+	}
+
+	private void logSqlLengthEvent(String sql, String params) {
+		int length = sql == null ? 0 : sql.length();
+
+		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
+			if (length <= item.getKey()) {
+				Cat.logEvent("SQL.Length", item.getValue(), Transaction.SUCCESS, params);
+				return;
+			}
+		}
 	}
 
 	@Override
@@ -204,17 +213,6 @@ public class CatFilter extends DefaultJdbcFilter {
 			t.setStatus("Fail to find any master database");
 		} finally {
 			t.complete();
-		}
-	}
-
-	private void logSqlLengthEvent(String sql, String params) {
-		int length = sql == null ? 0 : sql.length();
-
-		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
-			if (length <= item.getKey()) {
-				Cat.logEvent("SQL.Length", item.getValue(), Transaction.SUCCESS, params);
-				return;
-			}
 		}
 	}
 }

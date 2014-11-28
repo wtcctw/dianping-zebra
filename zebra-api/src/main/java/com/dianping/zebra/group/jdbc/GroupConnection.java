@@ -40,8 +40,8 @@ public class GroupConnection implements Connection {
 	private DataSource writeDataSource;
 
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
-		  CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType,
-		  List<JdbcFilter> filters) {
+			CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType,
+			List<JdbcFilter> filters) {
 		super();
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
@@ -125,8 +125,9 @@ public class GroupConnection implements Connection {
 	public void close() throws SQLException {
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
-				@Override public void closeGroupConnection(GroupConnection source, JdbcFilter chain)
-					  throws SQLException {
+				@Override
+				public void closeGroupConnection(GroupConnection source, JdbcFilter chain)
+						throws SQLException {
 					if (index < filters.size()) {
 						filters.get(index++).closeGroupConnection(source, chain);
 					} else {
@@ -240,7 +241,7 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-		  throws SQLException {
+			throws SQLException {
 		GroupStatement stmt = (GroupStatement) createStatement(resultSetType, resultSetConcurrency);
 		stmt.setResultSetHoldability(resultSetHoldability);
 		return stmt;
@@ -285,7 +286,7 @@ public class GroupConnection implements Connection {
 	}
 
 	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
-		  int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+			int resultSetConcurrency, int resultSetHoldability) throws SQLException {
 		if (resultSetType == Integer.MIN_VALUE) {
 			return conn.prepareCall(sql);
 		} else if (resultSetHoldability == Integer.MIN_VALUE) {
@@ -580,7 +581,7 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-		  int resultSetHoldability) throws SQLException {
+			int resultSetHoldability) throws SQLException {
 		checkClosed();
 		CallableStatement cstmt = null;
 		// 存储过程强制走写库
@@ -623,7 +624,7 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-		  throws SQLException {
+			throws SQLException {
 		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql);
 		pstmt.setResultSetType(resultSetType);
 		pstmt.setResultSetConcurrency(resultSetConcurrency);
@@ -637,9 +638,9 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-		  int resultSetHoldability) throws SQLException {
+			int resultSetHoldability) throws SQLException {
 		GroupPreparedStatement pstmt = (GroupPreparedStatement) prepareStatement(sql, resultSetType,
-			  resultSetConcurrency);
+				resultSetConcurrency);
 		pstmt.setResultSetHoldability(resultSetHoldability);
 		return pstmt;
 	}

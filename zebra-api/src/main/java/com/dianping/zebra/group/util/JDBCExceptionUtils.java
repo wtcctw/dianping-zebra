@@ -1,8 +1,8 @@
 /**
  * Project: zebra-client
- * 
+ *
  * File Created at Feb 20, 2014
- * 
+ *
  */
 package com.dianping.zebra.group.util;
 
@@ -13,7 +13,6 @@ import java.util.List;
 
 /**
  * @author Leo Liang
- * 
  */
 public final class JDBCExceptionUtils {
 

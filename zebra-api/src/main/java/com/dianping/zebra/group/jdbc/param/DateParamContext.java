@@ -1,9 +1,9 @@
 /**
  * Project: zebra-client
- * 
+ *
  * File Created at 2011-6-19
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -22,9 +22,8 @@ import java.util.Calendar;
 
 /**
  * TODO Comment of DateParamContext
- * 
+ *
  * @author Leo Liang
- * 
  */
 public class DateParamContext extends ParamContext {
 

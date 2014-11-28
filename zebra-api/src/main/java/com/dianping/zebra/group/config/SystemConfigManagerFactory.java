@@ -1,10 +1,10 @@
 package com.dianping.zebra.group.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.exception.IllegalConfigException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public final class SystemConfigManagerFactory {
 
@@ -31,7 +31,7 @@ public final class SystemConfigManagerFactory {
 						systemConfigManager = new DefaultSystemConfigManager(name, configService);
 					} else {
 						throw new IllegalConfigException(String.format("illegal systemConfigManagerType[%s]",
-						      configManagerType));
+								configManagerType));
 					}
 					systemConfigManager.init();
 					systemConfigManagers.put(name, systemConfigManager);

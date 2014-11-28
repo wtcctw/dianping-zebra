@@ -1,7 +1,7 @@
 package com.dianping.zebra.group.jdbc;
 
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
+import com.dianping.zebra.group.filter.JdbcFilter;
 
 import java.io.InputStream;
 import java.io.Reader;
