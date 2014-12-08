@@ -391,7 +391,7 @@ public class GroupStatement implements Statement {
 	protected <T> T executeWithFilter(final JDBCOperationCallback<T> callback, final String sql, Object params,
 	      boolean isBatch, final boolean forceWriter) throws SQLException {
 
-		final Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
+		Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
 
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {

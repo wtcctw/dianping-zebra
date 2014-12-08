@@ -90,7 +90,7 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 
 	@Override
 	public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
-		return null;
+		throw new NotImplementedException();
 	}
 
 	@Override
