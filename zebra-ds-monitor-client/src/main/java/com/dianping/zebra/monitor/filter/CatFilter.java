@@ -57,8 +57,8 @@ public class CatFilter extends DefaultJdbcFilter {
 	}
 
 	@Override
-	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
-			boolean isBatched, boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
+	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
+	      boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
 		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
@@ -79,11 +79,11 @@ public class CatFilter extends DefaultJdbcFilter {
 			SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
 
 			if (singleConnection != null) {
-				Cat.logEvent("SQL.Database", singleConnection.getConfig().getJdbcUrl(), Event.SUCCESS,
-						singleConnection.getConfig().getId());
+				Cat.logEvent("SQL.Database", singleConnection.getConfig().getJdbcUrl(), Event.SUCCESS, singleConnection
+				      .getConfig().getId());
 			}
 			String params = Stringizers.forJson().compact()
-					.from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
+			      .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
 			if (isBatched) {
 				if (batchedSql != null) {
 					for (String bSql : batchedSql) {
@@ -113,7 +113,7 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
 		FailOverDataSource.FindMasterDataSourceResult result = chain.findMasterFailOverDataSource(source, chain);
 
 		if (result != null && result.isChangedMaster()) {
@@ -174,11 +174,19 @@ public class CatFilter extends DefaultJdbcFilter {
 	private void logSqlLengthEvent(String sql, String params) {
 		int length = sql == null ? 0 : sql.length();
 
+		int counter = 0;
 		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
 			if (length <= item.getKey()) {
-				Cat.logEvent("SQL.Length", item.getValue(), Transaction.SUCCESS, params);
+				if (counter < 4) {
+					Cat.logEvent("SQL.Length", item.getValue(), Message.SUCCESS, params);
+				} else {
+					// > 1M
+					Cat.logEvent("SQL.Length", item.getValue(), "long-sql", params);
+				}
 				return;
 			}
+
+			counter++;
 		}
 	}
 
