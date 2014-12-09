@@ -79,8 +79,7 @@ public class CatFilter extends DefaultJdbcFilter {
 			SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
 
 			if (singleConnection != null) {
-				Cat.logEvent("SQL.Database", singleConnection.getConfig().getJdbcUrl(), Event.SUCCESS, singleConnection
-				      .getConfig().getId());
+				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, singleConnection.getId());
 			}
 			String params = Stringizers.forJson().compact()
 			      .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);

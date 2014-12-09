@@ -14,22 +14,22 @@ public class SingleConnection implements Connection {
 
 	private final Connection conn;
 
+	private final String id;
+	
 	private final SingleDataSource dataSource;
 
 	private final List<JdbcFilter> filters;
 
-	private final DataSourceConfig config;
-
 	public SingleConnection(SingleDataSource dataSource, DataSourceConfig config, Connection conn,
 			List<JdbcFilter> filters) {
+		this.id = config.getId();
 		this.dataSource = dataSource;
 		this.conn = conn;
 		this.filters = filters;
-		this.config = config;
 	}
 
-	public DataSourceConfig getConfig() {
-		return config;
+	public String getId() {
+		return id;
 	}
 
 	public void abort(Executor executor) throws SQLException {
