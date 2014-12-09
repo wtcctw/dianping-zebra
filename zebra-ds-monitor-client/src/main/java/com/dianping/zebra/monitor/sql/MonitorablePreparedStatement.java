@@ -15,21 +15,39 @@
  */
 package com.dianping.zebra.monitor.sql;
 
-import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.cat.Cat;
-import com.dianping.cat.CatConstants;
-import com.dianping.cat.message.MessageProducer;
-import com.dianping.cat.message.Transaction;
-import com.site.helper.Stringizers;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.NClob;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.dianping.avatar.tracker.ExecutionContextHolder;
+import com.dianping.cat.Cat;
+import com.dianping.cat.CatConstants;
+import com.dianping.cat.message.Message;
+import com.dianping.cat.message.MessageProducer;
+import com.dianping.cat.message.Transaction;
+import com.site.helper.Stringizers;
 
 /**
  * @author danson.liu
@@ -70,16 +88,24 @@ public class MonitorablePreparedStatement extends MonitorableStatement implement
 	private void logSqlLengthEvent(String sql) {
 		int length = sql == null ? 0 : sql.length();
 
+		int counter = 0;
 		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
 			if (length <= item.getKey()) {
-				Cat.logEvent("SQL.Length", item.getValue());
+				if (counter < 4) {
+					Cat.logEvent("SQL.Length", item.getValue(), Message.SUCCESS, "");
+				} else {
+					// > 1M
+					Cat.logEvent("SQL.Length", item.getValue(), "long-sql warning", "");
+				}
 				return;
 			}
+
+			counter++;
 		}
 	}
 
 	public MonitorablePreparedStatement(PreparedStatement prepareStatement, String sql,
-			MonitorableConnection monitorableConnection) {
+	      MonitorableConnection monitorableConnection) {
 		super(prepareStatement, monitorableConnection);
 		this.prepareStatement = prepareStatement;
 		this.sql = sql;
@@ -114,9 +140,12 @@ public class MonitorablePreparedStatement extends MonitorableStatement implement
 			t.addData(sql);
 			try {
 				cat.logEvent("SQL.Database", monitorableConnection.getMetaData().getURL());
-				cat.logEvent("SQL.Method", buildSqlType(sql),
-						Transaction.SUCCESS, Stringizers.forJson().compact()
-								.from(getParamList(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
+				cat.logEvent(
+				      "SQL.Method",
+				      buildSqlType(sql),
+				      Transaction.SUCCESS,
+				      Stringizers.forJson().compact()
+				            .from(getParamList(), CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH));
 				logSqlLengthEvent(sql);
 				t.setStatus(Transaction.SUCCESS);
 				ExecutionContextHolder.getContext().add(CAT_LOGED, "Loged");

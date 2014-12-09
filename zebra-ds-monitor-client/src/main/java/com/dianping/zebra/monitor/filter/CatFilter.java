@@ -88,13 +88,13 @@ public class CatFilter extends DefaultJdbcFilter {
 				if (batchedSql != null) {
 					for (String bSql : batchedSql) {
 						Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(bSql), Transaction.SUCCESS, params);
-						logSqlLengthEvent(sql, params);
+						logSqlLengthEvent(sql);
 					}
 				}
 			} else {
 				if (sql != null) {
 					Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, params);
-					logSqlLengthEvent(sql, params);
+					logSqlLengthEvent(sql);
 				}
 			}
 
@@ -171,17 +171,17 @@ public class CatFilter extends DefaultJdbcFilter {
 		return result;
 	}
 
-	private void logSqlLengthEvent(String sql, String params) {
+	private void logSqlLengthEvent(String sql) {
 		int length = sql == null ? 0 : sql.length();
 
 		int counter = 0;
 		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
 			if (length <= item.getKey()) {
 				if (counter < 4) {
-					Cat.logEvent("SQL.Length", item.getValue(), Message.SUCCESS, params);
+					Cat.logEvent("SQL.Length", item.getValue(), Message.SUCCESS, "");
 				} else {
 					// > 1M
-					Cat.logEvent("SQL.Length", item.getValue(), "long-sql", params);
+					Cat.logEvent("SQL.Length", item.getValue(), "long-sql warning", "");
 				}
 				return;
 			}
