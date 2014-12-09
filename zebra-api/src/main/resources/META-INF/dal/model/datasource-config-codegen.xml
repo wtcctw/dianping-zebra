@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <entity name="group-data-source-config" root="true">
+        <attribute name="router-strategy" value-type="String"/>
+        <attribute name="transaction-force-write" value-type="boolean"/>
+        <attribute name="write-first" value-type="boolean"/>
+        <attribute name="filters" value-type="String"/>
+        <entity-ref name="data-source-config" type="list" names="data-source-configs"/>
+    </entity>
+    <entity name="data-source-config">
+        <attribute name="id" value-type="String"/>
+        <attribute name="weight" value-type="int"/>
+        <attribute name="canRead" value-type="boolean"/>
+        <attribute name="canWrite" value-type="boolean"/>
+        <attribute name="active" value-type="boolean"/>
+        <element name="test-read-only-sql" value-type="String"/>
+        <element name="time-window" value-type="long"/>
+        <element name="punish-limit" value-type="long"/>
+        <element name="jdbc-url" value-type="String"/>
+        <element name="username" value-type="String"/>
+        <element name="driver-class" value-type="String"/>
+        <element name="password" value-type="String"/>
+    </entity>
+</model>
+

@@ -129,4 +129,28 @@
             <artifactId>fdb-sql-parser</artifactId>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.unidal.maven.plugins</groupId>
+                <artifactId>codegen-maven-plugin</artifactId>
+                <version>2.0.14</version>
+                <executions>
+                    <execution>
+                        <id>generate dal model files</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>dal-model</goal>
+                        </goals>
+                        <configuration>
+                            <manifest><![CDATA[,
+                        ${basedir}/src/main/resources/META-INF/dal/model/datasource-config-manifest.xml,
+                        ${basedir}/src/main/resources/META-INF/dal/model/system-config-manifest.xml,
+                     ,]]></manifest>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
