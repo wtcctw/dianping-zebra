@@ -11,6 +11,7 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +32,7 @@ public class GroupDataSourceTest {
 		for (Map.Entry<String, String> expectedEntity : expectedMap.entrySet()) {
 			Assert.assertTrue(expectedEntity.getKey(), actualMap.containsKey(expectedEntity.getKey()));
 			Assert.assertEquals(expectedEntity.getKey(), expectedEntity.getValue(),
-					actualMap.get(expectedEntity.getKey()));
+				actualMap.get(expectedEntity.getKey()));
 		}
 	}
 
@@ -79,7 +80,11 @@ public class GroupDataSourceTest {
 		ds.setFilter("stat");
 		config.setFilters("cat");
 		ds.buildGroupConfigFilter(config);
-		Assert.assertEquals("cat,stat", config.getFilters());
+
+		List<String> configs = Lists.newArrayList(config.getFilters().split(","));
+		Assert.assertTrue(configs.size() == 2);
+		Assert.assertTrue(configs.contains("cat"));
+		Assert.assertTrue(configs.contains("stat"));
 	}
 
 	@Test
@@ -93,73 +98,73 @@ public class GroupDataSourceTest {
 	}
 
 	private void test_build_group_datasource_config_url_extra(GroupDataSourceConfig config, String extra)
-			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 		GroupDataSource target = new GroupDataSource();
 		target.setJdbcUrlExtra(extra);
 		Method method = GroupDataSource.class
-				.getDeclaredMethod("buildGroupConfigJdbcUrlExtra", GroupDataSourceConfig.class);
+			.getDeclaredMethod("buildGroupConfigJdbcUrlExtra", GroupDataSourceConfig.class);
 		method.setAccessible(true);
 		method.invoke(target, config);
 	}
 
 	@Test
 	public void test_build_group_datasource_config_url_extra_with_all()
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		GroupDataSourceConfig config = initGroupDataSourceConfig(
-				"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=2");
+			"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=2");
 		test_build_group_datasource_config_url_extra(config, "encode=utf8&bb=1");
 		assert_params("jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=2&encode=utf8&bb=1",
-				config.getDataSourceConfigs().get("1").getJdbcUrl());
+			config.getDataSourceConfigs().get("1").getJdbcUrl());
 	}
 
 	@Test
 	public void test_build_group_datasource_config_url_extra_with_empty()
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		GroupDataSourceConfig config = initGroupDataSourceConfig(
-				"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?");
+			"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?");
 		test_build_group_datasource_config_url_extra(config, null);
 		Assert.assertEquals("jdbc:mysql://192.168.8.44:3306/localhost-m1-write?",
-				config.getDataSourceConfigs().get("1").getJdbcUrl());
+			config.getDataSourceConfigs().get("1").getJdbcUrl());
 	}
 
 	@Test
 	public void test_build_group_datasource_config_url_extra_with_empty_extra()
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		GroupDataSourceConfig config = initGroupDataSourceConfig(
-				"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=2");
+			"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=2");
 		test_build_group_datasource_config_url_extra(config, null);
 		assert_params("jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=2",
-				config.getDataSourceConfigs().get("1").getJdbcUrl());
+			config.getDataSourceConfigs().get("1").getJdbcUrl());
 	}
 
 	@Test
 	public void test_build_group_datasource_config_url_extra_with_empty_url()
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		GroupDataSourceConfig config = initGroupDataSourceConfig(
-				"jdbc:mysql://192.168.8.44:3306/localhost-m1-write");
+			"jdbc:mysql://192.168.8.44:3306/localhost-m1-write");
 		test_build_group_datasource_config_url_extra(config, "autoReconnect=true&cc=2");
 		assert_params("jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=2",
-				config.getDataSourceConfigs().get("1").getJdbcUrl());
+			config.getDataSourceConfigs().get("1").getJdbcUrl());
 	}
 
 	@Test
 	public void test_build_group_datasource_config_url_extra_with_same_key()
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		GroupDataSourceConfig config = initGroupDataSourceConfig(
-				"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=1");
+			"jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=true&cc=1");
 		test_build_group_datasource_config_url_extra(config, "autoReconnect=false");
 		assert_params("jdbc:mysql://192.168.8.44:3306/localhost-m1-write?autoReconnect=false&cc=1",
-				config.getDataSourceConfigs().get("1").getJdbcUrl());
+			config.getDataSourceConfigs().get("1").getJdbcUrl());
 	}
 
 	@Test
 	public void test_override_properties_by_srping_bean()
-			throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 		GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("1");
@@ -174,7 +179,7 @@ public class GroupDataSourceTest {
 		target.setMinPoolSize(1);
 
 		Method method = GroupDataSource.class
-				.getDeclaredMethod("buildGroupConfigMergeC3P0Properties", GroupDataSourceConfig.class);
+			.getDeclaredMethod("buildGroupConfigMergeC3P0Properties", GroupDataSourceConfig.class);
 		method.setAccessible(true);
 		method.invoke(target, groupConfig);
 
