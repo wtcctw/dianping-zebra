@@ -55,11 +55,11 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		String[] beanDefinitionNames = listableBeanFactory.getBeanDefinitionNames();
 		for (String beanDefinitionName : beanDefinitionNames) {
 			AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) listableBeanFactory
-					.getBeanDefinition(beanDefinitionName);
+				.getBeanDefinition(beanDefinitionName);
 			try {
 				Class<?> beanClazz = beanDefinition.resolveBeanClass(ClassUtils.getDefaultClassLoader());
 				if (beanClazz != null && DataSource.class.isAssignableFrom(beanClazz)
-						&& (!GroupDataSource.class.isAssignableFrom(beanClazz))) {
+					&& (!GroupDataSource.class.isAssignableFrom(beanClazz))) {
 					autoReplaceWithMonitorableDataSource(beanDefinitionName, beanDefinition, beanClazz);
 				}
 			} catch (ClassNotFoundException e) {
@@ -71,10 +71,16 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	}
 
 	private void autoReplaceWithMonitorableDataSource(String beanName, BeanDefinition dataSourceDefinition,
-			Class<?> dataSourceClazz) {
+		Class<?> dataSourceClazz) {
+
+		if (isZebraDataSource(dataSourceClazz)) {
+			if (!checkInnerDataSourceInZebra(beanName, dataSourceDefinition)) {
+				return;
+			}
+		}
 
 		listableBeanFactory.registerBeanDefinition(beanName,
-				createMonitorableBeanDefinition(beanName, dataSourceDefinition));
+			createMonitorableBeanDefinition(beanName, dataSourceDefinition));
 
 		// zebra需做特殊处理，一些inner datasource可能作为nested bean方式定义，也需要wrapper
 		if (isZebraDataSource(dataSourceClazz)) {
@@ -83,6 +89,34 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 	}
 
 	@SuppressWarnings("unchecked")
+	private boolean checkInnerDataSourceInZebra(String beanName, BeanDefinition zebraDataSourceDefinition) {
+		MutablePropertyValues propertyValues = zebraDataSourceDefinition.getPropertyValues();
+		PropertyValue dataSourcePoolVal = propertyValues.getPropertyValue("dataSourcePool");
+
+		if (dataSourcePoolVal == null) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Zebra dataSource's dataSourcePool property not found, maybe its name is modified, "
+					+ "change the automonitor's implementation, otherwise some inner dataSource cannot be monitored.");
+			}
+			return true;
+		}
+
+		Map<TypedStringValue, Object> innerDSDefinitionMap = (Map<TypedStringValue, Object>) dataSourcePoolVal
+			.getValue();
+		for (Entry<TypedStringValue, Object> innerDSDefEntry : innerDSDefinitionMap.entrySet()) {
+			Object innerDSDefVal = innerDSDefEntry.getValue();
+			if (innerDSDefVal instanceof BeanDefinitionHolder) {
+				BeanDefinitionHolder innerDSDefHolder = (BeanDefinitionHolder) innerDSDefVal;
+				BeanDefinition innerDSDefinition = innerDSDefHolder.getBeanDefinition();
+				if (GroupDataSource.class.getName().equals(innerDSDefinition.getBeanClassName())) {
+					return false;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	private void replaceInnerDataSourceInZebra(String beanName, BeanDefinition zebraDataSourceDefinition) {
 		MutablePropertyValues propertyValues = zebraDataSourceDefinition.getPropertyValues();
 		PropertyValue dataSourcePoolVal = propertyValues.getPropertyValue("dataSourcePool");
@@ -90,27 +124,28 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		if (dataSourcePoolVal == null) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Zebra dataSource's dataSourcePool property not found, maybe its name is modified, "
-						+ "change the automonitor's implementation, otherwise some inner dataSource cannot be monitored.");
+					+ "change the automonitor's implementation, otherwise some inner dataSource cannot be monitored.");
 			}
 			return;
 		}
 
 		Map<TypedStringValue, Object> innerDSDefinitionMap = (Map<TypedStringValue, Object>) dataSourcePoolVal
-				.getValue();
+			.getValue();
 		for (Entry<TypedStringValue, Object> innerDSDefEntry : innerDSDefinitionMap.entrySet()) {
 			Object innerDSDefVal = innerDSDefEntry.getValue();
 			if (innerDSDefVal instanceof BeanDefinitionHolder) {
 				BeanDefinitionHolder innerDSDefHolder = (BeanDefinitionHolder) innerDSDefVal;
 				BeanDefinition innerDSDefinition = innerDSDefHolder.getBeanDefinition();
 				innerDSDefEntry.setValue(new BeanDefinitionHolder(createMonitorableBeanDefinition(beanName,
-						innerDSDefinition), innerDSDefHolder.getBeanName(), innerDSDefHolder
-						.getAliases()));
+					innerDSDefinition), innerDSDefHolder.getBeanName(), innerDSDefHolder
+					.getAliases()));
 			}
 		}
 	}
 
 	private BeanDefinition createMonitorableBeanDefinition(String beanName, BeanDefinition dataSourceDefinition) {
-		if (MonitorableDataSource.class.getName().equals(dataSourceDefinition.getBeanClassName())) {
+		if (MonitorableDataSource.class.getName().equals(dataSourceDefinition.getBeanClassName()) ||
+			GroupDataSource.class.getName().equals(dataSourceDefinition.getBeanClassName())) {
 			return dataSourceDefinition;
 		}
 
@@ -121,7 +156,7 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		GenericBeanDefinition monitorableDataSourceDefinition = new GenericBeanDefinition();
 		monitorableDataSourceDefinition.setBeanClass(MonitorableDataSource.class);
 		monitorableDataSourceDefinition.getConstructorArgumentValues().addGenericArgumentValue(
-				new RuntimeBeanReference(newBeanName));
+			new RuntimeBeanReference(newBeanName));
 		return monitorableDataSourceDefinition;
 	}
 
