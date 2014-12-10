@@ -54,6 +54,11 @@ public class HeartbeatUpdateServiceImpl implements HeartbeatUpdateService, Task 
 				if (cmdbName != null && !name.equalsIgnoreCase(cmdbName)) {
 					m_heartbeatDao.deleteByPK(heartbeat);
 				}
+				
+				// if ip is no longer belongs to any app, then delete this heartbeat
+				if(cmdbName == null){
+					m_heartbeatDao.deleteByPK(heartbeat);
+				}
 			}
 
 			transaction.setStatus(Message.SUCCESS);
