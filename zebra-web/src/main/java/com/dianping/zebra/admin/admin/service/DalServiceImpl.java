@@ -67,7 +67,11 @@ public class DalServiceImpl implements DalService {
 			      "fail to mark down %s on mysql-instance [%s:%s] because of lion problem.", unMarkedDataSources,
 			      result.getIp(), result.getPort(), markedDataSource));
 		} else {
-			result.onSuccess(dataSources);
+			if(markedDataSource.size() > 0){
+				result.onSuccess(0, dataSources);
+			}else{
+				result.onSuccess(2, dataSources);
+			}
 		}
 	}
 
@@ -83,8 +87,12 @@ public class DalServiceImpl implements DalService {
 
 			// 找到所有符合ip:port的db
 			Set<String> dataSources = findDataSources(ip, port, database, keyValues);
-			
-			markDBInternal(result, dataSources, false);
+
+			if (dataSources.size() != 0) {
+				markDBInternal(result, dataSources, false);
+			} else {
+				result.onSuccess(2, dataSources);
+			}
 		} catch (IOException e) {
 			result.onFail(e.getMessage());
 		} finally {

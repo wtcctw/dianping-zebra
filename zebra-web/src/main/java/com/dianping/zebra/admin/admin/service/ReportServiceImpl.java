@@ -1,8 +1,10 @@
 package com.dianping.zebra.admin.admin.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
@@ -227,6 +229,20 @@ public class ReportServiceImpl implements ReportService {
 
 			for (App app : database.getApps().values()) {
 				visitApp(app);
+			}
+			
+			Set<String> connectedApps = new HashSet<String>();
+			for(String app : connectedIps.values()){
+				connectedApps.add(app);
+			}
+			
+			for(String name : connectedApps){
+				App app = database.findApp(name);
+				
+				if(app == null){
+					app = database.findOrCreateApp(name);
+					visitApp(app);
+				}
 			}
 		}
 	}
