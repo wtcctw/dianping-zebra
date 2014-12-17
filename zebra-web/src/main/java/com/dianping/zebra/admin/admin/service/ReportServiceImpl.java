@@ -231,17 +231,19 @@ public class ReportServiceImpl implements ReportService {
 				visitApp(app);
 			}
 			
-			Set<String> connectedApps = new HashSet<String>();
-			for(String app : connectedIps.values()){
-				connectedApps.add(app);
-			}
-			
-			for(String name : connectedApps){
-				App app = database.findApp(name);
+			if(connectedIps != null){
+				Set<String> connectedApps = new HashSet<String>();
+				for(String app : connectedIps.values()){
+					connectedApps.add(app);
+				}
 				
-				if(app == null){
-					app = database.findOrCreateApp(name);
-					visitApp(app);
+				for(String name : connectedApps){
+					App app = database.findApp(name);
+					
+					if(app == null){
+						app = database.findOrCreateApp(name);
+						visitApp(app);
+					}
 				}
 			}
 		}
