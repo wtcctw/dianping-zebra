@@ -41,10 +41,10 @@ public class CmdbServiceImpl implements CmdbService {
 			if (array.size() > 0) {
 				String name = array.get(0).getAsJsonObject().get("project_name").getAsString();
 
+				transaction.setStatus(Message.SUCCESS);
 				return name;
 			}
 
-			transaction.setStatus(Message.SUCCESS);
 		} catch (Exception e) {
 			Cat.logError(e);
 			transaction.setStatus(e);

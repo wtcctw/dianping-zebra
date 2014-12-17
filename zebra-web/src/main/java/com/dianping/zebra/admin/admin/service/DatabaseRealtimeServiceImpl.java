@@ -16,6 +16,7 @@ import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
@@ -161,11 +162,14 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Tas
 				}
 
 				m_allConnectedIps = result;
+				
+				transaction.setStatus(Message.SUCCESS);
 			} else {
 				throw new IOException(obj.get("message").getAsString());
 			}
 		} catch (Exception e) {
 			Cat.logError(e);
+			transaction.setStatus(e);
 		}finally{
 			transaction.complete();
 		}
