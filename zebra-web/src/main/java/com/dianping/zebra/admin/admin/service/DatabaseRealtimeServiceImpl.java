@@ -16,6 +16,7 @@ import org.unidal.helper.Threads.Task;
 import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
@@ -127,6 +128,7 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Tas
 	}
 
 	public void initialize() throws InitializationException {
+		Transaction transaction = Cat.newTransaction("Database", "Connections");
 		try {
 			String content = m_httpService.sendGet(URL_ALL);
 
@@ -164,6 +166,8 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Tas
 			}
 		} catch (Exception e) {
 			Cat.logError(e);
+		}finally{
+			transaction.complete();
 		}
 	}
 
