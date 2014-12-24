@@ -73,7 +73,8 @@
 
 ### Hint的使用
 因为MYSQL主从同步会有延迟，应用有些时候不能容忍这种延迟，需要读请求也要走写库。可以在SQL前面加一个hint，表明这个读请求强制走写库，例如:
-	/*+zebra:w*/select * from test
+
+    /*+zebra:w*/select * from test
 
 其中, `/*+zebra:w*/`就是hint的格式，告诉zebra这条sql必须走写库。
 
@@ -98,7 +99,6 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 * 写库数据源是`mysql`
 
 ## 更新说明
-
 ### 2.6.4
 * [/] 修正了zebra-ds-monitor-client的若干bug
 
