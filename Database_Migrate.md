@@ -9,8 +9,8 @@
 以下均以`tuangou2010`为例
 
 ### 迁库
-1. 保证访问tuangou2010这个库的业务均已升级了DAL（如需了解如何升级DAL，请参看README.md）
-2. DBA操作修改Lion，将jdbcRef = tuangou2010的这个dal配置从原来的库，修改指向新的库，完成切换
+1. 保证访问`tuangou2010`这个库的业务均已升级了DAL（如需了解如何升级DAL，请参看[README.md](/arch/zebra/edit/master/README.md)）
+2. DBA操作修改Lion，将jdbcRef = `tuangou2010`的这个dal配置从原来的库，修改指向新的库，完成切换
 
 
 ### 拆库
