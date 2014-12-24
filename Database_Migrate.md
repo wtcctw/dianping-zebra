@@ -26,25 +26,12 @@
 以上过程是一个大概的过程，每个库在进行实际操作时，可能会有稍许的差别，但总的流程不变。
 
 ## 案例分享
-1. 2014年9月		dpreview库迁库
+1. 2014年09月	dpreview库迁库
 2. 2014年11月	社区库拆库出活动库
 3. 2014年12月	社区库迁库
 4. 2014年12月	dianpinguc库迁库
-5. 2014年12月	dianping库拆库出dpshop`(TODO)`
 
-    <table>
-    	<thead>
-			<th>时间</th>
-			<th>读库QPS</th>
-			<th>写库QPS</th>
-			<th>出错个数</th>
-		</thead>
-		<tbody>
-			<tr>
-				<td><< 1分钟</td>
-				<td>200</td>
-				<td>80</td>
-				<td>1000左右</td>
-			</tr>
-		</tbody>
-	</table>
+        时间        读库QPS     写库QPS     出错个数
+        << 1分钟    200         80          1000左右              
+    
+5. 2014年12月	dianping库拆库出dpshop`(TODO)`
