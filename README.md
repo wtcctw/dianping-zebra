@@ -11,7 +11,7 @@
 7. DBA可以更加方便的进行数据库维护，如写库切换，读库上线下线，用户名密码变更等操作
 8. 兼容老的DPDL
 9. 支持SQL黑名单功能，DBA可以在后台禁止指定SQL语句的执行
-10. 业务可以更加方便的进行`迁库/拆库`的操作，具体请见[Database_Migrate.md](/Database_Migrate.md)
+10. 业务可以更加方便的进行`迁库/拆库`的操作，具体请见[Database_Migrate.md](/arch/zebra/blob/master/Database_Migrate.md)
 
 ## 使用说明
 
