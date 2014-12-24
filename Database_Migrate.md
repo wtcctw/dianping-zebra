@@ -17,7 +17,7 @@
 假如想从`tuangou2010`库中拆除一个做团单的库，库名叫`tuangoudeal`，可能的步骤如下：
 
 1. DBA创建新的jdbcRef = `tuangoudeal`，使这个Ref使用`tuangou2010`的值，这样保证`tuangoudeal`和`tuangou2010`访问相同的库
-2. 开发修改相应业务，新建一个DAL的`datasource`，使它的jdbcRef = `tuangouDeal`，有关访问tuangoudeal中表的sql均使用该`datasource`
+2. 开发修改相应业务，新建一个DAL的`datasource`，使它的jdbcRef = `tuangoudeal`，有关访问tuangoudeal中表的sql均使用该`datasource`
 3. 开发将所有相应业务都上线
 4. DBA进行拆分库和老库之间数据同步
 5. DBA操作修改Lion，将jdbcRef = `tuangoudeal`的这个dal配置从原来的库，修改指向新的库，完成切换
