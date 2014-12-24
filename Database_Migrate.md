@@ -20,7 +20,7 @@
 2. 开发修改相应业务，新建一个DAL的`datasource`，使它的jdbcRef = `tuangouDeal`，有关访问tuangoudeal中表的sql均使用该`datasource`
 3. 开发将所有相应业务都上线
 4. DBA进行拆分库和老库之间数据同步
-5. DBA操作修改Lion，将jdbcRef = tuangouDeal的这个dal配置从原来的库，修改指向新的库，完成切换
+5. DBA操作修改Lion，将jdbcRef = `tuangoudeal`的这个dal配置从原来的库，修改指向新的库，完成切换
 
 ### 重要
 以上过程是一个大概的过程，每个库在进行实际操作时，可能会有稍许的差别，但总的流程不变。
