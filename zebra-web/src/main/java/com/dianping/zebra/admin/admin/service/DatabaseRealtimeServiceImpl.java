@@ -44,6 +44,9 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Tas
 	@Inject
 	private HttpService m_httpService;
 
+	@Inject
+	private LionHttpService m_lionService;
+
 	private volatile Map<String, Map<String, String>> m_allConnectedIps = new HashMap<String, Map<String, String>>();;
 
 	public DatabaseRealtimeServiceImpl() {
@@ -108,8 +111,13 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Tas
 				for (int i = 0; i < ipArray.size(); i++) {
 					String ip = ipArray.get(i).getAsString();
 
-					if (ip.startsWith("10.1") || ip.startsWith("10.2")) {
-						ips.add(ip);
+					if (ipFilter != null && ipFilter.size() > 0) {
+						for (String prefix : ipFilter) {
+							if (ip.startsWith(prefix)) {
+								ips.add(ip);
+								break;
+							}
+						}
 					}
 				}
 
@@ -129,49 +137,55 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Tas
 	}
 
 	public void initialize() throws InitializationException {
-		Transaction transaction = Cat.newTransaction("Database", "Connections");
-		try {
-			String content = m_httpService.sendGet(URL_ALL);
+		if (m_lionService.isProduct()) {
+			Transaction transaction = Cat.newTransaction("Database", "Connections");
+			try {
+				String content = m_httpService.sendGet(URL_ALL);
 
-			JsonParser parser = new JsonParser();
-			JsonObject obj = parser.parse(content).getAsJsonObject();
+				JsonParser parser = new JsonParser();
+				JsonObject obj = parser.parse(content).getAsJsonObject();
 
-			int status = obj.get("status").getAsInt();
-			if (status == 0) {
-				Map<String, String> ipMappings = getAllIpNameMappings(obj);
+				int status = obj.get("status").getAsInt();
+				if (status == 0) {
+					Map<String, String> ipMappings = getAllIpNameMappings(obj);
 
-				Map<String, Map<String, String>> result = new HashMap<String, Map<String, String>>();
-				JsonObject databases = obj.get("info").getAsJsonObject();
+					Map<String, Map<String, String>> result = new HashMap<String, Map<String, String>>();
+					JsonObject databases = obj.get("info").getAsJsonObject();
 
-				for (Entry<String, JsonElement> entry : databases.entrySet()) {
-					JsonArray ipArray = entry.getValue().getAsJsonArray();
-					Map<String, String> databaseMaping = new HashMap<String, String>();
-					for (int i = 0; i < ipArray.size(); i++) {
-						String ip = ipArray.get(i).getAsString();
+					for (Entry<String, JsonElement> entry : databases.entrySet()) {
+						JsonArray ipArray = entry.getValue().getAsJsonArray();
+						Map<String, String> databaseMaping = new HashMap<String, String>();
+						for (int i = 0; i < ipArray.size(); i++) {
+							String ip = ipArray.get(i).getAsString();
 
-						if (ip.startsWith("10.1") || ip.startsWith("10.2")) {
-							String name = ipMappings.get(ip);
+							if (ipFilter != null && ipFilter.size() > 0) {
+								for (String prefix : ipFilter) {
+									if (ip.startsWith(prefix)) {
+										String name = ipMappings.get(ip);
 
-							if (name != null && name.length() > 0) {
-								databaseMaping.put(ip, name);
+										if (name != null && name.length() > 0) {
+											databaseMaping.put(ip, name);
+										}
+									}
+								}
 							}
 						}
+
+						result.put(entry.getKey(), databaseMaping);
 					}
 
-					result.put(entry.getKey(), databaseMaping);
-				}
+					m_allConnectedIps = result;
 
-				m_allConnectedIps = result;
-				
-				transaction.setStatus(Message.SUCCESS);
-			} else {
-				throw new IOException(obj.get("message").getAsString());
+					transaction.setStatus(Message.SUCCESS);
+				} else {
+					throw new IOException(obj.get("message").getAsString());
+				}
+			} catch (Exception e) {
+				Cat.logError(e);
+				transaction.setStatus(e);
+			} finally {
+				transaction.complete();
 			}
-		} catch (Exception e) {
-			Cat.logError(e);
-			transaction.setStatus(e);
-		}finally{
-			transaction.complete();
 		}
 	}
 

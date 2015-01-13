@@ -90,6 +90,9 @@
 				<requirement>
 					<role>com.dianping.zebra.admin.admin.service.HttpService</role>
 				</requirement>
+				<requirement>
+					<role>com.dianping.zebra.admin.admin.service.LionHttpService</role>
+				</requirement>
 			</requirements>
 		</component>
 		<component>
