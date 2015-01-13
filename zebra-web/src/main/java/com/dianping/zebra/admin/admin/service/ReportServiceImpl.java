@@ -96,7 +96,7 @@ public class ReportServiceImpl implements ReportService {
 	public App getApp(String appName, boolean isProduct) {
 		App app = new App(appName);
 
-		Transaction transaction = Cat.newTransaction("Performance", "app");
+		Transaction transaction = Cat.newTransaction("Report", "App");
 
 		try {
 			List<Heartbeat> all = m_heartbeatDao.findByAppName(appName, HeartbeatEntity.READSET_FULL);
@@ -130,7 +130,7 @@ public class ReportServiceImpl implements ReportService {
 
 	@Override
 	public Database getDatabase(String database, boolean isProduct) {
-		Transaction transaction = Cat.newTransaction("Performance", "database");
+		Transaction transaction = Cat.newTransaction("Report", "Database");
 
 		Database database2 = getReportInternal().getDatabases().get(database);
 
@@ -147,7 +147,7 @@ public class ReportServiceImpl implements ReportService {
 
 	@Override
 	public Report getReport(boolean isProduct) {
-		Transaction transaction = Cat.newTransaction("Performance", "report");
+		Transaction transaction = Cat.newTransaction("Report", "All");
 
 		Report report = getReportInternal();
 

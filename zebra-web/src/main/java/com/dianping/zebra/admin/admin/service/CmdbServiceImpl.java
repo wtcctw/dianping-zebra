@@ -18,9 +18,9 @@ import com.google.gson.JsonParser;
 
 public class CmdbServiceImpl implements CmdbService {
 
-	private final String URL = "http://api.cmdb.dp/api/v0.1/ip/%s/projects";
+	private final String CMDB_QUERY_URL = "http://api.cmdb.dp/api/v0.1/ip/%s/projects";
 
-	private final String URL_BATCH = "http://api.cmdb.dp/api/v0.1/projects/by_ips";
+	private final String CMDB_BATCH_QUERY_URL = "http://api.cmdb.dp/api/v0.1/projects/by_ips";
 
 	private final String QUOTE = "\"\"";
 
@@ -29,7 +29,7 @@ public class CmdbServiceImpl implements CmdbService {
 
 	@Override
 	public String getAppName(String ip) {
-		String url = String.format(URL, ip);
+		String url = String.format(CMDB_QUERY_URL, ip);
 
 		Transaction transaction = Cat.newTransaction("Cmdb", "single");
 
@@ -45,6 +45,7 @@ public class CmdbServiceImpl implements CmdbService {
 				return name;
 			}
 
+			transaction.setStatus(Message.SUCCESS);
 		} catch (Exception e) {
 			Cat.logError(e);
 			transaction.setStatus(e);
@@ -72,7 +73,7 @@ public class CmdbServiceImpl implements CmdbService {
 				}
 			}
 
-			String content = httpService.sendPost(URL_BATCH, "ip=" + sb.toString());
+			String content = httpService.sendPost(CMDB_BATCH_QUERY_URL, "ip=" + sb.toString());
 
 			JsonParser parser = new JsonParser();
 			for (Entry<String, JsonElement> entry : parser.parse(content).getAsJsonObject().entrySet()) {
