@@ -25,7 +25,6 @@
     </properties>
     <modules>
         <module>zebra-api</module>
-        <module>zebra-environment</module>
         <module>zebra-web</module>
         <module>zebra-ds-monitor-client</module>
         <module>zebra-maven-plugin</module>
