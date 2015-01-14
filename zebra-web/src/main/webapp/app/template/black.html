@@ -2,6 +2,7 @@
     <div class="col-xs-12">
         <form class="form-inline" role="form">
             <input class="form-control input-sm" required ng-model="addId" type="text" placeholder="New SQL ID">
+            <input class="form-control input-sm" ng-model="addComment" type="text" placeholder="备注">
             <input class="form-control input-sm" ng-model="addIp" type="text" placeholder="IP(Empty for Global)">
             <button ng-click="add()" class="btn btn-sm btn-primary">Add</button>
         </form>
@@ -15,9 +16,11 @@
             <tr ng-repeat="config in blackList | toArray | orderBy:'$key':true">
                 <td>{{config.$key}}</td>
                 <td>
-                    <div style="margin-right: 10px;" class="btn-group btn-group-xs" ng-repeat="id in config">
-                        <button type="button" class="btn active btn-default">{{id}}</button>
-                        <button ng-click="remove(config.$key,id)" type="button" title="Remove" class="btn btn-danger">
+                    <div style="margin-right: 10px;" class="btn-group btn-group-xs"
+                         ng-repeat="item in config | toArray">
+                        <button popover-trigger="mouseenter" popover="{{item.comment}}" type="button" class="popover-xlarge btn active btn-default">{{item.$key}}</button>
+                        <button ng-click="remove(config.$key,item.$key)" type="button" title="Remove"
+                                class="btn btn-danger">
                             <span class="glyphicon glyphicon-remove"></span>
                         </button>
                     </div>

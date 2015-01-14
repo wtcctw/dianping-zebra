@@ -14,6 +14,9 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 	@FieldMeta("key")
 	private String m_key;
 
+	@FieldMeta("comment")
+	private String m_comment;
+
 	@FieldMeta("ip")
 	private String m_ip;
 
@@ -37,6 +40,14 @@ public class Payload implements ActionPayload<AdminPage, Action> {
 
 	public void setEnv(String env) {
 		this.m_env = env;
+	}
+
+	public String getComment() {
+		return m_comment;
+	}
+
+	public void setComment(String comment) {
+		this.m_comment = comment;
 	}
 
 	@Override

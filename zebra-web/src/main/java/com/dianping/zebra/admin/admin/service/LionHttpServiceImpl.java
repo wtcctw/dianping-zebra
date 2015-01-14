@@ -9,6 +9,8 @@ import com.google.gson.JsonParser;
 import org.unidal.lookup.annotation.Inject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -166,7 +168,12 @@ public class LionHttpServiceImpl implements LionHttpService {
 		}
 		Cat.logEvent("LionAPI-SetConfig", key + "=" + value);
 
-		String result = httpService.sendGet(String.format(setConfigUrl, env, ID, key, value));
+		String result = null;
+		try {
+			result = httpService.sendGet(String.format(setConfigUrl, env, ID, key, URLEncoder.encode(value, "utf-8")));
+		} catch (UnsupportedEncodingException e) {
+			return false;
+		}
 
 		if (result != null && result.length() > 0) {
 			JsonParser parser = new JsonParser();

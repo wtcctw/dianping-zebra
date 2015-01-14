@@ -25,11 +25,17 @@ zebraWeb.controller('black', function ($scope, $http) {
 
     $scope.add = function () {
         if (confirm('确山添加？')) {
-            $http.get('/a/blacklist?op=add&env=' + $scope.config.env + '&ip=' + ($scope.addIp ? $scope.addIp : '') + '&id=' + ($scope.addId ? $scope.addId : ''))
+
+            $http.post('/a/blacklist?op=add&env=' + $scope.config.env +
+                '&ip=' + ($scope.addIp ? $scope.addIp : '') +
+                '&id=' + ($scope.addId ? $scope.addId : ''),
+                $.param({comment: $scope.addComment ? encodeURIComponent($scope.addComment) : ''}),
+                {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
                 .success(function (data, status, headers, config) {
                     $scope.load();
                     $scope.addId = '';
                     $scope.addIp = '';
+                    $scope.addComment = '';
                 });
         }
     }

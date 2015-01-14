@@ -2,6 +2,7 @@ package com.dianping.zebra.admin.admin.page.blacklist;
 
 import com.dianping.zebra.admin.admin.page.JsonHandler;
 import com.dianping.zebra.admin.admin.service.BlackListService;
+import jodd.util.URLDecoder;
 import org.unidal.lookup.annotation.Inject;
 import org.unidal.web.mvc.annotation.InboundActionMeta;
 import org.unidal.web.mvc.annotation.OutboundActionMeta;
@@ -34,7 +35,8 @@ public class Handler extends JsonHandler<Context> {
 				responseObject = m_blackListService.getAllBlackList(payload.getEnv());
 				break;
 			case ADD:
-				m_blackListService.addItem(payload.getEnv(), payload.getIp(), payload.getId());
+				m_blackListService.addItem(payload.getEnv(), payload.getIp(), payload.getId(),
+					URLDecoder.decode(payload.getComment()));
 				break;
 			case DELETE:
 				m_blackListService.deleteItem(payload.getEnv(), payload.getKey(), payload.getId());
