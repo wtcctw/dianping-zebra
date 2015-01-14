@@ -406,6 +406,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		if (wraper != null) {
 			customizedReadWriteStrategy = wraper;
 		}
+
+		setDataSourceConfigToStrategy();
+	}
+
+	private void setDataSourceConfigToStrategy() {
+		if (customizedReadWriteStrategy != null) {
+			customizedReadWriteStrategy.setGroupDataSourceConfig(this.groupConfig);
+		}
 	}
 
 	private void refresh(String propertyToChange) {
@@ -486,6 +494,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 		// switch config
 		groupConfig = groupDataSourceConfig;
+
+		setDataSourceConfigToStrategy();
 	}
 
 	private void refreshUserAndPassword() {

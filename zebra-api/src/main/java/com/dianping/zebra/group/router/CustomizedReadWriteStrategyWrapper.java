@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.router;
 
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,12 @@ public class CustomizedReadWriteStrategyWrapper implements CustomizedReadWriteSt
 				return true;
 			}
 		}
-
 		return false;
+	}
+
+	@Override public void setGroupDataSourceConfig(GroupDataSourceConfig config) {
+		for (CustomizedReadWriteStrategy strategy : items) {
+			strategy.setGroupDataSourceConfig(config);
+		}
 	}
 }

@@ -5,7 +5,7 @@
         <attribute name="router-strategy" value-type="String" default-value="roundrobin"/>
         <attribute name="transaction-force-write" value-type="boolean" primitive="true" default-value="false"/>
         <attribute name="write-first" value-type="boolean" primitive="true" default-value="false"/>
-        <attribute name="login-force-write" value-type="boolean" primitive="true" default-value="false"/>
+        <attribute name="login-force-write" value-type="boolean" primitive="true" default-value="true"/>
         <attribute name="filters" value-type="String" default-value=""/>
         <entity-ref name="data-source-config" type="map" names="data-source-configs" xml-indent="true"
                     method-find-or-create="true"/>

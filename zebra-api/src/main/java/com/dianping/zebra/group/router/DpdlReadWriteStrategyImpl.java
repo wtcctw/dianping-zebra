@@ -1,5 +1,6 @@
 package com.dianping.zebra.group.router;
 
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -11,6 +12,8 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 	private static Method isAuthenticatedMethod = null;
 
 	private static boolean serviceFlag = false;
+
+	private GroupDataSourceConfig config;
 
 	static {
 		try {
@@ -33,7 +36,7 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 
 	@Override
 	public boolean forceReadFromMaster() {
-		if (serviceFlag) {
+		if (serviceFlag && config != null && config.getLoginForceWrite()) {
 			try {
 				Object context = getContextMethod.invoke(null);
 				if (context != null) {
@@ -45,5 +48,9 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 		}
 
 		return false;
+	}
+
+	@Override public void setGroupDataSourceConfig(GroupDataSourceConfig config) {
+		this.config = config;
 	}
 }

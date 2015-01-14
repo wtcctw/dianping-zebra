@@ -1,5 +1,6 @@
 package com.dianping.zebra.group.router;
 
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import org.junit.*;
 
 public class CustomizedReadWriteStrategyWrapperTest {
@@ -11,12 +12,20 @@ public class CustomizedReadWriteStrategyWrapperTest {
 			public boolean forceReadFromMaster() {
 				return false;
 			}
+
+			@Override public void setGroupDataSourceConfig(GroupDataSourceConfig config) {
+
+			}
 		});
 		
 		wrapper.addStrategy(new CustomizedReadWriteStrategy() {
 			@Override
 			public boolean forceReadFromMaster() {
 				return true;
+			}
+
+			@Override public void setGroupDataSourceConfig(GroupDataSourceConfig config) {
+
 			}
 		});
 		
@@ -31,12 +40,20 @@ public class CustomizedReadWriteStrategyWrapperTest {
 			public boolean forceReadFromMaster() {
 				return false;
 			}
+
+			@Override public void setGroupDataSourceConfig(GroupDataSourceConfig config) {
+
+			}
 		});
 		
 		wrapper.addStrategy(new CustomizedReadWriteStrategy() {
 			@Override
 			public boolean forceReadFromMaster() {
 				return false;
+			}
+
+			@Override public void setGroupDataSourceConfig(GroupDataSourceConfig config) {
+
 			}
 		});
 		
