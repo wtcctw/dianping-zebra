@@ -5,6 +5,7 @@
         <attribute name="transaction-force-write" value-type="boolean"/>
         <attribute name="write-first" value-type="boolean"/>
         <attribute name="filters" value-type="String"/>
+        <attribute name="login-force-write" value-type="boolean"/>
         <entity-ref name="data-source-config" type="list" names="data-source-configs"/>
     </entity>
     <entity name="data-source-config">
