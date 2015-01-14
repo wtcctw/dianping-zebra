@@ -17,6 +17,7 @@
         <java.target.version>1.6</java.target.version>
         <spring.version>2.5.6</spring.version>
         <project.encoding>UTF-8</project.encoding>
+        <groovy.version>2.3.9</groovy.version>
         <repo.internal.snapshots.url>http://mvn.dianpingoa.com/dianping-snapshots</repo.internal.snapshots.url>
         <repo.internal.releases.url>http://mvn.dianpingoa.com/dianping-releases</repo.internal.releases.url>
         <repo.external.url>http://mvn.dianpingoa.com/third-party</repo.external.url>
@@ -227,6 +228,16 @@
                 <groupId>org.unidal.framework</groupId>
                 <artifactId>dal-jdbc</artifactId>
                 <version>2.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>${groovy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.spockframework</groupId>
+                <artifactId>spock-core</artifactId>
+                <version>0.7-groovy-2.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
