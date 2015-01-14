@@ -26,7 +26,7 @@ public class DalResult {
 
 	private String m_message;
 
-	private int m_status = 0; // 0 for success, 1 for failure
+	private int m_status = 0; // 0 for success, 1 for failure, 2 for success but no database markdown
 
 	public DalResult(String ip, String port, String database, String env, String action) {
 		super();
@@ -97,11 +97,10 @@ public class DalResult {
 		m_message = message;
 	}
 
-	public void onSuccess(Set<String> operated) {
-		if (operated != null) {
-			m_planOperated = operated;
-			m_actualOperated = operated;
-		}
+	public void onSuccess(int status, Set<String> operated) {
+		m_status = status;
+		m_planOperated = operated;
+		m_actualOperated = operated;
 	}
 
 	public void setAction(String action) {

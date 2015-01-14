@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.unidal.lookup.ComponentTestCase;
 
 import com.dianping.zebra.admin.admin.service.CmdbService;
+import com.dianping.zebra.admin.report.entity.App;
 
 public class CmdbServiceTest extends ComponentTestCase {
 
@@ -32,5 +33,16 @@ public class CmdbServiceTest extends ComponentTestCase {
 		}
 
 		System.out.println(m_cmdbService.getMultiAppName(ips));
+	}
+
+	@Test
+	public void tt() {
+		App app = new App();
+		app.setUpdateStatus(1);
+
+		String result = app.getUpdateStatus() == -1 ? "danger" : (app.getUpdateStatus() == 0 ? "success"
+		      : (app.getUpdateStatus() == 2 ? "info" : "warning"));
+		System.out.println(result);
+		
 	}
 }

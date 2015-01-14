@@ -1,0 +1,7 @@
+#main-container{
+    margin-top: 60px;
+}
+
+.big-popover + .popover {
+    max-width: 100%;
+}

@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class GroupDataSourceRouter {
+public class GroupDataSourceRouterTest {
 
 	private Map<String, Integer> counter = new HashMap<String, Integer>();
 

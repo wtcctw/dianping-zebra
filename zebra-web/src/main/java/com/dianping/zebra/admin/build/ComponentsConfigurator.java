@@ -66,7 +66,7 @@ public class ComponentsConfigurator extends AbstractResourceConfigurator {
 		      HeartbeatDao.class));
 		all.add(C(HttpService.class, HttpServiceImpl.class));
 		all.add(C(DatabaseRealtimeService.class, DatabaseRealtimeServiceImpl.class).req(CmdbService.class,
-		      HttpService.class));
+		      HttpService.class,LionHttpService.class));
 		all.add(C(DalConfigService.class, DalConfigServiceImpl.class).req(LionHttpService.class));
 		all.add(C(DalService.class, DalServiceImpl.class).req(LionHttpService.class));
 		all.add(C(ReportService.class, ReportServiceImpl.class).req(HeartbeatDao.class, CmdbService.class,

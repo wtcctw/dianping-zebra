@@ -27,7 +27,7 @@ public class HeartbeatUpdateServiceImpl implements HeartbeatUpdateService, Task 
 	private CmdbService cmdbService;
 
 	@Override
-	public void update() {
+	public void update() throws DalException {
 		Transaction transaction = Cat.newTransaction("Heartbeat", "update");
 		try {
 			List<Heartbeat> heartbeats = m_heartbeatDao.findAll(HeartbeatEntity.READSET_FULL);
@@ -54,12 +54,18 @@ public class HeartbeatUpdateServiceImpl implements HeartbeatUpdateService, Task 
 				if (cmdbName != null && !name.equalsIgnoreCase(cmdbName)) {
 					m_heartbeatDao.deleteByPK(heartbeat);
 				}
+
+				// if ip is no longer belongs to any app, then delete this heartbeat
+				if (cmdbName == null) {
+					m_heartbeatDao.deleteByPK(heartbeat);
+				}
 			}
 
 			transaction.setStatus(Message.SUCCESS);
 		} catch (DalException e) {
 			transaction.setStatus(e);
 			Cat.logError(e);
+			throw e;
 		} finally {
 			transaction.complete();
 		}
@@ -68,11 +74,12 @@ public class HeartbeatUpdateServiceImpl implements HeartbeatUpdateService, Task 
 	@Override
 	public void run() {
 		while (true) {
-			update();
-
 			try {
-				TimeUnit.HOURS.sleep(1);
-			} catch (InterruptedException e) {
+				update();
+
+				TimeUnit.MINUTES.sleep(30);
+			} catch (Throwable e) {
+				Cat.logError(e);
 			}
 		}
 	}

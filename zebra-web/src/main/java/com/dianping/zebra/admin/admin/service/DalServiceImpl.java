@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.unidal.lookup.annotation.Inject;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.util.Splitters;
 
@@ -65,58 +67,62 @@ public class DalServiceImpl implements DalService {
 			      "fail to mark down %s on mysql-instance [%s:%s] because of lion problem.", unMarkedDataSources,
 			      result.getIp(), result.getPort(), markedDataSource));
 		} else {
-			result.onSuccess(dataSources);
+			if(markedDataSource.size() > 0){
+				result.onSuccess(0, dataSources);
+			}else{
+				result.onSuccess(2, dataSources);
+			}
 		}
 	}
 
 	@Override
 	public DalResult markDown(String env, String ip, String port, String database) {
+		Transaction transaction = Cat.newTransaction("MarkDown", database);
+		Cat.logEvent("MarkDown-IP", ip);
+		Cat.logEvent("MarkDown-Port", port);
 		DalResult result = new DalResult(ip, port, database, env, "markdown");
-		HashMap<String, String> keyValues = null;
+
 		try {
-			keyValues = m_lionHttpService.getConfigByProject(env, PORJECT);
+			HashMap<String, String> keyValues = m_lionHttpService.getConfigByProject(env, PORJECT);
+
+			// 找到所有符合ip:port的db
+			Set<String> dataSources = findDataSources(ip, port, database, keyValues);
+
+			if (dataSources.size() != 0) {
+				markDBInternal(result, dataSources, false);
+			} else {
+				result.onSuccess(2, dataSources);
+			}
 		} catch (IOException e) {
 			result.onFail(e.getMessage());
-
-			return result;
+		} finally {
+			transaction.complete();
 		}
-
-		// 找到所有符合ip:port的db
-		Set<String> dataSources = findDataSources(ip, port, database, keyValues);
-//		Set<String> dataBasesWithoutReadDB = validateDataSources(keyValues, dataSources);
-//
-//		if (dataBasesWithoutReadDB.size() > 0) {
-//			result.onFail(String.format("fail to mark down %s:%s because %s will have no read databases.", ip, port,
-//			      dataBasesWithoutReadDB));
-//
-//			return result;
-//		}
-
-		markDBInternal(result, dataSources, false);
 
 		return result;
 	}
 
 	@Override
 	public DalResult markUp(String env, String ip, String port, String database) {
+		Transaction transaction = Cat.newTransaction("MarkUp", database);
+		Cat.logEvent("MarkUp-IP", ip);
+		Cat.logEvent("MarkUp-Port", port);
 		DalResult result = new DalResult(ip, port, database, env, "markup");
 
-		HashMap<String, String> keyValues = null;
 		try {
-			keyValues = m_lionHttpService.getConfigByProject(env, PORJECT);
-		} catch (IOException e) {
+			HashMap<String, String> keyValues = m_lionHttpService.getConfigByProject(env, PORJECT);
+			markDBInternal(result, findDataSources(ip, port, database, keyValues), true);
+		} catch (Exception e) {
 			result.onFail(e.getMessage());
-
-			return result;
+		} finally {
+			transaction.complete();
 		}
-
-		markDBInternal(result, findDataSources(ip, port, database, keyValues), true);
 
 		return result;
 	}
 
 	@SuppressWarnings("unused")
-   private Set<String> validateDataSources(HashMap<String, String> keyValues, Set<String> dataSources) {
+	private Set<String> validateDataSources(HashMap<String, String> keyValues, Set<String> dataSources) {
 		// 找到使用这些db的读库组
 		Set<String> dataBases = new HashSet<String>();
 		for (String db : dataSources) {

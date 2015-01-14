@@ -1,8 +1,10 @@
 package com.dianping.zebra.admin.admin.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.unidal.dal.jdbc.DalException;
 import org.unidal.lookup.annotation.Inject;
@@ -94,7 +96,7 @@ public class ReportServiceImpl implements ReportService {
 	public App getApp(String appName, boolean isProduct) {
 		App app = new App(appName);
 
-		Transaction transaction = Cat.newTransaction("Performance", "app");
+		Transaction transaction = Cat.newTransaction("Report", "App");
 
 		try {
 			List<Heartbeat> all = m_heartbeatDao.findByAppName(appName, HeartbeatEntity.READSET_FULL);
@@ -128,7 +130,7 @@ public class ReportServiceImpl implements ReportService {
 
 	@Override
 	public Database getDatabase(String database, boolean isProduct) {
-		Transaction transaction = Cat.newTransaction("Performance", "database");
+		Transaction transaction = Cat.newTransaction("Report", "Database");
 
 		Database database2 = getReportInternal().getDatabases().get(database);
 
@@ -145,7 +147,7 @@ public class ReportServiceImpl implements ReportService {
 
 	@Override
 	public Report getReport(boolean isProduct) {
-		Transaction transaction = Cat.newTransaction("Performance", "report");
+		Transaction transaction = Cat.newTransaction("Report", "All");
 
 		Report report = getReportInternal();
 
@@ -205,7 +207,7 @@ public class ReportServiceImpl implements ReportService {
 					String ip = entry.getKey();
 					String appName = entry.getValue();
 
-					if (appName.toLowerCase().equals(app.getName().toLowerCase())) {
+					if (appName.equalsIgnoreCase(app.getName())) {
 						Machine machine = app.findMachine(ip);
 
 						if (machine == null) {
@@ -228,6 +230,22 @@ public class ReportServiceImpl implements ReportService {
 			for (App app : database.getApps().values()) {
 				visitApp(app);
 			}
+			
+			if(connectedIps != null){
+				Set<String> connectedApps = new HashSet<String>();
+				for(String app : connectedIps.values()){
+					connectedApps.add(app);
+				}
+				
+				for(String name : connectedApps){
+					App app = database.findApp(name);
+					
+					if(app == null){
+						app = database.findOrCreateApp(name);
+						visitApp(app);
+					}
+				}
+			}
 		}
 	}
 
@@ -240,7 +258,7 @@ public class ReportServiceImpl implements ReportService {
 					Map<String, String> connections = entry.getValue();
 
 					for (Entry<String, String> entry2 : connections.entrySet()) {
-						if (entry2.getValue().toLowerCase().equals(app.getName().toLowerCase())) {
+						if (entry2.getValue().equalsIgnoreCase(app.getName())) {
 							String ip = entry2.getKey();
 							Machine machine = app.findMachine(ip);
 

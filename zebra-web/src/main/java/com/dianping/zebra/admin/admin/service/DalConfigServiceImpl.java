@@ -16,102 +16,10 @@ import java.util.Map;
 
 public class DalConfigServiceImpl implements DalConfigService {
 
-	private String project = "ds";
-
 	@Inject
 	private LionHttpService m_lionHttpService;
 
-	public void updateDsConfig(GroupConfigModel modal) {
-		Transaction tran = Cat.newTransaction("DsConfigUpdate", modal.getId());
-		try {
-			String groupKey = getGroupDataSourceKeyById(modal.getId());
-
-			String oldConfig = m_lionHttpService.getConfig(modal.getEnv(), groupKey);
-
-			m_lionHttpService.setConfig(modal.getEnv(), groupKey, modal.getConfig());
-			Cat.logEvent("GroupDsConfigUpdate", String.format("env:%s key:%s from:%s to:%s",
-				  modal.getEnv(), groupKey, oldConfig, modal.getConfig()));
-
-			for (DsConfigModel ds : modal.getConfigs()) {
-				for (ConfigProperty prop : ds.getProperties()) {
-					if (prop.isDelete()) {
-						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), "");
-						Cat.logEvent("DsConfigRemove", String.format("env:%s key:%s ",
-							  modal.getEnv(), prop.getKey()));
-						continue;
-					}
-					if (prop.isCreate()) {
-						m_lionHttpService.createKey("ds", prop.getKey());
-					}
-					m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
-
-					Cat.logEvent("DsConfigUpdate", String.format("env:%s key:%s from:%s to:%s",
-						  modal.getEnv(), prop.getKey(), prop.getValue(), prop.getNewValue()));
-				}
-			}
-
-			tran.setStatus(Message.SUCCESS);
-		} catch (IOException e) {
-			Cat.logError(e);
-			tran.setStatus(e);
-		} finally {
-			tran.complete();
-		}
-	}
-
-	private String getGroupDataSourceKeyById(String groupId) {
-		return String.format("groupds.%s.mapping", groupId);
-	}
-
-	public GroupConfigModel getDsConfig(String env, String groupId) {
-		try {
-			GroupConfigModel result = new GroupConfigModel();
-			result.setEnv(env);
-			result.setId(groupId);
-			result.setConfig(m_lionHttpService.getConfig(env, getGroupDataSourceKeyById(groupId)));
-			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
-				  .parseConfig(result.getConfig());
-
-			final String originGroupId = groupId.split("\\.")[0];
-
-			HashMap<String, String> configs = m_lionHttpService.getConfigByProject(env, "ds");
-			List<String> keys = Lists.newArrayList(Iterables.filter(configs.keySet(), new Predicate<String>() {
-				@Override public boolean apply(String input) {
-					return input.matches("^ds\\." + originGroupId + "\\-[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
-				}
-			}));
-			Map<String, DsConfigModel> dsConfigMap = new HashMap<String, DsConfigModel>();
-
-			for (String key : keys) {
-				String dsKey = getDsIdFromKey(key);
-				if (!dsConfigMap.containsKey(dsKey)) {
-					DsConfigModel ds = new DsConfigModel();
-					ds.setId(dsKey);
-					dsConfigMap.put(dsKey, ds);
-				}
-
-				DsConfigModel ds = dsConfigMap.get(dsKey);
-				ConfigProperty config = new ConfigProperty();
-				config.setKey(key);
-				config.setValue(configs.get(key));
-				config.setNewValue(configs.get(key));
-				ds.getProperties().add(config);
-
-				ds.setRole(groupConfig.get(dsKey));
-			}
-
-			result.setConfigs(Lists.newArrayList(dsConfigMap.values()));
-			return result;
-		} catch (IOException e) {
-			Cat.logError(e);
-			return null;
-		}
-	}
-
-	private String getDsIdFromKey(String key) {
-		String result = key.substring(key.indexOf(".") + 1);
-		return result.substring(0, result.indexOf("."));
-	}
+	private String project = "ds";
 
 	@Override
 	public boolean generateConfig(String name) {
@@ -180,8 +88,104 @@ public class DalConfigServiceImpl implements DalConfigService {
 		return true;
 	}
 
+	public GroupConfigModel getDsConfig(String env, String groupId) {
+		try {
+			GroupConfigModel result = new GroupConfigModel();
+			result.setEnv(env);
+			result.setId(groupId);
+			result.setConfig(m_lionHttpService.getConfig(env, getGroupDataSourceKeyById(groupId)));
+			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
+					.parseConfig(result.getConfig());
+
+			final String originGroupId = groupId.split("\\.")[0];
+
+			HashMap<String, String> configs = m_lionHttpService.getConfigByProject(env, "ds");
+			List<String> keys = Lists.newArrayList(Iterables.filter(configs.keySet(), new Predicate<String>() {
+				@Override
+				public boolean apply(String input) {
+					return input.matches("^ds\\." + originGroupId + "\\-[a-zA-Z0-9\\-]+\\.jdbc\\.[a-zA-Z0-9]+$");
+				}
+			}));
+			Map<String, DsConfigModel> dsConfigMap = new HashMap<String, DsConfigModel>();
+
+			for (String key : keys) {
+				String dsKey = getDsIdFromKey(key);
+				if (!dsConfigMap.containsKey(dsKey)) {
+					DsConfigModel ds = new DsConfigModel();
+					ds.setId(dsKey);
+					dsConfigMap.put(dsKey, ds);
+				}
+
+				DsConfigModel ds = dsConfigMap.get(dsKey);
+				ConfigProperty config = new ConfigProperty();
+				config.setKey(key);
+				config.setValue(configs.get(key));
+				config.setNewValue(configs.get(key));
+				ds.getProperties().add(config);
+
+				ds.setRole(groupConfig.get(dsKey));
+			}
+
+			result.setConfigs(Lists.newArrayList(dsConfigMap.values()));
+			return result;
+		} catch (IOException e) {
+			Cat.logError(e);
+			return null;
+		}
+	}
+
+	private String getDsIdFromKey(String key) {
+		String result = key.substring(key.indexOf(".") + 1);
+		return result.substring(0, result.indexOf("."));
+	}
+
+	private String getGroupDataSourceKeyById(String groupId) {
+		return String.format("groupds.%s.mapping", groupId);
+	}
+
 	@Override
 	public void setProject(String project) {
 		this.project = project;
+	}
+
+	public void updateDsConfig(GroupConfigModel modal, boolean isForce) {
+		Transaction tran = Cat.newTransaction("DsConfigUpdate", modal.getId());
+		try {
+			String groupKey = getGroupDataSourceKeyById(modal.getId());
+
+			String oldConfig = m_lionHttpService.getConfig(modal.getEnv(), groupKey);
+
+			m_lionHttpService.setConfig(modal.getEnv(), groupKey, modal.getConfig());
+			Cat.logEvent("GroupDsConfigUpdate", String.format("env:%s key:%s from:%s to:%s",
+					modal.getEnv(), groupKey, oldConfig, modal.getConfig()));
+
+			for (DsConfigModel ds : modal.getConfigs()) {
+				for (ConfigProperty prop : ds.getProperties()) {
+					if (prop.isDelete()) {
+						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), "");
+						Cat.logEvent("DsConfigRemove", String.format("env:%s key:%s ",
+								modal.getEnv(), prop.getKey()));
+						continue;
+					}
+					if (prop.isCreate()) {
+						m_lionHttpService.createKey("ds", prop.getKey());
+					}
+					if (prop.isCreate() || (prop.getNewValue() != null && !prop.getNewValue().equals(prop.getValue()))
+							|| isForce) {
+						m_lionHttpService.setConfig(modal.getEnv(), prop.getKey(), prop.getNewValue());
+					}
+
+					Cat.logEvent("DsConfigUpdate", String.format("env:%s key:%s from:%s to:%s",
+							modal.getEnv(), prop.getKey(), prop.getValue(), prop.getNewValue()));
+				}
+			}
+
+			tran.setStatus(Message.SUCCESS);
+		} catch (IOException e) {
+			Cat.logError(e);
+			tran.setStatus(e);
+		} finally {
+			tran.complete();
+		}
 	}
 }

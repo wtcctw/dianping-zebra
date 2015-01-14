@@ -12,24 +12,24 @@ import java.util.concurrent.Executor;
 
 public class SingleConnection implements Connection {
 
+	private final String id;
+
 	private final Connection conn;
 
 	private final SingleDataSource dataSource;
 
 	private final List<JdbcFilter> filters;
 
-	private final DataSourceConfig config;
-
-	public SingleConnection(SingleDataSource dataSource, DataSourceConfig config, Connection conn,
-			List<JdbcFilter> filters) {
+	public SingleConnection(SingleDataSource dataSource, final DataSourceConfig config, Connection conn,
+	      List<JdbcFilter> filters) {
+		this.id = config.getId();
 		this.dataSource = dataSource;
 		this.conn = conn;
 		this.filters = filters;
-		this.config = config;
 	}
 
-	public DataSourceConfig getConfig() {
-		return config;
+	public String getId() {
+		return id;
 	}
 
 	public void abort(Executor executor) throws SQLException {
@@ -106,7 +106,7 @@ public class SingleConnection implements Connection {
 
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-			throws SQLException {
+	      throws SQLException {
 		return conn.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
@@ -248,7 +248,7 @@ public class SingleConnection implements Connection {
 
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability) throws SQLException {
+	      int resultSetHoldability) throws SQLException {
 		return conn.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
@@ -259,13 +259,13 @@ public class SingleConnection implements Connection {
 
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-			throws SQLException {
+	      throws SQLException {
 		return conn.prepareStatement(sql, resultSetType, resultSetConcurrency);
 	}
 
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability) throws SQLException {
+	      int resultSetHoldability) throws SQLException {
 		return conn.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 

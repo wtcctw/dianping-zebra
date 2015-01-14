@@ -46,13 +46,13 @@
             <tbody ng-repeat="(ip,machine) in app.m_machines">
             <tr>
                 <td rowspan="{{(machine.m_datasources | objectCount)+1}}"><a
-                        href="http://web.cmdb.dp/#menu=search;ip={{ip}};page=1;" target="_blank">{{ip}}</a></td>
+                        href="http://api.cmdb.dp/api/v0.1/projects/by_ips?ip={{ip}}" target="_blank">{{ip}}</a></td>
                 <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{machine.m_version}}</td>
             </tr>
             <tr ng-repeat="(name,datasources) in machine.m_datasources">
                 <td>{{name}}</td>
                 <td>
-                    <button type="button" class="url-button btn btn-default btn-xs" popover-trigger="mouseenter"
+                    <button type="button" class="big-popover btn btn-default btn-xs" popover-trigger="mouseenter"
                             popover="{{datasources.m_jdbcUrl }}">查看
                     </button>
                 </td>
@@ -71,8 +71,3 @@
         </table>
     </div>
 </div>
-<style type="text/css">
-    .url-button + .popover {
-        max-width: 100%;
-    }
-</style>

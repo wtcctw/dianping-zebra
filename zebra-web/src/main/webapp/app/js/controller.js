@@ -45,29 +45,38 @@ zebraWeb.controller('update-database', function ($scope, $stateParams, $http) {
 });
 
 zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window) {
-    $http.get('/a/update?op=app&app=' + $stateParams.name).success(function (data, status, headers, config) {
-        $scope.app = data;
-    });
+    $scope.load = function () {
+        $http.get('/a/update?op=app&app=' + $stateParams.name).success(function (data, status, headers, config) {
+            $scope.app = data;
+        });
+    }
+
+    $scope.load();
 
     $scope.deleteInfo = function (ip, beanName) {
         $http.get('/a/update?op=delete_info&app=' + $stateParams.name + '&ip=' + ip + '&beanName=' + beanName).success(function (data) {
-            if (data == "true") {
-                $window.location.reload();
+            if (!!data) {
+                $scope.load();
             }
         });
     }
 });
 
-zebraWeb.controller('config-test', function ($scope, $http, name) {
+zebraWeb.controller('config-test', function ($scope, $http, name, configs) {
     $scope.name = name;
     var url = '/a/config?op=test&key=' + name + '&env=' + $scope.config.env;
 
-    $http.get(url).success(function (data, status, headers, config) {
-        $scope.connectionStatus = data;
-    });
+    if (configs) {
+        $scope.connectionStatus = configs;
+    } else {
+        $http.get(url).success(function (data, status, headers, config) {
+            $scope.connectionStatus = data;
+            console.log(data);
+        });
+    }
 });
 
-zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
+zebraWeb.controller('config-edit', function ($scope, $http, name, close, configService) {
     $scope.name = name;
     $scope.load = function () {
         if ($scope.config && $scope.config.env) {
@@ -128,11 +137,20 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close) {
         $scope.newDsName = '';
     }
 
-    $scope.save = function () {
-        $http.post('/a/config?op=updateDs', $.param({dsConfigs: encodeURIComponent(angular.toJson($scope.data))}),
+    $scope.save = function (force) {
+        force = !!force;
+        $http.post('/a/config?op=updateDs&force=' + force, $.param({dsConfigs: encodeURIComponent(angular.toJson($scope.data))}),
             {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
             .success(function (data, status, headers, config) {
                 close();
+            });
+    }
+
+    $scope.test = function () {
+        $http.post('/a/config?op=test&env=' + $scope.config.env, $.param({dsConfigs: encodeURIComponent(angular.toJson($scope.data))}),
+            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+            .success(function (data, status, headers, config) {
+                configService.openTestModal("", data);
             });
     }
 

@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-xs-12">
         <form class="form-inline" role="form">
-            <input class="form-control" placeholder="Search App" ng-model="searchTest"/>
+            <input class="form-control input-sm" placeholder="Search App" ng-model="searchTest"/>
         </form>
     </div>
 </div>
@@ -32,7 +32,7 @@
                 <td>{{app.m_replacedDpdlDataSource}}/{{app.m_dpdlDataSource }}</td>
                 <td>{{app.m_groupDataSource }}</td>
                 <td>
-                    <span class="badge alert-{{app.m_updateStatus == -1?('danger'):(app.m_updateStatus == 0 ?'success': (database.m_updateStatus == 2 ? 'info' : 'warning'))}}">{{app.m_totalDataSource}}</span>
+                    <span class="badge alert-{{app.m_updateStatus == -1 ? 'danger' :(app.m_updateStatus == 0 ?'success': (app.m_updateStatus == 2 ? 'info' : 'warning'))}}">{{app.m_totalDataSource}}</span>
                 </td>
             </tr>
             </tbody>
