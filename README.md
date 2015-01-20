@@ -100,12 +100,10 @@
 其中, `/*+zebra:w*/`就是hint的格式，告诉zebra这条sql必须走写库。
 
 ### 答疑解惑
-
 Q：为什么要加`init-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ## 老业务兼容情况
-
 通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.9`以上，`Zebra`会自动替换满足条件的`DataSource`。
 
 #### 没有使用`dpdl`的`ComboPooledDataSource`
