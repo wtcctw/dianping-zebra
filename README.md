@@ -72,6 +72,32 @@
 2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
 3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
+### 额外配置
+1.如果业务需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。一般情况下，如果对主从延迟不要的应用，建议不要使用该配置。
+
+    <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+		<property name="jdbcRef" value="tuangou2010" /> 
+		......
+		<!-- 只走读库 -->
+		<property name="routerType" value="load-balance" /> 
+	<bean>
+	
+    <bean id="writeDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+		<property name="jdbcRef" value="tuangou2010" /> 
+		......
+		<!-- 只走写库 -->
+		<property name="routerType" value="fail-over" /> 
+	<bean>
+
+2.关闭登录用户默认走写库的逻辑。目前，为了兼容老的DPDL登录用户走写库的逻辑，DAL也默认开启了，当然也可以通过在spring的配置中加入如下的property来关闭该功能。
+
+    <bean id="writeDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+		<property name="jdbcRef" value="tuangou2010" /> 
+		......
+		<!-- 关闭登录用户走写库，默认值是true，表明开启该功能 -->
+		<property name="forceWriteOnLogin" value="false" /> 
+	<bean>
+
 ### hint的使用
 因为MYSQL主从同步会有延迟，应用有些时候不能容忍这种延迟，需要读请求也要走写库。可以在SQL前面加一个hint，表明这个读请求强制走写库，例如:
 
