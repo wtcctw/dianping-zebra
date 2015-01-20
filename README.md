@@ -77,22 +77,20 @@
 
     <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
         <property name="jdbcRef" value="tuangou2010" /> 
-        <property name="routerType" value="load-balance" /> 
+        <property name="routerType" value="load-balance" /> <!-- 只走读库 -->
     <bean>
-	
+    
     <bean id="writeDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
     	<property name="jdbcRef" value="tuangou2010" /> 
-    	<!-- 只走写库 -->
-    	<property name="routerType" value="fail-over" /> 
+    	<property name="routerType" value="fail-over" /><!-- 只走写库 -->
     <bean>
 
 2.关闭登录用户默认走写库的逻辑。目前，为了兼容老的DPDL登录用户走写库的逻辑，DAL也默认开启了，当然也可以通过在spring的配置中加入如下的property来关闭该功能。
 
     <bean id="writeDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-        <property name="jdbcRef" value="tuangou2010" /> 
-        <!-- 关闭登录用户走写库，默认值是true，表明开启该功能 -->
-        <property name="forceWriteOnLogin" value="false" /> 
-    <bean>
+    	<property name="jdbcRef" value="tuangou2010" /> 
+        <property name="forceWriteOnLogin" value="false" /> <!-- 关闭登录用户走写库，默认值是true，表明开启该功能 -->
+    </bean>
 
 ### hint的使用
 因为MYSQL主从同步会有延迟，应用有些时候不能容忍这种延迟，需要读请求也要走写库。可以在SQL前面加一个hint，表明这个读请求强制走写库，例如:
