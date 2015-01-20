@@ -77,14 +77,12 @@
 
     <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="tuangou2010" /> 
-		......
 		<!-- 只走读库 -->
 		<property name="routerType" value="load-balance" /> 
 	<bean>
 	
     <bean id="writeDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="tuangou2010" /> 
-		......
 		<!-- 只走写库 -->
 		<property name="routerType" value="fail-over" /> 
 	<bean>
@@ -93,7 +91,6 @@
 
     <bean id="writeDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="tuangou2010" /> 
-		......
 		<!-- 关闭登录用户走写库，默认值是true，表明开启该功能 -->
 		<property name="forceWriteOnLogin" value="false" /> 
 	<bean>
