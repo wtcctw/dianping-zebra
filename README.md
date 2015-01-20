@@ -44,7 +44,7 @@
 ### 在 Spring 中 DataSource 的配置
 
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<property name="jdbcRef" value="tuangou2010" />
+		<property name="jdbcRef" value="tuangou2010" /> <!-- 唯一确定数据库的key -->
 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
 		<property name="maxPoolSize" value="${lion.key.maxPoolSize}" />
         <property name="initialPoolSize" value="${lion.key.initialPoolSize}" />
