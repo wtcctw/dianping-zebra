@@ -18,11 +18,11 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 	static {
 		try {
 			Class<?> contextHolderClass = Class.forName("com.dianping.avatar.tracker.ExecutionContextHolder");
-			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] { });
+			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] {});
 			getContextMethod.setAccessible(true);
 
 			Class<?> contextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
-			isAuthenticatedMethod = contextClass.getDeclaredMethod("isAuthenticated", new Class[] { });
+			isAuthenticatedMethod = contextClass.getDeclaredMethod("isAuthenticated", new Class[] {});
 			isAuthenticatedMethod.setAccessible(true);
 
 			serviceFlag = true;
@@ -36,7 +36,7 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 
 	@Override
 	public boolean forceReadFromMaster() {
-		if (serviceFlag && config != null && config.getLoginForceWrite()) {
+		if (serviceFlag && config != null && config.getForceWriteOnLogin()) {
 			try {
 				Object context = getContextMethod.invoke(null);
 				if (context != null) {
@@ -50,7 +50,8 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 		return false;
 	}
 
-	@Override public void setGroupDataSourceConfig(GroupDataSourceConfig config) {
+	@Override
+	public void setGroupDataSourceConfig(GroupDataSourceConfig config) {
 		this.config = config;
 	}
 }

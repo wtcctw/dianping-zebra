@@ -27,8 +27,8 @@ import java.util.regex.Pattern;
 public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
 
-	protected final static Pattern ID_PATTERN = Pattern
-			.compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH + "})(\\*\\/).*");
+	protected final static Pattern ID_PATTERN = Pattern.compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH
+	      + "})(\\*\\/).*");
 
 	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
 
@@ -93,6 +93,7 @@ public class WallFilter extends DefaultJdbcFilter {
 
 		result = StringUtils.md5(token).substring(0, MAX_ID_LENGTH);
 
+		System.out.println(result);
 		if (needToCache) {
 			generatedIdCache.put(token, result);
 		}
@@ -113,7 +114,7 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	private void initBlackList() {
 		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 
 		buildBlackListFromSystemConfig(this.systemConfigManager.getSystemConfig());
 
@@ -121,7 +122,7 @@ public class WallFilter extends DefaultJdbcFilter {
 			@Override
 			public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
 				if (propertyChangeEvent.getPropertyName()
-						.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)) {
+				      .startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)) {
 					buildBlackListFromSystemConfig(systemConfigManager.getSystemConfig());
 				}
 			}

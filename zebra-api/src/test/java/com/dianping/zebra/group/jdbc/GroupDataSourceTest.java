@@ -51,7 +51,7 @@ public class GroupDataSourceTest {
 		GroupDataSource ds = new GroupDataSource();
 		ds.setFilter("stat");
 		config.setFilters("stat");
-		ds.buildGroupConfigFilter(config);
+		ds.buildGroupConfigForFilter(config);
 		Assert.assertEquals("stat", config.getFilters());
 	}
 
@@ -60,7 +60,7 @@ public class GroupDataSourceTest {
 		GroupDataSourceConfig config = new GroupDataSourceConfig();
 		GroupDataSource ds = new GroupDataSource();
 		config.setFilters("stat");
-		ds.buildGroupConfigFilter(config);
+		ds.buildGroupConfigForFilter(config);
 		Assert.assertEquals("stat", config.getFilters());
 	}
 
@@ -69,7 +69,7 @@ public class GroupDataSourceTest {
 		GroupDataSourceConfig config = new GroupDataSourceConfig();
 		GroupDataSource ds = new GroupDataSource();
 		ds.setFilter("stat");
-		ds.buildGroupConfigFilter(config);
+		ds.buildGroupConfigForFilter(config);
 		Assert.assertEquals("stat", config.getFilters());
 	}
 
@@ -79,7 +79,7 @@ public class GroupDataSourceTest {
 		GroupDataSource ds = new GroupDataSource();
 		ds.setFilter("stat");
 		config.setFilters("cat");
-		ds.buildGroupConfigFilter(config);
+		ds.buildGroupConfigForFilter(config);
 
 		List<String> configs = Lists.newArrayList(config.getFilters().split(","));
 		Assert.assertTrue(configs.size() == 2);
@@ -93,7 +93,7 @@ public class GroupDataSourceTest {
 		GroupDataSource ds = new GroupDataSource();
 		ds.setFilter("stat,!cat");
 		config.setFilters("stat,cat");
-		ds.buildGroupConfigFilter(config);
+		ds.buildGroupConfigForFilter(config);
 		Assert.assertEquals("stat", config.getFilters());
 	}
 
@@ -102,7 +102,7 @@ public class GroupDataSourceTest {
 		GroupDataSource target = new GroupDataSource();
 		target.setJdbcUrlExtra(extra);
 		Method method = GroupDataSource.class
-			.getDeclaredMethod("buildGroupConfigJdbcUrlExtra", GroupDataSourceConfig.class);
+			.getDeclaredMethod("buildGroupConfigForJdbcUrlExtra", GroupDataSourceConfig.class);
 		method.setAccessible(true);
 		method.invoke(target, config);
 	}
@@ -179,7 +179,7 @@ public class GroupDataSourceTest {
 		target.setMinPoolSize(1);
 
 		Method method = GroupDataSource.class
-			.getDeclaredMethod("buildGroupConfigMergeC3P0Properties", GroupDataSourceConfig.class);
+			.getDeclaredMethod("buildGroupConfigForC3P0Properties", GroupDataSourceConfig.class);
 		method.setAccessible(true);
 		method.invoke(target, groupConfig);
 

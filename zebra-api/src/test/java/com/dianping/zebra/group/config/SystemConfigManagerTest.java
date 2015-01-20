@@ -14,13 +14,7 @@ public class SystemConfigManagerTest {
 		
 		SystemConfig config = systemConfigManager.getSystemConfig();
 		
-		Assert.assertEquals(10, config.getHealthCheckInterval());
-		Assert.assertEquals(3, config.getMaxErrorCounter());
 		Assert.assertEquals(2, config.getRetryTimes());
-		Assert.assertEquals(2, config.getCookieExpiredTime());
-		Assert.assertEquals(".dianping.com", config.getCookieDomain());
-		Assert.assertEquals("zebra", config.getCookieName());
-		Assert.assertEquals("2123174217368174103", config.getEncryptSeed());
 	}
 
 }

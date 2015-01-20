@@ -40,33 +40,27 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	protected AtomicRefresh atomicRefresh = new AtomicRefresh();
 
-	protected DataSourceConfig c3p0Config = new DataSourceConfig();
-
-	protected CustomizedReadWriteStrategy customizedReadWriteStrategy;
+	protected SystemConfigManager systemConfigManager;
 
 	protected DataSourceConfigManager dataSourceConfigManager;
 
-	protected final Map<String, Object> springProperties = new HashMap<String, Object>();
+	protected String jdbcRef;
 
-	protected final static String FILTER_PROP_KEY = "filter";
-
-	protected final static String LOGIN_FORCE_WRITE_PROP_KEY = "loginForceWrite";
+	protected DataSourceConfig c3p0Config = new DataSourceConfig();
 
 	protected GroupDataSourceConfig groupConfig = new GroupDataSourceConfig();
 
-	protected volatile boolean init = false;
-
-	protected String jdbcRef;
+	protected RouterType routerType = RouterType.ROUND_ROBIN;
 
 	protected String jdbcUrlExtra;
 
 	protected LoadBalancedDataSource readDataSource;
 
-	protected RouterType routerType = RouterType.ROUND_ROBIN;
-
-	protected SystemConfigManager systemConfigManager;
-
 	protected FailOverDataSource writeDataSource;
+
+	protected CustomizedReadWriteStrategy customizedReadWriteStrategy;
+
+	protected volatile boolean init = false;
 
 	public GroupDataSource() {
 	}
@@ -82,66 +76,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	protected GroupDataSourceConfig buildGroupConfig(GroupDataSourceConfig newGroupConfig) {
-		buildGroupConfigMergeProperties(newGroupConfig);
-		buildGroupConfigJdbcUrlExtra(newGroupConfig);
-		buildGroupConfigMergeC3P0Properties(newGroupConfig);
-		buildGroupConfigFilter(newGroupConfig);
-		buildOtherPropertyConfig(newGroupConfig);
+		buildGroupConfigForJdbcUrlExtra(newGroupConfig);
+		buildGroupConfigForC3P0Properties(newGroupConfig);
+		buildGroupConfigForExtendSpringProperties(newGroupConfig);
+
 		return newGroupConfig;
 	}
 
-	protected void buildOtherPropertyConfig(GroupDataSourceConfig newGroupConfig) {
-		Object loginForceWriteObject = springProperties.get(LOGIN_FORCE_WRITE_PROP_KEY);
-		if (loginForceWriteObject instanceof Boolean) {
-			newGroupConfig.setLoginForceWrite(((Boolean) loginForceWriteObject).booleanValue());
-		}
-	}
-
-	protected void buildGroupConfigFilter(GroupDataSourceConfig newGroupConfig) {
-		String remoteConfig = newGroupConfig.getFilters();
-		Object beanConfigObject = this.springProperties.get(FILTER_PROP_KEY);
-		String beanConfig = beanConfigObject instanceof String ? (String) beanConfigObject : null;
-		Set<String> result = new HashSet<String>();
-
-		if (!StringUtils.isBlank(remoteConfig)) {
-			String[] remoteFilters = remoteConfig.split(",");
-			result.addAll(Arrays.asList(remoteFilters));
-		}
-
-		if (!StringUtils.isBlank(beanConfig)) {
-			String[] beanFilters = beanConfig.split(",");
-			for (String beanFilter : beanFilters) {
-				if (beanFilter.startsWith("!") && beanFilter.length() > 1) {
-					result.remove(beanFilter.substring(1));
-				} else {
-					result.add(beanFilter);
-				}
-			}
-		}
-		newGroupConfig.setFilters(StringUtils.joinCollectionToString(result, ","));
-	}
-
-	protected void buildGroupConfigJdbcUrlExtra(GroupDataSourceConfig newGroupConfig) {
-		if (!StringUtils.isBlank(jdbcUrlExtra)) {
-			for (DataSourceConfig cfg : newGroupConfig.getDataSourceConfigs().values()) {
-				String[] urlInfo = cfg.getJdbcUrl().split("\\?");
-				String url = urlInfo[0];
-				String param = urlInfo.length > 1 ? urlInfo[1] : null;
-
-				if (StringUtils.isBlank(param) && StringUtils.isBlank(jdbcUrlExtra)) {
-					continue;
-				}
-
-				Map<String, String> map = new HashMap<String, String>();
-				StringUtils.splitStringToMap(map, param);
-				StringUtils.splitStringToMap(map, jdbcUrlExtra);
-
-				cfg.setJdbcUrl(String.format("%s?%s", url, StringUtils.joinMapToString(map)));
-			}
-		}
-	}
-
-	protected void buildGroupConfigMergeC3P0Properties(GroupDataSourceConfig newGroupConfig) {
+	protected void buildGroupConfigForC3P0Properties(GroupDataSourceConfig newGroupConfig) {
 		for (Entry<String, DataSourceConfig> entry : newGroupConfig.getDataSourceConfigs().entrySet()) {
 			DataSourceConfig config = entry.getValue();
 
@@ -167,10 +109,57 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 	}
 
-	protected void buildGroupConfigMergeProperties(GroupDataSourceConfig newGroupConfig) {
+	protected void buildGroupConfigForFilter(GroupDataSourceConfig newGroupConfig) {
+		String remoteConfig = newGroupConfig.getFilters();
+		Object beanConfigObject = this.groupConfig.getFilters();
+		String beanConfig = beanConfigObject instanceof String ? (String) beanConfigObject : null;
+		Set<String> result = new HashSet<String>();
+
+		if (!StringUtils.isBlank(remoteConfig)) {
+			String[] remoteFilters = remoteConfig.split(",");
+			result.addAll(Arrays.asList(remoteFilters));
+		}
+
+		if (!StringUtils.isBlank(beanConfig)) {
+			String[] beanFilters = beanConfig.split(",");
+			for (String beanFilter : beanFilters) {
+				if (beanFilter.startsWith("!") && beanFilter.length() > 1) {
+					result.remove(beanFilter.substring(1));
+				} else {
+					result.add(beanFilter);
+				}
+			}
+		}
+		newGroupConfig.setFilters(StringUtils.joinCollectionToString(result, ","));
+	}
+
+	protected void buildGroupConfigForJdbcUrlExtra(GroupDataSourceConfig newGroupConfig) {
+		if (!StringUtils.isBlank(jdbcUrlExtra)) {
+			for (DataSourceConfig cfg : newGroupConfig.getDataSourceConfigs().values()) {
+				String[] urlInfo = cfg.getJdbcUrl().split("\\?");
+				String url = urlInfo[0];
+				String param = urlInfo.length > 1 ? urlInfo[1] : null;
+
+				if (StringUtils.isBlank(param) && StringUtils.isBlank(jdbcUrlExtra)) {
+					continue;
+				}
+
+				Map<String, String> map = new HashMap<String, String>();
+
+				StringUtils.splitStringToMap(map, param);
+				StringUtils.splitStringToMap(map, jdbcUrlExtra);
+
+				cfg.setJdbcUrl(String.format("%s?%s", url, StringUtils.joinMapToString(map)));
+			}
+		}
+	}
+
+	protected void buildGroupConfigForExtendSpringProperties(GroupDataSourceConfig newGroupConfig) {
 		newGroupConfig.setRouterStrategy(this.groupConfig.getRouterStrategy());
-		newGroupConfig.setTransactionForceWrite(this.groupConfig.getTransactionForceWrite());
-		newGroupConfig.setWriteFirst(this.groupConfig.getWriteFirst());
+		newGroupConfig.setForceWriteOnLogin(this.groupConfig.getForceWriteOnLogin());
+		newGroupConfig.setFilters(this.groupConfig.getFilters());
+
+		buildGroupConfigForFilter(newGroupConfig);
 	}
 
 	public void close() throws SQLException {
@@ -242,8 +231,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
 				@Override
-				public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain)
-					throws SQLException {
+				public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException {
 					if (index < filters.size()) {
 						return filters.get(index++).getGroupConnection(source, chain);
 					} else {
@@ -258,8 +246,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private GroupConnection getConnectionOrigin(String username, String password) {
-		return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy,
-			routerType, filters);
+		return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy, routerType, filters);
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -281,16 +268,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		return jdbcRef;
 	}
 
-	public synchronized void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
-	}
-
 	public String getJdbcUrlExtra() {
 		return jdbcUrlExtra;
-	}
-
-	public void setJdbcUrlExtra(String jdbcUrlExtra) {
-		this.jdbcUrlExtra = jdbcUrlExtra;
 	}
 
 	private Map<String, DataSourceConfig> getLoadBalancedConfig(Map<String, DataSourceConfig> configs) {
@@ -356,18 +335,18 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	protected void initConfig() {
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
+		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 		this.groupConfig = buildGroupConfig();
-		this.systemConfigManager = SystemConfigManagerFactory
-			.getConfigManger(configManagerType, Constants.DEFAULT_SYSTEM_RESOURCE_ID);
 	}
 
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-				this.filters, systemConfigManager.getSystemConfig().getRetryTimes());
+			      this.filters, systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
-				this.filters);
+			      this.filters);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -410,12 +389,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setDataSourceConfigToStrategy();
 	}
 
-	private void setDataSourceConfigToStrategy() {
-		if (customizedReadWriteStrategy != null) {
-			customizedReadWriteStrategy.setGroupDataSourceConfig(this.groupConfig);
-		}
-	}
-
 	private void refresh(String propertyToChange) {
 		if (!this.init) {
 			return;
@@ -430,8 +403,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
 				@Override
-				public void refreshGroupDataSource(GroupDataSource source, String propertyToChange,
-					JdbcFilter chain) {
+				public void refreshGroupDataSource(GroupDataSource source, String propertyToChange, JdbcFilter chain) {
 					if (index < filters.size()) {
 						filters.get(index++).refreshGroupDataSource(source, propertyToChange, chain);
 					} else {
@@ -455,11 +427,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-				getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.filters,
-				systemConfigManager.getSystemConfig().getRetryTimes());
+			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.filters, systemConfigManager
+			            .getSystemConfig().getRetryTimes());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
-				this.filters);
+			      this.filters);
 			newWriteDataSource.init(false);
 
 			preparedSwitch = true;
@@ -543,6 +515,12 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("connectionTesterClassName", connectionTesterClassName);
 	}
 
+	private void setDataSourceConfigToStrategy() {
+		if (customizedReadWriteStrategy != null) {
+			customizedReadWriteStrategy.setGroupDataSourceConfig(this.groupConfig);
+		}
+	}
+
 	public synchronized void setDataSourceName(String dataSourceName) {
 		setProperty("dataSourceName", dataSourceName);
 	}
@@ -565,17 +543,17 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public synchronized void setFilter(String filter) {
-		this.springProperties.put(FILTER_PROP_KEY, filter);
-		refresh(FILTER_PROP_KEY);
-	}
-
-	public synchronized void setLoginForceWrite(boolean loginForceWrite) {
-		this.springProperties.put(LOGIN_FORCE_WRITE_PROP_KEY, loginForceWrite);
-		refresh(LOGIN_FORCE_WRITE_PROP_KEY);
+		this.groupConfig.setFilters(filter);
+		refresh("filter");
 	}
 
 	public synchronized void setForceIgnoreUnresolvedTransactions(boolean forceIgnoreUnresolvedTransactions) {
 		setProperty("forceIgnoreUnresolvedTransactions", String.valueOf(forceIgnoreUnresolvedTransactions));
+	}
+
+	public synchronized void setForceWriteOnLogin(boolean turnOn) {
+		this.groupConfig.setForceWriteOnLogin(turnOn);
+		refresh("forceWriteOnLogin");
 	}
 
 	public synchronized void setIdleConnectionTestPeriod(int idleConnectionTestPeriod) {
@@ -584,6 +562,14 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public synchronized void setInitialPoolSize(int initialPoolSize) {
 		setProperty("initialPoolSize", String.valueOf(initialPoolSize));
+	}
+
+	public synchronized void setJdbcRef(String jdbcRef) {
+		this.jdbcRef = jdbcRef;
+	}
+
+	public void setJdbcUrlExtra(String jdbcUrlExtra) {
+		this.jdbcUrlExtra = jdbcUrlExtra;
 	}
 
 	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
@@ -687,11 +673,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("testConnectionOnCheckout", String.valueOf(testConnectionOnCheckout));
 	}
 
-	public void setTransactionForceWrite(boolean transactionForceWrite) {
-		this.groupConfig.setTransactionForceWrite(transactionForceWrite);
-		refresh("transactionForceWrite");
-	}
-
 	public synchronized void setUnreturnedConnectionTimeout(int unreturnedConnectionTimeout) {
 		setProperty("unreturnedConnectionTimeout", String.valueOf(unreturnedConnectionTimeout));
 	}
@@ -702,11 +683,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public synchronized void setUsesTraditionalReflectiveProxies(boolean usesTraditionalReflectiveProxies) {
 		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
-	}
-
-	public void setWriteFirst(boolean writeFirst) {
-		this.groupConfig.setWriteFirst(writeFirst);
-		refresh("writeFirst");
 	}
 
 	public class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
