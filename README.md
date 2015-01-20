@@ -77,7 +77,6 @@
 
     <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
         <property name="jdbcRef" value="tuangou2010" /> 
-        <!-- 只走读库 -->
         <property name="routerType" value="load-balance" /> 
     <bean>
 	
