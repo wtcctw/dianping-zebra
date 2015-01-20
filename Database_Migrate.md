@@ -39,4 +39,4 @@
         时间        读库QPS     写库QPS     出错个数
         << 1分钟    150         20          0
         
-6. 2015年01月	dianping库拆库出dpshop`(TODO)`
+6. 2015年01月	dianping库拆库出dpshop
