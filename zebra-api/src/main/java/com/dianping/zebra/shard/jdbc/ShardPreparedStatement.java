@@ -1,4 +1,4 @@
-package com.dianping.zebra.sharding.jdbc;
+package com.dianping.zebra.shard.jdbc;
 
 /**
  * Dozer @ 2015-01

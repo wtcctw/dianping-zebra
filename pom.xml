@@ -28,7 +28,6 @@
         <module>zebra-web</module>
         <module>zebra-ds-monitor-client</module>
         <module>zebra-maven-plugin</module>
-        <module>zebra-sharding</module>
         <module>zebra-common</module>
     </modules>
     <description>zebra</description>

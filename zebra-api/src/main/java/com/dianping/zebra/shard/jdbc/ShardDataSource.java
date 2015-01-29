@@ -1,4 +1,4 @@
-package com.dianping.zebra.sharding.jdbc;
+package com.dianping.zebra.shard.jdbc;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
