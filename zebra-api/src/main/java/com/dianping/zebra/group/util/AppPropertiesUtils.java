@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.util;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -7,7 +7,7 @@ import java.sql.Statement;
 import org.junit.Test;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 
 public class CatLogTest extends MultiDatabaseTestCase {
 	

@@ -7,7 +7,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.jdbc.MultiDatabaseTestCase;
 
 @Ignore

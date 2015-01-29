@@ -17,7 +17,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.exception.DalException;
 
 /**

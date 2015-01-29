@@ -1,6 +1,6 @@
 package com.dianping.zebra.admin.mock;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.ConfigService;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;

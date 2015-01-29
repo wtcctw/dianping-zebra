@@ -1,7 +1,7 @@
 package com.dianping.zebra.group.filter.wall;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;

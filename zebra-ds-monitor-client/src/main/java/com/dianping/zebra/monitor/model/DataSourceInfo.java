@@ -1,7 +1,8 @@
 package com.dianping.zebra.monitor.model;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.util.AppPropertiesUtils;
+
 import org.springframework.beans.BeanUtils;
 import org.unidal.net.Networks;
 

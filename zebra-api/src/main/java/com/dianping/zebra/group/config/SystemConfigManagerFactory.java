@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.config;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
 import java.util.HashMap;

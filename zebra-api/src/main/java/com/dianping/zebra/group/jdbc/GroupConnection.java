@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.jdbc;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
@@ -11,6 +11,7 @@ import com.dianping.zebra.group.util.SqlUtils;
 import com.dianping.zebra.group.util.StringUtils;
 
 import javax.sql.DataSource;
+
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Executor;

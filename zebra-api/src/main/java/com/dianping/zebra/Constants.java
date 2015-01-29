@@ -4,13 +4,13 @@
  * File Created at Feb 17, 2014
  *
  */
-package com.dianping.zebra.group;
+package com.dianping.zebra;
 
 /**
  * @author Leo Liang, Dozer
  */
 public final class Constants {
-	public static final String ZEBRA_VERSION = "2.6.5";
+	public static final String ZEBRA_VERSION = "2.7.0";
 
 	public static final String SQL_FORCE_WRITE_HINT = "/*+zebra:w*/";
 
