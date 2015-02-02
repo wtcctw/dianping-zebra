@@ -87,7 +87,7 @@ public class Update extends DMLCommon implements Value{
 		sb.append(where.toString());
 		return sb.toString();
 	}
-	public List<OrderByEle> getOrderByList() {
+	public List<OrderBy> getOrderByList() {
 		return where.getOrderByColumns();
 	}
 }

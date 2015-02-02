@@ -17,7 +17,7 @@ package com.dianping.zebra.shard.router;
 
 import com.dianping.zebra.shard.parser.sqlParser.Columns;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.parser.sqlParser.OrderByEle;
+import com.dianping.zebra.shard.parser.sqlParser.OrderBy;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class RouterTarget {
 
 	private List<TargetedSql> targetedSqls;
 	
-	private List<OrderByEle> orderBys;
+	private List<OrderBy> orderBys;
 	
 	private int skip = NO_SKIP;
 	
@@ -55,8 +55,6 @@ public class RouterTarget {
 	
 	private List<Object> newParams;
 	
-	private List<TargetedSql> subTargetedSqls;
-
 	public List<TargetedSql> getTargetedSqls() {
 		return targetedSqls;
 	}
@@ -65,11 +63,11 @@ public class RouterTarget {
 		this.targetedSqls = targetedSqls;
 	}
 
-	public List<OrderByEle> getOrderBys() {
+	public List<OrderBy> getOrderBys() {
 		return orderBys;
 	}
 
-	public void setOrderBys(List<OrderByEle> orderBys) {
+	public void setOrderBys(List<OrderBy> orderBys) {
 		this.orderBys = orderBys;
 	}
 
@@ -87,14 +85,6 @@ public class RouterTarget {
 
 	public void setMax(int max) {
 		this.max = max;
-	}
-
-	public List<TargetedSql> getSubTargetedSqls() {
-		return subTargetedSqls;
-	}
-
-	public void setSubTargetedSqls(List<TargetedSql> subTargetedSqls) {
-		this.subTargetedSqls = subTargetedSqls;
 	}
 
 	public Columns getColumns() {
@@ -136,5 +126,4 @@ public class RouterTarget {
 	public void setGeneratedPK(String generatedPK) {
 		this.generatedPK = generatedPK;
 	}
-	
 }

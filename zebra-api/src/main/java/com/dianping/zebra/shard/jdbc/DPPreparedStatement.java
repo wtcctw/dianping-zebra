@@ -255,7 +255,6 @@ public class DPPreparedStatement extends DPStatement implements PreparedStatemen
 
 		int affectedRows = 0;
 		List<Throwable> exceptions = new ArrayList<Throwable>();
-		boolean rewritedInsert = false;
 
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
@@ -275,13 +274,6 @@ public class DPPreparedStatement extends DPStatement implements PreparedStatemen
 					// 把insert语句返回的生成key保存在当前会话中
 					if (executableSql.trim().charAt(0) == 'i' || executableSql.trim().charAt(0) == 'I') {
 						getAndSetGeneratedKeys(stmt);
-					}
-
-					// 因为insert一定可以解析到某一个库上的某一个表上，所以只需要做一次，而且如果有自增键需要返回，必定能在这一次里获得
-					if (!rewritedInsert
-						&& (executableSql.trim().charAt(0) == 'i' || executableSql.trim().charAt(0) == 'I')) {
-						rewriteInsertIfNeed(routerTarget);
-						rewritedInsert = true;
 					}
 				} catch (Exception e) {
 					exceptions.add(e);

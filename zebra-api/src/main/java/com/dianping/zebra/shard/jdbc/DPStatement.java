@@ -12,6 +12,21 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+
 import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.shard.jdbc.util.JDBCUtils;
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
@@ -20,11 +35,6 @@ import com.dianping.zebra.shard.router.DataSourceRouteException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.shard.router.TargetedSql;
-import org.apache.log4j.Logger;
-
-import java.io.Serializable;
-import java.sql.*;
-import java.util.*;
 
 /**
  * Zebra的Statement wrapper
@@ -752,8 +762,6 @@ public class DPStatement implements Statement {
 		int affectedRows = 0;
 		List<Throwable> exceptions = new ArrayList<Throwable>();
 
-		boolean rewritedInsert = false;
-
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
@@ -782,14 +790,6 @@ public class DPStatement implements Statement {
 					if (executableSql.trim().charAt(0) == 'i' || executableSql.trim().charAt(0) == 'I') {
 						getAndSetGeneratedKeys(stmt);
 					}
-
-					// 因为insert一定可以解析到某一个库上的某一个表上，所以只需要做一次，而且如果有自增键需要返回，必定能在这一次里获得
-					if (!rewritedInsert
-							&& (executableSql.trim().charAt(0) == 'i' || executableSql.trim().charAt(0) == 'I')) {
-						rewriteInsertIfNeed(routerTarget);
-						rewritedInsert = true;
-					}
-
 				} catch (Exception e) {
 					exceptions.add(e);
 
@@ -814,61 +814,6 @@ public class DPStatement implements Statement {
 		} else {
 			getConnectionWrapper().setGeneratedKey(null);
 		}
-	}
-
-	protected void rewriteInsertIfNeed(RouterTarget routerTarget) throws SQLException {
-		if (routerTarget.getSubTargetedSqls() != null && routerTarget.getSubTargetedSqls().size() != 0) {
-			String pkName = routerTarget.getGeneratedPK();
-			Long pkValue = null;
-			if (pkName != null && pkName.trim().length() != 0) {
-				if (getConnectionWrapper().getGeneratedKey() != null) {
-					pkValue = (Long) getConnectionWrapper().getGeneratedKey().getObject(1);
-					getConnectionWrapper().getGeneratedKey().beforeFirst();
-
-					for (TargetedSql subTargetedSql : routerTarget.getSubTargetedSqls()) {
-						List<String> newSqlList = new ArrayList<String>(subTargetedSql.getSqls().size());
-						for (String sql : subTargetedSql.getSqls()) {
-							// Insert语句需要判断是否需要增加自增键
-							if (sql != null && (sql.trim().charAt(0) == 'I' || sql.trim().charAt(0) == 'i')
-									&& pkValue != null) {
-								String newSql = rewriteInsertSql(pkName, pkValue, sql);
-								newSqlList.add(newSql);
-							} else {
-								newSqlList.add(sql);
-							}
-						}
-						subTargetedSql.setSqls(newSqlList);
-
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * @param pkName
-	 * @param pkValue
-	 * @param sql
-	 * @return
-	 */
-	private String rewriteInsertSql(String pkName, Long pkValue, String sql) {
-		StringBuilder newSql = new StringBuilder();
-		boolean isValue = false;
-		boolean finished = false;
-		for (char ch : sql.toCharArray()) {
-			if (ch != '(' || finished) {
-				newSql.append(ch);
-			} else {
-				if (!isValue) {
-					newSql.append(ch).append(pkName).append(",");
-					isValue = true;
-				} else {
-					newSql.append(ch).append(pkValue).append(",");
-					finished = true;
-				}
-			}
-		}
-		return newSql.toString();
 	}
 
 	protected JudgeSQLRetVal judgeSQLType(String sql) throws SQLException {

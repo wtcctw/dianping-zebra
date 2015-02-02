@@ -68,8 +68,6 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 				target.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
 					tableShardRule.getTableName(), skip, max));
 				target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
-				target.setSubTargetedSqls(createSubTargetedSqls(sql, dmlSql, tableShardRule.getTableName(),
-					matchResult.getSubDBAndTables()));
 			} else {
 				NamedDataSource dataSource = getDataSource(DataSourceRepository.DEFAULT_DS_NAME, dmlSql);
 				if (dataSource == null) {
@@ -124,22 +122,6 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 			}
 		}
 		return new ArrayList<TargetedSql>(targetedSqlMap.values());
-	}
-
-	private List<TargetedSql> createSubTargetedSqls(String sql, DMLCommon dmlSql, String table,
-		Map<String, Set<String>> subDBAndTables) {
-		List<TargetedSql> subTargetedSqls = null;
-		if (!(dmlSql instanceof Select)) {
-			subTargetedSqls = new ArrayList<TargetedSql>();
-			for (Entry<String, Set<String>> entry : subDBAndTables.entrySet()) {
-				List<String> sqls = new ArrayList<String>();
-				for (String physicalTable : entry.getValue()) {
-					sqls.add(reconstructSql(sql, dmlSql, table, physicalTable));
-				}
-				subTargetedSqls.add(new TargetedSql(entry.getKey(), null, sqls));
-			}
-		}
-		return subTargetedSqls;
 	}
 
 	private String reconstructSql(String sql, DMLCommon dmlSql, String table, String physicalTable) {

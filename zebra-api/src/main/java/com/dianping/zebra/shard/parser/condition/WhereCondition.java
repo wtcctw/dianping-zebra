@@ -16,14 +16,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.dianping.zebra.shard.parser.sqlParser.OrderByEle;
+import com.dianping.zebra.shard.parser.sqlParser.OrderBy;
 import com.dianping.zebra.shard.parser.valueObject.Value;
 
 public  class WhereCondition implements Value{
 	private BindIndexHolder holder = new BindIndexHolder();
 
 	public final static WhereCondition NULL_WHERE_CONDITION = new WhereCondition();
-	private final List<OrderByEle> orderByColumns = new ArrayList<OrderByEle>();
+	private final List<OrderBy> orderByColumns = new ArrayList<OrderBy>();
 	private List<String> groupByColumns;
 	private OrExpressionGroup expGroup = new OrExpressionGroup();
 
@@ -56,14 +56,14 @@ public  class WhereCondition implements Value{
 	}
 
 	public void addOrderByColumn(String  table, String column, boolean isAsc) {
-		orderByColumns.add(new OrderByEle(table, column, isAsc));
+		orderByColumns.add(new OrderBy(table, column, isAsc));
 	}
 
 	public OrExpressionGroup getExpGroup() {
 		return expGroup;
 	}
 
-	public List<OrderByEle> getOrderByColumns() {
+	public List<OrderBy> getOrderByColumns() {
 		return this.orderByColumns;
 	}
 
@@ -104,7 +104,7 @@ public  class WhereCondition implements Value{
 		if (orderByColumns.size() != 0) {
 			sb.append(" ORDER BY ");
 			boolean comma = false;
-			for (OrderByEle ol : orderByColumns) {
+			for (OrderBy ol : orderByColumns) {
 				if (comma) {
 					sb.append(",");
 				}
@@ -136,7 +136,7 @@ public  class WhereCondition implements Value{
 			sb.append(" ORDER BY ");
 
 			boolean comma = false;
-			for (OrderByEle ol : orderByColumns) {
+			for (OrderBy ol : orderByColumns) {
 				if (comma) {
 					sb.append(",");
 				}

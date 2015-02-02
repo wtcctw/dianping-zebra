@@ -248,7 +248,7 @@ public abstract class DMLCommon extends BindIndexHolder implements Value {
 		return sb.toString();
 	}
 
-	public abstract List<OrderByEle> getOrderByList();
+	public abstract List<OrderBy> getOrderByList();
 	// public TableName getTbName() {
 	// return tbName;
 	// }

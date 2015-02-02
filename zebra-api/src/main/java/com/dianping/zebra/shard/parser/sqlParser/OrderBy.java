@@ -12,11 +12,11 @@
  */
 package com.dianping.zebra.shard.parser.sqlParser;
 
-public class OrderByEle implements Cloneable {
+public class OrderBy implements Cloneable {
 	private String table;
 	private String name;
 	private boolean isASC;
-	public OrderByEle(String table,String name,boolean isASC) {
+	public OrderBy(String table,String name,boolean isASC) {
 		this.table=table;
 		this.name=name;
 		this.isASC=isASC;

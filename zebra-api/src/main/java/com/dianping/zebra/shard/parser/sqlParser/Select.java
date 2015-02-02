@@ -119,7 +119,7 @@ public class Select extends DMLCommon implements Value {
 		return ValueType.SubQuery;
 	}
 
-	public List<OrderByEle> getOrderByList() {
+	public List<OrderBy> getOrderByList() {
 		return where.getOrderByColumns();
 	}
 	

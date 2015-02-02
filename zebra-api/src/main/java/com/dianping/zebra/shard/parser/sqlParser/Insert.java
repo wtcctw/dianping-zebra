@@ -78,7 +78,7 @@ public class Insert extends DMLCommon{
 		sb.append(")");
 		return sb.toString();
 	}
-	public List<OrderByEle> getOrderByList() {
+	public List<OrderBy> getOrderByList() {
 		return Collections.emptyList();
 	}
 

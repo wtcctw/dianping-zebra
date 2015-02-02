@@ -57,7 +57,7 @@ public class Delete extends DMLCommon implements Value {
 		return sb.toString();
 	}
 
-	public List<OrderByEle> getOrderByList() {
+	public List<OrderBy> getOrderByList() {
 		return where.getOrderByColumns();
 	}
 }

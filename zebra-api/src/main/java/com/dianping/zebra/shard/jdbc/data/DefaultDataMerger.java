@@ -17,7 +17,7 @@ package com.dianping.zebra.shard.jdbc.data;
 
 import com.dianping.zebra.shard.jdbc.data.processor.*;
 import com.dianping.zebra.shard.parser.sqlParser.Column;
-import com.dianping.zebra.shard.parser.sqlParser.OrderByEle;
+import com.dianping.zebra.shard.parser.sqlParser.OrderBy;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Count;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Max;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Min;
@@ -119,7 +119,7 @@ public class DefaultDataMerger implements DataMerger {
 				@Override
 				public int compare(RowData o1, RowData o2) {
 					try {
-						for (OrderByEle orderByEle : routerTarget.getOrderBys()) {
+						for (OrderBy orderByEle : routerTarget.getOrderBys()) {
 							Object value1 = o1.get(orderByEle.getName()).getValue();
 							Class<?> type1 = o1.get(orderByEle.getName()).getType();
 							Object value2 = o2.get(orderByEle.getName()).getValue();
