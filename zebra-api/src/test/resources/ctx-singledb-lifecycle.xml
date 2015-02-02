@@ -14,17 +14,14 @@
 	
 	
 	
-	<bean id="zebraDS" class="com.dianping.zebra.jdbc.DPDataSource" init-method="init">
+	<bean id="zebraDS" class="com.dianping.zebra.shard.jdbc.DPDataSource" init-method="init">
 		<property name="dataSourcePool">
 			<map>
 				<entry key="ds0" value-ref="ds0"/>
 			</map>	
 		</property>
-		<property name="syncEventNotifier">
-			<bean class="com.dianping.zebra.jdbc.EchoEventNotifier"/>
-		</property>
 		<property name="routerFactory">
-			<bean class="com.dianping.zebra.router.ClassPathXmlDataSourceRouterFactory">
+			<bean class="com.dianping.zebra.shard.router.ClassPathXmlDataSourceRouterFactory">
 				<constructor-arg value="router-rule-singledb-lifecycle.xml"/>
 			</bean>
 		</property>
