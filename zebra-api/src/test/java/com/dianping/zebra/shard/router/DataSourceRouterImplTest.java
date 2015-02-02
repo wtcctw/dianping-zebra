@@ -51,6 +51,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 1, 200));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -63,6 +64,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -80,6 +82,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, params);
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -90,6 +93,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -104,6 +108,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 100, 200, 3, 5));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -116,6 +121,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 1, 200, 3, 5));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -129,6 +135,7 @@ public class DataSourceRouterImplTest {
 			.getTarget(sql, Arrays.asList((Object) 200, 100, 3, new Date(), new Date(), "10.1.1.22", "223344422"));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -139,6 +146,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -151,6 +159,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 100, 20));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -161,6 +170,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -171,6 +181,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -181,6 +192,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -194,6 +206,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -204,6 +217,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -219,6 +233,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300, 400));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -229,6 +244,7 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) "10.1.1.22", 300));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
@@ -239,8 +255,18 @@ public class DataSourceRouterImplTest {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 3, 300));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
+	}
+
+	private void printSql(List<TargetedSql> targetedSqls) {
+		for (TargetedSql targetedSql : targetedSqls) {
+			for (String sql : targetedSql.getSqls()) {
+
+				System.out.println(String.format("[%s]  %s", targetedSql.getDataSourceName(), sql));
+			}
+		}
 	}
 
 }
