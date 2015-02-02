@@ -25,6 +25,8 @@ import java.util.Map.Entry;
  * @author danson.liu
  *
  */
+
+//todo: 这里需要大改，改成 SpringDataSourceRespository ??
 public class LocalDataSourceRepository implements DataSourceRepository {
 	
 	public static final String WRITE_DB_INDEX_SUFFIX = "_W";
