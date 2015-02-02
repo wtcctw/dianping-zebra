@@ -15,25 +15,24 @@
  */
 package com.dianping.zebra.shard.router;
 
-import javax.sql.DataSource;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 /**
  * @author danson.liu
+ * @author hao.zhu modified
  * 
  */
-public class TargetedSql implements Serializable {
+public class TargetedSql {
 
-	private static final long		serialVersionUID	= 7793984197425884451L;
+	private String dataSourceName;
 
-	private String					dataSourceName;
+	private DataSource dataSource;
 
-	private transient DataSource	dataSource;
-
-	private List<String>			sqls;
+	private List<String> sqls;
 
 	public TargetedSql(String dataSourceName, DataSource dataSource, List<String> sqls) {
 		this.dataSourceName = dataSourceName;
@@ -93,5 +92,4 @@ public class TargetedSql implements Serializable {
 		}
 		this.sqls.add(sql);
 	}
-
 }
