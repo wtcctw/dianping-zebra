@@ -70,6 +70,29 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         assert executeQuery(getZebraDs().getConnection(), "select * from test").size() > 0;
     }
 
+    //todo: 不支持？？
+    @Test
+    public void "select * from test where xxx order by classid"() {
+        def whereCondition = [
+                "",
+                "where id = 3",
+        ];
+
+        whereCondition.each {
+            def sql = "select classid from test ${it} order by classid";
+            println sql;
+            def data = executeQuery(getZebraDs().getConnection(), sql);
+            def lastClassid = null;
+
+            data.each {
+                if (lastClassid != null) {
+                    assert it[0] >= lastClassid;
+                }
+                lastClassid = it[0];
+            }
+        }
+    }
+
     @Test
     public void "select * from test where id < 100"() {
         def size1 = executeQuery(getZebraDs().getConnection(), "select * from test where  id <= 3").size();
@@ -152,7 +175,8 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
                 "where id = 3",
                 "where id in (1,2,3)",
                 "where id <> 3",
-                "where classid = 3" //todo: error
+                "where classid = 3", //todo: error
+                "where id in (select id from test where id = 3)", //todo: error
         ];
 
         whereCondiction.each {
@@ -174,7 +198,8 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
                 "where id = 3",
                 "where id in (1,2,3)",
                 "where id <> 3",
-                "where classid = 3" //todo: error
+                "where classid = 3", //todo: error
+                "where id in (select id from test where id = 3)", //todo: error
         ];
 
         whereCondiction.each {
