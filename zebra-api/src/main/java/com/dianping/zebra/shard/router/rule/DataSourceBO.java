@@ -28,9 +28,9 @@ import java.util.Map;
  */
 public class DataSourceBO {
 
-	private final String	dbIndex;
+	private final String dbIndex;
 
-	private List<String>	physicalTables	= new ArrayList<String>(80);
+	private List<String> physicalTables = new ArrayList<String>(80);
 
 	private RuleEngine tableRuleEngine;
 
@@ -58,5 +58,4 @@ public class DataSourceBO {
 		Number tablePos = (Number) tableRuleEngine.eval(new RuleEngineEvalContext(valMap));
 		return physicalTables.get(tablePos.intValue());
 	}
-
 }

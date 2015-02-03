@@ -26,9 +26,9 @@ import java.util.regex.Matcher;
  *
  */
 public abstract class AbstractDimensionRule implements DimensionRule {
-	
+
 	protected Set<String> basedColumns = new HashSet<String>(2);
-	
+
 	protected boolean isMaster;
 
 	public Set<String> getBasedColumns() {
@@ -56,5 +56,4 @@ public abstract class AbstractDimensionRule implements DimensionRule {
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
 	}
-	
 }
