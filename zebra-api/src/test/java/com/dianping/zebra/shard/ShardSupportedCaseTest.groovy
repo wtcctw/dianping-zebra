@@ -90,6 +90,11 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
+    public void "select * from test where id <> 3 limit 1"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where  id <> 3 limit 1").size() == 1;
+    }
+
+    @Test
     public void "select * from test where id = 3 and classid = 100"() {
         assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid = 100").size() == 0;
         assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid = 3").size() > 0;
@@ -138,6 +143,35 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         //todo:
     }
 
+    @Test
+    public void "update test set name = 'newName'"() {
+        assert executeUpdate(getZebraDs().getConnection(), "update test set name = 'newName'") > 0;
+
+        executeQuery(getZebraDs().getConnection(), "select name from test").each {
+            assert it[0] == "newName";
+        }
+    }
+
+    @Test
+    public void "update test set name = 'newName' where"() {
+        def baseUpdate = "update test set name = 'newName' ";
+        def baseQuery = "select name from test "
+        def whereCondiction = [
+                "where id = 3",
+                "where id in (1,2,3)",
+                "where id <> 3",
+                "where classid = 3" //todo: error
+        ];
+
+        whereCondiction.each {
+            assert executeUpdate(getZebraDs().getConnection(), "${baseUpdate} ${it}") > 0;
+            println "${baseUpdate} ${it}"
+
+            executeQuery(getZebraDs().getConnection(), "${baseQuery} ${it}").each {
+                assert it[0] == "newName";
+            };
+        };
+    }
 
     protected DataSource getZebraDs() {
         return context.getBean("zebraDS");
