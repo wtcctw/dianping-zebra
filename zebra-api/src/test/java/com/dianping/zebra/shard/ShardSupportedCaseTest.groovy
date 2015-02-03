@@ -48,14 +48,6 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         return ["ctx-multidb-lifecycle.xml"];
     }
 
-    protected DataSource getZebraDs() {
-        return context.getBean("zebraDS");
-    }
-
-    protected DataSource getInnerDs(def name) {
-        return context.getBean(name);
-    }
-
     @Test
     public void test_insert_and_generate_key() throws Exception {
         //todo: failed ! must fix it!
@@ -69,7 +61,21 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
                         "insert into test (id, name, score, type, classid) values (100, 'xxx', 1, 'a', 0)");
         def expectData = [[100, "xxx", 1, "a", 0]];
         assertData(getZebraDs().getConnection(), "select id,name,score,type,classid from test where id = 100", expectData);
-        assertData(getInnerDs("id1").getConnection(), "select id,name,score,type,classid from test_2 where id = 100", expectData);
+        assertData(getInnerDs("id2").getConnection(), "select id,name,score,type,classid from test_4 where id = 100", expectData);
+        assertData(getInnerDs("id0").getConnection(), "select id,name,score,type,classid from test_1 where id = 100", []);
+    }
+
+
+
+
+
+
+    protected DataSource getZebraDs() {
+        return context.getBean("zebraDS");
+    }
+
+    protected DataSource getInnerDs(def name) {
+        return context.getBean(name);
     }
 
     protected void assertData(Connection conn, String sql, List<List<Object>> expect) {
