@@ -167,27 +167,21 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
-    public void debug() {
-        println executeUpdate(getZebraDs().getConnection(), "update test set name = 'newName' where classid = 3")
-    }
-
-    @Test
     public void "update test set name = 'newName'"() {
         def baseUpdate = "update test set name = 'newName' ";
         def baseQuery = "select name from test "
         def whereCondiction = [
-                "",
                 "where id = 3",
                 "where id in (1,2,3)",
-                "where id <> 3",
+                "where id <> 5",
+                "",
                 //"where classid = 3", //不支持！
                 //"where id in (select id from test where id = 3)", //不支持！
         ];
 
         whereCondiction.each {
-            assert executeUpdate(getZebraDs().getConnection(), "${baseUpdate} ${it}") > 0;
             println "${baseUpdate} ${it}"
-
+            assert executeUpdate(getZebraDs().getConnection(), "${baseUpdate} ${it}") > 0;
             executeQuery(getZebraDs().getConnection(), "${baseQuery} ${it}").each {
                 assert it[0] == "newName";
             };
@@ -199,17 +193,17 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         def baseUpdate = "delete from test ";
         def baseQuery = "select * from test "
         def whereCondiction = [
-                "", //todo:error
                 "where id = 3",
                 "where id in (1,2,3)",
-                "where id <> 3",
+                "where id <> 5",
+                "",
                 //"where classid = 3", //不支持
                 //"where id in (select id from test where id = 3)", //不支持
         ];
 
         whereCondiction.each {
-            assert executeUpdate(getZebraDs().getConnection(), "${baseUpdate} ${it}") > 0;
             println "${baseUpdate} ${it}"
+            assert executeUpdate(getZebraDs().getConnection(), "${baseUpdate} ${it}") > 0;
             assert executeQuery(getZebraDs().getConnection(), "${baseQuery} ${it}").size() == 0;
         };
     }
