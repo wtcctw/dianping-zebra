@@ -29,22 +29,22 @@ import java.util.Map.Entry;
  */
 public class DimensionRuleImpl extends AbstractDimensionRule {
 
-	private Map<String, Set<String>>	allDBAndTables	= new HashMap<String, Set<String>>();
+	private Map<String, Set<String>> allDBAndTables = new HashMap<String, Set<String>>();
 
-	private RuleEngine dbRuleEngine;
+	private RuleEngine ruleEngine;
 
-	private DataSourceProvider			dataSourceProvider;
+	private DataSourceProvider dataSourceProvider;
 
-	private List<DimensionRule>			whiteListRules;
+	private List<DimensionRule> whiteListRules;
 
-	private String						tableName;
+	private String tableName;
 
-	public RuleEngine getDbRuleEngine() {
-		return dbRuleEngine;
+	public RuleEngine getRuleEngine() {
+		return ruleEngine;
 	}
 
-	public void setDbRuleEngine(RuleEngine dbRuleEngine) {
-		this.dbRuleEngine = dbRuleEngine;
+	public void setRuleEngine(RuleEngine ruleEngine) {
+		this.ruleEngine = ruleEngine;
 	}
 
 	public Map<String, Set<String>> getAllDBAndTables() {
@@ -63,7 +63,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		this.isMaster = dimensionConfig.isMaster();
 		this.tableName = dimensionConfig.getTableName();
 		this.dataSourceProvider = new SimpleDataSourceProvider(dimensionConfig.getTableName(),
-				dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
+		      dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
 		allDBAndTables.putAll(this.dataSourceProvider.getAllDBAndTables());
 		for (DimensionRule whiteListRule : this.whiteListRules) {
 			Map<String, Set<String>> whiteListDBAndTables = whiteListRule.getAllDBAndTables();
@@ -75,7 +75,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 				allDBAndTables.get(db).addAll(allDBAndTable.getValue());
 			}
 		}
-		this.dbRuleEngine = new GroovyRuleEngine(dimensionConfig.getDbRule());
+		this.ruleEngine = new GroovyRuleEngine(dimensionConfig.getDbRule());
 		this.initBasedColumns(dimensionConfig.getDbRule());
 	}
 
@@ -86,7 +86,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		boolean onlyMatchOnce = matchContext.onlyMatchOnce();
 		String basedColumn = basedColumns.iterator().next();
 		Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, basedColumn,
-				matchContext.getParams());
+		      matchContext.getParams());
 		if (shardColValues == null || shardColValues.isEmpty()) {
 			if (onlyMatchMaster && isMaster) {
 				// 强制匹配了Master Rule，将该主规则所有表设置为主路由结果
@@ -111,7 +111,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		for (Object colVal : matchContext.getColValues()) {
 			Map<String, Object> valMap = new HashMap<String, Object>();
 			valMap.put(basedColumn, colVal);
-			Number dbPos = (Number) dbRuleEngine.eval(new RuleEngineEvalContext(valMap));
+			Number dbPos = (Number) ruleEngine.eval(new RuleEngineEvalContext(valMap));
 			DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
 			String table = dataSource.evalTable(valMap);
 			if (dbAndTablesSetted) {
@@ -125,5 +125,4 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		}
 		return !onlyMatchOnce;
 	}
-
 }
