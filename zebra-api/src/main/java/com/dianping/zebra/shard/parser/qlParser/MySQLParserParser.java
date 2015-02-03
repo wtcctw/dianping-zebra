@@ -29,6 +29,7 @@ import org.antlr.runtime.tree.TreeAdaptor;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunctionRegister;
 import com.dianping.zebra.shard.parser.valueObject.FunctionConvertor;
 
+@SuppressWarnings("unused")
 public class MySQLParserParser extends Parser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "EXPR", "GROUPBY", "COUNTCOLUMN", "JOINTYPE", "ALIAS", "TABLENAME", "TABLENAMES", "SUBQUERY", "COLUMN", "AS", "SELECT", "DISPLAYED_COUNT_COLUMN", "DISPLAYED_COLUMN", "IN", "NOT", "SELECT_LIST", "QUTED_STR", "WHERE", "CONDITION_OR", "CONDITION_LEFT", "IN_LISTS", "CONDITION_OR_NOT", "AND", "OR", "ISNOT", "IS", "NULL", "NAN", "INFINITE", "LIKE", "NOT_LIKE", "NOT_BETWEEN", "BETWEEN", "ORDERBY", "INSERT", "INSERT_VAL", "PRIORITY", "COLUMNS", "UPDATE", "SET", "SET_ELE", "COL_TAB", "DELETE", "SKIP", "RANGE", "COMMA", "EQ", "LPAREN", "RPAREN", "PLUS", "MINUS", "DOUBLEVERTBAR", "ASTERISK", "DIVIDE", "MOD", "EXPONENT", "ID", "LTH", "GTH", "NOT_EQ", "LEQ", "GEQ", "ASC", "DESC", "DOT", "N", "NUMBER", "POINT", "ARROW", "QUOTED_STRING", "DOUBLEQUOTED_STRING", "WS", "'SET'", "'INSERT'", "'INTO'", "'VALUES'", "'ORDER'", "'BY'", "'SELECT'", "'WHERE'", "'NOT'", "'OR'", "'AND'", "'BETWEEN'", "'IS'", "'NAN'", "'INFINITE'", "'NULL'", "'IN'", "'LIKE'", "'ROWNUM'", "'FROM'", "'?'", "'TRUE'", "'FALSE'", "'AS'", "'GROUP BY'", "'FORCE'", "'INDEX'", "'IGNORE'", "'DELETE'", "'UPDATE'", "'LIMIT'", "'ON'", "'INNER JOIN'", "'LEFT JOIN'", "'RIGHT JOIN'", "'JOIN'", "'CONCAT'", "'DISTINCT'", "'COUNT'"
@@ -470,7 +471,7 @@ public class MySQLParserParser extends Parser {
 
     // $ANTLR start "updateColumnSpecs"
     // MySQLParser.g:125:1: updateColumnSpecs : updateColumnSpec ( COMMA updateColumnSpec )* -> ( ^( SET_ELE updateColumnSpec ) )+ ;
-    public final MySQLParserParser.updateColumnSpecs_return updateColumnSpecs() throws RecognitionException {
+   public final MySQLParserParser.updateColumnSpecs_return updateColumnSpecs() throws RecognitionException {
         MySQLParserParser.updateColumnSpecs_return retval = new MySQLParserParser.updateColumnSpecs_return();
         retval.start = input.LT(1);
 

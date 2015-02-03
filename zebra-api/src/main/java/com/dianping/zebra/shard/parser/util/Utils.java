@@ -20,27 +20,25 @@ import com.dianping.zebra.shard.parser.valueObject.Value;
 public class Utils {
 	private final static Object[] ARRAYOBJ = new Object[] {};
 
-
 	public static void appendSQL(Object obj, StringBuilder sb) {
 		if (obj instanceof Value) {
 			((Value) obj).appendSQL(sb);
-		} else if(obj==null){
+		} else if (obj == null) {
 			throw new RuntimeException("expression中的值不能为null,如果想使用null请使用DBFunctions提供的NULL");
-		} else if(obj instanceof String) {
+		} else if (obj instanceof String) {
 			sb.append("'").append(obj).append("'");
 		} else {
 			sb.append(obj);
 		}
 	}
 
-	
 	/**
 	 * 处理内联ListValueObject
 	 * 
 	 * @param obj
 	 * @param sb
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static void appendSQLList(Object obj, StringBuilder sb) {
 
 		if (obj instanceof List) {
@@ -54,8 +52,7 @@ public class Utils {
 				}
 				appendSQLList(innerObj, sb);
 			}
-		} else if (obj != null
-				&& ARRAYOBJ.getClass().isAssignableFrom(obj.getClass())) {
+		} else if (obj != null && ARRAYOBJ.getClass().isAssignableFrom(obj.getClass())) {
 			boolean splider = false;
 			for (Object innerObj : (Object[]) obj) {
 				if (splider) {
@@ -70,9 +67,7 @@ public class Utils {
 		}
 	}
 
-
-
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public static void appendParams(Object obj, List<Object> params) {
 		if (obj instanceof Value) {
 			((Value) obj).appendParams(params);
@@ -80,8 +75,7 @@ public class Utils {
 			for (Object innerObj : (List) obj) {
 				appendParams(innerObj, params);
 			}
-		} else if (obj != null
-				&& ARRAYOBJ.getClass().isAssignableFrom(obj.getClass())) {
+		} else if (obj != null && ARRAYOBJ.getClass().isAssignableFrom(obj.getClass())) {
 			for (Object innerObj : (Object[]) obj) {
 				appendParams(innerObj, params);
 			}
@@ -90,32 +84,24 @@ public class Utils {
 		}
 
 	}
-	//
-	// public static String getEmbracedClassName(String simplePrimitiveName) {
-	// String temp=(String) simpleNameToEmbraceClassNameMap
-	// .get(simplePrimitiveName);
-	// if (temp != null) {
-	// simplePrimitiveName = temp;
-	// }
-	// return simplePrimitiveName;
-	// }
-	
+
 	public static void toString(Object obj, StringBuilder sb) {
 		if (obj instanceof Value) {
-			if(Constant.useToString(obj)) {
+			if (Constant.useToString(obj)) {
 				sb.append(obj.toString());
 			} else {
 				((Value) obj).appendSQL(sb);
 			}
-		} else if(obj==null){
+		} else if (obj == null) {
 			throw new RuntimeException("expression中的值不能为null,如果想使用null请使用DBFunctions提供的NULL");
-		} else if(obj instanceof String) {
+		} else if (obj instanceof String) {
 			sb.append("'").append(obj).append("'");
 		} else {
 			sb.append(obj);
 		}
 	}
-	
+
+	@SuppressWarnings("rawtypes")
 	public static void listToString(Object obj, StringBuilder sb) {
 		if (obj instanceof List) {
 			boolean splider = false;
@@ -128,8 +114,7 @@ public class Utils {
 				}
 				listToString(innerObj, sb);
 			}
-		} else if (obj != null
-				&& ARRAYOBJ.getClass().isAssignableFrom(obj.getClass())) {
+		} else if (obj != null && ARRAYOBJ.getClass().isAssignableFrom(obj.getClass())) {
 			boolean splider = false;
 			for (Object innerObj : (Object[]) obj) {
 				if (splider) {
@@ -143,6 +128,4 @@ public class Utils {
 			toString(obj, sb);
 		}
 	}
-
-
 }

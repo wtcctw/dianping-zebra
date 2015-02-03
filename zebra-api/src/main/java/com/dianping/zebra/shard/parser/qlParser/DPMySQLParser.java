@@ -18,7 +18,6 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenRewriteStream;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
-import org.antlr.runtime.tree.TreeNodeStream;
 import org.apache.log4j.Logger;
 
 import com.dianping.zebra.shard.parser.condition.WhereCondition;
@@ -63,21 +62,9 @@ public class DPMySQLParser {
 		walker.setGroupFunc(GroupFunctionRegister.reg);
 		walker.setFunctionMap(FunctionRegister.funcReg);
 		MySQLWalker.beg_return ret = walker.beg();
-		TreeNodeStream tns = walker.getTreeNodeStream();
 
-
-//		StringBuilder sb = new StringBuilder(sql);
-//		int i = 0;
-//		for (Map.Entry<Integer, String> entry : walker.pos2TableName.entrySet()) {
-//			int pos = entry.getKey();
-//			String tn = entry.getValue();
-//			sb.replace(pos + i, pos + i + tn.length(), tn + "0");
-//			i++;
-//		}
-//		System.out.println(sb);
-		
-		
 		ret.obj.setPos2TableName(walker.pos2TableName);
+		
 		return ret;
 
 	}

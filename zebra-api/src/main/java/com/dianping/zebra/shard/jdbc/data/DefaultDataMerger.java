@@ -134,7 +134,7 @@ public class DefaultDataMerger implements DataMerger {
 									+ " which isn't comparable.");
 							}
 
-							@SuppressWarnings({ "unchecked" })
+							@SuppressWarnings({ "unchecked", "rawtypes" })
 							int compareRes = ((Comparable) value1).compareTo((Comparable) value2);
 
 							if (orderByEle.isASC()) {

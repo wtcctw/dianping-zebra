@@ -57,6 +57,8 @@ import com.dianping.zebra.shard.parser.sqlParser.mySql.MyWhereCondition;
 import com.dianping.zebra.shard.parser.util.DbFunctions;
 import com.dianping.zebra.shard.parser.valueObject.ColumnObject;
 import com.dianping.zebra.shard.parser.valueObject.FunctionConvertor;
+
+@SuppressWarnings("rawtypes")
 public class MySQLWalker extends TreeParser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "EXPR", "GROUPBY", "COUNTCOLUMN", "JOINTYPE", "ALIAS", "TABLENAME", "TABLENAMES", "SUBQUERY", "COLUMN", "AS", "SELECT", "DISPLAYED_COUNT_COLUMN", "DISPLAYED_COLUMN", "IN", "NOT", "SELECT_LIST", "QUTED_STR", "WHERE", "CONDITION_OR", "CONDITION_LEFT", "IN_LISTS", "CONDITION_OR_NOT", "AND", "OR", "ISNOT", "IS", "NULL", "NAN", "INFINITE", "LIKE", "NOT_LIKE", "NOT_BETWEEN", "BETWEEN", "ORDERBY", "INSERT", "INSERT_VAL", "PRIORITY", "COLUMNS", "UPDATE", "SET", "SET_ELE", "COL_TAB", "DELETE", "SKIP", "RANGE", "COMMA", "EQ", "LPAREN", "RPAREN", "PLUS", "MINUS", "DOUBLEVERTBAR", "ASTERISK", "DIVIDE", "MOD", "EXPONENT", "ID", "LTH", "GTH", "NOT_EQ", "LEQ", "GEQ", "ASC", "DESC", "DOT", "N", "NUMBER", "POINT", "ARROW", "QUOTED_STRING", "DOUBLEQUOTED_STRING", "WS", "'SET'", "'INSERT'", "'INTO'", "'VALUES'", "'ORDER'", "'BY'", "'SELECT'", "'WHERE'", "'NOT'", "'OR'", "'AND'", "'BETWEEN'", "'IS'", "'NAN'", "'INFINITE'", "'NULL'", "'IN'", "'LIKE'", "'ROWNUM'", "'FROM'", "'?'", "'TRUE'", "'FALSE'", "'AS'", "'GROUP BY'", "'FORCE'", "'INDEX'", "'IGNORE'", "'DELETE'", "'UPDATE'", "'LIMIT'", "'ON'", "'INNER JOIN'", "'LEFT JOIN'", "'RIGHT JOIN'", "'JOIN'", "'CONCAT'", "'DISTINCT'", "'COUNT'"
@@ -198,11 +200,14 @@ public class MySQLWalker extends TreeParser {
     /** allows convenient multi-value initialization:
      *  "new STAttrMap().put(...).put(...)"
      */
-    public static class STAttrMap extends HashMap {
+    @SuppressWarnings("serial")
+   public static class STAttrMap extends HashMap {
+      @SuppressWarnings("unchecked")
       public STAttrMap put(String attrName, Object value) {
         super.put(attrName, value);
         return this;
       }
+      @SuppressWarnings("unchecked")
       public STAttrMap put(String attrName, int value) {
         super.put(attrName, new Integer(value));
         return this;
@@ -1284,7 +1289,8 @@ public class MySQLWalker extends TreeParser {
         MySQLWalker.condition_return retval = new MySQLWalker.condition_return();
         retval.start = input.LT(1);
 
-        MySQLWalker.condition_return s1 = null;
+      @SuppressWarnings("unused")
+      MySQLWalker.condition_return s1 = null;
 
 
         try {
@@ -2261,7 +2267,7 @@ public class MySQLWalker extends TreeParser {
     // $ANTLR end "left_cond"
 
     public static class in_list_return extends TreeRuleReturnScope {
-        public List list;
+      public List list;
         public StringTemplate st;
         public Object getTemplate() { return st; }
         public String toString() { return st==null?null:st.toString(); }
@@ -2440,7 +2446,8 @@ public class MySQLWalker extends TreeParser {
 
     // $ANTLR start "inCondition_expr_adds"
     // MySQLWalker.g:309:1: inCondition_expr_adds[BindIndexHolder where] returns [List list] : ( expr_add[$where] )+ ;
-    public final MySQLWalker.inCondition_expr_adds_return inCondition_expr_adds(BindIndexHolder where) throws RecognitionException {
+    @SuppressWarnings("unchecked")
+   public final MySQLWalker.inCondition_expr_adds_return inCondition_expr_adds(BindIndexHolder where) throws RecognitionException {
         MySQLWalker.inCondition_expr_adds_return retval = new MySQLWalker.inCondition_expr_adds_return();
         retval.start = input.LT(1);
 
@@ -5110,7 +5117,8 @@ public class MySQLWalker extends TreeParser {
 
     // $ANTLR start "joinClause"
     // MySQLWalker.g:519:1: joinClause[Select select] : ^( joinType table_spec[$select, true] ( alias )? 'ON' sqlCondition[$joinClause::fakeCondition] ) ;
-    public final MySQLWalker.joinClause_return joinClause(Select select) throws RecognitionException {
+    @SuppressWarnings("unchecked")
+   public final MySQLWalker.joinClause_return joinClause(Select select) throws RecognitionException {
         joinClause_stack.push(new joinClause_scope());
         MySQLWalker.joinClause_return retval = new MySQLWalker.joinClause_return();
         retval.start = input.LT(1);
@@ -5546,7 +5554,8 @@ public class MySQLWalker extends TreeParser {
 
     // $ANTLR start "countColumn"
     // MySQLWalker.g:547:1: countColumn returns [List infos] : ^( COUNTCOLUMN ( identifier )? identifierOrN ) ;
-    public final MySQLWalker.countColumn_return countColumn() throws RecognitionException {
+    @SuppressWarnings("unchecked")
+   public final MySQLWalker.countColumn_return countColumn() throws RecognitionException {
         MySQLWalker.countColumn_return retval = new MySQLWalker.countColumn_return();
         retval.start = input.LT(1);
 
