@@ -1,9 +1,9 @@
 /**
  * Project: ${zebra-client.aid}
- * 
+ *
  * File Created at 2011-7-6
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -26,9 +26,7 @@ import java.sql.Statement;
 import java.util.*;
 
 /**
- * 
  * @author Leo Liang
- * 
  */
 public class MultiDBLifeCycleTest extends ZebraMultiDBBaseTestCase {
 
@@ -196,7 +194,7 @@ public class MultiDBLifeCycleTest extends ZebraMultiDBBaseTestCase {
 				rows.add(rs.getInt("score"));
 			}
 			Assert.assertEquals(14, rows.size());
-			List<Integer> expectedResult = Arrays.asList(new Integer[]{1,1,3,3,4,5,5,6,6,7,7,8,8,20});
+			List<Integer> expectedResult = Arrays.asList(new Integer[] { 1, 1, 3, 3, 4, 5, 5, 6, 6, 7, 7, 8, 8, 20 });
 			for (int i = 0; i < expectedResult.size(); i++) {
 				Assert.assertEquals(expectedResult.get(i).intValue(), rows.get(i).intValue());
 			}
@@ -247,7 +245,7 @@ public class MultiDBLifeCycleTest extends ZebraMultiDBBaseTestCase {
 				rows.add(rs.getInt("score"));
 			}
 			Assert.assertEquals(14, rows.size());
-			List<Integer> expectedResult = Arrays.asList(new Integer[]{20,8,8,7,7,6,6,5,5,4,3,3,1,1});
+			List<Integer> expectedResult = Arrays.asList(new Integer[] { 20, 8, 8, 7, 7, 6, 6, 5, 5, 4, 3, 3, 1, 1 });
 			for (int i = 0; i < expectedResult.size(); i++) {
 				Assert.assertEquals(expectedResult.get(i).intValue(), rows.get(i).intValue());
 			}
@@ -277,12 +275,12 @@ public class MultiDBLifeCycleTest extends ZebraMultiDBBaseTestCase {
 				cols.put("score", rs.getLong("score"));
 				rows.add(cols);
 			}
-			
+
 			Assert.assertEquals(8, rows.size());
 			Assert.assertEquals("leo3", rows.get(0).get("name"));
 			Assert.assertEquals("a", rows.get(0).get("type"));
 			Assert.assertEquals(24, ((Long) rows.get(0).get("score")).intValue());
-			
+
 			Assert.assertEquals("leo7", rows.get(1).get("name"));
 			Assert.assertEquals("b", rows.get(1).get("type"));
 			Assert.assertEquals(16, ((Long) rows.get(1).get("score")).intValue());
@@ -298,7 +296,6 @@ public class MultiDBLifeCycleTest extends ZebraMultiDBBaseTestCase {
 			Assert.assertEquals("leo4", rows.get(4).get("name"));
 			Assert.assertEquals("a", rows.get(4).get("type"));
 			Assert.assertEquals(10, ((Long) rows.get(4).get("score")).intValue());
-
 
 			Assert.assertEquals("leo2", rows.get(5).get("name"));
 			Assert.assertEquals("a", rows.get(5).get("type"));
@@ -863,7 +860,7 @@ public class MultiDBLifeCycleTest extends ZebraMultiDBBaseTestCase {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testMultiRouterResult21() throws Exception {
 		DataSource ds = (DataSource) context.getBean("zebraDS");
