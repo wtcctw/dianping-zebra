@@ -15,8 +15,6 @@
  */
 package com.dianping.zebra.monitor.sql;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.sql.*;
 
 /**
@@ -270,11 +268,11 @@ public class MonitorableStatement implements Statement {
 	}
 
 	public void closeOnCompletion() throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("closeOnCompletion");
 	}
 
 	public boolean isCloseOnCompletion() throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("isCloseOnCompletion");
 	}
 
 	@Override
