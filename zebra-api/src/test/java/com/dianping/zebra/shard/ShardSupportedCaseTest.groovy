@@ -145,17 +145,10 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test
     public void "update test set name = 'newName'"() {
-        assert executeUpdate(getZebraDs().getConnection(), "update test set name = 'newName'") > 0;
-        executeQuery(getZebraDs().getConnection(), "select name from test").each {
-            assert it[0] == "newName";
-        }
-    }
-
-    @Test
-    public void "update test set name = 'newName' where"() {
         def baseUpdate = "update test set name = 'newName' ";
         def baseQuery = "select name from test "
         def whereCondiction = [
+                "",
                 "where id = 3",
                 "where id in (1,2,3)",
                 "where id <> 3",
@@ -174,15 +167,10 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test
     public void "delete from test"() {
-        assert executeUpdate(getZebraDs().getConnection(), "delete from test") > 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test").size() == 0
-    }
-
-    @Test
-    public void "delete from test where"() {
         def baseUpdate = "delete from test ";
         def baseQuery = "select * from test "
         def whereCondiction = [
+                "", //todo:error
                 "where id = 3",
                 "where id in (1,2,3)",
                 "where id <> 3",
