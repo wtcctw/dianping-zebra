@@ -30,6 +30,7 @@ public class DataSourceRouterImplTest {
 
 	private static Map<String, DataSource> createDataSourcePool() {
 		Map<String, DataSource> dsPool = new HashMap<String, DataSource>();
+
 		dsPool.put("Group_00", createMockDataSource("Group_00"));
 		dsPool.put("Group_01", createMockDataSource("Group_01"));
 		dsPool.put("Group_02", createMockDataSource("Group_02"));
@@ -43,8 +44,21 @@ public class DataSourceRouterImplTest {
 		return new MockDataSource(identity);
 	}
 
+	public void singleTargetTest(String sql, List<Object> params, String targetDs, String targetTable) {
+		RouterTarget target = router.getTarget(sql, params);
+		assertNotNull(target);
+		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
+		assertTrue(targetedSqls != null && !targetedSqls.isEmpty() && targetedSqls.size() == 1);
+		assertTrue(!target.getNewParams().isEmpty());
+
+		TargetedSql targetedSql = targetedSqls.get(0);
+		assertTrue(targetedSql.getDataSourceName().equalsIgnoreCase(targetDs)
+		      && targetedSql.getSqls().get(0).contains(targetTable));
+	}
+
 	public void baseTest(String sql, List<Object> params) {
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 1, 200));
+		RouterTarget target = router.getTarget(sql, params);
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
 		printSql(targetedSqls);
@@ -65,12 +79,9 @@ public class DataSourceRouterImplTest {
 		String sql = "SELECT N.GroupID, F.FollowNoteID, F.UserID, F.NoteId "
 		      + "FROM DP_GroupFollowNote F INNER JOIN DP_GroupNote N ON N.NoteID = F.NoteID "
 		      + "WHERE F.UserID = ? AND F.NoteClass <> 3";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200);
+
+		singleTargetTest(sql, params,"Group_01","DP_GroupFollowNote_ByUserId_0");
 	}
 
 	@Test
@@ -257,7 +268,6 @@ public class DataSourceRouterImplTest {
 	private void printSql(List<TargetedSql> targetedSqls) {
 		for (TargetedSql targetedSql : targetedSqls) {
 			for (String sql : targetedSql.getSqls()) {
-
 				System.out.println(String.format("[%s]  %s", targetedSql.getDataSourceName(), sql));
 			}
 		}

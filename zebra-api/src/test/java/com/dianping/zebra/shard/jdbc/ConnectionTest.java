@@ -16,6 +16,7 @@
 package com.dianping.zebra.shard.jdbc;
 
 import junit.framework.Assert;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import java.util.Set;
  * @author Leo Liang
  * 
  */
+@SuppressWarnings("resource")
 public class ConnectionTest extends ZebraBaseTestCase {
 
 	private Mockery	context	= new Mockery();
@@ -169,7 +171,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testCommit() throws Exception {
-		DPConnection conn = new DPConnection();
+      DPConnection conn = new DPConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");

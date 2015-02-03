@@ -36,7 +36,7 @@ public class LocalDataSourceRepository implements DataSourceRepository {
 
 	public LocalDataSourceRepository(Map<String, DataSource> dataSourcePool) {
 		for (Entry<String, DataSource> dataSourceEntry : dataSourcePool.entrySet()) {
-			String dbIndex = dataSourceEntry.getKey().toUpperCase();
+			String dbIndex = dataSourceEntry.getKey();
 			DataSource dataSource = dataSourceEntry.getValue();
 
 			registerDataSource(dbIndex, dataSource, null);
