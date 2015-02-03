@@ -696,7 +696,6 @@ public class DPDatabaseMetaData implements DatabaseMetaData {
 		return null;
 	}
 
-	@Override
 	public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
 	      String columnNamePattern) throws SQLException {
 		// TODO Auto-generated method stub

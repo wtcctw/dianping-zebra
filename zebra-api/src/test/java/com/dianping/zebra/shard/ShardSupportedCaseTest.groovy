@@ -167,6 +167,11 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
+    public void debug(){
+
+    }
+
+    @Test
     public void "update test set name = 'newName'"() {
         def baseUpdate = "update test set name = 'newName' ";
         def baseQuery = "select name from test "
