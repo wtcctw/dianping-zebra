@@ -49,13 +49,13 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
-    public void test_insert_and_generate_key() throws Exception {
+    public void "insert into test (name) values ('test')"() throws Exception {
         //todo: failed ! must fix it!
         println executeInsert(getZebraDs().getConnection(), "insert into test ( name, score, type, classid) values ('xxx', 1, 'a', 0)")
     }
 
     @Test
-    public void test_insert_with_key() throws Exception {
+    public void "insert into test (id, name) values (1, 'test')"() throws Exception {
         assert 1 ==
                 executeUpdate(getZebraDs().getConnection(),
                         "insert into test (id, name, score, type, classid) values (100, 'xxx', 1, 'a', 0)");
@@ -65,6 +65,63 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         assertData(getInnerDs("id0").getConnection(), "select id,name,score,type,classid from test_1 where id = 100", []);
     }
 
+    @Test
+    public void "select * from test"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test").size() > 0;
+    }
+
+    @Test
+    public void "select * from test where id < 100"() {
+        def size1 = executeQuery(getZebraDs().getConnection(), "select * from test where  id <= 3").size();
+        def size2 = executeQuery(getZebraDs().getConnection(), "select * from test where  id > 3").size();
+        def sizeAll = executeQuery(getZebraDs().getConnection(), "select * from test").size();
+
+        assert sizeAll == size1 + size2;
+    }
+
+    @Test
+    public void "select * from test where id = 3"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where  id = 3").size() > 0;
+    }
+
+    @Test
+    public void "select * from test where id <> 3"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where  id <> 3").size() > 0;
+    }
+
+    @Test
+    public void "select * from test where id = 3 and classid = 100"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid = 100").size() == 0;
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid = 3").size() > 0;
+    }
+
+    @Test
+    public void "select * from test where id = 3 and name = 'x'"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name = 'leox'").size() == 0;
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name = 'leo3'").size() > 0;
+    }
+
+    @Test
+    public void "select * from test where id = 3 and name like '%x%'"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name like '%dozer%'").size() == 0;
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name like '%leo%'").size() > 0;
+    }
+
+    @Test
+    public void "select * from test where id > 3 and name like '%x%'"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id > 3 and name like '%dozer%'").size() == 0;
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id > 3 and name like '%leo%'").size() > 0;
+    }
+
+    @Test
+    public void "select * from test where id in (select id from test where id = 5)"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id in (select id from test where id= 5)").size() > 0;
+    }
+
+    @Test
+    public void "select * from test where id in (select id from test where id > 2 and id < 10)"() {
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id in (select id from test where id > 2 and id < 10)").size() > 0;
+    }
 
 
 
