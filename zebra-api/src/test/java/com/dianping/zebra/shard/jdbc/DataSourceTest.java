@@ -15,12 +15,16 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.sql.DataSource;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.dianping.zebra.util.MockDataSource;
 
 /**
  * 
@@ -43,7 +47,7 @@ public class DataSourceTest extends ZebraBaseTestCase {
 	public void testInitWithoutDataSourcePool2() {
 		DPDataSource dataSource = new DPDataSource();
 		try {
-			dataSource.setDataSourcePool(new HashMap<String, Object>());
+			dataSource.setDataSourcePool(new HashMap<String, DataSource>());
 			dataSource.init();
 			Assert.fail("DPDataSource can't init with an empty dataSourcePool");
 		} catch (IllegalArgumentException e) {
@@ -55,8 +59,8 @@ public class DataSourceTest extends ZebraBaseTestCase {
 	public void testInitWithoutRouterFactory() {
 		DPDataSource dataSource = new DPDataSource();
 		try {
-			Map<String, Object> dataSourcePool = new HashMap<String, Object>();
-			dataSourcePool.put("mock", new Object());
+			Map<String, DataSource> dataSourcePool = new HashMap<String, DataSource>();
+			dataSourcePool.put("mock", new MockDataSource("mock"));
 			dataSource.setDataSourcePool(dataSourcePool);
 			dataSource.init();
 			Assert.fail("DPDataSource can't init without routerFactory");

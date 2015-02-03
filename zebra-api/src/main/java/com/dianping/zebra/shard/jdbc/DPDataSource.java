@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class DPDataSource implements DataSource {
 
-	private Map<String, Object> dataSourcePool;
+	private Map<String, DataSource> dataSourcePool;
 
 	private DataSourceRouterFactory routerFactory;
 
@@ -57,7 +57,7 @@ public class DPDataSource implements DataSource {
 		this.routerFactory = routerFactory;
 	}
 
-	public void setDataSourcePool(Map<String, Object> dataSourcePool) {
+	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
 		this.dataSourcePool = dataSourcePool;
 	}
 

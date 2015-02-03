@@ -15,6 +15,8 @@ package com.dianping.zebra.shard.router;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 /**
  * 数据源路由
  * 
@@ -23,11 +25,11 @@ import java.util.Map;
  * 
  */
 public interface DataSourceRouter {
-	
-    RouterTarget getTarget(String sql, List<Object> params) throws DataSourceRouteException;
 
-	void setDataSourcePool(Map<String, Object> dataSourcePool);
+	RouterTarget getTarget(String sql, List<Object> params) throws DataSourceRouteException;
+
+	void setDataSourcePool(Map<String, DataSource> dataSourcePool);
 
 	void init();
-	
+
 }

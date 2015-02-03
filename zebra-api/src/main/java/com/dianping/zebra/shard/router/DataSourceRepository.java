@@ -21,11 +21,8 @@ package com.dianping.zebra.shard.router;
  *
  */
 public interface DataSourceRepository {
-
+	
 	String DEFAULT_DS_NAME = "default";
 
-	NamedDataSource getReadDataSource(String dsName);
-	
-	NamedDataSource getWriteDataSource(String dsName);
-	
+	NamedDataSource getDataSource(String dsName);
 }

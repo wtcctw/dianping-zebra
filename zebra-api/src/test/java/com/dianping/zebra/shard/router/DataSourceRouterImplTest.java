@@ -21,33 +21,22 @@ public class DataSourceRouterImplTest {
 		router.init();
 	}
 
-	private static Map<String, Object> createDataSourcePool() {
-		Map<String, Object> dsPool = new HashMap<String, Object>();
-		dsPool.put("Group_00", createMockDataSource("Group_00", 1));
-		dsPool.put("Group_01", createMockDataSource("Group_01", 1));
-		dsPool.put("Group_02_R", createMockDataSource("Group_02_R", 3));
-		dsPool.put("Group_02_W", createMockDataSource("Group_02_W", 1));
-		dsPool.put("Group_03_R", createMockDataSource("Group_03", 6));
-		dsPool.put("Group_03_W", createMockDataSource("Group_03", 1));
-		dsPool.put("Group_07_R", createMockDataSource("Group_07_R", 2));
-		dsPool.put("Group_07_W", createMockDataSource("Group_07_W", 1));
+	private static Map<String, DataSource> createDataSourcePool() {
+		Map<String, DataSource> dsPool = new HashMap<String, DataSource>();
+		dsPool.put("Group_00", createMockDataSource("Group_00"));
+		dsPool.put("Group_01", createMockDataSource("Group_01"));
+		dsPool.put("Group_02", createMockDataSource("Group_02"));
+		dsPool.put("Group_03", createMockDataSource("Group_03"));
+		dsPool.put("Group_07", createMockDataSource("Group_07"));
+
 		return dsPool;
 	}
 
-	private static Object createMockDataSource(String identity, int i) {
-		if (i == 1) {
-			return new MockDataSource(identity);
-		}
-		List<DataSource> dataSources = new ArrayList<DataSource>();
-		for (int j = 0; j < i; j++) {
-			dataSources.add(new MockDataSource(identity + "$" + i));
-		}
-		return dataSources;
+	private static DataSource createMockDataSource(String identity) {
+		return new MockDataSource(identity);
 	}
 
-	@Test
-	public void testCase1() {
-		String sql = "UPDATE DP_GroupFollowNote SET NoteClass = ? WHERE UserID = ?";
+	public void baseTest(String sql, List<Object> params) {
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 1, 200));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
@@ -57,10 +46,18 @@ public class DataSourceRouterImplTest {
 	}
 
 	@Test
+	public void testCase1() {
+		String sql = "UPDATE DP_GroupFollowNote SET NoteClass = ? WHERE UserID = ?";
+		List<Object> params = Arrays.asList((Object) 1, 200);
+
+		baseTest(sql, params);
+	}
+
+	@Test
 	public void testCase2() {
-		String sql = "SELECT N.GroupID, F.FollowNoteID, F.UserID, F.NoteId " +
-			"FROM DP_GroupFollowNote F INNER JOIN DP_GroupNote N ON N.NoteID = F.NoteID " +
-			"WHERE F.UserID = ? AND F.NoteClass <> 3";
+		String sql = "SELECT N.GroupID, F.FollowNoteID, F.UserID, F.NoteId "
+		      + "FROM DP_GroupFollowNote F INNER JOIN DP_GroupNote N ON N.NoteID = F.NoteID "
+		      + "WHERE F.UserID = ? AND F.NoteClass <> 3";
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
@@ -71,14 +68,13 @@ public class DataSourceRouterImplTest {
 
 	@Test
 	public void testCase3() {
-		String sql = "SELECT * FROM DP_GroupFollowNote " +
-			"WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) " +
-			"AND NoteID = ? LIMIT ?, ?";
+		String sql = "SELECT * FROM DP_GroupFollowNote " + "WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) "
+		      + "AND NoteID = ? LIMIT ?, ?";
 		List<Object> params = new ArrayList<Object>();
-		params.add(3);    //UserID
-		params.add(5);    //NoteID
-		params.add(3);    //Skip
-		params.add(5);    //Max
+		params.add(3); // UserID
+		params.add(5); // NoteID
+		params.add(3); // Skip
+		params.add(5); // Max
 		RouterTarget target = router.getTarget(sql, params);
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
@@ -100,11 +96,9 @@ public class DataSourceRouterImplTest {
 
 	@Test
 	public void testCase5() {
-		String sql = "SELECT * FROM DP_GroupFollowNote " +
-			"WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) " +
-			"AND NoteID = ? AND UserID = ? " +
-			"LIMIT ?, ?";
-		//match white list of NodeID's rule
+		String sql = "SELECT * FROM DP_GroupFollowNote " + "WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) "
+		      + "AND NoteID = ? AND UserID = ? " + "LIMIT ?, ?";
+		// match white list of NodeID's rule
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 100, 200, 3, 5));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
@@ -115,9 +109,8 @@ public class DataSourceRouterImplTest {
 
 	@Test
 	public void testCase6() {
-		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote " +
-			"WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) AND NoteID = ? " +
-			"AND UserID = ?";
+		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote "
+		      + "WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) AND NoteID = ? " + "AND UserID = ?";
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 1, 200, 3, 5));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
@@ -128,11 +121,10 @@ public class DataSourceRouterImplTest {
 
 	@Test
 	public void testCase7() {
-		String sql =
-			"INSERT INTO DP_GroupFollowNote (NoteID, UserID, NoteClass, ADDTIME, UpdateTime, LastIP, DCashNumber) " +
-				"VALUES(?, ?, ?, ?, ?, ?, ?)";
-		RouterTarget target = router
-			.getTarget(sql, Arrays.asList((Object) 200, 100, 3, new Date(), new Date(), "10.1.1.22", "223344422"));
+		String sql = "INSERT INTO DP_GroupFollowNote (NoteID, UserID, NoteClass, ADDTIME, UpdateTime, LastIP, DCashNumber) "
+		      + "VALUES(?, ?, ?, ?, ?, ?, ?)";
+		RouterTarget target = router.getTarget(sql,
+		      Arrays.asList((Object) 200, 100, 3, new Date(), new Date(), "10.1.1.22", "223344422"));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
 		printSql(targetedSqls);
@@ -153,9 +145,8 @@ public class DataSourceRouterImplTest {
 
 	@Test
 	public void testCase9() {
-		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote " +
-			"WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) AND NoteID = ? " +
-			"AND FollowNoteID <= ?";
+		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote "
+		      + "WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) AND NoteID = ? " + "AND FollowNoteID <= ?";
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 100, 20));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
@@ -199,10 +190,8 @@ public class DataSourceRouterImplTest {
 
 	@Test
 	public void testCase13() {
-		String sql =
-			"SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote F INNER JOIN DP_GroupNote N ON F.NoteID = N.NoteID AND N.GroupID = ? AND N.Status = 1 "
-				+
-				"WHERE F.UserID = ? AND F.NoteClass = 1";
+		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote F INNER JOIN DP_GroupNote N ON F.NoteID = N.NoteID AND N.GroupID = ? AND N.Status = 1 "
+		      + "WHERE F.UserID = ? AND F.NoteClass = 1";
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();
@@ -224,12 +213,10 @@ public class DataSourceRouterImplTest {
 
 	@Test
 	public void testCase15() {
-		String sql =
-			"SELECT DISTINCT(GN.NoteID) FROM DP_GroupNote GN INNER JOIN DP_Group G ON GN.GroupID = G.GroupID AND G.Status = 0 "
-				+
-				"INNER JOIN DP_GroupFollowNote GFN ON GN.NoteID = GFN.NoteID " +
-				"WHERE (GN.Status = 1 OR (GN.Status = 3 AND GN.UserID = ?)) AND GN.UserID <> ? " +
-				"AND GFN.UserID = ? AND GNF.NoteClass = 1";
+		String sql = "SELECT DISTINCT(GN.NoteID) FROM DP_GroupNote GN INNER JOIN DP_Group G ON GN.GroupID = G.GroupID AND G.Status = 0 "
+		      + "INNER JOIN DP_GroupFollowNote GFN ON GN.NoteID = GFN.NoteID "
+		      + "WHERE (GN.Status = 1 OR (GN.Status = 3 AND GN.UserID = ?)) AND GN.UserID <> ? "
+		      + "AND GFN.UserID = ? AND GNF.NoteClass = 1";
 		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300, 400));
 		assertNotNull(target);
 		List<TargetedSql> targetedSqls = target.getTargetedSqls();

@@ -15,6 +15,20 @@
  */
 package com.dianping.zebra.shard.router;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.sql.DataSource;
+
+import org.antlr.runtime.RecognitionException;
+
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
 import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
@@ -28,11 +42,6 @@ import com.dianping.zebra.shard.parser.valueObject.variable.BindVar;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardMatchResult;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
-import org.antlr.runtime.RecognitionException;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * @author danson.liu
@@ -41,13 +50,11 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 
 	private RouterRule routerRule;
 
-	private Map<String, Object> dataSourcePool;
+	private Map<String, DataSource> dataSourcePool;
 
 	private DataSourceRepository dataSourceRepository;
 
-	private Map<String, DMLCommon> sqlParseCache = Collections
-		.synchronizedMap(new LRUCache<String, DMLCommon>(
-			1000));
+	private Map<String, DMLCommon> sqlParseCache = Collections.synchronizedMap(new LRUCache<String, DMLCommon>(1000));
 
 	private static final String SKIP_MAX_STUB = "?";
 
@@ -64,20 +71,20 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 				ShardMatchResult matchResult = tableShardRule.match(dmlSql, params);
 				Map<String, Set<String>> dbAndTables = matchResult.getDbAndTables();
 				boolean acrossTable = dbAndTables.size() > 1
-					|| dbAndTables.entrySet().iterator().next().getValue().size() > 1;
+				      || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
 				target.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
-					tableShardRule.getTableName(), skip, max));
+				      tableShardRule.getTableName(), skip, max));
 				target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
 			} else {
 				NamedDataSource dataSource = getDataSource(DataSourceRepository.DEFAULT_DS_NAME, dmlSql);
 				if (dataSource == null) {
 					throw new DataSourceRouteException("Named datasource[name='" + DataSourceRepository.DEFAULT_DS_NAME
-						+ "'] not found.");
+					      + "'] not found.");
 				}
 				target.setTargetedSqls(Arrays.asList(new TargetedSql(dataSource, sql)));
 			}
 			return enrichRouterTarget(target, dmlSql, tableShardRule == null ? null : tableShardRule.getGeneratedPK(),
-				skip, max);
+			      skip, max);
 		} catch (Exception e) {
 			throw new DataSourceRouteException("DataSource route failed, cause: ", e);
 		}
@@ -93,8 +100,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		return parsedResult;
 	}
 
-	private RouterTarget enrichRouterTarget(RouterTarget target, DMLCommon dmlSql, String generatedPK, int skip,
-		int max) {
+	private RouterTarget enrichRouterTarget(RouterTarget target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
 		target.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
 		target.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
 		target.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);
@@ -106,7 +112,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	}
 
 	private List<TargetedSql> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable, String sql,
-		DMLCommon dmlSql, String table, int skip, int max) {
+	      DMLCommon dmlSql, String table, int skip, int max) {
 
 		Map<String, TargetedSql> targetedSqlMap = new HashMap<String, TargetedSql>();
 		sql = reconstructSqlLimit(acrossTable, sql, dmlSql, skip, max);
@@ -138,7 +144,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		// Note: 其实应该加上一个过滤条件，groupby里面没有分区键
 		if ((dmlSql instanceof Select) && acrossTable && (max != RouterTarget.NO_MAX || skip != RouterTarget.NO_SKIP)) {
 			if (((Select) dmlSql).getWhere().getGroupByColumns() != null
-				&& !((Select) dmlSql).getWhere().getGroupByColumns().isEmpty()) {
+			      && !((Select) dmlSql).getWhere().getGroupByColumns().isEmpty()) {
 				return sql.substring(0, sql.toLowerCase().lastIndexOf(" limit "));
 			}
 		}
@@ -161,8 +167,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		return sql;
 	}
 
-	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, DMLCommon dmlSql, int skip,
-		int max) {
+	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, DMLCommon dmlSql, int skip, int max) {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
@@ -196,11 +201,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	}
 
 	private NamedDataSource getDataSource(String dsName, DMLCommon dmlSql) {
-		if (dmlSql instanceof Select) {
-			return dataSourceRepository.getReadDataSource(dsName);
-		} else {
-			return dataSourceRepository.getWriteDataSource(dsName);
-		}
+		return dataSourceRepository.getDataSource(dsName);
 	}
 
 	private TableShardRule getAppliedShardRule(Set<String> relatedTables) throws DataSourceRouteException {
@@ -219,7 +220,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	}
 
 	@Override
-	public void setDataSourcePool(Map<String, Object> dataSourcePool) {
+	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
 		this.dataSourcePool = dataSourcePool;
 	}
 
