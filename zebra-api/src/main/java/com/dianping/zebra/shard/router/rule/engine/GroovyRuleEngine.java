@@ -34,7 +34,8 @@ public class GroovyRuleEngine implements RuleEngine {
 
 	private GroovyObject engineObj;
 
-	public GroovyRuleEngine(String rule) {
+	@SuppressWarnings("resource")
+   public GroovyRuleEngine(String rule) {
 		try {
 			Matcher matcher = DimensionRule.RULE_COLUMN_PATTERN.matcher(rule);
 			StringBuilder engineClazzImpl = new StringBuilder(200).append("class RuleEngine {")

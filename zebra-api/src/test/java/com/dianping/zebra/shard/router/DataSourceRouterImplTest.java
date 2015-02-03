@@ -1,14 +1,21 @@
 package com.dianping.zebra.shard.router;
 
-import com.dianping.zebra.util.MockDataSource;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.sql.DataSource;
-import java.util.*;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import com.dianping.zebra.shard.jdbc.MockDataSource;
 
 public class DataSourceRouterImplTest {
 	private static DataSourceRouter router;

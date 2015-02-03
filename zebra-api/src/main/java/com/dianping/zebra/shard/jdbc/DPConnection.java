@@ -14,10 +14,12 @@ package com.dianping.zebra.shard.jdbc;
 
 import com.dianping.zebra.shard.jdbc.util.JDBCUtils;
 import com.dianping.zebra.shard.router.DataSourceRouter;
+
 import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.Executor;
 
 /**
  * Zebra的JDBC Connection Wrapper
@@ -27,35 +29,25 @@ import java.util.*;
  */
 public class DPConnection implements Connection {
 
-	private static final Logger		log							= Logger.getLogger(DPConnection.class);
+	private static final Logger log = Logger.getLogger(DPConnection.class);
 
 	private DataSourceRouter router;
 
-	private Map<String, Connection>	actualConnections			= new HashMap<String, Connection>();
-	private Set<Statement>			attachedStatements			= new HashSet<Statement>();
-	private boolean					closed						= false;
-	private boolean					readOnly;
-	private boolean					autoCommit					= true;
-	private int						transactionIsolation		= -1;
+	private Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 
-	private boolean					performanceMonitorSwitchOn	= false;
+	private Set<Statement> attachedStatements = new HashSet<Statement>();
 
-	protected ResultSet				generatedKey;
+	private boolean closed = false;
 
-	/**
-	 * @return the performanceMonitorSwitchOn
-	 */
-	public boolean isPerformanceMonitorSwitchOn() {
-		return performanceMonitorSwitchOn;
-	}
+	private boolean readOnly;
 
-	/**
-	 * @param performanceMonitorSwitchOn
-	 *            the performanceMonitorSwitchOn to set
-	 */
-	public void setPerformanceMonitorSwitchOn(boolean performanceMonitorSwitchOn) {
-		this.performanceMonitorSwitchOn = performanceMonitorSwitchOn;
-	}
+	private boolean autoCommit = true;
+
+	private int transactionIsolation = -1;
+
+	private boolean performanceMonitorSwitchOn = false;
+
+	protected ResultSet generatedKey;
 
 	public DPConnection() {
 
@@ -64,43 +56,8 @@ public class DPConnection implements Connection {
 	public DPConnection(String username, String password) {
 	}
 
-	/**
-	 * @return the generatedKey
-	 */
-	public ResultSet getGeneratedKey() {
-		return generatedKey;
-	}
-
-	/**
-	 * @param generatedKey
-	 *            the generatedKey to set
-	 */
-	public void setGeneratedKey(ResultSet generatedKey) {
-		this.generatedKey = generatedKey;
-	}
-
-	public Set<Statement> getAttachedStatements() {
-		return attachedStatements;
-	}
-
-	public void setAttachedStatements(Set<Statement> attachedStatements) {
-		this.attachedStatements = attachedStatements;
-	}
-
-	public Map<String, Connection> getActualConnections() {
-		return actualConnections;
-	}
-
-	public void setActualConnections(Map<String, Connection> actualConnections) {
-		this.actualConnections = actualConnections;
-	}
-
-	public DataSourceRouter getRouter() {
-		return router;
-	}
-
-	public void setRouter(DataSourceRouter router) {
-		this.router = router;
+	public void abort(Executor executor) throws SQLException {
+		throw new UnsupportedOperationException("Zebra unsupport abort");
 	}
 
 	private void checkClosed() throws SQLException {
@@ -203,8 +160,7 @@ public class DPConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createArrayOf(java.lang.String,
-	 * java.lang.Object[])
+	 * @see java.sql.Connection#createArrayOf(java.lang.String, java.lang.Object[])
 	 */
 	@Override
 	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
@@ -294,7 +250,7 @@ public class DPConnection implements Connection {
 	 */
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-			throws SQLException {
+	      throws SQLException {
 		DPStatement stmt = (DPStatement) createStatement(resultSetType, resultSetConcurrency);
 
 		stmt.setResultSetHoldability(resultSetHoldability);
@@ -305,12 +261,19 @@ public class DPConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createStruct(java.lang.String,
-	 * java.lang.Object[])
+	 * @see java.sql.Connection#createStruct(java.lang.String, java.lang.Object[])
 	 */
 	@Override
 	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport createStruct");
+	}
+
+	public Map<String, Connection> getActualConnections() {
+		return actualConnections;
+	}
+
+	public Set<Statement> getAttachedStatements() {
+		return attachedStatements;
 	}
 
 	/*
@@ -353,6 +316,13 @@ public class DPConnection implements Connection {
 		throw new UnsupportedOperationException("Zebra unsupport getClientInfo");
 	}
 
+	/**
+	 * @return the generatedKey
+	 */
+	public ResultSet getGeneratedKey() {
+		return generatedKey;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -372,6 +342,18 @@ public class DPConnection implements Connection {
 	public DatabaseMetaData getMetaData() throws SQLException {
 		checkClosed();
 		return new DPDatabaseMetaData();
+	}
+
+	public int getNetworkTimeout() throws SQLException {
+		throw new UnsupportedOperationException("getNetworkTimeout");
+	}
+
+	public DataSourceRouter getRouter() {
+		return router;
+	}
+
+	public String getSchema() throws SQLException {
+		throw new UnsupportedOperationException("Zebra unsupport getSchema");
 	}
 
 	/*
@@ -414,6 +396,13 @@ public class DPConnection implements Connection {
 		return closed;
 	}
 
+	/**
+	 * @return the performanceMonitorSwitchOn
+	 */
+	public boolean isPerformanceMonitorSwitchOn() {
+		return performanceMonitorSwitchOn;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -432,6 +421,16 @@ public class DPConnection implements Connection {
 	@Override
 	public boolean isValid(int timeout) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport isValid");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
+	 */
+	@Override
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+		throw new UnsupportedOperationException("Zebra unsupport isWrapperFor");
 	}
 
 	/*
@@ -471,7 +470,7 @@ public class DPConnection implements Connection {
 	 */
 	@Override
 	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability) throws SQLException {
+	      int resultSetHoldability) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport prepareCall");
 	}
 
@@ -512,6 +511,33 @@ public class DPConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
+	 */
+	@Override
+	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+	      throws SQLException {
+		DPPreparedStatement stmt = (DPPreparedStatement) prepareStatement(sql);
+		stmt.setResultSetType(resultSetType);
+		stmt.setResultSetConcurrency(resultSetConcurrency);
+		return stmt;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
+	 */
+	@Override
+	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
+	      int resultSetHoldability) throws SQLException {
+		DPPreparedStatement stmt = (DPPreparedStatement) prepareStatement(sql, resultSetType, resultSetConcurrency);
+		stmt.setResultSetHoldability(resultSetHoldability);
+		return stmt;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.sql.Connection#prepareStatement(java.lang.String, int[])
 	 */
 	@Override
@@ -524,41 +550,12 @@ public class DPConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String,
-	 * java.lang.String[])
+	 * @see java.sql.Connection#prepareStatement(java.lang.String, java.lang.String[])
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
 		DPPreparedStatement stmt = (DPPreparedStatement) prepareStatement(sql);
 		stmt.setColumnNames(columnNames);
-		return stmt;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
-	 */
-	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-			throws SQLException {
-		DPPreparedStatement stmt = (DPPreparedStatement) prepareStatement(sql);
-		stmt.setResultSetType(resultSetType);
-		stmt.setResultSetConcurrency(resultSetConcurrency);
-		return stmt;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int,
-	 * int)
-	 */
-	@Override
-	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-			int resultSetHoldability) throws SQLException {
-		DPPreparedStatement stmt = (DPPreparedStatement) prepareStatement(sql, resultSetType, resultSetConcurrency);
-		stmt.setResultSetHoldability(resultSetHoldability);
 		return stmt;
 	}
 
@@ -613,6 +610,14 @@ public class DPConnection implements Connection {
 		throw new UnsupportedOperationException("Zebra unsupport rollback with savepoint");
 	}
 
+	public void setActualConnections(Map<String, Connection> actualConnections) {
+		this.actualConnections = actualConnections;
+	}
+
+	public void setAttachedStatements(Set<Statement> attachedStatements) {
+		this.attachedStatements = attachedStatements;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -647,12 +652,19 @@ public class DPConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#setClientInfo(java.lang.String,
-	 * java.lang.String)
+	 * @see java.sql.Connection#setClientInfo(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public void setClientInfo(String name, String value) throws SQLClientInfoException {
 		throw new UnsupportedOperationException("Zebra unsupport setClientInfo");
+	}
+
+	/**
+	 * @param generatedKey
+	 *           the generatedKey to set
+	 */
+	public void setGeneratedKey(ResultSet generatedKey) {
+		this.generatedKey = generatedKey;
 	}
 
 	/*
@@ -665,6 +677,18 @@ public class DPConnection implements Connection {
 		throw new UnsupportedOperationException("Zebra unsupport setHoldability");
 	}
 
+	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+		throw new UnsupportedOperationException("Zebra unsupport setNetworkTimeout");
+	}
+
+	/**
+	 * @param performanceMonitorSwitchOn
+	 *           the performanceMonitorSwitchOn to set
+	 */
+	public void setPerformanceMonitorSwitchOn(boolean performanceMonitorSwitchOn) {
+		this.performanceMonitorSwitchOn = performanceMonitorSwitchOn;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -675,6 +699,10 @@ public class DPConnection implements Connection {
 		checkClosed();
 
 		this.readOnly = readOnly;
+	}
+
+	public void setRouter(DataSourceRouter router) {
+		this.router = router;
 	}
 
 	/*
@@ -695,6 +723,10 @@ public class DPConnection implements Connection {
 	@Override
 	public Savepoint setSavepoint(String name) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport setSavepoint");
+	}
+
+	public void setSchema(String schema) throws SQLException {
+		throw new UnsupportedOperationException("Zebra unsupport setSchema");
 	}
 
 	/*
@@ -721,21 +753,10 @@ public class DPConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
-	 */
-	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport isWrapperFor");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see java.sql.Wrapper#unwrap(java.lang.Class)
 	 */
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport unwrap");
 	}
-
 }

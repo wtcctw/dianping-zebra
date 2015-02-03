@@ -24,8 +24,6 @@ import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.dianping.zebra.util.MockDataSource;
-
 /**
  * 
  * @author Leo Liang

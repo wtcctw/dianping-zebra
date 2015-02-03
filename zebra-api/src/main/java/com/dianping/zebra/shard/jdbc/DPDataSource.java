@@ -16,10 +16,13 @@ import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 
 import javax.sql.DataSource;
+
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Zebra的JDBC DataSource Wrapper
@@ -35,31 +38,6 @@ public class DPDataSource implements DataSource {
 	private DataSourceRouter router;
 
 	private boolean performanceMonitorSwitchOn = false;
-
-	/**
-	 * @return the performanceMonitorSwitchOn
-	 */
-	public boolean isPerformanceMonitorSwitchOn() {
-		return performanceMonitorSwitchOn;
-	}
-
-	/**
-	 * @param performanceMonitorSwitchOn the performanceMonitorSwitchOn to set
-	 */
-	public void setPerformanceMonitorSwitchOn(boolean performanceMonitorSwitchOn) {
-		this.performanceMonitorSwitchOn = performanceMonitorSwitchOn;
-	}
-
-	/**
-	 * @param routerFactory the routerFactory to set
-	 */
-	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
-		this.routerFactory = routerFactory;
-	}
-
-	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
-		this.dataSourcePool = dataSourcePool;
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -77,8 +55,7 @@ public class DPDataSource implements DataSource {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.sql.DataSource#getConnection(java.lang.String,
-	 * java.lang.String)
+	 * @see javax.sql.DataSource#getConnection(java.lang.String, java.lang.String)
 	 */
 	@Override
 	public Connection getConnection(String username, String password) {
@@ -86,16 +63,6 @@ public class DPDataSource implements DataSource {
 		connection.setRouter(router);
 		connection.setPerformanceMonitorSwitchOn(performanceMonitorSwitchOn);
 		return connection;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#getLogWriter()
-	 */
-	@Override
-	public PrintWriter getLogWriter() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getLogWriter");
 	}
 
 	/*
@@ -111,11 +78,48 @@ public class DPDataSource implements DataSource {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.sql.CommonDataSource#setLogWriter(java.io.PrintWriter)
+	 * @see javax.sql.CommonDataSource#getLogWriter()
 	 */
 	@Override
-	public void setLogWriter(PrintWriter out) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setLogWriter");
+	public PrintWriter getLogWriter() throws SQLException {
+		throw new UnsupportedOperationException("Zebra unsupport getLogWriter");
+	}
+
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		return null;
+	}
+
+	public void init() {
+		if (dataSourcePool == null || dataSourcePool.isEmpty()) {
+			throw new IllegalArgumentException("dataSourcePool is required.");
+		}
+		if (routerFactory == null) {
+			throw new IllegalArgumentException("routerRuleFile must be set.");
+		}
+		this.router = routerFactory.getRouter();
+		this.router.setDataSourcePool(dataSourcePool);
+		this.router.init();
+	}
+
+	/**
+	 * @return the performanceMonitorSwitchOn
+	 */
+	public boolean isPerformanceMonitorSwitchOn() {
+		return performanceMonitorSwitchOn;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
+	 */
+	@Override
+	public boolean isWrapperFor(Class<?> iface) throws SQLException {
+		throw new UnsupportedOperationException("Zebra unsupport isWrapperFor");
+	}
+
+	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
+		this.dataSourcePool = dataSourcePool;
 	}
 
 	/*
@@ -131,11 +135,27 @@ public class DPDataSource implements DataSource {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
+	 * @see javax.sql.CommonDataSource#setLogWriter(java.io.PrintWriter)
 	 */
 	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport isWrapperFor");
+	public void setLogWriter(PrintWriter out) throws SQLException {
+		throw new UnsupportedOperationException("Zebra unsupport setLogWriter");
+	}
+
+	/**
+	 * @param performanceMonitorSwitchOn
+	 *           the performanceMonitorSwitchOn to set
+	 */
+	public void setPerformanceMonitorSwitchOn(boolean performanceMonitorSwitchOn) {
+		this.performanceMonitorSwitchOn = performanceMonitorSwitchOn;
+	}
+
+	/**
+	 * @param routerFactory
+	 *           the routerFactory to set
+	 */
+	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
+		this.routerFactory = routerFactory;
 	}
 
 	/*
@@ -147,17 +167,4 @@ public class DPDataSource implements DataSource {
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport unwrap");
 	}
-
-	public void init() {
-		if (dataSourcePool == null || dataSourcePool.isEmpty()) {
-			throw new IllegalArgumentException("dataSourcePool is required.");
-		}
-		if (routerFactory == null) {
-			throw new IllegalArgumentException("routerRuleFile must be set.");
-		}
-		this.router = routerFactory.getRouter();
-		this.router.setDataSourcePool(dataSourcePool);
-		this.router.init();
-	}
-
 }
