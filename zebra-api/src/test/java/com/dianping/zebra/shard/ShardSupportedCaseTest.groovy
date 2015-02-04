@@ -72,11 +72,11 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
-    @Ignore("not support")
     public void "select * from test where xxx order by classid"() {
         def whereCondition = [
                 "",
                 "where id = 3",
+                "where id > 3"
         ];
 
         whereCondition.each {
@@ -85,6 +85,7 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
             def data = executeQuery(getZebraDs().getConnection(), sql);
             def lastClassid = null;
 
+            println data;
             data.each {
                 if (lastClassid != null) {
                     assert it[0] >= lastClassid;
@@ -154,6 +155,7 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test
     public void "select count(id) as id_count from test"() {
+        //todo: 支持无字段别名的查询
         def count = executeQuery(getZebraDs().getConnection(), "select count(id) as id_count from test")[0][0];
         def max = executeQuery(getZebraDs().getConnection(), "select max(id) as id_max from test")[0][0];
         def min = executeQuery(getZebraDs().getConnection(), "select min(id) as id_min from test")[0][0];
@@ -165,8 +167,9 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
-    public void "select classid,count(id) from test group by classid"() {
-        //todo:
+    public void "select classid,count(id) as id_count from test group by classid"() {
+        def data = executeQuery(getZebraDs().getConnection(), "select classid,count(id) as id_count from test group by classid");
+        assert data.sort { it[0] }.equals([[0, 2], [1, 3], [2, 2], [3, 2], [4, 2], [5, 2], [6, 2], [7, 2]]);
     }
 
     @Test
