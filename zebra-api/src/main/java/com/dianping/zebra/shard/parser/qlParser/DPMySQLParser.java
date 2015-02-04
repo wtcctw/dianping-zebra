@@ -20,10 +20,7 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.apache.log4j.Logger;
 
-import com.dianping.zebra.shard.parser.condition.WhereCondition;
-import com.dianping.zebra.shard.parser.qlParser.MySQLWalker.beg_return;
 import com.dianping.zebra.shard.parser.sqlParser.AntlrStringStream;
-import com.dianping.zebra.shard.parser.sqlParser.Select;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunctionRegister;
 import com.dianping.zebra.shard.parser.valueObject.function.FunctionRegister;
 
