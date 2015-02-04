@@ -1,7 +1,7 @@
 package com.dianping.zebra.shard
 
 import com.dianping.zebra.shard.jdbc.ZebraMultiDBBaseTestCase
-import org.junit.Ignore
+import com.dianping.zebra.shard.router.DataSourceRouteException
 import org.junit.Test
 
 import javax.sql.DataSource
@@ -49,10 +49,9 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         return ["ctx-multidb-lifecycle.xml"];
     }
 
-    @Test
-    @Ignore("not support")
+    @Test(expected = Exception.class)
     public void "insert into test (name) values ('test')"() throws Exception {
-        println executeInsert(getZebraDs().getConnection(), "insert into test ( name, score, type, classid) values ('xxx', 1, 'a', 0)")
+        executeInsert(getZebraDs().getConnection(), "insert into test ( name, score, type, classid) values ('xxx', 1, 'a', 0)")
     }
 
     @Test
