@@ -58,7 +58,7 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
-	      boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
+		boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
 		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
@@ -73,46 +73,60 @@ public class CatFilter extends DefaultJdbcFilter {
 			t.addData(sql);
 		}
 
+		Exception executeExp = null;
 		try {
 			T result = chain.execute(source, conn, sql, batchedSql, isBatched, autoCommit, sqlParams, chain);
-
-			SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
-
-			if (singleConnection != null) {
-				Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, singleConnection.getId());
-			}
-			String params = Stringizers.forJson().compact()
-			      .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
-			if (isBatched) {
-				if (batchedSql != null) {
-					for (String bSql : batchedSql) {
-						Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(bSql), Transaction.SUCCESS, params);
-						logSqlLengthEvent(sql);
-					}
-				}
-			} else {
-				if (sql != null) {
-					Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Transaction.SUCCESS, params);
-					logSqlLengthEvent(sql);
-				}
-			}
-
 			t.setStatus(Transaction.SUCCESS);
 			return result;
 		} catch (SQLException exp) {
+			executeExp = exp;
+			Cat.logError(exp);
 			t.setStatus(exp);
 			throw exp;
 		} catch (RuntimeException exp) {
+			executeExp = exp;
+			Cat.logError(exp);
 			t.setStatus(exp);
 			throw exp;
 		} finally {
+			logSqlDatabaseEvent(conn, executeExp);
+			logSqlMethodEvent(sql, batchedSql, isBatched, sqlParams, executeExp);
 			t.complete();
+		}
+	}
+
+	private void logSqlMethodEvent(String sql, List<String> batchedSql, boolean isBatched, Object sqlParams,
+		Exception executeExp) {
+		String params = Stringizers.forJson().compact()
+			.from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
+		if (isBatched) {
+			if (batchedSql != null) {
+				for (String bSql : batchedSql) {
+					Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(bSql),
+						executeExp == null ? Event.SUCCESS : executeExp.getMessage(), params);
+					logSqlLengthEvent(sql, executeExp);
+				}
+			}
+		} else {
+			if (sql != null) {
+				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql),
+					executeExp == null ? Event.SUCCESS : executeExp.getMessage(), params);
+				logSqlLengthEvent(sql, executeExp);
+			}
+		}
+	}
+
+	private void logSqlDatabaseEvent(Connection conn, Exception executeExp) throws SQLException {
+		SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
+		if (singleConnection != null && conn.getMetaData() != null) {
+			Cat.logEvent("SQL.Database", conn.getMetaData().getURL(),
+				executeExp == null ? Event.SUCCESS : executeExp.getMessage(), singleConnection.getId());
 		}
 	}
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+		FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
 		FailOverDataSource.FindMasterDataSourceResult result = chain.findMasterFailOverDataSource(source, chain);
 
 		if (result != null && result.isChangedMaster()) {
@@ -156,6 +170,7 @@ public class CatFilter extends DefaultJdbcFilter {
 			StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
 			transaction.setStatus(Message.SUCCESS);
 		} catch (RuntimeException e) {
+			Cat.logError(e);
 			transaction.setStatus(e);
 			throw e;
 		} finally {
@@ -170,14 +185,15 @@ public class CatFilter extends DefaultJdbcFilter {
 		return result;
 	}
 
-	private void logSqlLengthEvent(String sql) {
+	private void logSqlLengthEvent(String sql, Exception executeExp) {
 		int length = sql == null ? 0 : sql.length();
 
 		int counter = 0;
 		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
 			if (length <= item.getKey()) {
 				if (counter < 4) {
-					Cat.logEvent("SQL.Length", item.getValue(), Message.SUCCESS, "");
+					Cat.logEvent("SQL.Length", item.getValue(),
+						executeExp == null ? Event.SUCCESS : executeExp.getMessage(), "");
 				} else {
 					// > 1M
 					Cat.logEvent("SQL.Length", item.getValue(), "long-sql warning", "");
@@ -197,7 +213,9 @@ public class CatFilter extends DefaultJdbcFilter {
 			chain.refreshGroupDataSource(source, propertiesName, chain);
 			t.setStatus(Message.SUCCESS);
 		} catch (RuntimeException exp) {
+			Cat.logError(exp);
 			t.setStatus(exp);
+			throw exp;
 		} finally {
 			t.complete();
 		}
@@ -212,7 +230,9 @@ public class CatFilter extends DefaultJdbcFilter {
 			t.setStatus(Message.SUCCESS);
 		} catch (RuntimeException exp) {
 			Cat.logEvent("DAL.FailOver", "Failed");
+			Cat.logError(exp);
 			t.setStatus("Fail to find any master database");
+			throw exp;
 		} finally {
 			t.complete();
 		}
