@@ -1,7 +1,6 @@
 package com.dianping.zebra.shard
 
 import com.dianping.zebra.shard.jdbc.ZebraMultiDBBaseTestCase
-import com.dianping.zebra.shard.router.DataSourceRouteException
 import org.junit.Test
 
 import javax.sql.DataSource
@@ -50,7 +49,7 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test(expected = Exception.class)
-    public void "insert into test (name) values ('test')"() throws Exception {
+    public void "! insert into test (name) values ('test')"() throws Exception {
         executeInsert(getZebraDs().getConnection(), "insert into test ( name, score, type, classid) values ('xxx', 1, 'a', 0)")
     }
 
@@ -166,9 +165,10 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
-    public void "select classid,count(id) as id_count from test group by classid"() {
-        def data = executeQuery(getZebraDs().getConnection(), "select classid,count(id) as id_count from test group by classid");
-        assert data.sort { it[0] }.equals([[0, 2], [1, 3], [2, 2], [3, 2], [4, 2], [5, 2], [6, 2], [7, 2]]);
+    public void "select classid,count(id) as id_count from test group by type"() {
+        def data = executeQuery(getZebraDs().getConnection(), "select type,count(id) as id_count from test group by type");
+        println data;
+        assert data.sort { it[0] }.equals([["a", 11], ["b", 6]]);
     }
 
     @Test
