@@ -15,7 +15,6 @@
  */
 package com.dianping.zebra.monitor.sql;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -595,10 +594,10 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 }

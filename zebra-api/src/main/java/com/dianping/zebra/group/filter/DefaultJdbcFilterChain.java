@@ -7,7 +7,6 @@ import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupResultSet;
 import com.dianping.zebra.group.jdbc.GroupStatement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -28,90 +27,75 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 
 	@Override
 	public void closeGroupConnection(GroupConnection source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
-
 	}
 
 	@Override
 	public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
 	}
 
 	@Override
 	public void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
-
 	}
 
 	@Override
 	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
-
 	}
 
 	@Override
-	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
-			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
+	      boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
+		return null;
 	}
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
-		throw new NotImplementedException();
+	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+		return null;
 	}
 
 	@Override
 	public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		return null;
 	}
 
 	@Override
 	public int getOrder() {
-		throw new NotImplementedException();
-
+		return 0;
 	}
 
 	@Override
-	public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain)
-			throws SQLException {
-		throw new NotImplementedException();
+	public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain) throws SQLException {
+		return null;
 	}
 
 	@Override
 	public void init() {
-		throw new NotImplementedException();
 	}
 
 	@Override
 	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
-		throw new NotImplementedException();
 	}
 
 	@Override
 	public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
-		throw new NotImplementedException();
+		return null;
 	}
 
 	@Override
 	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
-		throw new NotImplementedException();
 	}
 
 	@Override
 	public boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		return false;
 	}
 
 	@Override
-	public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
+		return null;
 	}
 
 	@Override
 	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
-		throw new NotImplementedException();
-
 	}
-
 }

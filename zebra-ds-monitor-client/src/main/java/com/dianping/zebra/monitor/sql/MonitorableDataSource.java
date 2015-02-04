@@ -15,8 +15,6 @@
  */
 package com.dianping.zebra.monitor.sql;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -66,7 +64,7 @@ public class MonitorableDataSource implements DataSource {
 	}
 
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

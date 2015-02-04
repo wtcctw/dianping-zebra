@@ -1,15 +1,5 @@
 package com.dianping.zebra.group.filter.wall;
 
-import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.SystemConfigManager;
-import com.dianping.zebra.group.config.SystemConfigManagerFactory;
-import com.dianping.zebra.group.config.system.entity.SystemConfig;
-import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.filter.DefaultJdbcFilter;
-import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.util.StringUtils;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.security.NoSuchAlgorithmException;
@@ -19,7 +9,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
+
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.config.SystemConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
+import com.dianping.zebra.group.config.system.entity.SystemConfig;
+import com.dianping.zebra.group.datasources.SingleConnection;
+import com.dianping.zebra.group.filter.DefaultJdbcFilter;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.util.StringUtils;
 
 /**
  * Created by Dozer on 9/24/14.
@@ -27,18 +25,15 @@ import java.util.regex.Pattern;
 public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
 
-	protected final static Pattern ID_PATTERN = Pattern.compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH
-	      + "})(\\*\\/).*");
+	private static Map<String, String> sqlIDCache = new ConcurrentHashMap<String, String>(1024);
 
-	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
-
-	protected volatile static Set<String> blackList = new HashSet<String>();
-
-	private static Map<String, String> generatedIdCache = new ConcurrentHashMap<String, String>();
-
-	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+	private static Set<String> blackList = new HashSet<String>();
 
 	private SystemConfigManager systemConfigManager;
+
+	public static Set<String> getBlackList() {
+		return blackList;
+	}
 
 	private synchronized void buildBlackListFromSystemConfig(SystemConfig config) {
 		Set<String> newblackList = new HashSet<String>();
@@ -58,47 +53,17 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	protected String generateId(SingleConnection conn, String sql) throws NoSuchAlgorithmException {
-		String token = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
-		if (StringUtils.isBlank(token)) {
-			token = sql;
+		String token = String.format("/*%s*/%s", conn.getId(), sql);
+		String resultId = sqlIDCache.get(String.format("/*%s*/%s", conn.getId(), sql));
+
+		if (resultId != null) {
+			return resultId;
+		} else {
+			resultId = StringUtils.md5(token).substring(0, MAX_ID_LENGTH);
+			sqlIDCache.put(token, resultId);
+
+			return resultId;
 		}
-
-		if (StringUtils.isBlank(token)) {
-			return null;
-		}
-
-		if (conn != null && StringUtils.isNotBlank(conn.getId())) {
-			token = String.format("/*%s*/%s", conn.getId(), token);
-		}
-
-		return generateId(token);
-	}
-
-	private String generateId(String token) throws NoSuchAlgorithmException {
-		String result;
-		boolean needToCache = true;
-		if (token != null && token.length() > 1024) {
-			needToCache = false;
-		}
-		if (generatedIdCache.size() > 1024) {
-			needToCache = false;
-		}
-
-		if (needToCache) {
-			result = generatedIdCache.get(token);
-			if (result != null) {
-				return result;
-			}
-		}
-
-		result = StringUtils.md5(token).substring(0, MAX_ID_LENGTH);
-
-		System.out.println(result);
-		if (needToCache) {
-			generatedIdCache.put(token, result);
-		}
-
-		return result;
 	}
 
 	public int getOrder() {
@@ -108,7 +73,6 @@ public class WallFilter extends DefaultJdbcFilter {
 	@Override
 	public void init() {
 		super.init();
-		this.initWallFilter();
 		this.initBlackList();
 	}
 
@@ -129,28 +93,23 @@ public class WallFilter extends DefaultJdbcFilter {
 		});
 	}
 
-	private void initWallFilter() {
-		String configManagerType = WallFilterConfig.getConfigManagerType();
-		if (StringUtils.isNotBlank(configManagerType)) {
-			this.configManagerType = configManagerType;
-		}
-	}
-
 	@Override
-	public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
+	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
 		if (chain != null) {
-			sql = chain.sql(conn, sql, chain);
+			sql = chain.sql(conn, sql, isPreparedStmt, chain);
 		}
 
-		if (StringUtils.isBlank(sql)) {
-			return sql;
-		}
+		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sql)) {
+			try {
+				String id = generateId(conn, sql);
+				
+				checkBlackList(sql, id);
 
-		try {
-			String id = generateId(conn, sql);
-			checkBlackList(sql, id);
-			return String.format("/*z:%s*/%s", id, sql);
-		} catch (NoSuchAlgorithmException e) {
+				return String.format("/*id:%s*/%s", id, sql);
+			} catch (NoSuchAlgorithmException e) {
+				return sql;
+			}
+		} else {
 			return sql;
 		}
 	}
