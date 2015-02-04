@@ -31,12 +31,6 @@ public class DPMySQLParser {
 	
 	private static Logger logger = Logger.getLogger(DPMySQLParser.class);
 	
-	public static void main(String[] args) throws RecognitionException, IOException {
-		beg_return parsed = parse("select * from Torder");
-		WhereCondition where = ((Select) parsed.obj).getWhere();
-		System.out.println(where);
-	}
-
 	public static MySQLWalker.beg_return parse(String sql) throws RecognitionException, IOException {
 		
 		sql = sql.replaceAll("\\n", " ");
