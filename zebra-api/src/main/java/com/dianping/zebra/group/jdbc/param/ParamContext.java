@@ -73,7 +73,7 @@ public abstract class ParamContext implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return "Param [idx=" + index + ", val=" + Arrays.toString(values) + "]";
+		return Arrays.toString(values);
 	}
 
 }

@@ -1,5 +1,16 @@
 package com.dianping.zebra.monitor.filter;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.sql.DataSource;
+
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -19,23 +30,24 @@ import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.site.helper.Stringizers;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
-
 /**
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends DefaultJdbcFilter {
-	private static final String DAL_CAT_TYPE = "DAL";
+	private static final String CAT_TYPE = "DAL";
 
-	private static final int MAX_CACHED_SQL = 2000;
+	private static final String SQL_NAME = "sql_statement_name";
 
-	private static final int MAX_LENGTH_PER_SQL = 1024 * 10; // about 10k
+	private static final int MAX_ALLOWED_SQL_CHAR = 1024;
+
+	private static final int MAX_ALLOWED_TRUNCATED_SQL_NUM = 2000;
+
+	private static Set<String> cachedTruncatedSqls = Collections.synchronizedSet(new HashSet<String>(
+	      MAX_ALLOWED_TRUNCATED_SQL_NUM));
 
 	private static final Map<Integer, String> SQL_LENGTH_RANGE = new LinkedHashMap<Integer, String>();
 
+	private static final int TOO_LARGE_SQL_LENGTH_INDEX = 3; // > 100k
 	static {
 		SQL_LENGTH_RANGE.put(1024, "<= 1K");
 		SQL_LENGTH_RANGE.put(10240, "<= 10K");
@@ -46,10 +58,6 @@ public class CatFilter extends DefaultJdbcFilter {
 		SQL_LENGTH_RANGE.put(Integer.MAX_VALUE, "> 100M");
 	}
 
-	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
-
-	private Set<String> cachedSqlSet = new HashSet<String>();
-
 	@Override
 	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
 		chain.closeSingleDataSource(source, chain);
@@ -58,14 +66,15 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
-		boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
-		String sqlName = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
+	      boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
+		String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
-			t = Cat.newTransaction("SQL", getCachedSqlName(sql, batchedSql, isBatched));
 			if (isBatched) {
+				t = Cat.newTransaction("SQL", "batched");
 				t.addData(Stringizers.forJson().compact().from(batchedSql));
 			} else {
+				t = Cat.newTransaction("SQL", getCachedTruncatedSql(sql));
 				t.addData(sql);
 			}
 		} else {
@@ -73,98 +82,60 @@ public class CatFilter extends DefaultJdbcFilter {
 			t.addData(sql);
 		}
 
-		Exception executeExp = null;
 		try {
 			T result = chain.execute(source, conn, sql, batchedSql, isBatched, autoCommit, sqlParams, chain);
 			t.setStatus(Transaction.SUCCESS);
+
 			return result;
 		} catch (SQLException exp) {
-			executeExp = exp;
 			Cat.logError(exp);
 			t.setStatus(exp);
-			throw exp;
-		} catch (RuntimeException exp) {
-			executeExp = exp;
-			Cat.logError(exp);
-			t.setStatus(exp);
+
 			throw exp;
 		} finally {
-			logSqlDatabaseEvent(conn, executeExp);
-			logSqlMethodEvent(sql, batchedSql, isBatched, sqlParams, executeExp);
+			try {
+				logSqlDatabaseEvent(conn);
+				logSqlMethodEvent(sqlName, batchedSql, isBatched, sqlParams);
+			} catch (Throwable exp) {
+				Cat.logError(exp);
+			}
+
 			t.complete();
-		}
-	}
-
-	private void logSqlMethodEvent(String sql, List<String> batchedSql, boolean isBatched, Object sqlParams,
-		Exception executeExp) {
-		String params = Stringizers.forJson().compact()
-			.from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
-		if (isBatched) {
-			if (batchedSql != null) {
-				for (String bSql : batchedSql) {
-					Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(bSql),
-						executeExp == null ? Event.SUCCESS : executeExp.getMessage(), params);
-					logSqlLengthEvent(sql, executeExp);
-				}
-			}
-		} else {
-			if (sql != null) {
-				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql),
-					executeExp == null ? Event.SUCCESS : executeExp.getMessage(), params);
-				logSqlLengthEvent(sql, executeExp);
-			}
-		}
-	}
-
-	private void logSqlDatabaseEvent(Connection conn, Exception executeExp) throws SQLException {
-		SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
-		if (singleConnection != null && conn.getMetaData() != null) {
-			Cat.logEvent("SQL.Database", conn.getMetaData().getURL(),
-				executeExp == null ? Event.SUCCESS : executeExp.getMessage(), singleConnection.getId());
 		}
 	}
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-		FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
 		FailOverDataSource.FindMasterDataSourceResult result = chain.findMasterFailOverDataSource(source, chain);
 
 		if (result != null && result.isChangedMaster()) {
 			Cat.logEvent("DAL.Master", "Found-" + result.getDsId());
 		}
+		
 		return result;
 	}
 
-	private String getCachedSqlName(String sql, List<String> batchedSql, boolean isBatch) {
-		if (!isBatch) {
-			if (sql == null) {
-				return null;
-			} else {
-				int len = sql.length();
+	private String getCachedTruncatedSql(String sql) {
+		if (sql == null) {
+			return null;
+		}
 
-				if (len > MAX_LENGTH_PER_SQL) {
-					sql = sql.substring(0, MAX_LENGTH_PER_SQL);
-				}
+		if (sql.length() > MAX_ALLOWED_SQL_CHAR) {
+			sql = sql.substring(0, MAX_ALLOWED_SQL_CHAR);
+		}
 
-				if (!cachedSqlSet.contains(sql) && cachedSqlSet.size() > MAX_CACHED_SQL) {
-					return null;
-				} else {
-					cachedSqlSet.add(sql);
-					return sql;
-				}
-			}
+		if (!cachedTruncatedSqls.contains(sql) && cachedTruncatedSqls.size() > MAX_ALLOWED_TRUNCATED_SQL_NUM) {
+			return null;
 		} else {
-			if (batchedSql == null) {
-				return null;
-			} else {
-				return "batched";
-			}
+			cachedTruncatedSqls.add(sql);
+			return sql;
 		}
 	}
 
 	@Override
 	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
-		Transaction transaction = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Init-" + source.getJdbcRef());
+		Transaction transaction = Cat.newTransaction(CAT_TYPE, "DataSource.Init-" + source.getJdbcRef());
 		try {
 			chain.initGroupDataSource(source, chain);
 			StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
@@ -185,18 +156,23 @@ public class CatFilter extends DefaultJdbcFilter {
 		return result;
 	}
 
-	private void logSqlLengthEvent(String sql, Exception executeExp) {
-		int length = sql == null ? 0 : sql.length();
+	private void logSqlDatabaseEvent(Connection conn) throws SQLException {
+		SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
+		if (singleConnection != null && conn.getMetaData() != null) {
+			Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, singleConnection.getId());
+		}
+	}
+
+	private void logSqlLengthEvent(String sql) {
+		int length = (sql == null) ? 0 : sql.length();
 
 		int counter = 0;
 		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
 			if (length <= item.getKey()) {
-				if (counter < 4) {
-					Cat.logEvent("SQL.Length", item.getValue(),
-						executeExp == null ? Event.SUCCESS : executeExp.getMessage(), "");
+				if (counter < TOO_LARGE_SQL_LENGTH_INDEX) {
+					Cat.logEvent("SQL.Length", item.getValue(), Event.SUCCESS, "");
 				} else {
-					// > 1M
-					Cat.logEvent("SQL.Length", item.getValue(), "long-sql warning", "");
+					Cat.logEvent("SQL.Length", item.getValue(), "long-sql", "length=" + length);
 				}
 				return;
 			}
@@ -205,9 +181,27 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 	}
 
+	private void logSqlMethodEvent(String sql, List<String> batchedSql, boolean isBatched, Object sqlParams) {
+		String params = Stringizers.forJson().compact()
+		      .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
+		if (isBatched) {
+			if (batchedSql != null) {
+				for (String bSql : batchedSql) {
+					Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(bSql), Event.SUCCESS, params);
+					logSqlLengthEvent(sql);
+				}
+			}
+		} else {
+			if (sql != null) {
+				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Event.SUCCESS, params);
+				logSqlLengthEvent(sql);
+			}
+		}
+	}
+
 	@Override
 	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
-		Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "DataSource.Refresh-" + source.getJdbcRef());
+		Transaction t = Cat.newTransaction(CAT_TYPE, "DataSource.Refresh-" + source.getJdbcRef());
 		Cat.logEvent("DAL.Refresh.Property", propertiesName);
 		try {
 			chain.refreshGroupDataSource(source, propertiesName, chain);
@@ -223,7 +217,7 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
-		Transaction t = Cat.newTransaction(DAL_CAT_TYPE, "FailOver");
+		Transaction t = Cat.newTransaction(CAT_TYPE, "FailOver");
 		try {
 			chain.switchFailOverDataSource(source, chain);
 			Cat.logEvent("DAL.FailOver", "Success");
