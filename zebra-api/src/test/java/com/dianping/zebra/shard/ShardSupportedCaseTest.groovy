@@ -153,13 +153,15 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
-    public void "select count(id) from test"() {
-        //todo: not support count!
+    public void "select count(id) as id_count from test"() {
         def count = executeQuery(getZebraDs().getConnection(), "select count(id) as id_count from test")[0][0];
-//        def max = executeQuery(getZebraDs().getConnection(), "select max(id) from test")[0][0];
-//        def min = executeQuery(getZebraDs().getConnection(), "select min(id) from test")[0][0];
-//        def sum = executeQuery(getZebraDs().getConnection(), "select sum(id) from test")[0][0];
-//        def avg = executeQuery(getZebraDs().getConnection(), "select avg(id) from test")[0][0];
+        def max = executeQuery(getZebraDs().getConnection(), "select max(id) as id_max from test")[0][0];
+        def min = executeQuery(getZebraDs().getConnection(), "select min(id) as id_min from test")[0][0];
+        def sum = executeQuery(getZebraDs().getConnection(), "select sum(id) as id_sum from test")[0][0];
+//        def avg = executeQuery(getZebraDs().getConnection(), "select avg(id) as id_avg from test")[0][0];//todo: not support!!
+
+        assert min <= sum / count
+        assert sum / count <= max
     }
 
     @Test
