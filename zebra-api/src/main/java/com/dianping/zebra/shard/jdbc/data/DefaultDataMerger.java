@@ -276,7 +276,7 @@ public class DefaultDataMerger implements DataMerger {
 
 				for (Column col : routerTarget.getColumns().getColumnsList()) {
 					String columnName = col.getAlias() == null ? col.getColumn() : col.getAlias();
-					int columnIndex = actualResultSets.get(resultSetIndex).findColumn(columnName);
+					int columnIndex = actualResultSets.get(resultSetIndex).findColumn(columnName);//todo:count(id) 报错，此时没有字段名
 					Object value = actualResultSets.get(resultSetIndex).getObject(columnIndex);
 					boolean wasNull = actualResultSets.get(resultSetIndex).wasNull();
 					RowId rowId = null;
