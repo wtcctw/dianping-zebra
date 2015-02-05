@@ -19,7 +19,6 @@ public class CatFilterTest {
     public void init() throws SQLException {
         ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
         ds.setJdbcRef("sample.ds.v2");
-        ds.setFilter("cat");
         ds.init();
 
         Sql sql = new Sql(ds.getConnection());

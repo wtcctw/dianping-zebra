@@ -3,13 +3,15 @@ package com.dianping.zebra.group.util;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
+import com.dianping.zebra.group.Constants;
+
 public final class SqlUtils {
 
 	/**
 	 * 用于判断是否是一个select ... for update的sql
 	 */
 	private static final Pattern SELECT_FOR_UPDATE_PATTERN = Pattern.compile("^select\\s+.*\\s+for\\s+update.*$",
-			Pattern.CASE_INSENSITIVE);
+	      Pattern.CASE_INSENSITIVE);
 
 	public static SqlType getSqlType(String sql) throws SQLException {
 		SqlType sqlType = null;
@@ -20,10 +22,10 @@ public final class SqlUtils {
 
 		if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "select")) {
 			if (noCommentsSql.toLowerCase().contains(" for ")
-					&& SELECT_FOR_UPDATE_PATTERN.matcher(noCommentsSql).matches()) {
+			      && SELECT_FOR_UPDATE_PATTERN.matcher(noCommentsSql).matches()) {
 				sqlType = SqlType.SELECT_FOR_UPDATE;
 			} else if (noCommentsSql.toLowerCase().contains("@@identity")
-					|| noCommentsSql.toLowerCase().contains("last_insert_id()")) {
+			      || noCommentsSql.toLowerCase().contains("last_insert_id()")) {
 				sqlType = SqlType.SELECT_FOR_IDENTITY;
 			} else {
 				sqlType = SqlType.SELECT;
@@ -52,8 +54,8 @@ public final class SqlUtils {
 			sqlType = SqlType.EXECUTE;
 		} else {
 			sqlType = SqlType.DEFAULT_SQL_TYPE;
-			//			throw new SQLException(
-			//			      "only select, insert, update, delete,replace,truncate,create,drop,load,merge,call sql is supported");
+			// throw new SQLException(
+			// "only select, insert, update, delete,replace,truncate,create,drop,load,merge,call sql is supported");
 		}
 
 		return sqlType;
@@ -61,6 +63,10 @@ public final class SqlUtils {
 
 	public static String buildSqlType(String sql) {
 		try {
+			if (sql.contains(Constants.SQL_FORCE_WRITE_HINT)) {
+				return "Select";
+			}
+
 			char c = sql.trim().charAt(0);
 			if (c == 's' || c == 'S') {
 				return "Select";
