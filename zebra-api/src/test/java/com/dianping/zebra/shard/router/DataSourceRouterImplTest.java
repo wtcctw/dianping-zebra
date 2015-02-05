@@ -81,7 +81,7 @@ public class DataSourceRouterImplTest {
 		      + "WHERE F.UserID = ? AND F.NoteClass <> 3";
 		List<Object> params = Arrays.asList((Object) 200);
 
-		singleTargetTest(sql, params,"Group_01","DP_GroupFollowNote_ByUserId_0");
+		singleTargetTest(sql, params, "Group_01", "DP_GroupFollowNote_ByUserId_0");
 	}
 
 	@Test
@@ -90,15 +90,11 @@ public class DataSourceRouterImplTest {
 		      + "AND NoteID = ? LIMIT ?, ?";
 		List<Object> params = new ArrayList<Object>();
 		params.add(3); // UserID
-		params.add(5); // NoteID
+		params.add(25); // NoteID
 		params.add(3); // Skip
 		params.add(5); // Max
-		RouterTarget target = router.getTarget(sql, params);
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+
+		singleTargetTest(sql, params, "Group_03", "DP_GroupFollowNote_ByNoteId_25");
 	}
 
 	@Test

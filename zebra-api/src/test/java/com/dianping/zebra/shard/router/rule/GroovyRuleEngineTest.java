@@ -19,4 +19,13 @@ public class GroovyRuleEngineTest {
 		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
 		System.out.println(retVal);
 	}
+	
+	@Test
+	public void testRule1() {
+		RuleEngine ruleEngine = new GroovyRuleEngine("#NoteID#.longValue() % 8");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		valMap.put("NoteID", 25);
+		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
+		System.out.println(retVal);
+	}
 }
