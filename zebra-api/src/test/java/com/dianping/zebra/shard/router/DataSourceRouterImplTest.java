@@ -20,14 +20,6 @@ import com.dianping.zebra.shard.jdbc.MockDataSource;
 public class DataSourceRouterImplTest {
 	private static DataSourceRouter router;
 
-	@BeforeClass
-	public static void setUp() {
-		DataSourceRouterFactory routerFactory = new ClassPathXmlDataSourceRouterFactory("db-router-rule.xml");
-		router = routerFactory.getRouter();
-		router.setDataSourcePool(createDataSourcePool());
-		router.init();
-	}
-
 	private static Map<String, DataSource> createDataSourcePool() {
 		Map<String, DataSource> dsPool = new HashMap<String, DataSource>();
 
@@ -44,6 +36,31 @@ public class DataSourceRouterImplTest {
 		return new MockDataSource(identity);
 	}
 
+	@BeforeClass
+	public static void setUp() {
+		DataSourceRouterFactory routerFactory = new ClassPathXmlDataSourceRouterFactory("db-router-rule.xml");
+		router = routerFactory.getRouter();
+		router.setDataSourcePool(createDataSourcePool());
+		router.init();
+	}
+
+	public void baseTest(String sql, List<Object> params) {
+		RouterTarget target = router.getTarget(sql, params);
+		assertNotNull(target);
+		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		printSql(targetedSqls);
+		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
+		assertTrue(!target.getNewParams().isEmpty());
+	}
+
+	private void printSql(List<TargetedSql> targetedSqls) {
+		for (TargetedSql targetedSql : targetedSqls) {
+			for (String sql : targetedSql.getSqls()) {
+				System.out.println(String.format("[%s]  %s", targetedSql.getDataSourceName(), sql));
+			}
+		}
+	}
+
 	public void singleTargetTest(String sql, List<Object> params, String targetDs, String targetTable) {
 		RouterTarget target = router.getTarget(sql, params);
 		assertNotNull(target);
@@ -55,15 +72,6 @@ public class DataSourceRouterImplTest {
 		TargetedSql targetedSql = targetedSqls.get(0);
 		assertTrue(targetedSql.getDataSourceName().equalsIgnoreCase(targetDs)
 		      && targetedSql.getSqls().get(0).contains(targetTable));
-	}
-
-	public void baseTest(String sql, List<Object> params) {
-		RouterTarget target = router.getTarget(sql, params);
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
 	}
 
 	@Test
@@ -100,12 +108,9 @@ public class DataSourceRouterImplTest {
 	@Test
 	public void testCase4() {
 		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) AND NoteID = ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200, 300);
+
+		singleTargetTest(sql, params, "Group_01", "DP_GroupFollowNote_ByNoteId_12");
 	}
 
 	@Test
@@ -113,116 +118,85 @@ public class DataSourceRouterImplTest {
 		String sql = "SELECT * FROM DP_GroupFollowNote " + "WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) "
 		      + "AND NoteID = ? AND UserID = ? " + "LIMIT ?, ?";
 		// match white list of NodeID's rule
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 100, 200, 3, 5));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200, 100, 200, 3, 5);
+
+		singleTargetTest(sql, params, "Group_00", "DP_GroupFollowNote_ByNoteId_100_103");
 	}
 
 	@Test
 	public void testCase6() {
 		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote "
 		      + "WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) AND NoteID = ? " + "AND UserID = ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 1, 200, 3, 5));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200, 1, 200);
+
+		singleTargetTest(sql, params, "Group_07", "DP_GroupFollowNote_ByNoteId_1");
 	}
 
 	@Test
 	public void testCase7() {
 		String sql = "INSERT INTO DP_GroupFollowNote (NoteID, UserID, NoteClass, ADDTIME, UpdateTime, LastIP, DCashNumber) "
 		      + "VALUES(?, ?, ?, ?, ?, ?, ?)";
-		RouterTarget target = router.getTarget(sql,
-		      Arrays.asList((Object) 200, 100, 3, new Date(), new Date(), "10.1.1.22", "223344422"));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200, 100, 3, new Date(), new Date(), "10.1.1.22", "223344422");
+
+		singleTargetTest(sql, params, "Group_01", "DP_GroupFollowNote_ByNoteId_8");
 	}
 
 	@Test
 	public void testCase8() {
 		String sql = "SELECT * FROM DP_GroupFollowNote WHERE FollowNoteID = ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200);
+
+		baseTest(sql, params);
 	}
 
 	@Test
 	public void testCase9() {
 		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote "
 		      + "WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) AND NoteID = ? " + "AND FollowNoteID <= ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 100, 20));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
-	}
+		List<Object> params = Arrays.asList((Object) 200, 100, 20);
 
+		singleTargetTest(sql, params, "Group_00", "DP_GroupFollowNote_ByNoteId_100_103");
+	}
+	
 	@Test
 	public void testCase10() {
 		String sql = "SELECT COUNT(DISTINCT(UserID)) FROM DP_GroupFollowNote WHERE NoteID = ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200);
+
+		singleTargetTest(sql, params, "Group_01", "DP_GroupFollowNote_ByNoteId_8");
 	}
 
 	@Test
 	public void testCase11() {
 		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote WHERE NoteID = ? AND UserID = ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200, 300);
+
+		singleTargetTest(sql, params, "Group_01", "DP_GroupFollowNote_ByNoteId_8");
 	}
 
 	@Test
 	public void testCase12() {
 		String sql = "SELECT * FROM DP_GroupFollowNote WHERE NoteID = ? AND NoteClass = 1 ORDER BY FollowNoteID DESC LIMIT 1";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200);
+
+		singleTargetTest(sql, params, "Group_01", "DP_GroupFollowNote_ByNoteId_8");
 	}
 
 	@Test
 	public void testCase13() {
 		String sql = "SELECT COUNT(FollowNoteID) FROM DP_GroupFollowNote F INNER JOIN DP_GroupNote N ON F.NoteID = N.NoteID AND N.GroupID = ? AND N.Status = 1 "
 		      + "WHERE F.UserID = ? AND F.NoteClass = 1";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200, 300);
+
+		singleTargetTest(sql, params, "Group_01", "DP_GroupFollowNote_ByUserId_4");
 	}
 
 	@Test
 	public void testCase14() {
 		String sql = "UPDATE DP_GroupFollowNote SET DCashNumber = DCashNumber + ? WHERE FollowNoteID = ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200, 300);
+
+		baseTest(sql, params);
 	}
 
 	@Test
@@ -231,42 +205,24 @@ public class DataSourceRouterImplTest {
 		      + "INNER JOIN DP_GroupFollowNote GFN ON GN.NoteID = GFN.NoteID "
 		      + "WHERE (GN.Status = 1 OR (GN.Status = 3 AND GN.UserID = ?)) AND GN.UserID <> ? "
 		      + "AND GFN.UserID = ? AND GNF.NoteClass = 1";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 200, 300, 400));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) 200, 300, 400);
+
+		singleTargetTest(sql, params, "Group_02", "DP_GroupFollowNote_ByUserId_0");
 	}
 
 	@Test
 	public void testCase16() {
 		String sql = "UPDATE DP_GroupFollowNote SET UpdateTime = Now(), LastIP = ? WHERE FollowNoteID = ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) "10.1.1.22", 300));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		List<Object> params = Arrays.asList((Object) "10.1.1.22", 300);
+
+		baseTest(sql, params);
 	}
 
 	@Test
 	public void testCase17() {
 		String sql = "UPDATE DP_GroupFollowNote SET NoteClass = ? WHERE  FollowNoteID = ?";
-		RouterTarget target = router.getTarget(sql, Arrays.asList((Object) 3, 300));
-		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
-		printSql(targetedSqls);
-		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
-	}
+		List<Object> params = Arrays.asList((Object) 3, 300);
 
-	private void printSql(List<TargetedSql> targetedSqls) {
-		for (TargetedSql targetedSql : targetedSqls) {
-			for (String sql : targetedSql.getSqls()) {
-				System.out.println(String.format("[%s]  %s", targetedSql.getDataSourceName(), sql));
-			}
-		}
+		baseTest(sql, params);
 	}
-
 }
