@@ -121,6 +121,8 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 ### 2.6.5
 * [-] 删除了DAL中无用的配置
 * [+] 添加了forceWriteOnLogin这个配置项来关闭登录用户走写库的逻辑
+* [/] 修正了SQL的CAT打点丢失Exception的StackTrace的bug
+* [/] 修正SQL黑名单只对PreparedStatement进行拦截，不再对Statement进行拦截
 
 ### 2.6.4
 * [/] 修正了zebra-ds-monitor-client的若干bug
