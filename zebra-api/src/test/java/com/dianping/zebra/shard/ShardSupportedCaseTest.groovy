@@ -169,6 +169,43 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     @Test
+    public void "select * from test where id = 3 and classid = 3"() {
+        //删光 class 维度的数据
+        assert executeUpdate(getInnerDs("class0").getConnection(), "delete from test_class0") > 0;
+        assert executeUpdate(getInnerDs("class0").getConnection(), "delete from test_class1") > 0;
+        assert executeUpdate(getInnerDs("class1").getConnection(), "delete from test_class2") > 0;
+        assert executeUpdate(getInnerDs("class1").getConnection(), "delete from test_class3") > 0;
+        assert executeUpdate(getInnerDs("class2").getConnection(), "delete from test_class4") > 0;
+        assert executeUpdate(getInnerDs("class2").getConnection(), "delete from test_class5") > 0;
+        assert executeUpdate(getInnerDs("class3").getConnection(), "delete from test_class6") > 0;
+        assert executeUpdate(getInnerDs("class3").getConnection(), "delete from test_class7") > 0;
+
+        //分区成功
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid = 3").size() > 0;
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid > 2").size() > 0;
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid <> 2").size() > 0;
+
+        //分区失败，直接到主维度全表扫描
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 or classid = 3").size() == 2;
+    }
+
+    @Test
+    public void "select * from test where classid = 3"() {
+        //删光 id 维度的数据
+        assert executeUpdate(getInnerDs("id0").getConnection(), "delete from test_0") > 0;
+        assert executeUpdate(getInnerDs("id0").getConnection(), "delete from test_1") > 0;
+        assert executeUpdate(getInnerDs("id1").getConnection(), "delete from test_2") > 0;
+        assert executeUpdate(getInnerDs("id1").getConnection(), "delete from test_3") > 0;
+        assert executeUpdate(getInnerDs("id2").getConnection(), "delete from test_4") > 0;
+        assert executeUpdate(getInnerDs("id2").getConnection(), "delete from test_5") > 0;
+        assert executeUpdate(getInnerDs("id3").getConnection(), "delete from test_6") > 0;
+        assert executeUpdate(getInnerDs("id3").getConnection(), "delete from test_7") > 0;
+
+        //分区成功
+        assert executeQuery(getZebraDs().getConnection(), "select * from test where classid = 3").size() > 0;
+    }
+
+    @Test
     public void "update test set name = 'newName'"() {
         def baseUpdate = "update test set name = 'newName' ";
         def baseQuery = "select name from test "
