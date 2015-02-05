@@ -17,8 +17,8 @@ public class DpdlReadWriteStrategyImplTest {
 		trackerContext.setExtension(new HashMap<String, Object>());
 		ExecutionContextHolder.setTrackerContext(trackerContext);
 
-		DpdlReadWriteStrategyImpl target = new DpdlReadWriteStrategyImpl();
-		Assert.assertFalse(target.forceReadFromMaster());
+		DpdlReadWriteStrategy target = new DpdlReadWriteStrategy();
+		Assert.assertFalse(target.shouldReadFromMaster());
 	}
 
 	@Test
@@ -28,17 +28,17 @@ public class DpdlReadWriteStrategyImplTest {
 		trackerContext.setExtension(new HashMap<String, Object>());
 		ExecutionContextHolder.setTrackerContext(trackerContext);
 
-		DpdlReadWriteStrategyImpl target = new DpdlReadWriteStrategyImpl();
+		DpdlReadWriteStrategy target = new DpdlReadWriteStrategy();
 		target.setGroupDataSourceConfig(new GroupDataSourceConfig());
 
-		Assert.assertTrue(target.forceReadFromMaster());
+		Assert.assertTrue(target.shouldReadFromMaster());
 	}
 
 	@Test
 	public void test_not_auth() throws InterruptedException {
 		System.out.println(Thread.currentThread().getId());
 
-		DpdlReadWriteStrategyImpl target = new DpdlReadWriteStrategyImpl();
-		Assert.assertFalse(target.forceReadFromMaster());
+		DpdlReadWriteStrategy target = new DpdlReadWriteStrategy();
+		Assert.assertFalse(target.shouldReadFromMaster());
 	}
 }
