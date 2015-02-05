@@ -42,13 +42,13 @@ import com.dianping.zebra.shard.router.TargetedSql;
  * @author Leo Liang
  * 
  */
-public class DPStatement implements Statement {
+public class ShardStatement implements Statement {
 
-	private static final Logger log = Logger.getLogger(DPStatement.class);
+	private static final Logger log = Logger.getLogger(ShardStatement.class);
 
 	private DataSourceRouter router;
 
-	private DPConnection connectionWrapper;
+	private ShardConnection connectionWrapper;
 
 	private boolean closed;
 
@@ -183,7 +183,7 @@ public class DPStatement implements Statement {
 		if (getConnectionWrapper().getGeneratedKey() != null && sql != null
 		      && sql.indexOf(SELECT_GENERATEDKEY_SQL_PATTERN) >= 0) {
 
-			DPResultSet rs = new DPResultSet();
+			ShardResultSet rs = new ShardResultSet();
 			rs.setStatementWrapper(this);
 			DataPool dataPool = new DataPool();
 			List<ResultSet> rsList = new ArrayList<ResultSet>();
@@ -381,7 +381,7 @@ public class DPStatement implements Statement {
 
 		RouterTarget routerTarget = routingAndCheck(sql, null);
 
-		DPResultSet rs = new DPResultSet();
+		ShardResultSet rs = new ShardResultSet();
 		rs.setStatementWrapper(this);
 		rs.setRouterTarget(routerTarget);
 
@@ -485,7 +485,7 @@ public class DPStatement implements Statement {
 		return connectionWrapper;
 	}
 
-	public DPConnection getConnectionWrapper() {
+	public ShardConnection getConnectionWrapper() {
 		return connectionWrapper;
 	}
 
@@ -748,7 +748,7 @@ public class DPStatement implements Statement {
 		this.autoCommit = autoCommit;
 	}
 
-	public void setConnectionWrapper(DPConnection dpConnection) {
+	public void setConnectionWrapper(ShardConnection dpConnection) {
 		this.connectionWrapper = dpConnection;
 	}
 

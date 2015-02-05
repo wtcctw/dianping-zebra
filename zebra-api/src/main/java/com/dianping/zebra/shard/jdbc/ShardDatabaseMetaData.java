@@ -20,7 +20,7 @@ import java.sql.*;
  * @author Leo Liang
  * 
  */
-public class DPDatabaseMetaData implements DatabaseMetaData {
+public class ShardDatabaseMetaData implements DatabaseMetaData {
 
 	/*
 	 * (non-Javadoc)

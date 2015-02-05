@@ -50,18 +50,18 @@ public class StatementTest extends ZebraBaseTestCase {
 	}
 
 	protected Object getTestObj() {
-		return new DPStatement();
+		return new ShardStatement();
 	}
 
 	@Test
 	public void testAddBatch() throws Exception {
-		DPStatement stmt = new DPStatement();
+		ShardStatement stmt = new ShardStatement();
 		String[] batchSqls = new String[] { "SELECT * FROM A", "SELECT * FROM B" };
 		for (String sql : batchSqls) {
 			stmt.addBatch(sql);
 		}
 
-		Field field = DPStatement.class.getDeclaredField("batchedArgs");
+		Field field = ShardStatement.class.getDeclaredField("batchedArgs");
 		field.setAccessible(true);
 		@SuppressWarnings("unchecked")
 		List<String> batchedArgs = (List<String>) field.get(stmt);
@@ -74,7 +74,7 @@ public class StatementTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testclearBatch() throws Exception {
-		DPStatement stmt = new DPStatement();
+		ShardStatement stmt = new ShardStatement();
 		String[] batchSqls = new String[] { "SELECT * FROM A", "SELECT * FROM B" };
 		for (String sql : batchSqls) {
 			stmt.addBatch(sql);
@@ -82,7 +82,7 @@ public class StatementTest extends ZebraBaseTestCase {
 
 		stmt.clearBatch();
 
-		Field field = DPStatement.class.getDeclaredField("batchedArgs");
+		Field field = ShardStatement.class.getDeclaredField("batchedArgs");
 		field.setAccessible(true);
 		@SuppressWarnings("unchecked")
 		List<String> batchedArgs = (List<String>) field.get(stmt);
@@ -92,7 +92,7 @@ public class StatementTest extends ZebraBaseTestCase {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testClose() throws Exception {
-		DPStatement stmt = new DPStatement();
+		ShardStatement stmt = new ShardStatement();
 
 		final ResultSet rs1 = context.mock(ResultSet.class, "rs1");
 		final ResultSet rs2 = context.mock(ResultSet.class, "rs2");
@@ -106,11 +106,11 @@ public class StatementTest extends ZebraBaseTestCase {
 		List<Statement> actualStmts = new ArrayList<Statement>();
 		actualStmts.add(stmt1);
 		actualStmts.add(stmt2);
-		Field field = DPStatement.class.getDeclaredField("actualStatements");
+		Field field = ShardStatement.class.getDeclaredField("actualStatements");
 		field.setAccessible(true);
 		field.set(stmt, actualStmts);
 
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		stmt.setConnectionWrapper(conn);
 		Set<Statement> attachedStatements = new HashSet<Statement>();
 		attachedStatements.add(stmt);
@@ -138,7 +138,7 @@ public class StatementTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testCloseThrowException() throws Exception {
-		DPStatement stmt = new DPStatement();
+		ShardStatement stmt = new ShardStatement();
 
 		final ResultSet rs1 = context.mock(ResultSet.class, "rs1");
 		final ResultSet rs2 = context.mock(ResultSet.class, "rs2");
@@ -152,11 +152,11 @@ public class StatementTest extends ZebraBaseTestCase {
 		List<Statement> actualStmts = new ArrayList<Statement>();
 		actualStmts.add(stmt1);
 		actualStmts.add(stmt2);
-		Field field = DPStatement.class.getDeclaredField("actualStatements");
+		Field field = ShardStatement.class.getDeclaredField("actualStatements");
 		field.setAccessible(true);
 		field.set(stmt, actualStmts);
 
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		stmt.setConnectionWrapper(conn);
 		Set<Statement> attachedStatements = new HashSet<Statement>();
 		attachedStatements.add(stmt);
@@ -187,7 +187,7 @@ public class StatementTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testCloseThrowException2() throws Exception {
-		DPStatement stmt = new DPStatement();
+		ShardStatement stmt = new ShardStatement();
 
 		final ResultSet rs1 = context.mock(ResultSet.class, "rs1");
 		final ResultSet rs2 = context.mock(ResultSet.class, "rs2");
@@ -201,11 +201,11 @@ public class StatementTest extends ZebraBaseTestCase {
 		List<Statement> actualStmts = new ArrayList<Statement>();
 		actualStmts.add(stmt1);
 		actualStmts.add(stmt2);
-		Field field = DPStatement.class.getDeclaredField("actualStatements");
+		Field field = ShardStatement.class.getDeclaredField("actualStatements");
 		field.setAccessible(true);
 		field.set(stmt, actualStmts);
 
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		stmt.setConnectionWrapper(conn);
 		Set<Statement> attachedStatements = new HashSet<Statement>();
 		attachedStatements.add(stmt);

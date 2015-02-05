@@ -36,11 +36,11 @@ import java.util.Map;
  * @author Leo Liang
  * 
  */
-public class DPResultSet implements ResultSet {
+public class ShardResultSet implements ResultSet {
 
-	private static Logger log = Logger.getLogger(DPResultSet.class);
+	private static Logger log = Logger.getLogger(ShardResultSet.class);
 
-	private DPStatement statementWrapper;
+	private ShardStatement statementWrapper;
 
 	private DataPool dataPool = new DataPool();
 
@@ -847,7 +847,7 @@ public class DPResultSet implements ResultSet {
 		return statementWrapper;
 	}
 
-	public DPStatement getStatementWrapper() {
+	public ShardStatement getStatementWrapper() {
 		return statementWrapper;
 	}
 
@@ -1263,7 +1263,7 @@ public class DPResultSet implements ResultSet {
 		this.routerTarget = routerTarget;
 	}
 
-	public void setStatementWrapper(DPStatement statementWrapper) {
+	public void setStatementWrapper(ShardStatement statementWrapper) {
 		this.statementWrapper = statementWrapper;
 	}
 

@@ -32,9 +32,9 @@ import java.util.*;
  *
  * @author Leo Liang
  */
-public class DPPreparedStatement extends DPStatement implements PreparedStatement {
+public class ShardPreparedStatement extends ShardStatement implements PreparedStatement {
 
-	private static final Logger log = Logger.getLogger(DPPreparedStatement.class);
+	private static final Logger log = Logger.getLogger(ShardPreparedStatement.class);
 
 	private String sql;
 
@@ -201,7 +201,7 @@ public class DPPreparedStatement extends DPStatement implements PreparedStatemen
 
 		rewriteAndMergeParms(routerTarget.getNewParams());
 
-		DPResultSet rs = new DPResultSet();
+		ShardResultSet rs = new ShardResultSet();
 		rs.setStatementWrapper(this);
 		rs.setRouterTarget(routerTarget);
 

@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  *
  * @author Leo Liang
  */
-public class DPDataSource implements DataSource {
+public class ShardDataSource implements DataSource {
 
 	private Map<String, DataSource> dataSourcePool;
 
@@ -46,7 +46,7 @@ public class DPDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection() {
-		DPConnection connection = new DPConnection();
+		ShardConnection connection = new ShardConnection();
 		connection.setRouter(router);
 		connection.setPerformanceMonitorSwitchOn(performanceMonitorSwitchOn);
 		return connection;
@@ -59,7 +59,7 @@ public class DPDataSource implements DataSource {
 	 */
 	@Override
 	public Connection getConnection(String username, String password) {
-		DPConnection connection = new DPConnection(username, password);
+		ShardConnection connection = new ShardConnection(username, password);
 		connection.setRouter(router);
 		connection.setPerformanceMonitorSwitchOn(performanceMonitorSwitchOn);
 		return connection;

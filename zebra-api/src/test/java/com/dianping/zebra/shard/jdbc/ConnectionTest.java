@@ -46,12 +46,12 @@ public class ConnectionTest extends ZebraBaseTestCase {
 	}
 
 	protected Object getTestObj() {
-		return new DPConnection();
+		return new ShardConnection();
 	}
 
 	@Test
 	public void testClose() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -89,7 +89,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 //	@Test
 	public void testCloseThrowException() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -130,7 +130,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 //	@Test
 	public void testCloseThrowException2() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -171,7 +171,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testCommit() throws Exception {
-      DPConnection conn = new DPConnection();
+      ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -198,7 +198,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 //	@Test
 	public void testCommitThrowException() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -231,7 +231,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testCloseAutoCommitTrue() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -258,38 +258,38 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testCreateStatement() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.createStatement();
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPStatement));
+		Assert.assertTrue((stmt instanceof ShardStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testCreateStatement2() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.createStatement(ResultSet.FETCH_FORWARD, ResultSet.CONCUR_READ_ONLY);
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPStatement));
+		Assert.assertTrue((stmt instanceof ShardStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testCreateStatement3() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.createStatement(ResultSet.FETCH_FORWARD, ResultSet.CONCUR_READ_ONLY,
 				ResultSet.HOLD_CURSORS_OVER_COMMIT);
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPStatement));
+		Assert.assertTrue((stmt instanceof ShardStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testCreateStatement4() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		conn.close();
 		try {
 			conn.createStatement(ResultSet.FETCH_FORWARD, ResultSet.CONCUR_READ_ONLY,
@@ -303,76 +303,76 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testGetMetaData() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		DatabaseMetaData meta = conn.getMetaData();
 		Assert.assertNotNull(meta);
-		Assert.assertTrue((meta instanceof DPDatabaseMetaData));
+		Assert.assertTrue((meta instanceof ShardDatabaseMetaData));
 	}
 
 	@Test
 	public void testPrepareStatement() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.prepareStatement("SELECT * FROM A");
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPPreparedStatement));
+		Assert.assertTrue((stmt instanceof ShardPreparedStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testPrepareStatement2() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.prepareStatement("SELECT * FROM A", Statement.NO_GENERATED_KEYS);
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPPreparedStatement));
+		Assert.assertTrue((stmt instanceof ShardPreparedStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testPrepareStatement3() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.prepareStatement("SELECT * FROM A", new int[] {});
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPPreparedStatement));
+		Assert.assertTrue((stmt instanceof ShardPreparedStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testPrepareStatement4() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.prepareStatement("SELECT * FROM A", new String[] {});
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPPreparedStatement));
+		Assert.assertTrue((stmt instanceof ShardPreparedStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testPrepareStatement5() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.prepareStatement("SELECT * FROM A", ResultSet.FETCH_FORWARD, ResultSet.CONCUR_READ_ONLY);
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPPreparedStatement));
+		Assert.assertTrue((stmt instanceof ShardPreparedStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testPrepareStatement6() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 		Statement stmt = conn.prepareStatement("SELECT * FROM A", ResultSet.FETCH_FORWARD, ResultSet.CONCUR_READ_ONLY,
 				ResultSet.HOLD_CURSORS_OVER_COMMIT);
 		Assert.assertNotNull(stmt);
-		Assert.assertTrue((stmt instanceof DPPreparedStatement));
+		Assert.assertTrue((stmt instanceof ShardPreparedStatement));
 		Assert.assertEquals(1, conn.getAttachedStatements().size());
 		Assert.assertTrue(conn.getAttachedStatements().contains(stmt));
 	}
 
 	@Test
 	public void testRollback() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -399,7 +399,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 //	@Test
 	public void testRollbackThrowException() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -432,7 +432,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testRollbackClosed() throws Exception {
-		DPConnection conn = new DPConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");

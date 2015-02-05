@@ -32,7 +32,7 @@ import org.junit.Test;
 public class DataSourceTest extends ZebraBaseTestCase {
 	@Test
 	public void testInitWithoutDataSourcePool() {
-		DPDataSource dataSource = new DPDataSource();
+		ShardDataSource dataSource = new ShardDataSource();
 		try {
 			dataSource.init();
 			Assert.fail("DPDataSource can't init without dataSourcePool");
@@ -43,7 +43,7 @@ public class DataSourceTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testInitWithoutDataSourcePool2() {
-		DPDataSource dataSource = new DPDataSource();
+		ShardDataSource dataSource = new ShardDataSource();
 		try {
 			dataSource.setDataSourcePool(new HashMap<String, DataSource>());
 			dataSource.init();
@@ -55,7 +55,7 @@ public class DataSourceTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testInitWithoutRouterFactory() {
-		DPDataSource dataSource = new DPDataSource();
+		ShardDataSource dataSource = new ShardDataSource();
 		try {
 			Map<String, DataSource> dataSourcePool = new HashMap<String, DataSource>();
 			dataSourcePool.put("mock", new MockDataSource("mock"));
@@ -69,18 +69,18 @@ public class DataSourceTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testGetConnection() {
-		DPDataSource dataSource = new DPDataSource();
+		ShardDataSource dataSource = new ShardDataSource();
 		Connection conn = dataSource.getConnection();
 		Assert.assertNotNull(conn);
-		Assert.assertTrue((conn instanceof DPConnection));
+		Assert.assertTrue((conn instanceof ShardConnection));
 	}
 
 	@Test
 	public void testGetConnection2() {
-		DPDataSource dataSource = new DPDataSource();
+		ShardDataSource dataSource = new ShardDataSource();
 		Connection conn = dataSource.getConnection("leo", "test");
 		Assert.assertNotNull(conn);
-		Assert.assertTrue((conn instanceof DPConnection));
+		Assert.assertTrue((conn instanceof ShardConnection));
 	}
 
 	protected String[] getSupportedOps() {
@@ -89,7 +89,7 @@ public class DataSourceTest extends ZebraBaseTestCase {
 	}
 
 	protected Object getTestObj() {
-		return new DPDataSource();
+		return new ShardDataSource();
 	}
 
 }

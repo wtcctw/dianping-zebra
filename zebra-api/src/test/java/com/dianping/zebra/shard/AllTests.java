@@ -10,8 +10,7 @@ import com.dianping.zebra.shard.router.DataSourceRouterImplTest;
 @SuiteClasses({
 	
 	//router
-	DataSourceRouterImplTest.class
-	
+	DataSourceRouterImplTest.class,
 	
 })
 public class AllTests {

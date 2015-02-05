@@ -47,7 +47,7 @@ public class ResultSetTest extends ZebraBaseTestCase {
 	 */
 	@Override
 	protected Object getTestObj() {
-		return new DPResultSet();
+		return new ShardResultSet();
 	}
 
 }
