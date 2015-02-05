@@ -79,11 +79,9 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
         whereCondition.each {
             def sql = "select classid from test ${it} order by classid";
-            println sql;
             def data = executeQuery(getZebraDs().getConnection(), sql);
             def lastClassid = null;
 
-            println data;
             data.each {
                 if (lastClassid != null) {
                     assert it[0] >= lastClassid;
@@ -167,7 +165,6 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     @Test
     public void "select classid,count(id) as id_count from test group by type"() {
         def data = executeQuery(getZebraDs().getConnection(), "select type,count(id) as id_count from test group by type");
-        println data;
         assert data.sort { it[0] }.equals([["a", 11], ["b", 6]]);
     }
 
@@ -185,7 +182,6 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         ];
 
         whereCondiction.each {
-            println "${baseUpdate} ${it}"
             assert executeUpdate(getZebraDs().getConnection(), "${baseUpdate} ${it}") > 0;
             executeQuery(getZebraDs().getConnection(), "${baseQuery} ${it}").each {
                 assert it[0] == "newName";
@@ -207,7 +203,6 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         ];
 
         whereCondiction.each {
-            println "${baseUpdate} ${it}"
             assert executeUpdate(getZebraDs().getConnection(), "${baseUpdate} ${it}") > 0;
             assert executeQuery(getZebraDs().getConnection(), "${baseQuery} ${it}").size() == 0;
         };
@@ -227,11 +222,14 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     protected def executeInsert(Connection conn, String sql, boolean closeConnection = true) {
+        println sql;
         Statement stmt;
         try {
             stmt = conn.createStatement();
             stmt.executeUpdate(sql);
-            return readResultSet(stmt.getGeneratedKeys());
+            def result = readResultSet(stmt.getGeneratedKeys());
+            println result;
+            return result;
         } finally {
             closeAll(stmt, conn);
             if (closeConnection) {
@@ -242,10 +240,13 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     protected int executeUpdate(Connection conn, String sql, boolean closeConnection = true) {
+        println sql;
         Statement stmt;
         try {
             stmt = conn.createStatement();
-            return stmt.executeUpdate(sql);
+            def result = stmt.executeUpdate(sql);
+            println result;
+            return result;
         } finally {
             closeAll(stmt, conn);
             if (closeConnection) {
@@ -256,12 +257,15 @@ class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     protected List<List<Object>> executeQuery(Connection conn, String sql, boolean closeConnection = true) {
+        println sql;
         Statement stmt;
         ResultSet resultSet;
         try {
             stmt = conn.createStatement();
             resultSet = stmt.executeQuery(sql);
-            return readResultSet(resultSet);
+            def result = readResultSet(resultSet);
+            println result;
+            return result;
         } finally {
             closeAll(resultSet, stmt);
             if (closeConnection) {
