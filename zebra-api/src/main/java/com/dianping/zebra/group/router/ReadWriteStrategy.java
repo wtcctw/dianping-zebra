@@ -11,7 +11,8 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 /**
  * @author Leo Liang
  */
-public interface CustomizedReadWriteStrategy {
-	boolean forceReadFromMaster();
+public interface ReadWriteStrategy {
+	boolean shouldReadFromMaster();
+
 	void setGroupDataSourceConfig(GroupDataSourceConfig config);
 }

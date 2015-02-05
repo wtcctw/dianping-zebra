@@ -6,10 +6,10 @@ import org.junit.*;
 public class CustomizedReadWriteStrategyWrapperTest {
 	@Test
 	public void test_wrapper_true(){
-		CustomizedReadWriteStrategyWrapper wrapper = new CustomizedReadWriteStrategyWrapper();
-		wrapper.addStrategy(new CustomizedReadWriteStrategy() {
+		ReadWriteStrategyWrapper wrapper = new ReadWriteStrategyWrapper();
+		wrapper.addStrategy(new ReadWriteStrategy() {
 			@Override
-			public boolean forceReadFromMaster() {
+			public boolean shouldReadFromMaster() {
 				return false;
 			}
 
@@ -18,9 +18,9 @@ public class CustomizedReadWriteStrategyWrapperTest {
 			}
 		});
 		
-		wrapper.addStrategy(new CustomizedReadWriteStrategy() {
+		wrapper.addStrategy(new ReadWriteStrategy() {
 			@Override
-			public boolean forceReadFromMaster() {
+			public boolean shouldReadFromMaster() {
 				return true;
 			}
 
@@ -29,15 +29,15 @@ public class CustomizedReadWriteStrategyWrapperTest {
 			}
 		});
 		
-		Assert.assertTrue(wrapper.forceReadFromMaster());
+		Assert.assertTrue(wrapper.shouldReadFromMaster());
 	}
 	
 	@Test
 	public void test_wrapper_false(){
-		CustomizedReadWriteStrategyWrapper wrapper = new CustomizedReadWriteStrategyWrapper();
-		wrapper.addStrategy(new CustomizedReadWriteStrategy() {
+		ReadWriteStrategyWrapper wrapper = new ReadWriteStrategyWrapper();
+		wrapper.addStrategy(new ReadWriteStrategy() {
 			@Override
-			public boolean forceReadFromMaster() {
+			public boolean shouldReadFromMaster() {
 				return false;
 			}
 
@@ -46,9 +46,9 @@ public class CustomizedReadWriteStrategyWrapperTest {
 			}
 		});
 		
-		wrapper.addStrategy(new CustomizedReadWriteStrategy() {
+		wrapper.addStrategy(new ReadWriteStrategy() {
 			@Override
-			public boolean forceReadFromMaster() {
+			public boolean shouldReadFromMaster() {
 				return false;
 			}
 
@@ -57,6 +57,6 @@ public class CustomizedReadWriteStrategyWrapperTest {
 			}
 		});
 		
-		Assert.assertTrue(!wrapper.forceReadFromMaster());
+		Assert.assertTrue(!wrapper.shouldReadFromMaster());
 	}
 }

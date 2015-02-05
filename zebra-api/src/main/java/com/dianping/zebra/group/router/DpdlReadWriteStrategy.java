@@ -6,12 +6,12 @@ import org.apache.log4j.Logger;
 
 import java.lang.reflect.Method;
 
-public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
+public class DpdlReadWriteStrategy implements ReadWriteStrategy {
+	private static final Logger logger = LogManager.getLogger(DpdlReadWriteStrategy.class);
+
 	private static Method getContextMethod = null;
 
 	private static Method isAuthenticatedMethod = null;
-
-	private static boolean serviceFlag = false;
 
 	private GroupDataSourceConfig config;
 
@@ -24,19 +24,13 @@ public class DpdlReadWriteStrategyImpl implements CustomizedReadWriteStrategy {
 			Class<?> contextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
 			isAuthenticatedMethod = contextClass.getDeclaredMethod("isAuthenticated", new Class[] {});
 			isAuthenticatedMethod.setAccessible(true);
-
-			serviceFlag = true;
-		} catch (ClassNotFoundException ignore) {
-		} catch (SecurityException ignore) {
-		} catch (NoSuchMethodException ignore) {
+		} catch (Throwable ignore) {
 		}
 	}
 
-	private final Logger logger = LogManager.getLogger(this.getClass());
-
 	@Override
-	public boolean forceReadFromMaster() {
-		if (serviceFlag && config != null && config.getForceWriteOnLogin()) {
+	public boolean shouldReadFromMaster() {
+		if (config != null && config.getForceWriteOnLogin()) {
 			try {
 				Object context = getContextMethod.invoke(null);
 				if (context != null) {

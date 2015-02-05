@@ -17,8 +17,8 @@ import com.dianping.zebra.group.filter.FilterManagerFactory;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
-import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
-import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapper;
+import com.dianping.zebra.group.router.ReadWriteStrategy;
+import com.dianping.zebra.group.router.ReadWriteStrategyWrapper;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.JDBCExceptionUtils;
@@ -59,7 +59,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	protected FailOverDataSource writeDataSource;
 
-	protected CustomizedReadWriteStrategy customizedReadWriteStrategy;
+	protected ReadWriteStrategyWrapper readWriteStrategyWrapper;
 
 	protected volatile boolean init = false;
 
@@ -247,7 +247,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private GroupConnection getConnectionOrigin(String username, String password) {
-		return new GroupConnection(readDataSource, writeDataSource, customizedReadWriteStrategy, routerType, filters);
+		return new GroupConnection(readDataSource, writeDataSource, readWriteStrategyWrapper, routerType, filters);
 	}
 
 	private Map<String, DataSourceConfig> getFailoverConfig(Map<String, DataSourceConfig> configs) {
@@ -323,13 +323,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 					if (index < filters.size()) {
 						filters.get(index++).initGroupDataSource(source, chain);
 					} else {
-						source.initOrigin();
+						source.initInternal();
 					}
 				}
 			};
 			chain.initGroupDataSource(this, chain);
 		} else {
-			initOrigin();
+			initInternal();
 		}
 	}
 
@@ -343,6 +343,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	private void initDataSources() {
 		try {
+			SingleDataSourceManagerFactory.getDataSourceManager().init();
+
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
 			      this.filters, systemConfigManager.getSystemConfig().getRetryTimes());
 			this.readDataSource.init();
@@ -363,31 +365,29 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.filters = FilterManagerFactory.getFilterManager().loadFilters(this.groupConfig.getFilters());
 	}
 
-	private void initOrigin() {
-		SingleDataSourceManagerFactory.getDataSourceManager().init();
+	private void initInternal() {
 		initDataSources();
-		loadCustomizedReadWriteStrategy();
+		initReadWriteStrategy();
+
 		this.init = true;
+
 		logger.info(String.format("GroupDataSource(%s) successfully initialized.", jdbcRef));
 	}
 
-	private void loadCustomizedReadWriteStrategy() {
-		ServiceLoader<CustomizedReadWriteStrategy> strategies = ServiceLoader.load(CustomizedReadWriteStrategy.class);
-		CustomizedReadWriteStrategyWrapper wraper = new CustomizedReadWriteStrategyWrapper();
+	private void initReadWriteStrategy() {
+		readWriteStrategyWrapper = new ReadWriteStrategyWrapper();
+		
+		ServiceLoader<ReadWriteStrategy> strategies = ServiceLoader.load(ReadWriteStrategy.class);
 
 		if (strategies != null) {
-			for (CustomizedReadWriteStrategy strategy : strategies) {
+			for (ReadWriteStrategy strategy : strategies) {
 				if (strategy != null) {
-					wraper.addStrategy(strategy);
+					readWriteStrategyWrapper.addStrategy(strategy);
 				}
 			}
 		}
 
-		if (wraper != null) {
-			customizedReadWriteStrategy = wraper;
-		}
-
-		setDataSourceConfigToStrategy();
+		readWriteStrategyWrapper.setGroupDataSourceConfig(this.groupConfig);
 	}
 
 	private void refresh(String propertyToChange) {
@@ -468,7 +468,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		// switch config
 		groupConfig = groupDataSourceConfig;
 
-		setDataSourceConfigToStrategy();
+		initReadWriteStrategy();
 	}
 
 	private void refreshUserAndPassword() {
@@ -514,12 +514,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public synchronized void setConnectionTesterClassName(String connectionTesterClassName) {
 		setProperty("connectionTesterClassName", connectionTesterClassName);
-	}
-
-	private void setDataSourceConfigToStrategy() {
-		if (customizedReadWriteStrategy != null) {
-			customizedReadWriteStrategy.setGroupDataSourceConfig(this.groupConfig);
-		}
 	}
 
 	public synchronized void setDataSourceName(String dataSourceName) {
