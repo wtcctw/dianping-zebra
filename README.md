@@ -23,7 +23,7 @@
     	<version>${version}</version>
 	</dependency>
 
-目前的最新版本为`2.6.4`
+目前的最新版本为`2.6.6`
 
 ### 数据库监控功能
 
