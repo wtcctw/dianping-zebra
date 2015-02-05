@@ -17,6 +17,7 @@ package com.dianping.zebra.monitor.spring;
 
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -31,6 +32,7 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
 
 import javax.sql.DataSource;
+
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -117,7 +119,8 @@ public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, Priority
 		return false;
 	}
 
-	private void replaceInnerDataSourceInZebra(String beanName, BeanDefinition zebraDataSourceDefinition) {
+	@SuppressWarnings("unchecked")
+   private void replaceInnerDataSourceInZebra(String beanName, BeanDefinition zebraDataSourceDefinition) {
 		MutablePropertyValues propertyValues = zebraDataSourceDefinition.getPropertyValues();
 		PropertyValue dataSourcePoolVal = propertyValues.getPropertyValue("dataSourcePool");
 

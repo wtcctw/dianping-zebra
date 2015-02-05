@@ -31,13 +31,11 @@ public interface JdbcFilter {
 
 	void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException;
 
-	<T> T execute(GroupStatement source, Connection conn,
-			String sql, List<String> batchedSql,
-			boolean isBatched, boolean autoCommit,
-			Object params, JdbcFilter chain) throws SQLException;
+	<T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
+	      boolean autoCommit, Object params, JdbcFilter chain) throws SQLException;
 
 	FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain);
+	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain);
 
 	GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException;
 
@@ -61,7 +59,7 @@ public interface JdbcFilter {
 
 	boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException;
 
-	String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException;
+	String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException;
 
 	void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain);
 }

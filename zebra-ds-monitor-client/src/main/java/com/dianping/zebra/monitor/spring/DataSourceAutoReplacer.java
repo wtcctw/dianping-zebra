@@ -1,25 +1,29 @@
 package com.dianping.zebra.monitor.spring;
 
-import com.dianping.cat.Cat;
-import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.config.DataSourceConfigManager;
-import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
-import com.dianping.zebra.group.exception.DalException;
-import com.dianping.zebra.group.exception.IllegalConfigException;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.router.RouterType;
-import com.dianping.zebra.group.util.StringUtils;
-import com.dianping.zebra.monitor.model.DataSourceInfo;
-import com.dianping.zebra.monitor.util.LionUtil;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.config.*;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -29,18 +33,27 @@ import org.springframework.util.ClassUtils;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
-import javax.sql.DataSource;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.dianping.cat.Cat;
+import com.dianping.zebra.Constants;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.group.router.RouterType;
+import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.monitor.model.DataSourceInfo;
+import com.dianping.zebra.monitor.util.LionUtil;
 
 /**
  * Created by Dozer on 8/13/14.
  */
 public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, PriorityOrdered {
+
+	private static final Log logger = LogFactory.getLog(DataSourceAutoReplacer.class);
+
+	// datasource class name
 	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";
 
 	private static final String DPDL_CLASS_NAME = "com.dianping.dpdl.sql.DPDataSource";
@@ -49,21 +62,20 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private static final String UPLOAD_DS_INFO_KEY = "zebra.server.heartbeat.url";
 
-	private static final Log logger = LogFactory.getLog(DataSourceAutoReplacer.class);
-
-	private static boolean hasProcessd;
-
+	// datasource set
 	private Set<String> c3p0Ds = new HashSet<String>();
-
-	private Map<String, String> canReplacedDatabase = new HashMap<String, String>();
 
 	private Set<String> dpdlDs = new HashSet<String>();
 
 	private Set<String> groupds = new HashSet<String>();
 
-	private DefaultListableBeanFactory listableBeanFactory = null;
-
 	private Set<String> otherDs = new HashSet<String>();
+
+	private static boolean hasProcessd;
+
+	private Map<String, String> canReplacedDatabase = new HashMap<String, String>();
+
+	private DefaultListableBeanFactory listableBeanFactory = null;
 
 	private Pattern pattern = Pattern.compile("^jdbc:([a-zA-Z0-9]+)://([^/]+)/([^?]+).*$");
 
@@ -105,13 +117,12 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		if (tempValue == null) {
 			return null;
 		}
-		return tempValue instanceof TypedStringValue ?
-				((TypedStringValue) tempValue).getValue() :
-				String.valueOf(tempValue);
+		return tempValue instanceof TypedStringValue ? ((TypedStringValue) tempValue).getValue() : String
+		      .valueOf(tempValue);
 	}
 
 	private Set<PropertyValue> getC3P0PropertyValues(BeanDefinition c3p0BeanDefinition, DataSourceInfo info,
-			RouterType routerType) {
+	      RouterType routerType) {
 		Set<PropertyValue> properties = new HashSet<PropertyValue>();
 
 		if (!c3p0BeanDefinition.getBeanClassName().equals(C3P0_CLASS_NAME)) {
@@ -161,8 +172,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private BeanDefinition getDpdlWriteDsBean(BeanDefinition dataSourceDefinition) {
-		String writeDsBeanName = getBeanPropertyStringValue(
-				dataSourceDefinition.getPropertyValues().getPropertyValue("writeDS").getValue());
+		String writeDsBeanName = getBeanPropertyStringValue(dataSourceDefinition.getPropertyValues()
+		      .getPropertyValue("writeDS").getValue());
 
 		c3p0Ds.remove(writeDsBeanName);
 		BeanDefinition writeDsBean = listableBeanFactory.getBeanDefinition(writeDsBeanName);
@@ -255,7 +266,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		for (String beanDefinitionName : beanDefinitionNames) {
 			try {
 				AbstractBeanDefinition beanDefinition = (AbstractBeanDefinition) listableBeanFactory
-						.getBeanDefinition(beanDefinitionName);
+				      .getBeanDefinition(beanDefinitionName);
 				Class<?> beanClazz = beanDefinition.resolveBeanClass(ClassUtils.getDefaultClassLoader());
 				if (beanClazz != null && DataSource.class.isAssignableFrom(beanClazz)) {
 					if (beanClazz.getName().equals(C3P0_CLASS_NAME)) {
@@ -279,7 +290,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			@Override
 			public void process(BeanDefinition dataSourceDefinition, String beanName, DataSourceInfo info) {
 				Set<PropertyValue> properties = getC3P0PropertyValues(dataSourceDefinition, info,
-						getRouterTypeFromBeans(dataSourceDefinition, null));
+				      getRouterTypeFromBeans(dataSourceDefinition, null));
 
 				if (properties.size() > 0) {
 					setGroupDataSourceProperties(dataSourceDefinition, info, properties);
@@ -300,7 +311,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				List<BeanDefinition> dpdlReadDsBean = getDpdlReadDsBean(dataSourceDefinition);
 
 				Set<PropertyValue> properties = getC3P0PropertyValues(dpdlWriteDsBean, info,
-						getRouterTypeFromBeans(dpdlWriteDsBean, dpdlReadDsBean));
+				      getRouterTypeFromBeans(dpdlWriteDsBean, dpdlReadDsBean));
 
 				if (properties.size() > 0) {
 					setGroupDataSourceProperties(dataSourceDefinition, info, properties);
@@ -323,7 +334,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				Object tempValue;
 				if (propertyValue == null) {
 					ConstructorArgumentValues.ValueHolder valueHolder = (ValueHolder) dataSourceDefinition
-							.getConstructorArgumentValues().getGenericArgumentValues().get(0);
+					      .getConstructorArgumentValues().getGenericArgumentValues().get(0);
 					tempValue = valueHolder.getValue();
 				} else {
 					tempValue = propertyValue.getValue();
@@ -337,7 +348,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 					}
 					if (StringUtils.isNotBlank(jdbcRef)) {
 						DataSourceConfigManager manager = DataSourceConfigManagerFactory.getConfigManager(
-								Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
+						      Constants.CONFIG_MANAGER_TYPE_REMOTE, jdbcRef);
 						GroupDataSourceConfig config = manager.getGroupDataSourceConfig();
 						if (config.getDataSourceConfigs().size() > 0) {
 							DataSourceConfig dsConfig = config.getDataSourceConfigs().values().iterator().next();
@@ -367,7 +378,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	}
 
 	private void setGroupDataSourceProperties(BeanDefinition dataSourceDefinition, DataSourceInfo info,
-			Set<PropertyValue> properties) {
+	      Set<PropertyValue> properties) {
 		dataSourceDefinition.setBeanClassName(GroupDataSource.class.getName());
 		for (PropertyValue p : dataSourceDefinition.getPropertyValues().getPropertyValues()) {
 			dataSourceDefinition.getPropertyValues().removePropertyValue(p);
@@ -389,9 +400,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		} else {
 			try {
 				callHttp(String.format("%s?%s", url, info.toString()));
-			} catch (IOException e) {
-				String msg = String.format("Call Zebra-Web failed! [%s]", url);
-				logger.warn(msg, e);
+			} catch (IOException ignore) {
 			}
 		}
 	}
@@ -409,12 +418,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 				try {
 					template.process(dataSourceDefinition, beanName, info);
-				} catch (Exception e) {
-					String msg = String
-							.format("DataSourceProcesser Error! bean:%s  class:%s", info.getDataSourceBeanName(),
-									info.getDataSourceBeanClass());
-					Exception exp = new DalException(e);
-					logger.warn(msg, exp);
+				} catch (Exception ignore) {
 				}
 
 				uploadDataSourceInfo(info);

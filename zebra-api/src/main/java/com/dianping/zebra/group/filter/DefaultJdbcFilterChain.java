@@ -104,7 +104,7 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 	}
 
 	@Override
-	public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
+	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
