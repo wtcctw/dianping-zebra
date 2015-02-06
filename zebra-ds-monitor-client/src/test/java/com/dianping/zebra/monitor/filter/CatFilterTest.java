@@ -1,6 +1,6 @@
 package com.dianping.zebra.monitor.filter;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import groovy.sql.Sql;
 import org.junit.Before;

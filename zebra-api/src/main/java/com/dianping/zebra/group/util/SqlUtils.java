@@ -1,9 +1,9 @@
 package com.dianping.zebra.group.util;
 
+import com.dianping.zebra.Constants;
+
 import java.sql.SQLException;
 import java.util.regex.Pattern;
-
-import com.dianping.zebra.group.Constants;
 
 public final class SqlUtils {
 
