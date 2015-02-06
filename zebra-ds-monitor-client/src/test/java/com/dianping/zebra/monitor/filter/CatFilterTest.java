@@ -1,12 +1,12 @@
-package com.dianping.zebra.monitor.filter
+package com.dianping.zebra.monitor.filter;
 
-import com.dianping.zebra.group.Constants
-import com.dianping.zebra.group.jdbc.GroupDataSource
-import groovy.sql.Sql
-import org.junit.Before
-import org.junit.Test
+import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
+import groovy.sql.Sql;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.sql.SQLException
+import java.sql.SQLException;
 
 /**
  * Created by Dozer on 9/9/14.
@@ -16,13 +16,12 @@ public class CatFilterTest {
     GroupDataSource ds = new GroupDataSource();
 
     @Before
-    public void init() {
+    public void init() throws SQLException {
         ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
         ds.setJdbcRef("sample.ds.v2");
-        ds.setFilter("cat");
         ds.init();
 
-        def sql = new Sql(ds.getConnection());
+        Sql sql = new Sql(ds.getConnection());
         sql.execute("CREATE TABLE Persons\n" +
                 "(\n" +
                 "Id int,\n" +

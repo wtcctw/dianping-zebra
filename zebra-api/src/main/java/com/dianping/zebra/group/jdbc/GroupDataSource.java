@@ -156,9 +156,15 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	protected void buildGroupConfigForExtendSpringProperties(GroupDataSourceConfig newGroupConfig) {
-		newGroupConfig.setRouterStrategy(this.groupConfig.getRouterStrategy());
+		if(StringUtils.isNotBlank(this.groupConfig.getRouterStrategy())){
+			newGroupConfig.setRouterStrategy(this.groupConfig.getRouterStrategy());
+		}
+		
 		newGroupConfig.setForceWriteOnLogin(this.groupConfig.getForceWriteOnLogin());
-		newGroupConfig.setFilters(this.groupConfig.getFilters());
+		
+		if(StringUtils.isNotBlank(this.groupConfig.getFilters())){
+			newGroupConfig.setFilters(this.groupConfig.getFilters());
+		}
 
 		buildGroupConfigForFilter(newGroupConfig);
 	}
