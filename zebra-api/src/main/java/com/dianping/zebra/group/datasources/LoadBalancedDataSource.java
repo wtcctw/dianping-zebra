@@ -22,9 +22,9 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private Map<String, DataSourceConfig> loadBalancedConfigMap;
 
-	private int retryTimes;
-
 	private DataSourceRouter router;
+
+	private int retryTimes;
 
 	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
 			List<JdbcFilter> filters, int retryTimes) {
