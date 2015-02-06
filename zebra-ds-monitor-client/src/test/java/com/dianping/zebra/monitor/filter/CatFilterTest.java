@@ -19,6 +19,7 @@ public class CatFilterTest {
     public void init() throws SQLException {
         ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
         ds.setJdbcRef("sample.ds.v2");
+        ds.setFilter("!wall");
         ds.init();
 
         Sql sql = new Sql(ds.getConnection());
@@ -31,6 +32,14 @@ public class CatFilterTest {
                 "City varchar(255)\n" +
                 ")");
         sql.execute("insert into persons (id,lastname,firstname,address,city) values (1,'','','','')");
+        
+        
+        System.out.println(ds.getConfig());
+        
+        ds.setForceWriteOnLogin(true);
+        
+        System.out.println(ds.getConfig());
+        
     }
 
     @Test
