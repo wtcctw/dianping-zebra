@@ -181,11 +181,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		if (forceWriteOnLogin instanceof Boolean) {
 			newGroupConfig.setForceWriteOnLogin(((Boolean) forceWriteOnLogin).booleanValue());
 		}
-
-		Object routerStrategy = springProperties.get(Constants.SPRING_PROPERTY_ROUTER_STRATEGY);
-		if (routerStrategy instanceof String) {
-			newGroupConfig.setRouterStrategy((String) routerStrategy);
-		}
 	}
 
 	public void close() throws SQLException {
@@ -675,12 +670,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		setProperty("propertyCycle", String.valueOf(propertyCycle));
 	}
 
-	public void setRouterStrategy(String routerStrategy) {
-		this.springProperties.put(Constants.SPRING_PROPERTY_ROUTER_STRATEGY, routerStrategy);
-		refresh("routerStrategy");
-	}
-
-	// hack for single datasource replace
+	// hack for set only use slave or master datasource
 	public void setRouterType(String routerType) {
 		this.routerType = RouterType.getRouterType(routerType);
 	}
