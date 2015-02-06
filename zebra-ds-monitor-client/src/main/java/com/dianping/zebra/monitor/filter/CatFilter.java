@@ -1,5 +1,16 @@
 package com.dianping.zebra.monitor.filter;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.sql.DataSource;
+
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -17,13 +28,7 @@ import com.dianping.zebra.group.jdbc.GroupStatement;
 import com.dianping.zebra.group.util.SqlUtils;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
-import com.google.common.base.Strings;
 import com.site.helper.Stringizers;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
 
 /**
  * Created by Dozer on 9/5/14.
@@ -52,7 +57,7 @@ public class CatFilter extends DefaultJdbcFilter {
 	}
 
 	private static Set<String> cachedTruncatedSqls = Collections.synchronizedSet(new HashSet<String>(
-		MAX_ALLOWED_TRUNCATED_SQL_NUM));
+	      MAX_ALLOWED_TRUNCATED_SQL_NUM));
 
 	@Override
 	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
@@ -62,7 +67,7 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
-		boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
+	      boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
 		String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
 		Transaction t;
 		if (StringUtils.isBlank(sqlName)) {
@@ -91,8 +96,7 @@ public class CatFilter extends DefaultJdbcFilter {
 		} finally {
 			try {
 				logSqlDatabaseEvent(conn);
-				logSqlMethodEvent(Strings.isNullOrEmpty(sqlName) ? getCachedTruncatedSql(sql) : sqlName, batchedSql,
-					isBatched, sqlParams);
+				logSqlMethodEvent(sql, batchedSql, isBatched, sqlParams);
 			} catch (Throwable exp) {
 				Cat.logError(exp);
 			}
@@ -103,7 +107,7 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-		FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
 		FailOverDataSource.FindMasterDataSourceResult result = chain.findMasterFailOverDataSource(source, chain);
 
 		if (result != null && result.isChangedMaster()) {
@@ -169,7 +173,7 @@ public class CatFilter extends DefaultJdbcFilter {
 				if (counter < TOO_LARGE_SQL_LENGTH_INDEX) {
 					Cat.logEvent("SQL.Length", item.getValue(), Event.SUCCESS, "");
 				} else {
-					Cat.logEvent("SQL.Length", item.getValue(), "long-sql", "length=" + length);
+					Cat.logEvent("SQL.Length", item.getValue(), "long-length-sql", String.valueOf(length));
 				}
 				return;
 			}
@@ -180,7 +184,7 @@ public class CatFilter extends DefaultJdbcFilter {
 
 	private void logSqlMethodEvent(String sql, List<String> batchedSql, boolean isBatched, Object sqlParams) {
 		String params = Stringizers.forJson().compact()
-			.from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
+		      .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
 		if (isBatched) {
 			if (batchedSql != null) {
 				for (String bSql : batchedSql) {
