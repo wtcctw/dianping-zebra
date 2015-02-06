@@ -135,7 +135,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				String groupConfig = LionUtil.getLionConfig(String.format("groupds.%s.mapping", jdbcRef));
 				if (!StringUtils.isBlank(groupConfig)) {
 					properties.add(new PropertyValue("jdbcRef", jdbcRef));
-					properties.add(new PropertyValue("jdbcUrlExtra", parseUrlExtra(info.getUrl())));
+					properties.add(new PropertyValue("extraJdbcUrlParams", parseUrlExtra(info.getUrl())));
 					properties.add(new PropertyValue("routerType", routerType.getRouterType()));
 
 					Set<String> ignoreList = getGroupDataSourceIgnoreProperties();
