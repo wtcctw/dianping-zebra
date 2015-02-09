@@ -145,8 +145,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
 
     $scope.save = function (force) {
         force = !!force;
-        $http.post('/a/config?op=updateDs&force=' + force, $.param({dsConfigs: encodeURIComponent(angular.toJson($scope.data))}),
-            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+        $http.post('/a/config/updateds?force=' + force, angular.toJson($scope.data))
             .success(function (data, status, headers, config) {
                 close();
             });
@@ -225,7 +224,7 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
 
     $scope.createGroupDs = function () {
         if ($scope.addText) {
-            $http.get('/a/config?op=create&project=groupds&key=' + $scope.addText).success(function (data, status, headers, config) {
+            $http.post('/a/config/create?project=groupds&key=' + $scope.addText).success(function (data, status, headers, config) {
                 $scope.addText = '';
                 $scope.load();
                 alert('添加成功！')

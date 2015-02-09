@@ -57,6 +57,32 @@ public class ConfigController {
         return lionHttpService.getConfigByProject(env, "groupds");
     }
 
+    @RequestMapping(value = "/updateds", method = RequestMethod.POST)
+    @ResponseBody
+    public Object updateds(boolean force, @RequestBody DalConfigService.GroupConfigModel dsConfig) throws Exception {
+        dalConfigService.updateDsConfig(dsConfig, force);
+        return null;
+    }
+
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @ResponseBody
+    public Object create(String project, String key) throws Exception {
+        if (project.equals("groupds")) {
+            if (Strings.isNullOrEmpty(key)) {
+                throw new NullPointerException("key");
+            }
+            String dskey = String.format("groupds.%s.mapping", key.toLowerCase());
+
+            lionHttpService.createKey("groupds", dskey);
+
+            lionHttpService.removeUnset(dskey);
+
+        } else if (project.equals("ds")) {
+        }
+        return null;
+    }
+
+
     @RequestMapping(value = "/ds", method = RequestMethod.GET)
     @ResponseBody
     public Object ds(String env, String key) throws Exception {
