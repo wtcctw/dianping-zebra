@@ -11,6 +11,6 @@ import java.util.List;
  * http://www.dozer.cc
  */
 public interface HeartBeatMapper {
-    @Select("SELECT * FROM heartbeat")
-    List<HeartbeatEntity> getAll();
+//    @Select("SELECT * FROM heartbeat")
+//    List<HeartbeatEntity> saveHeartBeat();
 }
