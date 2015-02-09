@@ -138,8 +138,8 @@ public class DalConfigServiceImpl implements DalConfigService {
 	}
 
 	private String getDsIdFromKey(String key) {
-		String result = key.substring(key.indexOf("") + 1);
-		return result.substring(0, result.indexOf(""));
+		String result = key.substring(key.indexOf(".") + 1);
+		return result.substring(0, result.indexOf("."));
 	}
 
 	private String getGroupDataSourceKeyById(String groupId) {
