@@ -70,7 +70,7 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window
 
 zebraWeb.controller('config-test', function ($scope, $http, name, configs) {
     $scope.name = name;
-    var url = '/a/config?op=test&key=' + name + '&env=' + $scope.config.env;
+    var url = '/a/config/test?key=' + name + '&env=' + $scope.config.env;
 
     if (configs) {
         $scope.connectionStatus = configs;
@@ -86,7 +86,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
     $scope.name = name;
     $scope.load = function () {
         if ($scope.config && $scope.config.env) {
-            $http.get('/a/config?op=viewDs&key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+            $http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
                 $scope.data = data;
             });
         }
@@ -153,8 +153,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
     }
 
     $scope.test = function () {
-        $http.post('/a/config?op=test&env=' + $scope.config.env, $.param({dsConfigs: encodeURIComponent(angular.toJson($scope.data))}),
-            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+        $http.post('/a/config/test?env=' + $scope.config.env, angular.toJson($scope.data))
             .success(function (data, status, headers, config) {
                 configService.openTestModal("", data);
             });
@@ -183,7 +182,7 @@ zebraWeb.controller('header', function ($rootScope, $scope, $cookies, $http, log
     });
 
     $scope.load = function () {
-        $http.get('/a/config?op=env').success(function (data, status, headers, config) {
+        $http.get('/a/config/env').success(function (data, status, headers, config) {
             $rootScope.config = {
                 envs: data,
                 env: $cookies.env ? $cookies.env : data[0]
@@ -216,7 +215,7 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
 
     $scope.load = function () {
         if ($scope.config && $scope.config.env) {
-            $http.get('/a/config?op=view&env=' + $scope.config.env).success(function (data, status, headers, config) {
+            $http.get('/a/config/?env=' + $scope.config.env).success(function (data, status, headers, config) {
                 $scope.lionConfigs = data;
             });
         }
@@ -256,7 +255,7 @@ zebraWeb.controller('merge-edit', function ($scope, $http, $log, name, close) {
     $scope.name = name;
     $scope.load = function () {
         if ($scope.config && $scope.config.env) {
-            $http.get('/a/config?op=viewDs&key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+            $http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
                 $scope.data = data;
             });
         }
