@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+    <bean id="zebraDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="jdbcUrl" value="${zebra.server.jdbc.url}"/>
+        <property name="user" value="${zebra.server.jdbc.username}"/>
+        <property name="password" value="${zebra.server.jdbc.password}"/>
+    </bean>
+
+    <bean id="zebraSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="zebraDataSource" />
+    </bean>
+</beans>
