@@ -237,11 +237,10 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
 
 zebraWeb.controller('login', function ($rootScope, $scope, $http) {
     $scope.login = function () {
-        $http.post('/a/login?op=view', $.param({
-                username: encodeURIComponent($scope.username),
-                password: encodeURIComponent($scope.password)
-            }),
-            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+        $http.post('/a/login',{
+                username: $scope.username,
+                password: $scope.password
+            })
             .success(function (data, status, headers, config) {
                 alert('登陆成功!')
                 location.reload();
