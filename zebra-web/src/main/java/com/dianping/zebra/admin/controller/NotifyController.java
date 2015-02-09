@@ -1,5 +1,6 @@
 package com.dianping.zebra.admin.controller;
 
+import com.dianping.zebra.admin.dao.HeartbeatMapper;
 import com.dianping.zebra.admin.dto.HeartbeatDto;
 import com.dianping.zebra.admin.entity.HeartbeatEntity;
 import com.dianping.zebra.admin.service.DalConfigService;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * Dozer @ 2015-02
@@ -32,6 +36,9 @@ public class NotifyController {
 
     @Autowired
     private ModelMapper mapper;
+
+    @Resource(name = "heartbeatMapper")
+    private HeartbeatMapper heartbeatMapper;
 
     private static final String NOT_FOUND = "N/A";
 
@@ -63,7 +70,15 @@ public class NotifyController {
                 entity.setDatabaseType(NOT_FOUND);
             }
 
-//            m_reportService.createOrUpdate(hb);
+            List<HeartbeatEntity> old = heartbeatMapper.getHeartbeat(entity.getAppName(), entity.getIp(), entity.getDatasourceBeanName());
+
+            if (old.size() > 1) {
+                heartbeatMapper.deleteHeartbeat(entity.getAppName(), entity.getIp(), entity.getDatasourceBeanName());
+            } else if (old.size() == 1) {
+
+            } else {
+
+            }
 
         }
         return null;
