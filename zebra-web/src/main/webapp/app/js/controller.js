@@ -8,7 +8,7 @@ zebraWeb.controller('update', function ($scope, $http) {
 
 zebraWeb.controller('black', function ($scope, $http) {
     $scope.load = function () {
-        $http.get('/a/blacklist?op=view&env=' + $scope.config.env).success(function (data, status, headers, config) {
+        $http.get('/a/blacklist/?env=' + $scope.config.env).success(function (data, status, headers, config) {
             $scope.blackList = data;
         });
     }
@@ -16,7 +16,7 @@ zebraWeb.controller('black', function ($scope, $http) {
 
     $scope.remove = function (key, id) {
         if (confirm('确山删除？')) {
-            $http.get('/a/blacklist?op=delete&env=' + $scope.config.env + '&id=' + id + '&key=' + key)
+            $http.post('/a/blacklist/delete?env=' + $scope.config.env + '&id=' + id + '&key=' + key)
                 .success(function (data, status, headers, config) {
                     $scope.load();
                 });
@@ -25,18 +25,17 @@ zebraWeb.controller('black', function ($scope, $http) {
 
     $scope.add = function () {
         if (confirm('确山添加？')) {
-
-            $http.post('/a/blacklist?op=add&env=' + $scope.config.env +
-                '&ip=' + ($scope.addIp ? $scope.addIp : '') +
-                '&id=' + ($scope.addId ? $scope.addId : ''),
-                $.param({comment: $scope.addComment ? encodeURIComponent($scope.addComment) : ''}),
-                {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
-                .success(function (data, status, headers, config) {
+            $http.post('/a/blacklist/add?env=' + $scope.config.env,
+             {
+             ip :($scope.addIp ? $scope.addIp : ''),
+             id :($scope.addId ? $scope.addId : ''),
+             comment: ($scope.addComment ? $scope.addComment : '')
+             }).success(function (data, status, headers, config) {
                     $scope.load();
                     $scope.addId = '';
                     $scope.addIp = '';
                     $scope.addComment = '';
-                });
+             });
         }
     }
 
