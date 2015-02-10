@@ -1,16 +1,20 @@
 package com.dianping.zebra.admin.controller;
 
 import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.zebra.admin.dto.ConnectionStatusDto;
 import com.dianping.zebra.admin.service.ConnectionService;
 import com.dianping.zebra.admin.service.DalConfigService;
 import com.dianping.zebra.admin.service.LionHttpService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Dozer @ 2015-02
@@ -91,40 +95,24 @@ public class ConfigController {
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)
     @ResponseBody
-    public Object test(String env, String key) throws Exception {
+    public ConnectionStatusDto test(String env, String key) throws Exception {
         env = convertEnv(env);
         key = convertKey(key);
 
         if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
             return connectionService.getConnectionResult(key, null);
         } else {
-//            String host = "";
-//            if ("alpha".equals(env)) {
-//                host = "http://192.168.214.228:8080";
-//            } else if ("qa".equals(env)) {
-//                host = "http://zebra-web01.beta:8080";
-//            } else if ("prelease".equals(env)) {
-//                host = "http://10.2.8.65:8080";
-//            } else if ("product".equals(env)) {
-//                host = "http://zebra.dp";
-//            } else {
-//                throw new Exception("Error: unrecognized lion env!");
-//            }
+            String host = getHost(env);
+            if (Strings.isNullOrEmpty(host)) {
+                throw new NullPointerException("host");
+            }
+            String url = getUrl(env, key, host);
 
-//            if (host.length() > 0) {
-//                String url = host + "/a/config/test&key=" + jdbcRef + "&env=" + env;
-//                if (payload.getDsConfigs() == null) {
-//                    responseObject = m_httpService.sendGet(url);
-//                } else {
-//                    responseObject = m_httpService.sendPost(url, "dsConfigs=" + payload.getDsConfigs());
-//                }
-//                successJson(ctx, (String) responseObject);
-//            } else {
-//                success(ctx, responseObject);
-//            }
-            return null;
+            RestTemplate client = new RestTemplate();
+            return client.exchange(url, HttpMethod.GET, null, ConnectionStatusDto.class).getBody();
         }
     }
+
 
     @RequestMapping(value = "/test", method = RequestMethod.POST)
     @ResponseBody
@@ -136,33 +124,37 @@ public class ConfigController {
             return connectionService
                     .getConnectionResult(key, dsConfig);
         } else {
-//            String host = "";
-//            if ("alpha".equals(env)) {
-//                host = "http://192.168.214.228:8080";
-//            } else if ("qa".equals(env)) {
-//                host = "http://zebra-web01.beta:8080";
-//            } else if ("prelease".equals(env)) {
-//                host = "http://10.2.8.65:8080";
-//            } else if ("product".equals(env)) {
-//                host = "http://zebra.dp";
-//            } else {
-//                throw new Exception("Error: unrecognized lion env!");
-//            }
+            String host = getHost(env);
+            if (Strings.isNullOrEmpty(host)) {
+                throw new NullPointerException("host");
+            }
+            String url = getUrl(env, key, host);
 
-//            if (host.length() > 0) {
-//                String url = host + "/a/config/test&key=" + jdbcRef + "&env=" + env;
-//                if (payload.getDsConfigs() == null) {
-//                    responseObject = m_httpService.sendGet(url);
-//                } else {
-//                    responseObject = m_httpService.sendPost(url, "dsConfigs=" + payload.getDsConfigs());
-//                }
-//                successJson(ctx, (String) responseObject);
-//            } else {
-//                success(ctx, responseObject);
-//            }
-            return null;
+            RestTemplate client = new RestTemplate();
+            return client.exchange(url, HttpMethod.POST, new HttpEntity<DalConfigService.GroupConfigModel>(dsConfig), ConnectionStatusDto.class).getBody();
         }
     }
+
+    private String getUrl(String env, String key, String host) {
+        return host + "/a/config/test&key=" + key + "&env=" + env;
+    }
+
+    private String getHost(String env) throws Exception {
+        String host = "";
+        if ("alpha".equals(env)) {
+            host = "http://192.168.214.228:8080";
+        } else if ("qa".equals(env)) {
+            host = "http://zebra-web01.beta:8080";
+        } else if ("prelease".equals(env)) {
+            host = "http://10.2.8.65:8080";
+        } else if ("product".equals(env)) {
+            host = "http://zebra.dp";
+        } else {
+            throw new Exception("Error: unrecognized lion env!");
+        }
+        return host;
+    }
+
 
     private String convertKey(String key) {
         if (!Strings.isNullOrEmpty(key) && key.toLowerCase().equals("dpreview")) {
