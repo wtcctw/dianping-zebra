@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.zebra.admin.dao.HeartbeatMapper">
+    <select id="getHeartbeat" parameterType="map" resultType="HeartbeatEntity">
+        SELECT * FROM heartbeat WHERE app_name = #{appName} and ip = #{ip} and datasource_bean_name =
+        #{datasourceBeanName}
+    </select>
+
+    <delete id="deleteHeartbeat" parameterType="map">
+        DELETE FROM heartbeat WHERE app_name = #{appName} and ip = #{ip} and datasource_bean_name =
+        #{datasourceBeanName}
+    </delete>
+
+    <insert id="insertHeartbeat" parameterType="HeartbeatEntity">
+        INSERT INTO `heartbeat`
+        (
+        `app_name`,
+        `ip`,
+        `datasource_bean_name`,
+        `database_name`,
+        `database_type`,
+        `username`,
+        `datasource_bean_class`,
+        `replaced`,
+        `jdbc_url`,
+        `init_pool_size`,
+        `max_pool_size`,
+        `min_pool_size`,
+        `version`,
+        `create_time`,
+        `update_time`)
+        VALUES
+        (
+        #{appName},
+        #{ip},
+        #{datasourceBeanName},
+        #{databaseName},
+        #{databaseType},
+        #{username},
+        #{datasourceBeanClass},
+        #{replaced},
+        #{jdbcUrl},
+        #{initPoolSize},
+        #{maxPoolSize},
+        #{minPoolSize},
+        #{version},
+        #{createTime},
+        #{updateTime})
+    </insert>
+
+    <insert id="updateHeartbeat" parameterType="HeartbeatEntity">
+        INSERT INTO `heartbeat`
+        (
+        `app_name`,
+        `ip`,
+        `datasource_bean_name`,
+        `database_name`,
+        `database_type`,
+        `username`,
+        `datasource_bean_class`,
+        `replaced`,
+        `jdbc_url`,
+        `init_pool_size`,
+        `max_pool_size`,
+        `min_pool_size`,
+        `version`,
+        `create_time`,
+        `update_time`)
+        VALUES
+        (
+        #{appName},
+        #{ip},
+        #{datasourceBeanName},
+        #{databaseName},
+        #{databaseType},
+        #{username},
+        #{datasourceBeanClass},
+        #{replaced},
+        #{jdbcUrl},
+        #{initPoolSize},
+        #{maxPoolSize},
+        #{minPoolSize},
+        #{version},
+        #{createTime},
+        #{updateTime})
+    </insert>
+</mapper>

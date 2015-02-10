@@ -2,7 +2,6 @@ package com.dianping.zebra.admin.mapper;
 
 import com.dianping.zebra.admin.dto.HeartbeatDto;
 import com.dianping.zebra.admin.entity.HeartbeatEntity;
-import com.google.common.base.Strings;
 import org.modelmapper.PropertyMap;
 
 /**
@@ -15,7 +14,7 @@ public class HeartbeatDto2HeartbeatEntityMap extends
 
     @Override
     protected void configure() {
-        map().setAppName(Strings.isNullOrEmpty(source.getApp()) ? null : source.getApp().toLowerCase());
+        map().setAppName(source.getApp());
         map().setJdbcUrl(source.getUrl());
     }
 }

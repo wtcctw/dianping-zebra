@@ -12,5 +12,7 @@
 
     <bean id="zebraSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="zebraDataSource" />
+        <property name="mapperLocations" value="classpath*:config/sqlmap/**/*.xml" />
+        <property name="typeAliasesPackage" value="com.dianping.zebra.admin.entity" />
     </bean>
 </beans>

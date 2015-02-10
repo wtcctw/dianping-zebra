@@ -12,10 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,17 +36,21 @@ public class NotifyController {
     @Autowired
     private ModelMapper mapper;
 
-    @Resource(name = "heartbeatMapper")
+    @Autowired
     private HeartbeatMapper heartbeatMapper;
 
     private static final String NOT_FOUND = "N/A";
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public Object notify(@RequestParam HeartbeatDto dto) {
-        if (dto.getApp() != null && dto.getIp() != null && dto.getDataSourceBeanName() != null) {
+    public Object notify(HeartbeatDto model) {
+        if (model.getApp() != null && model.getIp() != null && model.getDataSourceBeanName() != null) {
 
-            HeartbeatEntity entity = mapper.map(dto, HeartbeatEntity.class);
+            HeartbeatEntity entity = mapper.map(model, HeartbeatEntity.class);
+            if (!Strings.isNullOrEmpty(entity.getAppName())) {
+                entity.setAppName(entity.getAppName().toLowerCase());
+            }
+
             if (Strings.isNullOrEmpty(entity.getDatabaseName())) {
                 entity.setDatabaseName(NOT_FOUND);
             }
@@ -67,6 +70,7 @@ public class NotifyController {
                     entity.setDatabaseType(parts[1].toLowerCase());
                 }
             } else {
+                entity.setJdbcUrl(NOT_FOUND);
                 entity.setDatabaseType(NOT_FOUND);
             }
 
@@ -75,11 +79,12 @@ public class NotifyController {
             if (old.size() > 1) {
                 heartbeatMapper.deleteHeartbeat(entity.getAppName(), entity.getIp(), entity.getDatasourceBeanName());
             } else if (old.size() == 1) {
-
+                //todo: update
             } else {
-
+                entity.setUpdateTime(new Date());
+                entity.setCreateTime(new Date());
+                heartbeatMapper.insertHeartbeat(entity);
             }
-
         }
         return null;
     }

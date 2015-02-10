@@ -13,9 +13,11 @@ import java.util.List;
  * http://www.dozer.cc
  */
 public interface HeartbeatMapper {
-    @Select("SELECT * FROM heartbeat WHERE appName = #{appName} and ip = #{ip} and datasourceBeanName = #{datasourceBeanName}")
     List<HeartbeatEntity> getHeartbeat(@Param("appName") String appName, @Param("ip") String ip, @Param("datasourceBeanName") String datasourceBeanName);
 
-    @Delete("DELETE FROM heartbeat WHERE appName = #{appName} and ip = #{ip} and datasourceBeanName = #{datasourceBeanName}")
     int deleteHeartbeat(@Param("appName") String appName, @Param("ip") String ip, @Param("datasourceBeanName") String datasourceBeanName);
+
+    int insertHeartbeat(HeartbeatEntity entity);
+
+    int updateHeartbeat(HeartbeatEntity entity);
 }
