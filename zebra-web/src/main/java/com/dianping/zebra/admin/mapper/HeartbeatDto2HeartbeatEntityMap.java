@@ -14,7 +14,7 @@ public class HeartbeatDto2HeartbeatEntityMap extends
 
     @Override
     protected void configure() {
-        map().setAppName(source.getApp());
-        map().setJdbcUrl(source.getUrl());
+        map().setApp_name(source.getApp());
+        map().setJdbc_url(source.getUrl());
     }
 }

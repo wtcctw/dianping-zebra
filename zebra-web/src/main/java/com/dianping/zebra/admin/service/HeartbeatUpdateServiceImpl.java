@@ -39,7 +39,7 @@ public class HeartbeatUpdateServiceImpl implements HeartbeatUpdateService, Runna
 
             for (HeartbeatEntity heartbeat : heartbeats) {
                 String ip = heartbeat.getIp();
-                String name = heartbeat.getAppName();
+                String name = heartbeat.getApp_name();
                 String cmdbName = multiAppName.get(ip);
 
                 // if ip is no longer belongs to this app, then delete this heartbeat

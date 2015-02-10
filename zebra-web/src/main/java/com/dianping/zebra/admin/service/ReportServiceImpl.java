@@ -10,26 +10,29 @@ import com.dianping.zebra.admin.entity.HeartbeatEntity;
 import com.dianping.zebra.group.exception.DalException;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 /**
-* updateStatus:
-* <p>
-* -1 = 没有升级任何
-* </p>
-* <p>
-* 0 = 升级成功
-* </p>
-* <p>
-* 1 = 部分升级
-* </p>
-* <p>
-* 2 = 没有接入dal，所以没有被dal监控到
-* </p>
-*
-* @author damonzhu,Dozer
-*/
+ * updateStatus:
+ * <p>
+ * -1 = 没有升级任何
+ * </p>
+ * <p>
+ * 0 = 升级成功
+ * </p>
+ * <p>
+ * 1 = 部分升级
+ * </p>
+ * <p>
+ * 2 = 没有接入dal，所以没有被dal监控到
+ * </p>
+ *
+ * @author damonzhu, Dozer
+ */
+
+@Service
 public class ReportServiceImpl implements ReportService {
     @Autowired
     private HeartbeatMapper heartbeatMapper;
@@ -47,30 +50,30 @@ public class ReportServiceImpl implements ReportService {
         machine.setIp(hb.getIp());
         machine.setVersion(hb.getVersion());
 
-        DatasourceDto ds = machine.findOrCreateDatasource(hb.getDatasourceBeanName());
+        DatasourceDto ds = machine.findOrCreateDatasource(hb.getDatasource_bean_name());
 
-        ds.setName(hb.getDatabaseName());
+        ds.setName(hb.getDatabase_name());
         ds.setUsername(hb.getUsername());
-        ds.setBeanName(hb.getDatasourceBeanName());
-        ds.setType(hb.getDatasourceBeanClass());
-        ds.setInitPoolSize(hb.getInitPoolSize());
-        ds.setJdbcUrl(hb.getJdbcUrl());
-        ds.setMaxPoolSize(hb.getMaxPoolSize());
-        ds.setMinPoolSize(hb.getMinPoolSize());
+        ds.setBeanName(hb.getDatasource_bean_name());
+        ds.setType(hb.getDatasource_bean_class());
+        ds.setInitPoolSize(hb.getInit_pool_size());
+        ds.setJdbcUrl(hb.getJdbc_url());
+        ds.setMaxPoolSize(hb.getMax_pool_size());
+        ds.setMinPoolSize(hb.getMin_pool_size());
         ds.setReplaced(hb.isReplaced());
     }
 
     @Override
     public void createOrUpdate(HeartbeatEntity entity) {
-        if (!Strings.isNullOrEmpty(entity.getAppName())) {
-            entity.setAppName(entity.getAppName().toLowerCase());
+        if (!Strings.isNullOrEmpty(entity.getApp_name())) {
+            entity.setApp_name(entity.getApp_name().toLowerCase());
         }
 
-        if (Strings.isNullOrEmpty(entity.getDatabaseName())) {
-            entity.setDatabaseName(NOT_FOUND);
+        if (Strings.isNullOrEmpty(entity.getDatabase_name())) {
+            entity.setDatabase_name(NOT_FOUND);
         }
-        if (Strings.isNullOrEmpty(entity.getDatasourceBeanClass())) {
-            entity.setDatasourceBeanClass(NOT_FOUND);
+        if (Strings.isNullOrEmpty(entity.getDatasource_bean_class())) {
+            entity.setDatasource_bean_class(NOT_FOUND);
         }
         if (Strings.isNullOrEmpty(entity.getVersion())) {
             entity.setVersion(NOT_FOUND);
@@ -79,28 +82,28 @@ public class ReportServiceImpl implements ReportService {
             entity.setUsername(NOT_FOUND);
         }
 
-        if (!Strings.isNullOrEmpty(entity.getJdbcUrl())) {
-            String[] parts = entity.getJdbcUrl().split(":");
+        if (!Strings.isNullOrEmpty(entity.getJdbc_url())) {
+            String[] parts = entity.getJdbc_url().split(":");
             if (parts != null && parts.length > 2) {
-                entity.setDatabaseType(parts[1].toLowerCase());
+                entity.setDatabase_type(parts[1].toLowerCase());
             }
         } else {
-            entity.setJdbcUrl(NOT_FOUND);
-            entity.setDatabaseType(NOT_FOUND);
+            entity.setJdbc_url(NOT_FOUND);
+            entity.setDatabase_type(NOT_FOUND);
         }
 
-        List<HeartbeatEntity> old = heartbeatMapper.getHeartbeat(entity.getAppName(), entity.getIp(), entity.getDatasourceBeanName());
+        List<HeartbeatEntity> old = heartbeatMapper.getHeartbeat(entity.getApp_name(), entity.getIp(), entity.getDatasource_bean_name());
 
         if (old.size() > 1) {
-            heartbeatMapper.deleteHeartbeat(entity.getAppName(), entity.getIp(), entity.getDatasourceBeanName());
+            heartbeatMapper.deleteHeartbeat(entity.getApp_name(), entity.getIp(), entity.getDatasource_bean_name());
         } else if (old.size() == 1) {
             entity.setId(old.get(0).getId());
-            entity.setCreateTime(old.get(0).getCreateTime());
-            entity.setUpdateTime(new Date());
+            entity.setCreate_time(old.get(0).getCreate_time());
+            entity.setUpdate_time(new Date());
             heartbeatMapper.updateHeartbeat(entity);
         } else {
-            entity.setUpdateTime(new Date());
-            entity.setCreateTime(new Date());
+            entity.setUpdate_time(new Date());
+            entity.setCreate_time(new Date());
             heartbeatMapper.insertHeartbeat(entity);
         }
 
@@ -117,11 +120,11 @@ public class ReportServiceImpl implements ReportService {
             List<HeartbeatEntity> all = heartbeatMapper.getAll();
 
             for (HeartbeatEntity hb : all) {
-                if (hb.getAppName().equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME) && hb.getIp() != null) {
+                if (hb.getApp_name().equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME) && hb.getIp() != null) {
                     String name = cmdbService.getAppName(hb.getIp());
 
                     if (!name.equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME)) {
-                        hb.setAppName(name);
+                        hb.setApp_name(name);
 
                         heartbeatMapper.updateHeartbeat(hb);
                     }
@@ -183,12 +186,12 @@ public class ReportServiceImpl implements ReportService {
             List<HeartbeatEntity> all = heartbeatMapper.getAll();
 
             for (HeartbeatEntity hb : all) {
-                if (!hb.getDatabaseName().equals("N/A")) {
-                    DatabaseDto database = report.findOrCreateDatabase(hb.getDatabaseName());
-                    database.setName(hb.getDatabaseName());
+                if (!NOT_FOUND.equals(hb.getDatabase_name())) {
+                    DatabaseDto database = report.findOrCreateDatabase(hb.getDatabase_name());
+                    database.setName(hb.getDatabase_name());
 
-                    AppDto app = database.findOrCreateApp(hb.getAppName());
-                    app.setName(hb.getAppName());
+                    AppDto app = database.findOrCreateApp(hb.getApp_name());
+                    app.setName(hb.getApp_name());
 
                     buildApp(app, hb);
                 }
