@@ -51,39 +51,22 @@
     </insert>
 
     <insert id="updateHeartbeat" parameterType="HeartbeatEntity">
-        INSERT INTO `heartbeat`
-        (
-        `app_name`,
-        `ip`,
-        `datasource_bean_name`,
-        `database_name`,
-        `database_type`,
-        `username`,
-        `datasource_bean_class`,
-        `replaced`,
-        `jdbc_url`,
-        `init_pool_size`,
-        `max_pool_size`,
-        `min_pool_size`,
-        `version`,
-        `create_time`,
-        `update_time`)
-        VALUES
-        (
-        #{appName},
-        #{ip},
-        #{datasourceBeanName},
-        #{databaseName},
-        #{databaseType},
-        #{username},
-        #{datasourceBeanClass},
-        #{replaced},
-        #{jdbcUrl},
-        #{initPoolSize},
-        #{maxPoolSize},
-        #{minPoolSize},
-        #{version},
-        #{createTime},
-        #{updateTime})
+        UPDATE `heartbeat` SET
+        `app_name` = #{appName},
+        `ip` = #{ip},
+        `datasource_bean_name` = #{datasourceBeanName},
+        `database_name` = #{databaseName},
+        `database_type` = #{databaseType},
+        `username` = #{username},
+        `datasource_bean_class` = #{datasourceBeanClass},
+        `replaced` = #{replaced},
+        `jdbc_url` = #{jdbcUrl},
+        `init_pool_size` = #{initPoolSize},
+        `max_pool_size` = #{maxPoolSize},
+        `min_pool_size` = #{minPoolSize},
+        `version` = #{version},
+        `create_time` = #{createTime},
+        `update_time` = #{updateTime}
+        WHERE id = #{id}
     </insert>
 </mapper>

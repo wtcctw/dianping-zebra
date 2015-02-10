@@ -79,7 +79,10 @@ public class NotifyController {
             if (old.size() > 1) {
                 heartbeatMapper.deleteHeartbeat(entity.getAppName(), entity.getIp(), entity.getDatasourceBeanName());
             } else if (old.size() == 1) {
-                //todo: update
+                entity.setId(old.get(0).getId());
+                entity.setCreateTime(old.get(0).getCreateTime());
+                entity.setUpdateTime(new Date());
+                heartbeatMapper.updateHeartbeat(entity);
             } else {
                 entity.setUpdateTime(new Date());
                 entity.setCreateTime(new Date());
