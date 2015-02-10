@@ -24,22 +24,22 @@
 //import com.dianping.zebra.web.dal.stat.HeartbeatEntity;
 //
 ///**
-// * updateStatus:
-// * <p>
-// * -1 = 没有升级任何
-// * </p>
-// * <p>
-// * 0 = 升级成功
-// * </p>
-// * <p>
-// * 1 = 部分升级
-// * </p>
-// * <p>
-// * 2 = 没有接入dal，所以没有被dal监控到
-// * </p>
-// *
-// * @author damonzhu
-// */
+//* updateStatus:
+//* <p>
+//* -1 = 没有升级任何
+//* </p>
+//* <p>
+//* 0 = 升级成功
+//* </p>
+//* <p>
+//* 1 = 部分升级
+//* </p>
+//* <p>
+//* 2 = 没有接入dal，所以没有被dal监控到
+//* </p>
+//*
+//* @author damonzhu
+//*/
 //public class ReportServiceImpl implements ReportService {
 //
 //	@Inject

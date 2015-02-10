@@ -1,9 +1,7 @@
 package com.dianping.zebra.admin.dao;
 
 import com.dianping.zebra.admin.entity.HeartbeatEntity;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -13,9 +11,13 @@ import java.util.List;
  * http://www.dozer.cc
  */
 public interface HeartbeatMapper {
+    List<HeartbeatEntity> getAll();
+
     List<HeartbeatEntity> getHeartbeat(@Param("appName") String appName, @Param("ip") String ip, @Param("datasourceBeanName") String datasourceBeanName);
 
     int deleteHeartbeat(@Param("appName") String appName, @Param("ip") String ip, @Param("datasourceBeanName") String datasourceBeanName);
+
+    int deleteHeartbeatById(@Param("id") int id);
 
     int insertHeartbeat(HeartbeatEntity entity);
 
