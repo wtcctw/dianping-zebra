@@ -117,7 +117,7 @@ public class ReportServiceImpl implements ReportService {
         Transaction transaction = Cat.newTransaction("Report", "App");
 
         try {
-            List<HeartbeatEntity> all = heartbeatMapper.getAll();
+            List<HeartbeatEntity> all = heartbeatMapper.getHeartbeatByAppName(appName);
 
             for (HeartbeatEntity hb : all) {
                 if (hb.getApp_name().equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME) && hb.getIp() != null) {

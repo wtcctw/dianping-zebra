@@ -12,6 +12,10 @@
         #{datasource_bean_name}
     </select>
 
+    <select id="getHeartbeatByAppName" parameterType="map" resultType="HeartbeatEntity">
+        SELECT * FROM heartbeat WHERE app_name = #{app_name}
+    </select>
+
     <delete id="deleteHeartbeat" parameterType="map">
         DELETE FROM heartbeat WHERE app_name = #{app_name} and ip = #{ip} and datasource_bean_name =
         #{datasource_bean_name}

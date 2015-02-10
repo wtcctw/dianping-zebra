@@ -15,14 +15,14 @@
             </thead>
             <tbody>
             <tr>
-                <td>{{app.m_groupDataSource}}</td>
-                <td>{{app.m_dpdlDataSource}}</td>
-                <td>{{app.m_c3p0DataSource}}</td>
-                <td>{{app.m_singleDataSource}}</td>
-                <td>{{app.m_otherDataSource}}</td>
-                <td>{{app.m_replacedSingleDataSource}}</td>
-                <td>{{app.m_replacedDpdlDataSource}}</td>
-                <td>{{app.m_totalDataSource}}</td>
+                <td>{{app.groupDataSource}}</td>
+                <td>{{app.dpdlDataSource}}</td>
+                <td>{{app.c3p0DataSource}}</td>
+                <td>{{app.singleDataSource}}</td>
+                <td>{{app.otherDataSource}}</td>
+                <td>{{app.replacedSingleDataSource}}</td>
+                <td>{{app.replacedDpdlDataSource}}</td>
+                <td>{{app.totalDataSource}}</td>
             </tr>
             </tbody>
         </table>
@@ -43,26 +43,26 @@
                 <th>Delete</th>
             </tr>
             </thead>
-            <tbody ng-repeat="(ip,machine) in app.m_machines">
+            <tbody ng-repeat="(ip,machine) in app.machines">
             <tr>
-                <td rowspan="{{(machine.m_datasources | objectCount)+1}}"><a
+                <td rowspan="{{(machine.datasources | objectCount)+1}}"><a
                         href="http://api.cmdb.dp/api/v0.1/projects/by_ips?ip={{ip}}" target="_blank">{{ip}}</a></td>
-                <td rowspan="{{(machine.m_datasources | objectCount)+1}}">{{machine.m_version}}</td>
+                <td rowspan="{{(machine.datasources | objectCount)+1}}">{{machine.version}}</td>
             </tr>
-            <tr ng-repeat="(name,datasources) in machine.m_datasources">
+            <tr ng-repeat="(name,datasources) in machine.datasources">
                 <td>{{name}}</td>
                 <td>
                     <button type="button" class="popover-xlarge btn btn-default btn-xs" popover-trigger="mouseenter"
-                            popover="{{datasources.m_jdbcUrl }}">查看
+                            popover="{{datasources.jdbcUrl }}">查看
                     </button>
                 </td>
-                <td>{{datasources.m_username }}</td>
-                <td>{{datasources.m_type }}</td>
-                <td>{{datasources.m_initPoolSize }}</td>
-                <td>{{datasources.m_maxPoolSize }}</td>
-                <td>{{datasources.m_minPoolSize }}</td>
+                <td>{{datasources.username }}</td>
+                <td>{{datasources.type }}</td>
+                <td>{{datasources.initPoolSize }}</td>
+                <td>{{datasources.maxPoolSize }}</td>
+                <td>{{datasources.minPoolSize }}</td>
                 <td><span
-                        class="badge alert-{{datasources.m_type.indexOf('GroupDataSource') >= 0 || datasources.m_replaced ? 'success' : 'warning'}}">{{datasources.m_type.indexOf('GroupDataSource') >= 0  || datasources.m_replaced == true ? '是':'否'}}</span>
+                        class="badge alert-{{datasources.type.indexOf('GroupDataSource') >= 0 || datasources.replaced ? 'success' : 'warning'}}">{{datasources.type.indexOf('GroupDataSource') >= 0  || datasources.replaced == true ? '是':'否'}}</span>
                 </td>
                 <td>
                     <button class="btn btn-danger btn-xs" ng-click="deleteInfo(ip,name)">删除</button>

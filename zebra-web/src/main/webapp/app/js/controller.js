@@ -1,6 +1,6 @@
 zebraWeb.controller('update', function ($scope, $http) {
     $http.get('/a/update/index').success(function (data, status, headers, config) {
-        $scope.predicate = 'm_name';
+        $scope.predicate = 'name';
         $scope.report = data;
     });
 
@@ -44,7 +44,7 @@ zebraWeb.controller('black', function ($scope, $http) {
 
 zebraWeb.controller('update-database', function ($scope, $stateParams, $http) {
     $http.get('/a/update/database?database=' + $stateParams.name).success(function (data, status, headers, config) {
-        $scope.predicate = 'm_name';
+        $scope.predicate = 'name';
         $scope.database = data;
     });
 });

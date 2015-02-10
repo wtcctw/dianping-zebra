@@ -15,6 +15,8 @@ public interface HeartbeatMapper {
 
     List<HeartbeatEntity> getHeartbeat(@Param("app_name") String appName, @Param("ip") String ip, @Param("datasource_bean_name") String datasourceBeanName);
 
+    List<HeartbeatEntity> getHeartbeatByAppName(@Param("app_name") String appName);
+
     int deleteHeartbeat(@Param("app_name") String appName, @Param("ip") String ip, @Param("datasource_bean_name") String datasourceBeanName);
 
     int deleteHeartbeatById(@Param("id") int id);
