@@ -117,7 +117,7 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 * 在`Lion`上找到了`groupds.${database_name}.mapping`配置
 * 写库数据源是`mysql`
 
-## 更新说明
+##  更新说明
 ### 2.6.7
 * [-] 删除了DAL中无用的配置
 * [+] 添加了forceWriteOnLogin这个配置项来关闭登录用户走写库的逻辑
