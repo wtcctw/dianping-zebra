@@ -26,6 +26,8 @@ public final class Constants {
 
 	public static final String DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX = "zebra-sql-blacklist";
 
+    public static final String DEFAULT_SHARDING_PRFIX = "zebra-sharding";
+
 	public static final String ZEBRA_FILTER_PRFIX = "zebra.filter.";
 
 	public static final String DEFAULT_DATASOURCE_SINGLE_PRFIX = "ds";

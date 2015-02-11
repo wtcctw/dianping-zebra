@@ -38,6 +38,8 @@ public class ShardDataSource extends AbstractDataSource {
 
     private String ruleName;
 
+    private String configType;
+
     @Override
     public Connection getConnection() {
         return getConnection(null, null);
@@ -75,5 +77,9 @@ public class ShardDataSource extends AbstractDataSource {
 
     public void setRuleName(String ruleName) {
         this.ruleName = ruleName;
+    }
+
+    public void setConfigType(String configType) {
+        this.configType = configType;
     }
 }
