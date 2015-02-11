@@ -12,7 +12,6 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import com.dianping.zebra.shard.jdbc.replicate.ReplicateContext;
 import com.dianping.zebra.shard.jdbc.util.JDBCUtils;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 
