@@ -12,6 +12,7 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
@@ -39,7 +40,9 @@ public class ShardDataSource extends AbstractDataSource {
 
     private String ruleName;
 
-    private String configType;
+    private String configType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+
+    private String localConfigName;
 
     @Override
     public Connection getConnection() throws SQLException {
@@ -106,5 +109,9 @@ public class ShardDataSource extends AbstractDataSource {
 
     public void setOriginDataSource(DataSource originDataSource) {
         this.originDataSource = originDataSource;
+    }
+
+    public void setLocalConfigName(String localConfigName) {
+        this.localConfigName = localConfigName;
     }
 }
