@@ -18,7 +18,7 @@ import com.dianping.zebra.group.util.FileUtils;
 
 public class LocalConfigServiceTest {
 
-	private String resourceId = "zebra.v2.system";
+	private String resourceId = "zebra.system";
 
 	private ConfigService localConfigService;
 
