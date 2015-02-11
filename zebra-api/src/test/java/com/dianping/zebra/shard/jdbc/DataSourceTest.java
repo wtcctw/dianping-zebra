@@ -16,6 +16,7 @@
 package com.dianping.zebra.shard.jdbc;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,7 +69,7 @@ public class DataSourceTest extends ZebraBaseTestCase {
 	}
 
 	@Test
-	public void testGetConnection() {
+	public void testGetConnection() throws SQLException {
 		ShardDataSource dataSource = new ShardDataSource();
 		Connection conn = dataSource.getConnection();
 		Assert.assertNotNull(conn);
@@ -76,7 +77,7 @@ public class DataSourceTest extends ZebraBaseTestCase {
 	}
 
 	@Test
-	public void testGetConnection2() {
+	public void testGetConnection2() throws SQLException {
 		ShardDataSource dataSource = new ShardDataSource();
 		Connection conn = dataSource.getConnection("leo", "test");
 		Assert.assertNotNull(conn);

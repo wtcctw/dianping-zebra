@@ -87,16 +87,8 @@ public class ShardDataSource extends AbstractDataSource {
         this.routerFactory = routerFactory;
     }
 
-    public boolean isSwitchOn() {
-        return switchOn;
-    }
-
     public void setSwitchOn(boolean switchOn) {
         this.switchOn = switchOn;
-    }
-
-    public DataSource getOriginDataSource() {
-        return originDataSource;
     }
 
     public void setRuleName(String ruleName) {
