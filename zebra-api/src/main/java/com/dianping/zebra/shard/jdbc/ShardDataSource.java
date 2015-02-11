@@ -86,7 +86,7 @@ public class ShardDataSource implements DataSource {
 	}
 
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		return null;
+        throw new UnsupportedOperationException("Zebra unsupport getParentLogger");
 	}
 
 	public void init() {

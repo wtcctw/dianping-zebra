@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.config;
+package com.dianping.zebra.shard.config;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

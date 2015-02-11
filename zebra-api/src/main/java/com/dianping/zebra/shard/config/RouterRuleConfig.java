@@ -13,42 +13,24 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.config;
+package com.dianping.zebra.shard.config;
+
+import java.util.List;
 
 /**
  * @author danson.liu
  *
  */
-public class ExceptionConfig {
-
-	private String condition;
+public class RouterRuleConfig {
 	
-	private String db;
-	
-	private String table;
+	private List<TableShardRuleConfig> tableShardConfigs;
 
-	public String getCondition() {
-		return condition;
+	public List<TableShardRuleConfig> getTableShardConfigs() {
+		return tableShardConfigs;
 	}
 
-	public void setCondition(String condition) {
-		this.condition = condition;
+	public void setTableShardConfigs(List<TableShardRuleConfig> tableShardConfig) {
+		this.tableShardConfigs = tableShardConfig;
 	}
 
-	public String getDb() {
-		return db;
-	}
-
-	public void setDb(String db) {
-		this.db = db;
-	}
-
-	public String getTable() {
-		return table;
-	}
-
-	public void setTable(String table) {
-		this.table = table;
-	}
-	
 }

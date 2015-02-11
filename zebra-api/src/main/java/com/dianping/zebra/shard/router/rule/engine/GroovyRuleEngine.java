@@ -21,7 +21,7 @@ import groovy.lang.GroovyObject;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import com.dianping.zebra.shard.router.config.RouterConfigException;
+import com.dianping.zebra.shard.config.RouterConfigException;
 import com.dianping.zebra.shard.router.rule.AbstractDimensionRule;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 

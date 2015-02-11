@@ -15,10 +15,10 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
-import com.dianping.zebra.shard.router.config.ExceptionConfig;
-import com.dianping.zebra.shard.router.config.RouterRuleConfig;
-import com.dianping.zebra.shard.router.config.TableShardDimensionConfig;
-import com.dianping.zebra.shard.router.config.TableShardRuleConfig;
+import com.dianping.zebra.shard.config.ExceptionConfig;
+import com.dianping.zebra.shard.config.RouterRuleConfig;
+import com.dianping.zebra.shard.config.TableShardDimensionConfig;
+import com.dianping.zebra.shard.config.TableShardRuleConfig;
 
 import java.util.*;
 
