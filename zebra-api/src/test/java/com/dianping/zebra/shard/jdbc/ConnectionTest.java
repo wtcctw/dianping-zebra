@@ -42,7 +42,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 				"setPassword", "getRouter", "setRouter", "close", "commit", "createStatement", "getAutoCommit",
 				"getMetaData", "getTransactionIsolation", "isClosed", "isReadOnly", "prepareStatement", "rollback",
 				"setAutoCommit", "setReadOnly", "setTransactionIsolation", "setSyncEventNotifier", "getEventNotifier",
-				"getGeneratedKey", "setGeneratedKey", "isPerformanceMonitorSwitchOn", "setPerformanceMonitorSwitchOn" };
+				"getGeneratedKey", "setGeneratedKey"};
 	}
 
 	protected Object getTestObj() {

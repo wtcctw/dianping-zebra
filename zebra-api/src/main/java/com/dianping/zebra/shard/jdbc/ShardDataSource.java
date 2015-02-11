@@ -13,7 +13,12 @@
 package com.dianping.zebra.shard.jdbc;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.config.LionConfigService;
+import com.dianping.zebra.config.LocalConfigService;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
+import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.shard.router.ConfigServiceDataSourceRouterFactory;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 
@@ -34,7 +39,7 @@ public class ShardDataSource extends AbstractDataSource {
 
     private DataSourceRouter router;
 
-    private volatile boolean switchOn;
+    private volatile boolean switchOn = true;
 
     private DataSource originDataSource;
 
@@ -42,7 +47,7 @@ public class ShardDataSource extends AbstractDataSource {
 
     private String configType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
-    private String localConfigName;
+    private ConfigService configService;
 
     @Override
     public Connection getConnection() throws SQLException {
@@ -66,7 +71,21 @@ public class ShardDataSource extends AbstractDataSource {
     }
 
     public void init() {
-        // todo: init from config
+        if (StringUtils.isNotBlank(ruleName)) {
+            if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equals(configType)) {
+                configService = new LionConfigService();
+            } else {
+                configService = new LocalConfigService(ruleName);
+            }
+
+            if (routerFactory == null) {
+                routerFactory = new ConfigServiceDataSourceRouterFactory(configService, ruleName);
+            }
+
+            if (dataSourcePool == null) {
+                dataSourcePool = routerFactory.getDataSourcePool();
+            }
+        }
 
         if (dataSourcePool == null || dataSourcePool.isEmpty()) {
             throw new IllegalArgumentException("dataSourcePool is required.");
@@ -74,6 +93,7 @@ public class ShardDataSource extends AbstractDataSource {
         if (routerFactory == null) {
             throw new IllegalArgumentException("routerRuleFile must be set.");
         }
+
         this.router = routerFactory.getRouter();
         this.router.setDataSourcePool(dataSourcePool);
         this.router.init();
@@ -97,13 +117,5 @@ public class ShardDataSource extends AbstractDataSource {
 
     public void setConfigType(String configType) {
         this.configType = configType;
-    }
-
-    public void setOriginDataSource(DataSource originDataSource) {
-        this.originDataSource = originDataSource;
-    }
-
-    public void setLocalConfigName(String localConfigName) {
-        this.localConfigName = localConfigName;
     }
 }

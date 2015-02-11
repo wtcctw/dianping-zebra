@@ -33,8 +33,6 @@ public class ShardConnection implements Connection {
 
 	private DataSourceRouter router;
 
-	private ReplicateContext replicateContext;
-	
 	private Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 
 	private Set<Statement> attachedStatements = new HashSet<Statement>();
@@ -740,13 +738,5 @@ public class ShardConnection implements Connection {
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport unwrap");
-	}
-	
-	public void setReplicateContext(ReplicateContext replicateContext){
-		this.replicateContext = replicateContext;
-	}
-	
-	public ReplicateContext getReplicateContext(){
-		return this.replicateContext;
 	}
 }

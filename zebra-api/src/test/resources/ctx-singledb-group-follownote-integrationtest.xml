@@ -20,7 +20,6 @@
 				<entry key="groupdb" value-ref="groupdb"/>
 			</map>	
 		</property>
-		<property name="performanceMonitorSwitchOn" value="true"/>
 		<property name="routerFactory">
 			<bean class="com.dianping.zebra.shard.router.ClassPathXmlDataSourceRouterFactory">
 				<constructor-arg value="router-rule-singledb-group-follownote-integrationtest.xml"/>

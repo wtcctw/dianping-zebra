@@ -1,9 +1,9 @@
 /**
  * Project: com.dianping.zebra.zebra-client-0.1.0
- * 
+ *
  * File Created at 2011-6-13
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -20,35 +20,41 @@ import com.dianping.zebra.shard.config.XmlDataSourceRouterConfigLoader;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
 
+import javax.sql.DataSource;
+import java.util.Map;
+
 /**
  * @author danson.liu
- * 
  */
-public class ClassPathXmlDataSourceRouterFactory implements DataSourceRouterFactory {
+public class ClassPathXmlDataSourceRouterFactory extends AbstractDataSourceRouterFactory {
 
-	private final String					routerRuleFile;
+    private final String routerRuleFile;
 
-	private XmlDataSourceRouterConfigLoader routerConfigLoader	= new XmlDataSourceRouterConfigLoader();
+    private XmlDataSourceRouterConfigLoader routerConfigLoader = new XmlDataSourceRouterConfigLoader();
 
-	public ClassPathXmlDataSourceRouterFactory(String routerRuleFile) {
-		this.routerRuleFile = routerRuleFile;
-	}
+    public ClassPathXmlDataSourceRouterFactory(String routerRuleFile) {
+        this.routerRuleFile = routerRuleFile;
+    }
 
-	/**
-	 * @param routerConfigLoader
-	 *            the routerConfigLoader to set
-	 */
-	public void setRouterConfigLoader(XmlDataSourceRouterConfigLoader routerConfigLoader) {
-		this.routerConfigLoader = routerConfigLoader;
-	}
+    /**
+     * @param routerConfigLoader the routerConfigLoader to set
+     */
+    public void setRouterConfigLoader(XmlDataSourceRouterConfigLoader routerConfigLoader) {
+        this.routerConfigLoader = routerConfigLoader;
+    }
 
-	@Override
-	public DataSourceRouter getRouter() {
-		DataSourceRouterImpl router = new DataSourceRouterImpl();
-		RouterRuleConfig routerConfig = routerConfigLoader.loadConfig(routerRuleFile);
-		RouterRule routerRule = RouterRuleBuilder.build(routerConfig);
-		router.setRouterRule(routerRule);
-		return router;
-	}
+    @Override
+    public DataSourceRouter getRouter() {
+        DataSourceRouterImpl router = new DataSourceRouterImpl();
+        RouterRuleConfig routerConfig = routerConfigLoader.loadConfig(routerRuleFile);
+        RouterRule routerRule = RouterRuleBuilder.build(routerConfig);
+        router.setRouterRule(routerRule);
+        return router;
+    }
+
+    @Override
+    public Map<String, DataSource> getDataSourcePool() {
+        return getDataSourcePoolFromConfig(routerConfigLoader.loadConfig(routerRuleFile));
+    }
 
 }
