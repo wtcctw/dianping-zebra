@@ -17,7 +17,9 @@ import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 
 import javax.sql.DataSource;
+
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -26,54 +28,78 @@ import java.util.Map;
  */
 public class ShardDataSource extends AbstractDataSource {
 
-    private Map<String, DataSource> dataSourcePool;
+	private Map<String, DataSource> dataSourcePool;
 
-    private DataSourceRouterFactory routerFactory;
+	private DataSourceRouterFactory routerFactory;
 
-    private DataSourceRouter router;
+	private DataSourceRouter router;
 
-    private boolean switchOn;
+	private volatile boolean switchOn;
 
-    private DataSource originDataSource;
+	private DataSource originDataSource;
 
-    private String ruleName;
+	private String ruleName;
 
-    @Override
-    public Connection getConnection() {
-        return getConnection(null, null);
-    }
+	@Override
+	public Connection getConnection() throws SQLException {
+		return getConnection(null, null);
+	}
 
-    @Override
-    public Connection getConnection(String username, String password) {
-        ShardConnection connection = new ShardConnection(username, password);
-        connection.setRouter(router);
+	@Override
+	public Connection getConnection(String username, String password) throws SQLException {
+		if (switchOn) {
+			ShardConnection connection = new ShardConnection(username, password);
+			connection.setRouter(router);
 
-        return connection;
-    }
+			return connection;
+		} else {
+			if (originDataSource != null) {
+				return originDataSource.getConnection();
+			} else {
+				throw new SQLException("cannot get connections from originDataSource because originDataSource is null.");
+			}
+		}
+	}
 
-    public void init() {
-        //todo: init from config
+	public void init() {
+		// todo: init from config
 
-        if (dataSourcePool == null || dataSourcePool.isEmpty()) {
-            throw new IllegalArgumentException("dataSourcePool is required.");
-        }
-        if (routerFactory == null) {
-            throw new IllegalArgumentException("routerRuleFile must be set.");
-        }
-        this.router = routerFactory.getRouter();
-        this.router.setDataSourcePool(dataSourcePool);
-        this.router.init();
-    }
+		if (dataSourcePool == null || dataSourcePool.isEmpty()) {
+			throw new IllegalArgumentException("dataSourcePool is required.");
+		}
+		if (routerFactory == null) {
+			throw new IllegalArgumentException("routerRuleFile must be set.");
+		}
+		this.router = routerFactory.getRouter();
+		this.router.setDataSourcePool(dataSourcePool);
+		this.router.init();
+	}
 
-    public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
-        this.dataSourcePool = dataSourcePool;
-    }
+	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
+		this.dataSourcePool = dataSourcePool;
+	}
 
-    public void setRouterFactory(DataSourceRouterFactory routerFactory) {
-        this.routerFactory = routerFactory;
-    }
+	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
+		this.routerFactory = routerFactory;
+	}
 
-    public void setRuleName(String ruleName) {
-        this.ruleName = ruleName;
-    }
+	public void setRuleName(String ruleName) {
+		this.ruleName = ruleName;
+	}
+
+	public boolean isSwitchOn() {
+		return switchOn;
+	}
+
+	public void setSwitchOn(boolean switchOn) {
+		this.switchOn = switchOn;
+	}
+
+	public DataSource getOriginDataSource() {
+		return originDataSource;
+	}
+
+	public void setOriginDataSource(DataSource originDataSource) {
+		this.originDataSource = originDataSource;
+	}
 }
