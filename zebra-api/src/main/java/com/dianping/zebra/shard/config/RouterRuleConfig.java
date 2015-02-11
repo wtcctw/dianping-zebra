@@ -23,51 +23,11 @@ import java.util.List;
 public class RouterRuleConfig {
     private List<TableShardRuleConfig> tableShardConfigs;
 
-    private String ruleName;
-
-    private String oldDataSource;
-
-    private ReadWriteStrategy readStrategy;
-
-    private ReadWriteStrategy writeStrategy;
-
     public List<TableShardRuleConfig> getTableShardConfigs() {
         return tableShardConfigs;
     }
 
     public void setTableShardConfigs(List<TableShardRuleConfig> tableShardConfig) {
         this.tableShardConfigs = tableShardConfig;
-    }
-
-    public ReadWriteStrategy getWriteStrategy() {
-        return writeStrategy;
-    }
-
-    public void setWriteStrategy(ReadWriteStrategy writeStrategy) {
-        this.writeStrategy = writeStrategy;
-    }
-
-    public ReadWriteStrategy getReadStrategy() {
-        return readStrategy;
-    }
-
-    public void setReadStrategy(ReadWriteStrategy readStrategy) {
-        this.readStrategy = readStrategy;
-    }
-
-    public String getOldDataSource() {
-        return oldDataSource;
-    }
-
-    public void setOldDataSource(String oldDataSource) {
-        this.oldDataSource = oldDataSource;
-    }
-
-    public String getRuleName() {
-        return ruleName;
-    }
-
-    public void setRuleName(String ruleName) {
-        this.ruleName = ruleName;
     }
 }
