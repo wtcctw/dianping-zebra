@@ -1,5 +1,7 @@
 <system-config>
-    <retry-times>0</retry-times>
-    <global-black-list>aaa,bbb</global-black-list>
-    <app-black-list>aaa,bbb</app-black-list>
+	<retry-times>0</retry-times>
+	<!-- 流控 -->
+	<!-- key值表示每条sql的唯一id，value值表示允许打到数据库的比例，100%表示不拦截 -->
+	<sql-flow-control sql-id="aaa" allow-percent="10" app="group-service" />
+	<sql-flow-control sql-id="bbb" allow-percent="90" app="global" />
 </system-config>

@@ -1,6 +1,5 @@
 package com.dianping.zebra.admin.mock;
 
-import com.dianping.zebra.group.Constants;
 import com.dianping.zebra.group.config.ConfigService;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
@@ -14,8 +13,7 @@ public class GroupDataSourceExtend extends GroupDataSource {
 	@Override
 	protected void initConfig() {
 		this.groupConfig = buildGroupConfig();
-		this.systemConfigManager = SystemConfigManagerFactory
-				.getConfigManger(configManagerType, Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType);
 	}
 
 	public void setDataSourceConfigManager(ConfigService configService) {

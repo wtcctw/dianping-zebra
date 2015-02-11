@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
 
 public class SingleConnection implements Connection {
 
-	private final String id;
+	private final String dsId;
 
 	private final Connection conn;
 
@@ -22,14 +22,14 @@ public class SingleConnection implements Connection {
 
 	public SingleConnection(SingleDataSource dataSource, final DataSourceConfig config, Connection conn,
 	      List<JdbcFilter> filters) {
-		this.id = config.getId();
+		this.dsId = config.getId();
 		this.dataSource = dataSource;
 		this.conn = conn;
 		this.filters = filters;
 	}
 
-	public String getId() {
-		return id;
+	public String getDataSourceId() {
+		return dsId;
 	}
 
 	public void abort(Executor executor) throws SQLException {

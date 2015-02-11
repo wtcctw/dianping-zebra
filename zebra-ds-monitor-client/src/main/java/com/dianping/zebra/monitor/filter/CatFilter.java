@@ -160,7 +160,7 @@ public class CatFilter extends DefaultJdbcFilter {
 	private void logSqlDatabaseEvent(Connection conn) throws SQLException {
 		SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
 		if (singleConnection != null && conn.getMetaData() != null) {
-			Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, singleConnection.getId());
+			Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, singleConnection.getDataSourceId());
 		}
 	}
 

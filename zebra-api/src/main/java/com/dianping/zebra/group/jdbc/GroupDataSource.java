@@ -353,8 +353,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	protected void initConfig() {
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
-		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-		      Constants.DEFAULT_SYSTEM_RESOURCE_ID);
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType);
 		this.groupConfig = buildGroupConfig();
 	}
 
