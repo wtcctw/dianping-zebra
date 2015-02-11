@@ -137,6 +137,10 @@
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
