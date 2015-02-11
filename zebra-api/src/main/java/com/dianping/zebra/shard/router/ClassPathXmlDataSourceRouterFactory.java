@@ -15,8 +15,8 @@
  */
 package com.dianping.zebra.shard.router;
 
-import com.dianping.zebra.shard.router.config.RouterRuleConfig;
-import com.dianping.zebra.shard.router.config.XmlDataSourceRouterConfigLoader;
+import com.dianping.zebra.shard.config.RouterRuleConfig;
+import com.dianping.zebra.shard.config.XmlDataSourceRouterConfigLoader;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
 

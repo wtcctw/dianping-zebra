@@ -15,7 +15,7 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
-import com.dianping.zebra.shard.router.config.RouterConfigException;
+import com.dianping.zebra.shard.config.RouterConfigException;
 
 import java.util.HashSet;
 import java.util.Set;

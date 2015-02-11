@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.config;
+package com.dianping.zebra.config;
 
 import java.beans.PropertyChangeListener;
 

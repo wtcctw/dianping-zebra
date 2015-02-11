@@ -8,13 +8,17 @@
     </select>
 
     <select id="getHeartbeat" parameterType="map" resultType="HeartbeatEntity">
-        SELECT * FROM heartbeat WHERE app_name = #{appName} and ip = #{ip} and datasource_bean_name =
-        #{datasourceBeanName}
+        SELECT * FROM heartbeat WHERE app_name = #{app_name} and ip = #{ip} and datasource_bean_name =
+        #{datasource_bean_name}
+    </select>
+
+    <select id="getHeartbeatByAppName" parameterType="map" resultType="HeartbeatEntity">
+        SELECT * FROM heartbeat WHERE app_name = #{app_name}
     </select>
 
     <delete id="deleteHeartbeat" parameterType="map">
-        DELETE FROM heartbeat WHERE app_name = #{appName} and ip = #{ip} and datasource_bean_name =
-        #{datasourceBeanName}
+        DELETE FROM heartbeat WHERE app_name = #{app_name} and ip = #{ip} and datasource_bean_name =
+        #{datasource_bean_name}
     </delete>
 
     <delete id="deleteHeartbeatById" parameterType="map">
@@ -41,40 +45,40 @@
         `update_time`)
         VALUES
         (
-        #{appName},
+        #{app_name},
         #{ip},
-        #{datasourceBeanName},
-        #{databaseName},
-        #{databaseType},
+        #{datasource_bean_name},
+        #{database_name},
+        #{database_type},
         #{username},
-        #{datasourceBeanClass},
+        #{datasource_bean_class},
         #{replaced},
-        #{jdbcUrl},
-        #{initPoolSize},
-        #{maxPoolSize},
-        #{minPoolSize},
+        #{jdbc_url},
+        #{init_pool_size},
+        #{max_pool_size},
+        #{min_pool_size},
         #{version},
-        #{createTime},
-        #{updateTime})
+        #{create_time},
+        #{update_time})
     </insert>
 
     <insert id="updateHeartbeat" parameterType="HeartbeatEntity">
         UPDATE `heartbeat` SET
-        `app_name` = #{appName},
+        `app_name` = #{app_name},
         `ip` = #{ip},
-        `datasource_bean_name` = #{datasourceBeanName},
-        `database_name` = #{databaseName},
-        `database_type` = #{databaseType},
+        `datasource_bean_name` = #{datasource_bean_name},
+        `database_name` = #{database_name},
+        `database_type` = #{database_type},
         `username` = #{username},
-        `datasource_bean_class` = #{datasourceBeanClass},
+        `datasource_bean_class` = #{datasource_bean_class},
         `replaced` = #{replaced},
-        `jdbc_url` = #{jdbcUrl},
-        `init_pool_size` = #{initPoolSize},
-        `max_pool_size` = #{maxPoolSize},
-        `min_pool_size` = #{minPoolSize},
+        `jdbc_url` = #{jdbc_url},
+        `init_pool_size` = #{init_pool_size},
+        `max_pool_size` = #{max_pool_size},
+        `min_pool_size` = #{min_pool_size},
         `version` = #{version},
-        `create_time` = #{createTime},
-        `update_time` = #{updateTime}
+        `create_time` = #{create_time},
+        `update_time` = #{update_time}
         WHERE id = #{id}
     </insert>
 </mapper>

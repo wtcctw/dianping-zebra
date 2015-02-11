@@ -1,17 +1,17 @@
 <div class="row">
     <div class="col-xs-12">
         <div class="progress">
-            <div popover="完全升级:{{report.m_successDatabase}}" popover-trigger="mouseenter"
+            <div popover="完全升级:{{report.successDatabase}}" popover-trigger="mouseenter"
                  class="progress-bar progress-bar-success progress-bar-striped"
-                 style="width: {{report.m_successDatabase * 100 / (report.m_successDatabase + report.m_halfDoneDatabase + report.m_failureDatabase)}}%">
+                 style="width: {{report.successDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
             </div>
-            <div popover="部分升级:{{report.m_halfDoneDatabase}}" popover-trigger="mouseenter"
+            <div popover="部分升级:{{report.halfDoneDatabase}}" popover-trigger="mouseenter"
                  class="progress-bar progress-bar-warning progress-bar-striped"
-                 style="width: {{report.m_halfDoneDatabase * 100 / (report.m_successDatabase + report.m_halfDoneDatabase + report.m_failureDatabase)}}%">
+                 style="width: {{report.halfDoneDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
             </div>
-            <div popover="未升级:{{report.m_failureDatabase}}" popover-trigger="mouseenter"
+            <div popover="未升级:{{report.failureDatabase}}" popover-trigger="mouseenter"
                  class="progress-bar progress-bar-danger progress-bar-striped"
-                 style="width: {{report.m_failureDatabase * 100 / (report.m_successDatabase + report.m_halfDoneDatabase + report.m_failureDatabase)}}%">
+                 style="width: {{report.failureDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
             </div>
         </div>
     </div>
@@ -30,29 +30,29 @@
         <table class="table table-striped table-condensed">
             <thead>
             <tr>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_name'">数据库({{report.m_databases |
+                <th><a href="" ng-click="reverse=!reverse;predicate='name'">数据库({{report.databases |
                     objectCount}})</a></th>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedSingleDataSource'">自动替换的数目({{report.m_replacedSingleDataSource}})</a>
+                <th><a href="" ng-click="reverse=!reverse;predicate='replacedSingleDataSource'">自动替换的数目({{report.replacedSingleDataSource}})</a>
                     <span>/</span>
-                    <a href="" ng-click="reverse=!reverse;predicate='m_c3p0DataSource'">所有的C3P0数目({{report.m_c3p0DataSource}})</a>
+                    <a href="" ng-click="reverse=!reverse;predicate='c3p0DataSource'">所有的C3P0数目({{report.c3p0DataSource}})</a>
                 </th>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_replacedDpdlDataSource'">自动替换的数目({{report.m_replacedDpdlDataSource}})</a><span>/</span>
-                    <a href="" ng-click="reverse=!reverse;predicate='m_dpdlDataSource'">所有的DPDL数目({{report.m_dpdlDataSource}})</a>
+                <th><a href="" ng-click="reverse=!reverse;predicate='replacedDpdlDataSource'">自动替换的数目({{report.replacedDpdlDataSource}})</a><span>/</span>
+                    <a href="" ng-click="reverse=!reverse;predicate='dpdlDataSource'">所有的DPDL数目({{report.dpdlDataSource}})</a>
                 </th>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_groupDataSource'">升级Dal的数目({{report.m_groupDataSource}})</a>
+                <th><a href="" ng-click="reverse=!reverse;predicate='groupDataSource'">升级Dal的数目({{report.groupDataSource}})</a>
                 </th>
-                <th><a href="" ng-click="reverse=!reverse;predicate='m_totalDataSource'">总数据源({{report.m_totalDataSource}})</a>
+                <th><a href="" ng-click="reverse=!reverse;predicate='totalDataSource'">总数据源({{report.totalDataSource}})</a>
                 </th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="database in report.m_databases | toArray | filter:searchTest | orderBy:predicate:reverse">
-                <td><a href="#/update/database/{{database.m_name}}">{{database.m_name}}</a></td>
-                <td>{{database.m_replacedSingleDataSource}}/{{database.m_c3p0DataSource}}</td>
-                <td>{{database.m_replacedDpdlDataSource}}/{{database.m_dpdlDataSource}}</td>
-                <td>{{database.m_groupDataSource }}</td>
+            <tr ng-repeat="database in report.databases | toArray | filter:searchTest | orderBy:predicate:reverse">
+                <td><a href="#/update/database/{{database.name}}">{{database.name}}</a></td>
+                <td>{{database.replacedSingleDataSource}}/{{database.c3p0DataSource}}</td>
+                <td>{{database.replacedDpdlDataSource}}/{{database.dpdlDataSource}}</td>
+                <td>{{database.groupDataSource }}</td>
                 <td>
-                    <span class="badge alert-{{database.m_updateStatus == -1?'danger':(database.m_updateStatus == 0 ?'success': (database.m_updateStatus == 2 ? 'info' : 'warning'))}}">{{database.m_totalDataSource}}</span>
+                    <span class="badge alert-{{database.updateStatus == -1?'danger':(database.updateStatus == 0 ?'success': (database.updateStatus == 2 ? 'info' : 'warning'))}}">{{database.totalDataSource}}</span>
                 </td>
             </tr>
             </tbody>

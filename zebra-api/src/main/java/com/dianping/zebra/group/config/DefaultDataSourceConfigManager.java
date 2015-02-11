@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.config;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;

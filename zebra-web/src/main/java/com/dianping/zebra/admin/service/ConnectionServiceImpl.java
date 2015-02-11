@@ -3,7 +3,7 @@ package com.dianping.zebra.admin.service;
 import com.dianping.cat.Cat;
 import com.dianping.zebra.admin.dto.ConnectionStatusDto;
 import com.dianping.zebra.admin.mock.GroupDataSourceExtend;
-import com.dianping.zebra.group.config.ConfigService;
+import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;

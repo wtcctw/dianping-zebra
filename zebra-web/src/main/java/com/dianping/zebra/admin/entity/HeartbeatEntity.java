@@ -10,37 +10,35 @@ import java.util.Date;
 public class HeartbeatEntity {
     private int id;
 
-    private String appName;
+    private String app_name;
 
     private String ip;
 
-    private String datasourceBeanName;
+    private String datasource_bean_name;
 
-    private String databaseName;
+    private String database_name;
 
-    private String databaseType;
+    private String database_type;
 
     private String username;
 
-    private String datasourceBeanClass;
+    private String datasource_bean_class;
 
     private boolean replaced;
 
-    private String jdbcUrl;
+    private String jdbc_url;
 
-    private int initPoolSize;
+    private int init_pool_size;
 
-    private int maxPoolSize;
+    private int max_pool_size;
 
-    private int minPoolSize;
+    private int min_pool_size;
 
     private String version;
 
-    private java.util.Date createTime;
+    private java.util.Date create_time;
 
-    private java.util.Date updateTime;
-
-    private int keyId;
+    private java.util.Date update_time;
 
     public int getId() {
         return id;
@@ -50,12 +48,12 @@ public class HeartbeatEntity {
         this.id = id;
     }
 
-    public String getAppName() {
-        return appName;
+    public String getApp_name() {
+        return app_name;
     }
 
-    public void setAppName(String appName) {
-        this.appName = appName;
+    public void setApp_name(String app_name) {
+        this.app_name = app_name;
     }
 
     public String getIp() {
@@ -66,28 +64,28 @@ public class HeartbeatEntity {
         this.ip = ip;
     }
 
-    public String getDatasourceBeanName() {
-        return datasourceBeanName;
+    public String getDatasource_bean_name() {
+        return datasource_bean_name;
     }
 
-    public void setDatasourceBeanName(String datasourceBeanName) {
-        this.datasourceBeanName = datasourceBeanName;
+    public void setDatasource_bean_name(String datasource_bean_name) {
+        this.datasource_bean_name = datasource_bean_name;
     }
 
-    public String getDatabaseName() {
-        return databaseName;
+    public String getDatabase_name() {
+        return database_name;
     }
 
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setDatabase_name(String database_name) {
+        this.database_name = database_name;
     }
 
-    public String getDatabaseType() {
-        return databaseType;
+    public String getDatabase_type() {
+        return database_type;
     }
 
-    public void setDatabaseType(String databaseType) {
-        this.databaseType = databaseType;
+    public void setDatabase_type(String database_type) {
+        this.database_type = database_type;
     }
 
     public String getUsername() {
@@ -98,12 +96,12 @@ public class HeartbeatEntity {
         this.username = username;
     }
 
-    public String getDatasourceBeanClass() {
-        return datasourceBeanClass;
+    public String getDatasource_bean_class() {
+        return datasource_bean_class;
     }
 
-    public void setDatasourceBeanClass(String datasourceBeanClass) {
-        this.datasourceBeanClass = datasourceBeanClass;
+    public void setDatasource_bean_class(String datasource_bean_class) {
+        this.datasource_bean_class = datasource_bean_class;
     }
 
     public boolean isReplaced() {
@@ -114,36 +112,36 @@ public class HeartbeatEntity {
         this.replaced = replaced;
     }
 
-    public String getJdbcUrl() {
-        return jdbcUrl;
+    public String getJdbc_url() {
+        return jdbc_url;
     }
 
-    public void setJdbcUrl(String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
+    public void setJdbc_url(String jdbc_url) {
+        this.jdbc_url = jdbc_url;
     }
 
-    public int getInitPoolSize() {
-        return initPoolSize;
+    public int getInit_pool_size() {
+        return init_pool_size;
     }
 
-    public void setInitPoolSize(int initPoolSize) {
-        this.initPoolSize = initPoolSize;
+    public void setInit_pool_size(int init_pool_size) {
+        this.init_pool_size = init_pool_size;
     }
 
-    public int getMaxPoolSize() {
-        return maxPoolSize;
+    public int getMax_pool_size() {
+        return max_pool_size;
     }
 
-    public void setMaxPoolSize(int maxPoolSize) {
-        this.maxPoolSize = maxPoolSize;
+    public void setMax_pool_size(int max_pool_size) {
+        this.max_pool_size = max_pool_size;
     }
 
-    public int getMinPoolSize() {
-        return minPoolSize;
+    public int getMin_pool_size() {
+        return min_pool_size;
     }
 
-    public void setMinPoolSize(int minPoolSize) {
-        this.minPoolSize = minPoolSize;
+    public void setMin_pool_size(int min_pool_size) {
+        this.min_pool_size = min_pool_size;
     }
 
     public String getVersion() {
@@ -154,27 +152,19 @@ public class HeartbeatEntity {
         this.version = version;
     }
 
-    public Date getCreateTime() {
-        return createTime;
+    public Date getCreate_time() {
+        return create_time;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
+    public void setCreate_time(Date create_time) {
+        this.create_time = create_time;
     }
 
-    public Date getUpdateTime() {
-        return updateTime;
+    public Date getUpdate_time() {
+        return update_time;
     }
 
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public int getKeyId() {
-        return keyId;
-    }
-
-    public void setKeyId(int keyId) {
-        this.keyId = keyId;
+    public void setUpdate_time(Date update_time) {
+        this.update_time = update_time;
     }
 }

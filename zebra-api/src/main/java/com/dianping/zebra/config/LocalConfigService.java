@@ -1,5 +1,6 @@
-package com.dianping.zebra.group.config;
+package com.dianping.zebra.config;
 
+import com.dianping.zebra.group.config.AdvancedPropertyChangeEvent;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.util.FileUtils;
 import com.dianping.zebra.group.util.StringUtils;

@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.config;
+package com.dianping.zebra.config;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.config.LocalConfigService;
 import junit.framework.Assert;
 
 import org.junit.After;
