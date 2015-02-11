@@ -18,6 +18,7 @@ import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 
 /**
@@ -32,7 +33,7 @@ public class ShardDataSource extends AbstractDataSource {
 
     private DataSourceRouter router;
 
-    private boolean switchOn;
+    private volatile boolean switchOn;
 
     private DataSource originDataSource;
 
@@ -41,20 +42,28 @@ public class ShardDataSource extends AbstractDataSource {
     private String configType;
 
     @Override
-    public Connection getConnection() {
+    public Connection getConnection() throws SQLException {
         return getConnection(null, null);
     }
 
     @Override
-    public Connection getConnection(String username, String password) {
-        ShardConnection connection = new ShardConnection(username, password);
-        connection.setRouter(router);
+    public Connection getConnection(String username, String password) throws SQLException {
+        if (switchOn) {
+            ShardConnection connection = new ShardConnection(username, password);
+            connection.setRouter(router);
 
-        return connection;
+            return connection;
+        } else {
+            if (originDataSource != null) {
+                return originDataSource.getConnection();
+            } else {
+                throw new SQLException("cannot get connections from originDataSource because originDataSource is null.");
+            }
+        }
     }
 
     public void init() {
-        //todo: init from config
+        // todo: init from config
 
         if (dataSourcePool == null || dataSourcePool.isEmpty()) {
             throw new IllegalArgumentException("dataSourcePool is required.");
@@ -75,11 +84,27 @@ public class ShardDataSource extends AbstractDataSource {
         this.routerFactory = routerFactory;
     }
 
+    public boolean isSwitchOn() {
+        return switchOn;
+    }
+
+    public void setSwitchOn(boolean switchOn) {
+        this.switchOn = switchOn;
+    }
+
+    public DataSource getOriginDataSource() {
+        return originDataSource;
+    }
+
     public void setRuleName(String ruleName) {
         this.ruleName = ruleName;
     }
 
     public void setConfigType(String configType) {
         this.configType = configType;
+    }
+
+    public void setOriginDataSource(DataSource originDataSource) {
+        this.originDataSource = originDataSource;
     }
 }

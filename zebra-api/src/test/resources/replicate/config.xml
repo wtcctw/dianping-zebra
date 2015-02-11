@@ -41,8 +41,7 @@
 	
 	<!-- 如果有这个，则支持动态动态的切换功能；如果没有，则不开启 -->
 	<property name="swithOn" value="false"></property>
-	<property name="orignalDs" ref="ds"></property>
-	
+	<property name="originDataSource" ref="ds"></property>
 </bean>
 
 <!-- TODO 完善这个配置 -->
