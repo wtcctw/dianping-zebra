@@ -1,9 +1,9 @@
 /**
  * Project: com.dianping.zebra.zebra-client-0.1.0
- * 
+ *
  * File Created at 2011-6-14
  * $Id$
- * 
+ *
  * Copyright 2010 dianping.com.
  * All rights reserved.
  *
@@ -19,18 +19,55 @@ import java.util.List;
 
 /**
  * @author danson.liu
- *
  */
 public class RouterRuleConfig {
-	
-	private List<TableShardRuleConfig> tableShardConfigs;
+    private List<TableShardRuleConfig> tableShardConfigs;
 
-	public List<TableShardRuleConfig> getTableShardConfigs() {
-		return tableShardConfigs;
-	}
+    private String ruleName;
 
-	public void setTableShardConfigs(List<TableShardRuleConfig> tableShardConfig) {
-		this.tableShardConfigs = tableShardConfig;
-	}
+    private String oldDataSource;
 
+    private ReadWriteStrategy readStrategy;
+
+    private ReadWriteStrategy writeStrategy;
+
+    public List<TableShardRuleConfig> getTableShardConfigs() {
+        return tableShardConfigs;
+    }
+
+    public void setTableShardConfigs(List<TableShardRuleConfig> tableShardConfig) {
+        this.tableShardConfigs = tableShardConfig;
+    }
+
+    public ReadWriteStrategy getWriteStrategy() {
+        return writeStrategy;
+    }
+
+    public void setWriteStrategy(ReadWriteStrategy writeStrategy) {
+        this.writeStrategy = writeStrategy;
+    }
+
+    public ReadWriteStrategy getReadStrategy() {
+        return readStrategy;
+    }
+
+    public void setReadStrategy(ReadWriteStrategy readStrategy) {
+        this.readStrategy = readStrategy;
+    }
+
+    public String getOldDataSource() {
+        return oldDataSource;
+    }
+
+    public void setOldDataSource(String oldDataSource) {
+        this.oldDataSource = oldDataSource;
+    }
+
+    public String getRuleName() {
+        return ruleName;
+    }
+
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
+    }
 }

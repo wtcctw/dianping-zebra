@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.config;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.util.AppPropertiesUtils;
