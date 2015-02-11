@@ -17,12 +17,15 @@ import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LocalConfigService;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.util.StringUtils;
 import com.dianping.zebra.shard.router.ConfigServiceDataSourceRouterFactory;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 
 import javax.sql.DataSource;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
@@ -47,8 +50,6 @@ public class ShardDataSource extends AbstractDataSource {
 
     private String configType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
-    private ConfigService configService;
-
     @Override
     public Connection getConnection() throws SQLException {
         return getConnection(null, null);
@@ -72,6 +73,8 @@ public class ShardDataSource extends AbstractDataSource {
 
     public void init() {
         if (StringUtils.isNotBlank(ruleName)) {
+            ConfigService configService;
+
             if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equals(configType)) {
                 configService = new LionConfigService();
             } else {
@@ -85,6 +88,23 @@ public class ShardDataSource extends AbstractDataSource {
             if (dataSourcePool == null) {
                 dataSourcePool = routerFactory.getDataSourcePool();
             }
+
+            String originDataSourceName = configService.getProperty(getOriginDataSourceKey());
+            final String switchOnValue = configService.getProperty(getSwitchOnKey());
+
+            this.switchOn = "true".equals(switchOnValue);
+            GroupDataSource groupDataSource = new GroupDataSource(originDataSourceName);
+            groupDataSource.init();
+            this.originDataSource = groupDataSource;
+
+            configService.addPropertyChangeListener(new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if (getSwitchOnKey().equals(evt.getPropertyName())) {
+                        switchOn = "true".equals(evt.getNewValue());
+                    }
+                }
+            });
         }
 
         if (dataSourcePool == null || dataSourcePool.isEmpty()) {
@@ -97,6 +117,14 @@ public class ShardDataSource extends AbstractDataSource {
         this.router = routerFactory.getRouter();
         this.router.setDataSourcePool(dataSourcePool);
         this.router.init();
+    }
+
+    private String getSwitchOnKey() {
+        return String.format("%s,%s,%s", Constants.DEFAULT_SHARDING_PRFIX, ruleName, "switch");
+    }
+
+    private String getOriginDataSourceKey() {
+        return String.format("%s,%s,%s", Constants.DEFAULT_SHARDING_PRFIX, ruleName, "origin");
     }
 
     public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
