@@ -12,16 +12,13 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import java.sql.Connection;
-import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
-import com.dianping.zebra.shard.jdbc.replicate.ReplicateContext;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.util.Map;
 
 /**
  * @author Leo Liang
@@ -29,56 +26,54 @@ import com.dianping.zebra.shard.router.DataSourceRouterFactory;
  */
 public class ShardDataSource extends AbstractDataSource {
 
-	private Map<String, DataSource> dataSourcePool;
+    private Map<String, DataSource> dataSourcePool;
 
-	private DataSourceRouterFactory routerFactory;
+    private DataSourceRouterFactory routerFactory;
 
-	private DataSourceRouter router;
+    private DataSourceRouter router;
 
-	private ReplicateContext replicateContext = new ReplicateContext();
+    private boolean switchOn;
 
-	@Override
-	public Connection getConnection() {
-		return getConnection(null, null);
-	}
+    private DataSource originDataSource;
 
-	@Override
-	public Connection getConnection(String username, String password) {
-		ShardConnection connection = new ShardConnection(username, password);
-		connection.setRouter(router);
+    private String ruleName;
 
-		return connection;
-	}
+    @Override
+    public Connection getConnection() {
+        return getConnection(null, null);
+    }
 
-	public void init() {
-		if (dataSourcePool == null || dataSourcePool.isEmpty()) {
-			throw new IllegalArgumentException("dataSourcePool is required.");
-		}
-		if (routerFactory == null) {
-			throw new IllegalArgumentException("routerRuleFile must be set.");
-		}
-		this.router = routerFactory.getRouter();
-		this.router.setDataSourcePool(dataSourcePool);
-		this.router.init();
-	}
+    @Override
+    public Connection getConnection(String username, String password) {
+        ShardConnection connection = new ShardConnection(username, password);
+        connection.setRouter(router);
 
-	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
-		this.dataSourcePool = dataSourcePool;
-	}
+        return connection;
+    }
 
-	public void setOriginalDs(DataSource originalDs) {
-		this.replicateContext.setOriginalDs(originalDs);
-	}
+    public void init() {
+        //todo: init from config
 
-	public void setReplicated(boolean isReplicated) {
-		this.replicateContext.setReplicated(isReplicated);
-	}
+        if (dataSourcePool == null || dataSourcePool.isEmpty()) {
+            throw new IllegalArgumentException("dataSourcePool is required.");
+        }
+        if (routerFactory == null) {
+            throw new IllegalArgumentException("routerRuleFile must be set.");
+        }
+        this.router = routerFactory.getRouter();
+        this.router.setDataSourcePool(dataSourcePool);
+        this.router.init();
+    }
 
-	public void setReplicatedDs(List<DataSource> replicatedDs) {
-		this.replicateContext.setReplicatedDs(replicatedDs);
-	}
+    public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
+        this.dataSourcePool = dataSourcePool;
+    }
 
-	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
-		this.routerFactory = routerFactory;
-	}
+    public void setRouterFactory(DataSourceRouterFactory routerFactory) {
+        this.routerFactory = routerFactory;
+    }
+
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
+    }
 }
