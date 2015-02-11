@@ -27,8 +27,7 @@
         <module>zebra-api</module>
         <module>zebra-web</module>
         <module>zebra-ds-monitor-client</module>
-        <module>zebra-maven-plugin</module>
-        <module>zebra-common</module>
+        <module>zebra-mysql-monitor</module>
     </modules>
     <description>zebra</description>
     <dependencyManagement>

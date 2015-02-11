@@ -12,6 +12,7 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
+import com.dianping.zebra.shard.jdbc.replicate.ReplicateContext;
 import com.dianping.zebra.shard.jdbc.util.JDBCUtils;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 
@@ -22,9 +23,8 @@ import java.util.*;
 import java.util.concurrent.Executor;
 
 /**
- * Zebra的JDBC Connection Wrapper
- * 
  * @author Leo Liang
+ * @author hao.zhu
  * 
  */
 public class ShardConnection implements Connection {
@@ -33,6 +33,8 @@ public class ShardConnection implements Connection {
 
 	private DataSourceRouter router;
 
+	private ReplicateContext replicateContext;
+	
 	private Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 
 	private Set<Statement> attachedStatements = new HashSet<Statement>();
@@ -45,12 +47,9 @@ public class ShardConnection implements Connection {
 
 	private int transactionIsolation = -1;
 
-	private boolean performanceMonitorSwitchOn = false;
-
 	protected ResultSet generatedKey;
 
 	public ShardConnection() {
-
 	}
 
 	public ShardConnection(String username, String password) {
@@ -221,7 +220,6 @@ public class ShardConnection implements Connection {
 		stmt.setAutoCommit(autoCommit);
 		stmt.setReadOnly(readOnly);
 		stmt.setConnectionWrapper(this);
-		stmt.setPerformanceMonitorSwitchOn(performanceMonitorSwitchOn);
 
 		attachedStatements.add(stmt);
 
@@ -396,13 +394,6 @@ public class ShardConnection implements Connection {
 		return closed;
 	}
 
-	/**
-	 * @return the performanceMonitorSwitchOn
-	 */
-	public boolean isPerformanceMonitorSwitchOn() {
-		return performanceMonitorSwitchOn;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -489,7 +480,6 @@ public class ShardConnection implements Connection {
 		stmt.setReadOnly(readOnly);
 		stmt.setConnectionWrapper(this);
 		stmt.setSql(sql);
-		stmt.setPerformanceMonitorSwitchOn(performanceMonitorSwitchOn);
 
 		attachedStatements.add(stmt);
 
@@ -681,14 +671,6 @@ public class ShardConnection implements Connection {
 		throw new UnsupportedOperationException("Zebra unsupport setNetworkTimeout");
 	}
 
-	/**
-	 * @param performanceMonitorSwitchOn
-	 *           the performanceMonitorSwitchOn to set
-	 */
-	public void setPerformanceMonitorSwitchOn(boolean performanceMonitorSwitchOn) {
-		this.performanceMonitorSwitchOn = performanceMonitorSwitchOn;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -758,5 +740,13 @@ public class ShardConnection implements Connection {
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport unwrap");
+	}
+	
+	public void setReplicateContext(ReplicateContext replicateContext){
+		this.replicateContext = replicateContext;
+	}
+	
+	public ReplicateContext getReplicateContext(){
+		return this.replicateContext;
 	}
 }

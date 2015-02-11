@@ -12,24 +12,22 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import com.dianping.zebra.shard.router.DataSourceRouter;
-import com.dianping.zebra.shard.router.DataSourceRouterFactory;
+import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.dianping.zebra.group.jdbc.AbstractDataSource;
+import com.dianping.zebra.shard.jdbc.replicate.ReplicateContext;
+import com.dianping.zebra.shard.router.DataSourceRouter;
+import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 
 /**
- * Zebra的JDBC DataSource Wrapper
- *
  * @author Leo Liang
+ * @author hao.zhu
  */
-public class ShardDataSource implements DataSource {
+public class ShardDataSource extends AbstractDataSource {
 
 	private Map<String, DataSource> dataSourcePool;
 
@@ -37,56 +35,19 @@ public class ShardDataSource implements DataSource {
 
 	private DataSourceRouter router;
 
-	private boolean performanceMonitorSwitchOn = false;
+	private ReplicateContext replicateContext = new ReplicateContext();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.DataSource#getConnection()
-	 */
 	@Override
 	public Connection getConnection() {
-		ShardConnection connection = new ShardConnection();
-		connection.setRouter(router);
-		connection.setPerformanceMonitorSwitchOn(performanceMonitorSwitchOn);
-		return connection;
+		return getConnection(null, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.DataSource#getConnection(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public Connection getConnection(String username, String password) {
 		ShardConnection connection = new ShardConnection(username, password);
 		connection.setRouter(router);
-		connection.setPerformanceMonitorSwitchOn(performanceMonitorSwitchOn);
+
 		return connection;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#getLoginTimeout()
-	 */
-	@Override
-	public int getLoginTimeout() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getLoginTimeout");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#getLogWriter()
-	 */
-	@Override
-	public PrintWriter getLogWriter() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getLogWriter");
-	}
-
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		return null;
 	}
 
 	public void init() {
@@ -101,70 +62,23 @@ public class ShardDataSource implements DataSource {
 		this.router.init();
 	}
 
-	/**
-	 * @return the performanceMonitorSwitchOn
-	 */
-	public boolean isPerformanceMonitorSwitchOn() {
-		return performanceMonitorSwitchOn;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
-	 */
-	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport isWrapperFor");
-	}
-
 	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
 		this.dataSourcePool = dataSourcePool;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#setLoginTimeout(int)
-	 */
-	@Override
-	public void setLoginTimeout(int seconds) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setLoginTimeout");
+	public void setOriginalDs(DataSource originalDs) {
+		this.replicateContext.setOriginalDs(originalDs);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.sql.CommonDataSource#setLogWriter(java.io.PrintWriter)
-	 */
-	@Override
-	public void setLogWriter(PrintWriter out) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setLogWriter");
+	public void setReplicated(boolean isReplicated) {
+		this.replicateContext.setReplicated(isReplicated);
 	}
 
-	/**
-	 * @param performanceMonitorSwitchOn
-	 *           the performanceMonitorSwitchOn to set
-	 */
-	public void setPerformanceMonitorSwitchOn(boolean performanceMonitorSwitchOn) {
-		this.performanceMonitorSwitchOn = performanceMonitorSwitchOn;
+	public void setReplicatedDs(List<DataSource> replicatedDs) {
+		this.replicateContext.setReplicatedDs(replicatedDs);
 	}
 
-	/**
-	 * @param routerFactory
-	 *           the routerFactory to set
-	 */
 	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
 		this.routerFactory = routerFactory;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Wrapper#unwrap(java.lang.Class)
-	 */
-	@Override
-	public <T> T unwrap(Class<T> iface) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport unwrap");
 	}
 }

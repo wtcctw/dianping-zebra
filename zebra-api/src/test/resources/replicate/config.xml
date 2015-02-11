@@ -1,0 +1,25 @@
+<bean id="replicatedDs" class="com.dianping.zebra.replicate.jdbc.ReplicateDataSource"
+	init-method="init">
+	<property name="originalDs" ref="ds0"></property>
+	<property name="replicatedDs">
+		<list>
+			<ref local="ds1" />
+			<ref local="ds2" />
+		</list>
+	</property>
+	<property name="isStopReplicate" value="false"></property>
+</bean>
+
+<!-- TODO -->
+<bean id="migrateTask" class="com.dianping.zebra.migrate.MigrateTask"
+	init-method="init">
+	<property name="originalDs" ref="ds0" stop="false">
+		<list>
+			<ref local="ds1" />
+			<ref local="ds2" />
+		</list>
+	</property>
+	<property name="replicatedDs" stop="false" />
+	<property name="" value=""></property>
+	<property name="" value=""></property>
+</bean>
