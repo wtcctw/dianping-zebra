@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
-import com.dianping.zebra.shard.jdbc.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 import com.dianping.zebra.shard.router.DataSourceRouteException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.RouterTarget;
