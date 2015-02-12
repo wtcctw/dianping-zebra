@@ -28,7 +28,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.dianping.zebra.shard.jdbc.data.DataPool;
-import com.dianping.zebra.shard.jdbc.util.JDBCUtils;
+import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
 import com.dianping.zebra.shard.jdbc.util.StringUtils;
 import com.dianping.zebra.shard.router.DataSourceRouteException;
@@ -112,7 +112,7 @@ public class ShardStatement implements Statement {
 		RouterTarget routerTarget = routingAndCheck(sql, null);
 
 		int affectedRows = 0;
-		List<Throwable> exceptions = new ArrayList<Throwable>();
+		List<SQLException> exceptions = new ArrayList<SQLException>();
 
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
@@ -141,7 +141,7 @@ public class ShardStatement implements Statement {
 					if (executableSql.trim().charAt(0) == 'i' || executableSql.trim().charAt(0) == 'I') {
 						getAndSetGeneratedKeys(stmt);
 					}
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					exceptions.add(e);
 
 					log.error(e);
@@ -255,13 +255,13 @@ public class ShardStatement implements Statement {
 			return;
 		}
 
-		List<Throwable> exceptions = new ArrayList<Throwable>();
+		List<SQLException> exceptions = new ArrayList<SQLException>();
 
 		try {
 			for (ResultSet resultSet : attachedResultSets) {
 				try {
 					resultSet.close();
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					exceptions.add(e);
 					log.error(e);
 				}
@@ -270,7 +270,7 @@ public class ShardStatement implements Statement {
 			for (Statement stmt : actualStatements) {
 				try {
 					stmt.close();
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					exceptions.add(e);
 					log.error(e);
 				}
@@ -385,7 +385,7 @@ public class ShardStatement implements Statement {
 
 		attachedResultSets.add(rs);
 
-		List<Throwable> exceptions = new ArrayList<Throwable>();
+		List<SQLException> exceptions = new ArrayList<SQLException>();
 
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
@@ -398,7 +398,7 @@ public class ShardStatement implements Statement {
 					Statement stmt = createStatementInternal(conn);
 					actualStatements.add(stmt);
 					rs.getActualResultSets().add(stmt.executeQuery(executableSql));
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					exceptions.add(e);
 					log.error(e);
 				}
@@ -457,7 +457,7 @@ public class ShardStatement implements Statement {
 		return _executeUpdate(sql, -1, null, columnNames);
 	}
 
-	protected void getAndSetGeneratedKeys(Statement stmt) throws Exception {
+	protected void getAndSetGeneratedKeys(Statement stmt) throws SQLException {
 		ResultSet rs = stmt.getGeneratedKeys();
 		if (rs.next()) {
 			getConnectionWrapper().setGeneratedKey(rs);

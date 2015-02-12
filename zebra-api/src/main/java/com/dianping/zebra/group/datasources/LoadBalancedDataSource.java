@@ -8,7 +8,7 @@ import com.dianping.zebra.group.router.DataSourceRouter;
 import com.dianping.zebra.group.router.RouterContext;
 import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.router.WeightDataSourceRouter;
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.util.JDBCUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -77,7 +77,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 			}
 
 			if (!exceptions.isEmpty()) {
-				JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
+				JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
 			}
 		} else {
 			throw new SQLException("No available dataSource");

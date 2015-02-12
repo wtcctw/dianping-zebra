@@ -15,7 +15,7 @@ package com.dianping.zebra.shard.jdbc;
 import com.dianping.zebra.shard.jdbc.data.DataMerger;
 import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.shard.jdbc.data.DefaultDataMerger;
-import com.dianping.zebra.shard.jdbc.util.JDBCUtils;
+import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.shard.router.RouterTarget;
 
 import org.apache.log4j.Logger;
@@ -126,13 +126,13 @@ public class ShardResultSet implements ResultSet {
 			return;
 		}
 
-		List<Throwable> exceptions = new ArrayList<Throwable>();
+		List<SQLException> exceptions = new ArrayList<SQLException>();
 
 		try {
 			for (int i = 0; i < actualResultSets.size(); ++i) {
 				try {
 					actualResultSets.get(i).close();
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					exceptions.add(e);
 					log.error(e);
 				}

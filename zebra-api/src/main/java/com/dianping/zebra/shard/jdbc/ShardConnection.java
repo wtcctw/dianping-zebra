@@ -12,7 +12,7 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import com.dianping.zebra.shard.jdbc.util.JDBCUtils;
+import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 
 import org.apache.log4j.Logger;
@@ -84,13 +84,13 @@ public class ShardConnection implements Connection {
 			return;
 		}
 
-		List<Throwable> innerExceptions = new ArrayList<Throwable>();
+		List<SQLException> innerExceptions = new ArrayList<SQLException>();
 
 		try {
 			if (generatedKey != null) {
 				try {
 					generatedKey.close();
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					innerExceptions.add(e);
 					log.error(e);
 				}
@@ -99,7 +99,7 @@ public class ShardConnection implements Connection {
 			for (Statement stmt : attachedStatements) {
 				try {
 					stmt.close();
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					innerExceptions.add(e);
 					log.error(e);
 				}
@@ -110,7 +110,7 @@ public class ShardConnection implements Connection {
 			for (Map.Entry<String, Connection> entry : actualConnections.entrySet()) {
 				try {
 					entry.getValue().close();
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					innerExceptions.add(e);
 					log.error(errorMsgPrefix + entry.getKey(), e);
 				}
@@ -138,13 +138,13 @@ public class ShardConnection implements Connection {
 			return;
 		}
 
-		List<Throwable> innerExceptions = new ArrayList<Throwable>();
+		List<SQLException> innerExceptions = new ArrayList<SQLException>();
 		String errorMsgPrefix = "DS : ";
 
 		for (Map.Entry<String, Connection> entry : actualConnections.entrySet()) {
 			try {
 				entry.getValue().commit();
-			} catch (Exception e) {
+			} catch (SQLException e) {
 				innerExceptions.add(e);
 				log.error(errorMsgPrefix + entry.getKey(), e);
 			}
@@ -570,13 +570,13 @@ public class ShardConnection implements Connection {
 			return;
 		}
 
-		List<Throwable> exceptions = new ArrayList<Throwable>();
+		List<SQLException> exceptions = new ArrayList<SQLException>();
 		String errorMsgPrefix = "DS : ";
 
 		for (Map.Entry<String, Connection> entry : actualConnections.entrySet()) {
 			try {
 				entry.getValue().rollback();
-			} catch (Exception e) {
+			} catch (SQLException e) {
 
 				exceptions.add(e);
 
