@@ -6,6 +6,9 @@ zebraWeb.controller('update', function ($scope, $http) {
 
 });
 
+zebraWeb.controller('shard', function ($scope, $http) {
+});
+
 zebraWeb.controller('black', function ($scope, $http) {
     $scope.load = function () {
         $http.get('/a/blacklist/?env=' + $scope.config.env).success(function (data, status, headers, config) {
