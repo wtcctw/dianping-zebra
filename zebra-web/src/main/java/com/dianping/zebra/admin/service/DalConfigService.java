@@ -8,7 +8,7 @@ import java.util.List;
 public interface DalConfigService {
 	public boolean generateConfig(String name);
 
-	GroupConfigModel getDsConfig(String env, final String groupId);
+	GroupConfigModel getDsConfig(String env, final String groupId, String otherkey);
 
 	void updateDsConfig(GroupConfigModel modal,boolean isForce);
 

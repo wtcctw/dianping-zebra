@@ -94,6 +94,14 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         }
     }
 
+    $scope.changeName = function () {
+        if ($scope.config && $scope.config.env) {
+            $http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env + '&otherkey=' + $scope.changedName).success(function (data, status, headers, config) {
+                $scope.data = data;
+            });
+        }
+    }
+
     $scope.$watch('config.env', $scope.load);
     $scope.load();
 
