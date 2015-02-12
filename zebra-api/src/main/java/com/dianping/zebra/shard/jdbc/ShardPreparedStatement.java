@@ -71,7 +71,7 @@ import com.dianping.zebra.group.jdbc.param.TimeParamContext;
 import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
 import com.dianping.zebra.group.jdbc.param.UnicodeStreamParamContext;
-import com.dianping.zebra.shard.jdbc.util.JDBCUtils;
+import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.shard.router.TargetedSql;
 
@@ -255,7 +255,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 
 		attachedResultSets.add(rs);
 
-		List<Throwable> exceptions = new ArrayList<Throwable>();
+		List<SQLException> exceptions = new ArrayList<SQLException>();
 
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
@@ -270,7 +270,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 					actualStatements.add(stmt);
 					setParams(stmt);
 					rs.getActualResultSets().add(stmt.executeQuery());
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					exceptions.add(e);
 					log.error(e);
 				}
@@ -302,7 +302,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 		rewriteAndMergeParms(routerTarget.getNewParams());
 
 		int affectedRows = 0;
-		List<Throwable> exceptions = new ArrayList<Throwable>();
+		List<SQLException> exceptions = new ArrayList<SQLException>();
 
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
@@ -323,7 +323,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 					if (executableSql.trim().charAt(0) == 'i' || executableSql.trim().charAt(0) == 'I') {
 						getAndSetGeneratedKeys(stmt);
 					}
-				} catch (Exception e) {
+				} catch (SQLException e) {
 					exceptions.add(e);
 					log.error(e);
 				}

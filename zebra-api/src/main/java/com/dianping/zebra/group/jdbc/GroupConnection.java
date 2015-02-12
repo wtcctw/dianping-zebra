@@ -5,7 +5,7 @@ import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.router.ReadWriteStrategy;
 import com.dianping.zebra.group.router.RouterType;
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
 import com.dianping.zebra.group.util.StringUtils;
@@ -119,7 +119,7 @@ public class GroupConnection implements Connection {
 			wConnection = null;
 		}
 
-		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
+		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
 	}
 
 	@Override

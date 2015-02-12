@@ -21,7 +21,7 @@ import com.dianping.zebra.group.router.ReadWriteStrategy;
 import com.dianping.zebra.group.router.ReadWriteStrategyWrapper;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.AtomicRefresh;
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.group.util.StringUtils;
 
@@ -216,7 +216,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			exps.add(e);
 		}
 
-		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exps);
+		JDBCUtils.throwSQLExceptionIfNeeded(exps);
 	}
 
 	private Any findAny(List<Any> all, String name) {

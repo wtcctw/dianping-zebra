@@ -10,7 +10,7 @@ import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.exception.DalNotSupportException;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.group.util.SqlType;
 import com.dianping.zebra.group.util.SqlUtils;
 
@@ -361,7 +361,7 @@ public class GroupStatement implements Statement {
 					if (conn instanceof SingleConnection) {
 						((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
 					}
-					JDBCExceptionUtils.throwWrappedSQLException(e);
+					JDBCUtils.throwWrappedSQLException(e);
 				}
 				return updateCount;
 			}
