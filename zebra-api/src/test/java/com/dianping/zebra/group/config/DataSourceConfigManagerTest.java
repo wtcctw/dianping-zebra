@@ -17,7 +17,6 @@ public class DataSourceConfigManagerTest {
 	public void testAssert(String config, String expected) {
 		Map<String, ReadOrWriteRole> parseConfig = ReadOrWriteRole.parseConfig(config);
 
-		System.out.println(parseConfig);
 		Assert.assertEquals(expected, parseConfig.toString());
 	}
 
