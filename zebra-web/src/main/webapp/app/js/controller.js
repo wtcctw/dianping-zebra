@@ -129,7 +129,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         if (!$scope.newDsName) {
             return;
         }
-        if ($scope.newDsName.indexOf('ds.' + $scope.name) != 0) {
+        if ($scope.newDsName.indexOf($scope.name) != 0) {
             alert('请以 ds.' + $scope.name + ' 开头！');
             return;
         }
