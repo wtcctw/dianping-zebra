@@ -2,13 +2,12 @@ package com.dianping.zebra.admin.service;
 
 import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.unidal.lookup.annotation.Inject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

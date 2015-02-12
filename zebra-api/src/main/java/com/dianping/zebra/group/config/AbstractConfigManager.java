@@ -1,7 +1,7 @@
 package com.dianping.zebra.group.config;
 
 import com.dianping.zebra.config.ConfigService;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 

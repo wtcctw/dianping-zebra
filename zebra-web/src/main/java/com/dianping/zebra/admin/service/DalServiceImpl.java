@@ -9,12 +9,11 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.unidal.lookup.annotation.Inject;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Transaction;
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.util.Splitters;
+import com.dianping.zebra.util.Splitters;
 
 @Service
 public class DalServiceImpl implements DalService {

@@ -6,9 +6,9 @@ import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.router.ReadWriteStrategy;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.util.JDBCUtils;
-import com.dianping.zebra.group.util.SqlType;
-import com.dianping.zebra.group.util.SqlUtils;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.SqlType;
+import com.dianping.zebra.util.SqlUtils;
+import com.dianping.zebra.util.StringUtils;
 
 import javax.sql.DataSource;
 

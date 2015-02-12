@@ -10,8 +10,8 @@ import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.param.*;
 import com.dianping.zebra.util.JDBCUtils;
-import com.dianping.zebra.group.util.SqlType;
-import com.dianping.zebra.group.util.SqlUtils;
+import com.dianping.zebra.util.SqlType;
+import com.dianping.zebra.util.SqlUtils;
 
 import java.io.InputStream;
 import java.io.Reader;

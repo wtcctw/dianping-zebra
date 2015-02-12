@@ -1,5 +1,6 @@
 package com.dianping.zebra.group.util;
 
+import com.dianping.zebra.util.AppPropertiesUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

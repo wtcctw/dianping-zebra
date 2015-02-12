@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.filter;
 
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

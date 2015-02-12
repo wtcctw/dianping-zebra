@@ -4,7 +4,7 @@ import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.junit.Test;

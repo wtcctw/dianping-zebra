@@ -1,12 +1,11 @@
 package com.dianping.zebra.admin.service;
 
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.unidal.lookup.annotation.Inject;
 
 import java.io.IOException;
 import java.util.HashMap;

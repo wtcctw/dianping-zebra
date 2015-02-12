@@ -25,8 +25,8 @@ import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupStatement;
-import com.dianping.zebra.group.util.SqlUtils;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.SqlUtils;
+import com.dianping.zebra.util.StringUtils;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.site.helper.Stringizers;
 

@@ -11,8 +11,8 @@ import com.dianping.zebra.group.exception.DalNotSupportException;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.util.JDBCUtils;
-import com.dianping.zebra.group.util.SqlType;
-import com.dianping.zebra.group.util.SqlUtils;
+import com.dianping.zebra.util.SqlType;
+import com.dianping.zebra.util.SqlUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
