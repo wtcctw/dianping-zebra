@@ -5,38 +5,34 @@ import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LocalConfigService;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public final class SystemConfigManagerFactory {
 
-	private static Map<String, SystemConfigManager> systemConfigManagers = new HashMap<String, SystemConfigManager>();
+	/*
+	 * SystemConfigManagerFactory has only one instance of SystemConfigManager, which differ from DataSourceConfigManagerFactory who
+	 * has its own DataSourceConfigManager for each GroupDataSource
+	 */
+	private static SystemConfigManager systemConfigManager;
 
 	private SystemConfigManagerFactory() {
 	}
 
-	public static SystemConfigManager getConfigManger(String configManagerType, String name) {
-		SystemConfigManager systemConfigManager = systemConfigManagers.get(name);
-
+	public static SystemConfigManager getConfigManger(String configManagerType) {
 		if (systemConfigManager == null) {
-			synchronized (systemConfigManagers) {
-				systemConfigManager = systemConfigManagers.get(name);
-
+			synchronized (SystemConfigManagerFactory.class) {
 				if (systemConfigManager == null) {
 					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
-						LocalConfigService configService = new LocalConfigService(name);
+						LocalConfigService configService = new LocalConfigService();
 						configService.init();
-						systemConfigManager = new DefaultSystemConfigManager(name, configService);
+						systemConfigManager = new DefaultSystemConfigManager(configService);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
 						LionConfigService configService = new LionConfigService();
 						configService.init();
-						systemConfigManager = new DefaultSystemConfigManager(name, configService);
+						systemConfigManager = new DefaultSystemConfigManager(configService);
 					} else {
 						throw new IllegalConfigException(String.format("illegal systemConfigManagerType[%s]",
-								configManagerType));
+						      configManagerType));
 					}
 					systemConfigManager.init();
-					systemConfigManagers.put(name, systemConfigManager);
 				}
 
 			}

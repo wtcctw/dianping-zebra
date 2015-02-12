@@ -89,5 +89,23 @@ public class SqlUtilsTest {
 		Assert.assertEquals(SqlType.SELECT_FOR_IDENTITY, sqlType2);
 		Assert.assertEquals(false, sqlType.isRead());
 	}
+	
+	@Test
+	public void testbuildSqlType() throws SQLException{
+		String sql = "SELECT CityID, CityName, Status, AddTime, UpdateTime FROM GP_BackCity WHERE Status=1";
+		
+		String type = SqlUtils.buildSqlType(sql);
+		
+		System.out.println(type);
+	}
+	
+	@Test
+	public void testbuildSqlType2() throws SQLException{
+		String sql = "SELECT CategoryID, ParentCategoryID, CategoryOrderID, CityID, IsMain, AddDate FROM DP_CategoryTree";
+		
+		String type = SqlUtils.buildSqlType(sql);
+		
+		System.out.println(type);
+	}
 
 }

@@ -24,9 +24,12 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	private final char pairSeparator = '&';
 
 	private GroupDataSourceConfigBuilder builder;
+	
+	private String jdbcRef;
 
-	public DefaultDataSourceConfigManager(String name, ConfigService configService) {
-		super(name, configService);
+	public DefaultDataSourceConfigManager(String jdbcRef, ConfigService configService) {
+		super(configService);
+		this.jdbcRef = jdbcRef;
 	}
 
 	@Override

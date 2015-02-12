@@ -69,6 +69,8 @@ public final class Constants {
 
 	// System
 	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
+	
+	public static final String ELEMENT_FLOW_CONTROL = "flowControl";
 
 	// router
 	public static final String ROUTER_STRATEGY_ROUNDROBIN = "roundrobin";

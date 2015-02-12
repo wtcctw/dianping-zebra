@@ -20,8 +20,6 @@ public abstract class AbstractConfigManager {
 
 	protected final ConfigService configService;
 
-	protected final String jdbcRef;
-
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
 	private ExecutorService listenerNotifyThreadPool = Executors.newFixedThreadPool(5, new ThreadFactory() {
@@ -37,8 +35,7 @@ public abstract class AbstractConfigManager {
 		}
 	});
 
-	public AbstractConfigManager(String jdbcRef, ConfigService configService) {
-		this.jdbcRef = jdbcRef;
+	public AbstractConfigManager(ConfigService configService) {
 		this.configService = configService;
 		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
 	}
