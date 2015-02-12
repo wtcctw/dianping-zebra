@@ -2,6 +2,7 @@ package com.dianping.zebra.admin.controller;
 
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.admin.service.LionHttpService;
+import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class ShardController {
         Map<String, String> configStr = lionHttpService.getConfigByProject(env, Constants.DEFAULT_SHARDING_PRFIX);
         Map<String, RouterRuleConfig> configs = new HashMap<String, RouterRuleConfig>();
         for (Map.Entry<String, String> entry : configStr.entrySet()) {
-            if (!entry.getKey().endsWith(".shard")) {
+            if (!LionKey.isShardConfigKey(entry.getKey())) {
                 continue;
             }
 
