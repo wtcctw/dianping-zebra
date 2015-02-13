@@ -12,6 +12,14 @@ zebraWeb.controller('shard', function($scope, $http) {
             $scope.data = data;
         });
     }
+
+
+    $scope.test = function(key){
+        $http.get('/a/shard/' + $scope.config.env + '/test?key=' +  key).success(function(data, status, headers, config) {
+            alert(data.message);
+        });
+    }
+
     $scope.load();
 });
 
@@ -84,7 +92,6 @@ zebraWeb.controller('config-test', function($scope, $http, name, configs) {
     } else {
         $http.get(url).success(function(data, status, headers, config) {
             $scope.connectionStatus = data;
-            console.log(data);
         });
     }
 });

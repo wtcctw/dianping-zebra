@@ -14,17 +14,16 @@
             <thead>
                 <tr>
                     <th>Key</th>
-                    <th>Value</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="shard in data | toArray | filter:{$key:'.shard'} | filter:{$key:searchText}">
                     <td>{{shard.$key}}</td>
-                    <td></td>
                     <td>
-                        <button class="btn btn-xs btn-primary" ng-click="edit(group.$key)">Edit</button>
-                        <button class="btn btn-xs btn-success" ng-click="test(group.$key)">Test</button>
+                        <button class="btn btn-xs btn-primary" ng-click="edit(shard.$key)">Edit</button>
+                        <button class="btn btn-xs btn-success" ng-click="test(shard.$key)">Test</button>
+                        <button class="btn btn-xs btn-danger" ng-click="debug(shard.$key)">Debug</button>
                     </td>
                 </tr>
             </tbody>

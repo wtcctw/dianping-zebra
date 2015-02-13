@@ -32,7 +32,7 @@ public final class LionKey {
         if (StringUtils.isBlank(key)) {
             return null;
         }
-        String[] array = key.split(".");
+        String[] array = key.split("\\.");
         if (array.length != 3) {
             return null;
         }

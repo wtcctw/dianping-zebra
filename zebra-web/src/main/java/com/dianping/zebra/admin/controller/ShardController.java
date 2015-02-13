@@ -48,18 +48,20 @@ public class ShardController {
     }
 
 
-    @RequestMapping(value = "/{env}/test/{key}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{env}/test", method = RequestMethod.GET)
     @ResponseBody
-    public Object test(@PathVariable String env, @PathVariable String key) {
+    public Object test(@PathVariable String env, String key) {
+        key = LionKey.getRuleNameFromShardKey(key);
+
         ShardDataSource ds = new ShardDataSource();
         ds.setRuleName(key);
 
-        return testShardDataSource(ds);
+        return new testResult(testShardDataSource(ds));
     }
 
     @RequestMapping(value = "/{env}/test", method = RequestMethod.POST)
     @ResponseBody
-    public Object test(@PathVariable String env, @RequestBody final RouterRuleConfig config) {
+    public Object testWithConfig(@PathVariable String env, @RequestBody final RouterRuleConfig config) {
         ConfigService configService = new ConfigService() {
             @Override
             public void init() {
@@ -84,12 +86,33 @@ public class ShardController {
         ds.setRuleName("test");
         ds.setConfigService(configService);
 
-        return testShardDataSource(ds);
+        return new testResult(testShardDataSource(ds));
     }
 
-    private Object testShardDataSource(ShardDataSource ds) {
-        ds.init();
-        return null;
+    private String testShardDataSource(ShardDataSource ds) {
+        try {
+            ds.init();
+            return "成功！";
+        } catch (Exception exp) {
+            return exp.getMessage();
+        }
+    }
+
+    class testResult {
+
+        public testResult(String message) {
+            this.message = message;
+        }
+
+        private String message;
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
     }
 
     @RequestMapping(value = "/{env}/update", method = RequestMethod.POST)
