@@ -47,6 +47,16 @@ public class ShardController {
         return configs;
     }
 
+
+    @RequestMapping(value = "/{env}/test/{key}", method = RequestMethod.GET)
+    @ResponseBody
+    public Object test(@PathVariable String env, @PathVariable String key) {
+        ShardDataSource ds = new ShardDataSource();
+        ds.setRuleName(key);
+
+        return testShardDataSource(ds);
+    }
+
     @RequestMapping(value = "/{env}/test", method = RequestMethod.POST)
     @ResponseBody
     public Object test(@PathVariable String env, @RequestBody final RouterRuleConfig config) {
@@ -73,8 +83,12 @@ public class ShardController {
         ShardDataSource ds = new ShardDataSource();
         ds.setRuleName("test");
         ds.setConfigService(configService);
-        ds.init();
 
+        return testShardDataSource(ds);
+    }
+
+    private Object testShardDataSource(ShardDataSource ds) {
+        ds.init();
         return null;
     }
 
