@@ -6,21 +6,32 @@ zebraWeb.controller('update', function($scope, $http) {
 
 });
 
-zebraWeb.controller('shard', function($scope, $http) {
+zebraWeb.controller('shard', function($scope, $http, shardService) {
     $scope.load = function() {
         $http.get('/a/shard/' + $scope.config.env).success(function(data, status, headers, config) {
             $scope.data = data;
         });
     }
 
+    $scope.edit = function(key, config) {
+        shardService.openEditModal(key, config)
+    }
 
-    $scope.test = function(key){
-        $http.get('/a/shard/' + $scope.config.env + '/test?key=' +  key).success(function(data, status, headers, config) {
+    $scope.test = function(key) {
+        $http.get('/a/shard/' + $scope.config.env + '/test?key=' + key).success(function(data, status, headers, config) {
             alert(data.message);
         });
     }
 
     $scope.load();
+});
+
+zebraWeb.controller('shard-edit', function($scope, $http, name, configs, close) {
+    $scope.name = name;
+    $scope.configs = configs;
+    $scope.close = function() {
+        close();
+    }
 });
 
 zebraWeb.controller('black', function($scope, $http) {
