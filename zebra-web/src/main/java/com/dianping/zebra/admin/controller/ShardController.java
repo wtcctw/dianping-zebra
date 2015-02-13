@@ -2,13 +2,16 @@ package com.dianping.zebra.admin.controller;
 
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.admin.service.LionHttpService;
+import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
+import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +49,32 @@ public class ShardController {
 
     @RequestMapping(value = "/{env}/test", method = RequestMethod.POST)
     @ResponseBody
-    public Object test(@PathVariable String env, @RequestBody RouterRuleConfig config) {
+    public Object test(@PathVariable String env, @RequestBody final RouterRuleConfig config) {
+        ConfigService configService = new ConfigService() {
+            @Override
+            public void init() {
+
+            }
+
+            @Override
+            public String getProperty(String key) {
+                if (LionKey.isShardConfigKey(key)) {
+                    return new Gson().toJson(config);
+                }
+                return null;
+            }
+
+            @Override
+            public void addPropertyChangeListener(PropertyChangeListener listener) {
+
+            }
+        };
+
+        ShardDataSource ds = new ShardDataSource();
+        ds.setRuleName("test");
+        ds.setConfigService(configService);
+        ds.init();
+
         return null;
     }
 

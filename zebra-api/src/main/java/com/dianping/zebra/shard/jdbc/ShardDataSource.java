@@ -51,6 +51,8 @@ public class ShardDataSource extends AbstractDataSource {
 
     private String configType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
 
+    private ConfigService configService;
+
     @Override
     public Connection getConnection() throws SQLException {
         return getConnection(null, null);
@@ -74,12 +76,12 @@ public class ShardDataSource extends AbstractDataSource {
 
     public void init() {
         if (StringUtils.isNotBlank(ruleName)) {
-            ConfigService configService;
-
-            if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equals(configType)) {
-                configService = new LionConfigService();
-            } else {
-                configService = new LocalConfigService(ruleName);
+            if (configService == null) {
+                if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equals(configType)) {
+                    configService = new LionConfigService();
+                } else {
+                    configService = new LocalConfigService(ruleName);
+                }
             }
 
             if (routerFactory == null) {
@@ -94,9 +96,11 @@ public class ShardDataSource extends AbstractDataSource {
             final String switchOnValue = configService.getProperty(LionKey.getShardSiwtchOnKey(ruleName));
 
             this.switchOn = "true".equals(switchOnValue);
-            GroupDataSource groupDataSource = new GroupDataSource(originDataSourceName);
-            groupDataSource.init();
-            this.originDataSource = groupDataSource;
+            if (StringUtils.isNotBlank(originDataSourceName)) {
+                GroupDataSource groupDataSource = new GroupDataSource(originDataSourceName);
+                groupDataSource.init();
+                this.originDataSource = groupDataSource;
+            }
 
             configService.addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
@@ -138,5 +142,9 @@ public class ShardDataSource extends AbstractDataSource {
 
     public void setConfigType(String configType) {
         this.configType = configType;
+    }
+
+    public void setConfigService(ConfigService configService) {
+        this.configService = configService;
     }
 }
