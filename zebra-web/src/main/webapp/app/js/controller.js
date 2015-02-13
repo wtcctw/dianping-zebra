@@ -6,7 +6,14 @@ zebraWeb.controller('update', function($scope, $http) {
 
 });
 
-zebraWeb.controller('shard', function($scope, $http) {});
+zebraWeb.controller('shard', function($scope, $http) {
+    $scope.load = function() {
+        $http.get('/a/shard/' + $scope.config.env).success(function(data, status, headers, config) {
+            $scope.data = data;
+        });
+    }
+    $scope.load();
+});
 
 zebraWeb.controller('black', function($scope, $http) {
     $scope.load = function() {
