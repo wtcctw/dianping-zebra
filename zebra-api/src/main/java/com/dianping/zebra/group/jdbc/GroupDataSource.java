@@ -23,7 +23,7 @@ import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.group.util.SmoothReload;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;

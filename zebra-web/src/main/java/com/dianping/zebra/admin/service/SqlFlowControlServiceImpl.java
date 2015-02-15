@@ -18,7 +18,7 @@ import com.dianping.zebra.admin.entity.FlowControlEntity;
 import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.config.system.transform.DefaultSaxParser;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 
 /**
  * Created by Dozer on 10/14/14.

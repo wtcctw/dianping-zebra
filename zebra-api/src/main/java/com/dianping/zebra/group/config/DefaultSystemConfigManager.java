@@ -10,8 +10,8 @@ import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.config.system.transform.DefaultSaxParser;
 import com.dianping.zebra.group.exception.IllegalConfigException;
-import com.dianping.zebra.group.util.AppPropertiesUtils;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.AppPropertiesUtils;
+import com.dianping.zebra.util.StringUtils;
 
 public class DefaultSystemConfigManager extends AbstractConfigManager implements SystemConfigManager {
 

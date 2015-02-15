@@ -9,7 +9,7 @@ import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
-import com.dianping.zebra.group.util.JdbcDriverClassHelper;
+import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
 import org.apache.log4j.LogManager;

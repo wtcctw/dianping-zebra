@@ -14,7 +14,7 @@ import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.StringUtils;
 
 /**
  * Created by Dozer on 9/24/14.
@@ -74,13 +74,13 @@ public class WallFilter extends DefaultJdbcFilter {
 		this.flowControl = this.systemConfigManager.getSystemConfig().getSqlFlowControls();
 
 		this.systemConfigManager.addListerner(new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-				synchronized (flowControl) {
-					flowControl = systemConfigManager.getSystemConfig().getSqlFlowControls();
-				}
-			}
-		});
+            @Override
+            public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+                synchronized (flowControl) {
+                    flowControl = systemConfigManager.getSystemConfig().getSqlFlowControls();
+                }
+            }
+        });
 	}
 
 	@Override

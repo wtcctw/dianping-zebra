@@ -2,8 +2,8 @@ package com.dianping.zebra.config;
 
 import com.dianping.zebra.group.config.AdvancedPropertyChangeEvent;
 import com.dianping.zebra.group.exception.IllegalConfigException;
-import com.dianping.zebra.group.util.FileUtils;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.FileUtils;
+import com.dianping.zebra.util.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 

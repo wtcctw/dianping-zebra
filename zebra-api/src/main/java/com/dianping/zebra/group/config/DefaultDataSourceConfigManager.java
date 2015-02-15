@@ -7,9 +7,9 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.BaseVisitor;
 import com.dianping.zebra.group.exception.IllegalConfigException;
-import com.dianping.zebra.group.util.AppPropertiesUtils;
-import com.dianping.zebra.group.util.Splitters;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.AppPropertiesUtils;
+import com.dianping.zebra.util.Splitters;
+import com.dianping.zebra.util.StringUtils;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.util;
+package com.dianping.zebra.util;
 
 import java.io.IOException;
 import java.io.StringReader;

@@ -89,8 +89,8 @@ public class ConfigController {
 
     @RequestMapping(value = "/ds", method = RequestMethod.GET)
     @ResponseBody
-    public Object ds(String env, String key) throws Exception {
-        return dalConfigService.getDsConfig(env, key);
+    public Object ds(String env, String key, String otherkey) throws Exception {
+        return dalConfigService.getDsConfig(env, key, otherkey);
     }
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)

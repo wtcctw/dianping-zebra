@@ -7,8 +7,6 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import com.dianping.zebra.config.ConfigService;
-import com.dianping.zebra.config.LocalConfigService;
 import junit.framework.Assert;
 
 import org.junit.After;
@@ -16,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.util.FileUtils;
+import com.dianping.zebra.util.FileUtils;
 
 public class LocalConfigServiceTest {
 

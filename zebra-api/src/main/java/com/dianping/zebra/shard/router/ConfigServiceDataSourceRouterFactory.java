@@ -1,7 +1,7 @@
 package com.dianping.zebra.shard.router;
 
-import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
@@ -25,7 +25,7 @@ public class ConfigServiceDataSourceRouterFactory extends AbstractDataSourceRout
     public ConfigServiceDataSourceRouterFactory(ConfigService configService, String ruleName) {
         this.configService = configService;
         this.ruleName = ruleName;
-        this.routerConfig = new Gson().fromJson(configService.getProperty(getShardKey()), RouterRuleConfig.class);
+        this.routerConfig = new Gson().fromJson(configService.getProperty(LionKey.getShardConfigKey(ruleName)), RouterRuleConfig.class);
     }
 
     @Override
@@ -39,9 +39,5 @@ public class ConfigServiceDataSourceRouterFactory extends AbstractDataSourceRout
     @Override
     public Map<String, DataSource> getDataSourcePool() {
         return getDataSourcePoolFromConfig(routerConfig);
-    }
-
-    private String getShardKey() {
-        return String.format("%s.%s.%s", Constants.DEFAULT_SHARDING_PRFIX, ruleName, "shard");
     }
 }

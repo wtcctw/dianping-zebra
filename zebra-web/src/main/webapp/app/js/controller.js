@@ -1,27 +1,87 @@
 zebraWeb.controller('update', function($scope, $http) {
-	$http.get('/a/update/index').success(
-			function(data, status, headers, config) {
-				$scope.predicate = 'name';
-				$scope.report = data;
-			});
+    $http.get('/a/update/index').success(function(data, status, headers, config) {
+        $scope.predicate = 'name';
+        $scope.report = data;
+    });
 
 });
 
-zebraWeb.controller('shard', function($scope, $http) {
+zebraWeb.controller('shard', function($scope, $http, shardService) {
+    $scope.load = function() {
+        $http.get('/a/shard/' + $scope.config.env).success(function(data, status, headers, config) {
+            $scope.data = data;
+        });
+    }
+
+    $scope.edit = function(key, config) {
+        shardService.openEditModal(key, config)
+    }
+
+    $scope.test = function(key) {
+        $http.get('/a/shard/' + $scope.config.env + '/test?key=' + key).success(function(data, status, headers, config) {
+            alert(data.message);
+        });
+    }
+
+    $scope.load();
+});
+
+zebraWeb.controller('shard-edit', function($scope, $http, name, configs, close) {
+    $scope.name = name;
+    if (configs.tableShardConfigs && configs.tableShardConfigs.length > 0) {
+        configs.tableShardConfigs[0].active = true;
+    }
+    $scope.configs = configs;
+    $scope.close = function() {
+        close();
+    }
+
+    $scope.addTable = function() {
+        $scope.configs.tableShardConfigs.forEach(function(item) {
+            item.active = false;
+        });
+
+        var newTable = 'table_new';
+
+        while ($scope.configs.tableShardConfigs.filter(function(item) {
+                return item.tableName == newTable
+            }).length >= 1) {
+            newTable += '_new';
+        }
+
+        $scope.configs.tableShardConfigs.push({
+            active: true,
+            tableName: newTable
+        })
+    }
+
+    $scope.changeActive = function(tableName) {
+        if ($scope.configs.tableShardConfigs.filter(function(item) {
+                return item.tableName == tableName
+            }).length > 1) {
+            alert('表名重复！请修改表名');
+            return;
+        }
+
+        $scope.configs.tableShardConfigs.forEach(function(item) {
+            if (item.tableName == tableName) {
+                item.active = true;
+            } else {
+                item.active = false;
+            }
+        });
+    }
 });
 
 zebraWeb.controller('black', function($scope, $http) {
-	$scope.load = function() {
-		if ($scope.config && $scope.config.env) {
-			$http.get('/a/blacklist/?env=' + $scope.config.env).success(
-					function(data, status, headers, config) {
-						$scope.blackList = data;
-					});
-		}
-	}
-	$scope.load();
+    $scope.load = function() {
+        $http.get('/a/blacklist/?env=' + $scope.config.env).success(function(data, status, headers, config) {
+            $scope.blackList = data;
+        });
+    }
+    $scope.load();
 
-	$scope.remove = function(key, id) {
+    $scope.remove = function(key, id) {
 		if (confirm('确定删除？')) {
 			$http.post(
 					'/a/blacklist/delete?env=' + $scope.config.env + '&key=' + key).success(
@@ -48,300 +108,298 @@ zebraWeb.controller('black', function($scope, $http) {
 		}
 	}
 
-	$scope.$watch('config.env', $scope.load);
+
+    $scope.$watch('config.env', $scope.load);
 });
 
 zebraWeb.controller('update-database', function($scope, $stateParams, $http) {
-	$http.get('/a/update/database?database=' + $stateParams.name).success(
-			function(data, status, headers, config) {
-				$scope.predicate = 'name';
-				$scope.database = data;
-			});
+    $http.get('/a/update/database?database=' + $stateParams.name).success(function(data, status, headers, config) {
+        $scope.predicate = 'name';
+        $scope.database = data;
+    });
 });
 
-zebraWeb.controller('update-app',
-		function($scope, $stateParams, $http, $window) {
-			$scope.load = function() {
-				$http.get('/a/update/app?app=' + $stateParams.name).success(
-						function(data, status, headers, config) {
-							$scope.app = data;
-						});
-			}
+zebraWeb.controller('update-app', function($scope, $stateParams, $http, $window) {
+    $scope.load = function() {
+        $http.get('/a/update/app?app=' + $stateParams.name).success(function(data, status, headers, config) {
+            $scope.app = data;
+        });
+    }
 
-			$scope.load();
+    $scope.load();
 
-			$scope.deleteInfo = function(ip, beanName) {
-				$http.get(
-						'/a/update/delete-info?app=' + $stateParams.name
-								+ '&ip=' + ip + '&beanName=' + beanName)
-						.success(function(data) {
-							if (!!data) {
-								$scope.load();
-							}
-						});
-			}
-		});
+    $scope.deleteInfo = function(ip, beanName) {
+        $http.get('/a/update/delete-info?app=' + $stateParams.name + '&ip=' + ip + '&beanName=' + beanName).success(function(data) {
+            if (!!data) {
+                $scope.load();
+            }
+        });
+    }
+});
 
 zebraWeb.controller('config-test', function($scope, $http, name, configs) {
-	$scope.name = name;
-	var url = '/a/config/test?key=' + name + '&env=' + $scope.config.env;
+    $scope.name = name;
+    var url = '/a/config/test?key=' + name + '&env=' + $scope.config.env;
 
-	if (configs) {
-		$scope.connectionStatus = configs;
-	} else {
-		$http.get(url).success(function(data, status, headers, config) {
-			$scope.connectionStatus = data;
-			console.log(data);
-		});
-	}
+    if (configs) {
+        $scope.connectionStatus = configs;
+    } else {
+        $http.get(url).success(function(data, status, headers, config) {
+            $scope.connectionStatus = data;
+        });
+    }
 });
 
-zebraWeb.controller('config-edit', function($scope, $http, name, close,
-		configService) {
-	$scope.name = name;
-	$scope.load = function() {
-		if ($scope.config && $scope.config.env) {
-			$http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env)
-					.success(function(data, status, headers, config) {
-						$scope.data = data;
-					});
-		}
-	}
+zebraWeb.controller('config-edit', function($scope, $http, name, close, configService) {
+    $scope.name = name;
 
-	$scope.$watch('config.env', $scope.load);
-	$scope.load();
+    $scope.load = function() {
+        if ($scope.config && $scope.config.env) {
+            $http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env).success(function(data, status, headers, config) {
+                $scope.data = data;
+            });
+        }
+    }
 
-	var calGroupPrevoew = function() {
-		if (!$scope.data) {
-			return;
-		}
-		var writeList = '';
-		var readList = '';
-		$scope.data.configs.forEach(function(config) {
-			if (!config.role) {
-				return;
-			}
-			if (config.role.isWrite) {
-				writeList += writeList ? ',' + config.id : config.id;
-			}
-			if (config.role.isRead) {
-				if (!config.role.weight) {
-					config.role.weight = 1;
-				}
-				var temp = config.id + ':' + config.role.weight;
-				readList += readList ? ',' + temp : temp;
-			}
-		});
-		$scope.data.config = '(' + readList + '),(' + writeList + ')';
-	}
+    $scope.changeName = function() {
+        if ($scope.config && $scope.config.env) {
+            $http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env + '&otherkey=' + $scope.changedName).success(function(data, status, headers, config) {
+                $scope.data = data;
+            });
+        }
+    }
 
-	$scope.close = function() {
-		close();
-	}
+    $scope.$watch('config.env', $scope.load);
+    $scope.load();
 
-	$scope.addDs = function() {
-		if (!$scope.newDsName) {
-			return;
-		}
-		if ($scope.newDsName.indexOf('ds.' + $scope.name) != 0) {
-			alert('请以 ds.' + $scope.name + ' 开头！');
-			return;
-		}
-		$scope.data.configs.push({
-			id : $scope.newDsName,
-			role : {
-				isWrite : false,
-				isRead : false,
-				weight : 1
-			},
-			properties : []
-		});
-		$scope.newDsName = '';
-	}
+    var calGroupPrevoew = function() {
+        if (!$scope.data) {
+            return;
+        }
+        var writeList = '';
+        var readList = '';
+        $scope.data.configs.forEach(function(config) {
+            if (!config.role) {
+                return;
+            }
+            if (config.role.isWrite) {
+                writeList += writeList ? ',' + config.id : config.id;
+            }
+            if (config.role.isRead) {
+                if (!config.role.weight) {
+                    config.role.weight = 1;
+                }
+                var temp = config.id + ':' + config.role.weight;
+                readList += readList ? ',' + temp : temp;
+            }
+        });
+        $scope.data.config = '(' + readList + '),(' + writeList + ')';
+    }
 
-	$scope.save = function(force) {
-		force = !!force;
-		$http.post('/a/config/updateds?force=' + force,
-				angular.toJson($scope.data)).success(
-				function(data, status, headers, config) {
-					close();
-				});
-	}
+    $scope.close = function() {
+        close();
+    }
 
-	$scope.test = function() {
-		$http.post('/a/config/test?env=' + $scope.config.env,
-				angular.toJson($scope.data)).success(
-				function(data, status, headers, config) {
-					configService.openTestModal("", data);
-				});
-	}
+    $scope.addDs = function() {
+        if (!$scope.newDsName) {
+            return;
+        }
+        if ($scope.newDsName.indexOf($scope.name) != 0) {
+            alert('请以 ds.' + $scope.name + ' 开头！');
+            return;
+        }
+        $scope.data.configs.push({
+            id: $scope.newDsName,
+            role: {
+                isWrite: false,
+                isRead: false,
+                weight: 1
+            },
+            properties: []
+        });
+        $scope.newDsName = '';
+    }
 
-	$scope.$watch(function() {
-		calGroupPrevoew();
-	})
+    $scope.save = function(force) {
+        force = !!force;
+        $http.post('/a/config/updateds?force=' + force, angular.toJson($scope.data))
+            .success(function(data, status, headers, config) {
+                close();
+            });
+    }
 
-	$scope.addProperty = function(list, id, key, value) {
-		list.push({
-			key : 'ds.' + id + '.jdbc.' + key,
-			value : '',
-			isCreate : true,
-			newValue : value
-		});
-	}
+    $scope.test = function() {
+        $http.post('/a/config/test?env=' + $scope.config.env, angular.toJson($scope.data))
+            .success(function(data, status, headers, config) {
+                configService.openTestModal("", data);
+            });
+    }
+
+    $scope.$watch(function() {
+        calGroupPrevoew();
+    })
+
+    $scope.newKeys = ['url', 'username', 'password', 'active', 'properties', 'warmupTime', 'driverClass'];
+
+    $scope.addProperty = function(config) {
+        if (!config.properties.newKey) {
+            alert('请选择 key ！');
+        } else {
+            config.properties.push({
+                key: 'ds.' + config.id + '.jdbc.' + config.properties.newKey,
+                value: '',
+                isCreate: true,
+                newValue: config.properties.newValue
+            });
+
+            config.properties.newValue = '';
+            config.properties.newKey = '';
+        }
+    }
 });
 
-zebraWeb.controller('header', function($rootScope, $scope, $cookies, $http,
-		loginService) {
-	$scope.$watch('config.env', function() {
-		if ($scope.config && $scope.config.env) {
-			$cookies.env = $scope.config.env;
-		}
-	});
 
-	$scope.load = function() {
-		$http.get('/a/config/env').success(
-				function(data, status, headers, config) {
-					$rootScope.config = {
-						envs : data,
-						env : $cookies.env ? $cookies.env : data[0]
-					}
-				}).error(function(data, status, headers, config) {
-			if (status == 401) {
-				loginService.login();
-			}
-		});
-	}
-	$scope.load();
+zebraWeb.controller('header', function($rootScope, $scope, $cookies, $http, loginService) {
+    $scope.$watch('config.env', function() {
+        if ($scope.config && $scope.config.env) {
+            $cookies.env = $scope.config.env;
+        }
+    });
+
+    $scope.load = function() {
+        $http.get('/a/config/env').success(function(data, status, headers, config) {
+            $rootScope.config = {
+                envs: data,
+                env: $cookies.env ? $cookies.env : data[0]
+            }
+        }).error(function(data, status, headers, config) {
+            if (status == 401) {
+                loginService.login();
+            }
+        });
+    }
+    $scope.load();
 });
 
-zebraWeb.controller('config', function($scope, $stateParams, $http,
-		configService) {
-	var convertKey = function(key) {
-		return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
-	}
+zebraWeb.controller('config', function($scope, $stateParams, $http, configService) {
+    var convertKey = function(key) {
+        return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
+    }
 
-	$scope.edit = function(key) {
-		configService.openEditModal(convertKey(key), $scope.load);
-	};
+    $scope.edit = function(key) {
+        configService.openEditModal(convertKey(key), $scope.load);
+    };
 
-	$scope.merge = function(key) {
-		configService.openMergeModal(convertKey(key), $scope.load);
-	};
+    $scope.merge = function(key) {
+        configService.openMergeModal(convertKey(key), $scope.load);
+    };
 
-	$scope.test = function(key) {
-		configService.openTestModal(convertKey(key));
-	};
+    $scope.test = function(key) {
+        configService.openTestModal(convertKey(key));
+    };
 
-	$scope.load = function() {
-		if ($scope.config && $scope.config.env) {
-			$http.get('/a/config/?env=' + $scope.config.env).success(
-					function(data, status, headers, config) {
-						$scope.lionConfigs = data;
-					});
-		}
-	}
-	$scope.$watch('config.env', $scope.load);
-	$scope.load();
+    $scope.load = function() {
+        if ($scope.config && $scope.config.env) {
+            $http.get('/a/config/?env=' + $scope.config.env).success(function(data, status, headers, config) {
+                $scope.lionConfigs = data;
+            });
+        }
+    }
+    $scope.$watch('config.env', $scope.load);
+    $scope.load();
 
-	$scope.createGroupDs = function() {
-		if ($scope.addText) {
-			$http
-					.post(
-							'/a/config/create?project=groupds&key='
-									+ $scope.addText).success(
-							function(data, status, headers, config) {
-								$scope.addText = '';
-								$scope.load();
-								alert('添加成功！')
-							});
-		}
-	}
+    $scope.createGroupDs = function() {
+        if ($scope.addText) {
+            $http.post('/a/config/create?project=groupds&key=' + $scope.addText).success(function(data, status, headers, config) {
+                $scope.addText = '';
+                $scope.load();
+                alert('添加成功！')
+            });
+        }
+    }
 });
 
 zebraWeb.controller('login', function($rootScope, $scope, $http) {
-	$scope.login = function() {
-		$http.post('/a/login', {
-			username : $scope.username,
-			password : $scope.password
-		}).success(function(data, status, headers, config) {
-			alert('登陆成功!')
-			location.reload();
-		}).error(function() {
-			alert('登陆失败!')
-			$scope.username = '';
-			$scope.password = '';
-		});
-	}
+    $scope.login = function() {
+        $http.post('/a/login', {
+                username: $scope.username,
+                password: $scope.password
+            })
+            .success(function(data, status, headers, config) {
+                alert('登陆成功!')
+                location.reload();
+            }).error(function() {
+                alert('登陆失败!')
+                $scope.username = '';
+                $scope.password = '';
+            });
+    }
 });
 
 zebraWeb.controller('merge-edit', function($scope, $http, $log, name, close) {
-	$scope.name = name;
-	$scope.load = function() {
-		if ($scope.config && $scope.config.env) {
-			$http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env)
-					.success(function(data, status, headers, config) {
-						$scope.data = data;
-					});
-		}
-	}
+    $scope.name = name;
+    $scope.load = function() {
+        if ($scope.config && $scope.config.env) {
+            $http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env).success(function(data, status, headers, config) {
+                $scope.data = data;
+            });
+        }
+    }
 
-	$scope.$watch('config.env', $scope.load);
-	$scope.load();
+    $scope.$watch('config.env', $scope.load);
+    $scope.load();
 
-	$scope.close = function() {
-		close();
-	}
+    $scope.close = function() {
+        close();
+    }
 
-	$scope.onChange = function(selectedConfig) {
-		if (selectedConfig.isMerged) {
-			$scope.data.configs.forEach(function(config) {
-				if (config.id != selectedConfig.id && config.isMerged) {
-					config.isMerged = !config.isMerged;
-				}
-			});
+    $scope.onChange = function(selectedConfig) {
+        if (selectedConfig.isMerged) {
+            $scope.data.configs.forEach(function(config) {
+                if (config.id != selectedConfig.id && config.isMerged) {
+                    config.isMerged = !config.isMerged;
+                }
+            });
 
-			$scope.data.configs.forEach(function(config) {
-				config.isDelete = false;
-				if (config.selected) {
-					if (!config.isMerged) {
-						config.isDelete = true;
-					}
-				}
-			});
-		} else {
-			$scope.data.configs.forEach(function(config) {
-				config.isDelete = false;
-			});
-		}
-	};
+            $scope.data.configs.forEach(function(config) {
+                config.isDelete = false;
+                if (config.selected) {
+                    if (!config.isMerged) {
+                        config.isDelete = true;
+                    }
+                }
+            });
+        } else {
+            $scope.data.configs.forEach(function(config) {
+                config.isDelete = false;
+            });
+        }
+    };
 
-	$scope.merge = function() {
-		var from = "";
-		var to = "";
-		if ($scope.config && $scope.config.env) {
-			var first = true;
-			$scope.data.configs.forEach(function(config) {
-				if (config.selected) {
-					if (first) {
-						from += config.id;
-						first = false;
-					} else {
-						from += ",";
-						from += config.id;
-					}
+    $scope.merge = function() {
+        var from = "";
+        var to = "";
+        if ($scope.config && $scope.config.env) {
+            var first = true;
+            $scope.data.configs.forEach(function(config) {
+                if (config.selected) {
+                    if (first) {
+                        from += config.id;
+                        first = false;
+                    } else {
+                        from += ",";
+                        from += config.id;
+                    }
 
-					if (config.isMerged) {
-						to = config.id;
-					}
-				}
-			});
+                    if (config.isMerged) {
+                        to = config.id;
+                    }
+                }
+            });
 
-			$http.get(
-					'/a/merge?op=merge&from=' + from + '&to=' + to + '&env='
-							+ $scope.config.env).success(
-					function(data, status, headers, config) {
-						close();
-					});
-		}
-	}
+            $http.get('/a/merge?op=merge&from=' + from + '&to=' + to + '&env=' + $scope.config.env).success(function(data, status, headers, config) {
+                close();
+            });
+        }
+    }
 });

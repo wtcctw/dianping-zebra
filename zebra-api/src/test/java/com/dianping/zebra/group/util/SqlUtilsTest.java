@@ -2,6 +2,8 @@ package com.dianping.zebra.group.util;
 
 import java.sql.SQLException;
 
+import com.dianping.zebra.util.SqlType;
+import com.dianping.zebra.util.SqlUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
