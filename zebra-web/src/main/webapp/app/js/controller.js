@@ -28,9 +28,22 @@ zebraWeb.controller('shard', function($scope, $http, shardService) {
 
 zebraWeb.controller('shard-edit', function($scope, $http, name, configs, close) {
     $scope.name = name;
+    if (configs.tableShardConfigs && configs.tableShardConfigs.length > 0) {
+        configs.tableShardConfigs[0].active = true;
+    }
     $scope.configs = configs;
     $scope.close = function() {
         close();
+    }
+
+    $scope.changeActive = function(tableName) {
+        $scope.configs.tableShardConfigs.forEach(function(item) {
+            if (item.tableName == tableName) {
+                item.active = true;
+            } else {
+                item.active = false;
+            }
+        });
     }
 });
 
