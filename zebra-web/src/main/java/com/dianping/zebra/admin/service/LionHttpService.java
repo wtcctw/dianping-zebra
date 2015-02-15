@@ -17,7 +17,9 @@ public interface LionHttpService {
 
 	boolean createKey(String project, String key) throws IOException;
 
-	String getConfig(String env, String key) throws IOException;
+	String getConfigByHttp(String env, String key) throws IOException;
+	
+	String getConfigFromZk(String key);
 
 	HashMap<String, String> getConfigByProject(String env, String project) throws IOException;
 

@@ -9,7 +9,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.unidal.lookup.annotation.Inject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,38 +44,38 @@ public class DalConfigServiceImpl implements DalConfigService {
 
 		try {
 			for (String env : m_lionHttpService.getAllEnv()) {
-				String originUrl = m_lionHttpService.getConfig(env, url);
+				String originUrl = m_lionHttpService.getConfigByHttp(env, url);
 				if (originUrl == null || originUrl.length() == 0) {
 					m_lionHttpService.setConfig(env, url, "jdbc:mysql://{ip}:{port}/{database}?characterEncoding=UTF8");
 				} else {
 					m_lionHttpService.setConfig(env, url, originUrl);
 				}
 
-				String originUser = m_lionHttpService.getConfig(env, user);
+				String originUser = m_lionHttpService.getConfigByHttp(env, user);
 				if (originUser == null || originUser.length() == 0) {
 					m_lionHttpService.setConfig(env, user, "");
 				} else {
 					m_lionHttpService.setConfig(env, user, originUser);
 				}
 
-				String originPassword = m_lionHttpService.getConfig(env, password);
+				String originPassword = m_lionHttpService.getConfigByHttp(env, password);
 				if (originPassword == null || originPassword.length() == 0) {
 					m_lionHttpService.setConfig(env, password, "");
 				} else {
 					m_lionHttpService.setConfig(env, password, originPassword);
 				}
 
-				String originDriverClass = m_lionHttpService.getConfig(env, driverClass);
+				String originDriverClass = m_lionHttpService.getConfigByHttp(env, driverClass);
 				if (originDriverClass == null || originDriverClass.length() == 0) {
 					m_lionHttpService.setConfig(env, driverClass, "com.mysql.jdbc.Driver");
 				}
 
-				String originProperties = m_lionHttpService.getConfig(env, properties);
+				String originProperties = m_lionHttpService.getConfigByHttp(env, properties);
 				if (originProperties == null || originProperties.length() == 0) {
 					m_lionHttpService.setConfig(env, properties, "${ds.datasource.properties}");
 				}
 
-				String originActive = m_lionHttpService.getConfig(env, active);
+				String originActive = m_lionHttpService.getConfigByHttp(env, active);
 				if (originActive == null || originActive.length() == 0) {
 					m_lionHttpService.setConfig(env, active, "true");
 				} else {
@@ -96,7 +95,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 			GroupConfigModel result = new GroupConfigModel();
 			result.setEnv(env);
 			result.setId(groupId);
-			result.setConfig(m_lionHttpService.getConfig(env, getGroupDataSourceKeyById(groupId)));
+			result.setConfig(m_lionHttpService.getConfigByHttp(env, getGroupDataSourceKeyById(groupId)));
 			Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
 					.parseConfig(result.getConfig());
 
@@ -156,7 +155,7 @@ public class DalConfigServiceImpl implements DalConfigService {
 		try {
 			String groupKey = getGroupDataSourceKeyById(modal.getId());
 
-			String oldConfig = m_lionHttpService.getConfig(modal.getEnv(), groupKey);
+			String oldConfig = m_lionHttpService.getConfigByHttp(modal.getEnv(), groupKey);
 
 			m_lionHttpService.setConfig(modal.getEnv(), groupKey, modal.getConfig());
 			Cat.logEvent("GroupDsConfigUpdate", String.format("env:%s key:%s from:%s to:%s",

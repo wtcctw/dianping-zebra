@@ -1,15 +1,5 @@
 package com.dianping.zebra.admin.service;
 
-import com.dianping.cat.Cat;
-import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.zebra.group.util.StringUtils;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.unidal.lookup.annotation.Inject;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -17,6 +7,18 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dianping.cat.Cat;
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.LionException;
+import com.dianping.zebra.group.util.StringUtils;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 @Service
 public class LionHttpServiceImpl implements LionHttpService {
@@ -83,7 +85,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 	}
 
 	@Override
-	public String getConfig(String env, String key) throws IOException {
+	public String getConfigByHttp(String env, String key) throws IOException {
 		Cat.logEvent("LionAPI-GetConfig", key);
 
 		String url = String.format(getConfigUrl, env, key, ID);
@@ -154,7 +156,7 @@ public class LionHttpServiceImpl implements LionHttpService {
 	public void removeUnset(String key) {
 		try {
 			for (String env : ALL_ENV) {
-				String value = getConfig(env, key);
+				String value = getConfigByHttp(env, key);
 				if (StringUtils.isBlank(value)) {
 					setConfig(env, key, "");
 				}
@@ -189,6 +191,15 @@ public class LionHttpServiceImpl implements LionHttpService {
 			}
 		} else {
 			return false;
+		}
+	}
+
+	@Override
+	public String getConfigFromZk(String key) {
+		try {
+			return ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key);
+		} catch (LionException e) {
+			return null;
 		}
 	}
 }
