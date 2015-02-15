@@ -36,7 +36,33 @@ zebraWeb.controller('shard-edit', function($scope, $http, name, configs, close) 
         close();
     }
 
+    $scope.addTable = function() {
+        $scope.configs.tableShardConfigs.forEach(function(item) {
+            item.active = false;
+        });
+
+        var newTable = 'table_new';
+
+        while ($scope.configs.tableShardConfigs.filter(function(item) {
+                return item.tableName == newTable
+            }).length >= 1) {
+            newTable += '_new';
+        }
+
+        $scope.configs.tableShardConfigs.push({
+            active: true,
+            tableName: newTable
+        })
+    }
+
     $scope.changeActive = function(tableName) {
+        if ($scope.configs.tableShardConfigs.filter(function(item) {
+                return item.tableName == tableName
+            }).length > 1) {
+            alert('表名重复！请修改表名');
+            return;
+        }
+
         $scope.configs.tableShardConfigs.forEach(function(item) {
             if (item.tableName == tableName) {
                 item.active = true;

@@ -14,8 +14,8 @@
             <a href ng-click="addTable()"><span title="Add Table" class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
         </li>
     </ul>
-    <div ng-repeat="shard in configs.tableShardConfigs">
-        <div ng-show="shard.active">{{shard}}</div>
+    <div ng-show="shard.active" ng-repeat="shard in configs.tableShardConfigs">
+        <input type="text" ng-model="shard.tableName" />
     </div>
 </div>
 <div class="modal-footer">
