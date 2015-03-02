@@ -15,7 +15,7 @@
         </li>
     </ul>
     <div ng-show="shard.active" ng-repeat="shard in configs.tableShardConfigs">
-        <input type="text" ng-model="shard.tableName" />
+        <input type="text" ng-change="tableNameChange(shard);" ng-model="shard.tableName" />
     </div>
 </div>
 <div class="modal-footer">

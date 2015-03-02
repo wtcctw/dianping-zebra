@@ -1,5 +1,5 @@
 zebraWeb.service('shardService', function($modal) {
-    this.openEditModal = function(name, configs, onClose) {
+    this.openEditModal = function(name, onClose) {
         var modal = $modal.open({
             templateUrl: 'app/template/shard-edit.html',
             controller: 'shard-edit',
@@ -8,9 +8,6 @@ zebraWeb.service('shardService', function($modal) {
             resolve: {
                 name: function() {
                     return name;
-                },
-                configs: function() {
-                    return configs;
                 },
                 close: function() {
                     return function() {
