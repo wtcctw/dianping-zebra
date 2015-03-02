@@ -84,40 +84,40 @@ zebraWeb.controller('shard-edit', function($scope, $http, name, close) {
     }
 });
 
-zebraWeb.controller('black', function($scope, $http) {
+zebraWeb.controller('flow', function($scope, $http) {
     $scope.load = function() {
-        $http.get('/a/blacklist/?env=' + $scope.config.env).success(function(data, status, headers, config) {
+        $http.get('/a/flowcontrol/?env=' + $scope.config.env).success(function(data, status, headers, config) {
             $scope.blackList = data;
         });
     }
     $scope.load();
 
     $scope.remove = function(key, id) {
-        if (confirm('确定删除？')) {
-            $http.post(
-                '/a/blacklist/delete?env=' + $scope.config.env + '&key=' + key).success(
-                function(data, status, headers, config) {
-                    $scope.load();
-                });
-        }
-    }
+		if (confirm('确定删除？')) {
+			$http.post(
+					'/a/flowcontrol/delete?env=' + $scope.config.env + '&key=' + key).success(
+					function(data, status, headers, config) {
+						$scope.load();
+					});
+		}
+	}
 
-    $scope.add = function() {
-        if (confirm('确定添加？')) {
-            $http.post('/a/blacklist/add?env=' + $scope.config.env, {
-                ip: ($scope.addIp ? $scope.addIp : ''),
-                m_sqlId: ($scope.addId ? $scope.addId : ''),
-                sql: ($scope.addComment ? $scope.addComment : ''),
-                m_allowPercent: ($scope.addAllowedPercent ? $scope.addAllowedPercent : '')
-            }).success(function(data, status, headers, config) {
-                $scope.load();
-                $scope.addId = '';
-                $scope.addIp = '';
-                $scope.addComment = '';
-                $scope.addAllowedPercent = 100;
-            });
-        }
-    }
+	$scope.add = function() {
+		if (confirm('确定添加？')) {
+			$http.post('/a/flowcontrol/add?env=' + $scope.config.env, {
+				ip : ($scope.addIp ? $scope.addIp : ''),
+				m_sqlId : ($scope.addId ? $scope.addId : ''),
+				sql : ($scope.addComment ? $scope.addComment : ''),
+				m_allowPercent : ($scope.addAllowedPercent ? $scope.addAllowedPercent : '')
+			}).success(function(data, status, headers, config) {
+				$scope.load();
+				$scope.addId = '';
+				$scope.addIp = '';
+				$scope.addComment = '';
+				$scope.addAllowedPercent = 100;
+			});
+		}
+	}
 
 
     $scope.$watch('config.env', $scope.load);

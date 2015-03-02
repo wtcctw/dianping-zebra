@@ -2,13 +2,13 @@ package com.dianping.zebra.admin.service;
 
 import java.util.Map;
 
-import com.dianping.zebra.admin.dto.SqlFlowControlDto;
+import com.dianping.zebra.admin.dto.FlowControlDto;
 
 /**
- * Created by Dozer on 10/14/14.
+ * @author hao.zhu
  */
-public interface SqlFlowControlService {
-	Map<String, SqlFlowControlDto> getAllBlackList(String env);
+public interface FlowControlService {
+	Map<String, FlowControlDto> getAllFlowControl(String env);
 
 	boolean deleteItem(String env, String key);
 

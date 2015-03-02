@@ -79,10 +79,10 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/shard',
         controller: 'shard',
         templateUrl: 'app/template/shard.html'
-    }).state('black', {
-              url: '/black',
-              controller: 'black',
-              templateUrl: 'app/template/black.html'
+    }).state('flow-control', {
+              url: '/flow',
+              controller: 'flow',
+              templateUrl: 'app/template/flow-control.html'
     }).state('update', {
         url: '/update',
         templateUrl: 'app/template/update.html',
