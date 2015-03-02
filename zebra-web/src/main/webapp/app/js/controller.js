@@ -110,6 +110,12 @@ zebraWeb.controller('shard-edit', function($scope, $http, name, close) {
             }
         });
     }
+
+    $scope.test = function() {
+        $http.post('/a/shard/' + $scope.config.env + '/test/', $scope.configs).success(function(data, status, headers, config) {
+            alert(data.message)
+        });
+    }
 });
 
 zebraWeb.controller('flow', function($scope, $http) {
