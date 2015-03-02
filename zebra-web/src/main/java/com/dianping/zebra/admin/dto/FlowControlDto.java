@@ -2,12 +2,12 @@ package com.dianping.zebra.admin.dto;
 
 import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 
-public class SqlFlowControlDto extends SqlFlowControl {
+public class FlowControlDto extends SqlFlowControl {
 	private String sql;
 	
 	private String ip;
 
-	public SqlFlowControlDto(SqlFlowControl sqlFlowContorl) {
+	public FlowControlDto(SqlFlowControl sqlFlowContorl) {
 		this.setSqlId(sqlFlowContorl.getSqlId());
 		this.setAllowPercent(sqlFlowContorl.getAllowPercent());
 		this.setApp(sqlFlowContorl.getApp());

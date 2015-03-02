@@ -2,6 +2,8 @@ package com.dianping.zebra.admin.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.dianping.zebra.admin.entity.FlowControlEntity;
 
 public interface FlowControlMapper {
@@ -10,5 +12,5 @@ public interface FlowControlMapper {
 
 	public void insertFlowControl(FlowControlEntity entity);
 
-	public void deleteFlowControl(String sqlId, String env);
+	public void deleteFlowControl(@Param("sqlId")String sqlId, @Param("env")String env);
 }

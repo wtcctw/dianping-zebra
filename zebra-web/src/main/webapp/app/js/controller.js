@@ -73,9 +73,9 @@ zebraWeb.controller('shard-edit', function($scope, $http, name, configs, close) 
     }
 });
 
-zebraWeb.controller('black', function($scope, $http) {
+zebraWeb.controller('flow', function($scope, $http) {
     $scope.load = function() {
-        $http.get('/a/blacklist/?env=' + $scope.config.env).success(function(data, status, headers, config) {
+        $http.get('/a/flowcontrol/?env=' + $scope.config.env).success(function(data, status, headers, config) {
             $scope.blackList = data;
         });
     }
@@ -84,7 +84,7 @@ zebraWeb.controller('black', function($scope, $http) {
     $scope.remove = function(key, id) {
 		if (confirm('确定删除？')) {
 			$http.post(
-					'/a/blacklist/delete?env=' + $scope.config.env + '&key=' + key).success(
+					'/a/flowcontrol/delete?env=' + $scope.config.env + '&key=' + key).success(
 					function(data, status, headers, config) {
 						$scope.load();
 					});
@@ -93,7 +93,7 @@ zebraWeb.controller('black', function($scope, $http) {
 
 	$scope.add = function() {
 		if (confirm('确定添加？')) {
-			$http.post('/a/blacklist/add?env=' + $scope.config.env, {
+			$http.post('/a/flowcontrol/add?env=' + $scope.config.env, {
 				ip : ($scope.addIp ? $scope.addIp : ''),
 				m_sqlId : ($scope.addId ? $scope.addId : ''),
 				sql : ($scope.addComment ? $scope.addComment : ''),
