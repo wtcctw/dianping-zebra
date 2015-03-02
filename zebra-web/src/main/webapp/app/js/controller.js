@@ -44,6 +44,28 @@ zebraWeb.controller('shard-edit', function($scope, $http, name, close) {
     }
     $scope.load();
 
+    $scope.addException = function(dimension) {
+        if (!dimension.exceptions) {
+            dimension.exceptions = [];
+        }
+        dimension.exceptions.push({});
+    }
+
+    $scope.removeException = function(dimension, index) {
+        dimension.exceptions.splice(index, 1);
+    }
+
+    $scope.addDimension = function(shard) {
+        if (!shard.dimensionConfigs) {
+            shard.dimensionConfigs = [];
+        }
+        shard.dimensionConfigs.push({});
+    }
+
+    $scope.removeDimension = function(shard, index) {
+        shard.dimensionConfigs.splice(index, 1);
+    }
+
     $scope.tableNameChange = function(shard) {
         while ($scope.configs.tableShardConfigs.filter(function(item) {
                 return item.tableName == shard.tableName
@@ -93,31 +115,31 @@ zebraWeb.controller('flow', function($scope, $http) {
     $scope.load();
 
     $scope.remove = function(key, id) {
-		if (confirm('确定删除？')) {
-			$http.post(
-					'/a/flowcontrol/delete?env=' + $scope.config.env + '&key=' + key).success(
-					function(data, status, headers, config) {
-						$scope.load();
-					});
-		}
-	}
+        if (confirm('确定删除？')) {
+            $http.post(
+                '/a/flowcontrol/delete?env=' + $scope.config.env + '&key=' + key).success(
+                function(data, status, headers, config) {
+                    $scope.load();
+                });
+        }
+    }
 
-	$scope.add = function() {
-		if (confirm('确定添加？')) {
-			$http.post('/a/flowcontrol/add?env=' + $scope.config.env, {
-				ip : ($scope.addIp ? $scope.addIp : ''),
-				m_sqlId : ($scope.addId ? $scope.addId : ''),
-				sql : ($scope.addComment ? $scope.addComment : ''),
-				m_allowPercent : ($scope.addAllowedPercent ? $scope.addAllowedPercent : '')
-			}).success(function(data, status, headers, config) {
-				$scope.load();
-				$scope.addId = '';
-				$scope.addIp = '';
-				$scope.addComment = '';
-				$scope.addAllowedPercent = 100;
-			});
-		}
-	}
+    $scope.add = function() {
+        if (confirm('确定添加？')) {
+            $http.post('/a/flowcontrol/add?env=' + $scope.config.env, {
+                ip: ($scope.addIp ? $scope.addIp : ''),
+                m_sqlId: ($scope.addId ? $scope.addId : ''),
+                sql: ($scope.addComment ? $scope.addComment : ''),
+                m_allowPercent: ($scope.addAllowedPercent ? $scope.addAllowedPercent : '')
+            }).success(function(data, status, headers, config) {
+                $scope.load();
+                $scope.addId = '';
+                $scope.addIp = '';
+                $scope.addComment = '';
+                $scope.addAllowedPercent = 100;
+            });
+        }
+    }
 
 
     $scope.$watch('config.env', $scope.load);
