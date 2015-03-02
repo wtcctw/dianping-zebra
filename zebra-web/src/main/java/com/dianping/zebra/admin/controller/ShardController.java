@@ -122,9 +122,10 @@ public class ShardController {
         }
     }
 
-    @RequestMapping(value = "/{env}/update", method = RequestMethod.POST)
+    @RequestMapping(value = "/{env}/update/{name}", method = RequestMethod.POST)
     @ResponseBody
-    public Object update(@PathVariable String env, @RequestBody RouterRuleConfig config) {
+    public Object update(@PathVariable String env, @PathVariable String name, @RequestBody RouterRuleConfig config) {
+        lionHttpService.setConfig(env, name, gson.toJson(config));
         return null;
     }
 }
