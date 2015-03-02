@@ -8,13 +8,13 @@ zebraWeb.controller('update', function($scope, $http) {
 
 zebraWeb.controller('shard', function($scope, $http, shardService) {
     $scope.load = function() {
-        $http.get('/a/shard/' + $scope.config.env).success(function(data, status, headers, config) {
+        $http.get('/a/shard/' + $scope.config.env + '/config').success(function(data, status, headers, config) {
             $scope.data = data;
         });
     }
 
     $scope.edit = function(key, config) {
-        shardService.openEditModal(key, config)
+        shardService.openEditModal(key)
     }
 
     $scope.test = function(key) {
@@ -26,14 +26,60 @@ zebraWeb.controller('shard', function($scope, $http, shardService) {
     $scope.load();
 });
 
-zebraWeb.controller('shard-edit', function($scope, $http, name, configs, close) {
+zebraWeb.controller('shard-edit', function($scope, $http, name, close) {
     $scope.name = name;
-    if (configs.tableShardConfigs && configs.tableShardConfigs.length > 0) {
-        configs.tableShardConfigs[0].active = true;
-    }
-    $scope.configs = configs;
+
     $scope.close = function() {
         close();
+    }
+
+    $scope.load = function() {
+        $http.get('/a/shard/' + $scope.config.env + '/config/' + name + '/').success(function(data, status, headers, config) {
+            $scope.configs = data;
+
+            if ($scope.configs.tableShardConfigs && $scope.configs.tableShardConfigs.length > 0) {
+                $scope.configs.tableShardConfigs[0].active = true;
+            }
+        });
+    }
+    $scope.load();
+
+    $scope.addException = function(dimension) {
+        if (!dimension.exceptions) {
+            dimension.exceptions = [];
+        }
+        dimension.exceptions.push({});
+    }
+
+    $scope.removeException = function(dimension, index) {
+        dimension.exceptions.splice(index, 1);
+    }
+
+    $scope.addDimension = function(shard) {
+        if (!shard.dimensionConfigs) {
+            shard.dimensionConfigs = [];
+        }
+        shard.dimensionConfigs.push({});
+    }
+
+    $scope.removeDimension = function(shard, index) {
+        shard.dimensionConfigs.splice(index, 1);
+    }
+
+    $scope.tableNameChange = function(shard) {
+        while ($scope.configs.tableShardConfigs.filter(function(item) {
+                return item.tableName == shard.tableName
+            }).length > 1) {
+            alert('表名重复！请修改表名');
+            shard.tableName += '_new';
+        }
+    }
+
+    $scope.removeTable = function(configs, index) {
+        configs.tableShardConfigs.splice(index, 1);
+        if (configs.tableShardConfigs.length > 0) {
+            configs.tableShardConfigs[0].active = true;
+        }
     }
 
     $scope.addTable = function() {
@@ -56,19 +102,24 @@ zebraWeb.controller('shard-edit', function($scope, $http, name, configs, close) 
     }
 
     $scope.changeActive = function(tableName) {
-        if ($scope.configs.tableShardConfigs.filter(function(item) {
-                return item.tableName == tableName
-            }).length > 1) {
-            alert('表名重复！请修改表名');
-            return;
-        }
-
         $scope.configs.tableShardConfigs.forEach(function(item) {
             if (item.tableName == tableName) {
                 item.active = true;
             } else {
                 item.active = false;
             }
+        });
+    }
+
+    $scope.test = function() {
+        $http.post('/a/shard/' + $scope.config.env + '/test/', $scope.configs).success(function(data, status, headers, config) {
+            alert(data.message);
+        });
+    }
+
+    $scope.save = function() {
+        $http.post('/a/shard/' + $scope.config.env + '/update/' + $scope.name + '/', $scope.configs).success(function(data, status, headers, config) {
+            alert('保存成功！');
         });
     }
 });
@@ -82,31 +133,31 @@ zebraWeb.controller('flow', function($scope, $http) {
     $scope.load();
 
     $scope.remove = function(key, id) {
-		if (confirm('确定删除？')) {
-			$http.post(
-					'/a/flowcontrol/delete?env=' + $scope.config.env + '&key=' + key).success(
-					function(data, status, headers, config) {
-						$scope.load();
-					});
-		}
-	}
+        if (confirm('确定删除？')) {
+            $http.post(
+                '/a/flowcontrol/delete?env=' + $scope.config.env + '&key=' + key).success(
+                function(data, status, headers, config) {
+                    $scope.load();
+                });
+        }
+    }
 
-	$scope.add = function() {
-		if (confirm('确定添加？')) {
-			$http.post('/a/flowcontrol/add?env=' + $scope.config.env, {
-				ip : ($scope.addIp ? $scope.addIp : ''),
-				m_sqlId : ($scope.addId ? $scope.addId : ''),
-				sql : ($scope.addComment ? $scope.addComment : ''),
-				m_allowPercent : ($scope.addAllowedPercent ? $scope.addAllowedPercent : '')
-			}).success(function(data, status, headers, config) {
-				$scope.load();
-				$scope.addId = '';
-				$scope.addIp = '';
-				$scope.addComment = '';
-				$scope.addAllowedPercent = 100;
-			});
-		}
-	}
+    $scope.add = function() {
+        if (confirm('确定添加？')) {
+            $http.post('/a/flowcontrol/add?env=' + $scope.config.env, {
+                ip: ($scope.addIp ? $scope.addIp : ''),
+                m_sqlId: ($scope.addId ? $scope.addId : ''),
+                sql: ($scope.addComment ? $scope.addComment : ''),
+                m_allowPercent: ($scope.addAllowedPercent ? $scope.addAllowedPercent : '')
+            }).success(function(data, status, headers, config) {
+                $scope.load();
+                $scope.addId = '';
+                $scope.addIp = '';
+                $scope.addComment = '';
+                $scope.addAllowedPercent = 100;
+            });
+        }
+    }
 
 
     $scope.$watch('config.env', $scope.load);

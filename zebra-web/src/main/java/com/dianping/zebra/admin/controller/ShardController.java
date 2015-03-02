@@ -31,9 +31,9 @@ public class ShardController {
 
     private final Gson gson = new Gson();
 
-    @RequestMapping(value = "/{env}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{env}/config", method = RequestMethod.GET)
     @ResponseBody
-    public Object index(@PathVariable String env) throws IOException {
+    public Object allConfig(@PathVariable String env) throws IOException {
         Map<String, String> configStr = lionHttpService.getConfigByProject(env, Constants.DEFAULT_SHARDING_PRFIX);
         Map<String, RouterRuleConfig> configs = new HashMap<String, RouterRuleConfig>();
         for (Map.Entry<String, String> entry : configStr.entrySet()) {
@@ -45,6 +45,13 @@ public class ShardController {
             configs.put(entry.getKey(), config);
         }
         return configs;
+    }
+
+    @RequestMapping(value = "/{env}/config/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public Object config(@PathVariable String env, @PathVariable String name) throws IOException {
+        String config = lionHttpService.getConfigByHttp(env, name);
+        return gson.fromJson(config, RouterRuleConfig.class);
     }
 
 
@@ -115,9 +122,10 @@ public class ShardController {
         }
     }
 
-    @RequestMapping(value = "/{env}/update", method = RequestMethod.POST)
+    @RequestMapping(value = "/{env}/update/{name}", method = RequestMethod.POST)
     @ResponseBody
-    public Object update(@PathVariable String env, @RequestBody RouterRuleConfig config) {
+    public Object update(@PathVariable String env, @PathVariable String name, @RequestBody RouterRuleConfig config) {
+        lionHttpService.setConfig(env, name, gson.toJson(config));
         return null;
     }
 }

@@ -11,26 +11,74 @@
             <a href ng-click="changeActive(shard.tableName)">{{shard.tableName}}</a>
         </li>
         <li role="presentation">
-            <a href ng-click="addTable()"><span title="Add Table" class="glyphicon glyphicon-plus" aria-hidden="true"></span></a>
+            <a href ng-click="addTable()">
+                <span title="Add Table" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+            </a>
         </li>
     </ul>
-    <div ng-show="shard.active" ng-repeat="shard in configs.tableShardConfigs">
-        <input type="text" ng-model="shard.tableName" />
+    <br/>
+    <div ng-show="shard.active" class="form-inline" ng-repeat="shard in configs.tableShardConfigs">
+        <a href ng-click="removeTable(configs,$index)" style="float:right">
+            <span style="color:#d9534f" title="Remove Table" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </a>
+        <div class="form-group clearfix">
+            <label>Table Name</label>
+            <input type="text" ng-change="tableNameChange(shard);" ng-model="shard.tableName" /> &nbsp;
+            <label>GeneratedPK</label>
+            <input type="text" ng-model="shard.generatedPK" />
+        </div>
+        <br/>
+        <br/>
+        <div class="form-group">
+            <label>Dimension Configs</label>
+            <a href ng-click="addDimension(shard)">
+                <span title="Add Dimension" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+            </a>
+        </div>
+        <div class="well well-sm" ng-repeat="dimension in shard.dimensionConfigs">
+            <a href ng-click="removeDimension(shard,$index)" style="float:right">
+                <span style="color:#d9534f" title="Remove Dimension" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            </a>
+            <div class="form-group clearfix">
+                <label>Table Name</label>
+                <input type="text" ng-model="dimension.tableName" /> &nbsp;
+                <label>Is Master</label>
+                <input type="checkbox" ng-model="dimension.isMaster" /> &nbsp;
+                <br/>
+                <label>Db Rule</label>
+                <input style="width:300px;" type="text" ng-model="dimension.dbRule" /> &nbsp;
+                <label>Db Indexes</label>
+                <input style="width:250px;" type="text" ng-model="dimension.dbIndexes" /> &nbsp;
+                <br/>
+                <label>Tb Rule</label>
+                <input style="width:300px;" type="text" ng-model="dimension.tbRule" /> &nbsp;
+                <label>Tb Suffix</label>
+                <input type="text" ng-model="dimension.tbSuffix" /> &nbsp;
+                <br/>
+                <label>Exceptions</label>
+                <a href ng-click="addException(dimension)">
+                    <span title="Add Exceptions" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </a>
+                <div class="well well-sm" ng-repeat="exception in dimension.exceptions">
+                    <a href ng-click="removeException(dimension,$index)" style="float:right">
+                        <span style="color:#d9534f" title="Remove Exception" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </a>
+                    <label class="clearfix">Db</label>
+                    <input type="text" ng-model="exception.db" /> &nbsp;
+                    <label>Table</label>
+                    <input type="text" ng-model="exception.table" />
+                    <br/>
+                    <label>Table</label>
+                    <input type="text" ng-model="exception.condition" />
+                    <br/>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal-footer">
     <form class="form-inline" role="form">
-        <div class="btn-group" dropdown>
-            <button type="button" class="btn btn-success btn-sm" ng-click="save()">Save</button>
-            <button type="button" class="btn btn-success btn-sm dropdown-toggle">
-                <span class="caret"></span>
-                <span class="sr-only">Split button!</span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-                <li><a href="" ng-click="save(true)">Force Save</a>
-                </li>
-            </ul>
-        </div>
+        <button type="button" class="btn btn-success btn-sm" ng-click="save()">Save</button>
         <button title="直接使用当前配置测试，不保存到Lion" type="button" class="btn btn-primary btn-sm" ng-click="test()">Test</button>
         <button type="button" class="btn btn-warning btn-sm" ng-click="close()">Cancel</button>
     </form>
