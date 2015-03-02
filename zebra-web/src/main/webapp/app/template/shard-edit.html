@@ -18,7 +18,10 @@
     </ul>
     <br/>
     <div ng-show="shard.active" class="form-inline" ng-repeat="shard in configs.tableShardConfigs">
-        <div class="form-group">
+        <a href ng-click="removeTable(configs,$index)" style="float:right">
+            <span style="color:#d9534f" title="Remove Table" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </a>
+        <div class="form-group clearfix">
             <label>Table Name</label>
             <input type="text" ng-change="tableNameChange(shard);" ng-model="shard.tableName" /> &nbsp;
             <label>GeneratedPK</label>
@@ -43,12 +46,12 @@
                 <input type="text" ng-model="dimension.isMaster" /> &nbsp;
                 <br/>
                 <label>Db Rule</label>
-                <input type="text" ng-model="dimension.dbRule" /> &nbsp;
+                <input style="width:300px;" type="text" ng-model="dimension.dbRule" /> &nbsp;
                 <label>Db Indexes</label>
-                <input type="text" ng-model="dimension.dbIndexes" /> &nbsp;
+                <input style="width:250px;" type="text" ng-model="dimension.dbIndexes" /> &nbsp;
                 <br/>
                 <label>Tb Rule</label>
-                <input type="text" ng-model="dimension.tbRule" /> &nbsp;
+                <input style="width:300px;" type="text" ng-model="dimension.tbRule" /> &nbsp;
                 <label>Tb Suffix</label>
                 <input type="text" ng-model="dimension.tbSuffix" /> &nbsp;
                 <br/>

@@ -75,6 +75,12 @@ zebraWeb.controller('shard-edit', function($scope, $http, name, close) {
         }
     }
 
+    $scope.removeTable = function(configs, index) {
+        configs.tableShardConfigs.splice(index, 1);
+        if (configs.tableShardConfigs.length > 0) {
+            configs.tableShardConfigs[0].active = true;
+        }
+    }
 
     $scope.addTable = function() {
         $scope.configs.tableShardConfigs.forEach(function(item) {
