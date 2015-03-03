@@ -32,6 +32,8 @@ public class CatFilter extends DefaultJdbcFilter {
 
     private static final String SQL_NAME = "sql_statement_name";
 
+    private static final ThreadLocal<String> sql_name = new ThreadLocal<String>();
+
     private static final int MAX_ALLOWED_SQL_CHAR = 1024;
 
     private static final int MAX_ALLOWED_TRUNCATED_SQL_NUM = 2000;
@@ -60,19 +62,14 @@ public class CatFilter extends DefaultJdbcFilter {
     }
 
     @Override
-    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException {
+    public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain) throws SQLException {
         try {
-            return chain.getRealConnection(source, sql, forceWriter, chain);
+            return chain.getSingleConnection(source, chain);
         } catch (SQLException exp) {
-            String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
-            Transaction t;
-            if (StringUtils.isBlank(sqlName)) {
-                t = Cat.newTransaction("SQL", getCachedTruncatedSql(sql));
-                t.addData(sql);
-            } else {
-                t = Cat.newTransaction("SQL", sqlName);
-                t.addData(sql);
-            }
+            Transaction t = Cat.newTransaction("SQL", sql_name.get());
+            t.addData(sql_name.get());
+
+            Cat.logEvent("SQL.Database", source.getConfig().getJdbcUrl(), "ERROR", source.getConfig().getId());
 
             Cat.logError(exp);
             t.setStatus(exp);
@@ -83,20 +80,25 @@ public class CatFilter extends DefaultJdbcFilter {
     }
 
     @Override
+    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException {
+        String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
+        if (StringUtils.isBlank(sqlName)) {
+            sql_name.set(getCachedTruncatedSql(sql));
+        } else {
+            sql_name.set(sqlName);
+        }
+        return chain.getRealConnection(source, sql, forceWriter, chain);
+    }
+
+    @Override
     public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
                          boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
-        String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
         Transaction t;
-        if (StringUtils.isBlank(sqlName)) {
-            if (isBatched) {
-                t = Cat.newTransaction("SQL", "batched");
-                t.addData(Stringizers.forJson().compact().from(batchedSql));
-            } else {
-                t = Cat.newTransaction("SQL", getCachedTruncatedSql(sql));
-                t.addData(sql);
-            }
+        if (isBatched) {
+            t = Cat.newTransaction("SQL", "batched");
+            t.addData(Stringizers.forJson().compact().from(batchedSql));
         } else {
-            t = Cat.newTransaction("SQL", sqlName);
+            t = Cat.newTransaction("SQL", sql_name.get());
             t.addData(sql);
         }
 
