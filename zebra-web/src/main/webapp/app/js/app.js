@@ -1,4 +1,8 @@
-var zebraWeb = angular.module('ZebraWeb', ['ui.bootstrap', 'ui.router', 'ui.checkbox', 'ngCookies']);
+var zebraWeb = angular.module('ZebraWeb', ['ui.bootstrap', 'ui.router', 'ui.checkbox', 'ngCookies', 'xeditable']);
+
+zebraWeb.run(function(editableOptions) {
+  editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
+});
 
 zebraWeb.filter('objectCount', function () {
     return function (input) {

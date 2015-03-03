@@ -1,41 +1,40 @@
+<br />
 <div class="row">
-    <div class="col-xs-12">
-        <form class="form-inline" role="form">
-        		
-            <input class="form-control input-sm" required ng-model="addId" type="text" placeholder="SQL ID">
-            <input class="form-control input-sm" ng-model="addAllowedPercent" type="text" placeholder="流控比例，默认100（不进行流控）">
-            <input class="form-control input-sm" ng-model="addIp" type="text" placeholder="IP(Empty for Global)">
-            <input class="form-control input-sm" ng-model="addComment" type="text" placeholder="SQL语句">
-            <button ng-click="add()" class="btn btn-sm btn-primary">Add</button>
-        </form>
-    </div>
-</div>
-<br/>
-<div class="row">
-    <div class="col-xs-12">
-        <table class="table table-striped table-condensed">
-            <thead>
-        		<th>Sql ID</th>
-        		<th>App</th>
-        		<th>Allowed Percent(%)</th>
-        		<th>Sql语句</th>
-        		<th>删除</th>
-        	</thead>
-            <tbody>
-            <tr ng-repeat="item in blackList | toArray">
-                <td>{{item.$key}}</td>
-                <td>{{item.m_app}}</td>
-                <td><a href="#" id="percent" data-type="text" data-placement="right" data-title="输入流控比例">{{item.m_allowPercent}}</a>
-                </td>
-                <td>{{item.sql}}</td>
-                <td>
-                        <button ng-click="remove(item.$key)" type="button" title="Remove"
-                                class="btn btn-danger">
-                            <span class="glyphicon glyphicon-remove"></span>
-                        </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+	<div class="col-xs-12">
+		<table class="table table-bordered table-hover table-condensed">
+			<thead>
+				<th style="width:10%">Sql ID</th>
+				<th style="width:10%">App</th>
+				<th style="width:20%">Allowed Percent(%)</th>
+				<th style="width:45%">Sql语句</th>
+				<th style="width:25%">Edit</th>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in blackList | toArray">
+					<td><span editable-text="item.m_sqlId" e-name="m_sqlId" e-form="rowform" onbeforesave="checkSqlId($data)" e-required>{{item.m_sqlId}}</span></td>
+					<td><span editable-text="item.m_app" e-name="m_app" e-form="rowform">{{item.m_app}}</span></td>
+					<td><span editable-select="item.index" e-name="percent"
+						e-form="rowform" e-ng-options="p.index as p.text for p in percents" onbeforesave="checkPercent($data)" e-required>{{showPercent(item)}}</span>
+					</td>
+					<td><span editable-text="item.sql" e-name="sql" e-form="rowform">{{item.sql}}</span></td>
+					<td>
+				        <form editable-form name="rowform" onbeforesave="savePercent($data)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == item">
+				          <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
+				            save
+				          </button>
+				          <button type="button" ng-disabled="rowform.$waiting" ng-click="rowform.$cancel()" class="btn btn-default">
+				            cancel
+				          </button>
+				        </form>
+				        <div class="buttons" ng-show="!rowform.$visible">
+				          <button class="btn btn-primary" ng-click="rowform.$show();rowform.$show();">edit</button>
+				          <button class="btn btn-danger" ng-click="remove(item.$key)">del</button>
+				        </div>  
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<button class="btn btn-default" ng-click="addFlowControl()">新增流控规则</button>
+	</div>
 </div>

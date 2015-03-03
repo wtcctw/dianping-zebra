@@ -124,42 +124,107 @@ zebraWeb.controller('shard-edit', function($scope, $http, name, close) {
     }
 });
 
-zebraWeb.controller('flow', function($scope, $http) {
-    $scope.load = function() {
-        $http.get('/a/flowcontrol/?env=' + $scope.config.env).success(function(data, status, headers, config) {
-            $scope.blackList = data;
-        });
-    }
-    $scope.load();
-
-    $scope.remove = function(key, id) {
-        if (confirm('确定删除？')) {
-            $http.post(
-                '/a/flowcontrol/delete?env=' + $scope.config.env + '&key=' + key).success(
-                function(data, status, headers, config) {
-                    $scope.load();
-                });
+zebraWeb.controller('flow', function($scope, $http,$filter) {
+	$scope.load = function() {
+		$http.get('/a/flowcontrol/?env=' + $scope.config.env).success(function(data, status, headers, config) {
+			$scope.blackList = data;
+		});
+	}
+	$scope.load();
+    
+    $scope.percents = [ {
+			index : 0,
+			text : "0"
+		}, {
+			index : 1,
+			text : "10"
+		}, {
+			index : 2,
+			text : "20"
+		}, {
+			index : 3,
+			text : "30"
+		}, {
+			index : 4,
+			text : "40"
+		}, {
+			index : 5,
+			text : "50"
+		}, {
+			index : 6,
+			text : "60"
+		}, {
+			index : 7,
+			text : "70"
+		}, {
+			index : 8,
+			text : "80"
+		}, {
+			index : 9,
+			text : "90"
+		}, {
+			index : 10,
+			text : "100"
+		} ];
+    
+    $scope.showPercent = function(item) {
+    	var selected = [];
+    	
+        if(item.index) {
+          selected = $filter('filter')($scope.percents, {index: item.index});
         }
+        
+        return selected.length ? selected[0].text : 'Not set';
+    };
+    
+	  $scope.savePercent = function($data) {
+		var selected = [];
+	
+		selected = $filter('filter')($scope.percents, {index: $data.percent});
+		
+		if(selected.length){
+			$http.post('/a/flowcontrol/save?env='+ $scope.config.env,{
+					m_sqlId: $data.m_sqlId,
+	                ip: $data.m_app,
+					m_allowPercent: selected[0].text,
+					sql: $data.sql
+				}).success(
+					function(data, status, headers, config) {
+	                    $scope.load();
+                });	
+		}
+	  };
+		  
+    $scope.remove = function(key) {
+		$http.post('/a/flowcontrol/delete?env=' + $scope.config.env + '&key=' + key).success(
+			function(data, status, headers, config) {
+				$scope.load();
+		});
     }
+    
+    $scope.addFlowControl = function() {
+	    $scope.inserted = {
+	      m_sqlId: '',
+	      m_app:'',
+	      percent:0,
+	      sql: ''
+	    };
+	    
+	    $scope.blackList[' '] = $scope.inserted;
+	  };
 
-    $scope.add = function() {
-        if (confirm('确定添加？')) {
-            $http.post('/a/flowcontrol/add?env=' + $scope.config.env, {
-                ip: ($scope.addIp ? $scope.addIp : ''),
-                m_sqlId: ($scope.addId ? $scope.addId : ''),
-                sql: ($scope.addComment ? $scope.addComment : ''),
-                m_allowPercent: ($scope.addAllowedPercent ? $scope.addAllowedPercent : '')
-            }).success(function(data, status, headers, config) {
-                $scope.load();
-                $scope.addId = '';
-                $scope.addIp = '';
-                $scope.addComment = '';
-                $scope.addAllowedPercent = 100;
-            });
-        }
-    }
-
-
+	$scope.checkSqlId = function(data){
+		if(!data || data.length != 8 ){
+			return "请输入8位正确的sqlId！";
+		}
+	};
+	
+	$scope.checkPercent = function(data){
+		if(!data){
+			return "请输入需要控制的流量，0表示完全拦截，100表示不拦截！"
+		}
+	};
+	  
     $scope.$watch('config.env', $scope.load);
 });
 

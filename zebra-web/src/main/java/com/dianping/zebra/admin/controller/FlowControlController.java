@@ -33,14 +33,23 @@ public class FlowControlController {
 		return flowControlService.getAllFlowControl(env);
 	}
 
-	@RequestMapping(value = "add", method = RequestMethod.POST)
+	@RequestMapping(value = "save", method = RequestMethod.POST)
 	@ResponseBody
 	public Object add(String env, @RequestBody FlowControlDto dto) throws IOException {
 		if (dto.getSqlId() != null && dto.getSqlId().length() > 0) {
-			boolean ok = flowControlService.addItem(env, dto.getIp(), dto.getSqlId(), dto.getSql(), dto.getAllowPercent());
+			boolean contain = flowControlService.containFlowControl(env, dto.getSqlId());
 
-			if(ok){
-				blackListService.addItem(env, null, dto.getSqlId(), null);
+			if (contain) {
+				// modify
+				flowControlService.modifyItem(env, dto.getSqlId(), dto.getAllowPercent());
+			} else {
+				// crreate
+				boolean ok = flowControlService.addItem(env, dto.getIp(), dto.getSqlId(), dto.getSql(),
+				      dto.getAllowPercent());
+
+				if (ok) {
+					blackListService.addItem(env, null, dto.getSqlId(), null);
+				}
 			}
 		}
 
@@ -50,10 +59,14 @@ public class FlowControlController {
 	@RequestMapping(value = "delete", method = RequestMethod.POST)
 	@ResponseBody
 	public Object delete(String env, String key) throws IOException {
-		boolean ok = flowControlService.deleteItem(env, key);
+		boolean contain = flowControlService.containFlowControl(env, key);
 
-		if(ok){
-			blackListService.deleteItem(env, "zebra-sql-blacklist.global.id", key);
+		if (contain) {
+			boolean ok = flowControlService.deleteItem(env, key);
+
+			if (ok) {
+				blackListService.deleteItem(env, "zebra-sql-blacklist.global.id", key);
+			}
 		}
 		return null;
 	}

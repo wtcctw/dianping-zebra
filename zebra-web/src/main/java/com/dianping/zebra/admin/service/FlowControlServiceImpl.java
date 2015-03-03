@@ -74,11 +74,11 @@ public class FlowControlServiceImpl implements FlowControlService {
 
 			if (m_lionHttpService.setConfig(env, LION_KEY, systemConfig.toString())) {
 				transactionManager.commit(status);
-				
+
 				return true;
 			} else {
 				transactionManager.rollback(status);
-				
+
 				return false;
 			}
 		} catch (Exception e) {
@@ -98,7 +98,7 @@ public class FlowControlServiceImpl implements FlowControlService {
 
 			SystemConfig systemConfig = fetchSystemConfig(env);
 			systemConfig.getSqlFlowControls().remove(sqlId);
-			
+
 			if (m_lionHttpService.setConfig(env, LION_KEY, systemConfig.toString())) {
 				transactionManager.commit(status);
 
@@ -165,6 +165,42 @@ public class FlowControlServiceImpl implements FlowControlService {
 			return appName;
 		} else {
 			return GLOBAL_APP_NAME;
+		}
+	}
+
+	@Override
+	public boolean modifyItem(String env, String sqlId, int percent) {
+		try {
+			SystemConfig systemConfig = fetchSystemConfig(env);
+			SqlFlowControl flowControl = systemConfig.getSqlFlowControls().get(sqlId);
+
+			if (flowControl != null) {
+				flowControl.setAllowPercent(percent);
+
+				return m_lionHttpService.setConfig(env, LION_KEY, systemConfig.toString());
+			} else {
+				return true;
+			}
+		} catch (Exception e) {
+			Cat.logError(e);
+			return false;
+		}
+	}
+
+	@Override
+	public boolean containFlowControl(String env, String sqlId) {
+		try {
+			SystemConfig systemConfig = fetchSystemConfig(env);
+			SqlFlowControl flowControl = systemConfig.getSqlFlowControls().get(sqlId);
+
+			if (flowControl != null) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (Exception e) {
+			Cat.logError(e);
+			return false;
 		}
 	}
 }
