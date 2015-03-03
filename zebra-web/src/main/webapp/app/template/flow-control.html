@@ -4,10 +4,10 @@
 		<table class="table table-bordered table-hover table-condensed">
 			<thead>
 				<th style="width:10%">Sql ID</th>
-				<th style="width:10%">App</th>
-				<th style="width:20%">Allowed Percent(%)</th>
+				<th style="width:10%">应用</th>
+				<th style="width:20%">放入流量(%)</th>
 				<th style="width:45%">Sql语句</th>
-				<th style="width:25%">Edit</th>
+				<th style="width:25%">操作</th>
 			</thead>
 			<tbody>
 				<tr ng-repeat="item in blackList | toArray">
@@ -27,8 +27,8 @@
 				          </button>
 				        </form>
 				        <div class="buttons" ng-show="!rowform.$visible">
-				          <button class="btn btn-primary" ng-click="rowform.$show();rowform.$show();">edit</button>
-				          <button class="btn btn-danger" ng-click="remove(item.$key)">del</button>
+				          <button class="btn btn-primary" ng-click="rowform.$show();rowform.$show();">编辑</button>
+				          <button class="btn btn-danger" ng-click="remove(item.$key)">删除</button>
 				        </div>  
 					</td>
 				</tr>
