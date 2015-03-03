@@ -66,10 +66,14 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 		throw new UnsupportedOperationException();
 	}
 
+    @Override
+    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException{
+        throw new UnsupportedOperationException();
+    }
+
 	@Override
 	public int getOrder() {
 		throw new UnsupportedOperationException();
-
 	}
 
 	@Override
