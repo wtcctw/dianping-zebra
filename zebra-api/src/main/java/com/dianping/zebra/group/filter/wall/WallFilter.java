@@ -32,10 +32,10 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	private Random random;
 
-	protected void checkFlowControl(String sql, String id) throws SQLException {
+	protected void checkFlowControl(String id) throws SQLException {
 		if (StringUtils.isNotBlank(id) && flowControl.containsKey(id)) {
 			if (generateFlowPercent() > flowControl.get(id).getAllowPercent()) {
-				throw new SQLException("This SQL is in blacklist. Please check it from dba! SQL:" + sql);
+				throw new SQLException("The SQL is in the blacklist. Please contact with dba!","SQL.Blacklist");
 			}
 		}
 	}
@@ -74,13 +74,13 @@ public class WallFilter extends DefaultJdbcFilter {
 		this.flowControl = this.systemConfigManager.getSystemConfig().getSqlFlowControls();
 
 		this.systemConfigManager.addListerner(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-                synchronized (flowControl) {
-                    flowControl = systemConfigManager.getSystemConfig().getSqlFlowControls();
-                }
-            }
-        });
+			@Override
+			public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+				synchronized (flowControl) {
+					flowControl = systemConfigManager.getSystemConfig().getSqlFlowControls();
+				}
+			}
+		});
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class WallFilter extends DefaultJdbcFilter {
 			try {
 				String id = generateId(conn, sql);
 
-				checkFlowControl(sql, id);
+				checkFlowControl(id);
 
 				return String.format("/*id:%s*/%s", id, sql);
 			} catch (NoSuchAlgorithmException e) {
