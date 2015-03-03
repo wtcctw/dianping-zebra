@@ -35,7 +35,7 @@ public class FlowControlController {
 
 	@RequestMapping(value = "save", method = RequestMethod.POST)
 	@ResponseBody
-	public Object add(String env, @RequestBody FlowControlDto dto) throws IOException {
+	public Object save(String env, @RequestBody FlowControlDto dto) throws IOException {
 		if (dto.getSqlId() != null && dto.getSqlId().length() > 0) {
 			boolean contain = flowControlService.containFlowControl(env, dto.getSqlId());
 
@@ -43,7 +43,7 @@ public class FlowControlController {
 				// modify
 				flowControlService.modifyItem(env, dto.getSqlId(), dto.getAllowPercent());
 			} else {
-				// crreate
+				// create
 				boolean ok = flowControlService.addItem(env, dto.getIp(), dto.getSqlId(), dto.getSql(),
 				      dto.getAllowPercent());
 

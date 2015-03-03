@@ -4,21 +4,21 @@
 		<table class="table table-bordered table-hover table-condensed">
 			<thead>
 				<th style="width:10%">Sql ID</th>
-				<th style="width:10%">应用</th>
 				<th style="width:10%">放入流量(%)</th>
+				<th style="width:10%">应用</th>
 				<th style="width:55%">Sql语句</th>
 				<th style="width:25%">操作</th>
 			</thead>
 			<tbody>
 				<tr ng-repeat="item in blackList | toArray">
 					<td><span editable-text="item.m_sqlId" e-name="m_sqlId" e-form="rowform" onbeforesave="checkSqlId($data)" e-required>{{item.m_sqlId}}</span></td>
-					<td><span editable-text="item.m_app" e-name="m_app" e-form="rowform">{{item.m_app}}</span></td>
 					<td><span editable-select="item.index" e-name="percent"
 						e-form="rowform" e-ng-options="p.index as p.text for p in percents" onbeforesave="checkPercent($data)" e-required>{{showPercent(item)}}</span>
 					</td>
+					<td><span editable-text="item.m_app" e-name="m_app" e-form="rowform">{{item.m_app}}</span></td>
 					<td><span editable-text="item.sql" e-name="sql" e-form="rowform">{{item.sql}}</span></td>
 					<td>
-				        <form editable-form name="rowform" onbeforesave="savePercent($data)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == item">
+				        <form editable-form name="rowform" onbeforesave="save($data)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == item">
 				          <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
 				            保存
 				          </button>

@@ -177,7 +177,7 @@ zebraWeb.controller('flow', function($scope, $http,$filter) {
         return selected.length ? selected[0].text : 'Not set';
     };
     
-	  $scope.savePercent = function($data) {
+	  $scope.save = function($data) {
 		var selected = [];
 	
 		selected = $filter('filter')($scope.percents, {index: $data.percent});
