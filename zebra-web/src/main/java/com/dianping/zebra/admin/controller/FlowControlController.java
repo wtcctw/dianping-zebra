@@ -30,9 +30,15 @@ public class FlowControlController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Object index(String env) throws IOException {
-		return flowControlService.getAllFlowControl(env);
+		return flowControlService.getAllActiveFlowControl(env);
 	}
 
+	@RequestMapping(value="history",method = RequestMethod.GET)
+	@ResponseBody
+	public Object history(String env) throws IOException {
+		return flowControlService.getAllDeletedFlowControl(env);
+	}
+	
 	@RequestMapping(value = "save", method = RequestMethod.POST)
 	@ResponseBody
 	public Object save(String env, @RequestBody FlowControlDto dto) throws IOException {

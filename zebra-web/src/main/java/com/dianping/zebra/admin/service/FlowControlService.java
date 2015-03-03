@@ -8,7 +8,9 @@ import com.dianping.zebra.admin.dto.FlowControlDto;
  * @author hao.zhu
  */
 public interface FlowControlService {
-	Map<String, FlowControlDto> getAllFlowControl(String env);
+	Map<String, FlowControlDto> getAllActiveFlowControl(String env);
+	
+	Map<String, FlowControlDto> getAllDeletedFlowControl(String env);
 	
 	boolean containFlowControl(String env,String sqlId);
 

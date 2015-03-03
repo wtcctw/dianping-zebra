@@ -55,15 +55,17 @@ public class FlowControlServiceImpl implements FlowControlService {
 		TransactionStatus status = transactionManager.getTransaction(def);
 
 		try {
+			String appName = parseAppName(ip);
+
 			FlowControlEntity entity = new FlowControlEntity();
 			entity.setSqlId(sqlId);
 			entity.setSql(sql);
 			entity.setEnv(env);
+			entity.setApp(appName);
 
 			flowControlMapper.insertFlowControl(entity);
 
 			SystemConfig systemConfig = fetchSystemConfig(env);
-			String appName = parseAppName(ip);
 
 			SqlFlowControl sqlFlow = new SqlFlowControl();
 			sqlFlow.setSqlId(sqlId);
@@ -131,7 +133,7 @@ public class FlowControlServiceImpl implements FlowControlService {
 	}
 
 	@Override
-	public Map<String, FlowControlDto> getAllFlowControl(String env) {
+	public Map<String, FlowControlDto> getAllActiveFlowControl(String env) {
 		Map<String, FlowControlDto> result = new HashMap<String, FlowControlDto>();
 		try {
 			SystemConfig systemConfig = fetchSystemConfig(env);
@@ -202,5 +204,30 @@ public class FlowControlServiceImpl implements FlowControlService {
 			Cat.logError(e);
 			return false;
 		}
+	}
+
+	@Override
+   public Map<String, FlowControlDto> getAllDeletedFlowControl(String env) {
+		Map<String, FlowControlDto> result = new HashMap<String, FlowControlDto>();
+		try {
+			List<FlowControlEntity> findAllActiveFlowControl = flowControlMapper.findAllDeletedFlowControlByEnv(env);
+
+			for(FlowControlEntity entity : findAllActiveFlowControl){
+				FlowControlDto flowControlDto = new FlowControlDto();
+				
+				flowControlDto.setId(entity.getId());
+				flowControlDto.setSqlId(entity.getSqlId());
+				flowControlDto.setSql(entity.getSql());
+				flowControlDto.setApp(entity.getApp());
+				flowControlDto.setCreateTime(entity.getCreateTime());
+				flowControlDto.setUpdateTime(entity.getUpdateTime());
+			
+				result.put(entity.getSqlId(), flowControlDto);
+			}
+		} catch (Exception e) {
+			Cat.logError(e);
+		}
+
+		return result;
 	}
 }

@@ -129,6 +129,10 @@ zebraWeb.controller('flow', function($scope, $http,$filter) {
 		$http.get('/a/flowcontrol/?env=' + $scope.config.env).success(function(data, status, headers, config) {
 			$scope.blackList = data;
 		});
+		
+		$http.get('/a/flowcontrol/history?env=' + $scope.config.env).success(function(data, status, headers, config) {
+			$scope.history = data;
+		});
 	}
 	$scope.load();
     
@@ -205,7 +209,7 @@ zebraWeb.controller('flow', function($scope, $http,$filter) {
     $scope.addFlowControl = function() {
 	    $scope.inserted = {
 	      m_sqlId: '',
-	      m_app:'',
+	      m_app:'_global_',
 	      percent:0,
 	      sql: ''
 	    };

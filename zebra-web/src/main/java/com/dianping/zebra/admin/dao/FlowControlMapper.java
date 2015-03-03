@@ -9,6 +9,8 @@ import com.dianping.zebra.admin.entity.FlowControlEntity;
 public interface FlowControlMapper {
 
 	public List<FlowControlEntity> findAllActiveFlowControlByEnv(String env);
+	
+	public List<FlowControlEntity> findAllDeletedFlowControlByEnv(String env);
 
 	public void insertFlowControl(FlowControlEntity entity);
 

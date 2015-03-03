@@ -5,12 +5,12 @@
 			<thead>
 				<th style="width:10%">Sql ID</th>
 				<th style="width:10%">放入流量(%)</th>
-				<th style="width:10%">应用</th>
+				<th style="width:10%">作用范围</th>
 				<th style="width:55%">Sql语句</th>
 				<th style="width:25%">操作</th>
 			</thead>
 			<tbody>
-				<tr ng-repeat="item in blackList | toArray">
+				<tr ng-repeat="item in blackList | toArray ">
 					<td><span editable-text="item.m_sqlId" e-name="m_sqlId" e-form="rowform" onbeforesave="checkSqlId($data)" e-required>{{item.m_sqlId}}</span></td>
 					<td><span editable-select="item.index" e-name="percent"
 						e-form="rowform" e-ng-options="p.index as p.text for p in percents" onbeforesave="checkPercent($data)" e-required>{{showPercent(item)}}</span>
@@ -36,5 +36,29 @@
 		</table>
 
 		<button class="btn btn-default" ng-click="addFlowControl()">新增流控规则</button>
+	</div>
+</div>
+
+<h4>历史记录</h4>
+<div class="row">
+	<div class="col-xs-12">
+		<table class="table table-bordered table-hover table-condensed">
+			<thead>
+				<th style="width:3%">ID</th>
+				<th style="width:10%">Sql ID</th>
+				<th style="width:15%">作用范围</th>
+				<th style="width:52%">Sql 语句</th>
+				<th style="width:20%">创建时间</th>
+			</thead>
+				<tr ng-repeat="item in history | toArray | orderBy:'createTime'">
+					<td>{{item.id}}</td>
+					<td>{{item.m_sqlId}}</td>
+					<td>{{item.m_app}}</td>
+					<td>{{item.sql}}</td>
+					<td>{{item.createTime}}</td>
+				</tr>
+			<tbody>
+			</tbody>
+		</table>
 	</div>
 </div>

@@ -9,6 +9,8 @@ public class FlowControlEntity {
 	private String sqlId;
 
 	private String sql;
+	
+	private String app;
 
 	private String env;
 
@@ -40,6 +42,14 @@ public class FlowControlEntity {
 
 	public void setSql(String sql) {
 		this.sql = sql;
+	}
+
+	public String getApp() {
+		return app;
+	}
+
+	public void setApp(String app) {
+		this.app = app;
 	}
 
 	public String getEnv() {

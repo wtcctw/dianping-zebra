@@ -23,6 +23,7 @@ CREATE TABLE `heartbeat` (
 CREATE TABLE `flowcontrol` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `sqlId` varchar(11) NOT NULL DEFAULT '',
+  `app` varchar(100) NOT NULL DEFAULT '',
   `sql` varchar(256) DEFAULT '',
   `env` varchar(11) NOT NULL,
   `isDelete` tinyint(11) NOT NULL DEFAULT '0' COMMENT '0 is active,1 is deleted',
