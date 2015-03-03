@@ -516,7 +516,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public synchronized void setCheckoutTimeout(int checkoutTimeout) {
-		setProperty("checkoutTimeout", String.valueOf(checkoutTimeout));
+        //如果这个属性配置成了0，在数据源挂掉，并启动切换成可用的数据源后，可能会有线程无限等待，导致老的数据源无法关闭。
+        //setProperty("checkoutTimeout", String.valueOf(checkoutTimeout));
 	}
 
 	public synchronized void setConnectionCustomizerClassName(String connectionCustomizerClassName) {

@@ -59,7 +59,13 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		return chain.getGroupConnection(source, chain);
 	}
 
-	@Override
+    @Override
+    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException{
+        return chain.getRealConnection(source,sql,forceWriter,chain);
+    }
+
+
+    @Override
 	public int getOrder() {
 		return 0;
 	}

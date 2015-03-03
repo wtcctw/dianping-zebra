@@ -1,16 +1,5 @@
 package com.dianping.zebra.monitor.filter;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.sql.DataSource;
-
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -25,211 +14,241 @@ import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupStatement;
+import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.util.SqlUtils;
 import com.dianping.zebra.util.StringUtils;
-import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.site.helper.Stringizers;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * Created by Dozer on 9/5/14.
  */
 public class CatFilter extends DefaultJdbcFilter {
-	private static final String CAT_TYPE = "DAL";
+    private static final String CAT_TYPE = "DAL";
 
-	private static final String SQL_NAME = "sql_statement_name";
+    private static final String SQL_NAME = "sql_statement_name";
 
-	private static final int MAX_ALLOWED_SQL_CHAR = 1024;
+    private static final ThreadLocal<String> sql_name = new ThreadLocal<String>();
 
-	private static final int MAX_ALLOWED_TRUNCATED_SQL_NUM = 2000;
+    private static final int MAX_ALLOWED_SQL_CHAR = 1024;
 
-	private static final Map<Integer, String> SQL_LENGTH_RANGE = new LinkedHashMap<Integer, String>();
+    private static final int MAX_ALLOWED_TRUNCATED_SQL_NUM = 2000;
 
-	private static final int TOO_LARGE_SQL_LENGTH_INDEX = 3; // > 100k
+    private static final Map<Integer, String> SQL_LENGTH_RANGE = new LinkedHashMap<Integer, String>();
 
-	static {
-		SQL_LENGTH_RANGE.put(1024, "<= 1K");
-		SQL_LENGTH_RANGE.put(10240, "<= 10K");
-		SQL_LENGTH_RANGE.put(102400, "<= 100K");
-		SQL_LENGTH_RANGE.put(1024 * 1024, "<= 1M");
-		SQL_LENGTH_RANGE.put(10240 * 1024, "<= 10M");
-		SQL_LENGTH_RANGE.put(102400 * 1024, "<= 100M");
-		SQL_LENGTH_RANGE.put(Integer.MAX_VALUE, "> 100M");
-	}
+    private static final int TOO_LARGE_SQL_LENGTH_INDEX = 3; // > 100k
 
-	private static Set<String> cachedTruncatedSqls = Collections.synchronizedSet(new HashSet<String>(
-	      MAX_ALLOWED_TRUNCATED_SQL_NUM));
+    static {
+        SQL_LENGTH_RANGE.put(1024, "<= 1K");
+        SQL_LENGTH_RANGE.put(10240, "<= 10K");
+        SQL_LENGTH_RANGE.put(102400, "<= 100K");
+        SQL_LENGTH_RANGE.put(1024 * 1024, "<= 1M");
+        SQL_LENGTH_RANGE.put(10240 * 1024, "<= 10M");
+        SQL_LENGTH_RANGE.put(102400 * 1024, "<= 100M");
+        SQL_LENGTH_RANGE.put(Integer.MAX_VALUE, "> 100M");
+    }
 
-	@Override
-	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
-		chain.closeSingleDataSource(source, chain);
-		Cat.logEvent("DataSource.Destoryed", source.getConfig().getId());
-	}
+    private static Set<String> cachedTruncatedSqls = Collections.synchronizedSet(new HashSet<String>(
+            MAX_ALLOWED_TRUNCATED_SQL_NUM));
 
-	@Override
-	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
-	      boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
-		String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
-		Transaction t;
-		if (StringUtils.isBlank(sqlName)) {
-			if (isBatched) {
-				t = Cat.newTransaction("SQL", "batched");
-				t.addData(Stringizers.forJson().compact().from(batchedSql));
-			} else {
-				t = Cat.newTransaction("SQL", getCachedTruncatedSql(sql));
-				t.addData(sql);
-			}
-		} else {
-			t = Cat.newTransaction("SQL", sqlName);
-			t.addData(sql);
-		}
+    @Override
+    public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
+        chain.closeSingleDataSource(source, chain);
+        Cat.logEvent("DataSource.Destoryed", source.getConfig().getId());
+    }
 
-		try {
-			T result = chain.execute(source, conn, sql, batchedSql, isBatched, autoCommit, sqlParams, chain);
-			t.setStatus(Transaction.SUCCESS);
+    @Override
+    public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain) throws SQLException {
+        try {
+            return chain.getSingleConnection(source, chain);
+        } catch (SQLException exp) {
+            Transaction t = Cat.newTransaction("SQL", sql_name.get());
+            t.addData(sql_name.get());
 
-			return result;
-		} catch (SQLException exp) {
-			Cat.logError(exp);
-			t.setStatus(exp);
+            Cat.logEvent("SQL.Database", source.getConfig().getJdbcUrl(), "ERROR", source.getConfig().getId());
 
-			throw exp;
-		} finally {
-			try {
-				logSqlDatabaseEvent(conn);
-				logSqlMethodEvent(sql, batchedSql, isBatched, sqlParams);
-			} catch (Throwable exp) {
-				Cat.logError(exp);
-			}
+            Cat.logError(exp);
+            t.setStatus(exp);
+            t.complete();
 
-			t.complete();
-		}
-	}
+            throw exp;
+        }
+    }
 
-	@Override
-	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
-		FailOverDataSource.FindMasterDataSourceResult result = chain.findMasterFailOverDataSource(source, chain);
+    @Override
+    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException {
+        String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
+        if (StringUtils.isBlank(sqlName)) {
+            sql_name.set(getCachedTruncatedSql(sql));
+        } else {
+            sql_name.set(sqlName);
+        }
+        return chain.getRealConnection(source, sql, forceWriter, chain);
+    }
 
-		if (result != null && result.isChangedMaster()) {
-			Cat.logEvent("DAL.Master", "Found-" + result.getDsId());
-		}
+    @Override
+    public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
+                         boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
+        Transaction t;
+        if (isBatched) {
+            t = Cat.newTransaction("SQL", "batched");
+            t.addData(Stringizers.forJson().compact().from(batchedSql));
+        } else {
+            t = Cat.newTransaction("SQL", sql_name.get());
+            t.addData(sql);
+        }
 
-		return result;
-	}
+        try {
+            T result = chain.execute(source, conn, sql, batchedSql, isBatched, autoCommit, sqlParams, chain);
+            t.setStatus(Transaction.SUCCESS);
 
-	private String getCachedTruncatedSql(String sql) {
-		if (sql == null) {
-			return null;
-		}
+            return result;
+        } catch (SQLException exp) {
+            Cat.logError(exp);
+            t.setStatus(exp);
 
-		if (sql.length() > MAX_ALLOWED_SQL_CHAR) {
-			sql = sql.substring(0, MAX_ALLOWED_SQL_CHAR);
-		}
+            throw exp;
+        } finally {
+            try {
+                logSqlDatabaseEvent(conn);
+                logSqlMethodEvent(sql, batchedSql, isBatched, sqlParams);
+            } catch (Throwable exp) {
+                Cat.logError(exp);
+            }
 
-		if (!cachedTruncatedSqls.contains(sql) && cachedTruncatedSqls.size() > MAX_ALLOWED_TRUNCATED_SQL_NUM) {
-			return null;
-		} else {
-			cachedTruncatedSqls.add(sql);
-			return sql;
-		}
-	}
+            t.complete();
+        }
+    }
 
-	@Override
-	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
-		Transaction transaction = Cat.newTransaction(CAT_TYPE, "DataSource.Init-" + source.getJdbcRef());
-		try {
-			chain.initGroupDataSource(source, chain);
-			StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
-			transaction.setStatus(Message.SUCCESS);
-		} catch (RuntimeException e) {
-			Cat.logError(e);
-			transaction.setStatus(e);
-			throw e;
-		} finally {
-			transaction.complete();
-		}
-	}
+    @Override
+    public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
+            FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+        FailOverDataSource.FindMasterDataSourceResult result = chain.findMasterFailOverDataSource(source, chain);
 
-	@Override
-	public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
-		DataSource result = chain.initSingleDataSource(source, chain);
-		Cat.logEvent("DataSource.Created", source.getConfig().getId());
-		return result;
-	}
+        if (result != null && result.isChangedMaster()) {
+            Cat.logEvent("DAL.Master", "Found-" + result.getDsId());
+        }
 
-	private void logSqlDatabaseEvent(Connection conn) throws SQLException {
-		SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
-		if (singleConnection != null && conn.getMetaData() != null) {
-			Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, singleConnection.getDataSourceId());
-		}
-	}
+        return result;
+    }
 
-	private void logSqlLengthEvent(String sql) {
-		int length = (sql == null) ? 0 : sql.length();
+    private String getCachedTruncatedSql(String sql) {
+        if (sql == null) {
+            return null;
+        }
 
-		int counter = 0;
-		for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
-			if (length <= item.getKey()) {
-				if (counter < TOO_LARGE_SQL_LENGTH_INDEX) {
-					Cat.logEvent("SQL.Length", item.getValue(), Event.SUCCESS, "");
-				} else {
-					Cat.logEvent("SQL.Length", item.getValue(), "long-length-sql", String.valueOf(length));
-				}
-				return;
-			}
+        if (sql.length() > MAX_ALLOWED_SQL_CHAR) {
+            sql = sql.substring(0, MAX_ALLOWED_SQL_CHAR);
+        }
 
-			counter++;
-		}
-	}
+        if (!cachedTruncatedSqls.contains(sql) && cachedTruncatedSqls.size() > MAX_ALLOWED_TRUNCATED_SQL_NUM) {
+            return null;
+        } else {
+            cachedTruncatedSqls.add(sql);
+            return sql;
+        }
+    }
 
-	private void logSqlMethodEvent(String sql, List<String> batchedSql, boolean isBatched, Object sqlParams) {
-		String params = Stringizers.forJson().compact()
-		      .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
-		if (isBatched) {
-			if (batchedSql != null) {
-				for (String bSql : batchedSql) {
-					Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(bSql), Event.SUCCESS, params);
-					logSqlLengthEvent(sql);
-				}
-			}
-		} else {
-			if (sql != null) {
-				Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Event.SUCCESS, params);
-				logSqlLengthEvent(sql);
-			}
-		}
-	}
+    @Override
+    public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
+        Transaction transaction = Cat.newTransaction(CAT_TYPE, "DataSource.Init-" + source.getJdbcRef());
+        try {
+            chain.initGroupDataSource(source, chain);
+            StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
+            transaction.setStatus(Message.SUCCESS);
+        } catch (RuntimeException e) {
+            Cat.logError(e);
+            transaction.setStatus(e);
+            throw e;
+        } finally {
+            transaction.complete();
+        }
+    }
 
-	@Override
-	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
-		Transaction t = Cat.newTransaction(CAT_TYPE, "DataSource.Refresh-" + source.getJdbcRef());
-		Cat.logEvent("DAL.Refresh.Property", propertiesName);
-		try {
-			chain.refreshGroupDataSource(source, propertiesName, chain);
-			t.setStatus(Message.SUCCESS);
-		} catch (RuntimeException exp) {
-			Cat.logError(exp);
-			t.setStatus(exp);
-			throw exp;
-		} finally {
-			t.complete();
-		}
-	}
+    @Override
+    public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
+        DataSource result = chain.initSingleDataSource(source, chain);
+        Cat.logEvent("DataSource.Created", source.getConfig().getId());
+        return result;
+    }
 
-	@Override
-	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
-		Transaction t = Cat.newTransaction(CAT_TYPE, "FailOver");
-		try {
-			chain.switchFailOverDataSource(source, chain);
-			Cat.logEvent("DAL.FailOver", "Success");
-			t.setStatus(Message.SUCCESS);
-		} catch (RuntimeException exp) {
-			Cat.logEvent("DAL.FailOver", "Failed");
-			Cat.logError(exp);
-			t.setStatus("Fail to find any master database");
-			throw exp;
-		} finally {
-			t.complete();
-		}
-	}
+    private void logSqlDatabaseEvent(Connection conn) throws SQLException {
+        SingleConnection singleConnection = conn instanceof SingleConnection ? (SingleConnection) conn : null;
+        if (singleConnection != null && conn.getMetaData() != null) {
+            Cat.logEvent("SQL.Database", conn.getMetaData().getURL(), Event.SUCCESS, singleConnection.getDataSourceId());
+        }
+    }
+
+    private void logSqlLengthEvent(String sql) {
+        int length = (sql == null) ? 0 : sql.length();
+
+        int counter = 0;
+        for (Map.Entry<Integer, String> item : SQL_LENGTH_RANGE.entrySet()) {
+            if (length <= item.getKey()) {
+                if (counter < TOO_LARGE_SQL_LENGTH_INDEX) {
+                    Cat.logEvent("SQL.Length", item.getValue(), Event.SUCCESS, "");
+                } else {
+                    Cat.logEvent("SQL.Length", item.getValue(), "long-length-sql", String.valueOf(length));
+                }
+                return;
+            }
+
+            counter++;
+        }
+    }
+
+    private void logSqlMethodEvent(String sql, List<String> batchedSql, boolean isBatched, Object sqlParams) {
+        String params = Stringizers.forJson().compact()
+                .from(sqlParams, CatConstants.MAX_LENGTH, CatConstants.MAX_ITEM_LENGTH);
+        if (isBatched) {
+            if (batchedSql != null) {
+                for (String bSql : batchedSql) {
+                    Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(bSql), Event.SUCCESS, params);
+                    logSqlLengthEvent(sql);
+                }
+            }
+        } else {
+            if (sql != null) {
+                Cat.logEvent("SQL.Method", SqlUtils.buildSqlType(sql), Event.SUCCESS, params);
+                logSqlLengthEvent(sql);
+            }
+        }
+    }
+
+    @Override
+    public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
+        Transaction t = Cat.newTransaction(CAT_TYPE, "DataSource.Refresh-" + source.getJdbcRef());
+        Cat.logEvent("DAL.Refresh.Property", propertiesName);
+        try {
+            chain.refreshGroupDataSource(source, propertiesName, chain);
+            t.setStatus(Message.SUCCESS);
+        } catch (RuntimeException exp) {
+            Cat.logError(exp);
+            t.setStatus(exp);
+            throw exp;
+        } finally {
+            t.complete();
+        }
+    }
+
+    @Override
+    public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
+        Transaction t = Cat.newTransaction(CAT_TYPE, "FailOver");
+        try {
+            chain.switchFailOverDataSource(source, chain);
+            Cat.logEvent("DAL.FailOver", "Success");
+            t.setStatus(Message.SUCCESS);
+        } catch (RuntimeException exp) {
+            Cat.logEvent("DAL.FailOver", "Failed");
+            Cat.logError(exp);
+            t.setStatus("Fail to find any master database");
+            throw exp;
+        } finally {
+            t.complete();
+        }
+    }
 }
