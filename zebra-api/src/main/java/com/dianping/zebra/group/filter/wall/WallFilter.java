@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
@@ -23,6 +24,8 @@ import com.dianping.zebra.util.StringUtils;
  */
 public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
+	
+	private static final String SQL_NAME = "sql_statement_name";
 
 	private Map<String, String> sqlIDCache = new ConcurrentHashMap<String, String>(1024);
 
@@ -44,9 +47,9 @@ public class WallFilter extends DefaultJdbcFilter {
 		return random.nextInt(100);
 	}
 
-	protected String generateId(SingleConnection conn, String sql) throws NoSuchAlgorithmException {
-		String token = String.format("/*%s*/%s", conn.getDataSourceId(), sql);
-		String resultId = sqlIDCache.get(String.format("/*%s*/%s", conn.getDataSourceId(), sql));
+	protected String generateId(SingleConnection conn, String sqlName) throws NoSuchAlgorithmException {
+		String token = String.format("/*%s*/%s", conn.getDataSourceId(), sqlName);
+		String resultId = sqlIDCache.get(String.format("/*%s*/%s", conn.getDataSourceId(), sqlName));
 
 		if (resultId != null) {
 			return resultId;
@@ -88,10 +91,11 @@ public class WallFilter extends DefaultJdbcFilter {
 		if (chain != null) {
 			sql = chain.sql(conn, sql, isPreparedStmt, chain);
 		}
-
-		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sql)) {
+		String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
+		
+		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sqlName)) {
 			try {
-				String id = generateId(conn, sql);
+				String id = generateId(conn, sqlName);
 
 				checkFlowControl(id);
 

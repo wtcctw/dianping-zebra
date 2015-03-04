@@ -67,6 +67,8 @@ public class CatFilterTest {
        ds.setFilter("wall,cat");
        ds.init();
        
+ 		ExecutionContextHolder.getContext().add("sql_statement_name", "test");
+
        new Sql(ds.getConnection()).execute("select 1", new Object[0]);
  	}
 }
