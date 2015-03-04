@@ -1,13 +1,15 @@
 package com.dianping.zebra.monitor.filter;
 
-import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
 import groovy.sql.Sql;
+
+import java.sql.SQLException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.sql.SQLException;
+import com.dianping.avatar.tracker.ExecutionContextHolder;
+import com.dianping.zebra.Constants;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
 
 /**
  * Created by Dozer on 9/9/14.
@@ -56,4 +58,15 @@ public class CatFilterTest {
     public void test_sql_fail() throws SQLException {
         new Sql(ds.getConnection()).execute("select * from xxx");
     }
+    
+    @Test(expected = SQLException.class)
+ 	public void test_sql_rejected_by_flow_control() throws SQLException {
+   	 GroupDataSource ds = new GroupDataSource();
+       ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
+       ds.setJdbcRef("sample.ds.v2");
+       ds.setFilter("wall,cat");
+       ds.init();
+       
+       new Sql(ds.getConnection()).execute("select 1", new Object[0]);
+ 	}
 }

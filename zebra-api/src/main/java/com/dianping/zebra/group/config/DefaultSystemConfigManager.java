@@ -15,7 +15,7 @@ import com.dianping.zebra.util.StringUtils;
 
 public class DefaultSystemConfigManager extends AbstractConfigManager implements SystemConfigManager {
 
-	private static final String DEFAULT_LOCAL_CONFIG = "zebra.system";
+	public static final String DEFAULT_LOCAL_CONFIG = "zebra.system";
 
 	private SystemConfig systemConfig = new SystemConfig();
 

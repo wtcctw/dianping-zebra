@@ -2,13 +2,13 @@ package com.dianping.zebra.group.config;
 
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.LionConfigService;
-import com.dianping.zebra.config.LocalConfigService;
+import com.dianping.zebra.config.PropertyConfigService;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
 public final class SystemConfigManagerFactory {
 
 	/*
-	 * SystemConfigManagerFactory has only one instance of SystemConfigManager, which differ from DataSourceConfigManagerFactory who
+	 * SystemConfigManagerFactory has only one instance of SystemConfigManager, which differs from DataSourceConfigManagerFactory who
 	 * has its own DataSourceConfigManager for each GroupDataSource
 	 */
 	private static SystemConfigManager systemConfigManager;
@@ -21,12 +21,14 @@ public final class SystemConfigManagerFactory {
 			synchronized (SystemConfigManagerFactory.class) {
 				if (systemConfigManager == null) {
 					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
-						LocalConfigService configService = new LocalConfigService();
+						PropertyConfigService configService = new PropertyConfigService(DefaultSystemConfigManager.DEFAULT_LOCAL_CONFIG);
 						configService.init();
+						
 						systemConfigManager = new DefaultSystemConfigManager(configService);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
 						LionConfigService configService = new LionConfigService();
 						configService.init();
+						
 						systemConfigManager = new DefaultSystemConfigManager(configService);
 					} else {
 						throw new IllegalConfigException(String.format("illegal systemConfigManagerType[%s]",

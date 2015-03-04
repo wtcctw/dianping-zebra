@@ -27,7 +27,7 @@ public class LocalConfigServiceTest {
 	@Before
 	public void setup() throws IOException {
 		props = loadProperties(resourceId);
-		localConfigService = new LocalConfigService(resourceId);
+		localConfigService = new PropertyConfigService(resourceId);
 		localConfigService.init();
 	}
 
