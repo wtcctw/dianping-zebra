@@ -148,6 +148,10 @@ public class ShardDataSource extends AbstractDataSource {
         this.configService = configService;
     }
 
+    public DataSource getOriginDataSource() {
+        return originDataSource;
+    }
+
     public DataSourceRouter getRouter() {
         return router;
     }
