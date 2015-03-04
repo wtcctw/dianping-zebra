@@ -58,8 +58,12 @@ public class ShardDataSource extends AbstractDataSource {
         return getConnection(null, null);
     }
 
-    @Override
-    public Connection getConnection(String username, String password) throws SQLException {
+    public Connection getConnection(boolean switchOn) throws SQLException {
+        return getConnection(null, null, switchOn);
+    }
+
+
+    public Connection getConnection(String username, String password, boolean switchOn) throws SQLException {
         if (switchOn) {
             ShardConnection connection = new ShardConnection(username, password);
             connection.setRouter(router);
@@ -72,6 +76,11 @@ public class ShardDataSource extends AbstractDataSource {
                 throw new SQLException("cannot get connections from originDataSource because originDataSource is null.");
             }
         }
+    }
+
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        return getConnection(username, password, this.switchOn);
     }
 
     public void init() {
