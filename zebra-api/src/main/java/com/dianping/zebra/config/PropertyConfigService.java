@@ -21,12 +21,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class LocalConfigService implements ConfigService {
+public class PropertyConfigService implements ConfigService {
 
-	private static final Logger logger = LogManager.getLogger(LocalConfigService.class);
+	private static final Logger logger = LogManager.getLogger(PropertyConfigService.class);
 	
-	public static final String DEFAULT_RESOURCE_FILE = "zebra.system";
-
 	private String resourceFileName;
 
 	private File resourceFile;
@@ -37,11 +35,7 @@ public class LocalConfigService implements ConfigService {
 
 	private AtomicLong lastModifiedTime = new AtomicLong(-1);
 
-	public LocalConfigService() {
-		this(DEFAULT_RESOURCE_FILE);
-	}
-	
-	public LocalConfigService(String resourceId) {
+	public PropertyConfigService(String resourceId) {
 		this.resourceFileName = resourceId + ".properties";
 	}
 

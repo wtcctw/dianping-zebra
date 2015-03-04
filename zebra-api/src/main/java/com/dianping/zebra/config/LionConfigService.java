@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LionConfigService implements ConfigService {
-	private final Logger logger = LogManager.getLogger(this.getClass());
+	private static final Logger logger = LogManager.getLogger(LionConfigService.class);
 
 	private List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 

@@ -10,6 +10,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.JdbcFilter;
@@ -26,7 +27,8 @@ public class WallFilterTest {
 		config.setId("test-write-1");
 		SingleConnection conn = new SingleConnection(null, config, null, Lists.<JdbcFilter> newArrayList(filter));
 
-		Assert.assertEquals("/*id:ec262bf8*/select * from test", filter.sql(conn, "select * from test", true, null));
+		ExecutionContextHolder.getContext().add("sql_statement_name", "test");
+		Assert.assertEquals("/*id:a2f3e453*/select * from test", filter.sql(conn, "select * from test", true, null));
 	}
 
 	@Test(expected = SQLException.class)
@@ -38,6 +40,7 @@ public class WallFilterTest {
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
 		SingleConnection conn = new SingleConnection(null, config, null, Lists.<JdbcFilter> newArrayList(filter));
+		ExecutionContextHolder.getContext().add("sql_statement_name", "test");
 
 		filter.sql(conn, "select * from Test", true, null);
 	}
@@ -62,7 +65,7 @@ public class WallFilterTest {
 		
 		Assert.assertEquals(filter.getFlowControl().size(), 2);
 		Assert.assertTrue(filter.getFlowControl().containsKey("ec262bf8"));
-		Assert.assertTrue(filter.getFlowControl().containsKey("9a5f4d8a"));
+		Assert.assertTrue(filter.getFlowControl().containsKey("a2f3e453"));
 	}
 	
 	public class MockWallFilter extends WallFilter{

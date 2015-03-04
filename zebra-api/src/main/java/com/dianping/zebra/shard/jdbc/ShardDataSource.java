@@ -16,7 +16,7 @@ import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LionKey;
-import com.dianping.zebra.config.LocalConfigService;
+import com.dianping.zebra.config.PropertyConfigService;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.router.ConfigServiceDataSourceRouterFactory;
@@ -89,7 +89,7 @@ public class ShardDataSource extends AbstractDataSource {
                 if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equals(configType)) {
                     configService = new LionConfigService();
                 } else {
-                    configService = new LocalConfigService(ruleName);
+                    configService = new PropertyConfigService(ruleName);
                 }
             }
 

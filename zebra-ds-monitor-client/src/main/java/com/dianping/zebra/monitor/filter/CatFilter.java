@@ -67,14 +67,12 @@ public class CatFilter extends DefaultJdbcFilter {
 			return chain.getSingleConnection(source, chain);
 		} catch (SQLException exp) {
 			Transaction t = Cat.newTransaction("SQL", sql_name.get());
-			t.addData(sql_name.get());
 
 			Cat.logEvent("SQL.Database", source.getConfig().getJdbcUrl(), "ERROR", source.getConfig().getId());
-
 			Cat.logError(exp);
+			
 			t.setStatus(exp);
 			t.complete();
-
 			throw exp;
 		}
 	}
@@ -88,6 +86,7 @@ public class CatFilter extends DefaultJdbcFilter {
 		} else {
 			sql_name.set(sqlName);
 		}
+		
 		return chain.getRealConnection(source, sql, forceWriter, chain);
 	}
 
