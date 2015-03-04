@@ -9,6 +9,16 @@
 		<property name="jdbcUrl" value="${zebra.server.jdbc.url}" />
 		<property name="user" value="${zebra.server.jdbc.username}" />
 		<property name="password" value="${zebra.server.jdbc.password}" />
+		<property name="maxIdleTime" value="1800" />
+	    <property name="idleConnectionTestPeriod" value="60" />
+	    <property name="acquireRetryAttempts" value="3" />
+	    <property name="acquireRetryDelay" value="300" />
+	    <property name="maxStatements" value="0" />
+	    <property name="maxStatementsPerConnection" value="100" />
+	    <property name="numHelperThreads" value="6" />
+	    <property name="maxAdministrativeTaskTime" value="5" />
+	    <property name="preferredTestQuery" value="SELECT 1" />
+	    <property name="checkoutTimeout" value="1000" />
 	</bean>
 
 	<bean id="zebraSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
