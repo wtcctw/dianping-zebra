@@ -54,51 +54,53 @@ public class MigrateWorker {
             while (true) {
                 TaskConfig task = taskLoader.loadConfig();
 
-                String selectSql = SqlBuilder.getSelect(task);
-                int pageIndex = 0;
-                while (task.getPageSize() * pageIndex < task.getKeyEnd() - task.getKeyStart()) {
-                    Connection sConn = null;
-                    PreparedStatement sPrep = null;
-                    ResultSet resultSet = null;
-
-                    try {
-                        sConn = shardDataSource.getConnection(false);
-                        sPrep = sConn.prepareStatement(selectSql);
-                        sPrep.setInt(1, task.getKeyStart());
-                        sPrep.setInt(2, task.getKeyEnd());
-                        sPrep.setInt(3, task.getPageSize() * pageIndex++);
-                        sPrep.setInt(4, task.getPageSize());
-                        resultSet = sPrep.executeQuery();
-
-                        String insertSql = SqlBuilder.getInsert(task, resultSet);
-                        int columnCount = resultSet.getMetaData().getColumnCount();
-
-                        while (resultSet.next()) {
-                            Connection iConn = null;
-                            PreparedStatement iPrep = null;
-
-                            try {
-                                iConn = shardDataSource.getConnection(true);
-                                iPrep = iConn.prepareStatement(insertSql);
-                                for (int k = 1; k <= columnCount; k++) {
-                                    iPrep.setObject(k, resultSet.getObject(k));
-                                }
-                                iPrep.executeUpdate();
-                            } finally {
-                                JDBCUtils.closeAll(iPrep, iConn);
-                            }
-                        }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    } finally {
-                        JDBCUtils.closeAll(resultSet, sPrep, sConn);
-                    }
-                }
-
                 if (TaskConfig.TASK_TYPE_MIGRATE.equals(task.getTaskType())) {
-
+                    processMigrate(task);
                 } else {
 
+                }
+            }
+        }
+
+        private void processMigrate(TaskConfig task) {
+            String selectSql = SqlBuilder.getSelect(task);
+            int pageIndex = 0;
+            while (task.getPageSize() * pageIndex < task.getKeyEnd() - task.getKeyStart()) {
+                Connection sConn = null;
+                PreparedStatement sPrep = null;
+                ResultSet resultSet = null;
+
+                try {
+                    sConn = shardDataSource.getConnection(false);
+                    sPrep = sConn.prepareStatement(selectSql);
+                    sPrep.setInt(1, task.getKeyStart());
+                    sPrep.setInt(2, task.getKeyEnd());
+                    sPrep.setInt(3, task.getPageSize() * pageIndex++);
+                    sPrep.setInt(4, task.getPageSize());
+                    resultSet = sPrep.executeQuery();
+
+                    String insertSql = SqlBuilder.getInsert(task, resultSet);
+                    int columnCount = resultSet.getMetaData().getColumnCount();
+
+                    while (resultSet.next()) {
+                        Connection iConn = null;
+                        PreparedStatement iPrep = null;
+
+                        try {
+                            iConn = shardDataSource.getConnection(true);
+                            iPrep = iConn.prepareStatement(insertSql);
+                            for (int k = 1; k <= columnCount; k++) {
+                                iPrep.setObject(k, resultSet.getObject(k));
+                            }
+                            iPrep.executeUpdate();
+                        } finally {
+                            JDBCUtils.closeAll(iPrep, iConn);
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                } finally {
+                    JDBCUtils.closeAll(resultSet, sPrep, sConn);
                 }
             }
         }
