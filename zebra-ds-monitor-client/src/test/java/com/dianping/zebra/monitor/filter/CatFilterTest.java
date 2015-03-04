@@ -4,9 +4,13 @@ import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import groovy.sql.Sql;
+import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -38,6 +42,22 @@ public class CatFilterTest {
         ds.setFilter("!wall,cat");
         ds.init();
         new Sql(ds.getConnection()).execute("select 1");
+    }
+
+    @Test
+    public void test_limit() throws SQLException {
+        Connection conn = ds.getConnection();
+
+        PreparedStatement prep = conn.prepareStatement(Constants.SQL_FORCE_WRITE_HINT + "select * from persons limit ?,?");
+        prep.setInt(1, 0);
+        prep.setInt(2, 1);
+
+        ResultSet resultSet = prep.executeQuery();
+        Assert.assertTrue(resultSet.next());
+
+        resultSet.close();
+        prep.close();
+        conn.close();
     }
 
     @Test

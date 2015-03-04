@@ -2,7 +2,10 @@ package com.dianping.zebra.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 /**
@@ -46,5 +49,32 @@ public class JDBCUtils {
 
     public static boolean isReadOnlyException(SQLException e) {
         return e.getErrorCode() == READ_ONLY_ERROR_CODE && e.getMessage().contains(READ_ONLY_ERROR_MESSAGE);
+    }
+
+    public static void closeAll(Statement statement, Connection connection) {
+        closeAll(null, statement, connection);
+    }
+
+    public static void closeAll(ResultSet resultSet, Statement statement, Connection connection) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException ignore) {
+            }
+        }
+
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException ignore) {
+            }
+        }
+
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException ignore) {
+            }
+        }
     }
 }

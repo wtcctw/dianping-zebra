@@ -7,7 +7,7 @@ package com.dianping.zebra.migrate.task;
  */
 public class TaskLoader {
     public TaskConfig loadConfig() {
-        return null;
+        return new TaskConfig();
     }
 
     public void uploadPorcess(int taskId) {

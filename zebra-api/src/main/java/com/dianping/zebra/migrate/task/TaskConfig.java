@@ -6,7 +6,14 @@ package com.dianping.zebra.migrate.task;
  * http://www.dozer.cc
  */
 public class TaskConfig {
+
+    public final static String TASK_TYPE_MIGRATE = "migrate";
+
+    public final static String TASK_TYPE_VERIFY= "verify";
+
     private int taskId;
+
+    private String tableName;
 
     private String keyName;
 
@@ -17,9 +24,27 @@ public class TaskConfig {
     private int keyEnd;
 
     //limit 1000
-    private int limitPerQuery;
+    private int pageSize;
 
     private int sleepSecondsAfterPerQuery;
+
+    private String taskType;
+
+    public String getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(String taskType) {
+        this.taskType = taskType;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
     public int getTaskId() {
         return taskId;
@@ -53,12 +78,12 @@ public class TaskConfig {
         this.keyEnd = keyEnd;
     }
 
-    public int getLimitPerQuery() {
-        return limitPerQuery;
+    public int getPageSize() {
+        return pageSize;
     }
 
-    public void setLimitPerQuery(int limitPerQuery) {
-        this.limitPerQuery = limitPerQuery;
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
     }
 
     public int getSleepSecondsAfterPerQuery() {
