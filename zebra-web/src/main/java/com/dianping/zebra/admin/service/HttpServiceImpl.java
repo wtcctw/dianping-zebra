@@ -47,7 +47,6 @@ public class HttpServiceImpl implements HttpService {
 		String result = "";
 		try {
 			Cat.logEvent("Url", url);
-			Cat.logEvent("Params", params);
 			URL realUrl = new URL(url);
 			// 打开和URL之间的连接
 			URLConnection conn = realUrl.openConnection();
