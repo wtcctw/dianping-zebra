@@ -56,7 +56,8 @@
 		<property name="maxStatementsPerConnection" value="100" />
 		<property name="numHelperThreads" value="6" />
 		<property name="maxAdministrativeTaskTime" value="5" />
-		<property name="preferredTestQuery" value="SELECT 1" />   
+		<property name="preferredTestQuery" value="SELECT 1" />  
+        <property name="checkoutTimeout" value="1000" />
 	</bean>
 
 ### 在 Spring 中使用默认 DataSource 的配置
