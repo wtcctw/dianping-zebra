@@ -135,7 +135,7 @@ zebraWeb.controller('shard-edit', function ($scope, $http, name, close) {
 
 zebraWeb.controller('flow', function ($scope, $http, $filter) {
     $scope.load = function () {
-        $http.get('/a/flowcontrol/?env=' + $scope.config.env).success(function (data, status, headers, config) {
+        $http.get('/a/flowcontrol?env=' + $scope.config.env).success(function (data, status, headers, config) {
             $scope.blackList = data;
         });
 

@@ -29,7 +29,7 @@
     <filter-mapping>
         <filter-name>AuthorizationFilter</filter-name>
         <url-pattern>/a/config/*</url-pattern>
-        <url-pattern>/a/blacklist/*</url-pattern>
+        <url-pattern>/a/flow/*</url-pattern>
         <url-pattern>/a/merge/*</url-pattern>
         <url-pattern>/a/update/*</url-pattern>
     </filter-mapping>
