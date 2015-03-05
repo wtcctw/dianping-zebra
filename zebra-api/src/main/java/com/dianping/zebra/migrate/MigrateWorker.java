@@ -41,7 +41,9 @@ public class MigrateWorker {
     }
 
     public void close() {
-        this.workerThread.interrupt();
+        if (this.workerThread != null) {
+            this.workerThread.interrupt();
+        }
     }
 
     public void setShardDataSource(ShardDataSource shardDataSource) {

@@ -1,11 +1,19 @@
 package com.dianping.zebra.migrate;
 
+import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionKey;
+import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.dianping.zebra.util.ConfigServiceMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MigrateWorkerTest {
     MigrateWorker migrateWorker;
@@ -21,6 +29,9 @@ public class MigrateWorkerTest {
         shardDataSource = new ShardDataSource();
         shardDataSource.setRuleName(rule);
         shardDataSource.setConfigService(configService);
+
+        initDataSourcePool();
+
         shardDataSource.init();
 
         migrateWorker = new MigrateWorker();
@@ -40,10 +51,33 @@ public class MigrateWorkerTest {
 
     }
 
+    public void initDataSourcePool() {
+        GroupDataSourceExtend dsOrigin = new GroupDataSourceExtend();
+        dsOrigin.setJdbcRef("test");
+        dsOrigin.setDataSourceConfigManager(configService);
+        dsOrigin.init();
+
+        GroupDataSourceExtend ds0 = new GroupDataSourceExtend();
+        ds0.setJdbcRef("test0");
+        ds0.setDataSourceConfigManager(configService);
+        ds0.init();
+
+        GroupDataSourceExtend ds1 = new GroupDataSourceExtend();
+        ds1.setJdbcRef("test1");
+        ds1.setDataSourceConfigManager(configService);
+        ds1.init();
+
+        shardDataSource.setOriginDataSource(dsOrigin);
+        Map<String, DataSource> dsPool = new HashMap<String, DataSource>();
+        dsPool.put("test0", ds0);
+        dsPool.put("test1", ds1);
+        shardDataSource.setDataSourcePool(dsPool);
+    }
+
     public void initConfigs() {
         configService = new ConfigServiceMock();
         configService
-                .addProperty(LionKey.getShardConfigKey(rule), "{\"tableShardConfigs\": [{\"tableName\": \"test\",\"dimensionConfigs\": [{\"dbRule\": \"(#id# % 2)\",\"dbIndexes\": \"test0,test1\",\"tbRule\": \"(#id# /2 % 2))\",\"tbSuffix\": \"alldb:[_0,_1]\",\"isMaster\": true,\"exceptions\": [],}],\"generatedPK\": \"pk\"}]}")
+                .addProperty(LionKey.getShardConfigKey(rule), "{\"tableShardConfigs\":[{\"tableName\":\"test\",\"dimensionConfigs\":[{\"dbRule\":\"(#id# % 2)\",\"dbIndexes\":\"test0,test1\",\"tbRule\":\"((#id# / 2).toLong() % 2)\",\"tbSuffix\":\"everydb:[_0,_1]\",\"isMaster\":true,\"exceptions\":[]}],\"generatedPK\":\"pk\"}]}")
                 .addProperty(LionKey.getShardOriginDatasourceKey(rule), "test")
                 .addProperty(LionKey.getGroupDsConfigKey("test"), "(test-1),(test-1:1)") // origin
                 .addProperty(LionKey.getGroupDsConfigKey("test0"), "(test0-1),(test0-1:1)") // shard1
@@ -70,5 +104,18 @@ public class MigrateWorkerTest {
                 .addProperty(LionKey.getDsActiveConfigKey("test1-1"), "true") // origin test-1
                 .addProperty("ds.test1-1.jdbc.testReadOnlySql", "call readonly()") // origin test-1
         ;
+    }
+
+    public class GroupDataSourceExtend extends GroupDataSource {
+        @Override
+        protected void initConfig() {
+            this.groupConfig = buildGroupConfig();
+            this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType);
+        }
+
+        public void setDataSourceConfigManager(ConfigService configService) {
+            this.dataSourceConfigManager = new DefaultDataSourceConfigManager(jdbcRef, configService);
+            this.dataSourceConfigManager.init();
+        }
     }
 }
