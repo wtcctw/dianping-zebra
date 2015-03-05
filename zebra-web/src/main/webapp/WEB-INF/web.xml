@@ -28,10 +28,12 @@
     </filter>
     <filter-mapping>
         <filter-name>AuthorizationFilter</filter-name>
-        <url-pattern>/a/config/*</url-pattern>
-        <url-pattern>/a/flow/*</url-pattern>
+        <url-pattern>/a/config/updateds</url-pattern>
+        <url-pattern>/a/config/create</url-pattern>
+        <url-pattern>/a/flowcontrol/*</url-pattern>
         <url-pattern>/a/merge/*</url-pattern>
         <url-pattern>/a/update/*</url-pattern>
+        <url-pattern>/a/shard/*</url-pattern>
     </filter-mapping>
     <context-param>
         <param-name>contextConfigLocation</param-name>

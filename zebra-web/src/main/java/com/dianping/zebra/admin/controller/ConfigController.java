@@ -136,13 +136,13 @@ public class ConfigController {
     }
 
     private String getUrl(String env, String key, String host) {
-        return host + "/a/config/test&key=" + key + "&env=" + env;
+        return host + "/a/config/test?key=" + key + "&env=" + env;
     }
 
     private String getHost(String env) throws Exception {
         String host = "";
         if ("alpha".equals(env)) {
-            host = "http://192.168.214.228:8080";
+            host = "http://192.168.79.35:8080";
         } else if ("qa".equals(env)) {
             host = "http://zebra-web01.beta:8080";
         } else if ("prelease".equals(env)) {
