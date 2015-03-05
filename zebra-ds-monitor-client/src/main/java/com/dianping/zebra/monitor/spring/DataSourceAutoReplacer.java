@@ -58,8 +58,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private static final String DPDL_CLASS_NAME = "com.dianping.dpdl.sql.DPDataSource";
 
-	private static final String GROUP_CLASS_NAME = "com.dianping.zebra.group.jdbc.GroupDataSource";
-
+    private static final String GROUP_CLASS_NAME = "com.dianping.zebra.group.jdbc.GroupDataSource";
+    
 	private static final String UPLOAD_DS_INFO_KEY = "zebra.server.heartbeat.url";
 
 	// datasource set

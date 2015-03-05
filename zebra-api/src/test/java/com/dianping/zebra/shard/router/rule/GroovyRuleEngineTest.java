@@ -31,11 +31,10 @@ public class GroovyRuleEngineTest {
 
     @Test
     public void testCRC32() {
-        RuleEngine ruleEngine = new GroovyRuleEngine("crc32(#ID#)");
+        RuleEngine ruleEngine = new GroovyRuleEngine("(crc32(#bid#)/10).toLong()%10");
         Map<String, Object> valMap = new HashMap<String, Object>();
-        valMap.put("ID", 1889354660);
+        valMap.put("bid", "2127114697");
         Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
         System.out.println(retVal);
-        Assert.assertTrue(retVal.equals(2177129995l));
     }
 }

@@ -1,5 +1,6 @@
 package com.dianping.zebra.shard;
 
+import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.dianping.zebra.shard.jdbc.ZebraMultiDBBaseTestCase;
 import com.google.common.collect.Lists;
 import groovy.sql.GroovyRowResult;
@@ -57,6 +58,20 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     public void test_insert_without_key() throws Exception {
         executeInsert(getZebraDs().getConnection(), "insert into test ( name, score, type, classid) values ('xxx', 1, 'a', 0)");
     }
+
+
+//    @Test
+//    public void test_welife() throws SQLException {
+//        ShardDataSource sds = new ShardDataSource();
+//        sds.setRuleName("welife");
+//        sds.init();
+//
+//        List<List<Object>> result = executeQuery(sds.getConnection(), "select * from welife_users where bid = 2127114697 limit 1");
+//
+//        System.out.println(result);
+//
+//        sds.close();
+//    }
 
     @Test
     public void test_insert_with_key() throws Exception {

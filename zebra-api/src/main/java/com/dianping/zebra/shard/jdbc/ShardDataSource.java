@@ -64,23 +64,36 @@ public class ShardDataSource extends AbstractDataSource {
 
 
     public Connection getConnection(String username, String password, boolean switchOn) throws SQLException {
-        if (switchOn) {
+        if (switchOn || originDataSource == null) {
             ShardConnection connection = new ShardConnection(username, password);
             connection.setRouter(router);
-
             return connection;
         } else {
-            if (originDataSource != null) {
-                return originDataSource.getConnection();
-            } else {
-                throw new SQLException("cannot get connections from originDataSource because originDataSource is null.");
-            }
+            return originDataSource.getConnection();
         }
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
         return getConnection(username, password, this.switchOn);
+    }
+
+    public void close() {
+        for (DataSource ds : dataSourcePool.values()) {
+            if (ds instanceof GroupDataSource) {
+                try {
+                    ((GroupDataSource) ds).close();
+                } catch (SQLException ignore) {
+                }
+            }
+        }
+
+        if (originDataSource instanceof GroupDataSource) {
+            try {
+                ((GroupDataSource) originDataSource).close();
+            } catch (SQLException ignore) {
+            }
+        }
     }
 
     public void init() {

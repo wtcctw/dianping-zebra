@@ -82,7 +82,7 @@ public class DataSourceTest extends ZebraBaseTestCase {
     }
 
     protected String[] getSupportedOps() {
-        return new String[]{"getOriginDataSource", "setConfigService", "getRouter", "setRuleName", "setConfigType", "setSwitchOn", "getConnection", "init", "setDataSourcePool", "setSyncEventNotifier", "getEventNotifier",
+        return new String[]{"close", "getOriginDataSource", "setConfigService", "getRouter", "setRuleName", "setConfigType", "setSwitchOn", "getConnection", "init", "setDataSourcePool", "setSyncEventNotifier", "getEventNotifier",
                 "setRouterFactory"};
     }
 
