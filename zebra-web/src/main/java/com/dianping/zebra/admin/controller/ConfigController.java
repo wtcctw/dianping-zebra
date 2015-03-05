@@ -136,7 +136,7 @@ public class ConfigController {
     }
 
     private String getUrl(String env, String key, String host) {
-        return host + "/a/config/test&key=" + key + "&env=" + env;
+        return host + "/a/config/test?key=" + key + "&env=" + env;
     }
 
     private String getHost(String env) throws Exception {
