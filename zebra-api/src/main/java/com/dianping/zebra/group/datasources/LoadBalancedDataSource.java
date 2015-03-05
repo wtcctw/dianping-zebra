@@ -8,6 +8,7 @@ import com.dianping.zebra.group.router.DataSourceRouter;
 import com.dianping.zebra.group.router.RouterContext;
 import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.router.WeightDataSourceRouter;
+import com.dianping.zebra.group.util.SqlAliasManager;
 import com.dianping.zebra.util.JDBCUtils;
 
 import java.sql.Connection;
@@ -64,7 +65,13 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 			while (tmpRetryTimes++ < this.retryTimes) {
 				try {
-					return this.dataSources.get(target.getId()).getConnection();
+					Connection conn = this.dataSources.get(target.getId()).getConnection();
+					
+					if(tmpRetryTimes > 0){
+						SqlAliasManager.setRetrySqlAlias();
+					}
+					
+					return conn;
 				} catch (SQLException e) {
 					exceptions.add(e);
 					excludeTargets.add(target);

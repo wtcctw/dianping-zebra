@@ -1,27 +1,25 @@
 package com.dianping.zebra.monitor.filter;
 
-import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
 import groovy.sql.Sql;
+
+import java.sql.SQLException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.sql.SQLException;
+import com.dianping.avatar.tracker.ExecutionContextHolder;
+import com.dianping.zebra.Constants;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
 
 /**
  * Created by Dozer on 9/9/14.
  */
 
 public class CatFilterTest {
-    private static GroupDataSource ds = new GroupDataSource();
 
     @BeforeClass
     public static void init() throws SQLException {
-        ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
-        ds.setJdbcRef("sample.ds.v2");
-        ds.setFilter("!wall");
-        ds.init();
+   	  GroupDataSource ds = createDs();
 
         Sql sql = new Sql(ds.getConnection());
         sql.execute("CREATE TABLE Persons\n" + "(\n" + "Id int,\n" + "LastName varchar(255),\n"
@@ -29,6 +27,15 @@ public class CatFilterTest {
         sql.execute("insert into persons (id,lastname,firstname,address,city) values (1,'','','','')");
     }
 
+    public static GroupDataSource createDs(){
+   	 GroupDataSource ds = new GroupDataSource();
+       ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
+       ds.setJdbcRef("sample.ds.v2");
+       ds.setFilter("!wall");
+       ds.init();
+       
+       return ds;
+    }
 
     @Test(expected = SQLException.class, timeout = 30000)
     public void test_connect_fail() throws SQLException {
@@ -41,12 +48,29 @@ public class CatFilterTest {
     }
 
     @Test
+    public void test_connect_retry() throws SQLException {
+        GroupDataSource ds = new GroupDataSource();
+        ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
+        ds.setJdbcRef("sample.ds.retry");
+        ds.setFilter("cat");
+        ds.init();
+        
+        ExecutionContextHolder.getContext().add("sql_statement_name", "testPreparedStatementQuery");
+
+        new Sql(ds.getConnection()).execute("select 1");
+    }
+    
+    @Test
     public void test_sql_success() throws SQLException {
+   	 GroupDataSource ds = createDs();
+
         new Sql(ds.getConnection()).execute(Constants.SQL_FORCE_WRITE_HINT + "select * from Persons");
     }
 
     @Test
     public void test_sql_success1() throws SQLException {
+   	 GroupDataSource ds = createDs();
+
         ExecutionContextHolder.getContext().add("sql_statement_name", "testPreparedStatementQuery");
 
         new Sql(ds.getConnection()).execute(Constants.SQL_FORCE_WRITE_HINT + "select * from Persons");
@@ -54,6 +78,8 @@ public class CatFilterTest {
 
     @Test(expected = Exception.class)
     public void test_sql_fail() throws SQLException {
+   	 GroupDataSource ds = createDs();
+
         new Sql(ds.getConnection()).execute("select * from xxx");
     }
 }

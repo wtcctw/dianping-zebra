@@ -2,11 +2,12 @@ package com.dianping.zebra.monitor.filter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
-import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Event;
@@ -20,9 +21,9 @@ import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupStatement;
+import com.dianping.zebra.group.util.SqlAliasManager;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.util.SqlUtils;
-import com.dianping.zebra.util.StringUtils;
 import com.site.helper.Stringizers;
 
 /**
@@ -30,14 +31,6 @@ import com.site.helper.Stringizers;
  */
 public class CatFilter extends DefaultJdbcFilter {
 	private static final String CAT_TYPE = "DAL";
-
-	private static final String SQL_NAME = "sql_statement_name";
-
-	private static final ThreadLocal<String> sql_name = new ThreadLocal<String>();
-
-	private static final int MAX_ALLOWED_SQL_CHAR = 1024;
-
-	private static final int MAX_ALLOWED_TRUNCATED_SQL_NUM = 2000;
 
 	private static final Map<Integer, String> SQL_LENGTH_RANGE = new LinkedHashMap<Integer, String>();
 
@@ -53,9 +46,6 @@ public class CatFilter extends DefaultJdbcFilter {
 		SQL_LENGTH_RANGE.put(Integer.MAX_VALUE, "> 100M");
 	}
 
-	private static Set<String> cachedTruncatedSqls = Collections.synchronizedSet(new HashSet<String>(
-            MAX_ALLOWED_TRUNCATED_SQL_NUM));
-
 	@Override
 	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
 		chain.closeSingleDataSource(source, chain);
@@ -67,7 +57,7 @@ public class CatFilter extends DefaultJdbcFilter {
 		try {
 			return chain.getSingleConnection(source, chain);
 		} catch (SQLException exp) {
-			Transaction t = Cat.newTransaction("SQL", sql_name.get());
+			Transaction t = Cat.newTransaction("SQL", SqlAliasManager.getSqlAlias());
 
 			Cat.logEvent("SQL.Database", source.getConfig().getJdbcUrl(), "ERROR", source.getConfig().getId());
 			Cat.logError(exp);
@@ -81,12 +71,7 @@ public class CatFilter extends DefaultJdbcFilter {
 	@Override
 	public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain)
 	      throws SQLException {
-		String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
-		if (StringUtils.isBlank(sqlName)) {
-			sql_name.set(getCachedTruncatedSql(sql));
-		} else {
-			sql_name.set(sqlName);
-		}
+		SqlAliasManager.setSqlAlias(sql);
 		
 		return chain.getRealConnection(source, sql, forceWriter, chain);
 	}
@@ -99,7 +84,7 @@ public class CatFilter extends DefaultJdbcFilter {
 			t = Cat.newTransaction("SQL", "batched");
 			t.addData(Stringizers.forJson().compact().from(batchedSql));
 		} else {
-			t = Cat.newTransaction("SQL", sql_name.get());
+			t = Cat.newTransaction("SQL", SqlAliasManager.getSqlAlias());
 			t.addData(sql);
 		}
 
@@ -113,7 +98,7 @@ public class CatFilter extends DefaultJdbcFilter {
 			t.setStatus(exp);
 
 			if (exp.getSQLState().equalsIgnoreCase("SQL.Blacklist")) {
-				Cat.logEvent("SQL.Blacklist", sql_name.get());
+				Cat.logEvent("SQL.Blacklist", SqlAliasManager.getSqlAlias());
 			}
 			throw exp;
 		} finally {
@@ -138,23 +123,6 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 
 		return result;
-	}
-
-	private String getCachedTruncatedSql(String sql) {
-		if (sql == null) {
-			return null;
-		}
-
-		if (sql.length() > MAX_ALLOWED_SQL_CHAR) {
-			sql = sql.substring(0, MAX_ALLOWED_SQL_CHAR);
-		}
-
-		if (!cachedTruncatedSqls.contains(sql) && cachedTruncatedSqls.size() > MAX_ALLOWED_TRUNCATED_SQL_NUM) {
-			return null;
-		} else {
-			cachedTruncatedSqls.add(sql);
-			return sql;
-		}
 	}
 
 	@Override
