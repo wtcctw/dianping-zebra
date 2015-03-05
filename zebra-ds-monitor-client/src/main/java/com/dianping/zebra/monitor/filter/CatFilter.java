@@ -2,11 +2,7 @@ package com.dianping.zebra.monitor.filter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -58,7 +54,7 @@ public class CatFilter extends DefaultJdbcFilter {
 	}
 
 	private static Set<String> cachedTruncatedSqls = Collections.synchronizedSet(new HashSet<String>(
-	      MAX_ALLOWED_TRUNCATED_SQL_NUM));
+            MAX_ALLOWED_TRUNCATED_SQL_NUM));
 
 	@Override
 	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
