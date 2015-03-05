@@ -14,16 +14,16 @@ public final class SqlBuilder {
     private SqlBuilder() {
     }
 
-    private static final String SELECT_SQL_TEMPLATE = "/*ZebraMigrate*/ SELECT * FREOM %s WHERE %s >= ? AND %s < ? LIMIT ?,? ORDER BY %s";
+    private static final String SELECT_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s >= ? AND %s <= ? ORDER BY %s LIMIT ?,?";
 
-    private static final String INSERT_SQL_TEMPLATE = "/*ZebraMigrate*/ INSERT IGNORE INTO %s (%s) VALUES (%s)";
+    private static final String INSERT_SQL_TEMPLATE = "INSERT IGNORE INTO %s (%s) VALUES (%s)";
 
     public static String getInsert(TaskConfig config, ResultSet resultSet) throws SQLException {
         StringBuilder names = new StringBuilder();
         StringBuilder values = new StringBuilder();
 
         int columnCount = resultSet.getMetaData().getColumnCount();
-        for (int k = 0; k <= columnCount; k++) {
+        for (int k = 1; k <= columnCount; k++) {
             if (names.length() > 0) {
                 names.append(",");
             }

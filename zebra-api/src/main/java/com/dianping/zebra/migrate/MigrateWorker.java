@@ -64,7 +64,7 @@ public class MigrateWorker {
             }
         }
 
-        private void processMigrate(TaskConfig task) {
+        protected void processMigrate(TaskConfig task) {
             String selectSql = SqlBuilder.getSelect(task);
             int pageIndex = 0;
             while (task.getPageSize() * pageIndex < task.getKeyEnd() - task.getKeyStart()) {
