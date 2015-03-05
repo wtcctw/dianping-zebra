@@ -7,11 +7,13 @@ import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.dianping.zebra.util.ConfigServiceMock;
+import com.dianping.zebra.util.SqlExecuteHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,11 +21,14 @@ public class MigrateWorkerTest {
     MigrateWorker migrateWorker;
     ShardDataSource shardDataSource;
     ConfigServiceMock configService;
+    GroupDataSourceExtend dsOrigin;
+    GroupDataSourceExtend ds0;
+    GroupDataSourceExtend ds1;
 
     private final String rule = "test";
 
     @Before
-    public void init() {
+    public void init() throws SQLException {
         initConfigs();
 
         shardDataSource = new ShardDataSource();
@@ -33,6 +38,10 @@ public class MigrateWorkerTest {
         initDataSourcePool();
 
         shardDataSource.init();
+
+        createTableData();
+        initData();
+
 
         migrateWorker = new MigrateWorker();
         migrateWorker.setShardDataSource(shardDataSource);
@@ -51,18 +60,44 @@ public class MigrateWorkerTest {
 
     }
 
+    public void createTableData() throws SQLException {
+        String createOrigin = "CREATE TABLE test(" +
+                "id IDENTITY," +
+                "name VARCHAR(255)" +
+                ")";
+
+        String create0 = "CREATE TABLE test_0(" +
+                "id IDENTITY," +
+                "name VARCHAR(255)" +
+                ")";
+        String create1 = "CREATE TABLE test_1(" +
+                "id IDENTITY," +
+                "name VARCHAR(255)" +
+                ")";
+
+        SqlExecuteHelper.executeUpdate(dsOrigin.getConnection(), createOrigin);
+        SqlExecuteHelper.executeUpdate(ds0.getConnection(), create0);
+        SqlExecuteHelper.executeUpdate(ds0.getConnection(), create1);
+        SqlExecuteHelper.executeUpdate(ds1.getConnection(), create0);
+        SqlExecuteHelper.executeUpdate(ds1.getConnection(), create1);
+    }
+
+    public void initData() {
+
+    }
+
     public void initDataSourcePool() {
-        GroupDataSourceExtend dsOrigin = new GroupDataSourceExtend();
+        dsOrigin = new GroupDataSourceExtend();
         dsOrigin.setJdbcRef("test");
         dsOrigin.setDataSourceConfigManager(configService);
         dsOrigin.init();
 
-        GroupDataSourceExtend ds0 = new GroupDataSourceExtend();
+        ds0 = new GroupDataSourceExtend();
         ds0.setJdbcRef("test0");
         ds0.setDataSourceConfigManager(configService);
         ds0.init();
 
-        GroupDataSourceExtend ds1 = new GroupDataSourceExtend();
+        ds1 = new GroupDataSourceExtend();
         ds1.setJdbcRef("test1");
         ds1.setDataSourceConfigManager(configService);
         ds1.init();

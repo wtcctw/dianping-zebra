@@ -1,17 +1,14 @@
 package com.dianping.zebra.shard;
 
-import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.dianping.zebra.shard.jdbc.ZebraMultiDBBaseTestCase;
+import com.dianping.zebra.util.SqlExecuteHelper;
 import com.google.common.collect.Lists;
-import groovy.sql.GroovyRowResult;
-import groovy.sql.Sql;
 import junit.framework.Assert;
 import org.junit.Test;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,7 +53,7 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test(expected = Exception.class)
     public void test_insert_without_key() throws Exception {
-        executeInsert(getZebraDs().getConnection(), "insert into test ( name, score, type, classid) values ('xxx', 1, 'a', 0)");
+        SqlExecuteHelper.executeInsert(getZebraDs().getConnection(), "insert into test ( name, score, type, classid) values ('xxx', 1, 'a', 0)");
     }
 
 
@@ -66,7 +63,7 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 //        sds.setRuleName("welife");
 //        sds.init();
 //
-//        List<List<Object>> result = executeQuery(sds.getConnection(), "select * from welife_users where bid = 2127114697 limit 1");
+//        List<List<Object>> result = SqlExecuteHelper.executeQuery(sds.getConnection(), "select * from welife_users where bid = 2127114697 limit 1");
 //
 //        System.out.println(result);
 //
@@ -75,7 +72,7 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test
     public void test_insert_with_key() throws Exception {
-        Assert.assertTrue(executeUpdate(getZebraDs().getConnection(), "insert into test (id, name, score, type, classid) values (100, 'xxx', 1, 'a', 0)") == 1);
+        Assert.assertTrue(SqlExecuteHelper.executeUpdate(getZebraDs().getConnection(), "insert into test (id, name, score, type, classid) values (100, 'xxx', 1, 'a', 0)") == 1);
         List<List<Object>> expectData = Lists.<List<Object>>newArrayList(Lists.<Object>newArrayList(100, "xxx", 1, "a", 0));
         assertData(getZebraDs().getConnection(), "select id,name,score,type,classid from test where id = 100", expectData);
         assertData(getInnerDs("id2").getConnection(), "select id,name,score,type,classid from test_4 where id = 100", expectData);
@@ -84,7 +81,7 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test
     public void test_select() throws SQLException {
-        assert executeQuery(getZebraDs().getConnection(), "select * from test").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test").size() > 0;
     }
 
     @Test
@@ -97,7 +94,7 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
         for (String it : whereCondition) {
             String sql = "select classid from test " + it + " order by classid";
-            List<List<Object>> data = executeQuery(getZebraDs().getConnection(), sql);
+            List<List<Object>> data = SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), sql);
             Integer lastClassid = null;
 
             for (List<Object> row : data) {
@@ -111,44 +108,44 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test
     public void test_select_with_id() throws SQLException {
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where  id = 3").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where  id = 3").size() > 0;
     }
 
     @Test
     public void test_select_with_not_equals() throws SQLException {
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where  id <> 3").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where  id <> 3").size() > 0;
     }
 
     @Test
     public void test_select_with_limit() throws SQLException {
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where  id <> 3 limit 1").size() == 1;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where  id <> 3 limit 1").size() == 1;
     }
 
 
     @Test
     public void test_select_with_id_and_name() throws SQLException {
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name = 'leox'").size() == 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name = 'leo3'").size() > 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name like '%dozer%'").size() == 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name like '%leo%'").size() > 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id > 3 and name like '%dozer%'").size() == 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id > 3 and name like '%leo%'").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name = 'leox'").size() == 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name = 'leo3'").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name like '%dozer%'").size() == 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and name like '%leo%'").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id > 3 and name like '%dozer%'").size() == 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id > 3 and name like '%leo%'").size() > 0;
     }
 
     @Test
     public void test_select_with_sub_query() throws SQLException {
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id in (select id from test where id= 5)").size() > 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id in (select id from test where id > 2 and id < 10)").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id in (select id from test where id= 5)").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id in (select id from test where id > 2 and id < 10)").size() > 0;
     }
 
     @Test
     public void test_select_with_count() throws SQLException {
         //todo: 支持无字段别名的查询
-        Long count = (Long) executeQuery(getZebraDs().getConnection(), "select count(id) as id_count from test").get(0).get(0);
-        Integer max = (Integer) executeQuery(getZebraDs().getConnection(), "select max(id) as id_max from test").get(0).get(0);
-        Integer min = (Integer) executeQuery(getZebraDs().getConnection(), "select min(id) as id_min from test").get(0).get(0);
-        Long sum = (Long) executeQuery(getZebraDs().getConnection(), "select sum(id) as id_sum from test").get(0).get(0);
-//        def avg = executeQuery(getZebraDs().getConnection(), "select avg(id) as id_avg from test")[0][0];//todo: not support!!
+        Long count = (Long) SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select count(id) as id_count from test").get(0).get(0);
+        Integer max = (Integer) SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select max(id) as id_max from test").get(0).get(0);
+        Integer min = (Integer) SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select min(id) as id_min from test").get(0).get(0);
+        Long sum = (Long) SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select sum(id) as id_sum from test").get(0).get(0);
+//        def avg = SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select avg(id) as id_avg from test")[0][0];//todo: not support!!
 
         assert min <= sum / count;
         assert sum / count <= max;
@@ -156,44 +153,44 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test
     public void test_select_with_group() throws SQLException {
-        List<List<Object>> data = executeQuery(getZebraDs().getConnection(), "select type,count(id) as id_count from test group by type");
+        List<List<Object>> data = SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select type,count(id) as id_count from test group by type");
     }
 
     @Test
     public void test_select_with_multi_partition() throws SQLException {
         //删光 class 维度的数据
-        assert executeUpdate(getInnerDs("class0").getConnection(), "delete from test_class0") > 0;
-        assert executeUpdate(getInnerDs("class0").getConnection(), "delete from test_class1") > 0;
-        assert executeUpdate(getInnerDs("class1").getConnection(), "delete from test_class2") > 0;
-        assert executeUpdate(getInnerDs("class1").getConnection(), "delete from test_class3") > 0;
-        assert executeUpdate(getInnerDs("class2").getConnection(), "delete from test_class4") > 0;
-        assert executeUpdate(getInnerDs("class2").getConnection(), "delete from test_class5") > 0;
-        assert executeUpdate(getInnerDs("class3").getConnection(), "delete from test_class6") > 0;
-        assert executeUpdate(getInnerDs("class3").getConnection(), "delete from test_class7") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("class0").getConnection(), "delete from test_class0") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("class0").getConnection(), "delete from test_class1") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("class1").getConnection(), "delete from test_class2") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("class1").getConnection(), "delete from test_class3") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("class2").getConnection(), "delete from test_class4") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("class2").getConnection(), "delete from test_class5") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("class3").getConnection(), "delete from test_class6") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("class3").getConnection(), "delete from test_class7") > 0;
 
         //分区成功
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid = 3").size() > 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid > 2").size() > 0;
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid <> 2").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid = 3").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid > 2").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 and classid <> 2").size() > 0;
 
         //分区失败，直接到主维度全表扫描
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 or classid = 3").size() == 2;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where id = 3 or classid = 3").size() == 2;
     }
 
     @Test
     public void test_select_with_class_id() throws SQLException {
         //删光 id 维度的数据
-        assert executeUpdate(getInnerDs("id0").getConnection(), "delete from test_0") > 0;
-        assert executeUpdate(getInnerDs("id0").getConnection(), "delete from test_1") > 0;
-        assert executeUpdate(getInnerDs("id1").getConnection(), "delete from test_2") > 0;
-        assert executeUpdate(getInnerDs("id1").getConnection(), "delete from test_3") > 0;
-        assert executeUpdate(getInnerDs("id2").getConnection(), "delete from test_4") > 0;
-        assert executeUpdate(getInnerDs("id2").getConnection(), "delete from test_5") > 0;
-        assert executeUpdate(getInnerDs("id3").getConnection(), "delete from test_6") > 0;
-        assert executeUpdate(getInnerDs("id3").getConnection(), "delete from test_7") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("id0").getConnection(), "delete from test_0") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("id0").getConnection(), "delete from test_1") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("id1").getConnection(), "delete from test_2") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("id1").getConnection(), "delete from test_3") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("id2").getConnection(), "delete from test_4") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("id2").getConnection(), "delete from test_5") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("id3").getConnection(), "delete from test_6") > 0;
+        assert SqlExecuteHelper.executeUpdate(getInnerDs("id3").getConnection(), "delete from test_7") > 0;
 
         //分区成功
-        assert executeQuery(getZebraDs().getConnection(), "select * from test where classid = 3").size() > 0;
+        assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test where classid = 3").size() > 0;
     }
 
     @Test
@@ -210,8 +207,8 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         };
 
         for (String it : whereCondiction) {
-            assert executeUpdate(getZebraDs().getConnection(), baseUpdate + it) > 0;
-            for (List<Object> row : executeQuery(getZebraDs().getConnection(), baseQuery + it)) {
+            assert SqlExecuteHelper.executeUpdate(getZebraDs().getConnection(), baseUpdate + it) > 0;
+            for (List<Object> row : SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), baseQuery + it)) {
                 assert row.get(0).equals("newName");
             }
         }
@@ -232,8 +229,8 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         };
 
         for (String it : whereCondiction) {
-            assert executeUpdate(getZebraDs().getConnection(), baseUpdate + it) > 0;
-            assert executeQuery(getZebraDs().getConnection(), baseQuery + it).size() == 0;
+            assert SqlExecuteHelper.executeUpdate(getZebraDs().getConnection(), baseUpdate + it) > 0;
+            assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), baseQuery + it).size() == 0;
         }
     }
 
@@ -246,7 +243,7 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
     protected void assertData(Connection conn, String sql, List<List<Object>> expect) throws SQLException {
-        List<List<Object>> actual = executeQuery(conn, sql);
+        List<List<Object>> actual = SqlExecuteHelper.executeQuery(conn, sql);
         Assert.assertEquals(actual.size(), expect.size());
         for (int k = 0; k < actual.size(); k++) {
             List<Object> act = actual.get(k);
@@ -259,35 +256,5 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
         }
 
         assert expect.equals(actual);
-    }
-
-    protected int executeInsert(Connection conn, String sql) throws SQLException {
-        System.out.println(sql);
-        Sql client = new Sql(conn);
-        Integer result = (Integer) client.executeInsert(sql).get(0).get(0);
-        conn.close();
-        return result;
-    }
-
-    protected int executeUpdate(Connection conn, String sql) throws SQLException {
-        System.out.println(sql);
-        Sql client = new Sql(conn);
-        int result = client.executeUpdate(sql);
-        conn.close();
-        return result;
-    }
-
-    protected List<List<Object>> executeQuery(Connection conn, String sql) throws SQLException {
-        System.out.println(sql);
-        Sql client = new Sql(conn);
-        List<GroovyRowResult> rows = client.rows(sql);
-
-        List<List<Object>> result = new ArrayList<List<Object>>();
-
-        for (GroovyRowResult row : rows) {
-            result.add(Lists.newArrayList(row.values()));
-        }
-        conn.close();
-        return result;
     }
 }
