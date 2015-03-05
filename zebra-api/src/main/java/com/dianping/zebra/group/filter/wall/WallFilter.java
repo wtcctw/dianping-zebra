@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.group.util.SqlAliasManager;
 import com.dianping.zebra.util.StringUtils;
 
 /**
@@ -25,8 +25,6 @@ import com.dianping.zebra.util.StringUtils;
 public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
 	
-	private static final String SQL_NAME = "sql_statement_name";
-
 	private Map<String, String> sqlIDCache = new ConcurrentHashMap<String, String>(1024);
 
 	private Map<String, SqlFlowControl> flowControl;
@@ -47,9 +45,9 @@ public class WallFilter extends DefaultJdbcFilter {
 		return random.nextInt(100);
 	}
 
-	protected String generateId(SingleConnection conn, String sqlName) throws NoSuchAlgorithmException {
-		String token = String.format("/*%s*/%s", conn.getDataSourceId(), sqlName);
-		String resultId = sqlIDCache.get(String.format("/*%s*/%s", conn.getDataSourceId(), sqlName));
+	protected String generateId(SingleConnection conn, String sqlAlias) throws NoSuchAlgorithmException {
+		String token = String.format("/*%s*/%s", conn.getDataSourceId(), sqlAlias);
+		String resultId = sqlIDCache.get(String.format("/*%s*/%s", conn.getDataSourceId(), sqlAlias));
 
 		if (resultId != null) {
 			return resultId;
@@ -91,11 +89,11 @@ public class WallFilter extends DefaultJdbcFilter {
 		if (chain != null) {
 			sql = chain.sql(conn, sql, isPreparedStmt, chain);
 		}
-		String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
+		String sqlAlias = SqlAliasManager.getAvatarSqlAlias();
 		
-		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sqlName)) {
+		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sqlAlias)) {
 			try {
-				String id = generateId(conn, sqlName);
+				String id = generateId(conn, sqlAlias);
 
 				checkFlowControl(id);
 
