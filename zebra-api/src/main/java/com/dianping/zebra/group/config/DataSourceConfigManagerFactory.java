@@ -1,6 +1,8 @@
 package com.dianping.zebra.group.config;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
+import com.dianping.zebra.config.LionConfigService;
+import com.dianping.zebra.config.PropertyConfigService;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 
 import java.util.HashMap;
@@ -22,7 +24,7 @@ public final class DataSourceConfigManagerFactory {
 
 				if (dataSourceConfigManager == null) {
 					if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
-						LocalConfigService configService = new LocalConfigService(name);
+						PropertyConfigService configService = new PropertyConfigService(name);
 						configService.init();
 						dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {

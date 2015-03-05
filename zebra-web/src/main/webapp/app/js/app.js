@@ -1,4 +1,8 @@
-var zebraWeb = angular.module('ZebraWeb', ['ui.bootstrap', 'ui.router', 'ui.checkbox', 'ngCookies']);
+var zebraWeb = angular.module('ZebraWeb', ['ui.bootstrap', 'ui.router', 'ui.checkbox', 'ngCookies', 'xeditable']);
+
+zebraWeb.run(function(editableOptions) {
+  editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
+});
 
 zebraWeb.filter('objectCount', function () {
     return function (input) {
@@ -75,10 +79,14 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/config',
         templateUrl: 'app/template/config.html',
         controller: 'config'
-    }).state('black', {
-        url: '/black',
-        controller: 'black',
-        templateUrl: 'app/template/black.html'
+    }).state('shard', {
+        url: '/shard',
+        controller: 'shard',
+        templateUrl: 'app/template/shard.html'
+    }).state('flow-control', {
+              url: '/flow',
+              controller: 'flow',
+              templateUrl: 'app/template/flow-control.html'
     }).state('update', {
         url: '/update',
         templateUrl: 'app/template/update.html',

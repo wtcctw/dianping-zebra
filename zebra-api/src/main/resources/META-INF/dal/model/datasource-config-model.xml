@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model model-package="com.dianping.zebra.group.config.datasource" enable-base-visitor="true" enable-sax-parser="true" enable-xml-builder="true" enable-merger="true">
-	<entity name="group-data-source-config" root="true">
-	    <attribute name="router-strategy" value-type="String" default-value="roundrobin"/>
-    	<attribute name="transaction-force-write" value-type="boolean" primitive="true" default-value="false"/>
-    	<attribute name="write-first" value-type="boolean" primitive="true" default-value="false"/>
+<model model-package="com.dianping.zebra.group.config.datasource" enable-base-visitor="true" enable-sax-parser="true"
+       enable-xml-builder="true" enable-merger="true">
+    <entity name="group-data-source-config" root="true">
+        <attribute name="router-strategy" value-type="String" default-value="roundrobin"/>
+        <attribute name="force-write-on-login" value-type="boolean" primitive="true" default-value="true"/>
         <attribute name="filters" value-type="String" default-value=""/>
-		<entity-ref name="data-source-config" type="map" names="data-source-configs" xml-indent="true" method-find-or-create="true" />
-	</entity>
-	<entity name="data-source-config">
-		<attribute name="id" value-type="String" key="true" />
-		<attribute name="weight" value-type="int" primitive="true" default-value="1"/>
-		<attribute name="canRead" value-type="boolean"  primitive="true" default-value="false"/>
-    	<attribute name="canWrite" value-type="boolean"  primitive="true" default-value="false"/>
-    	<attribute name="active" value-type="boolean"  primitive="true"/>
-    	<element name="test-read-only-sql" value-type="String" primitive="true" default-value="select @@read_only"/>
-    	<element name="time-window" value-type="long"  primitive="true" default-value="0"/>
-    	<element name="punish-limit" value-type="long" primitive="true" default-value="0"/>
-		<element name="jdbc-url" value-type="String" primitive="true" default-value=""/>
-		<element name="username" value-type="String" primitive="true" default-value=""/>
-		<element name="driver-class" value-type="String" primitive="true" default-value=""/>
-		<element name="password" value-type="String" primitive="true" default-value=""/>
-		<element name="warmup-time" value-type="int" primitive="true" default-value="0"/>
-		<any name="properties" />
-	</entity>
+        <entity-ref name="data-source-config" type="map" names="data-source-configs" xml-indent="true"
+                    method-find-or-create="true"/>
+    </entity>
+    <entity name="data-source-config">
+        <attribute name="id" value-type="String" key="true"/>
+        <attribute name="weight" value-type="int" primitive="true" default-value="1"/>
+        <attribute name="canRead" value-type="boolean" primitive="true" default-value="false"/>
+        <attribute name="canWrite" value-type="boolean" primitive="true" default-value="false"/>
+        <attribute name="active" value-type="boolean" primitive="true"/>
+        <element name="test-read-only-sql" value-type="String" primitive="true" default-value="select @@read_only"/>
+        <element name="time-window" value-type="long" primitive="true" default-value="0"/>
+        <element name="punish-limit" value-type="long" primitive="true" default-value="0"/>
+        <element name="jdbc-url" value-type="String" primitive="true" default-value=""/>
+        <element name="username" value-type="String" primitive="true" default-value=""/>
+        <element name="driver-class" value-type="String" primitive="true" default-value=""/>
+        <element name="password" value-type="String" primitive="true" default-value=""/>
+        <element name="warmup-time" value-type="int" primitive="true" default-value="0"/>
+        <any name="properties"/>
+    </entity>
 </model>

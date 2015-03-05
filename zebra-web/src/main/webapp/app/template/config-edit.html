@@ -1,5 +1,9 @@
 <div class="modal-header">
-    <h4 class="modal-title">{{name}}</span>
+    <h4 class="modal-title">
+        <form class="form-inline" role="form">
+            <span>{{name}}</span> <input class="form-control input-sm" ng-model="changedName" type="text" placeholder="Other Name"/>
+            <button type="submit" class="btn btn-primary btn-sm" ng-click="changeName()">Search</button>
+        </form>
     </h4>
 </div>
 <div class="modal-body">
@@ -67,13 +71,15 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><input required placeholder="" ng-model="config.properties.newKey"
-                                   class="form-control input-sm" style="width: 200px"/></td>
+                        <td>
+                        <select style="width: 200px" class="form-control input-sm" ng-model="config.properties.newKey" ng-options="item as item for item in newKeys">
+                        </select>
+                        </td>
                         <td><input required placeholder="value" ng-model="config.properties.newValue"
                                    class="form-control input-sm"/></td>
                         <td>
                             <button title="Add Property"
-                                    ng-click="addProperty(config.properties,config.id,config.properties.newKey,config.properties.newValue)"
+                                    ng-click="addProperty(config)"
                                     class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span>
                             </button>
                         </td>

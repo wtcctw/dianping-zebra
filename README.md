@@ -23,7 +23,7 @@
     	<version>${version}</version>
 	</dependency>
 
-目前的最新版本为`2.6.4`
+目前的最新版本为`2.6.7`
 
 ### 数据库监控功能
 
@@ -44,7 +44,7 @@
 ### 在 Spring 中 DataSource 的配置
 
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<property name="jdbcRef" value="tuangou2010" />
+		<property name="jdbcRef" value="tuangou2010" /> <!-- 唯一确定数据库的key -->
 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
 		<property name="maxPoolSize" value="${lion.key.maxPoolSize}" />
         <property name="initialPoolSize" value="${lion.key.initialPoolSize}" />
@@ -56,7 +56,8 @@
 		<property name="maxStatementsPerConnection" value="100" />
 		<property name="numHelperThreads" value="6" />
 		<property name="maxAdministrativeTaskTime" value="5" />
-		<property name="preferredTestQuery" value="SELECT 1" />   
+		<property name="preferredTestQuery" value="SELECT 1" />  
+        <property name="checkoutTimeout" value="1000" />
 	</bean>
 
 ### 在 Spring 中使用默认 DataSource 的配置
@@ -72,6 +73,26 @@
 2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
 3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
+### 额外配置
+1.如果业务需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。一般情况下，如果对主从延迟不敏感的应用，建议`不要使用`该配置。
+
+    <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+    	<property name="jdbcRef" value="tuangou2010" /> 
+        <property name="routerType" value="load-balance" /> <!-- 只走读库 -->
+    </bean>
+    
+    <bean id="writeDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+    	<property name="jdbcRef" value="tuangou2010" /> 
+        <property name="routerType" value="fail-over" /><!-- 只走写库 -->
+    </bean>
+    
+2.关闭登录用户默认走写库的逻辑。目前，为了兼容老的DPDL登录用户走写库的逻辑，DAL也默认开启了，当然也可以通过在spring的配置中加入如下的property来关闭该功能。
+
+    <bean id="datasource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
+    	<property name="jdbcRef" value="tuangou2010" /> 
+        <property name="forceWriteOnLogin" value="false" /> <!-- 关闭登录用户走写库，默认值是true，表明开启该功能 -->
+    </bean>
+
 ### hint的使用
 因为MYSQL主从同步会有延迟，应用有些时候不能容忍这种延迟，需要读请求也要走写库。可以在SQL前面加一个hint，表明这个读请求强制走写库，例如:
 
@@ -81,11 +102,9 @@
 
 ### 答疑解惑
 Q：为什么要加`init-method`，不加会怎么样？
-
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 ## 老业务兼容情况
-
 通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.9`以上，`Zebra`会自动替换满足条件的`DataSource`。
 
 #### 没有使用`dpdl`的`ComboPooledDataSource`
@@ -99,7 +118,12 @@ A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安
 * 在`Lion`上找到了`groupds.${database_name}.mapping`配置
 * 写库数据源是`mysql`
 
-## 更新说明
+##  更新说明
+### 2.6.7
+* [-] 删除了DAL中无用的配置
+* [+] 添加了forceWriteOnLogin这个配置项来关闭登录用户走写库的逻辑
+* [/] 修正了SQL的CAT打点丢失Exception的StackTrace的bug
+* [/] 修正SQL黑名单只对PreparedStatement进行拦截，不再对Statement进行拦截
 
 ### 2.6.4
 * [/] 修正了zebra-ds-monitor-client的若干bug

@@ -1,5 +1,7 @@
 package com.dianping.zebra.group.util;
 
+import com.dianping.zebra.util.StringUtils;
+
 public class AtomicRefresh {
 	private String newPassword;
 

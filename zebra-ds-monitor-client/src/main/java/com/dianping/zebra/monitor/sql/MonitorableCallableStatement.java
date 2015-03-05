@@ -15,13 +15,22 @@
  */
 package com.dianping.zebra.monitor.sql;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -595,10 +604,10 @@ public class MonitorableCallableStatement extends MonitorablePreparedStatement i
 	}
 
 	public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("getObject");
 	}
 
 	public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("getObject");
 	}
 }

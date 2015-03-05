@@ -1,5 +1,11 @@
 package com.dianping.zebra.group.filter;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.datasources.SingleDataSource;
@@ -7,12 +13,6 @@ import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupResultSet;
 import com.dianping.zebra.group.jdbc.GroupStatement;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Created by Dozer on 11/11/14.
@@ -28,90 +28,92 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 
 	@Override
 	public void closeGroupConnection(GroupConnection source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 
 	}
 
 	@Override
 	public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 
 	}
 
 	@Override
 	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 
 	}
 
 	@Override
 	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
 			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
 			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
+
+    @Override
+    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException{
+        throw new UnsupportedOperationException();
+    }
 
 	@Override
 	public int getOrder() {
-		throw new NotImplementedException();
-
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain)
 			throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void init() {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
-		throw new NotImplementedException();
+	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
-		throw new NotImplementedException();
-
+		throw new UnsupportedOperationException();
 	}
-
 }

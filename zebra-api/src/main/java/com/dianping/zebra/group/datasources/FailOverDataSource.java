@@ -8,8 +8,8 @@ import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
-import com.dianping.zebra.group.util.JdbcDriverClassHelper;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.JdbcDriverClassHelper;
+import com.dianping.zebra.util.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 

@@ -1,7 +1,7 @@
 package com.dianping.zebra.monitor.inspect;
 
 import com.dianping.phoenix.status.AbstractComponentStatus;
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
@@ -11,6 +11,7 @@ import com.dianping.zebra.group.util.DataSourceState;
 
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;

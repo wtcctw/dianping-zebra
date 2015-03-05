@@ -1,7 +1,13 @@
-#main-container{
+#main-container {
     margin-top: 60px;
 }
 
-.big-popover + .popover {
-    max-width: 100%;
+.popover-large + .popover {
+    width: 300px !important;
+    max-width: 300px !important;
+}
+
+.popover-xlarge + .popover {
+    width: 500px !important;
+    max-width: 500px !important;
 }

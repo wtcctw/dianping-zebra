@@ -26,9 +26,8 @@ public class AuthorizationFilter implements Filter {
 		HttpServletResponse rsp = (HttpServletResponse) response;
 
 		String uri = req.getRequestURI();
-		String op = req.getParameter("op");
 
-		if ("/a/config".equalsIgnoreCase(uri) && "test".equalsIgnoreCase(op)) {
+		if (uri != null && uri.startsWith("/a/config/test")) {
 			chain.doFilter(request, response);
 		} else {
 			Cookie[] cookies = req.getCookies();

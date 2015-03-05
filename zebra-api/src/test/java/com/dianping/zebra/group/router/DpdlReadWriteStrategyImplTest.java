@@ -1,40 +1,44 @@
 package com.dianping.zebra.group.router;
 
-import java.util.HashMap;
-
-import org.junit.*;
-
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.avatar.tracker.TrackerContext;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.HashMap;
 
 public class DpdlReadWriteStrategyImplTest {
+
 	@Test
-	public void test_set_auth() throws InterruptedException{
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				System.out.println(Thread.currentThread().getId());
-				
-				TrackerContext trackerContext = new TrackerContext();
-				trackerContext.setAuthenticated(true);
-				trackerContext.setExtension(new HashMap<String, Object>());
-				ExecutionContextHolder.setTrackerContext(trackerContext);
-				
-				DpdlReadWriteStrategyImpl target = new DpdlReadWriteStrategyImpl();
-				Assert.assertTrue(target.forceReadFromMaster());
-			}
-		}).start();
-		
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				System.out.println(Thread.currentThread().getId());
-				
-				DpdlReadWriteStrategyImpl target = new DpdlReadWriteStrategyImpl();
-				Assert.assertTrue(!target.forceReadFromMaster());
-			}
-		}).start();
-		
-		Thread.sleep(1000);
+	public void test_set_auth_no_config() throws InterruptedException {
+		TrackerContext trackerContext = new TrackerContext();
+		trackerContext.setAuthenticated(true);
+		trackerContext.setExtension(new HashMap<String, Object>());
+		ExecutionContextHolder.setTrackerContext(trackerContext);
+
+		DpdlReadWriteStrategy target = new DpdlReadWriteStrategy();
+		Assert.assertFalse(target.shouldReadFromMaster());
+	}
+
+	@Test
+	public void test_set_auth_with_config() throws InterruptedException {
+		TrackerContext trackerContext = new TrackerContext();
+		trackerContext.setAuthenticated(true);
+		trackerContext.setExtension(new HashMap<String, Object>());
+		ExecutionContextHolder.setTrackerContext(trackerContext);
+
+		DpdlReadWriteStrategy target = new DpdlReadWriteStrategy();
+		target.setGroupDataSourceConfig(new GroupDataSourceConfig());
+
+		Assert.assertTrue(target.shouldReadFromMaster());
+	}
+
+	@Test
+	public void test_not_auth() throws InterruptedException {
+		System.out.println(Thread.currentThread().getId());
+
+		DpdlReadWriteStrategy target = new DpdlReadWriteStrategy();
+		Assert.assertFalse(target.shouldReadFromMaster());
 	}
 }

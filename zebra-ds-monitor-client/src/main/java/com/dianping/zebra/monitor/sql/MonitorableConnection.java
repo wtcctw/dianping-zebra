@@ -15,9 +15,21 @@
  */
 package com.dianping.zebra.monitor.sql;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Savepoint;
+import java.sql.Statement;
+import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -291,23 +303,23 @@ public class MonitorableConnection implements Connection {
 	}
 
 	public String getSchema() throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("getSchema");
 	}
 
 	public void setSchema(String schema) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("setSchema");
 	}
 
 	public void abort(Executor executor) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("abort");
 	}
 
 	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("setNetworkTimeout");
 	}
 
 	public int getNetworkTimeout() throws SQLException {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("getNetworkTimeout");
 	}
 
 	public Connection getInnerConnection() {

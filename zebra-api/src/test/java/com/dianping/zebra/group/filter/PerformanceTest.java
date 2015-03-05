@@ -1,9 +1,10 @@
 package com.dianping.zebra.group.filter;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+
 import org.junit.Test;
 
 import java.sql.Connection;

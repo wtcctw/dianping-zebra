@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.zebra.admin.dao.FlowControlMapper">
+
+	<select id="findAllActiveFlowControlByEnv" parameterType="map"
+		resultType="FlowControlEntity">
+		SELECT * FROM flowcontrol WHERE isDelete = 0 and env = #{env}
+	</select>
+	
+	<select id="findAllDeletedFlowControlByEnv" parameterType="map"
+		resultType="FlowControlEntity">
+		SELECT * FROM flowcontrol WHERE isDelete = 1 and env = #{env}
+	</select>
+
+	<update id="deleteFlowControl" parameterType="map">
+		UPDATE flowcontrol set isDelete = 1 , updateTime = NOW() WHERE sqlId = #{sqlId} and env = #{env}
+	</update>
+
+	<insert id="insertFlowControl" parameterType="FlowControlEntity">
+		INSERT INTO `flowcontrol`
+		(
+		`sqlId`,
+		`sql`,
+		`app`,
+		`env`,
+		`isDelete`,
+		`createTime`,
+		`updateTime`)
+		VALUES
+		(
+		#{sqlId},
+		#{sql},
+		#{app},
+		#{env},
+		#{isDelete},
+		NOW(),
+		NOW())
+	</insert>
+</mapper>

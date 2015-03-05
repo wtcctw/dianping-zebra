@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.config;
 
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.util.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -19,8 +20,6 @@ public abstract class AbstractConfigManager {
 
 	protected final ConfigService configService;
 
-	protected final String jdbcRef;
-
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
 	private ExecutorService listenerNotifyThreadPool = Executors.newFixedThreadPool(5, new ThreadFactory() {
@@ -36,8 +35,7 @@ public abstract class AbstractConfigManager {
 		}
 	});
 
-	public AbstractConfigManager(String jdbcRef, ConfigService configService) {
-		this.jdbcRef = jdbcRef;
+	public AbstractConfigManager(ConfigService configService) {
 		this.configService = configService;
 		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
 	}

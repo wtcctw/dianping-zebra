@@ -9,9 +9,9 @@ package com.dianping.zebra.group.jdbc;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.param.*;
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
-import com.dianping.zebra.group.util.SqlType;
-import com.dianping.zebra.group.util.SqlUtils;
+import com.dianping.zebra.util.JDBCUtils;
+import com.dianping.zebra.util.SqlType;
+import com.dianping.zebra.util.SqlUtils;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -39,15 +39,14 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	private String sql;
 
-	public GroupPreparedStatement(GroupConnection connection, String sql,
-			List<JdbcFilter> filters) {
+	public GroupPreparedStatement(GroupConnection connection, String sql, List<JdbcFilter> filters) {
 		super(connection, filters);
 		this.sql = sql;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#addBatch()
 	 */
 	@Override
@@ -65,7 +64,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#clearParameters()
 	 */
 	@Override
@@ -99,7 +98,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#execute()
 	 */
 	@Override
@@ -137,7 +136,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	}
 
 	private int[] executeBatchOnConnection(Connection conn) throws SQLException {
-		sql = processSQL(conn, sql);
+		sql = processSQL(conn, sql, true);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 
 		for (List<ParamContext> tmpParams : pstBatchedArgs) {
@@ -150,7 +149,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#executeQuery()
 	 */
 	@Override
@@ -168,7 +167,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
-		sql = processSQL(conn, sql);
+		sql = processSQL(conn, sql, true);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 		setParams(pstmt);
 		this.currentResultSet = new GroupResultSet(this.filters, pstmt.executeQuery());
@@ -177,7 +176,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#executeUpdate()
 	 */
 	@Override
@@ -194,7 +193,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 					if (conn instanceof SingleConnection) {
 						((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
 					}
-					JDBCExceptionUtils.throwWrappedSQLException(e);
+					JDBCUtils.throwWrappedSQLException(e);
 				}
 				return updateCount;
 			}
@@ -202,7 +201,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	}
 
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {
-		sql = processSQL(conn, sql);
+		sql = processSQL(conn, sql, true);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 
 		setParams(pstmt);
@@ -211,7 +210,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#getMetaData()
 	 */
 	@Override
@@ -221,7 +220,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#getParameterMetaData()
 	 */
 	@Override
@@ -231,7 +230,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setArray(int, java.sql.Array)
 	 */
 	@Override
@@ -241,7 +240,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream)
 	 */
 	@Override
@@ -251,7 +250,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, int)
 	 */
 	@Override
@@ -261,7 +260,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, long)
 	 */
 	@Override
@@ -281,7 +280,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBigDecimal(int, java.math.BigDecimal)
 	 */
 	@Override
@@ -291,7 +290,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBinaryStream(int, java.io.InputStream)
 	 */
 	@Override
@@ -301,7 +300,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBinaryStream(int, java.io.InputStream, int)
 	 */
 	@Override
@@ -311,7 +310,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBinaryStream(int, java.io.InputStream, long)
 	 */
 	@Override
@@ -321,7 +320,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBlob(int, java.sql.Blob)
 	 */
 	@Override
@@ -331,7 +330,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBlob(int, java.io.InputStream)
 	 */
 	@Override
@@ -341,7 +340,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBlob(int, java.io.InputStream, long)
 	 */
 	@Override
@@ -351,7 +350,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBoolean(int, boolean)
 	 */
 	@Override
@@ -361,7 +360,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setByte(int, byte)
 	 */
 	@Override
@@ -371,7 +370,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setBytes(int, byte[])
 	 */
 	@Override
@@ -381,7 +380,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setCharacterStream(int, java.io.Reader)
 	 */
 	@Override
@@ -391,7 +390,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setCharacterStream(int, java.io.Reader, int)
 	 */
 	@Override
@@ -401,7 +400,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setCharacterStream(int, java.io.Reader, long)
 	 */
 	@Override
@@ -411,7 +410,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setClob(int, java.sql.Clob)
 	 */
 	@Override
@@ -421,7 +420,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setClob(int, java.io.Reader)
 	 */
 	@Override
@@ -431,7 +430,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setClob(int, java.io.Reader, long)
 	 */
 	@Override
@@ -449,7 +448,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setDate(int, java.sql.Date)
 	 */
 	@Override
@@ -459,7 +458,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setDate(int, java.sql.Date, java.util.Calendar)
 	 */
 	@Override
@@ -469,7 +468,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setDouble(int, double)
 	 */
 	@Override
@@ -479,7 +478,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setFloat(int, float)
 	 */
 	@Override
@@ -489,7 +488,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setInt(int, int)
 	 */
 	@Override
@@ -499,7 +498,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setLong(int, long)
 	 */
 	@Override
@@ -509,7 +508,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setNCharacterStream(int, java.io.Reader)
 	 */
 	@Override
@@ -519,7 +518,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setNCharacterStream(int, java.io.Reader, long)
 	 */
 	@Override
@@ -529,7 +528,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setNClob(int, java.sql.NClob)
 	 */
 	@Override
@@ -539,7 +538,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setNClob(int, java.io.Reader)
 	 */
 	@Override
@@ -549,7 +548,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setNClob(int, java.io.Reader, long)
 	 */
 	@Override
@@ -559,7 +558,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setNString(int, java.lang.String)
 	 */
 	@Override
@@ -569,7 +568,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setNull(int, int)
 	 */
 	@Override
@@ -579,7 +578,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setNull(int, int, java.lang.String)
 	 */
 	@Override
@@ -589,7 +588,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setObject(int, java.lang.Object)
 	 */
 	@Override
@@ -599,7 +598,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setObject(int, java.lang.Object, int)
 	 */
 	@Override
@@ -609,7 +608,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setObject(int, java.lang.Object, int, int)
 	 */
 	@Override
@@ -625,7 +624,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setRef(int, java.sql.Ref)
 	 */
 	@Override
@@ -635,7 +634,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setRowId(int, java.sql.RowId)
 	 */
 	@Override
@@ -645,7 +644,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setSQLXML(int, java.sql.SQLXML)
 	 */
 	@Override
@@ -655,7 +654,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setShort(int, short)
 	 */
 	@Override
@@ -665,7 +664,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setString(int, java.lang.String)
 	 */
 	@Override
@@ -675,7 +674,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setTime(int, java.sql.Time)
 	 */
 	@Override
@@ -685,7 +684,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setTime(int, java.sql.Time, java.util.Calendar)
 	 */
 	@Override
@@ -695,7 +694,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp)
 	 */
 	@Override
@@ -705,7 +704,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setTimestamp(int, java.sql.Timestamp, java.util.Calendar)
 	 */
 	@Override
@@ -715,7 +714,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setURL(int, java.net.URL)
 	 */
 	@Override
@@ -725,7 +724,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.sql.PreparedStatement#setUnicodeStream(int, java.io.InputStream, int)
 	 */
 	@Override

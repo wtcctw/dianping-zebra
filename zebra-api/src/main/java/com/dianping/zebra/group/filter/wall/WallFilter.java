@@ -1,103 +1,64 @@
 package com.dianping.zebra.group.filter.wall;
 
-import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.group.Constants;
-import com.dianping.zebra.group.config.SystemConfigManager;
-import com.dianping.zebra.group.config.SystemConfigManagerFactory;
-import com.dianping.zebra.group.config.system.entity.SystemConfig;
-import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.filter.DefaultJdbcFilter;
-import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.util.StringUtils;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
+
+import com.dianping.avatar.tracker.ExecutionContextHolder;
+import com.dianping.zebra.group.config.SystemConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
+import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
+import com.dianping.zebra.group.datasources.SingleConnection;
+import com.dianping.zebra.group.filter.DefaultJdbcFilter;
+import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.util.StringUtils;
 
 /**
  * Created by Dozer on 9/24/14.
+ * 
+ * @author hao.zhu modified on 2/11/2015
  */
 public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
+	
+	private static final String SQL_NAME = "sql_statement_name";
 
-	protected final static Pattern ID_PATTERN = Pattern
-			.compile(".*(\\/\\*z:)([a-zA-Z0-9]{" + MAX_ID_LENGTH + "})(\\*\\/).*");
+	private Map<String, String> sqlIDCache = new ConcurrentHashMap<String, String>(1024);
 
-	private static final String SQL_STATEMENT_NAME = "sql_statement_name";
-
-	protected volatile static Set<String> blackList = new HashSet<String>();
-
-	private static Map<String, String> generatedIdCache = new ConcurrentHashMap<String, String>();
-
-	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+	private Map<String, SqlFlowControl> flowControl;
 
 	private SystemConfigManager systemConfigManager;
 
-	private synchronized void buildBlackListFromSystemConfig(SystemConfig config) {
-		Set<String> newblackList = new HashSet<String>();
-		if (StringUtils.isNotBlank(config.getGlobalBlackList())) {
-			newblackList.addAll(Arrays.asList(config.getGlobalBlackList().split(",")));
-		}
-		if (StringUtils.isNotBlank(config.getAppBlackList())) {
-			newblackList.addAll(Arrays.asList(config.getAppBlackList().split(",")));
-		}
-		blackList = newblackList;
-	}
+	private Random random;
 
-	protected void checkBlackList(String sql, String id) throws SQLException {
-		if (StringUtils.isNotBlank(id) && blackList.contains(id)) {
-			throw new SQLException("This SQL is in blacklist. Please check it from dba! SQL:" + sql);
-		}
-	}
-
-	protected String generateId(SingleConnection conn, String sql) throws NoSuchAlgorithmException {
-		String token = ExecutionContextHolder.getContext().get(SQL_STATEMENT_NAME);
-		if (StringUtils.isBlank(token)) {
-			token = sql;
-		}
-
-		if (StringUtils.isBlank(token)) {
-			return null;
-		}
-
-		if (conn != null && StringUtils.isNotBlank(conn.getId())) {
-			token = String.format("/*%s*/%s", conn.getId(), token);
-		}
-
-		return generateId(token);
-	}
-
-	private String generateId(String token) throws NoSuchAlgorithmException {
-		String result;
-		boolean needToCache = true;
-		if (token != null && token.length() > 1024) {
-			needToCache = false;
-		}
-		if (generatedIdCache.size() > 1024) {
-			needToCache = false;
-		}
-
-		if (needToCache) {
-			result = generatedIdCache.get(token);
-			if (result != null) {
-				return result;
+	protected void checkFlowControl(String id) throws SQLException {
+		if (StringUtils.isNotBlank(id) && flowControl.containsKey(id)) {
+			if (generateFlowPercent() > flowControl.get(id).getAllowPercent()) {
+				throw new SQLException("The SQL is in the blacklist. Please contact with dba!","SQL.Blacklist");
 			}
 		}
+	}
 
-		result = StringUtils.md5(token).substring(0, MAX_ID_LENGTH);
+	protected int generateFlowPercent() {
+		return random.nextInt(100);
+	}
 
-		if (needToCache) {
-			generatedIdCache.put(token, result);
+	protected String generateId(SingleConnection conn, String sqlName) throws NoSuchAlgorithmException {
+		String token = String.format("/*%s*/%s", conn.getDataSourceId(), sqlName);
+		String resultId = sqlIDCache.get(String.format("/*%s*/%s", conn.getDataSourceId(), sqlName));
+
+		if (resultId != null) {
+			return resultId;
+		} else {
+			resultId = StringUtils.md5(token).substring(0, MAX_ID_LENGTH);
+			sqlIDCache.put(token, resultId);
+
+			return resultId;
 		}
-
-		return result;
 	}
 
 	public int getOrder() {
@@ -107,50 +68,47 @@ public class WallFilter extends DefaultJdbcFilter {
 	@Override
 	public void init() {
 		super.init();
-		this.initWallFilter();
-		this.initBlackList();
+		this.random = new Random();
+		this.initFlowControl();
 	}
 
-	private void initBlackList() {
-		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType,
-				Constants.DEFAULT_SYSTEM_RESOURCE_ID);
-
-		buildBlackListFromSystemConfig(this.systemConfigManager.getSystemConfig());
+	private void initFlowControl() {
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType);
+		this.flowControl = this.systemConfigManager.getSystemConfig().getSqlFlowControls();
 
 		this.systemConfigManager.addListerner(new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-				if (propertyChangeEvent.getPropertyName()
-						.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)) {
-					buildBlackListFromSystemConfig(systemConfigManager.getSystemConfig());
+				synchronized (flowControl) {
+					flowControl = systemConfigManager.getSystemConfig().getSqlFlowControls();
 				}
 			}
 		});
 	}
 
-	private void initWallFilter() {
-		String configManagerType = WallFilterConfig.getConfigManagerType();
-		if (StringUtils.isNotBlank(configManagerType)) {
-			this.configManagerType = configManagerType;
+	@Override
+	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
+		if (chain != null) {
+			sql = chain.sql(conn, sql, isPreparedStmt, chain);
+		}
+		String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
+		
+		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sqlName)) {
+			try {
+				String id = generateId(conn, sqlName);
+
+				checkFlowControl(id);
+
+				return String.format("/*id:%s*/%s", id, sql);
+			} catch (NoSuchAlgorithmException e) {
+				return sql;
+			}
+		} else {
+			return sql;
 		}
 	}
 
-	@Override
-	public String sql(SingleConnection conn, String sql, JdbcFilter chain) throws SQLException {
-		if (chain != null) {
-			sql = chain.sql(conn, sql, chain);
-		}
-
-		if (StringUtils.isBlank(sql)) {
-			return sql;
-		}
-
-		try {
-			String id = generateId(conn, sql);
-			checkBlackList(sql, id);
-			return String.format("/*z:%s*/%s", id, sql);
-		} catch (NoSuchAlgorithmException e) {
-			return sql;
-		}
+	public Map<String, SqlFlowControl> getFlowControl() {
+		return flowControl;
 	}
 }

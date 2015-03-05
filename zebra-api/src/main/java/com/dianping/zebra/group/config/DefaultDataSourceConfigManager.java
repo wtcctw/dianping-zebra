@@ -1,14 +1,15 @@
 package com.dianping.zebra.group.config;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
+import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.BaseVisitor;
 import com.dianping.zebra.group.exception.IllegalConfigException;
-import com.dianping.zebra.group.util.AppPropertiesUtils;
-import com.dianping.zebra.group.util.Splitters;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.AppPropertiesUtils;
+import com.dianping.zebra.util.Splitters;
+import com.dianping.zebra.util.StringUtils;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -23,9 +24,12 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 	private final char pairSeparator = '&';
 
 	private GroupDataSourceConfigBuilder builder;
+	
+	private String jdbcRef;
 
-	public DefaultDataSourceConfigManager(String name, ConfigService configService) {
-		super(name, configService);
+	public DefaultDataSourceConfigManager(String jdbcRef, ConfigService configService) {
+		super(configService);
+		this.jdbcRef = jdbcRef;
 	}
 
 	@Override

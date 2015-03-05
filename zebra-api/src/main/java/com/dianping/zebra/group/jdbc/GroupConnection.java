@@ -1,16 +1,17 @@
 package com.dianping.zebra.group.jdbc;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.router.CustomizedReadWriteStrategy;
+import com.dianping.zebra.group.router.ReadWriteStrategy;
 import com.dianping.zebra.group.router.RouterType;
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
-import com.dianping.zebra.group.util.SqlType;
-import com.dianping.zebra.group.util.SqlUtils;
-import com.dianping.zebra.group.util.StringUtils;
+import com.dianping.zebra.util.JDBCUtils;
+import com.dianping.zebra.util.SqlType;
+import com.dianping.zebra.util.SqlUtils;
+import com.dianping.zebra.util.StringUtils;
 
 import javax.sql.DataSource;
+
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -21,7 +22,7 @@ public class GroupConnection implements Connection {
 
 	private boolean closed = false;
 
-	private CustomizedReadWriteStrategy customizedReadWriteStrategy;
+	private ReadWriteStrategy readWriteStrategy;
 
 	private List<JdbcFilter> filters;
 
@@ -40,12 +41,12 @@ public class GroupConnection implements Connection {
 	private DataSource writeDataSource;
 
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
-			CustomizedReadWriteStrategy customizedReadWriteStrategy, RouterType routerType,
+			ReadWriteStrategy readWriteStrategy, RouterType routerType,
 			List<JdbcFilter> filters) {
 		super();
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
-		this.customizedReadWriteStrategy = customizedReadWriteStrategy;
+		this.readWriteStrategy = readWriteStrategy;
 		this.filters = filters;
 		this.routerType = routerType;
 	}
@@ -118,7 +119,7 @@ public class GroupConnection implements Connection {
 			wConnection = null;
 		}
 
-		JDBCExceptionUtils.throwSQLExceptionIfNeeded(exceptions);
+		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
 	}
 
 	@Override
@@ -398,7 +399,7 @@ public class GroupConnection implements Connection {
 			return getWriteConnection();
 		} else if (!autoCommit || StringUtils.trimToEmpty(sql).contains(Constants.SQL_FORCE_WRITE_HINT)) {
 			return getWriteConnection();
-		} else if (customizedReadWriteStrategy != null && customizedReadWriteStrategy.forceReadFromMaster()) {
+		} else if (readWriteStrategy != null && readWriteStrategy.shouldReadFromMaster()) {
 			return getWriteConnection();
 		}
 

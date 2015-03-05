@@ -1,7 +1,8 @@
 package com.dianping.zebra.monitor.inspect;
 
-import com.dianping.zebra.group.Constants;
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

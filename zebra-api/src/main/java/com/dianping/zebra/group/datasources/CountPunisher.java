@@ -1,6 +1,6 @@
 package com.dianping.zebra.group.datasources;
 
-import com.dianping.zebra.group.util.JDBCExceptionUtils;
+import com.dianping.zebra.util.JDBCUtils;
 
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -82,7 +82,7 @@ public class CountPunisher {
 	}
 
 	public void countAndPunish(SQLException e) {
-		if (JDBCExceptionUtils.isReadOnlyException(e)) {
+		if (JDBCUtils.isReadOnlyException(e)) {
 			count();
 		}
 		// TODO getConnnetion loss exception
