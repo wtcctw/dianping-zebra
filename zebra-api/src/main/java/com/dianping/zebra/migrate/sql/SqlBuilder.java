@@ -16,7 +16,7 @@ public final class SqlBuilder {
 
     private static final String SELECT_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s >= ? AND %s <= ? ORDER BY %s LIMIT ?,?";
 
-    private static final String INSERT_SQL_TEMPLATE = "INSERT IGNORE INTO %s (%s) VALUES (%s)";
+    private static final String INSERT_SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s)";
 
     public static String getInsert(TaskConfig config, ResultSet resultSet) throws SQLException {
         StringBuilder names = new StringBuilder();

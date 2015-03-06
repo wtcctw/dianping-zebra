@@ -95,6 +95,8 @@ public class MigrateWorker {
                                 iPrep.setObject(k, resultSet.getObject(k));
                             }
                             iPrep.executeUpdate();
+                        } catch (SQLException e) {
+                            //todo:
                         } finally {
                             JDBCUtils.closeAll(iPrep, iConn);
                         }
