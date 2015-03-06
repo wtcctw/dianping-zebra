@@ -57,22 +57,10 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     }
 
 
-//    @Test
-//    public void test_welife() throws SQLException {
-//        ShardDataSource sds = new ShardDataSource();
-//        sds.setRuleName("welife");
-//        sds.init();
-//
-//        List<List<Object>> result = SqlExecuteHelper.executeQuery(sds.getConnection(), "select * from welife_users where bid = 2127114697 limit 1");
-//
-//        System.out.println(result);
-//
-//        sds.close();
-//    }
-
     @Test
     public void test_insert_with_key() throws Exception {
         Assert.assertTrue(SqlExecuteHelper.executeUpdate(getZebraDs().getConnection(), "insert into test (id, name, score, type, classid) values (100, 'xxx', 1, 'a', 0)") == 1);
+
         List<List<Object>> expectData = Lists.<List<Object>>newArrayList(Lists.<Object>newArrayList(100, "xxx", 1, "a", 0));
         assertData(getZebraDs().getConnection(), "select id,name,score,type,classid from test where id = 100", expectData);
         assertData(getInnerDs("id2").getConnection(), "select id,name,score,type,classid from test_4 where id = 100", expectData);
