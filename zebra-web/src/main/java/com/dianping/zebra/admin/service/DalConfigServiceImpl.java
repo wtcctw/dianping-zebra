@@ -3,6 +3,9 @@ package com.dianping.zebra.admin.service;
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.LionException;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.dianping.zebra.util.StringUtils;
 import com.google.common.base.Predicate;
@@ -21,6 +24,8 @@ public class DalConfigServiceImpl implements DalConfigService {
 
     @Autowired
     private LionHttpService m_lionHttpService;
+
+    private final static String currentEnv = EnvZooKeeperConfig.getEnv();
 
     private String project = "ds";
 
@@ -133,7 +138,17 @@ public class DalConfigServiceImpl implements DalConfigService {
                 DsConfigModel ds = dsConfigMap.get(dsKey);
                 ConfigProperty config = new ConfigProperty();
                 config.setKey(key);
-                config.setValue(configs.get(key));
+
+                if (env.equals(currentEnv)) {
+                    try {
+                        config.setValue(ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key));
+                    } catch (LionException e) {
+                        config.setValue(null);
+                    }
+                } else {
+                    config.setValue(configs.get(key));
+                }
+
                 config.setNewValue(configs.get(key));
                 ds.getProperties().add(config);
 
