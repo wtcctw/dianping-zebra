@@ -1,20 +1,25 @@
 package com.dianping.zebra.group.datasources;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.DataSourceRouter;
+import com.dianping.zebra.group.router.RetryConnectDataSourceRouter;
 import com.dianping.zebra.group.router.RouterContext;
 import com.dianping.zebra.group.router.RouterTarget;
-import com.dianping.zebra.group.router.WeightDataSourceRouter;
 import com.dianping.zebra.group.util.SqlAliasManager;
 import com.dianping.zebra.util.JDBCUtils;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
 
 public class LoadBalancedDataSource extends AbstractDataSource {
 
@@ -109,6 +114,6 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 			this.dataSources.put(config.getId(), dataSource);
 		}
 
-		this.router = new WeightDataSourceRouter(loadBalancedConfigMap);
+		this.router = new RetryConnectDataSourceRouter(loadBalancedConfigMap);
 	}
 }
