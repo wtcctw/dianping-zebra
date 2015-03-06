@@ -338,7 +338,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             return;
         }
         if ($scope.newDsName.indexOf($scope.name) != 0) {
-            alert('请以 ds.' + $scope.name + ' 开头！');
+            alert('请以 ' + $scope.name + ' 开头！');
             return;
         }
         $scope.data.configs.push({
@@ -374,22 +374,31 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         calGroupPrevoew();
     })
 
-    $scope.newKeys = ['url', 'username', 'password', 'active', 'properties', 'warmupTime', 'driverClass'];
+    $scope.newKeys = ['url', 'username', 'password', 'active', 'properties', 'warmupTime', 'driverClass', 'other'];
 
     $scope.addProperty = function (config) {
         if (!config.properties.newKey) {
             alert('请选择 key ！');
-        } else {
-            config.properties.push({
-                key: 'ds.' + config.id + '.jdbc.' + config.properties.newKey,
-                value: '',
-                isCreate: true,
-                newValue: config.properties.newValue
-            });
-
-            config.properties.newValue = '';
-            config.properties.newKey = '';
+            return;
         }
+
+        if (config.properties.newKey == 'other' && !config.properties.newOtherKey) {
+            alert('请输入新的 key ！');
+            return;
+        }
+
+        var newKey = config.properties.newKey == 'other' ? config.properties.newOtherKey : config.properties.newKey
+
+        config.properties.push({
+            key: 'ds.' + config.id + '.jdbc.' + newKey,
+            value: '',
+            isCreate: true,
+            newValue: config.properties.newValue
+        });
+
+        config.properties.newValue = '';
+        config.properties.newOtherValue = '';
+        config.properties.newKey = '';
     }
 });
 
