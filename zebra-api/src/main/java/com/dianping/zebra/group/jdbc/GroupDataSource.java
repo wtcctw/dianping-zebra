@@ -352,7 +352,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-			      this.filters, systemConfigManager.getSystemConfig().getRetryTimes());
+			      this.filters, systemConfigManager.getSystemConfig());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
 			      this.filters);
@@ -435,8 +435,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.filters, systemConfigManager
-			            .getSystemConfig().getRetryTimes());
+			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.filters,
+			      systemConfigManager.getSystemConfig());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
 			      this.filters);
@@ -516,8 +516,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public synchronized void setCheckoutTimeout(int checkoutTimeout) {
-        //如果这个属性配置成了0，在数据源挂掉，并启动切换成可用的数据源后，可能会有线程无限等待，导致老的数据源无法关闭。
-        //setProperty("checkoutTimeout", String.valueOf(checkoutTimeout));
+		// 如果这个属性配置成了0，在数据源挂掉，并启动切换成可用的数据源后，可能会有线程无限等待，导致老的数据源无法关闭。
+		// setProperty("checkoutTimeout", String.valueOf(checkoutTimeout));
 	}
 
 	public synchronized void setConnectionCustomizerClassName(String connectionCustomizerClassName) {

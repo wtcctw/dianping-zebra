@@ -33,7 +33,6 @@ public final class Constants {
 	public static final String DEFAULT_DATASOURCE_SINGLE_PRFIX = "ds";
 
 	// GroupDataSource
-
 	public final static String SPRING_PROPERTY_FILTER = "filter";
 
 	public static final String SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN = "forceWriteOnLogin";

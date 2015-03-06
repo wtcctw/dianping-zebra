@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.datasources;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -25,14 +26,14 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private DataSourceRouter router;
 
-	private int retryTimes;
+	private SystemConfig systemConfig;
 
 	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
-			List<JdbcFilter> filters, int retryTimes) {
+			List<JdbcFilter> filters, SystemConfig systemConfig) {
 		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
-		this.retryTimes = retryTimes;
 		this.filters = filters;
+		this.systemConfig = systemConfig;
 	}
 
 	public void close() throws SQLException {
@@ -63,7 +64,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 			Set<RouterTarget> excludeTargets = new HashSet<RouterTarget>();
 			List<SQLException> exceptions = new ArrayList<SQLException>();
 
-			while (tmpRetryTimes++ < this.retryTimes) {
+			while (tmpRetryTimes++ < this.systemConfig.getRetryTimes()) {
 				try {
 					Connection conn = this.dataSources.get(target.getId()).getConnection();
 					
