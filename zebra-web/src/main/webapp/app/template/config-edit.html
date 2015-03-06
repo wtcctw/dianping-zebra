@@ -12,9 +12,8 @@
     <form class="form-inline" role="form">
         <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs">
         </select>
-        <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="Search"/>
-        &nbsp;&nbsp;&nbsp;
-        <input required class="form-control input-sm" placeholder="DataSource Id" ng-model="newDsName"/>
+        <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="Search" /> &nbsp;&nbsp;&nbsp;
+        <input required class="form-control input-sm" placeholder="DataSource Id" ng-model="newDsName" />
         <button type="submit" class="btn btn-primary btn-sm" ng-click="addDs()">Add DataSource</button>
         <div class="form-group pull-right">
             <div class="btn-group" dropdown class="">
@@ -24,7 +23,8 @@
                     <span class="sr-only">Split button!</span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
-                    <li><a href="" ng-click="save(true)">Force Save</a></li>
+                    <li><a href="" ng-click="save(true)">Force Save</a>
+                    </li>
                 </ul>
             </div>
             <button title="直接使用当前配置测试，不保存到Lion" type="button" class="btn btn-primary btn-sm" ng-click="test()">Test</button>
@@ -41,46 +41,37 @@
                         <td>
                             <form class="form-inline" role="form">
                                 <div class="btn-group">
-                                    <label ng-class="{'btn-success':config.role.isWrite,'btn-danger':!config.role.isWrite}"
-                                           class="btn btn-sm" ng-model="config.role.isWrite" btn-checkbox>Write</label>
-                                    <label ng-class="{'btn-success':config.role.isRead,'btn-danger':!config.role.isRead}"
-                                           class="btn btn-sm" ng-model="config.role.isRead" btn-checkbox>Read</label>
+                                    <label ng-class="{'btn-success':config.role.isWrite,'btn-danger':!config.role.isWrite}" class="btn btn-sm" ng-model="config.role.isWrite" btn-checkbox>Write</label>
+                                    <label ng-class="{'btn-success':config.role.isRead,'btn-danger':!config.role.isRead}" class="btn btn-sm" ng-model="config.role.isRead" btn-checkbox>Read</label>
                                 </div>
-                                <input ng- placeholder="weight" class="form-control input-sm"
-                                       ng-model="config.role.weight"
-                                       type="number"
-                                       style="width: 75px"/>
+                                <input ng- placeholder="weight" class="form-control input-sm" ng-model="config.role.weight" type="number" style="width: 75px" />
                             </form>
                         </td>
                         <td>
                         </td>
                     </tr>
                     <tr ng-repeat="ds in config.properties">
-                        <td>{{ds.key}}</td>
-                        <td ng-class="{'has-warning':(ds.newValue != ds.value || ds.isDelete) }">
-                            <input ng-disabled="ds.isDelete" style="{{ds.isDelete?'text-decoration:line-through':''}}"
-                                   ng-model="ds.newValue"
-                                   class="form-control input-sm"/>
+                        <td ng-class="{'item-new':ds.isCreate,'item-removed':ds.isDelete,'item-edited':(ds.newValue != ds.value && !ds.isDelete && !ds.isCreate)}">{{ds.key}}</td>
+                        <td ng-class="{'has-warning':(ds.newValue != ds.value || ds.isDelete || ds.isCreate) }">
+                            <input ng-disabled="ds.isDelete" style="{{ds.isDelete?'text-decoration:line-through':''}}" ng-model="ds.newValue" class="form-control input-sm" />
                         </td>
                         <td>
-                            <button ng-class="{active : ds.isDelete}" title="Remove Property"
-                                    ng-click="ds.isDelete = !ds.isDelete"
-                                    class="btn btn-sm btn-danger">
+                            <button ng-class="{active : ds.isDelete}" title="Remove Property" ng-click="ds.isDelete = !ds.isDelete" class="btn btn-sm btn-danger">
                                 <span class="glyphicon glyphicon-minus"></span>
                             </button>
                         </td>
                     </tr>
                     <tr>
-                        <td>
-                        <select style="width: 200px" class="form-control input-sm" ng-model="config.properties.newKey" ng-options="item as item for item in newKeys">
-                        </select>
+                        <td class="form-inline">
+                            <select style="width: 100px" class="form-control input-sm" ng-model="config.properties.newKey" ng-options="item as item for item in newKeys">
+                            </select>
+                             <input style="width: 150px" ng-show ="config.properties.newKey == 'other'" placeholder="new key" ng-model="config.properties.newOtherKey" class="form-control input-sm" />
                         </td>
-                        <td><input required placeholder="value" ng-model="config.properties.newValue"
-                                   class="form-control input-sm"/></td>
                         <td>
-                            <button title="Add Property"
-                                    ng-click="addProperty(config)"
-                                    class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span>
+                            <input required placeholder="value" ng-model="config.properties.newValue" class="form-control input-sm" />
+                        </td>
+                        <td>
+                            <button title="Add Property" ng-click="addProperty(config)" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-plus"></span>
                             </button>
                         </td>
                     </tr>
@@ -98,7 +89,8 @@
                 <span class="sr-only">Split button!</span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li><a href="" ng-click="save(true)">Force Save</a></li>
+                <li><a href="" ng-click="save(true)">Force Save</a>
+                </li>
             </ul>
         </div>
         <button title="直接使用当前配置测试，不保存到Lion" type="button" class="btn btn-primary btn-sm" ng-click="test()">Test</button>

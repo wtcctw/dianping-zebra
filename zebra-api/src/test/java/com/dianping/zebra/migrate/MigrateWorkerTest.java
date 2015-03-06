@@ -9,6 +9,7 @@ import com.dianping.zebra.migrate.task.TaskConfig;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.dianping.zebra.util.ConfigServiceMock;
 import com.dianping.zebra.util.SqlExecuteHelper;
+import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +58,15 @@ public class MigrateWorkerTest {
     }
 
     @Test
-    public void test_init() {
+    public void test_migrate() throws SQLException {
+        //验证一开始是没数据的
+        for (int k = 1; k <= 100; k++) {
+            Assert.assertEquals(0, SqlExecuteHelper.executeQuery(
+                    shardDataSource.getConnection(true),
+                    String.format("SELECT * FROM test_shard where id = %d", k)).size());
+        }
+
+        //第一次迁移
         MigrateWorker.MigrateWorkerRunner runner = migrateWorker.new MigrateWorkerRunner();
         runner.processMigrate(new TaskConfig()
                         .setTaskId(1)
@@ -67,21 +76,48 @@ public class MigrateWorkerTest {
                         .setPageSize(10)
                         .setKeyName("id")
         );
+
+        //验证数据是否存在
+        for (int k = 1; k <= 100; k++) {
+            Assert.assertEquals(1, SqlExecuteHelper.executeQuery(
+                    shardDataSource.getConnection(true),
+                    String.format("SELECT * FROM test_shard where id = %d", k)).size());
+        }
+
+        //第二次迁移
+        runner.processMigrate(new TaskConfig()
+                        .setTaskId(1)
+                        .setTableName("test_shard")
+                        .setKeyStart(1)
+                        .setKeyEnd(100)
+                        .setPageSize(10)
+                        .setKeyName("id")
+        );
+
+        //验证数据是否重复
+        for (int k = 1; k <= 100; k++) {
+            Assert.assertEquals(1, SqlExecuteHelper.executeQuery(
+                    shardDataSource.getConnection(true),
+                    String.format("SELECT * FROM test_shard where id = %d", k)).size());
+        }
     }
 
     public void createTableData() throws SQLException {
         String createOrigin = "CREATE TABLE test_shard(" +
-                "id INT," +
-                "name VARCHAR(255)" +
+                "id INT NOT NULL," +
+                "name VARCHAR(255)," +
+                "PRIMARY KEY (id)" +
                 ")";
 
         String create0 = "CREATE TABLE test_shard0(" +
-                "id INT," +
-                "name VARCHAR(255)" +
+                "id INT NOT NULL," +
+                "name VARCHAR(255)," +
+                "PRIMARY KEY (id)" +
                 ")";
         String create1 = "CREATE TABLE test_shard1(" +
-                "id INT," +
-                "name VARCHAR(255)" +
+                "id INT NOT NULL," +
+                "name VARCHAR(255)," +
+                "PRIMARY KEY (id)" +
                 ")";
 
         SqlExecuteHelper.executeUpdate(dsOrigin.getConnection(), createOrigin);
@@ -125,7 +161,7 @@ public class MigrateWorkerTest {
     public void initConfigs() {
         configService = new ConfigServiceMock();
         configService
-                .addProperty(LionKey.getShardConfigKey(rule), "{\"tableShardConfigs\":[{\"tableName\":\"test_shard\",\"dimensionConfigs\":[{\"dbRule\":\"(#id# % 2)\",\"dbIndexes\":\"test_shard0,test_shard1\",\"tbRule\":\"((#id# / 2).toLong() % 2)\",\"tbSuffix\":\"everydb:[0,1]\",\"isMaster\":true,\"exceptions\":[]}],\"generatedPK\":\"pk\"}]}")
+                .addProperty(LionKey.getShardConfigKey(rule), "{\"tableShardConfigs\":[{\"tableName\":\"test_shard\",\"dimensionConfigs\":[{\"dbRule\":\"((#id#).toLong() % 2)\",\"dbIndexes\":\"test_shard0,test_shard1\",\"tbRule\":\"(((#id#).toLong() / 2).toLong() % 2)\",\"tbSuffix\":\"everydb:[0,1]\",\"isMaster\":true,\"exceptions\":[]}],\"generatedPK\":\"pk\"}]}")
                 .addProperty(LionKey.getShardOriginDatasourceKey(rule), "test")
                 .addProperty(LionKey.getGroupDsConfigKey("test_shard"), "(test_shard-1),(test_shard-1:1)") // origin
                 .addProperty(LionKey.getGroupDsConfigKey("test_shard0"), "(test_shard0-1),(test_shard0-1:1)") // shard1

@@ -95,16 +95,20 @@ public class MigrateWorker {
                                 iPrep.setObject(k, resultSet.getObject(k));
                             }
                             iPrep.executeUpdate();
+                        } catch (SQLException e) {
+                            //todo:异常检测
                         } finally {
                             JDBCUtils.closeAll(iPrep, iConn);
                         }
                     }
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    //todo:异常检测
                 } finally {
                     JDBCUtils.closeAll(resultSet, sPrep, sConn);
                 }
             }
+
+            //todo: 上传结果
         }
     }
 }

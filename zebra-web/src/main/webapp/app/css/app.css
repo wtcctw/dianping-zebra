@@ -11,3 +11,16 @@
     width: 500px !important;
     max-width: 500px !important;
 }
+
+.item-new {
+    color: #5cb85c;
+}
+
+.item-edited {
+    color: #d9534f;
+}
+
+.item-removed {
+    color: #d9534f;
+    text-decoration: line-through;
+}
