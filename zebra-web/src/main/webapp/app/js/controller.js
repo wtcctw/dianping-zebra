@@ -357,7 +357,9 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         force = !!force;
         $http.post('/a/config/updateds?force=' + force, angular.toJson($scope.data))
             .success(function (data, status, headers, config) {
+                alert('保存成功！');
                 close();
+                configService.openTestModal($scope.name);
             });
     }
 
