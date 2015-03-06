@@ -26,22 +26,18 @@ public final class Constants {
 
 	public static final String DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX = "zebra-sql-blacklist";
 
-    public static final String DEFAULT_SHARDING_PRFIX = "shardds";
+	public static final String DEFAULT_SHARDING_PRFIX = "shardds";
 
 	public static final String ZEBRA_FILTER_PRFIX = "zebra.filter.";
 
 	public static final String DEFAULT_DATASOURCE_SINGLE_PRFIX = "ds";
 
-	public static final String DEFAULT_SYSTEM_RESOURCE_ID = "zebra.v2.system";
-	
 	// GroupDataSource
-	
+
 	public final static String SPRING_PROPERTY_FILTER = "filter";
 
 	public static final String SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN = "forceWriteOnLogin";
-	
-	public static final String SPRING_PROPERTY_ROUTER_STRATEGY = "routerStrategy";
-	
+
 	public static final String SPRING_PROPERTY_EXTRA_JDBC_URL_PARAMS = "extraJdbcUrlParams";
 
 	// DataSource
@@ -69,7 +65,7 @@ public final class Constants {
 
 	// System
 	public static final String ELEMENT_RETRY_TIMES = "retryTimes";
-	
+
 	public static final String ELEMENT_FLOW_CONTROL = "flowControl";
 
 	// router

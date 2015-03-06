@@ -64,12 +64,12 @@ public final class SqlUtils {
 	public static String buildSqlType(String sql) {
 		try {
 			char c = sql.trim().charAt(0);
-			if (c == '/') {
+			if (c == 's' || c == 'S') {
+				return "Select";
+			} else if (c == '/') {
 				if (sql.contains(Constants.SQL_FORCE_WRITE_HINT)) {
 					return "Select";
 				}
-			} else if (c == 's' || c == 'S') {
-				return "Select";
 			} else if (c == 'u' || c == 'U') {
 				return "Update";
 			} else if (c == 'i' || c == 'I') {
