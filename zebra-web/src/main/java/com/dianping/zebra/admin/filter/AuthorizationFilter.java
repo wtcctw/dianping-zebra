@@ -30,6 +30,8 @@ public class AuthorizationFilter implements Filter {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("AuthorizationFilter")) {
                     cookie.setMaxAge(60 * 30);
+                    cookie.setValue("AuthorizationFilter");
+                    cookie.setPath("/");
                     rsp.addCookie(cookie);
                     chain.doFilter(request, response);
                     return;

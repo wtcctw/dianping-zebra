@@ -303,7 +303,6 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
     }
 
     $scope.$watch('config.env', $scope.load);
-    $scope.load();
 
     var calGroupPrevoew = function () {
         if (!$scope.data) {
@@ -450,7 +449,6 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
         }
     }
     $scope.$watch('config.env', $scope.load);
-    $scope.load();
 
     $scope.createGroupDs = function () {
         if ($scope.addText) {
@@ -491,7 +489,6 @@ zebraWeb.controller('merge-edit', function ($scope, $http, $log, name, close) {
     }
 
     $scope.$watch('config.env', $scope.load);
-    $scope.load();
 
     $scope.close = function () {
         close();

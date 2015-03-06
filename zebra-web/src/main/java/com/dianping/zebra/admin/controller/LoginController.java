@@ -25,6 +25,8 @@ public class LoginController {
         if ("zebra".equals(loginDto.getUsername()) && "zebra".equals(loginDto.getPassword())) {
             Cookie cookie = new Cookie("AuthorizationFilter", "");
             cookie.setMaxAge(60 * 30);
+            cookie.setPath("/");
+            cookie.setValue("AuthorizationFilter");
             response.addCookie(cookie);
             return null;
         } else {
