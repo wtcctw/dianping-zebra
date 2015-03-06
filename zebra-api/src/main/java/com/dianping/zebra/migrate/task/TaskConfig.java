@@ -9,7 +9,7 @@ public class TaskConfig {
 
     public final static String TASK_TYPE_MIGRATE = "migrate";
 
-    public final static String TASK_TYPE_VERIFY= "verify";
+    public final static String TASK_TYPE_VERIFY = "verify";
 
     private int taskId;
 
@@ -20,7 +20,7 @@ public class TaskConfig {
     // where key >= keyStart
     private int keyStart;
 
-    // where key < keyEnd
+    // where key <= keyEnd
     private int keyEnd;
 
     //limit 1000
@@ -34,63 +34,72 @@ public class TaskConfig {
         return taskType;
     }
 
-    public void setTaskType(String taskType) {
+    public TaskConfig setTaskType(String taskType) {
         this.taskType = taskType;
+        return this;
     }
 
     public String getTableName() {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
+    public TaskConfig setTableName(String tableName) {
         this.tableName = tableName;
+        return this;
+
     }
 
     public int getTaskId() {
         return taskId;
     }
 
-    public void setTaskId(int taskId) {
+    public TaskConfig setTaskId(int taskId) {
         this.taskId = taskId;
+        return this;
     }
 
     public String getKeyName() {
         return keyName;
     }
 
-    public void setKeyName(String keyName) {
+    public TaskConfig setKeyName(String keyName) {
         this.keyName = keyName;
+        return this;
     }
 
     public int getKeyStart() {
         return keyStart;
     }
 
-    public void setKeyStart(int keyStart) {
+    public TaskConfig setKeyStart(int keyStart) {
         this.keyStart = keyStart;
+        return this;
     }
 
     public int getKeyEnd() {
         return keyEnd;
     }
 
-    public void setKeyEnd(int keyEnd) {
+    public TaskConfig setKeyEnd(int keyEnd) {
         this.keyEnd = keyEnd;
+        return this;
     }
 
     public int getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(int pageSize) {
+    public TaskConfig setPageSize(int pageSize) {
         this.pageSize = pageSize;
+        return this;
     }
 
     public int getSleepSecondsAfterPerQuery() {
         return sleepSecondsAfterPerQuery;
     }
 
-    public void setSleepSecondsAfterPerQuery(int sleepSecondsAfterPerQuery) {
+    public TaskConfig setSleepSecondsAfterPerQuery(int sleepSecondsAfterPerQuery) {
         this.sleepSecondsAfterPerQuery = sleepSecondsAfterPerQuery;
+        return this;
     }
 }

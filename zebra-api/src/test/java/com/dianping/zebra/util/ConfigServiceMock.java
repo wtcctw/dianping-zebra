@@ -21,7 +21,9 @@ public class ConfigServiceMock implements ConfigService {
 
     @Override
     public String getProperty(String key) {
-        return configs.get(key);
+        String result = configs.get(key);
+        System.out.println(String.format("Read Config: key = %s  value = %s", key, result));
+        return result;
     }
 
     @Override

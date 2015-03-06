@@ -118,7 +118,8 @@ public class ShardDataSource extends AbstractDataSource {
             final String switchOnValue = configService.getProperty(LionKey.getShardSiwtchOnKey(ruleName));
 
             this.switchOn = "true".equals(switchOnValue);
-            if (StringUtils.isNotBlank(originDataSourceName)) {
+
+            if (originDataSource == null && StringUtils.isNotBlank(originDataSourceName)) {
                 GroupDataSource groupDataSource = new GroupDataSource(originDataSourceName);
                 groupDataSource.init();
                 this.originDataSource = groupDataSource;
@@ -168,6 +169,10 @@ public class ShardDataSource extends AbstractDataSource {
 
     public void setConfigService(ConfigService configService) {
         this.configService = configService;
+    }
+
+    public void setOriginDataSource(DataSource originDataSource) {
+        this.originDataSource = originDataSource;
     }
 
     public DataSource getOriginDataSource() {

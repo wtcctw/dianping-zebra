@@ -41,7 +41,9 @@ public class MigrateWorker {
     }
 
     public void close() {
-        this.workerThread.interrupt();
+        if (this.workerThread != null) {
+            this.workerThread.interrupt();
+        }
     }
 
     public void setShardDataSource(ShardDataSource shardDataSource) {
@@ -62,7 +64,7 @@ public class MigrateWorker {
             }
         }
 
-        private void processMigrate(TaskConfig task) {
+        protected void processMigrate(TaskConfig task) {
             String selectSql = SqlBuilder.getSelect(task);
             int pageIndex = 0;
             while (task.getPageSize() * pageIndex < task.getKeyEnd() - task.getKeyStart()) {

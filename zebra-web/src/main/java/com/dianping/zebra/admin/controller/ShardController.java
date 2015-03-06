@@ -102,6 +102,8 @@ public class ShardController {
             return "成功！";
         } catch (Exception exp) {
             return exp.getMessage();
+        } finally {
+            ds.close();
         }
     }
 
