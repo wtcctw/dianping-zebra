@@ -18,8 +18,10 @@ public class SqlAliasManager {
 
     private static final int MAX_ALLOWED_TRUNCATED_SQL_NUM = 2000;
 
-    private static final Map<String, String> cachedTruncatedSqls = new ConcurrentHashMap<String, String>(
+    private static final Map<String, Object> cachedTruncatedSqls = new ConcurrentHashMap<String, Object>(
             MAX_ALLOWED_TRUNCATED_SQL_NUM);
+
+    private static final Object PRESENT = new Object();
 
     public static String getAvatarSqlAlias() {
         return ExecutionContextHolder.getContext().get(SQL_NAME);
@@ -37,7 +39,7 @@ public class SqlAliasManager {
         if (!cachedTruncatedSqls.containsKey(sql) && cachedTruncatedSqls.size() > MAX_ALLOWED_TRUNCATED_SQL_NUM) {
             return null;
         } else {
-            cachedTruncatedSqls.put(sql, null);
+            cachedTruncatedSqls.put(sql, PRESENT);
             return sql;
         }
     }
