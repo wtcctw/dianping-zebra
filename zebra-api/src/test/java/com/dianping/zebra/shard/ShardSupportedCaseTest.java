@@ -3,10 +3,13 @@ package com.dianping.zebra.shard;
 import com.dianping.zebra.shard.jdbc.ZebraMultiDBBaseTestCase;
 import com.dianping.zebra.util.SqlExecuteHelper;
 import com.google.common.collect.Lists;
+
 import junit.framework.Assert;
+
 import org.junit.Test;
 
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -61,7 +64,8 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     public void test_insert_with_key() throws Exception {
         Assert.assertTrue(SqlExecuteHelper.executeUpdate(getZebraDs().getConnection(), "insert into test (id, name, score, type, classid) values (100, 'xxx', 1, 'a', 0)") == 1);
 
-        List<List<Object>> expectData = Lists.<List<Object>>newArrayList(Lists.<Object>newArrayList(100, "xxx", 1, "a", 0));
+        @SuppressWarnings("unchecked")
+      List<List<Object>> expectData = Lists.<List<Object>>newArrayList(Lists.<Object>newArrayList(100, "xxx", 1, "a", 0));
         assertData(getZebraDs().getConnection(), "select id,name,score,type,classid from test where id = 100", expectData);
         assertData(getInnerDs("id2").getConnection(), "select id,name,score,type,classid from test_4 where id = 100", expectData);
         assertData(getInnerDs("id0").getConnection(), "select id,name,score,type,classid from test_1 where id = 100", Lists.<List<Object>>newArrayList());
@@ -141,7 +145,7 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
 
     @Test
     public void test_select_with_group() throws SQLException {
-        List<List<Object>> data = SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select type,count(id) as id_count from test group by type");
+        SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select type,count(id) as id_count from test group by type");
     }
 
     @Test

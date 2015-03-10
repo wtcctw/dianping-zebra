@@ -3,7 +3,6 @@ package com.dianping.zebra.shard.router.rule;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
-import junit.framework.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
