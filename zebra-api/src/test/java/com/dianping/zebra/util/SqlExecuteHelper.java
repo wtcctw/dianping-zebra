@@ -1,6 +1,7 @@
 package com.dianping.zebra.util;
 
 import com.google.common.collect.Lists;
+
 import groovy.sql.GroovyRowResult;
 import groovy.sql.Sql;
 
@@ -34,7 +35,8 @@ public final class SqlExecuteHelper {
         return result;
     }
 
-    public static List<List<Object>> executeQuery(Connection conn, String sql) throws SQLException {
+    @SuppressWarnings("unchecked")
+   public static List<List<Object>> executeQuery(Connection conn, String sql) throws SQLException {
         System.out.println(sql);
         Sql client = new Sql(conn);
         List<GroovyRowResult> rows = client.rows(sql);

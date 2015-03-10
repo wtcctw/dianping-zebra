@@ -10,6 +10,7 @@ import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
 import com.google.gson.Gson;
 
 import javax.sql.DataSource;
+
 import java.util.Map;
 
 /**
@@ -17,10 +18,11 @@ import java.util.Map;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
+@SuppressWarnings("unused")
 public class ConfigServiceDataSourceRouterFactory extends AbstractDataSourceRouterFactory {
-    private final ConfigService configService;
+   private final ConfigService configService;
 
-    private final String ruleName;
+   private final String ruleName;
 
     private final RouterRuleConfig routerConfig;
 
