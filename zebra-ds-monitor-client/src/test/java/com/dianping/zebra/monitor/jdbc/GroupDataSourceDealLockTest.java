@@ -6,11 +6,14 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 import groovy.sql.Sql;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -38,10 +41,31 @@ public class GroupDataSourceDealLockTest {
 		ds.init();
 
 		Connection conn = ds.getConnection();
-		new Sql(conn).execute(
-			"create table if not exists PERSON (\n" + "  ID int identity primary key,\n" + "  NAME varchar,\n"
-				+ "  LAST_NAME varchar,\n" + "  AGE  smallint\n" + ")");
+
+		new Sql(conn).execute("DROP TABLE IF EXISTS PERSON");
+
+		new Sql(conn).execute("create table PERSON (\n" + "  ID int identity primary key,\n" + "  NAME varchar,\n"
+			+ "  LAST_NAME varchar,\n" + "  AGE  smallint\n" + ")");
 		conn.close();
+	}
+
+	@AfterClass
+	public static void cleanup() throws SQLException {
+		ds.close();
+	}
+
+	@Test
+	@Ignore
+	public void test_multi_thread_long_test() throws Exception {
+		while (true) {
+			test_multi_thread();
+
+			Connection conn = ds.getConnection();
+			new Sql(conn).execute("Delete from PERSON");
+			conn.close();
+
+			System.out.println("I'm running! " + new Date().toString());
+		}
 	}
 
 	@Test(timeout = 60 * 1000)
@@ -98,7 +122,6 @@ public class GroupDataSourceDealLockTest {
 
 		executorService.shutdown();
 		executorService.awaitTermination(60, TimeUnit.SECONDS);
-		ds.close();
 
 		for (Exception e : exps) {
 			throw e;
@@ -122,6 +145,8 @@ public class GroupDataSourceDealLockTest {
 	}
 
 	private void selectItem() throws SQLException {
+		execute("select * from PERSON where id = %d");
+		execute("select * from PERSON where id = %d");
 		execute("select * from PERSON where id = %d");
 	}
 
