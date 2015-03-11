@@ -48,6 +48,8 @@ public class MonitorableDataSource implements DataSource {
 		try {
 			conn = innerDataSource.getConnection();
 			this.jdbcUrl = conn.getMetaData().getURL();
+			
+			Cat.logEvent("SQL.JdbcUrl", this.jdbcUrl);
 		} catch (Exception ignore) {
 		} finally {
 			try {
@@ -62,13 +64,15 @@ public class MonitorableDataSource implements DataSource {
 		try{
 			return new MonitorableConnection(innerDataSource.getConnection());
 		}catch(SQLException e){
-			Transaction t = Cat.newTransaction("SQL", null);
-
-			try {
-				Cat.logEvent("SQL.Database", jdbcUrl, "ERROR", null);
-				t.setStatus(e);
-			} finally {
-				t.complete();
+			if(jdbcUrl != null){
+				Transaction t = Cat.newTransaction("SQL", null);
+				
+				try {
+					Cat.logEvent("SQL.Database", jdbcUrl, "ERROR", null);
+					t.setStatus(e);
+				} finally {
+					t.complete();
+				}
 			}
 
 			throw e;
