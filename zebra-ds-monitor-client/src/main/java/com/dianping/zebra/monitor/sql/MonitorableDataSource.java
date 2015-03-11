@@ -23,6 +23,9 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.dianping.cat.Cat;
+import com.dianping.cat.message.Transaction;
+
 
 /**
  * 该<code>DataSource</code>用于收集各底层DataSource的执行信息，包括sql, sql params, sql destination, 执行耗时等信息
@@ -35,14 +38,41 @@ public class MonitorableDataSource implements DataSource {
 	 * 被监控的DataSource
 	 */
 	private DataSource innerDataSource;
+	
+	private String jdbcUrl;
 
 	public MonitorableDataSource(DataSource innerDataSource) {
 		this.innerDataSource = getInnerDataSource(innerDataSource);
+		
+		Connection conn = null;
+		try {
+			conn = innerDataSource.getConnection();
+			this.jdbcUrl = conn.getMetaData().getURL();
+		} catch (Exception ignore) {
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+			}
+		}
 	}
 
 	@Override
 	public Connection getConnection() throws SQLException {
-		return new MonitorableConnection(innerDataSource.getConnection());
+		try{
+			return new MonitorableConnection(innerDataSource.getConnection());
+		}catch(SQLException e){
+			Transaction t = Cat.newTransaction("SQL", null);
+
+			try {
+				Cat.logEvent("SQL.Database", jdbcUrl, "ERROR", null);
+				t.setStatus(e);
+			} finally {
+				t.complete();
+			}
+
+			throw e;
+		}
 	}
 
 	@Override
