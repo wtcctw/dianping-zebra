@@ -55,7 +55,7 @@ public class RouterRuleBuilder {
 		Collections.sort(dimensionConfigs, new Comparator<TableShardDimensionConfig>() {
 			@Override
 			public int compare(TableShardDimensionConfig o1, TableShardDimensionConfig o2) {
-				return new Boolean(o2.isMaster()).compareTo(new Boolean(o1.isMaster()));
+				return Boolean.valueOf(o2.isMaster()).compareTo(Boolean.valueOf(o1.isMaster()));
 			}
 		});
 	}
