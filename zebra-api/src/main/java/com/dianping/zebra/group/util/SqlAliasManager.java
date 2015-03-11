@@ -48,6 +48,9 @@ public class SqlAliasManager {
         int sqlHash = sql.hashCode();
 
         if (!cachedTruncatedSqls.containsKey(sqlHash)) {
+            if (cachedTruncatedSqlsIsFull) {
+                return MORE_SQL_NAME;
+            }
             cachedTruncatedSqls.put(sqlHash, PRESENT);
         }
         return sql;
