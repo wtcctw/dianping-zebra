@@ -20,11 +20,11 @@ import com.google.gson.JsonParser;
 @Service
 public class CmdbServiceImpl implements CmdbService {
 
-	private final String CMDB_QUERY_URL = "http://10.1.130.125/api/v0.1/ip/%s/projects";
+	private static final String CMDB_QUERY_URL = "http://10.1.130.125/api/v0.1/ip/%s/projects";
 
-	private final String CMDB_BATCH_QUERY_URL = "http://10.1.130.125/api/v0.1/projects/by_ips";
+	private static final String CMDB_BATCH_QUERY_URL = "http://10.1.130.125/api/v0.1/projects/by_ips";
 
-	private final String QUOTE = "\"\"";
+	private static final String QUOTE = "\"\"";
 
 	@Autowired
 	private HttpService httpService;
