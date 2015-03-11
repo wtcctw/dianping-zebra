@@ -41,8 +41,10 @@ public class StartServer {
 
 		try {
 			monitor.connect();
-		} catch (ClassNotFoundException e) {
-		}
+		} catch (Exception e) {
+			System.err.println(e);
+			return;
+      }
 
 		while (true) {
 			try {

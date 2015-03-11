@@ -38,7 +38,7 @@ public class MySQLMonitor {
 				String key = entryConfig.getKey();
 				DataSourceConfig config = entryConfig.getValue();
 
-				if (config.isCanRead() && config.isActive()) {
+				if (config.isCanRead()) {
 					dataSourceConfigs.put(key, config);
 				}
 			}
@@ -68,7 +68,7 @@ public class MySQLMonitor {
 		for (DataSourceConfig dsConfig : this.dataSourceConfigs.values()) {
 			MySQLPingThread ping = new MySQLPingThread(this.monitorConfig, dsConfig);
 			ping.setName("Dal-Monitor-Slave-" + dsConfig.getId());
-
+			ping.setDaemon(true);
 			ping.start();
 
 			tmpMonitorThreads.add(ping);

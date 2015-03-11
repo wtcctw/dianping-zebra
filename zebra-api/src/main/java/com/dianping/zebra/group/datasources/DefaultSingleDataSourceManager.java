@@ -38,7 +38,14 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 			dataSourceMonitor.start();
 		}
 	}
-
+	
+	@Override
+	public synchronized void stop(){
+		if(dataSourceMonitor != null){
+			dataSourceMonitor.interrupt();
+		}
+	}
+	
 	class CloseDataSourceTask implements Runnable {
 		@Override
 		public void run() {

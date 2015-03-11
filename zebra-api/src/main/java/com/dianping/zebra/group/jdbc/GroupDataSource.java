@@ -216,6 +216,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			exps.add(e);
 		}
 
+		SingleDataSourceManagerFactory.getDataSourceManager().stop();
+		
 		JDBCUtils.throwSQLExceptionIfNeeded(exps);
 	}
 

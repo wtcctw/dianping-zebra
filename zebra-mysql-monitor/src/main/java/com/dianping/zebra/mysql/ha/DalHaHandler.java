@@ -18,7 +18,7 @@ public class DalHaHandler {
 
 	private static final String LION_SET_CONFIG_URL = "http://lionapi.dp:8080/config2/set?env=%s&id=%s&key=%s&value=%s";
 
-	private static final String DEFAULT_ENV = "product";
+	private static String DEFAULT_ENV = EnvZooKeeperConfig.getEnv();
 
 	private static final String ID = "2";
 

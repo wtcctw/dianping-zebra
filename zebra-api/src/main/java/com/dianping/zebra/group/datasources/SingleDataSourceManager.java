@@ -12,4 +12,6 @@ public interface SingleDataSourceManager {
 	public void destoryDataSource(SingleDataSource dataSource);
 
 	public void init();
+	
+	public void stop();
 }

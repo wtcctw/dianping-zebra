@@ -11,8 +11,8 @@ import com.dianping.zebra.mysql.ha.DalHaHandler;
 
 public class MySQLPingThread extends Thread {
 
-	/* ping失败超过4次，则将该读库mark down */
-	private int PING_FAIL_LIMIT = 4;
+	/* ping失败超过4次，则将该读库mark down ; 或者成功超过4次，则将该读库mark up */
+	private int PING_LIMIT = 4;
 
 	/* 每次ping的间隔时间 */
 	private int INTERVAL_SECONDS = 2;
@@ -21,17 +21,52 @@ public class MySQLPingThread extends Thread {
 
 	private int pingFailCounter = 0;
 
+	private int pingSuccessCounter = 0;
+
 	private MySQLConfig monitorConfig;
+
+	private int validPeriod;
 
 	public MySQLPingThread(MySQLConfig monitorConfig, DataSourceConfig config) {
 		this.monitorConfig = monitorConfig;
 		this.config = config;
-		this.PING_FAIL_LIMIT = this.monitorConfig.getPingFailLimit();
+		this.PING_LIMIT = this.monitorConfig.getPingFailLimit();
 		this.INTERVAL_SECONDS = this.monitorConfig.getPingIntervalSeconds();
+		this.validPeriod = this.PING_LIMIT * this.INTERVAL_SECONDS * 1000;
 	}
 
 	@Override
 	public void run() {
+		// 如果该库是active=false的状态，则自动ping检测markup
+		if (!config.getActive()) {
+			while (!Thread.currentThread().isInterrupted()) {
+				Connection con = null;
+				Statement stmt = null;
+
+				try {
+					con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
+					stmt = con.createStatement();
+					stmt.executeQuery(monitorConfig.getTestSql());
+
+					this.pingSuccessCounter++;
+
+					if (pingSuccessCounter == PING_LIMIT) {
+						DalHaHandler.markup(config.getId());
+
+						break;
+					}
+				} catch (SQLException ignore) {
+				}
+
+				try {
+					TimeUnit.SECONDS.sleep(INTERVAL_SECONDS);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+		}
+
+		// 如果该库是active=true的状态，则自动ping检测markdown
 		while (!Thread.currentThread().isInterrupted()) {
 			Connection con = null;
 			Statement stmt = null;
@@ -40,18 +75,10 @@ public class MySQLPingThread extends Thread {
 				con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
 				stmt = con.createStatement();
 				stmt.executeQuery(monitorConfig.getTestSql());
-
-				if (pingFailCounter > 0) {
-					pingFailCounter--;
-
-					if (pingFailCounter == 0) {
-						DalHaHandler.markup(config.getId());
-					}
-				}
 			} catch (SQLException e) {
-				pingFailCounter++;
-
-				if (pingFailCounter == PING_FAIL_LIMIT) {
+				if (pingFailCounter < PING_LIMIT) {
+					pingFailCounter++;
+				} else if (pingFailCounter == PING_LIMIT) {
 					DalHaHandler.markdown(config.getId());
 				}
 			} finally {
@@ -71,7 +98,7 @@ public class MySQLPingThread extends Thread {
 
 			try {
 				TimeUnit.SECONDS.sleep(INTERVAL_SECONDS);
-			} catch (InterruptedException e1) {
+			} catch (InterruptedException e) {
 				break;
 			}
 		}
