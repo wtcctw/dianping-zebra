@@ -77,7 +77,7 @@ public class GroupDataSourceDealLockTest {
 			public void run() {
 				try {
 					addItem();
-				} catch (SQLException e) {
+				} catch (Exception e) {
 					exps.add(e);
 					e.printStackTrace();
 				}
@@ -89,7 +89,7 @@ public class GroupDataSourceDealLockTest {
 			public void run() {
 				try {
 					updateItem();
-				} catch (SQLException e) {
+				} catch (Exception e) {
 					exps.add(e);
 					e.printStackTrace();
 				}
@@ -101,7 +101,7 @@ public class GroupDataSourceDealLockTest {
 			public void run() {
 				try {
 					selectItem();
-				} catch (SQLException e) {
+				} catch (Exception e) {
 					exps.add(e);
 					e.printStackTrace();
 				}
@@ -113,7 +113,7 @@ public class GroupDataSourceDealLockTest {
 			public void run() {
 				try {
 					deleteItem();
-				} catch (SQLException e) {
+				} catch (Exception e) {
 					exps.add(e);
 					e.printStackTrace();
 				}
