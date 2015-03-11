@@ -121,7 +121,11 @@ public class GroupDataSourceDealLockTest {
 		});
 
 		executorService.shutdown();
-		executorService.awaitTermination(60, TimeUnit.SECONDS);
+		boolean isFinish = executorService.awaitTermination(60, TimeUnit.SECONDS);
+
+		if (!isFinish) {
+			throw new Exception("Timeout!");
+		}
 
 		for (Exception e : exps) {
 			throw e;
