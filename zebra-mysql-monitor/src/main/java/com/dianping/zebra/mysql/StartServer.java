@@ -15,17 +15,15 @@ public class StartServer {
 	private static final String key2 = "zebra.monitor.sleep.interval";
 
 	public static void main(String[] args) throws LionException {
-		if (args == null || args.length != 2) {
+		if (args == null || args.length != 1) {
 			usage();
 			return;
 		}
 
 		String jdbcRef = args[0];
-		String testSql = args[1];
 
 		MySQLConfig mysqlConfig = new MySQLConfig();
 		mysqlConfig.setJdbcRef(jdbcRef);
-		mysqlConfig.setTestSql(testSql);
 
 		String limit = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key1);
 		if (limit != null) {
@@ -41,10 +39,12 @@ public class StartServer {
 
 		try {
 			monitor.connect();
+
+			System.out.println("Zebra-Slave-Monitor is started to monitor " + jdbcRef + " cluster.");
 		} catch (Exception e) {
 			System.err.println(e);
 			return;
-      }
+		}
 
 		while (true) {
 			try {
@@ -57,6 +57,6 @@ public class StartServer {
 
 	public static void usage() {
 		System.out.println("---dal slave monitor usage---");
-		System.out.println("com.dianping.zebra.mysql.StartServer {jdbcRef} {testSql}");
+		System.out.println("com.dianping.zebra.mysql.StartServer {jdbcRef}");
 	}
 }

@@ -8,7 +8,7 @@ public class MySQLConfig {
 	
 	private String password;
 	
-	private String testSql;
+	private String testSql = "SELECT 1";
 	
 	private int pingFailLimit = 10;
 	

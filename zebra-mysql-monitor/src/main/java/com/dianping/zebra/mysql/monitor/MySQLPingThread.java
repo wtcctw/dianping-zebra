@@ -49,6 +49,7 @@ public class MySQLPingThread extends Thread {
 					if (timestamp.shouldAction()) {
 						DalHaHandler.markup(config.getId());
 
+						System.out.println("markup " + config.getId());
 						break;
 					}
 				} catch (SQLException ignore) {
@@ -79,6 +80,8 @@ public class MySQLPingThread extends Thread {
 
 				if (timestamp.shouldAction()) {
 					DalHaHandler.markdown(config.getId());
+					System.out.println("markdown " + config.getId());
+
 					break;
 				}
 			} finally {
