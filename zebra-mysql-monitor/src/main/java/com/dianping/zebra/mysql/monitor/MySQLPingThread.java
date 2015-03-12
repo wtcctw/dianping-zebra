@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
@@ -11,34 +12,29 @@ import com.dianping.zebra.mysql.ha.DalHaHandler;
 
 public class MySQLPingThread extends Thread {
 
-	/* ping失败超过4次，则将该读库mark down ; 或者成功超过4次，则将该读库mark up */
-	private int PING_LIMIT = 4;
+	private int pingLimit;
 
-	/* 每次ping的间隔时间 */
-	private int INTERVAL_SECONDS = 2;
+	private int pingIntervalSeconds;
 
 	private DataSourceConfig config;
 
-	private int pingFailCounter = 0;
-
-	private int pingSuccessCounter = 0;
-
 	private MySQLConfig monitorConfig;
 
-	private int validPeriod;
+	private final long validPeriod = 30 * 1000; // 30 seconds
 
 	public MySQLPingThread(MySQLConfig monitorConfig, DataSourceConfig config) {
 		this.monitorConfig = monitorConfig;
 		this.config = config;
-		this.PING_LIMIT = this.monitorConfig.getPingFailLimit();
-		this.INTERVAL_SECONDS = this.monitorConfig.getPingIntervalSeconds();
-		this.validPeriod = this.PING_LIMIT * this.INTERVAL_SECONDS * 1000;
+		this.pingLimit = this.monitorConfig.getPingFailLimit();
+		this.pingIntervalSeconds = this.monitorConfig.getPingIntervalSeconds();
 	}
 
 	@Override
 	public void run() {
 		// 如果该库是active=false的状态，则自动ping检测markup
 		if (!config.getActive()) {
+			FixedLengthLinkedList timestamp = new FixedLengthLinkedList(this.pingLimit, this.validPeriod);
+
 			while (!Thread.currentThread().isInterrupted()) {
 				Connection con = null;
 				Statement stmt = null;
@@ -48,18 +44,20 @@ public class MySQLPingThread extends Thread {
 					stmt = con.createStatement();
 					stmt.executeQuery(monitorConfig.getTestSql());
 
-					this.pingSuccessCounter++;
+					timestamp.addLast(System.currentTimeMillis());
 
-					if (pingSuccessCounter == PING_LIMIT) {
+					if (timestamp.shouldAction()) {
 						DalHaHandler.markup(config.getId());
 
 						break;
 					}
 				} catch (SQLException ignore) {
+				} finally {
+					close(con, stmt);
 				}
 
 				try {
-					TimeUnit.SECONDS.sleep(INTERVAL_SECONDS);
+					TimeUnit.SECONDS.sleep(pingIntervalSeconds);
 				} catch (InterruptedException e) {
 					break;
 				}
@@ -67,6 +65,7 @@ public class MySQLPingThread extends Thread {
 		}
 
 		// 如果该库是active=true的状态，则自动ping检测markdown
+		FixedLengthLinkedList timestamp = new FixedLengthLinkedList(this.pingLimit, this.validPeriod);
 		while (!Thread.currentThread().isInterrupted()) {
 			Connection con = null;
 			Statement stmt = null;
@@ -76,35 +75,69 @@ public class MySQLPingThread extends Thread {
 				stmt = con.createStatement();
 				stmt.executeQuery(monitorConfig.getTestSql());
 			} catch (SQLException e) {
-				if (pingFailCounter < PING_LIMIT) {
-					pingFailCounter++;
-				} else if (pingFailCounter == PING_LIMIT) {
+				timestamp.addLast(System.currentTimeMillis());
+
+				if (timestamp.shouldAction()) {
 					DalHaHandler.markdown(config.getId());
+					break;
 				}
 			} finally {
-				if (stmt != null) {
-					try {
-						stmt.close();
-					} catch (SQLException ignore) {
-					}
-				}
-				if (con != null) {
-					try {
-						con.close();
-					} catch (SQLException ingore) {
-					}
-				}
+				close(con, stmt);
 			}
 
 			try {
-				TimeUnit.SECONDS.sleep(INTERVAL_SECONDS);
+				TimeUnit.SECONDS.sleep(pingIntervalSeconds);
 			} catch (InterruptedException e) {
 				break;
 			}
 		}
 	}
 
+	private void close(Connection con, Statement stmt) {
+		if (stmt != null) {
+			try {
+				stmt.close();
+			} catch (SQLException ignore) {
+			}
+		}
+		if (con != null) {
+			try {
+				con.close();
+			} catch (SQLException ingore) {
+			}
+		}
+	}
+
 	public void terminate() {
 		this.interrupt();
+	}
+
+	public static class FixedLengthLinkedList extends LinkedList<Long> {
+		private static final long serialVersionUID = 3800705659963203862L;
+
+		private final int maxLength;
+
+		private final long validPeriod;
+
+		public FixedLengthLinkedList(int maxLength, long validPeriod) {
+			this.maxLength = maxLength;
+			this.validPeriod = validPeriod;
+		}
+
+		public void addLast(Long e) {
+			if (this.size() >= this.maxLength) {
+				super.removeFirst();
+			}
+
+			super.addLast(e);
+		}
+
+		public long getDistance() {
+			return super.getLast() - super.getFirst();
+		}
+
+		public boolean shouldAction() {
+			return (size() == maxLength) && (getDistance() <= validPeriod);
+		}
 	}
 }

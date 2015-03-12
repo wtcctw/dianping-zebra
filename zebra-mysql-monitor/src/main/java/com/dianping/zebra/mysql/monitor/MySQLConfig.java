@@ -10,9 +10,9 @@ public class MySQLConfig {
 	
 	private String testSql;
 	
-	private int pingFailLimit = 4;
+	private int pingFailLimit = 10;
 	
-	private int pingIntervalSeconds = 2;
+	private int pingIntervalSeconds = 1;
 	
 	private boolean isAutoFailover = true;
 	

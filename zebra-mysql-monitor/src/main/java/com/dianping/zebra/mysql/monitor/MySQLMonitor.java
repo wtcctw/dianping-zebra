@@ -53,7 +53,7 @@ public class MySQLMonitor {
 	public void connect() throws ClassNotFoundException {
 		this.configManager = DataSourceConfigManagerFactory.getConfigManager("remote", monitorConfig.getJdbcRef());
 		this.configManager.addListerner(new DalConfigChangedListener());
-		this.originConfig = this.configManager.getGroupDataSourceConfig();
+		this.originConfig = new GroupDataSourceConfig();
 
 		Class.forName("com.mysql.jdbc.Driver");
 
