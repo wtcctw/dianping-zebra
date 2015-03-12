@@ -10,78 +10,83 @@ import com.dianping.zebra.group.util.DataSourceState;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GroupDataSourceMonitor implements StatusExtension {
 
-	private GroupDataSourceMBean groupDataSourceBean;
+    private final static AtomicInteger dsIdCounter = new AtomicInteger();
 
-	public GroupDataSourceMonitor(GroupDataSourceMBean dataSource) {
-		this.groupDataSourceBean = dataSource;
-	}
+    private final int dsId = dsIdCounter.incrementAndGet();
 
-	@Override
-	public String getDescription() {
-		StringBuilder sb = new StringBuilder(1024 * 3);
+    private GroupDataSourceMBean groupDataSourceBean;
 
-		SingleDataSourceMBean writeBean = groupDataSourceBean.getWriteSingleDataSourceMBean();
-		if (writeBean != null) {
-			sb.append("currentWriter:" + writeBean.getId() + " running at state:" + writeBean.getCurrentState() + "\n");
-		} else {
-			sb.append("currentWriter: No available writer\n");
-		}
-		Map<String, SingleDataSourceMBean> readerBeans = groupDataSourceBean.getReaderSingleDataSourceMBean();
+    public GroupDataSourceMonitor(GroupDataSourceMBean dataSource) {
+        this.groupDataSourceBean = dataSource;
+    }
 
-		if (readerBeans != null) {
-			sb.append("currentReader:");
-			for (SingleDataSourceMBean bean : readerBeans.values()) {
-				sb.append(bean.getId() + " running at state:" + bean.getCurrentState() + "\n");
-			}
-		} else {
-			sb.append("currentReader: No available readers<br>");
-		}
+    @Override
+    public String getDescription() {
+        StringBuilder sb = new StringBuilder(1024 * 3);
 
-		sb.append("\ndataSourceConfig:\n");
+        SingleDataSourceMBean writeBean = groupDataSourceBean.getWriteSingleDataSourceMBean();
+        if (writeBean != null) {
+            sb.append("currentWriter:" + writeBean.getId() + " running at state:" + writeBean.getCurrentState() + "\n");
+        } else {
+            sb.append("currentWriter: No available writer\n");
+        }
+        Map<String, SingleDataSourceMBean> readerBeans = groupDataSourceBean.getReaderSingleDataSourceMBean();
 
-		GroupDataSourceConfig groupDataSourceConfig = new GroupDataSourceConfig();
-		HidePasswordVisitor visitor = new HidePasswordVisitor(groupDataSourceConfig);
-		groupDataSourceBean.getConfig().accept(visitor);
+        if (readerBeans != null) {
+            sb.append("currentReader:");
+            for (SingleDataSourceMBean bean : readerBeans.values()) {
+                sb.append(bean.getId() + " running at state:" + bean.getCurrentState() + "\n");
+            }
+        } else {
+            sb.append("currentReader: No available readers<br>");
+        }
 
-		sb.append(groupDataSourceConfig);
+        sb.append("\ndataSourceConfig:\n");
 
-		return sb.toString();
-	}
+        GroupDataSourceConfig groupDataSourceConfig = new GroupDataSourceConfig();
+        HidePasswordVisitor visitor = new HidePasswordVisitor(groupDataSourceConfig);
+        groupDataSourceBean.getConfig().accept(visitor);
 
-	@Override
-	public String getId() {
-		return "dal";
-	}
+        sb.append(groupDataSourceConfig);
 
-	@Override
-	public Map<String, String> getProperties() {
-		Map<String, String> status = new LinkedHashMap<String, String>();
+        return sb.toString();
+    }
 
-		Map<String, SingleDataSourceMBean> beans = groupDataSourceBean.getReaderSingleDataSourceMBean();
-		if (beans != null) {
-			for (Entry<String, SingleDataSourceMBean> entry : beans.entrySet()) {
-				putProperty(status, entry.getValue());
-			}
-		}
+    @Override
+    public String getId() {
+        return "dal";
+    }
 
-		SingleDataSourceMBean bean = groupDataSourceBean.getWriteSingleDataSourceMBean();
+    @Override
+    public Map<String, String> getProperties() {
+        Map<String, String> status = new LinkedHashMap<String, String>();
 
-		if (bean != null) {
-			putProperty(status, bean);
-		}
+        Map<String, SingleDataSourceMBean> beans = groupDataSourceBean.getReaderSingleDataSourceMBean();
+        if (beans != null) {
+            for (Entry<String, SingleDataSourceMBean> entry : beans.entrySet()) {
+                putProperty(status, entry.getValue());
+            }
+        }
 
-		return status;
-	}
+        SingleDataSourceMBean bean = groupDataSourceBean.getWriteSingleDataSourceMBean();
 
-	private void putProperty(Map<String, String> status, SingleDataSourceMBean bean) {
-		if (bean.getState() != DataSourceState.INITIAL) {
-			String id = bean.getId();
-			status.put(id + "-TotalConnection", Integer.toString(bean.getNumConnections()));
-			status.put(id + "-BusyConnection", Integer.toString(bean.getNumBusyConnection()));
-			status.put(id + "-IdleConnection", Integer.toString(bean.getNumIdleConnection()));
-		}
-	}
+        if (bean != null) {
+            putProperty(status, bean);
+        }
+
+        return status;
+    }
+
+    private void putProperty(Map<String, String> status, SingleDataSourceMBean bean) {
+        if (bean.getState() != DataSourceState.INITIAL) {
+            String id = bean.getId();
+            status.put(String.format("[%d]%s-TotalConnection", dsId, id), Integer.toString(bean.getNumConnections()));
+            status.put(String.format("[%d]%s-BusyConnection", dsId, id), Integer.toString(bean.getNumBusyConnection()));
+            status.put(String.format("[%d]%s-IdleConnection", dsId, id), Integer.toString(bean.getNumIdleConnection()));
+        }
+    }
 }
