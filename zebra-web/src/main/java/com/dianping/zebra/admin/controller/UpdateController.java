@@ -1,12 +1,14 @@
 package com.dianping.zebra.admin.controller;
 
-import com.dianping.zebra.admin.service.LionHttpService;
-import com.dianping.zebra.admin.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.dianping.zebra.admin.dao.HeartbeatMapper;
+import com.dianping.zebra.admin.service.LionHttpService;
+import com.dianping.zebra.admin.service.ReportService;
 
 /**
  * Dozer @ 2015-02
@@ -23,6 +25,9 @@ public class UpdateController {
 
     @Autowired
     private LionHttpService lionHttpService;
+    
+    @Autowired
+    private HeartbeatMapper heartBeatMapper;
 
     @RequestMapping(value = "/index", method = RequestMethod.GET)
     @ResponseBody
@@ -45,10 +50,10 @@ public class UpdateController {
         return reportService.getApp(app, isProduct);
     }
 
-    @RequestMapping(value = "/delete-info", method = RequestMethod.POST)
+    @RequestMapping(value = "/delete-info", method = RequestMethod.GET)
     @ResponseBody
-    public Object index(String env) {
-        return null;
+    public Object delete(String app,String ip,String beanName) {
+        return heartBeatMapper.deleteHeartbeat(app, ip, beanName);
     }
 
 }
