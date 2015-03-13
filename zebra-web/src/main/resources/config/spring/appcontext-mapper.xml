@@ -4,11 +4,5 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
 
-    <bean name="zebraAdminMapper" class="com.dianping.zebra.admin.mapper.ZebraAdminMapper">
-        <property name="mappings">
-            <list>
-                <bean class="com.dianping.zebra.admin.mapper.HeartbeatDto2HeartbeatEntityMap" />
-            </list>
-        </property>
-    </bean>
+       <bean class="com.dianping.zebra.admin.mapper.HeartbeatDto2HeartbeatEntityMap" />
 </beans>
