@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
-public interface LionHttpService {
+public interface LionService {
 	Set<String> getAllEnv();
 
 	Set<String> getProductEnv();
 
 	Set<String> getDevEnv();
+	
+	String getEnv();
 
 	boolean isProduct();
 

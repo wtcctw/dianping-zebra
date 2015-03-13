@@ -21,7 +21,7 @@ public class DalServiceImpl implements DalService {
 	private final String PORJECT = Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX;
 
 	@Autowired
-	private LionHttpService m_lionHttpService;
+	private LionService m_lionHttpService;
 
 	private Set<String> findDataSources(String ip, String port, String database, HashMap<String, String> keyValues) {
 		String content = ip + ":" + port;

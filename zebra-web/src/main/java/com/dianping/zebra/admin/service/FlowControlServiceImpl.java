@@ -36,7 +36,7 @@ public class FlowControlServiceImpl implements FlowControlService {
 	private final static String GLOBAL_APP_NAME = "_global_";
 
 	@Autowired
-	private LionHttpService m_lionHttpService;
+	private LionService m_lionHttpService;
 
 	@Autowired
 	private CmdbService m_cmdbService;

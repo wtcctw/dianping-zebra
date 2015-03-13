@@ -43,6 +43,8 @@
                 </th>
                 <th><a href="" ng-click="reverse=!reverse;predicate='totalDataSource'">总数据源({{report.totalDataSource}})</a>
                 </th>
+                <th><a href="" ng-click="reverse=!reverse;predicate='isInWhiteList'">自动替换</a>
+                </th>
             </tr>
             </thead>
             <tbody>
@@ -53,6 +55,9 @@
                 <td>{{database.groupDataSource }}</td>
                 <td>
                     <span class="badge alert-{{database.updateStatus == -1?'danger':(database.updateStatus == 0 ?'success': (database.updateStatus == 2 ? 'info' : 'warning'))}}">{{database.totalDataSource}}</span>
+                </td>
+                <td>
+                	<span ng-show="database.isInWhiteList" class="badge">自动替换</span>
                 </td>
             </tr>
             </tbody>

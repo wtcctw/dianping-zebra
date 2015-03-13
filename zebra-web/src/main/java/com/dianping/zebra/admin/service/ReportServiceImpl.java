@@ -44,7 +44,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private DatabaseRealtimeService databaseRealtimeService;
-
+    
     private void buildApp(AppDto app, HeartbeatEntity hb) {
         MachineDto machine = app.findOrCreateMachine(hb.getIp());
         machine.setIp(hb.getIp());

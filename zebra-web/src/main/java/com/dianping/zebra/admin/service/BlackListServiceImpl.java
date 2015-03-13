@@ -28,7 +28,7 @@ public class BlackListServiceImpl implements BlackListService {
 	private final static String EXTEND_KEY = ".extend";
 
 	@Autowired
-	private LionHttpService m_lionHttpService;
+	private LionService m_lionHttpService;
 
 	@Autowired
 	private CmdbService m_cmdbService;

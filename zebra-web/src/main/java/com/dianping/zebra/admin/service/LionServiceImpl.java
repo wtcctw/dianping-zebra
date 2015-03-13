@@ -21,7 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 @Service
-public class LionHttpServiceImpl implements LionHttpService {
+public class LionServiceImpl implements LionService {
 
 	private static final Set<String> ALL_ENV;
 
@@ -202,4 +202,9 @@ public class LionHttpServiceImpl implements LionHttpService {
 			return null;
 		}
 	}
+
+	@Override
+   public String getEnv() {
+	   return EnvZooKeeperConfig.getEnv();
+   }
 }

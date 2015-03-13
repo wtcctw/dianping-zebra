@@ -1,7 +1,7 @@
 package com.dianping.zebra.admin.controller;
 
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.admin.service.LionHttpService;
+import com.dianping.zebra.admin.service.LionService;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class ShardController {
 
     @Autowired
-    private LionHttpService lionHttpService;
+    private LionService lionHttpService;
 
     private final Gson gson = new Gson();
 

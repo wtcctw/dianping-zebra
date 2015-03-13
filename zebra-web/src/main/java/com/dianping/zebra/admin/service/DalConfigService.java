@@ -1,9 +1,10 @@
 package com.dianping.zebra.admin.service;
 
-import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 
 public interface DalConfigService {
 	public boolean generateConfig(String name);
@@ -11,6 +12,8 @@ public interface DalConfigService {
 	GroupConfigModel getDsConfig(String env, final String groupId, String otherkey);
 
 	void updateDsConfig(GroupConfigModel modal,boolean isForce);
+	
+	Set<String> getWhiteList(String env);
 
 	// for test purpose
 	public void setProject(String project);

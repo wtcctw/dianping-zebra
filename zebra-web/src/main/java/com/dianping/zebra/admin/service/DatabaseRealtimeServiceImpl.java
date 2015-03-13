@@ -47,7 +47,7 @@ public class DatabaseRealtimeServiceImpl implements DatabaseRealtimeService, Tas
 	private HttpService m_httpService;
 
     @Autowired
-	private LionHttpService m_lionService;
+	private LionService m_lionService;
 
 	private volatile Map<String, Map<String, String>> m_allConnectedIps = new HashMap<String, Map<String, String>>();;
 

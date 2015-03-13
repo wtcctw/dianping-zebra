@@ -4,7 +4,7 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.zebra.admin.dto.ConnectionStatusDto;
 import com.dianping.zebra.admin.service.ConnectionService;
 import com.dianping.zebra.admin.service.DalConfigService;
-import com.dianping.zebra.admin.service.LionHttpService;
+import com.dianping.zebra.admin.service.LionService;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -28,7 +28,7 @@ public class ConfigController {
     private final static String currentEnv = EnvZooKeeperConfig.getEnv();
 
     @Autowired
-    private LionHttpService lionHttpService;
+    private LionService lionHttpService;
 
     @Autowired
     private DalConfigService dalConfigService;
