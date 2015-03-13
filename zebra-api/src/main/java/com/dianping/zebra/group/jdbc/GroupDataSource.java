@@ -54,8 +54,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	protected DataSourceConfigManager dataSourceConfigManager;
 
-	// init
+	// other
 	protected volatile boolean init = false;
+
+	protected volatile boolean closed = false;
 
 	protected AtomicRefresh atomicRefresh = new AtomicRefresh();
 
@@ -198,6 +200,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void closeInternal(final LoadBalancedDataSource read, final FailOverDataSource write) throws SQLException {
+		this.closed = true;
 		List<SQLException> exps = new ArrayList<SQLException>();
 
 		try {
@@ -217,7 +220,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 
 		SingleDataSourceManagerFactory.getDataSourceManager().stop();
-		
+
 		JDBCUtils.throwSQLExceptionIfNeeded(exps);
 	}
 
@@ -399,7 +402,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void refresh(String propertyToChange) {
-		if (!this.init) {
+		if (!this.init || this.closed) {
 			return;
 		}
 
