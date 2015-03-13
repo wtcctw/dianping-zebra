@@ -8,7 +8,7 @@ import com.dianping.zebra.admin.dao.HeartbeatMapper;
 import com.dianping.zebra.admin.dto.*;
 import com.dianping.zebra.admin.entity.HeartbeatEntity;
 import com.dianping.zebra.group.exception.DalException;
-import com.google.common.base.Strings;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,10 +34,10 @@ import java.util.*;
 
 @Service
 public class ReportServiceImpl implements ReportService {
+	private static final String NOT_FOUND = "N/A";
+
     @Autowired
     private HeartbeatMapper heartbeatMapper;
-
-    private static final String NOT_FOUND = "N/A";
 
     @Autowired
     private CmdbService cmdbService;
@@ -65,48 +65,28 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void createOrUpdate(HeartbeatEntity entity) {
-        if (!Strings.isNullOrEmpty(entity.getApp_name())) {
-            entity.setApp_name(entity.getApp_name().toLowerCase());
-        }
+   	 if (entity.getApp_name().equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME) && entity.getIp()!= null) {
+				String name = cmdbService.getAppName(entity.getIp());
 
-        if (Strings.isNullOrEmpty(entity.getDatabase_name())) {
-            entity.setDatabase_name(NOT_FOUND);
-        }
-        if (Strings.isNullOrEmpty(entity.getDatasource_bean_class())) {
-            entity.setDatasource_bean_class(NOT_FOUND);
-        }
-        if (Strings.isNullOrEmpty(entity.getVersion())) {
-            entity.setVersion(NOT_FOUND);
-        }
-        if (Strings.isNullOrEmpty(entity.getUsername())) {
-            entity.setUsername(NOT_FOUND);
-        }
-
-        if (!Strings.isNullOrEmpty(entity.getJdbc_url())) {
-            String[] parts = entity.getJdbc_url().split(":");
-            if (parts != null && parts.length > 2) {
-                entity.setDatabase_type(parts[1].toLowerCase());
-            }
-        } else {
-            entity.setJdbc_url(NOT_FOUND);
-            entity.setDatabase_type(NOT_FOUND);
-        }
-
+				if (!name.equalsIgnoreCase(Constants.PHOENIX_APP_NO_NAME)) {
+					entity.setApp_name(name);
+				}
+			}
+   	 
         List<HeartbeatEntity> old = heartbeatMapper.getHeartbeat(entity.getApp_name(), entity.getIp(), entity.getDatasource_bean_name());
-
+        boolean needInsert = false;
+        
         if (old.size() > 1) {
             heartbeatMapper.deleteHeartbeat(entity.getApp_name(), entity.getIp(), entity.getDatasource_bean_name());
+            needInsert = true;
         } else if (old.size() == 1) {
             entity.setId(old.get(0).getId());
-            entity.setCreate_time(old.get(0).getCreate_time());
-            entity.setUpdate_time(new Date());
             heartbeatMapper.updateHeartbeat(entity);
-        } else {
-            entity.setUpdate_time(new Date());
-            entity.setCreate_time(new Date());
+        }
+        
+        if(old.size() == 0 || needInsert){
             heartbeatMapper.insertHeartbeat(entity);
         }
-
     }
 
 

@@ -58,8 +58,8 @@
         #{max_pool_size},
         #{min_pool_size},
         #{version},
-        #{create_time},
-        #{update_time})
+        NOW(),
+        NOW())
     </insert>
 
     <insert id="updateHeartbeat" parameterType="HeartbeatEntity">
@@ -77,8 +77,7 @@
         `max_pool_size` = #{max_pool_size},
         `min_pool_size` = #{min_pool_size},
         `version` = #{version},
-        `create_time` = #{create_time},
-        `update_time` = #{update_time}
+        `update_time` = NOW()
         WHERE id = #{id}
     </insert>
 </mapper>

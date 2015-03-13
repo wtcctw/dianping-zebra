@@ -11,28 +11,25 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Dozer @ 2015-02
- * mail@dozer.cc
- * http://www.dozer.cc
+ * Dozer @ 2015-02 mail@dozer.cc http://www.dozer.cc
  */
 
 @Controller
 @RequestMapping(value = "/notify")
 public class NotifyController {
-    @Autowired
-    private ModelMapper mapper;
+	@Autowired
+	private ModelMapper mapper;
 
-    @Autowired
-    private ReportService reportService;
+	@Autowired
+	private ReportService reportService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    @ResponseBody
-    public Object notify(HeartbeatDto model) {
-        if (model.getApp() != null && model.getIp() != null && model.getDataSourceBeanName() != null) {
-
-            HeartbeatEntity entity = mapper.map(model, HeartbeatEntity.class);
-            reportService.createOrUpdate(entity);
-        }
-        return null;
-    }
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	public Object notify(HeartbeatDto model) {
+		if (model.getApp() != null && model.getIp() != null && model.getDataSourceBeanName() != null) {
+			HeartbeatEntity entity = mapper.map(model, HeartbeatEntity.class);
+			reportService.createOrUpdate(entity);
+		}
+		return null;
+	}
 }
