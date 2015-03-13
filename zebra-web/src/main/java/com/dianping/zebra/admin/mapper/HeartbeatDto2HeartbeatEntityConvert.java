@@ -19,6 +19,7 @@ public class HeartbeatDto2HeartbeatEntityConvert {
 		entity.setIp(source.getIp());
 		entity.setMax_pool_size(source.getMaxPoolSize());
 		entity.setMin_pool_size(source.getMinPoolSize());
+		entity.setReplaced(source.isReplaced());
 		entity.setJdbc_url(source.getUrl());
 		entity.setUsername(source.getUsername());
 		entity.setVersion(source.getVersion());
