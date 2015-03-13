@@ -2,7 +2,7 @@
     <h4 class="modal-title">
         <form class="form-inline" role="form">
             <span>{{name}}</span> <input class="form-control input-sm" ng-model="changedName" type="text" placeholder="Other Name"/>
-            <button type="submit" class="btn btn-primary btn-sm" ng-click="changeName()">Search</button>
+            <button type="submit" class="btn btn-primary btn-sm" ng-click="changeName()">搜素</button>
         </form>
     </h4>
 </div>
@@ -12,23 +12,23 @@
     <form class="form-inline" role="form">
         <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs">
         </select>
-        <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="Search" /> &nbsp;&nbsp;&nbsp;
+        <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="搜索" /> &nbsp;&nbsp;&nbsp;
         <input required class="form-control input-sm" placeholder="DataSource Id" ng-model="newDsName" />
-        <button type="submit" class="btn btn-primary btn-sm" ng-click="addDs()">Add DataSource</button>
+        <button type="submit" class="btn btn-primary btn-sm" ng-click="addDs()">添加DS配置组</button>
         <div class="form-group pull-right">
             <div class="btn-group" dropdown class="">
-                <button type="button" class="btn btn-success btn-sm" ng-click="save()">Save</button>
+                <button type="button" class="btn btn-success btn-sm" ng-click="save()">保存</button>
                 <button type="button" class="btn btn-success btn-sm dropdown-toggle">
                     <span class="caret"></span>
                     <span class="sr-only">Split button!</span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
-                    <li><a href="" ng-click="save(true)">Force Save</a>
+                    <li><a href="" ng-click="save(true)">完全保存</a>
                     </li>
                 </ul>
             </div>
-            <button title="直接使用当前配置测试，不保存到Lion" type="button" class="btn btn-primary btn-sm" ng-click="test()">Test</button>
-            <button type="button" class="btn btn-warning btn-sm" ng-click="close()">Cancel</button>
+            <button title="直接使用当前配置测试，不保存到Lion" type="button" class="btn btn-primary btn-sm" ng-click="test()">测试</button>
+            <button type="button" class="btn btn-warning btn-sm" ng-click="close()">取消</button>
         </div>
     </form>
     <hr/>
@@ -37,14 +37,14 @@
             <td>
                 <table class="table">
                     <tr>
-                        <td>{{config.id}}</td>
+                        <td><h4>{{config.id}}</h4></td>
                         <td>
                             <form class="form-inline" role="form">
                                 <div class="btn-group">
-                                    <label ng-class="{'btn-success':config.role.isWrite,'btn-danger':!config.role.isWrite}" class="btn btn-sm" ng-model="config.role.isWrite" btn-checkbox>Write</label>
-                                    <label ng-class="{'btn-success':config.role.isRead,'btn-danger':!config.role.isRead}" class="btn btn-sm" ng-model="config.role.isRead" btn-checkbox>Read</label>
+                                    <label ng-class="{'btn-success':config.role.isWrite,'btn-danger':!config.role.isWrite}" class="btn" ng-model="config.role.isWrite" btn-checkbox>可写</label>
+                                    <label ng-class="{'btn-success':config.role.isRead,'btn-danger':!config.role.isRead}" class="btn" ng-model="config.role.isRead" btn-checkbox>可读</label>
                                 </div>
-                                <input ng- placeholder="weight" class="form-control input-sm" ng-model="config.role.weight" type="number" style="width: 75px" />
+                                <input ng- placeholder="读库权重" class="form-control" ng-model="config.role.weight" type="number" style="width: 100px" />
                             </form>
                         </td>
                         <td>
@@ -83,17 +83,17 @@
 <div class="modal-footer">
     <form class="form-inline" role="form">
         <div class="btn-group" dropdown>
-            <button type="button" class="btn btn-success btn-sm" ng-click="save()">Save</button>
+            <button type="button" class="btn btn-success btn-sm" ng-click="save()">保存</button>
             <button type="button" class="btn btn-success btn-sm dropdown-toggle">
                 <span class="caret"></span>
                 <span class="sr-only">Split button!</span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li><a href="" ng-click="save(true)">Force Save</a>
+                <li><a href="" ng-click="save(true)">完全保存</a>
                 </li>
             </ul>
         </div>
-        <button title="直接使用当前配置测试，不保存到Lion" type="button" class="btn btn-primary btn-sm" ng-click="test()">Test</button>
-        <button type="button" class="btn btn-warning btn-sm" ng-click="close()">Cancel</button>
+        <button title="直接使用当前配置测试，不保存到Lion" type="button" class="btn btn-primary btn-sm" ng-click="test()">测试</button>
+        <button type="button" class="btn btn-warning btn-sm" ng-click="close()">取消</button>
     </form>
 </div>

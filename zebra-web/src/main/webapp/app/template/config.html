@@ -1,9 +1,10 @@
 <div class="row">
     <div class="col-xs-12">
         <form class="form-inline" role="form">
-            <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="Search">
-            <input required class="form-control input-sm" ng-model="addText" type="text" placeholder="New Group Id">
-            <button ng-click="createGroupDs()" class="btn btn-primary btn-sm">Create</button>
+            <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="搜索">
+            
+            <input required class="form-control input-sm" ng-model="addText" type="text" placeholder="New DAL Key">
+            <button ng-click="createGroupDs()" class="btn btn-primary btn-sm">创建</button>
         </form>
     </div>
 </div>
@@ -24,9 +25,9 @@
                 <td><span popover-trigger="mouseenter" popover="{{(group.value && group.value.length>60)?group.value:''}}">{{(group.value && group.value.length>60)?group.value.substring(0,60-3) + '...':group.value }}</span>
                 </td>
                 <td>
-                    <button class="btn btn-xs btn-primary" ng-click="edit(group.$key)">Edit</button>
-                    <button class="btn btn-xs btn-warning" ng-click="merge(group.$key)">Merge</button>
-                    <button class="btn btn-xs btn-success" ng-click="test(group.$key)">Test</button>
+                    <button class="btn btn-xs btn-primary" ng-click="edit(group.$key)">编辑</button>
+                    <button class="btn btn-xs btn-warning" ng-click="merge(group.$key)">配置合并</button>
+                    <button class="btn btn-xs btn-success" ng-click="test(group.$key)">测试连接</button>
                 </td>
             </tr>
             </tbody>
