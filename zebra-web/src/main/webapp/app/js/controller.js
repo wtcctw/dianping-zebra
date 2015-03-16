@@ -189,6 +189,10 @@ zebraWeb.controller('flow', function ($scope, $http, $filter) {
             });
         }
 
+        if(item.index == 0){
+        	return "0";
+        }
+        
         return selected.length ? selected[0].text : 'Not set';
     };
 
@@ -233,12 +237,6 @@ zebraWeb.controller('flow', function ($scope, $http, $filter) {
     $scope.checkSqlId = function (data) {
         if (!data || data.length != 8) {
             return "请输入8位正确的sqlId！";
-        }
-    };
-
-    $scope.checkPercent = function (data) {
-        if (!data) {
-            return "请输入需要控制的流量，0表示完全拦截，100表示不拦截！"
         }
     };
 

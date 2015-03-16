@@ -14,7 +14,7 @@
 				<tr ng-repeat="item in blackList | toArray ">
 					<td><span editable-text="item.m_sqlId" e-name="m_sqlId" e-form="rowform" onbeforesave="checkSqlId($data)" e-required>{{item.m_sqlId}}</span></td>
 					<td><span editable-select="item.index" e-name="percent"
-						e-form="rowform" e-ng-options="p.index as p.text for p in percents" onbeforesave="checkPercent($data)" e-required>{{showPercent(item)}}</span>
+						e-form="rowform" e-ng-options="p.index as p.text for p in percents" e-required>{{showPercent(item)}}</span>
 					</td>
 					<td><span editable-text="item.m_app" e-name="m_app" e-form="rowform">{{item.m_app}}</span></td>
 					<td><span editable-text="item.sql" e-name="sql" e-form="rowform">{{item.sql}}</span></td>
