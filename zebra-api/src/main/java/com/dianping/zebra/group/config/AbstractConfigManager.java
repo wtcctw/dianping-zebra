@@ -22,7 +22,7 @@ public abstract class AbstractConfigManager {
 
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
-	private ExecutorService listenerNotifyThreadPool = Executors.newFixedThreadPool(5, new ThreadFactory() {
+	private ExecutorService listenerNotifyThreadPool = Executors.newFixedThreadPool(2, new ThreadFactory() {
 		private AtomicInteger id = new AtomicInteger(0);
 
 		@Override
