@@ -46,12 +46,12 @@ public class WallFilter extends DefaultJdbcFilter {
 			} else {
 				String databases = sqlFlowControl.getDatabase();
 				String[] database = databases.split(",");
-				if(conn.getDataSource() != null){
+				if (conn.getDataSource() != null) {
 					String jdbcUrl = conn.getDataSource().getJdbcUrl();
-					
+
 					for (String db : database) {
 						int pos = jdbcUrl.indexOf(db);
-						
+
 						if (pos > 0) {
 							if (generateFlowPercent() > sqlFlowControl.getAllowPercent()) {
 								throw new SQLException("The SQL is in the blacklist. Please contact with dba!", "SQL.Blacklist");
