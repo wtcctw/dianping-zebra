@@ -62,19 +62,23 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 			try {
 				SystemConfig flowControl = DefaultSaxParser.parse(flowControlConfig);
 				String appName = AppPropertiesUtils.getAppName();
-
+				SystemConfig tmpConfig = new SystemConfig();
+				
 				if (!Constants.PHOENIX_APP_NO_NAME.equals(appName)) {
 					for (Entry<String, SqlFlowControl> flowControlEntry : flowControl.getSqlFlowControls().entrySet()) {
 						SqlFlowControl sqlFlowControl = flowControlEntry.getValue();
 						String app = sqlFlowControl.getApp();
 
 						if ("*".equalsIgnoreCase(app) || appName.equalsIgnoreCase(app)) {
-							config.addSqlFlowControl(sqlFlowControl);
+							tmpConfig.addSqlFlowControl(sqlFlowControl);
 						}
 					}
 				} else {
-					config.getSqlFlowControls().putAll(flowControl.getSqlFlowControls());
+					tmpConfig.getSqlFlowControls().putAll(flowControl.getSqlFlowControls());
 				}
+				
+				config.getSqlFlowControls().clear();
+				config.getSqlFlowControls().putAll(tmpConfig.getSqlFlowControls());
 			} catch (Exception ignore) {
 			}
 		}
