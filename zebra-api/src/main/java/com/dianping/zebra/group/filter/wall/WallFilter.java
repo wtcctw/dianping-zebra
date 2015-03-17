@@ -24,7 +24,7 @@ import com.dianping.zebra.util.StringUtils;
  */
 public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
-	
+
 	private Map<String, String> sqlIDCache = new ConcurrentHashMap<String, String>(1024);
 
 	private Map<String, SqlFlowControl> flowControl;
@@ -33,10 +33,32 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	private Random random;
 
-	protected void checkFlowControl(String id) throws SQLException {
+	private final String ANY = "*";
+
+	protected void checkFlowControl(String id, SingleConnection conn) throws SQLException {
 		if (StringUtils.isNotBlank(id) && flowControl.containsKey(id)) {
-			if (generateFlowPercent() > flowControl.get(id).getAllowPercent()) {
-				throw new SQLException("The SQL is in the blacklist. Please contact with dba!","SQL.Blacklist");
+			SqlFlowControl sqlFlowControl = flowControl.get(id);
+
+			if (ANY.equals(sqlFlowControl.getDatabase())) {
+				if (generateFlowPercent() > sqlFlowControl.getAllowPercent()) {
+					throw new SQLException("The SQL is in the blacklist. Please contact with dba!", "SQL.Blacklist");
+				}
+			} else {
+				String databases = sqlFlowControl.getDatabase();
+				String[] database = databases.split(",");
+				if(conn.getDataSource() != null){
+					String jdbcUrl = conn.getDataSource().getJdbcUrl();
+					
+					for (String db : database) {
+						int pos = jdbcUrl.indexOf(db);
+						
+						if (pos > 0) {
+							if (generateFlowPercent() > sqlFlowControl.getAllowPercent()) {
+								throw new SQLException("The SQL is in the blacklist. Please contact with dba!", "SQL.Blacklist");
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -90,12 +112,12 @@ public class WallFilter extends DefaultJdbcFilter {
 			sql = chain.sql(conn, sql, isPreparedStmt, chain);
 		}
 		String sqlAlias = SqlAliasManager.getAvatarSqlAlias();
-		
+
 		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sqlAlias)) {
 			try {
 				String id = generateId(conn, sqlAlias);
 
-				checkFlowControl(id);
+				checkFlowControl(id, conn);
 
 				return String.format("/*id:%s*/%s", id, sql);
 			} catch (NoSuchAlgorithmException e) {

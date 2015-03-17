@@ -8,6 +8,7 @@
     <attribute name="sql-id" value-type="String" />
     <attribute name="allow-percent" value-type="int" />
     <attribute name="app" value-type="String" />
+    <attribute name="database" value-type="String" />
   </entity>
 </model>
 

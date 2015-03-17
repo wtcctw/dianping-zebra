@@ -16,7 +16,7 @@ public interface FlowControlService {
 
 	boolean deleteItem(String env, String key);
 
-	boolean addItem(String env, String ip, String key, String sql, int percent);
+	boolean addItem(String env, String ip, String key, String sql, int percent,String database);
 	
-	boolean modifyItem(String env, String sqlId, int percent);
+	boolean modifyItem(String env, String sqlId, int percent,String database);
 }

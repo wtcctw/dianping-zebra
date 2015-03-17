@@ -68,7 +68,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 						SqlFlowControl sqlFlowControl = flowControlEntry.getValue();
 						String app = sqlFlowControl.getApp();
 
-						if ("_global_".equalsIgnoreCase(app) || appName.equalsIgnoreCase(app)) {
+						if ("*".equalsIgnoreCase(app) || appName.equalsIgnoreCase(app)) {
 							config.addSqlFlowControl(sqlFlowControl);
 						}
 					}

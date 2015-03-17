@@ -4,15 +4,17 @@
 	<div class="col-xs-12">
 		<table class="table table-bordered table-hover table-condensed">
 			<thead>
-				<th style="width:10%">Sql ID</th>
-				<th style="width:10%">放入流量(%)</th>
-				<th style="width:10%">作用范围</th>
-				<th style="width:55%">Sql语句</th>
-				<th style="width:25%">操作</th>
+				<th style="width:5%">Sql ID</th>
+				<th style="width:15%">目标库IP</th>
+				<th style="width:8%">放入流量(%)</th>
+				<th style="width:15%">目标应用IP</th>
+				<th style="width:40%">Sql语句</th>
+				<th style="width:20%">操作</th>
 			</thead>
 			<tbody>
 				<tr ng-repeat="item in blackList | toArray ">
 					<td><span editable-text="item.m_sqlId" e-name="m_sqlId" e-form="rowform" onbeforesave="checkSqlId($data)" e-required>{{item.m_sqlId}}</span></td>
+					<td><span editable-text="item.m_database" e-name="m_database" e-form="rowform" e-required>{{item.m_database}}</span></td>
 					<td><span editable-select="item.index" e-name="percent"
 						e-form="rowform" e-ng-options="p.index as p.text for p in percents" e-required>{{showPercent(item)}}</span>
 					</td>
@@ -45,13 +47,15 @@
 			<thead>
 				<th style="width:3%">ID</th>
 				<th style="width:10%">Sql ID</th>
-				<th style="width:15%">作用范围</th>
-				<th style="width:52%">Sql 语句</th>
+				<th style="width:10%">目标库IP</th>
+				<th style="width:15%">目标应用</th>
+				<th style="width:40%">Sql 语句</th>
 				<th style="width:20%">创建时间</th>
 			</thead>
 				<tr ng-repeat="item in history | toArray | orderBy:'createTime'">
 					<td>{{item.id}}</td>
 					<td>{{item.m_sqlId}}</td>
+					<td>{{item.m_database}}</td>
 					<td>{{item.m_app}}</td>
 					<td>{{item.sql}}</td>
 					<td>{{item.createTime}}</td>

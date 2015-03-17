@@ -9,6 +9,7 @@
 	<entity name="sql-flow-control">
 		<attribute name="sql-id" value-type="String" key="true" />
 		<attribute name="allow-percent" value-type="int" primitive="true" default-value="100"/>
-		<attribute name="app" value-type="String" />
+		<attribute name="app" value-type="String" default-value="*"/>
+		<attribute name="database" value-type="String" default-value="*"/>
 	</entity>
 </model>

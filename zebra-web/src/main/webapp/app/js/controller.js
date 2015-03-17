@@ -206,6 +206,7 @@ zebraWeb.controller('flow', function ($scope, $http, $filter) {
         if (selected.length) {
             $http.post('/a/flowcontrol/save?env=' + $scope.config.env, {
                 m_sqlId: $data.m_sqlId,
+                m_database: $data.m_database,
                 ip: $data.m_app,
                 m_allowPercent: selected[0].text,
                 sql: $data.sql
@@ -226,7 +227,7 @@ zebraWeb.controller('flow', function ($scope, $http, $filter) {
     $scope.addFlowControl = function () {
         $scope.inserted = {
             m_sqlId: '',
-            m_app: '_global_',
+            m_app: '*',
             percent: 0,
             sql: ''
         };
