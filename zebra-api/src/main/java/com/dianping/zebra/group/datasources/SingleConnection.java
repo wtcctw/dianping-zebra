@@ -19,7 +19,7 @@ public class SingleConnection implements Connection {
 	private final SingleDataSource dataSource;
 
 	private final List<JdbcFilter> filters;
-	
+
 	public SingleConnection(SingleDataSource dataSource, final DataSourceConfig config, Connection conn,
 	      List<JdbcFilter> filters) {
 		this.dsId = config.getId();

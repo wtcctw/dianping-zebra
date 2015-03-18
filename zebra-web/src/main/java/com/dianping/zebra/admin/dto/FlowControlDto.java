@@ -25,7 +25,6 @@ public class FlowControlDto extends SqlFlowControl {
 		this.setSqlId(sqlFlowContorl.getSqlId());
 		this.setAllowPercent(sqlFlowContorl.getAllowPercent());
 		this.setApp(sqlFlowContorl.getApp());
-		this.setDatabase(sqlFlowContorl.getDatabase());
 		this.setIndex(this.getAllowPercent() / 10);
 	}
 	

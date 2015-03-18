@@ -33,7 +33,7 @@ public class FlowControlServiceImpl implements FlowControlService {
 
 	private final static String LION_KEY = "zebra.system.flowControl";
 
-	private final static String ANY = "*";
+	private final static String GLOBAL_APP_NAME = "_global_";
 
 	@Autowired
 	private LionService m_lionHttpService;
@@ -51,7 +51,7 @@ public class FlowControlServiceImpl implements FlowControlService {
 	      TransactionDefinition.PROPAGATION_REQUIRED);
 
 	@Override
-	public boolean addItem(String env, String ip, String sqlId, String sql, int percent,String database) {
+	public boolean addItem(String env, String ip, String sqlId, String sql, int percent) {
 		TransactionStatus status = transactionManager.getTransaction(def);
 
 		try {
@@ -161,24 +161,23 @@ public class FlowControlServiceImpl implements FlowControlService {
 			String appName = m_cmdbService.getAppName(ip);
 
 			if (Constants.PHOENIX_APP_NO_NAME.equals(appName)) {
-				appName = ANY;
+				appName = GLOBAL_APP_NAME;
 			}
 
 			return appName;
 		} else {
-			return ANY;
+			return GLOBAL_APP_NAME;
 		}
 	}
 
 	@Override
-	public boolean modifyItem(String env, String sqlId, int percent,String database) {
+	public boolean modifyItem(String env, String sqlId, int percent) {
 		try {
 			SystemConfig systemConfig = fetchSystemConfig(env);
 			SqlFlowControl flowControl = systemConfig.getSqlFlowControls().get(sqlId);
 
 			if (flowControl != null) {
 				flowControl.setAllowPercent(percent);
-				flowControl.setDatabase(database);
 
 				return m_lionHttpService.setConfig(env, LION_KEY, systemConfig.toString());
 			} else {

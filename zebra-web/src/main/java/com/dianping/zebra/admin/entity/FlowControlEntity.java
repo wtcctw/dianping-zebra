@@ -11,8 +11,6 @@ public class FlowControlEntity {
 	private String sql;
 	
 	private String app;
-	
-	private String database;
 
 	private String env;
 
@@ -52,14 +50,6 @@ public class FlowControlEntity {
 
 	public void setApp(String app) {
 		this.app = app;
-	}
-	
-	public String getDatabase() {
-		return database;
-	}
-
-	public void setDatabase(String database) {
-		this.database = database;
 	}
 
 	public String getEnv() {

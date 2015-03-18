@@ -35,7 +35,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	private CountPunisher punisher;
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;
-	
+
 	public SingleDataSource(DataSourceConfig config, List<JdbcFilter> filters) {
 		this.dsId = config.getId();
 		this.config = config;
@@ -48,10 +48,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		if (state == DataSourceState.CLOSED || state == DataSourceState.DOWN) {
 			throw new SQLException(String.format("dataSource is not avaiable, current state is [%s]", state));
 		}
-	}
-	
-	public String getJdbcUrl(){
-		return this.config.getJdbcUrl();
 	}
 
 	public void closeOrigin() throws SQLException {

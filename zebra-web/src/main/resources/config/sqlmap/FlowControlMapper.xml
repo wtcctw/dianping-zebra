@@ -23,7 +23,6 @@
 		(
 		`sqlId`,
 		`sql`,
-		`database`,
 		`app`,
 		`env`,
 		`isDelete`,
@@ -33,7 +32,6 @@
 		(
 		#{sqlId},
 		#{sql},
-		#{database},
 		#{app},
 		#{env},
 		#{isDelete},

@@ -13,7 +13,6 @@ import org.junit.Test;
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.datasources.SingleDataSource;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.google.common.collect.Lists;
 
@@ -40,14 +39,12 @@ public class WallFilterTest {
 		
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
-		config.setJdbcUrl("jdbc:mysql://192.168.1.1:3306/test");
-		SingleDataSource ds = new SingleDataSource(config, null);
-		SingleConnection conn = new SingleConnection(ds, config, null, Lists.<JdbcFilter> newArrayList(filter));
+		SingleConnection conn = new SingleConnection(null, config, null, Lists.<JdbcFilter> newArrayList(filter));
 		ExecutionContextHolder.getContext().add("sql_statement_name", "test");
 
 		filter.sql(conn, "select * from Test", true, null);
 	}
-	
+
 	@Test
 	public void test_sql_not_reject_by_flow_control() throws SQLException {
 		WallFilter filter = new MockWallFilter(9);

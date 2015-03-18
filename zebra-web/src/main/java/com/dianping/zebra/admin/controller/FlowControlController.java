@@ -33,12 +33,12 @@ public class FlowControlController {
 		return flowControlService.getAllActiveFlowControl(env);
 	}
 
-	@RequestMapping(value = "history", method = RequestMethod.GET)
+	@RequestMapping(value="history",method = RequestMethod.GET)
 	@ResponseBody
 	public Object history(String env) throws IOException {
 		return flowControlService.getAllDeletedFlowControl(env);
 	}
-
+	
 	@RequestMapping(value = "save", method = RequestMethod.POST)
 	@ResponseBody
 	public Object save(String env, @RequestBody FlowControlDto dto) throws IOException {
@@ -47,11 +47,11 @@ public class FlowControlController {
 
 			if (contain) {
 				// modify
-				flowControlService.modifyItem(env, dto.getSqlId(), dto.getAllowPercent(), dto.getDatabase());
+				flowControlService.modifyItem(env, dto.getSqlId(), dto.getAllowPercent());
 			} else {
 				// create
 				boolean ok = flowControlService.addItem(env, dto.getIp(), dto.getSqlId(), dto.getSql(),
-				      dto.getAllowPercent(), dto.getDatabase());
+				      dto.getAllowPercent());
 
 				if (ok) {
 					blackListService.addItem(env, null, dto.getSqlId(), null);
