@@ -35,5 +35,4 @@ public interface DimensionRule {
 	boolean match(ShardMatchContext matchContext);
 	
 	Map<String, Set<String>> getAllDBAndTables();
-
 }

@@ -39,6 +39,10 @@ public class TableShardRule {
 		this.tableName = tableName;
 	}
 
+    public List<DimensionRule> getDimensionRules(){
+        return this.rules;
+    }
+
 	public void addDimensionRules(List<DimensionRule> dimensionRules) {
 		if (dimensionRules != null) {
 			this.rules.addAll(dimensionRules);

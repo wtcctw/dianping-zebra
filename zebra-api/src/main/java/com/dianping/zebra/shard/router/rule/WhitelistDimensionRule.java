@@ -72,5 +72,4 @@ public class WhitelistDimensionRule extends AbstractDimensionRule {
 		dbAndTables.put(dataSource, tableSet);
 		return dbAndTables;
 	}
-
 }
