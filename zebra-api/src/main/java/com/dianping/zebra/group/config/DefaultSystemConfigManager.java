@@ -70,7 +70,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 						String app = sqlFlowControl.getApp();
 
 						if ("_global_".equalsIgnoreCase(app) || appName.equalsIgnoreCase(app)) {
-							config.addSqlFlowControl(sqlFlowControl);
+                            tmpConfig.addSqlFlowControl(sqlFlowControl);
 						}
 					}
 				} else {

@@ -14,5 +14,6 @@ public class SystemConfigManagerTest {
 		
 		SystemConfig config = systemConfigManager.getSystemConfig();
 		Assert.assertEquals(2, config.getRetryTimes());
+		Assert.assertEquals(2, config.getSqlFlowControls().size());
 	}
 }

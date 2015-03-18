@@ -62,7 +62,7 @@ public class WallFilterTest {
 		WallFilter filter = new MockWallFilter(0);
 		filter.setConfigManagerType("local");
 		filter.init();
-		
+
 		Assert.assertEquals(filter.getFlowControl().size(), 2);
 		Assert.assertTrue(filter.getFlowControl().containsKey("ec262bf8"));
 		Assert.assertTrue(filter.getFlowControl().containsKey("a2f3e453"));

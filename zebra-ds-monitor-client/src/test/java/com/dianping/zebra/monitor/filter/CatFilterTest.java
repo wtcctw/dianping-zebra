@@ -82,17 +82,18 @@ public class CatFilterTest {
 
 		new Sql(ds.getConnection()).execute("select * from xxx");
 	}
-//	@Test(expected = SQLException.class)
-//	public void test_sql_rejected_by_flow_control() throws SQLException {
-//		GroupDataSource ds = new GroupDataSource();
-//		ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
-//		ds.setJdbcRef("sample.ds.v2");
-//		ds.setFilter("wall,cat");
-//		ds.init();
-//
-//		ExecutionContextHolder.getContext().add("sql_statement_name", "test");
-//
-//		new Sql(ds.getConnection()).execute("select 1", new Object[0]);
-//	}
+
+	@Test(expected = SQLException.class)
+	public void test_sql_rejected_by_flow_control() throws SQLException {
+		GroupDataSource ds = new GroupDataSource();
+		ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
+		ds.setJdbcRef("sample.ds.v2");
+		ds.setFilter("wall,cat");
+		ds.init();
+
+		ExecutionContextHolder.getContext().add("sql_statement_name", "test");
+
+		new Sql(ds.getConnection()).execute("select 1", new Object[0]);
+	}
 
 }
