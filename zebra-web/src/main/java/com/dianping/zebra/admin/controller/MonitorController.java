@@ -5,13 +5,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.zebra.admin.monitor.MySQLMonitorServer;
+import com.dianping.zebra.admin.monitor.MySQLMonitorManager;
 
 @Controller
 @RequestMapping(value = "/monitor")
 public class MonitorController {
 	
-	private MySQLMonitorServer monitorServer;
+	private MySQLMonitorManager monitorServer;
 
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
 	@ResponseBody
