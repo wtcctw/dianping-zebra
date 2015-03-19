@@ -1,18 +1,16 @@
 package com.dianping.zebra.admin.monitor;
 
-public class MySQLConfig {
-	
-	private String jdbcRef;
-	
-	private String username;
-	
-	private String password;
+public class MonitorConfig {
 	
 	private String testSql = "SELECT 1";
 	
 	private int pingFailLimit = 10;
 	
 	private int pingIntervalSeconds = 1;
+	
+	private int queryTimeout = 1;
+	
+	private long validPeriod = 30 * 1000; //30 seconds
 	
 	private boolean isAutoFailover = true;
 	
@@ -32,30 +30,6 @@ public class MySQLConfig {
 		this.pingIntervalSeconds = pingIntervalSeconds;
 	}
 
-	public void setJdbcRef(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
-	}
-
-	public String getJdbcRef() {
-		return jdbcRef;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	public String getTestSql() {
 		return testSql;
 	}
@@ -70,5 +44,21 @@ public class MySQLConfig {
 
 	public void setAutoFailover(boolean isAutoFailover) {
 		this.isAutoFailover = isAutoFailover;
+	}
+
+	public int getQueryTimeout() {
+		return queryTimeout;
+	}
+
+	public void setQueryTimeout(int queryTimeout) {
+		this.queryTimeout = queryTimeout;
+	}
+
+	public long getValidPeriod() {
+		return validPeriod;
+	}
+
+	public void setValidPeriod(long validPeriod) {
+		this.validPeriod = validPeriod;
 	}
 }

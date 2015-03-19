@@ -10,97 +10,19 @@ import java.util.concurrent.TimeUnit;
 import com.dianping.zebra.admin.monitor.handler.DalHaHandler;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
-public class MySQLPingThread extends Thread {
-
-	private int pingLimit;
-
-	private int pingIntervalSeconds;
+public class MySQLMonitorThread extends Thread {
 
 	private DataSourceConfig config;
 
-	private MySQLConfig monitorConfig;
+	private MonitorConfig monitorConfig;
 
-	private final long validPeriod = 30 * 1000; // 30 seconds
+	private volatile long lastUpdatedTime = 0L;
 
-	public MySQLPingThread(MySQLConfig monitorConfig, DataSourceConfig config) {
+	private Status currentState = Status.ALIVE;
+
+	public MySQLMonitorThread(MonitorConfig monitorConfig, DataSourceConfig config) {
 		this.monitorConfig = monitorConfig;
 		this.config = config;
-		this.pingLimit = this.monitorConfig.getPingFailLimit();
-		this.pingIntervalSeconds = this.monitorConfig.getPingIntervalSeconds();
-	}
-
-	@Override
-	public void run() {
-		// 如果该库是active=false的状态，则自动ping检测markup
-		if (!config.getActive()) {
-			FixedLengthLinkedList timestamp = new FixedLengthLinkedList(this.pingLimit, this.validPeriod);
-
-			while (!Thread.currentThread().isInterrupted()) {
-				Connection con = null;
-				Statement stmt = null;
-
-				try {
-					con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
-					stmt = con.createStatement();
-					stmt.setQueryTimeout(1);
-					stmt.executeQuery(monitorConfig.getTestSql());
-
-					timestamp.addLast(System.currentTimeMillis());
-
-					if (timestamp.shouldAction()) {
-						DalHaHandler.markup(config.getId());
-
-						System.out.println("markup " + config.getId());
-						break;
-					}
-				} catch (SQLException ignore) {
-					//如果不能连上，则清空队列中正常的次数；
-					timestamp.clear();
-				} finally {
-					close(con, stmt);
-				}
-
-				try {
-					TimeUnit.SECONDS.sleep(pingIntervalSeconds);
-				} catch (InterruptedException e) {
-					break;
-				}
-			}
-		}
-
-		// 如果该库是active=true的状态，则自动ping检测markdown
-		FixedLengthLinkedList timestamp = new FixedLengthLinkedList(this.pingLimit, this.validPeriod);
-		while (!Thread.currentThread().isInterrupted()) {
-			Connection con = null;
-			Statement stmt = null;
-
-			try {
-				con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
-				stmt = con.createStatement();
-				stmt.setQueryTimeout(1);
-				stmt.executeQuery(monitorConfig.getTestSql());
-
-				//如果能连上，则清空队列中的异常；因为要求连续的异常
-				timestamp.clear();
-			} catch (SQLException e) {
-				timestamp.addLast(System.currentTimeMillis());
-
-				if (timestamp.shouldAction()) {
-					DalHaHandler.markdown(config.getId());
-					System.out.println("markdown " + config.getId());
-
-					break;
-				}
-			} finally {
-				close(con, stmt);
-			}
-
-			try {
-				TimeUnit.SECONDS.sleep(pingIntervalSeconds);
-			} catch (InterruptedException e) {
-				break;
-			}
-		}
 	}
 
 	private void close(Connection con, Statement stmt) {
@@ -114,6 +36,95 @@ public class MySQLPingThread extends Thread {
 			try {
 				con.close();
 			} catch (SQLException ingore) {
+			}
+		}
+	}
+
+	public Status getCurrentState() {
+		return currentState;
+	}
+
+	public long getLastUpdatedTime() {
+		return lastUpdatedTime;
+	}
+
+	@Override
+	public void run() {
+		// 如果该库是active=false的状态，则自动ping检测markup
+		if (!config.getActive()) {
+			currentState = Status.DEAD;
+			FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig.getPingFailLimit(),
+			      monitorConfig.getValidPeriod());
+
+			while (!Thread.currentThread().isInterrupted()) {
+				Connection con = null;
+				Statement stmt = null;
+
+				try {
+					con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
+					stmt = con.createStatement();
+					stmt.setQueryTimeout(monitorConfig.getQueryTimeout());
+					stmt.executeQuery(monitorConfig.getTestSql());
+
+					lastUpdatedTime = System.currentTimeMillis();
+					timestamp.addLast(lastUpdatedTime);
+
+					if (timestamp.shouldAction()) {
+						DalHaHandler.markup(config.getId());
+
+						System.out.println("markup " + config.getId());
+						break;
+					}
+				} catch (SQLException ignore) {
+					// 如果不能连上，则清空队列中正常的次数；
+					timestamp.clear();
+				} finally {
+					close(con, stmt);
+				}
+
+				try {
+					TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+		}
+
+		// 如果该库是active=true的状态，则自动ping检测markdown
+		FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig.getPingFailLimit(),
+		      monitorConfig.getValidPeriod());
+		currentState = Status.ALIVE;
+		while (!Thread.currentThread().isInterrupted()) {
+			Connection con = null;
+			Statement stmt = null;
+
+			try {
+				con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
+				stmt = con.createStatement();
+				stmt.setQueryTimeout(monitorConfig.getQueryTimeout());
+				stmt.executeQuery(monitorConfig.getTestSql());
+
+				lastUpdatedTime = System.currentTimeMillis();
+
+				// 如果能连上，则清空队列中的异常；因为要求连续的异常
+				timestamp.clear();
+			} catch (SQLException e) {
+				timestamp.addLast(lastUpdatedTime);
+
+				if (timestamp.shouldAction()) {
+					DalHaHandler.markdown(config.getId());
+					System.out.println("markdown " + config.getId());
+
+					break;
+				}
+			} finally {
+				close(con, stmt);
+			}
+
+			try {
+				TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
+			} catch (InterruptedException e) {
+				break;
 			}
 		}
 	}
@@ -145,7 +156,7 @@ public class MySQLPingThread extends Thread {
 		public long getDistance() {
 			return super.getLast() - super.getFirst();
 		}
-		
+
 		public boolean shouldAction() {
 			return (size() == maxLength) && (getDistance() <= validPeriod);
 		}
