@@ -1,11 +1,9 @@
 package com.dianping.zebra.admin.controller;
 
-import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.zebra.admin.dto.ConnectionStatusDto;
-import com.dianping.zebra.admin.service.ConnectionService;
-import com.dianping.zebra.admin.service.DalConfigService;
-import com.dianping.zebra.admin.service.LionService;
-import com.google.common.base.Strings;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -15,6 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.zebra.admin.dto.ConfigDto;
+import com.dianping.zebra.admin.dto.ConnectionStatusDto;
+import com.dianping.zebra.admin.service.ConnectionService;
+import com.dianping.zebra.admin.service.DalConfigService;
+import com.dianping.zebra.admin.service.LionService;
+import com.google.common.base.Strings;
 
 /**
  * Dozer @ 2015-02
@@ -58,14 +64,48 @@ public class ConfigController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     @ResponseBody
     public Object index(String env) throws Exception {
-        return lionHttpService.getConfigByProject(env, "groupds");
+   	 HashMap<String, ConfigDto> configs = new HashMap<String, ConfigDto>();
+   	 
+   	 HashMap<String, String> jdbcRefs = lionHttpService.getConfigByProject(env, "groupds");
+   	 Set<String> whiteList = dalConfigService.getWhiteList(env);
+   	 
+   	 for(Entry<String,String> entry: jdbcRefs.entrySet()){
+   		 ConfigDto dto = new ConfigDto();
+   		 String jdbcRefKey = entry.getKey();
+   		 
+   		 if(jdbcRefKey != null && jdbcRefKey.endsWith("mapping")){
+   			 int first = jdbcRefKey.indexOf(".");
+   			 int last = jdbcRefKey.lastIndexOf(".");
+   			 String jdbcRef = jdbcRefKey.substring(first + 1, last);
+   			 
+   			 dto.setJdbcRef(jdbcRef);
+   			 dto.setValue(entry.getValue());
+   			 dto.setAutoReplaced(whiteList.contains(jdbcRef));
+   			 
+   			 configs.put(jdbcRef, dto);
+   		 }
+   	 }
+   	 
+        return configs;
     }
-
+    
     @RequestMapping(value = "/updateds", method = RequestMethod.POST)
     @ResponseBody
     public Object updateds(boolean force, @RequestBody DalConfigService.GroupConfigModel dsConfig) throws Exception {
         dalConfigService.updateDsConfig(dsConfig, force);
         return null;
+    }
+    
+    @RequestMapping(value = "/autoreplace", method = RequestMethod.POST)
+    @ResponseBody
+    public Object autoReplace(String jdbcRef, String env, boolean isNew) throws Exception {
+   	 if(isNew){
+    		 dalConfigService.addItemIntoWhiteList(env, jdbcRef);
+   	 }else{
+   		 dalConfigService.deleteItemFromWhiteList(env, jdbcRef);
+   	 }
+       
+   	 return null;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)

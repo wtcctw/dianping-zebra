@@ -244,4 +244,58 @@ public class DalConfigServiceImpl implements DalConfigService {
 
 		return whiteList;
 	}
+
+	@Override
+   public void addItemIntoWhiteList(String env, String database) {
+		Set<String> whiteList = getWhiteList(env);
+		
+		int pos = database.indexOf(".");
+		
+		if(pos < 0){
+			if(!whiteList.contains(database)){
+				whiteList.add(database);
+				
+				StringBuilder sb = new StringBuilder(1024);
+				boolean isFirst = true;
+				for(String db : whiteList){
+					if(isFirst){
+						sb.append(db);
+						isFirst = false;
+					}else{
+						sb.append(",");
+						sb.append(db);
+					}
+				}
+				
+				m_lionHttpService.setConfig(env, AUTO_REPLACE_KEY, sb.toString());
+			}
+		}
+	}
+
+	@Override
+   public void deleteItemFromWhiteList(String env, String database) {
+		Set<String> whiteList = getWhiteList(env);
+		
+		int pos = database.indexOf(".");
+		
+		if(pos < 0){
+			if(whiteList.contains(database)){
+				whiteList.remove(database);
+				
+				StringBuilder sb = new StringBuilder(1024);
+				boolean isFirst = true;
+				for(String db : whiteList){
+					if(isFirst){
+						sb.append(db);
+						isFirst = false;
+					}else{
+						sb.append(",");
+						sb.append(db);
+					}
+				}
+				
+				m_lionHttpService.setConfig(env, AUTO_REPLACE_KEY, sb.toString());
+			}
+		}	   
+   }
 }

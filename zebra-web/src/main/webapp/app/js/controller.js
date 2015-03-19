@@ -1,3 +1,6 @@
+zebraWeb.controller('monitor', function ($scope, $http) {
+});
+
 zebraWeb.controller('update', function ($scope, $http) {
     $http.get('/a/update/index').success(function (data, status, headers, config) {
         $scope.predicate = 'name';
@@ -424,7 +427,7 @@ zebraWeb.controller('header', function ($rootScope, $scope, $cookies, $http, log
 
 zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
     var convertKey = function (key) {
-        return key.substring(key.indexOf('.') + 1, key.lastIndexOf('.'));
+        return key;
     }
 
     $scope.edit = function (key) {
@@ -438,6 +441,14 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
     $scope.test = function (key) {
         configService.openTestModal(convertKey(key));
     };
+    
+    $scope.autoreplace = function(jdbcRef,isNew){
+    	 if (jdbcRef && $scope.config.env) {
+             $http.post('/a/config/autoreplace?env=' + $scope.config.env + '&jdbcRef=' + jdbcRef + '&isNew=' + isNew).success(function (data, status, headers, config) {
+            	 $scope.load();
+             });
+         }
+    }
 
     $scope.load = function () {
         if ($scope.config && $scope.config.env) {

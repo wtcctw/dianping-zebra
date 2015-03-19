@@ -22,8 +22,6 @@ public class MySQLPingThread extends Thread {
 
 	private final long validPeriod = 30 * 1000; // 30 seconds
 
-	private final String timeout = "connectTimeout=60000&socketTimeout=60000";
-	
 	public MySQLPingThread(MySQLConfig monitorConfig, DataSourceConfig config) {
 		this.monitorConfig = monitorConfig;
 		this.config = config;
@@ -44,6 +42,7 @@ public class MySQLPingThread extends Thread {
 				try {
 					con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
 					stmt = con.createStatement();
+					stmt.setQueryTimeout(1);
 					stmt.executeQuery(monitorConfig.getTestSql());
 
 					timestamp.addLast(System.currentTimeMillis());
@@ -78,6 +77,7 @@ public class MySQLPingThread extends Thread {
 			try {
 				con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
 				stmt = con.createStatement();
+				stmt.setQueryTimeout(1);
 				stmt.executeQuery(monitorConfig.getTestSql());
 
 				//如果能连上，则清空队列中的异常；因为要求连续的异常
