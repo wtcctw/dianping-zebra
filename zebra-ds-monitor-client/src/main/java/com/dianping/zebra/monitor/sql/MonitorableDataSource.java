@@ -53,7 +53,9 @@ public class MonitorableDataSource implements DataSource {
 		} catch (Exception ignore) {
 		} finally {
 			try {
-				conn.close();
+				if(conn != null){
+					conn.close();
+				}
 			} catch (SQLException e) {
 			}
 		}

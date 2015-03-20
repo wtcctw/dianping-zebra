@@ -3,6 +3,7 @@ package com.dianping.zebra.admin.monitor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
@@ -10,6 +11,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 @Service
 public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 
+	@Autowired
 	private MonitorConfig monitorConfig;
 
 	private Map<String, MySQLMonitorThread> monitorThreads = new ConcurrentHashMap<String, MySQLMonitorThread>();
