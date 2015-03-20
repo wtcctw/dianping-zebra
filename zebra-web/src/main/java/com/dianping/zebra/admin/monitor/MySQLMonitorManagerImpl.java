@@ -2,7 +2,9 @@ package com.dianping.zebra.admin.monitor;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,7 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 	@Autowired
-	private MySQLMonitorThreadGroup monitorManager;
+	private MySQLMonitorThreadGroup monitorThreadGroup;
 
 	private Map<String, DataSourceConfig> dataSourceConfigs = new ConcurrentHashMap<String, DataSourceConfig>();
 
@@ -46,13 +48,13 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 					if (dsConfig.isCanRead()) {
 						if (!dataSourceConfigs.containsKey(dsId)) {
 							dataSourceConfigs.put(dsId, dsConfig);
-							monitorManager.startOrRefreshMonitor(dsConfig);
+							monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 						} else {
 							DataSourceConfig oldConfig = dataSourceConfigs.get(dsId);
 
 							if (!dsConfig.toString().equals(oldConfig.toString())) {
 								dataSourceConfigs.put(dsId, dsConfig);
-								monitorManager.startOrRefreshMonitor(dsConfig);
+								monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 							}
 						}
 					}
@@ -61,7 +63,7 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 				for (String dsId : groupDataSourceConfigs.get(jdbcRef).getDataSourceConfigs().keySet()) {
 					if (!dataSourceConfigs.containsKey(dsId)) {
 						dataSourceConfigs.remove(dsId);
-						monitorManager.removeMonitor(dsId);
+						monitorThreadGroup.removeMonitor(dsId);
 					}
 				}
 			}
@@ -82,7 +84,7 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 			if (dsConfig.isCanRead()) {
 				dataSourceConfigs.put(key, dsConfig);
-				monitorManager.startOrRefreshMonitor(dsConfig);
+				monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 			}
 		}
 	}
@@ -98,8 +100,28 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 			if (dsConfig.isCanRead()) {
 				dataSourceConfigs.remove(dsId);
-				monitorManager.removeMonitor(dsId);
+				monitorThreadGroup.removeMonitor(dsId);
 			}
 		}
 	}
+
+	@Override
+   public Map<String, InstanceStatus> listStatus() {
+		Map<String, MySQLMonitorThread> monitors = monitorThreadGroup.getMonitors();
+		Map<String, InstanceStatus> result = new HashMap<String, InstanceStatus>();
+		
+		for(Entry<String,MySQLMonitorThread> entry : monitors.entrySet()){
+			String dsId = entry.getKey();
+			MySQLMonitorThread thread = entry.getValue();
+			InstanceStatus status = new InstanceStatus();
+			
+			status.setDsId(dsId);
+			status.setLastUpdateTime(thread.getLastUpdatedTime());
+			status.setStatus(thread.getCurrentState().name());
+			
+			result.put(dsId, status);
+		}
+		
+		return result;
+   }
 }

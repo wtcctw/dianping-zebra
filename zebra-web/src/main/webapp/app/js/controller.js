@@ -1,4 +1,19 @@
 zebraWeb.controller('monitor', function ($scope, $http) {
+    $scope.load = function () {
+        $http.get('/a/monitor/list').success(function (data, status, headers, config) {
+            $scope.statusList = data;
+        });
+    }
+    
+    $scope.load();
+
+	$scope.addJdbcRef = function() {
+        if ($scope.jdbcRef) {
+        	 $http.get('/a/monitor/add?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+        		 $scope.load();
+        	 });
+        }
+	}
 });
 
 zebraWeb.controller('update', function ($scope, $http) {
