@@ -15,12 +15,13 @@
  */
 package com.dianping.zebra.shard.config;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author danson.liu
  */
-public class RouterRuleConfig {
+public class RouterRuleConfig implements Serializable {
     private List<TableShardRuleConfig> tableShardConfigs;
 
     public List<TableShardRuleConfig> getTableShardConfigs() {

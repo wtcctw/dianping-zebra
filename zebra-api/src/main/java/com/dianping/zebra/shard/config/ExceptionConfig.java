@@ -15,11 +15,13 @@
  */
 package com.dianping.zebra.shard.config;
 
+import java.io.Serializable;
+
 /**
  * @author danson.liu
  *
  */
-public class ExceptionConfig {
+public class ExceptionConfig implements Serializable {
 
 	private String condition;
 	
