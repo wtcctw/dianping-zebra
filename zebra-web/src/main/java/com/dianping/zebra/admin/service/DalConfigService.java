@@ -9,11 +9,15 @@ import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 public interface DalConfigService {
 	public boolean generateConfig(String name);
 
-	GroupConfigModel getDsConfig(String env, final String groupId, String otherkey);
+	public GroupConfigModel getDsConfig(String env, final String groupId, String otherkey);
 
-	void updateDsConfig(GroupConfigModel modal,boolean isForce);
+	public void updateDsConfig(GroupConfigModel modal,boolean isForce);
 	
-	Set<String> getWhiteList(String env);
+	public Set<String> getWhiteList(String env);
+	
+	public void addItemIntoWhiteList(String env,String database);
+	
+	public void deleteItemFromWhiteList(String env,String database);
 
 	// for test purpose
 	public void setProject(String project);

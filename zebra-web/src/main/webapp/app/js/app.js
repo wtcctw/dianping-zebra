@@ -99,6 +99,10 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/update/database/{name}',
         templateUrl: 'app/template/update-database.html',
         controller: 'update-database'
+    }).state('monitor', {
+        url: '/monitor',
+        templateUrl: 'app/template/monitor.html',
+        controller: 'monitor'
     });
 });
 

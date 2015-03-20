@@ -12,8 +12,6 @@
  */
 package com.dianping.zebra.shard.router;
 
-import com.dianping.zebra.shard.router.rule.RouterRule;
-
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Map;

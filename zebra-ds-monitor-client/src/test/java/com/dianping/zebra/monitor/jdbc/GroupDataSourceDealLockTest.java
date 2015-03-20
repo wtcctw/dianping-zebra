@@ -5,7 +5,9 @@ import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
+
 import groovy.sql.Sql;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -31,7 +33,7 @@ public class GroupDataSourceDealLockTest {
 
 	protected static final Range<Integer> idRange = Range.closed(1, 10000);
 
-	protected static final List<Exception> exps = new CopyOnWriteArrayList();
+	protected static final List<Exception> exps = new CopyOnWriteArrayList<Exception>();
 
 	@BeforeClass
 	public static void init() throws SQLException {
