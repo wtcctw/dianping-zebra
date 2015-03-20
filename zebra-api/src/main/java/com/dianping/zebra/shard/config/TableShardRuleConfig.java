@@ -15,13 +15,14 @@
  */
 package com.dianping.zebra.shard.config;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author danson.liu
  *
  */
-public class TableShardRuleConfig {
+public class TableShardRuleConfig implements Serializable{
 
 	private String tableName;
 	

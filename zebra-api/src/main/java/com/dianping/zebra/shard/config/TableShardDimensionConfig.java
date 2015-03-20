@@ -15,13 +15,14 @@
  */
 package com.dianping.zebra.shard.config;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author danson.liu
  *
  */
-public class TableShardDimensionConfig {
+public class TableShardDimensionConfig implements Serializable {
 	
 	private String dbRule;
 	
