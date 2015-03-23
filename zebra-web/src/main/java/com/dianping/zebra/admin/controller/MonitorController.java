@@ -41,7 +41,7 @@ public class MonitorController {
 
 	@Autowired
 	private LionService lionService;
-	
+
 	@Autowired
 	private MonitorHistoryMapper monitorHistoryDao;
 
@@ -99,8 +99,8 @@ public class MonitorController {
 				if (ipWithJdbcRef != null) {
 					Set<String> newJdbcRefs = ipWithJdbcRef.get(localIpAddress);
 
-					if (newJdbcRefs != null) {
-						synchronized (currentJdbcRefs) {
+					synchronized (currentJdbcRefs) {
+						if (newJdbcRefs != null) {
 							for (String jdbcRef : newJdbcRefs) {
 								if (!currentJdbcRefs.contains(jdbcRef)) {
 									monitorServer.addJdbcRef(jdbcRef);
@@ -112,9 +112,18 @@ public class MonitorController {
 									monitorServer.removeJdbcRef(jdbcRef);
 								}
 							}
-
+							
 							currentJdbcRefs = newJdbcRefs;
+						}else{
+							if(currentJdbcRefs != null){
+								for(String jdbcRef : currentJdbcRefs){
+									monitorServer.removeJdbcRef(jdbcRef);
+								}
+								
+								currentJdbcRefs.clear();
+							}
 						}
+						
 					}
 				}
 			}
@@ -144,7 +153,6 @@ public class MonitorController {
 		return monitorHistoryDao.findAllHistory();
 	}
 
-	
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
 	public Object listJdbcRef() throws Exception {

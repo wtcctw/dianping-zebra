@@ -106,22 +106,22 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 	}
 
 	@Override
-   public Map<String, InstanceStatus> listStatus() {
+	public Map<String, InstanceStatus> listStatus() {
 		Map<String, MySQLMonitorThread> monitors = monitorThreadGroup.getMonitors();
 		Map<String, InstanceStatus> result = new HashMap<String, InstanceStatus>();
-		
-		for(Entry<String,MySQLMonitorThread> entry : monitors.entrySet()){
+
+		for (Entry<String, MySQLMonitorThread> entry : monitors.entrySet()) {
 			String dsId = entry.getKey();
 			MySQLMonitorThread thread = entry.getValue();
 			InstanceStatus status = new InstanceStatus();
-			
+
 			status.setDsId(dsId);
 			status.setLastUpdateTime(thread.getLastUpdatedTime());
 			status.setStatus(thread.getCurrentState().name());
-			
+
 			result.put(dsId, status);
 		}
-		
+
 		return result;
-   }
+	}
 }

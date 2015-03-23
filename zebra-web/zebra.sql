@@ -31,3 +31,12 @@ CREATE TABLE `flowcontrol` (
   `updateTime` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `monitor_history` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `dsId` varchar(50) DEFAULT NULL,
+  `operator` tinyint(11) DEFAULT NULL COMMENT '0 for markup, -1 for mark down',
+  `createTime` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+

@@ -1,4 +1,4 @@
-package com.dianping.zebra.util;
+package com.dianping.zebra.group.util;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Map;
 
+@Deprecated
 public final class StringUtils {
 	private static final String EMPTY = "";
 
