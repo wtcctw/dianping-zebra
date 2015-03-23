@@ -7,4 +7,12 @@
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
         <property name="basePackage" value="com.dianping.zebra.admin.dao" />
     </bean>
+    
+    <bean id="placeholder" class="com.dianping.lion.client.SpringConfig">
+    </bean>
+    
+    <bean id="monitorConfig" class="com.dianping.zebra.admin.monitor.MonitorConfig">
+        <property name="pingFailLimit" value="${zebra.monitor.fail.limit}"></property>
+        <property name="pingIntervalSeconds" value="${zebra.monitor.sleep.interval}"></property>
+    </bean>
 </beans>
