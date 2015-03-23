@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import com.dianping.cat.Cat;
 import com.dianping.cat.configuration.NetworkInterfaceManager;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
@@ -78,7 +80,7 @@ public class MonitorController {
 				ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new MyConfigChange());
 			} catch (LionException e) {
 			}
-			
+
 			init = true;
 		}
 	}
@@ -144,15 +146,19 @@ public class MonitorController {
 		if (ipWithJdbcRef != null) {
 			for (String ip : ipWithJdbcRef.keySet()) {
 				if (!ip.equalsIgnoreCase(localIpAddress)) {
-					String url = String.format("http://%s:8080/a/monitor/listown", ip);
+					try {
+						String url = String.format("http://%s:8080/a/monitor/listown", ip);
 
-					RestTemplate client = new RestTemplate();
-					String jsonBody = client.exchange(url, HttpMethod.GET, null, String.class).getBody();
+						RestTemplate client = new RestTemplate();
+						String jsonBody = client.exchange(url, HttpMethod.GET, null, String.class).getBody();
 
-					if (jsonBody != null) {
-						Map<String, InstanceStatus> fromJson = gson.fromJson(jsonBody, type1);
+						if (jsonBody != null) {
+							Map<String, InstanceStatus> fromJson = gson.fromJson(jsonBody, type1);
 
-						result.putAll(fromJson);
+							result.putAll(fromJson);
+						}
+					} catch (Exception e) {
+						Cat.logError(e);
 					}
 				}
 			}
@@ -160,7 +166,7 @@ public class MonitorController {
 
 		return result;
 	}
-	
+
 	@RequestMapping(value = "/listown", method = RequestMethod.GET)
 	@ResponseBody
 	public Object listOwnJdbcRef() throws Exception {
@@ -181,6 +187,15 @@ public class MonitorController {
 
 		if (ipWithJdbcRef == null) {
 			ipWithJdbcRef = new HashMap<String, Set<String>>();
+		}
+
+		// 如果已经存在，表明已经被监控，不做任何处理
+		for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+			for (String jdbcRef2 : entry.getValue()) {
+				if (jdbcRef2.equalsIgnoreCase(jdbcRef)) {
+					return;
+				}
+			}
 		}
 
 		Set<String> jdbcRefs = ipWithJdbcRef.get(localIpAddress);
