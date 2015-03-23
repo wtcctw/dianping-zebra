@@ -35,9 +35,9 @@
             <tbody>
             <tr ng-repeat="statusItem in statusList | toArray | filter:{$key:searchText}">
                 <td>{{statusItem.$key}}</td>
-                <td>{{statusItem.lastUpdateTime | date:'yyyy-MM-dd HH:mm:ss'}}</span>
-                <td>{{statusItem.status}}</span>
-                </td>
+                <td>{{statusItem.lastUpdateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td ng-show="statusItem.status == 'DEAD'"><span class="label label-danger">{{statusItem.status}}</span></td>
+                <td ng-show="statusItem.status == 'ALIVE'"><span class="label label-success">{{statusItem.status}}</span></td>
             </tr>
             </tbody>
         </table>
@@ -58,9 +58,9 @@
             <tbody>
             <tr ng-repeat="history in histories">
                 <td>{{history.dsId}}</td>
-                <td ng-show="history.operator == -1">markdown</span>
-                <td ng-show="history.operator == 0">markup</span>
-                <td>{{history.createTime}}</span>
+                <td ng-show="history.operator == -1"><span class="label label-danger">markdown</span></td>
+                <td ng-show="history.operator == 0"><span  class="label label-success">markup</span></td>
+                <td>{{history.createTime}}</td>
                 </td>
             </tr>
             </tbody>
