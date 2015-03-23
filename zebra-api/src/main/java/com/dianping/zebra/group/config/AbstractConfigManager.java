@@ -9,10 +9,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractConfigManager {
 
@@ -21,19 +17,6 @@ public abstract class AbstractConfigManager {
 	protected final ConfigService configService;
 
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
-
-	private ExecutorService listenerNotifyThreadPool = Executors.newFixedThreadPool(2, new ThreadFactory() {
-		private AtomicInteger id = new AtomicInteger(0);
-
-		@Override
-		public Thread newThread(Runnable r) {
-			Thread t = new Thread(r);
-			t.setDaemon(true);
-			t.setName("Dal-Config-Notify-" + id.incrementAndGet());
-
-			return t;
-		}
-	});
 
 	public AbstractConfigManager(ConfigService configService) {
 		this.configService = configService;
@@ -84,15 +67,7 @@ public abstract class AbstractConfigManager {
 
 	private void notifyListeners(final PropertyChangeEvent evt) {
 		for (final PropertyChangeListener listener : listeners) {
-			Runnable task = new Runnable() {
-
-				@Override
-				public void run() {
-					listener.propertyChange(evt);
-				}
-			};
-
-			listenerNotifyThreadPool.submit(task);
+			listener.propertyChange(evt);
 		}
 	}
 
