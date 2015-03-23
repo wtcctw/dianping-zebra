@@ -18,10 +18,7 @@ package com.dianping.zebra.shard.config;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @author danson.liu
- *
- */
+@SuppressWarnings("serial")
 public class TableShardDimensionConfig implements Serializable {
 	
 	private String dbRule;

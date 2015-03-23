@@ -17,10 +17,7 @@ package com.dianping.zebra.shard.config;
 
 import java.io.Serializable;
 
-/**
- * @author danson.liu
- *
- */
+@SuppressWarnings("serial")
 public class ExceptionConfig implements Serializable {
 
 	private String condition;

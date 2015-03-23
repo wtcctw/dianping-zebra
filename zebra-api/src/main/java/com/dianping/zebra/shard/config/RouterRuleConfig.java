@@ -18,9 +18,7 @@ package com.dianping.zebra.shard.config;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @author danson.liu
- */
+@SuppressWarnings("serial")
 public class RouterRuleConfig implements Serializable {
     private List<TableShardRuleConfig> tableShardConfigs;
 
