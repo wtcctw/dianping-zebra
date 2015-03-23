@@ -51,29 +51,35 @@ public class MonitorController {
 
 	private Set<String> currentJdbcRefs = new HashSet<String>();
 
+	private volatile boolean init = false;
+
 	@PostConstruct
 	public void init() {
-		localIpAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+		if (!init) {
+			localIpAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 
-		Map<String, Set<String>> ipToJdbcRefs = getIpWithJdbcRef();
+			Map<String, Set<String>> ipToJdbcRefs = getIpWithJdbcRef();
 
-		if (ipToJdbcRefs != null) {
-			Set<String> jdbcRefs = ipToJdbcRefs.get(localIpAddress);
+			if (ipToJdbcRefs != null) {
+				Set<String> jdbcRefs = ipToJdbcRefs.get(localIpAddress);
 
-			if (jdbcRefs != null) {
-				for (String jdbcRef : jdbcRefs) {
-					monitorServer.addJdbcRef(jdbcRef);
-				}
+				if (jdbcRefs != null) {
+					for (String jdbcRef : jdbcRefs) {
+						monitorServer.addJdbcRef(jdbcRef);
+					}
 
-				synchronized (currentJdbcRefs) {
-					currentJdbcRefs = jdbcRefs;
+					synchronized (currentJdbcRefs) {
+						currentJdbcRefs = jdbcRefs;
+					}
 				}
 			}
-		}
 
-		try {
-			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new MyConfigChange());
-		} catch (LionException e) {
+			try {
+				ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new MyConfigChange());
+			} catch (LionException e) {
+			}
+			
+			init = true;
 		}
 	}
 
@@ -167,18 +173,23 @@ public class MonitorController {
 	private void addJdbcRefToLion(String jdbcRef) {
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
 
-		if (ipWithJdbcRef != null) {
-			Set<String> jdbcRefs = ipWithJdbcRef.get(localIpAddress);
+		if (ipWithJdbcRef == null) {
+			ipWithJdbcRef = new HashMap<String, Set<String>>();
+		}
 
-			if (jdbcRefs != null) {
-				if (!jdbcRefs.contains(jdbcRef)) {
-					jdbcRefs.add(jdbcRef);
+		Set<String> jdbcRefs = ipWithJdbcRef.get(localIpAddress);
 
-					String json = gson.toJson(ipWithJdbcRef);
+		if (jdbcRefs == null) {
+			jdbcRefs = new HashSet<String>();
+			ipWithJdbcRef.put(localIpAddress, jdbcRefs);
+		}
 
-					lionService.setConfig(lionService.getEnv(), LION_KEY, json);
-				}
-			}
+		if (!jdbcRefs.contains(jdbcRef)) {
+			jdbcRefs.add(jdbcRef);
+
+			String json = gson.toJson(ipWithJdbcRef);
+
+			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
 		}
 	}
 
