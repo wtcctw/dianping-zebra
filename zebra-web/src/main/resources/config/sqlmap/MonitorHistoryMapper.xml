@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.zebra.admin.dao.MonitorHistoryMapper">
+
+	<select id="findAllHistory" parameterType="map"
+		resultType="MonitorHistoryEntity">
+		SELECT * FROM monitor_history WHERE 1 = 1
+	</select>
+	
+	<insert id="insertMonitorHistory" parameterType="MonitorHistoryEntity">
+		INSERT INTO `monitor_history`
+		(
+		`dsId`,
+		`operator`,
+		`createTime`)
+		VALUES
+		(
+		#{dsId},
+		#{operator},
+		NOW())
+	</insert>
+</mapper>

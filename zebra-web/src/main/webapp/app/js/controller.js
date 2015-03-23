@@ -3,6 +3,10 @@ zebraWeb.controller('monitor', function ($scope, $http) {
         $http.get('/a/monitor/list').success(function (data, status, headers, config) {
             $scope.statusList = data;
         });
+        
+        $http.get('/a/monitor/history').success(function (data, status, headers, config) {
+            $scope.histories = data;
+        });
     }
     
     $scope.load();

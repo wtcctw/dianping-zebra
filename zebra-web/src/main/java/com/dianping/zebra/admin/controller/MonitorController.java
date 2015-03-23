@@ -23,6 +23,7 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
+import com.dianping.zebra.admin.dao.MonitorHistoryMapper;
 import com.dianping.zebra.admin.monitor.InstanceStatus;
 import com.dianping.zebra.admin.monitor.MySQLMonitorManager;
 import com.dianping.zebra.admin.service.LionService;
@@ -40,6 +41,9 @@ public class MonitorController {
 
 	@Autowired
 	private LionService lionService;
+	
+	@Autowired
+	private MonitorHistoryMapper monitorHistoryDao;
 
 	private String localIpAddress;
 
@@ -134,6 +138,13 @@ public class MonitorController {
 		return null;
 	}
 
+	@RequestMapping(value = "/history", method = RequestMethod.GET)
+	@ResponseBody
+	public Object showHistory() throws Exception {
+		return monitorHistoryDao.findAllHistory();
+	}
+
+	
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
 	public Object listJdbcRef() throws Exception {

@@ -5,16 +5,26 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
 
+import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dianping.zebra.admin.dao.MonitorHistoryMapper;
+import com.dianping.zebra.admin.entity.MonitorHistoryEntity;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class DalHaHandler {
+@Component
+public class DalHaHandler implements HaHandler {
 
 	private static final String LION_SET_CONFIG_URL = "http://lionapi.dp:8080/config2/set?env=%s&id=%s&key=%s&value=%s";
 
@@ -26,25 +36,80 @@ public class DalHaHandler {
 
 	private static final String DOWN = "false";
 
-	public static boolean markdown(String dsId) {
+	@Autowired
+	private MonitorHistoryMapper monitorHistoryDao;
+
+	@Autowired
+	private DataSourceTransactionManager transactionManager;
+
+	private DefaultTransactionDefinition def = new DefaultTransactionDefinition(
+	      TransactionDefinition.PROPAGATION_REQUIRED);
+
+	@Override
+	public boolean markdown(String dsId) {
+		TransactionStatus status = transactionManager.getTransaction(def);
+
+		MonitorHistoryEntity entity = new MonitorHistoryEntity();
+		entity.setOperator(-1);
+		entity.setDsId(dsId);
+
 		String key = String.format("ds.%s.jdbc.active", dsId);
 
 		String value = getConfigFromZk(key);
 
 		if (value == null || value.length() == 0 || value.equalsIgnoreCase(UP)) {
-			return setConfig(DEFAULT_ENV, key, DOWN);
+			try {
+				monitorHistoryDao.insertMonitorHistory(entity);
+			} catch (Exception e) {
+				Cat.logError(e);
+				transactionManager.rollback(status);
+
+				return false;
+			}
+
+			if (setConfig(DEFAULT_ENV, key, DOWN)) {
+				transactionManager.commit(status);
+
+				return true;
+			} else {
+				transactionManager.rollback(status);
+
+				return false;
+			}
 		} else {
 			return true;
 		}
 	}
 
-	public static boolean markup(String dsId) {
+	@Override
+	public boolean markup(String dsId) {
+		TransactionStatus status = transactionManager.getTransaction(def);
+
+		MonitorHistoryEntity entity = new MonitorHistoryEntity();
+		entity.setOperator(0);
+		entity.setDsId(dsId);
+
 		String key = String.format("ds.%s.jdbc.active", dsId);
 
 		String value = getConfigFromZk(key);
 
 		if (value == null || value.length() == 0 || value.equalsIgnoreCase(DOWN)) {
-			return setConfig(DEFAULT_ENV, key, UP);
+			try {
+				monitorHistoryDao.insertMonitorHistory(entity);
+			} catch (Exception e) {
+				Cat.logError(e);
+				transactionManager.rollback(status);
+
+				return false;
+			}
+
+			if (setConfig(DEFAULT_ENV, key, UP)) {
+				transactionManager.commit(status);
+
+				return true;
+			} else {
+				return false;
+			}
 		} else {
 			return true;
 		}
