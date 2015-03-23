@@ -144,7 +144,7 @@ public class MonitorController {
 		if (ipWithJdbcRef != null) {
 			for (String ip : ipWithJdbcRef.keySet()) {
 				if (!ip.equalsIgnoreCase(localIpAddress)) {
-					String url = String.format("http://%s:8080/a/monitor/list", ip);
+					String url = String.format("http://%s:8080/a/monitor/listown", ip);
 
 					RestTemplate client = new RestTemplate();
 					String jsonBody = client.exchange(url, HttpMethod.GET, null, String.class).getBody();
@@ -159,6 +159,12 @@ public class MonitorController {
 		}
 
 		return result;
+	}
+	
+	@RequestMapping(value = "/listown", method = RequestMethod.GET)
+	@ResponseBody
+	public Object listOwnJdbcRef() throws Exception {
+		return monitorServer.listStatus();
 	}
 
 	private Map<String, Set<String>> getIpWithJdbcRef() {
