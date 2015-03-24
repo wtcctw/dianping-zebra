@@ -339,7 +339,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             }
             if (config.role.isRead) {
                 if (!config.role.weight) {
-                    config.role.weight = 1;
+                    config.role.weight = 0;
                 }
                 var temp = config.id + ':' + config.role.weight;
                 readList += readList ? ',' + temp : temp;
@@ -365,7 +365,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             role: {
                 isWrite: false,
                 isRead: false,
-                weight: 1
+                weight: 0
             },
             properties: []
         });

@@ -44,7 +44,7 @@
                                     <label ng-class="{'btn-primary':config.role.isWrite,'btn-default':!config.role.isWrite}" class="btn" ng-model="config.role.isWrite" btn-checkbox>可写</label>
                                     <label ng-class="{'btn-primary':config.role.isRead,'btn-default':!config.role.isRead}" class="btn" ng-model="config.role.isRead" btn-checkbox>可读</label>
                                 </div>
-                                <input ng- placeholder="读库权重" class="form-control" ng-model="config.role.weight" type="number" min="0" max="100" step="5" style="width: 100px" />
+                                <input ng- placeholder="读库权重" class="form-control" ng-model="config.role.weight" type="number" min="0" max="10" step="1" style="width: 100px" />
                             </form>
                         </td>
                         <td>
