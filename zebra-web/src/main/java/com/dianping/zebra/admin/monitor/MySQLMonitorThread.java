@@ -21,8 +21,8 @@ public class MySQLMonitorThread extends Thread {
 	private Status currentState = Status.ALIVE;
 
 	private HaHandler hahandler;
-	
-	public MySQLMonitorThread(MonitorConfig monitorConfig, DataSourceConfig config,HaHandler haHandler) {
+
+	public MySQLMonitorThread(MonitorConfig monitorConfig, DataSourceConfig config, HaHandler haHandler) {
 		this.monitorConfig = monitorConfig;
 		this.config = config;
 		this.hahandler = haHandler;
@@ -91,43 +91,43 @@ public class MySQLMonitorThread extends Thread {
 					break;
 				}
 			}
-		}
+		} else {
+			// 如果该库是active=true的状态，则自动ping检测markdown
+			FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig.getPingFailLimit(),
+			      monitorConfig.getValidPeriod());
+			currentState = Status.ALIVE;
+			while (!Thread.currentThread().isInterrupted()) {
+				Connection con = null;
+				Statement stmt = null;
 
-		// 如果该库是active=true的状态，则自动ping检测markdown
-		FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig.getPingFailLimit(),
-		      monitorConfig.getValidPeriod());
-		currentState = Status.ALIVE;
-		while (!Thread.currentThread().isInterrupted()) {
-			Connection con = null;
-			Statement stmt = null;
+				try {
+					con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
+					stmt = con.createStatement();
+					stmt.setQueryTimeout(monitorConfig.getQueryTimeout());
+					stmt.executeQuery(monitorConfig.getTestSql());
 
-			try {
-				con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
-				stmt = con.createStatement();
-				stmt.setQueryTimeout(monitorConfig.getQueryTimeout());
-				stmt.executeQuery(monitorConfig.getTestSql());
+					lastUpdatedTime = System.currentTimeMillis();
 
-				lastUpdatedTime = System.currentTimeMillis();
+					// 如果能连上，则清空队列中的异常；因为要求连续的异常
+					timestamp.clear();
+				} catch (SQLException e) {
+					timestamp.addLast(lastUpdatedTime);
 
-				// 如果能连上，则清空队列中的异常；因为要求连续的异常
-				timestamp.clear();
-			} catch (SQLException e) {
-				timestamp.addLast(lastUpdatedTime);
+					if (timestamp.shouldAction()) {
+						hahandler.markdown(config.getId());
+						System.out.println("markdown " + config.getId());
 
-				if (timestamp.shouldAction()) {
-					hahandler.markdown(config.getId());
-					System.out.println("markdown " + config.getId());
+						break;
+					}
+				} finally {
+					close(con, stmt);
+				}
 
+				try {
+					TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
+				} catch (InterruptedException e) {
 					break;
 				}
-			} finally {
-				close(con, stmt);
-			}
-
-			try {
-				TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
-			} catch (InterruptedException e) {
-				break;
 			}
 		}
 	}
