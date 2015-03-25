@@ -37,149 +37,146 @@ import java.util.Map;
  */
 public class ShardDataSource extends AbstractDataSource {
 
-    private Map<String, DataSource> dataSourcePool;
+	private Map<String, DataSource> dataSourcePool;
 
-    private DataSourceRouterFactory routerFactory;
+	private DataSourceRouterFactory routerFactory;
 
-    private DataSourceRouter router;
+	private DataSourceRouter router;
 
-    private volatile boolean switchOn = true;
+	private volatile boolean switchOn = true;
 
-    private DataSource originDataSource;
+	private DataSource originDataSource;
 
-    private String ruleName;
+	private String ruleName;
 
-    private String configType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+	private ConfigService configService;
 
-    private ConfigService configService;
+	@Override
+	public Connection getConnection() throws SQLException {
+		return getConnection(null, null);
+	}
 
-    @Override
-    public Connection getConnection() throws SQLException {
-        return getConnection(null, null);
-    }
+	public Connection getConnection(boolean switchOn) throws SQLException {
+		return getConnection(null, null, switchOn);
+	}
 
-    public Connection getConnection(boolean switchOn) throws SQLException {
-        return getConnection(null, null, switchOn);
-    }
+	public Connection getConnection(String username, String password, boolean switchOn) throws SQLException {
+		if (switchOn) {
+			ShardConnection connection = new ShardConnection(username, password);
+			connection.setRouter(router);
+			return connection;
+		} else {
+			return originDataSource.getConnection();
+		}
+	}
 
+	@Override
+	public Connection getConnection(String username, String password) throws SQLException {
+		return getConnection(username, password, this.switchOn);
+	}
 
-    public Connection getConnection(String username, String password, boolean switchOn) throws SQLException {
-        if (switchOn || originDataSource == null) {
-            ShardConnection connection = new ShardConnection(username, password);
-            connection.setRouter(router);
-            return connection;
-        } else {
-            return originDataSource.getConnection();
-        }
-    }
+	public void close() {
+		for (DataSource ds : dataSourcePool.values()) {
+			if (ds instanceof GroupDataSource) {
+				try {
+					((GroupDataSource) ds).close();
+				} catch (SQLException ignore) {
+				}
+			}
+		}
 
-    @Override
-    public Connection getConnection(String username, String password) throws SQLException {
-        return getConnection(username, password, this.switchOn);
-    }
+		if (originDataSource instanceof GroupDataSource) {
+			try {
+				((GroupDataSource) originDataSource).close();
+			} catch (SQLException ignore) {
+			}
+		}
+	}
 
-    public void close() {
-        for (DataSource ds : dataSourcePool.values()) {
-            if (ds instanceof GroupDataSource) {
-                try {
-                    ((GroupDataSource) ds).close();
-                } catch (SQLException ignore) {
-                }
-            }
-        }
+	public void init() {
+		if (StringUtils.isNotBlank(ruleName)) {
+			if (configService == null) {
+				if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equals(configManagerType)) {
+					configService = new LionConfigService();
+				} else {
+					configService = new PropertyConfigService(ruleName);
+				}
+			}
 
-        if (originDataSource instanceof GroupDataSource) {
-            try {
-                ((GroupDataSource) originDataSource).close();
-            } catch (SQLException ignore) {
-            }
-        }
-    }
+			if (routerFactory == null) {
+				routerFactory = new ConfigServiceDataSourceRouterFactory(configService, ruleName);
+			}
 
-    public void init() {
-        if (StringUtils.isNotBlank(ruleName)) {
-            if (configService == null) {
-                if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equals(configType)) {
-                    configService = new LionConfigService();
-                } else {
-                    configService = new PropertyConfigService(ruleName);
-                }
-            }
+			if (dataSourcePool == null) {
+				dataSourcePool = routerFactory.getDataSourcePool();
+			}
 
-            if (routerFactory == null) {
-                routerFactory = new ConfigServiceDataSourceRouterFactory(configService, ruleName);
-            }
+			String originDataSourceName = configService.getProperty(LionKey.getShardOriginDatasourceKey(ruleName));
+			final String switchOnValue = configService.getProperty(LionKey.getShardSiwtchOnKey(ruleName));
 
-            if (dataSourcePool == null) {
-                dataSourcePool = routerFactory.getDataSourcePool();
-            }
+			this.switchOn = "true".equals(switchOnValue);
 
-            String originDataSourceName = configService.getProperty(LionKey.getShardOriginDatasourceKey(ruleName));
-            final String switchOnValue = configService.getProperty(LionKey.getShardSiwtchOnKey(ruleName));
+			if (originDataSource == null && StringUtils.isNotBlank(originDataSourceName)) {
+				GroupDataSource groupDataSource = new GroupDataSource(originDataSourceName);
+				groupDataSource.init();
+				this.originDataSource = groupDataSource;
+			}
 
-            this.switchOn = "true".equals(switchOnValue);
+			configService.addPropertyChangeListener(new PropertyChangeListener() {
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (LionKey.getShardSiwtchOnKey(ruleName).equals(evt.getPropertyName())) {
+						switchOn = "true".equals(evt.getNewValue());
+					}
+				}
+			});
+		}
 
-            if (originDataSource == null && StringUtils.isNotBlank(originDataSourceName)) {
-                GroupDataSource groupDataSource = new GroupDataSource(originDataSourceName);
-                groupDataSource.init();
-                this.originDataSource = groupDataSource;
-            }
+		if (dataSourcePool == null || dataSourcePool.isEmpty()) {
+			throw new IllegalArgumentException("dataSourcePool is required.");
+		}
+		if (routerFactory == null) {
+			throw new IllegalArgumentException("routerRuleFile must be set.");
+		}
 
-            configService.addPropertyChangeListener(new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (LionKey.getShardSiwtchOnKey(ruleName).equals(evt.getPropertyName())) {
-                        switchOn = "true".equals(evt.getNewValue());
-                    }
-                }
-            });
-        }
+		this.router = routerFactory.getRouter();
+		this.router.setDataSourcePool(dataSourcePool);
+		this.router.init();
+	}
 
-        if (dataSourcePool == null || dataSourcePool.isEmpty()) {
-            throw new IllegalArgumentException("dataSourcePool is required.");
-        }
-        if (routerFactory == null) {
-            throw new IllegalArgumentException("routerRuleFile must be set.");
-        }
+	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
+		this.dataSourcePool = dataSourcePool;
+	}
 
-        this.router = routerFactory.getRouter();
-        this.router.setDataSourcePool(dataSourcePool);
-        this.router.init();
-    }
+	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
+		this.routerFactory = routerFactory;
+	}
 
-    public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
-        this.dataSourcePool = dataSourcePool;
-    }
+	public void setSwitchOn(boolean switchOn) {
+		this.switchOn = switchOn;
+	}
 
-    public void setRouterFactory(DataSourceRouterFactory routerFactory) {
-        this.routerFactory = routerFactory;
-    }
+	public void setRuleName(String ruleName) {
+		this.ruleName = ruleName;
+	}
 
-    public void setSwitchOn(boolean switchOn) {
-        this.switchOn = switchOn;
-    }
+	public void setConfigType(String configType) {
+		this.configManagerType = configType;
+	}
 
-    public void setRuleName(String ruleName) {
-        this.ruleName = ruleName;
-    }
+	public void setConfigService(ConfigService configService) {
+		this.configService = configService;
+	}
 
-    public void setConfigType(String configType) {
-        this.configType = configType;
-    }
+	public void setOriginDataSource(DataSource originDataSource) {
+		this.originDataSource = originDataSource;
+	}
 
-    public void setConfigService(ConfigService configService) {
-        this.configService = configService;
-    }
+	public DataSource getOriginDataSource() {
+		return originDataSource;
+	}
 
-    public void setOriginDataSource(DataSource originDataSource) {
-        this.originDataSource = originDataSource;
-    }
-
-    public DataSource getOriginDataSource() {
-        return originDataSource;
-    }
-
-    public DataSourceRouter getRouter() {
-        return router;
-    }
+	public DataSourceRouter getRouter() {
+		return router;
+	}
 }
