@@ -14,5 +14,7 @@
     <bean id="monitorConfig" class="com.dianping.zebra.admin.monitor.MonitorConfig">
         <property name="pingFailLimit" value="${zebra.monitor.fail.limit}"></property>
         <property name="pingIntervalSeconds" value="${zebra.monitor.sleep.interval}"></property>
+        <property name="testSql" value="${zebra.monitor.testSql}"></property>
+        <property name="validPeriod" value="${zebra.monitor.validPeriod}"></property>
     </bean>
 </beans>

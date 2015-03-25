@@ -1,19 +1,19 @@
 package com.dianping.zebra.admin.monitor;
 
 public class MonitorConfig {
-	
-	private String testSql = "SELECT 1";
-	
-	private int pingFailLimit = 10;
-	
-	private int pingIntervalSeconds = 1;
-	
+
+	private volatile String testSql;
+
+	private volatile int pingFailLimit;
+
+	private volatile int pingIntervalSeconds;
+
 	private int queryTimeout = 1;
-	
-	private long validPeriod = 30 * 1000; //30 seconds
-	
+
+	private volatile long validPeriod;
+
 	private boolean isAutoFailover = true;
-	
+
 	public int getPingFailLimit() {
 		return pingFailLimit;
 	}
