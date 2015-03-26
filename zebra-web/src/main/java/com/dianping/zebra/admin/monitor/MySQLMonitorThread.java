@@ -56,8 +56,7 @@ public class MySQLMonitorThread extends Thread {
 		// 如果该库是active=false的状态，则自动ping检测markup
 		if (!config.getActive()) {
 			currentState = Status.DEAD;
-			FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig.getPingFailLimit(),
-			      monitorConfig.getValidPeriod());
+			FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig);
 
 			while (!Thread.currentThread().isInterrupted()) {
 				Connection con = null;
@@ -93,8 +92,7 @@ public class MySQLMonitorThread extends Thread {
 			}
 		} else {
 			// 如果该库是active=true的状态，则自动ping检测markdown
-			FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig.getPingFailLimit(),
-			      monitorConfig.getValidPeriod());
+			FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig);
 			currentState = Status.ALIVE;
 			while (!Thread.currentThread().isInterrupted()) {
 				Connection con = null;
@@ -139,17 +137,14 @@ public class MySQLMonitorThread extends Thread {
 	public static class FixedLengthLinkedList extends LinkedList<Long> {
 		private static final long serialVersionUID = 3800705659963203862L;
 
-		private final int maxLength;
+		private MonitorConfig monitorConfig;
 
-		private final long validPeriod;
-
-		public FixedLengthLinkedList(int maxLength, long validPeriod) {
-			this.maxLength = maxLength;
-			this.validPeriod = validPeriod;
+		public FixedLengthLinkedList(MonitorConfig monitorConfig) {
+			this.monitorConfig = monitorConfig;
 		}
 
 		public void addLast(Long e) {
-			if (this.size() >= this.maxLength) {
+			if (this.size() >= monitorConfig.getPingFailLimit()) {
 				super.removeFirst();
 			}
 
@@ -161,7 +156,7 @@ public class MySQLMonitorThread extends Thread {
 		}
 
 		public boolean shouldAction() {
-			return (size() == maxLength) && (getDistance() <= validPeriod);
+			return (size() == monitorConfig.getPingFailLimit()) && (getDistance() <= monitorConfig.getValidPeriod());
 		}
 	}
 }
