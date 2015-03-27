@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.service;
+package com.dianping.zebra.admin.monitor;
 
 import java.util.Set;
 

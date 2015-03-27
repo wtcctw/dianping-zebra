@@ -17,9 +17,9 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
+import com.dianping.zebra.admin.monitor.MHAService;
 import com.dianping.zebra.admin.monitor.MySQLMonitorThreadGroup;
 import com.dianping.zebra.admin.service.LionService;
-import com.dianping.zebra.admin.service.MHAService;
 
 @Controller
 @RequestMapping(value = "/mha")

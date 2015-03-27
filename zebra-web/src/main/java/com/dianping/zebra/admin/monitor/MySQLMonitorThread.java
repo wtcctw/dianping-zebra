@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 import com.dianping.zebra.admin.monitor.handler.HaHandler;
+import com.dianping.zebra.admin.monitor.handler.HaHandler.Operator;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
 public class MySQLMonitorThread extends Thread {
@@ -75,7 +76,7 @@ public class MySQLMonitorThread extends Thread {
 					timestamp.addLast(System.currentTimeMillis());
 
 					if (timestamp.shouldAction()) {
-						hahandler.markup(config.getId());
+						hahandler.markup(config.getId(),Operator.ZEBRA);
 
 						System.out.println("markup " + config.getId());
 						break;
@@ -114,7 +115,7 @@ public class MySQLMonitorThread extends Thread {
 					timestamp.addLast(System.currentTimeMillis());
 
 					if (timestamp.shouldAction()) {
-						hahandler.markdown(config.getId());
+						hahandler.markdown(config.getId(),Operator.ZEBRA);
 						System.out.println("markdown " + config.getId());
 
 						break;

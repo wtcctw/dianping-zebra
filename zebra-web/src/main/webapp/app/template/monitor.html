@@ -44,6 +44,7 @@
             <tr>
                 <th>dsId</th>
                 <th>操作</th>
+                <th>操作人</th>
                 <th>操作时间</th>
             </tr>
             </thead>
@@ -52,6 +53,7 @@
                 <td>{{history.dsId}}</td>
                 <td ng-show="history.operator == -1"><span class="label label-danger">markdown</span></td>
                 <td ng-show="history.operator == 0"><span  class="label label-success">markup</span></td>
+                <td>{{history.who}}</td>
                 <td>{{history.createTime}}</td>
                 </td>
             </tr>

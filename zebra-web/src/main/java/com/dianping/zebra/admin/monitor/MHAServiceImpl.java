@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.service;
+package com.dianping.zebra.admin.monitor;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.zebra.admin.monitor.handler.HaHandler;
+import com.dianping.zebra.admin.monitor.handler.HaHandler.Operator;
+import com.dianping.zebra.admin.service.LionService;
 
 @Service
 public class MHAServiceImpl implements MHAService {
@@ -25,7 +27,7 @@ public class MHAServiceImpl implements MHAService {
 
 	@Autowired
 	private LionService m_lionHttpService;
-	
+
 	@Autowired
 	private HaHandler haHandler;
 
@@ -105,7 +107,7 @@ public class MHAServiceImpl implements MHAService {
 			Map<String, String> mhaMarkedDownDs = new ConcurrentHashMap<String, String>();
 
 			for (String dsId : dsIds) {
-				if(dsId != null && dsId.length() > 0){
+				if (dsId != null && dsId.length() > 0) {
 					mhaMarkedDownDs.put(dsId, dsId);
 				}
 			}
@@ -121,9 +123,9 @@ public class MHAServiceImpl implements MHAService {
 		}
 
 		flushToLion();
-		
+
 		for (String dsId : dsIds) {
-			haHandler.markdown(dsId);
+			haHandler.markdown(dsId, Operator.MHA);
 		}
 	}
 
@@ -149,8 +151,8 @@ public class MHAServiceImpl implements MHAService {
 
 		if (dsIdValue != null) {
 			flushToLion();
-			
-			haHandler.markup(dsId);
+
+			haHandler.markup(dsId, Operator.PEOPLE);
 		}
 	}
 }

@@ -6,7 +6,7 @@
 
 	<select id="findAllHistory" parameterType="map"
 		resultType="MonitorHistoryEntity">
-		SELECT * FROM monitor_history WHERE 1 = 1
+		SELECT * FROM monitor_history order by createTime desc 
 	</select>
 	
 	<insert id="insertMonitorHistory" parameterType="MonitorHistoryEntity">
@@ -14,11 +14,13 @@
 		(
 		`dsId`,
 		`operator`,
+		`who`,
 		`createTime`)
 		VALUES
 		(
 		#{dsId},
 		#{operator},
+		#{who},
 		NOW())
 	</insert>
 </mapper>

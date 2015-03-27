@@ -46,18 +46,18 @@ public class DalHaHandler implements HaHandler {
 	      TransactionDefinition.PROPAGATION_REQUIRED);
 
 	@Override
-	public boolean markdown(String dsId) {
-		TransactionStatus status = transactionManager.getTransaction(def);
-
+	public boolean markdown(String dsId, Operator operator) {
 		MonitorHistoryEntity entity = new MonitorHistoryEntity();
 		entity.setOperator(-1);
 		entity.setDsId(dsId);
+		entity.setWho(operator.getOperator());
 
 		String key = String.format("ds.%s.jdbc.active", dsId);
 
 		String value = getConfigFromZk(key);
 
 		if (value == null || value.length() == 0 || value.equalsIgnoreCase(UP)) {
+			TransactionStatus status = transactionManager.getTransaction(def);
 			try {
 				monitorHistoryDao.insertMonitorHistory(entity);
 			} catch (Exception e) {
@@ -82,18 +82,18 @@ public class DalHaHandler implements HaHandler {
 	}
 
 	@Override
-	public boolean markup(String dsId) {
-		TransactionStatus status = transactionManager.getTransaction(def);
-
+	public boolean markup(String dsId, Operator operator) {
 		MonitorHistoryEntity entity = new MonitorHistoryEntity();
 		entity.setOperator(0);
 		entity.setDsId(dsId);
+		entity.setWho(operator.getOperator());
 
 		String key = String.format("ds.%s.jdbc.active", dsId);
 
 		String value = getConfigFromZk(key);
 
 		if (value == null || value.length() == 0 || value.equalsIgnoreCase(DOWN)) {
+			TransactionStatus status = transactionManager.getTransaction(def);
 			try {
 				monitorHistoryDao.insertMonitorHistory(entity);
 			} catch (Exception e) {

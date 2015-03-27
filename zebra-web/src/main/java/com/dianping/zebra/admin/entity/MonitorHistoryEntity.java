@@ -10,6 +10,8 @@ public class MonitorHistoryEntity {
 	
 	private int operator;
 	
+	private String who;
+	
 	private Date createTime;
 
 	public int getId() {
@@ -34,6 +36,14 @@ public class MonitorHistoryEntity {
 
 	public void setOperator(int operator) {
 		this.operator = operator;
+	}
+
+	public String getWho() {
+		return who;
+	}
+
+	public void setWho(String who) {
+		this.who = who;
 	}
 
 	public Date getCreateTime() {
