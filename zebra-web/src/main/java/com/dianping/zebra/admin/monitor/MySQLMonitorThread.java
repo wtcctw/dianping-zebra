@@ -42,6 +42,10 @@ public class MySQLMonitorThread extends Thread {
 			}
 		}
 	}
+	
+	public void setCurrentState(Status state){
+		this.currentState = state;
+	}
 
 	public Status getCurrentState() {
 		return currentState;

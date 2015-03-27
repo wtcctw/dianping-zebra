@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dianping.zebra.admin.service.MHAService;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
@@ -20,6 +21,9 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 	@Autowired
 	private MySQLMonitorThreadGroup monitorThreadGroup;
+
+	@Autowired
+	private MHAService mhaService;
 
 	private Map<String, DataSourceConfig> dataSourceConfigs = new ConcurrentHashMap<String, DataSourceConfig>();
 
@@ -34,6 +38,10 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
+			if (!groupDataSourceConfigs.containsKey(jdbcRef)) {
+				return;
+			}
+
 			int pos = evt.getPropertyName().indexOf(jdbcRef);
 
 			if (pos > 0) {
@@ -48,20 +56,20 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 					if (dsConfig.isCanRead()) {
 						if (!dataSourceConfigs.containsKey(dsId)) {
 							dataSourceConfigs.put(dsId, dsConfig);
-							monitorThreadGroup.startOrRefreshMonitor(dsConfig);
+							monitorThreadGroup.startOrRefreshMonitor(dsConfig, mhaService.isMarkdownByMHA(dsId));
 						} else {
 							DataSourceConfig oldConfig = dataSourceConfigs.get(dsId);
 
 							if (!dsConfig.toString().equals(oldConfig.toString())) {
 								dataSourceConfigs.put(dsId, dsConfig);
-								monitorThreadGroup.startOrRefreshMonitor(dsConfig);
+								monitorThreadGroup.startOrRefreshMonitor(dsConfig, mhaService.isMarkdownByMHA(dsId));
 							}
 						}
 					}
 				}
 
 				for (String dsId : groupDataSourceConfigs.get(jdbcRef).getDataSourceConfigs().keySet()) {
-					if (!dataSourceConfigs.containsKey(dsId)) {
+					if (!newDataSourceConfigs.containsKey(dsId)) {
 						dataSourceConfigs.remove(dsId);
 						monitorThreadGroup.removeMonitor(dsId);
 					}
@@ -73,20 +81,20 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 	@Override
 	public synchronized void addJdbcRef(String jdbcRef) {
 		DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager("remote", jdbcRef);
-		configManager.addListerner(new DalConfigChangedListener(jdbcRef));
 		GroupDataSourceConfig groupDataSourceConfig = configManager.getGroupDataSourceConfig();
 
-		this.groupDataSourceConfigs.put(jdbcRef, groupDataSourceConfig);
-
 		for (Map.Entry<String, DataSourceConfig> entryConfig : groupDataSourceConfig.getDataSourceConfigs().entrySet()) {
-			String key = entryConfig.getKey();
+			String dsId = entryConfig.getKey();
 			DataSourceConfig dsConfig = entryConfig.getValue();
 
 			if (dsConfig.isCanRead()) {
-				dataSourceConfigs.put(key, dsConfig);
-				monitorThreadGroup.startOrRefreshMonitor(dsConfig);
+				dataSourceConfigs.put(dsId, dsConfig);
+				monitorThreadGroup.startOrRefreshMonitor(dsConfig, mhaService.isMarkdownByMHA(dsId));
 			}
 		}
+
+		this.groupDataSourceConfigs.put(jdbcRef, groupDataSourceConfig);
+		configManager.addListerner(new DalConfigChangedListener(jdbcRef));
 	}
 
 	@Override
@@ -103,10 +111,12 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 				monitorThreadGroup.removeMonitor(dsId);
 			}
 		}
+
+		this.groupDataSourceConfigs.remove(jdbcRef);
 	}
 
 	@Override
-	public Map<String, InstanceStatus> listStatus() {
+	public synchronized Map<String, InstanceStatus> listStatus() {
 		Map<String, MySQLMonitorThread> monitors = monitorThreadGroup.getMonitors();
 		Map<String, InstanceStatus> result = new HashMap<String, InstanceStatus>();
 

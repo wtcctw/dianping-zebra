@@ -26,6 +26,7 @@ import com.dianping.lion.client.LionException;
 import com.dianping.zebra.admin.dao.MonitorHistoryMapper;
 import com.dianping.zebra.admin.monitor.InstanceStatus;
 import com.dianping.zebra.admin.monitor.MySQLMonitorManager;
+import com.dianping.zebra.admin.monitor.handler.HaHandler;
 import com.dianping.zebra.admin.service.LionService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -44,7 +45,10 @@ public class MonitorController {
 
 	@Autowired
 	private MonitorHistoryMapper monitorHistoryDao;
-
+	
+	@Autowired
+	private HaHandler haHandler;
+	
 	private String localIpAddress;
 
 	private Gson gson = new Gson();
@@ -57,35 +61,29 @@ public class MonitorController {
 
 	private Set<String> currentJdbcRefs = new HashSet<String>();
 
-	private volatile boolean init = false;
-
 	@PostConstruct
 	public void init() {
-		if (!init) {
-			localIpAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
+		localIpAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
 
-			Map<String, Set<String>> ipToJdbcRefs = getIpWithJdbcRef();
+		Map<String, Set<String>> ipToJdbcRefs = getIpWithJdbcRef();
 
-			if (ipToJdbcRefs != null) {
-				Set<String> jdbcRefs = ipToJdbcRefs.get(localIpAddress);
+		if (ipToJdbcRefs != null) {
+			Set<String> jdbcRefs = ipToJdbcRefs.get(localIpAddress);
 
-				if (jdbcRefs != null) {
-					for (String jdbcRef : jdbcRefs) {
-						monitorServer.addJdbcRef(jdbcRef);
-					}
+			if (jdbcRefs != null) {
+				for (String jdbcRef : jdbcRefs) {
+					monitorServer.addJdbcRef(jdbcRef);
+				}
 
-					synchronized (currentJdbcRefs) {
-						currentJdbcRefs = jdbcRefs;
-					}
+				synchronized (currentJdbcRefs) {
+					currentJdbcRefs = jdbcRefs;
 				}
 			}
+		}
 
-			try {
-				ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new MyConfigChange());
-			} catch (LionException e) {
-			}
-
-			init = true;
+		try {
+			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new MyConfigChange());
+		} catch (LionException e) {
 		}
 	}
 
@@ -112,18 +110,18 @@ public class MonitorController {
 									monitorServer.removeJdbcRef(jdbcRef);
 								}
 							}
-							
+
 							currentJdbcRefs = newJdbcRefs;
-						}else{
-							if(currentJdbcRefs != null){
-								for(String jdbcRef : currentJdbcRefs){
+						} else {
+							if (currentJdbcRefs != null) {
+								for (String jdbcRef : currentJdbcRefs) {
 									monitorServer.removeJdbcRef(jdbcRef);
 								}
-								
+
 								currentJdbcRefs.clear();
 							}
 						}
-						
+
 					}
 				}
 			}
