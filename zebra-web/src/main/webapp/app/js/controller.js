@@ -18,6 +18,14 @@ zebraWeb.controller('monitor', function ($scope, $http) {
         	 });
         }
 	}
+	
+	$scope.markup = function(dsId){
+		if(dsId){
+       	 $http.get('/a/mha/markup?dsId=' + dsId).success(function (data, status, headers, config) {
+    		 $scope.load();
+    	 });
+		}
+	}
 });
 
 zebraWeb.controller('update', function ($scope, $http) {

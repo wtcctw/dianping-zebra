@@ -65,4 +65,16 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 			thread.interrupt();
 		}
 	}
+
+	@Override
+   public synchronized void suspendMonitor(String dsId, boolean isMHA) {
+		if(monitorThreads.containsKey(dsId)){
+			MySQLMonitorThread monitor = monitorThreads.get(dsId);
+			monitor.interrupt();
+
+			if(isMHA){
+				monitor.setCurrentState(Status.MHA_MARK_DOWN);
+			}
+		}
+   }
 }

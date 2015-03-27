@@ -8,6 +8,8 @@ public interface MySQLMonitorThreadGroup {
 
 	public void startOrRefreshMonitor(DataSourceConfig dsConfig, boolean isMHA);
 
+	public void suspendMonitor(String dsId, boolean isMHA);
+
 	public void removeMonitor(String dsId);
 
 	public Map<String, MySQLMonitorThread> getMonitors();
