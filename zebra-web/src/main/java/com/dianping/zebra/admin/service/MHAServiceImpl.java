@@ -105,7 +105,9 @@ public class MHAServiceImpl implements MHAService {
 			Map<String, String> mhaMarkedDownDs = new ConcurrentHashMap<String, String>();
 
 			for (String dsId : dsIds) {
-				mhaMarkedDownDs.put(dsId, dsId);
+				if(dsId != null && dsId.length() > 0){
+					mhaMarkedDownDs.put(dsId, dsId);
+				}
 			}
 
 			this.mhaMarkedDownDs = mhaMarkedDownDs;
