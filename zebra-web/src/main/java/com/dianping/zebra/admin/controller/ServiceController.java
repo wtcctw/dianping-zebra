@@ -1,9 +1,7 @@
 package com.dianping.zebra.admin.controller;
 
 import com.dianping.zebra.admin.service.DalConfigService;
-import com.dianping.zebra.admin.service.DalResult;
 import com.dianping.zebra.admin.service.MHAService;
-import com.dianping.zebra.admin.service.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,14 +17,9 @@ public class ServiceController {
 	@Autowired
 	private MHAService m_dalService;
 
-	@Autowired
-	private LogService m_logService;
-
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Object test(String action, String name) throws Exception {
-		DalResult result = null;
-
 		if ("initDs".equals(action)) {
 
 			if (name != null) {
@@ -36,6 +29,6 @@ public class ServiceController {
 			throw new Exception("unkown operation");
 		}
 
-		return result;
+		return null;
 	}
 }

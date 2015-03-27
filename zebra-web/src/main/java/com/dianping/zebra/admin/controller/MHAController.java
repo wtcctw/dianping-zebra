@@ -20,7 +20,7 @@ public class MHAController {
 	// 给mha集群调用
 	@RequestMapping(value = "/markdown", method = RequestMethod.GET)
 	@ResponseBody
-	public void markdown(String ip, String port) {
+	public Object markdown(String ip, String port) {
 		if (ip != null && port != null) {
 			Set<String> dsIds = mhaService.findDsIds(ip, port);
 
@@ -28,14 +28,18 @@ public class MHAController {
 				mhaService.markDownDsIds(dsIds);
 			}
 		}
+		
+		return "success";
 	}
 
 	// 给zebra-web界面调用
 	@RequestMapping(value = "/markup", method = RequestMethod.GET)
 	@ResponseBody
-	public void markup(String dsId) {
+	public Object markup(String dsId) {
 		if (dsId != null) {
 			mhaService.markUpDsId(dsId);
 		}
+		
+		return "success";
 	}
 }
