@@ -8,9 +8,9 @@
 
 #### INSERT
 
-* INSERT INTO User WHERE (Id, Name, CityId) VALUES (1, 'test', 2)
+##### 插入时必须指定主键，暂不支持自动生成主键
 
-插入时必须指定主键，暂不支持自动生成主键
+* INSERT INTO User WHERE (Id, Name, CityId) VALUES (1, 'test', 2)
 
 
 <br/>
