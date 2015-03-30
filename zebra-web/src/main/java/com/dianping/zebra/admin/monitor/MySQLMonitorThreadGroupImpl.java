@@ -3,6 +3,8 @@ package com.dianping.zebra.admin.monitor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PreDestroy;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +67,14 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 			thread.interrupt();
 		}
 	}
-
+	
+	@PreDestroy
+	public synchronized void destory(){
+		for(MySQLMonitorThread thread : this.monitorThreads.values()){
+			thread.interrupt();
+		}
+	}
+	
 	@Override
    public synchronized void suspendMonitor(String dsId, boolean isMHA) {
 		if(monitorThreads.containsKey(dsId)){
