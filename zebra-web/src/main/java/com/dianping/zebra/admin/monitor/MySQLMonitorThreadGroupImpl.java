@@ -32,7 +32,6 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 			MySQLMonitorThread monitor = new MySQLMonitorThread(this.monitorConfig, dsConfig, hahandler);
 			monitor.setName("Dal-Monitor-Slave(" + dsConfig.getId() + ")");
 			monitor.setContextLoader(contextLoader);
-			monitor.setDaemon(true);
 
 			if (isMHA) {
 				monitor.setCurrentState(Status.MHA_MARK_DOWN);
@@ -48,7 +47,6 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 			MySQLMonitorThread monitor = new MySQLMonitorThread(this.monitorConfig, dsConfig, hahandler);
 			monitor.setName("Dal-Monitor-Slave(" + dsConfig.getId() + ")");
 			monitor.setContextLoader(contextLoader);
-			monitor.setDaemon(true);
 
 			if (isMHA) {
 				monitor.setCurrentState(Status.MHA_MARK_DOWN);

@@ -71,7 +71,6 @@ public class MySQLMonitorThread extends Thread {
 				} catch (InterruptedException e) {
 					break;
 				}
-				continue;
 			} else {
 				break;
 			}
