@@ -46,10 +46,10 @@ public class MySQLMonitorThread extends Thread {
 		}
 	}
 
-	public void setContextLoader(SpringContextLoadFinished contextLoader){
+	public void setContextLoader(SpringContextLoadFinished contextLoader) {
 		this.contextLoader = contextLoader;
 	}
-	
+
 	public void setCurrentState(Status state) {
 		this.currentState = state;
 	}
@@ -74,6 +74,11 @@ public class MySQLMonitorThread extends Thread {
 			} else {
 				break;
 			}
+		}
+
+		try {
+			TimeUnit.SECONDS.sleep(30);
+		} catch (InterruptedException e) {
 		}
 
 		// 如果该库是active=false的状态，则自动ping检测markup
