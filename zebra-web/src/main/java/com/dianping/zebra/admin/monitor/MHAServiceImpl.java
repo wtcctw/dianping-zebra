@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +28,6 @@ public class MHAServiceImpl implements MHAService {
 
 	@Autowired
 	private HaHandler haHandler;
-
-	private Map<String, String> mhaMarkedDownDs = new ConcurrentHashMap<String, String>();
 
 	private Set<String> findDsIds1(String ip, String port, HashMap<String, String> keyValues) {
 		String content = ip + ":" + port;
@@ -95,41 +91,44 @@ public class MHAServiceImpl implements MHAService {
 
 	@Override
 	public boolean isMarkdownByMHA(String dsId) {
+		Map<String, String> mhaMarkedDownDs = load();
+
 		return mhaMarkedDownDs.containsKey(dsId);
 	}
 
-	@PostConstruct
-	public void init() {
+	private Map<String, String> load() {
 		String config = m_lionHttpService.getConfigFromZk(MHA_LION_KEY);
+		Map<String, String> mhaMarkedDownDs = new ConcurrentHashMap<String, String>();
 
 		if (config != null) {
 			String[] dsIds = config.split(",");
-			Map<String, String> mhaMarkedDownDs = new ConcurrentHashMap<String, String>();
 
 			for (String dsId : dsIds) {
 				if (dsId != null && dsId.length() > 0) {
 					mhaMarkedDownDs.put(dsId, dsId);
 				}
 			}
-
-			this.mhaMarkedDownDs = mhaMarkedDownDs;
 		}
+
+		return mhaMarkedDownDs;
 	}
 
 	@Override
 	public void markDownDsIds(Set<String> dsIds) {
+		Map<String, String> mhaMarkedDownDs = load();
+
 		for (String dsId : dsIds) {
 			mhaMarkedDownDs.put(dsId, dsId);
 		}
 
-		flushToLion();
+		flushToLion(mhaMarkedDownDs);
 
 		for (String dsId : dsIds) {
 			haHandler.markdown(dsId, Operator.MHA);
 		}
 	}
 
-	private void flushToLion() {
+	private void flushToLion(Map<String, String> mhaMarkedDownDs) {
 		StringBuilder value = new StringBuilder(1024);
 		boolean isFirst = true;
 		for (String dsId : mhaMarkedDownDs.keySet()) {
@@ -147,10 +146,12 @@ public class MHAServiceImpl implements MHAService {
 
 	@Override
 	public void markUpDsId(String dsId) {
+		Map<String, String> mhaMarkedDownDs = load();
+
 		String dsIdValue = mhaMarkedDownDs.remove(dsId);
 
 		if (dsIdValue != null) {
-			flushToLion();
+			flushToLion(mhaMarkedDownDs);
 
 			haHandler.markup(dsId, Operator.PEOPLE);
 		}

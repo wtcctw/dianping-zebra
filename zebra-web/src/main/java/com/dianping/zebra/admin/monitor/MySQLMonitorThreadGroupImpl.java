@@ -19,7 +19,10 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 
 	@Autowired
 	private HaHandler hahandler;
-
+	
+	@Autowired
+	private SpringContextLoadFinished contextLoader;
+	
 	private Map<String, MySQLMonitorThread> monitorThreads = new ConcurrentHashMap<String, MySQLMonitorThread>();
 
 	@Override
@@ -28,6 +31,7 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 		if (!this.monitorThreads.containsKey(dsId)) {
 			MySQLMonitorThread monitor = new MySQLMonitorThread(this.monitorConfig, dsConfig, hahandler);
 			monitor.setName("Dal-Monitor-Slave(" + dsConfig.getId() + ")");
+			monitor.setContextLoader(contextLoader);
 			monitor.setDaemon(true);
 
 			if (isMHA) {
@@ -43,6 +47,7 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 
 			MySQLMonitorThread monitor = new MySQLMonitorThread(this.monitorConfig, dsConfig, hahandler);
 			monitor.setName("Dal-Monitor-Slave(" + dsConfig.getId() + ")");
+			monitor.setContextLoader(contextLoader);
 			monitor.setDaemon(true);
 
 			if (isMHA) {

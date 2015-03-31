@@ -79,7 +79,7 @@ public class MHAController {
 
 		return result;
 	}
-	
+
 	@RequestMapping(value = "/find", method = RequestMethod.GET)
 	@ResponseBody
 	public Object find(String ip, String port) {
@@ -87,7 +87,7 @@ public class MHAController {
 	}
 
 	private class MyConfigChange implements ConfigChange {
-		
+
 		private static final String lionKey = "zebra.server.monitor.mha.markdown";
 
 		@Override

@@ -23,6 +23,8 @@ public class MySQLMonitorThread extends Thread {
 
 	private HaHandler hahandler;
 
+	private SpringContextLoadFinished contextLoader;
+
 	public MySQLMonitorThread(MonitorConfig monitorConfig, DataSourceConfig config, HaHandler haHandler) {
 		this.monitorConfig = monitorConfig;
 		this.config = config;
@@ -43,8 +45,12 @@ public class MySQLMonitorThread extends Thread {
 			}
 		}
 	}
+
+	public void setContextLoader(SpringContextLoadFinished contextLoader){
+		this.contextLoader = contextLoader;
+	}
 	
-	public void setCurrentState(Status state){
+	public void setCurrentState(Status state) {
 		this.currentState = state;
 	}
 
@@ -58,6 +64,19 @@ public class MySQLMonitorThread extends Thread {
 
 	@Override
 	public void run() {
+		while (!Thread.currentThread().isInterrupted()) {
+			if (!contextLoader.isLoaded()) {
+				try {
+					TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
+				} catch (InterruptedException e) {
+					break;
+				}
+				continue;
+			} else {
+				break;
+			}
+		}
+
 		// 如果该库是active=false的状态，则自动ping检测markup
 		if (!config.getActive()) {
 			currentState = Status.DEAD;
@@ -66,7 +85,6 @@ public class MySQLMonitorThread extends Thread {
 			while (!Thread.currentThread().isInterrupted()) {
 				Connection con = null;
 				Statement stmt = null;
-
 				try {
 					con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
 					stmt = con.createStatement();
@@ -76,7 +94,7 @@ public class MySQLMonitorThread extends Thread {
 					timestamp.addLast(System.currentTimeMillis());
 
 					if (timestamp.shouldAction()) {
-						hahandler.markup(config.getId(),Operator.ZEBRA);
+						hahandler.markup(config.getId(), Operator.ZEBRA);
 
 						System.out.println("markup " + config.getId());
 						break;
@@ -115,7 +133,7 @@ public class MySQLMonitorThread extends Thread {
 					timestamp.addLast(System.currentTimeMillis());
 
 					if (timestamp.shouldAction()) {
-						hahandler.markdown(config.getId(),Operator.ZEBRA);
+						hahandler.markdown(config.getId(), Operator.ZEBRA);
 						System.out.println("markdown " + config.getId());
 
 						break;
