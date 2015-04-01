@@ -153,7 +153,18 @@ public class MHAServiceImpl implements MHAService {
 		if (dsIdValue != null) {
 			flushToLion(mhaMarkedDownDs);
 
-			haHandler.markup(dsId, Operator.PEOPLE);
+			try {
+				String active = m_lionHttpService.getConfigByHttp(m_lionHttpService.getEnv(), "ds." + dsId + ".active");
+
+				if (active.equalsIgnoreCase("true")) {
+					// HACK! in case this ds has already marked up.
+					haHandler.markdown(dsId, Operator.ZEBRA);
+				} else {
+					haHandler.markup(dsId, Operator.PEOPLE);
+				}
+			} catch (IOException e) {
+			}
+
 		}
 	}
 }
