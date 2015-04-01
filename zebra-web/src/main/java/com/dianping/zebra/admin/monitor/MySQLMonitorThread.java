@@ -103,6 +103,7 @@ public class MySQLMonitorThread extends Thread {
 				Connection con = null;
 				Statement stmt = null;
 				try {
+					System.out.println(config);
 					con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
 					stmt = con.createStatement();
 					stmt.setQueryTimeout(monitorConfig.getQueryTimeout());
