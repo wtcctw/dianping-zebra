@@ -64,7 +64,8 @@ public class MySQLMonitorThread extends Thread {
 
 	@Override
 	public void run() {
-		//确保spring容器启动完成
+
+		// 确保spring容器启动完成
 		while (!Thread.currentThread().isInterrupted()) {
 			if (!contextLoader.isLoaded()) {
 				try {
@@ -77,14 +78,22 @@ public class MySQLMonitorThread extends Thread {
 			}
 		}
 
-		//确保tomcat加载应用完成，sleep 30秒
-		//同时限制不能频繁的markup和markdown，之间至少间隔30秒
+		try {
+			// 加载MySql的驱动类
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			System.out.println("找不到驱动程序类 ，加载驱动失败！");
+			e.printStackTrace();
+		}
+		
+		// 确保tomcat加载应用完成，sleep 30秒
+		// 同时限制不能频繁的markup和markdown，之间至少间隔30秒
 		try {
 			TimeUnit.SECONDS.sleep(30);
 		} catch (InterruptedException e) {
 			return;
 		}
-		
+
 		// 如果该库是active=false的状态，则自动ping检测markup
 		if (!config.getActive()) {
 			currentState = Status.DEAD;
