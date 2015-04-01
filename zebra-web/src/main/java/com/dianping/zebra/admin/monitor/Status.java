@@ -2,6 +2,8 @@ package com.dianping.zebra.admin.monitor;
 
 public enum Status {
 
+	INIT("init"),
+	
 	ALIVE("alive"),
 
 	DEAD("dead"),

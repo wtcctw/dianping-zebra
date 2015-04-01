@@ -19,7 +19,7 @@ public class MySQLMonitorThread extends Thread {
 
 	private volatile long lastUpdatedTime = 0L;
 
-	private Status currentState = Status.ALIVE;
+	private Status currentState = Status.INIT;
 
 	private HaHandler hahandler;
 
@@ -64,7 +64,6 @@ public class MySQLMonitorThread extends Thread {
 
 	@Override
 	public void run() {
-
 		// 确保spring容器启动完成
 		while (!Thread.currentThread().isInterrupted()) {
 			if (!contextLoader.isLoaded()) {
@@ -84,8 +83,9 @@ public class MySQLMonitorThread extends Thread {
 		} catch (ClassNotFoundException e) {
 			System.out.println("找不到驱动程序类 ，加载驱动失败！");
 			e.printStackTrace();
+			return;
 		}
-		
+
 		// 确保tomcat加载应用完成，sleep 30秒
 		// 同时限制不能频繁的markup和markdown，之间至少间隔30秒
 		try {
@@ -103,7 +103,6 @@ public class MySQLMonitorThread extends Thread {
 				Connection con = null;
 				Statement stmt = null;
 				try {
-					System.out.println(config);
 					con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
 					stmt = con.createStatement();
 					stmt.setQueryTimeout(monitorConfig.getQueryTimeout());
@@ -119,7 +118,6 @@ public class MySQLMonitorThread extends Thread {
 					}
 				} catch (SQLException ignore) {
 					// 如果不能连上，则清空队列中正常的次数；
-					ignore.printStackTrace();
 					timestamp.clear();
 				} finally {
 					lastUpdatedTime = System.currentTimeMillis();
@@ -149,7 +147,6 @@ public class MySQLMonitorThread extends Thread {
 					// 如果能连上，则清空队列中的异常；因为要求连续的异常
 					timestamp.clear();
 				} catch (SQLException e) {
-					e.printStackTrace();
 					timestamp.addLast(System.currentTimeMillis());
 
 					if (timestamp.shouldAction()) {
