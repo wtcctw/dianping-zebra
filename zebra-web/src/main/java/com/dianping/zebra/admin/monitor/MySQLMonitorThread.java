@@ -109,9 +109,10 @@ public class MySQLMonitorThread extends Thread {
 					}
 				} catch (SQLException ignore) {
 					// 如果不能连上，则清空队列中正常的次数；
-					lastUpdatedTime = System.currentTimeMillis();
+					ignore.printStackTrace();
 					timestamp.clear();
 				} finally {
+					lastUpdatedTime = System.currentTimeMillis();
 					close(con, stmt);
 				}
 
@@ -138,6 +139,7 @@ public class MySQLMonitorThread extends Thread {
 					// 如果能连上，则清空队列中的异常；因为要求连续的异常
 					timestamp.clear();
 				} catch (SQLException e) {
+					e.printStackTrace();
 					timestamp.addLast(System.currentTimeMillis());
 
 					if (timestamp.shouldAction()) {
