@@ -7,7 +7,11 @@
     </h4>
 </div>
 <div class="modal-body">
-    <div>{{data.config}}</div>
+    <div class="alert alert-success">{{data.config}}</div>
+    <div class="alert alert-danger" ng-show="data.alert">
+    	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    	{{data.alert}}
+    </div>
     <hr/>
     <form class="form-inline" role="form">
         <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs">

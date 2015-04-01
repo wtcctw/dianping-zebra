@@ -338,6 +338,9 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         }
         var writeList = '';
         var readList = '';
+        var readListHasWrite = false;
+        var readListLength = 0;
+        
         $scope.data.configs.forEach(function (config) {
             if (!config.role) {
                 return;
@@ -351,9 +354,25 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
                 }
                 var temp = config.id + ':' + config.role.weight;
                 readList += readList ? ',' + temp : temp;
+                
+                if(config.id.indexOf("write") >= 0){
+                	readListHasWrite = true;
+                }
+                
+                readListLength++;
             }
         });
         $scope.data.config = '(' + readList + '),(' + writeList + ')';
+        
+        $scope.data.alert = "";
+        
+        if(readListHasWrite == true){
+        	$scope.data.alert = "含有不合法的读role，只允许读账号作为读role。"
+        }
+        
+        if(readListLength <=  1){
+        	$scope.data.alert = $scope.data.alert + "配置的读role少于2个，将不具有读HA。"
+        }
     }
 
     $scope.close = function () {
