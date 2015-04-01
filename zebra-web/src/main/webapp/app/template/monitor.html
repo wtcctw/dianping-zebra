@@ -23,6 +23,7 @@
             <tr ng-repeat="statusItem in statusList | toArray | filter:{$key:searchText}">
                 <td>{{statusItem.$key}}</td>
                 <td>{{statusItem.lastUpdateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td ng-show="statusItem.status == 'INIT'"><span class="label label-info">{{statusItem.status}}</span></td>
                 <td ng-show="statusItem.status == 'DEAD' || statusItem.status == 'MHA_MARK_DOWN'"><span class="label label-danger">{{statusItem.status}}</span></td>
                 <td ng-show="statusItem.status == 'ALIVE'"><span class="label label-success">{{statusItem.status}}</span></td>
             	<td ng-show="statusItem.status == 'MHA_MARK_DOWN'">
