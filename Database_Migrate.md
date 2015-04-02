@@ -41,5 +41,5 @@
         
 6. 2015年01月	dianping库拆库到dpshop
 7. 2015年01月   tuangou2010库拆库到tgdeal
-8. 2015年03月  mopay库迁库
+8. 2015年03月  mopay库和DianPingHui库迁库
 9. 2015年04月  dpopenplatform库迁库
