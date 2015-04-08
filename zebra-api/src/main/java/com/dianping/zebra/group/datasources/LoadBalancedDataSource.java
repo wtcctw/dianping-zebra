@@ -74,7 +74,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 					if(tmpRetryTimes > 0){
 						SqlAliasManager.setRetrySqlAlias();
 					}
-
+					
 					return this.dataSources.get(target.getId()).getConnection();
 				} catch (SQLException e) {
 					exceptions.add(e);
