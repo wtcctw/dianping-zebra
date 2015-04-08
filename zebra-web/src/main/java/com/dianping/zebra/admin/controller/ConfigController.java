@@ -184,7 +184,7 @@ public class ConfigController {
         if ("alpha".equals(env)) {
             host = "http://192.168.214.228:8080";
         } else if ("qa".equals(env)) {
-            host = "http://zebra-web01.beta:8080";
+            host = "http://192.168.217.69:8080";
         } else if ("prelease".equals(env)) {
             host = "http://10.2.8.65:8080";
         } else if ("product".equals(env)) {
