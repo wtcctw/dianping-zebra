@@ -295,7 +295,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			throw e;
 		} catch (Exception e) {
 			throw new IllegalConfigException(e);
-		} finally {
 		}
 	}
 

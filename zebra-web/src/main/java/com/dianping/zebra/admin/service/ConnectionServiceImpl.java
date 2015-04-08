@@ -63,7 +63,7 @@ public class ConnectionServiceImpl implements ConnectionService {
                 ds.setJdbcRef(jdbcRef);
             }
 
-            ds.setFilter("stat,cat,wall");
+            ds.setFilter("cat");
             ds.init();
 
             testDs(ds);
@@ -105,7 +105,7 @@ public class ConnectionServiceImpl implements ConnectionService {
         }
     }
 
-    public void testDs(DataSource ds) throws SQLException {
+    public void testDs(GroupDataSource ds) throws SQLException {
         Connection conn = null;
         Statement stmt = null;
         try {

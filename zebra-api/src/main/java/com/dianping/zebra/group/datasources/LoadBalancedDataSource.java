@@ -1,6 +1,7 @@
 package com.dianping.zebra.group.datasources;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
+import com.dianping.zebra.group.exception.SlaveDsDisConnectedException;
 import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
@@ -20,6 +22,7 @@ import com.dianping.zebra.group.router.RouterContext;
 import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.util.SqlAliasManager;
 import com.dianping.zebra.util.JDBCUtils;
+import com.dianping.zebra.util.JdbcDriverClassHelper;
 
 public class LoadBalancedDataSource extends AbstractDataSource {
 
@@ -33,8 +36,8 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	private SystemConfig systemConfig;
 
-	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap,
-			List<JdbcFilter> filters, SystemConfig systemConfig) {
+	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap, List<JdbcFilter> filters,
+	      SystemConfig systemConfig) {
 		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.filters = filters;
@@ -71,10 +74,10 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 			while (tmpRetryTimes++ < this.systemConfig.getRetryTimes()) {
 				try {
-					if(tmpRetryTimes > 0){
+					if (tmpRetryTimes > 0) {
 						SqlAliasManager.setRetrySqlAlias();
 					}
-					
+
 					return this.dataSources.get(target.getId()).getConnection();
 				} catch (SQLException e) {
 					exceptions.add(e);
@@ -106,6 +109,20 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 
 	public void init() {
 		this.dataSourceManager = SingleDataSourceManagerFactory.getDataSourceManager();
+
+		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
+			try {
+				JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
+				Connection conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(),
+				      config.getPassword());
+
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				throw new SlaveDsDisConnectedException("Cannot connect slave datasource.");
+			}
+		}
 
 		for (DataSourceConfig config : loadBalancedConfigMap.values()) {
 			SingleDataSource dataSource = dataSourceManager.createDataSource(config, this.filters);

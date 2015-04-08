@@ -8,6 +8,7 @@ import com.dianping.zebra.group.config.DataSourceConfigManagerTest;
 import com.dianping.zebra.config.LocalConfigServiceTest;
 import com.dianping.zebra.group.config.SystemConfigManagerTest;
 import com.dianping.zebra.group.datasources.FailoverDataSourceTest;
+import com.dianping.zebra.group.datasources.LoadBalancedDataSourceTest;
 import com.dianping.zebra.group.filter.DefaultFilterManagerTest;
 import com.dianping.zebra.group.filter.FilterChainTest;
 import com.dianping.zebra.group.filter.wall.WallFilterTest;
@@ -33,6 +34,7 @@ import com.dianping.zebra.group.util.SqlUtilsTest;
 
 	  //datasources
 	  FailoverDataSourceTest.class,
+	  LoadBalancedDataSourceTest.class,
 
 	  //filter
 	  DefaultFilterManagerTest.class,
