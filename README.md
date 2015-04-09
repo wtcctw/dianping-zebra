@@ -26,7 +26,7 @@
 目前的最新版本为`2.7.2`
 
 ### 数据库监控功能
-
+如果想要在CAT上对数据库进行监控，请务必添加该组件
 	<dependency>
         <groupId>com.dianping.zebra</groupId>
         <artifactId>zebra-ds-monitor-client</artifactId>
@@ -34,10 +34,11 @@
     </dependency>
     
 `version`和`zebra-api`保持一致
+SQL调用依赖需要加载一个配置文件 /config/spring/common/appcontext-ds-monitor.xml和/config/spring/common/appcontext-ds-replacer.xml，这些文件是在zebra-ds-monitor-client这个jar包下。 web.xml 加载是需要加入classpath*:config/spring/common/appcontext-ds-monitor.xml classpath*:config/spring/common/appcontext-ds-replacer.xml
     
 ### 其他依赖
 
-* 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`CAT`到`1.1.3`版本，`dpsf-net`升级到`2.1.21`版本以上。
+* 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`cat-client`到`1.1.3`之上，`dpsf-net`升级到`2.1.21`之上,`lion-client`升级到`0.4.8`之上的版本。
 
 ## Spring 配置
 
@@ -93,99 +94,53 @@
         <property name="forceWriteOnLogin" value="false" /> <!-- 关闭登录用户走写库，默认值是true，表明开启该功能 -->
     </bean>
 
-### hint的使用
-因为MYSQL主从同步会有延迟，应用有些时候不能容忍这种延迟，需要读请求也要走写库。可以在SQL前面加一个hint，表明这个读请求强制走写库，例如:
-
-    /*+zebra:w*/select * from test
-
-其中, `/*+zebra:w*/`就是hint的格式，告诉zebra这条sql必须走写库。
-
-### 答疑解惑
+### 常见问题
 Q：为什么要加`init-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
-## 老业务兼容情况
-通过`Phoenix`强制升级`zebra-ds-monitor`的版本到`2.5.9`以上，`Zebra`会自动替换满足条件的`DataSource`。
+Q：我想看jdbcRef的配置如何看？
+A：想要理解并查看配置，请看文档 [README_CONFIG.md](/arch/zebra/blob/master/README_CONFIG.md)
 
-#### 没有使用`dpdl`的`ComboPooledDataSource`
-* 数据源在`Lion`的白名单`groupds.autoreplace.database`配置过
-* 在`Lion`上找到了`groupds.${database_name}.mapping`配置
-* 判断原来的数据源用户是写库还是读库，使用以上配置中对应的读库组或者写库
-* 数据源是`mysql`
+Q：GroupDataSource是如何根据jdbcRef读取配置的?
+A：根据jdbcRef可以找到groupds.{jdbcRef}.mapping这个key，从而读到这个值；根据里面的值再进一步的去寻找ds的值，从而构建出一份配置文件，然后进行初始化。
 
-#### 使用`dpdl`的
-* 数据源在`Lion`的白名单`groupds.autoreplace.database`配置过
-* 在`Lion`上找到了`groupds.${database_name}.mapping`配置
-* 写库数据源是`mysql`
+Q：GroupDataSource是如何做到动态刷新的？
+A：利用Lion配置变更会通知的机制。一旦任何配置变更，GroupDataSource就进行自刷新。自刷新的逻辑是，重新建立新的DataSource，然后销毁老的DataSource。
 
-##  更新说明
+Q：GroupDataSource是如何做到读重试的？
+A：一旦从某台读库上取连接失败，那么会自动去另外一台读库上进行重试，重试一次。有两个条件：一、配置有两台读库；二、针对的是取连接失败动作才重试
 
-### 2.7.2
-* [/] 修正了不能加载DpdlReadWriteStrategy
-* [/] 修正了retry逻辑的cat打点问题
+Q：如何判断重试是否成功？
+A：在CAT上的SQL报表中，可以看到重试的sql名字和原来的sql名字有区分，重试的sql名字后缀是`(retry-by-zebra)`，你可以对比原来sql的失败个数和重试sql的成功个数，一般都能对上。
 
-### 2.7.1
-* [/] 删除了配置变更需要线程池 
-* [/] 补回了StringUtils这个类，并把这个类设置成@Deprecated
+Q：如何让一个请求中的所有SQL都走写库？
+A: TODO
 
-### 2.7.0
-* [+] 支持了分库分表
-* [/] 客户端新增支持按百分比进行SQL流控功能
-* [+] 客户端新增支持对于非事务的读连接自动的重试，如果2个以上读库，那么一旦一台读库挂了，CAT虽然报错，但并不影响业务，因为SQL会被重试执行，重试的SQL能在CAT中看到
-* [/] 客户端修正取连接失败后CAT打点丢失信息的bug
-* [/] 客户端强制使用c3p0的参数checkoutTimeout=1000
-* [/] 客户端修正了若干线程安全的bug
+Q：如何指定让具体某条SQL走写库？
+A：可以在SQL前面加一个`hint`，表明这个读请求强制走写库，其中, `/*+zebra:w*/`就是hint的格式，告诉zebra这条sql必须走写库。
+。例如:
 
-### 2.6.7
-* [-] 删除了DAL中无用的配置
-* [+] 添加了forceWriteOnLogin这个配置项来关闭登录用户走写库的逻辑
-* [/] 修正了SQL的CAT打点丢失Exception的StackTrace的bug
-* [/] 修正SQL黑名单只对PreparedStatement进行拦截，不再对Statement进行拦截
+    /*+zebra:w*/select * from test
 
-### 2.6.4
-* [/] 修正了zebra-ds-monitor-client的若干bug
+Q：什么是数据源自动替换？
+A：为了方便升级，不用业务修改代码，zebra可以对数据库级别对数据源进行动态替换。替换的技术是Spring加载完bean的时候对DataSource这个类型的bean进行替换。过程如下：
+    1. 从datasource中获取jdbcUrl，从而知道是该datasource会访问哪个库
+    2. 判断该数据库是否在`Lion`的白名单`groupds.autoreplace.database`配置过
+    3. 如果配置过，则进行替换。替换时，判断用户名如果是读用户，则替换过的GroupDataSource只能读；如果是写用户，则替换过的GroupDataSource只能写。
+替换的DataSource仅限于c3p0和dpdl两种数据源。
 
-### 2.6.3
-* [+] 增加了`filter`功能
-* [+] 利用`filter`，增加了SQL黑名单功能
-* [/] 利用`filter`，重构了`CAT`监控的代码
+Q：如何查看版本信息？
+A: Release Note [ReleaseNote.md](/arch/zebra/blob/master/ReleaseNote.md)
 
-### 2.5.9
-* [/] 修复了transaction潜在的bug
 
-### 2.5.8
-* [/] 修正了Lion的值不停变化导致数据源的频繁刷新的bug(只有在应用使用了alpaca的情况下发生)
-* [-] 移除了zebra-api对phoenix-environment的强依赖
 
-### 2.5.7
-* [+] `FailOverDataSource`加入自动终止`Monitor`线程的功能，防止内存泄露
-* [+] 支持事务中默认走写库
 
-### 2.5.5
-* [+] 支持自动替换`dpdl`数据源，并且可以通过数据库白名单进行限制
-* [/] 移除自动替换`SingleDataSource`，全部改为替换成`GroupDataSource`
-* [+] 添加`DataSource`信息上传功能，便于监控升级情况
-* [+] 将`DataSource`信息展示在`inspect`页面，便于观察站点状况
-* [+] 支持针对单独应用配置`mapping`，并支持运行时切换
 
-### 2.5.2
-* [/] 修复`GroupConnection`中`getMetaData`时总是得到写库信息的问题
-* [/] 修复`ZebraDsMonitorClient`中`hawk`版本过低的问题
-* [/] 修复`ZebraDsMonitorClient`的`bean`在`Spring`中被多次声明时出错的问题
-* [/] 修改`CAT`监控参数，隐藏密码
 
-### 2.5.1
-* [/] 将`Lion`中的用户名的配置从`user`改成`username`
 
-### 2.5.0
-* [+] 支持`Spring`方式配置`GroupDataSource`
-* [+] 支持`Spring`方式配置`SingleDataSource`
-* [+] 通过升级`zebra-ds-monitor`,老应用自动替换`ComboPooledDataSource`到`SingleDataSource`
-* [+] 两种`DataSource`均支持配置动态刷新
 
-### 2.4.8
-* [*] 重构`FailOverDataSource`，检测逻辑更合理
-* [+] 兼容老版本`avatar`强制读写库的逻辑，业务方不需要修改相关逻辑代码
 
-### 2.4.7
-* [*] 修复`iBatis`中使用`SelectKey`后无法获得主键的Bug
+
+
+
+
