@@ -20,6 +20,7 @@ import com.dianping.zebra.group.jdbc.SingleAndGroupC3P0FieldTest;
 import com.dianping.zebra.group.router.CustomizedReadWriteStrategyWrapperTest;
 import com.dianping.zebra.group.router.DpdlReadWriteStrategyImplTest;
 import com.dianping.zebra.group.router.GroupDataSourceRouterTest;
+import com.dianping.zebra.group.router.ReadWriteStrategyLoaderTest;
 import com.dianping.zebra.group.util.AtomicRefreshTest;
 import com.dianping.zebra.group.util.SmoothReloadTest;
 import com.dianping.zebra.group.util.SqlUtilsTest;
@@ -52,6 +53,7 @@ import com.dianping.zebra.group.util.SqlUtilsTest;
 	  CustomizedReadWriteStrategyWrapperTest.class,
 	  DpdlReadWriteStrategyImplTest.class,
 	  GroupDataSourceRouterTest.class,
+	  ReadWriteStrategyLoaderTest.class,
 
 	  //util
 	  AtomicRefreshTest.class,
