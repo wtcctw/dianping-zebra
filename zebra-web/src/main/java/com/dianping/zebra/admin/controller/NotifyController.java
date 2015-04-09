@@ -25,8 +25,10 @@ public class NotifyController {
 	@ResponseBody
 	public Object notify(HeartbeatDto model) {
 		if (model.getApp() != null && model.getIp() != null && model.getDataSourceBeanName() != null) {
-			HeartbeatEntity entity = convert.convert(model);
-			reportService.createOrUpdate(entity);
+			if(!model.getApp().contains("job")){
+				HeartbeatEntity entity = convert.convert(model);
+				reportService.createOrUpdate(entity);
+			}
 		}
 		return null;
 	}
