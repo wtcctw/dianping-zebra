@@ -120,7 +120,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 					conn.close();
 				}
 			} catch (SQLException e) {
-				throw new SlaveDsDisConnectedException("Cannot connect slave datasource.");
+				throw new SlaveDsDisConnectedException("Cannot connect slave datasource(" + config.getId() + ").");
 			}
 		}
 

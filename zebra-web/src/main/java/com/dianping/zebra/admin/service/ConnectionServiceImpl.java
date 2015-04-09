@@ -10,7 +10,6 @@ import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.util.StringUtils;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.sql.SQLException;
