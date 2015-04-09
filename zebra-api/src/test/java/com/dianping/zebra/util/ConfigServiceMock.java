@@ -35,4 +35,10 @@ public class ConfigServiceMock implements ConfigService {
         configs.put(key, value);
         return this;
     }
+
+	@Override
+   public void destroy() {
+	   // TODO Auto-generated method stub
+	   
+   }
 }

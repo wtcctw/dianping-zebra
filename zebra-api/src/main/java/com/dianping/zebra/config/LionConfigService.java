@@ -21,6 +21,8 @@ public class LionConfigService implements ConfigService {
 
 	private List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
+	private ConfigChange configChange;
+
 	@Override
 	public String getProperty(String key) {
 		try {
@@ -39,24 +41,39 @@ public class LionConfigService implements ConfigService {
 	@Override
 	public void init() {
 		try {
-			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new ConfigChange() {
+			configChange = new ConfigChange() {
 				@Override
 				public void onChange(String key, String value) {
 					if (key.startsWith(Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX)
 					      || key.startsWith(Constants.DEFAULT_DATASOURCE_GROUP_PRFIX)
 					      || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)
 					      || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX)
-                          || key.startsWith(Constants.DEFAULT_SHARDING_PRFIX)) {
+					      || key.startsWith(Constants.DEFAULT_SHARDING_PRFIX)) {
 						PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
 						for (PropertyChangeListener listener : listeners) {
 							listener.propertyChange(event);
 						}
 					}
 				}
-			});
+			};
+
+			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(configChange);
 		} catch (LionException e) {
 			logger.error("fail to initilize Remote Config Manager for DAL", e);
 			throw new IllegalConfigException(e);
+		}
+	}
+
+	@Override
+	public void destroy() {
+		if (configChange != null) {
+			try {
+				ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).removeChange(configChange);
+			} catch (LionException e) {
+				logger.warn("fail to destroy Remote Config Manager for DAL", e);
+			} catch (Throwable e) {
+				logger.warn("Please Update lion-client version up to 2.4.8", e);
+			}
 		}
 	}
 }

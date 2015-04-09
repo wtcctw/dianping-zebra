@@ -2,6 +2,7 @@ package com.dianping.zebra.group.config;
 
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.util.StringUtils;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -21,6 +22,10 @@ public abstract class AbstractConfigManager {
 	public AbstractConfigManager(ConfigService configService) {
 		this.configService = configService;
 		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
+	}
+
+	public void close() {
+		configService.destroy();
 	}
 
 	public boolean getProperty(String key, boolean defaultValue) {

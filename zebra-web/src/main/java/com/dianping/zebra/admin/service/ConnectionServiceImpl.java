@@ -54,6 +54,10 @@ public class ConnectionServiceImpl implements ConnectionService {
                     public void init() {
 
                     }
+
+						@Override
+                  public void destroy() {
+                  }
                 });
 
                 ds = ext;

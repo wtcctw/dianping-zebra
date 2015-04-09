@@ -11,5 +11,7 @@ public interface DataSourceConfigManager {
 	public GroupDataSourceConfig getGroupDataSourceConfig();
 
 	public void init();
+	
+	public void close();
 
 }

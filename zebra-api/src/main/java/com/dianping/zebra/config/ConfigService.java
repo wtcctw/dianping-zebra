@@ -4,6 +4,8 @@ import java.beans.PropertyChangeListener;
 
 public interface ConfigService {
 	public void init();
+	
+	public void destroy();
 
 	public String getProperty(String key);
 

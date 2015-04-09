@@ -150,4 +150,8 @@ public class PropertyConfigService implements ConfigService {
 			}
 		}
 	}
+
+	@Override
+   public void destroy() {
+   }
 }

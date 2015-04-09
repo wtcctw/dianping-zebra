@@ -87,6 +87,10 @@ public class ShardController {
             public void addPropertyChangeListener(PropertyChangeListener listener) {
 
             }
+
+				@Override
+            public void destroy() {
+            }
         };
 
         ShardDataSource ds = new ShardDataSource();

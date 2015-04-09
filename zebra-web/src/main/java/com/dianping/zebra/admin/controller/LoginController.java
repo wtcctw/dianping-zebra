@@ -11,26 +11,24 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Dozer @ 2015-02
- * mail@dozer.cc
- * http://www.dozer.cc
+ * Dozer @ 2015-02 mail@dozer.cc http://www.dozer.cc
  */
 @Controller
 @RequestMapping(value = "/login")
 public class LoginController {
 
-    @RequestMapping(method = RequestMethod.POST)
-    @ResponseBody
-    public String login(HttpServletResponse response, @RequestBody LoginDto loginDto) throws Exception {
-        if ("zebra".equals(loginDto.getUsername()) && "zebra".equals(loginDto.getPassword())) {
-            Cookie cookie = new Cookie("AuthorizationFilter", "");
-            cookie.setMaxAge(60 * 30);
-            cookie.setPath("/");
-            cookie.setValue("AuthorizationFilter");
-            response.addCookie(cookie);
-            return null;
-        } else {
-            throw new Exception("password error!");
-        }
-    }
+	@RequestMapping(method = RequestMethod.POST)
+	@ResponseBody
+	public String login(HttpServletResponse response, @RequestBody LoginDto loginDto) throws Exception {
+		if ("zebra".equals(loginDto.getUsername()) && "zebra".equals(loginDto.getPassword())) {
+			Cookie cookie = new Cookie("AuthorizationFilter", "");
+			cookie.setMaxAge(60 * 60 * 12); // 12 hours
+			cookie.setPath("/");
+			cookie.setValue("AuthorizationFilter");
+			response.addCookie(cookie);
+			return null;
+		} else {
+			throw new Exception("password error!");
+		}
+	}
 }
