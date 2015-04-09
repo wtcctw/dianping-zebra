@@ -88,7 +88,6 @@ public class ShardController {
 
             }
 
-				@Override
             public void destroy() {
             }
         };

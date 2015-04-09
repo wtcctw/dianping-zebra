@@ -55,7 +55,6 @@ public class ConnectionServiceImpl implements ConnectionService {
 
                     }
 
-						@Override
                   public void destroy() {
                   }
                 });
