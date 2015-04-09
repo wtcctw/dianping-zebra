@@ -27,6 +27,7 @@
 
 ### 数据库监控功能
 如果想要在CAT上对数据库进行监控，请务必添加该组件
+
     <dependency>
         <groupId>com.dianping.zebra</groupId>
         <artifactId>zebra-ds-monitor-client</artifactId>
@@ -95,52 +96,39 @@ SQL调用依赖需要加载一个配置文件 /config/spring/common/appcontext-d
     </bean>
 
 ### 常见问题
-####Q：为什么要加`init-method`，不加会怎么样？
+#### Q：为什么要加`init-method`，不加会怎么样？
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
-####Q：我想看jdbcRef的配置，在哪里可以看到？
+#### Q：我想看jdbcRef的配置，在哪里可以看到？
 A：想要理解并查看配置，请看文档 [README_CONFIG.md](/arch/zebra/blob/master/README_CONFIG.md)
 
-####Q：GroupDataSource是如何根据jdbcRef读取配置的?
+#### Q：GroupDataSource是如何根据jdbcRef读取配置的?
 A：根据jdbcRef可以找到groupds.{jdbcRef}.mapping这个key，从而读到这个值；根据里面的值再进一步的去寻找ds的值，从而构建出一份配置文件，然后进行初始化。
 
-####Q：GroupDataSource是如何做到动态刷新的？
+#### Q：GroupDataSource是如何做到动态刷新的？
 A：利用Lion配置变更会通知的机制。一旦任何配置变更，GroupDataSource就进行自刷新。自刷新的逻辑是，重新建立新的DataSource，然后销毁老的DataSource。
 
-####Q：GroupDataSource是如何做到读重试的？
+#### Q：GroupDataSource是如何做到读重试的？
 A：一旦从某台读库上取连接失败，那么会自动去另外一台读库上进行重试，重试一次。有两个条件：一、配置有两台读库；二、针对的是取连接失败动作才重试
 
-####Q：如何判断重试是否成功？
+#### Q：如何判断重试是否成功？
 A：在CAT上的SQL报表中，可以看到重试的sql名字和原来的sql名字有区分，重试的sql名字后缀是`(retry-by-zebra)`，你可以对比原来sql的失败个数和重试sql的成功个数，一般都能对上。
 
-####Q：如何让一个请求中的所有SQL都走写库？
+#### Q：如何让一个请求中的所有SQL都走写库？
 A: TODO
 
-####Q：如何指定让具体某条SQL走写库？
+#### Q：如何指定让具体某条SQL走写库？
 A：可以在SQL前面加一个`hint`，表明这个读请求强制走写库，其中, `/*+zebra:w*/`就是hint的格式，告诉zebra这条sql必须走写库。
 。例如:
 
     /*+zebra:w*/select * from test
 
-####Q：什么是数据源自动替换？
+#### Q：什么是数据源自动替换？
 A：为了方便升级，不用业务修改代码，zebra可以对数据库级别对数据源进行动态替换。替换的技术是Spring加载完bean的时候对DataSource这个类型的bean进行替换。过程如下：
     1. 从datasource中获取jdbcUrl，从而知道是该datasource会访问哪个库
     2. 判断该数据库是否在`Lion`的白名单`groupds.autoreplace.database`配置过
     3. 如果配置过，则进行替换。替换时，判断用户名如果是读用户，则替换过的GroupDataSource只能读；如果是写用户，则替换过的GroupDataSource只能写。
 替换的DataSource仅限于c3p0和dpdl两种数据源。
 
-####Q：如何查看版本信息？
+#### Q：如何查看版本信息？
 A: Release Note [ReleaseNote.md](/arch/zebra/blob/master/ReleaseNote.md)
-
-
-
-
-
-
-
-
-
-
-
-
-
