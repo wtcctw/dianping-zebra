@@ -5,8 +5,8 @@
            http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
 
 	<bean id="zebraDataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource"
-		init-method="zebra">
-		<property name="jdbcUrl" value="zebra" />
+		init-method="init">
+		<property name="jdbcRef" value="zebra" />
 		<property name="driverClass" value="com.mysql.jdbc.Driver" />
 		<property name="maxIdleTime" value="1800" />
 		<property name="idleConnectionTestPeriod" value="60" />
