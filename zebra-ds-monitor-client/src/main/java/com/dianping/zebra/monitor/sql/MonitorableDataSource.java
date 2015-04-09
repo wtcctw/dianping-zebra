@@ -43,26 +43,12 @@ public class MonitorableDataSource implements DataSource {
 
 	public MonitorableDataSource(DataSource innerDataSource) {
 		this.innerDataSource = getInnerDataSource(innerDataSource);
-		
-		Connection conn = null;
-		try {
-			conn = innerDataSource.getConnection();
-			this.jdbcUrl = conn.getMetaData().getURL();
-			
-			Cat.logEvent("SQL.JdbcUrl", this.jdbcUrl);
-		} catch (Exception ignore) {
-		} finally {
-			try {
-				if(conn != null){
-					conn.close();
-				}
-			} catch (SQLException e) {
-			}
-		}
 	}
 
 	@Override
 	public Connection getConnection() throws SQLException {
+		checkJdbcUrl();
+		
 		try{
 			return new MonitorableConnection(innerDataSource.getConnection());
 		}catch(SQLException e){
@@ -80,6 +66,26 @@ public class MonitorableDataSource implements DataSource {
 			throw e;
 		}
 	}
+
+	private void checkJdbcUrl() {
+	   if(this.jdbcUrl == null){
+			Connection conn = null;
+			try {
+				conn = innerDataSource.getConnection();
+				this.jdbcUrl = conn.getMetaData().getURL();
+				
+				Cat.logEvent("SQL.JdbcUrl", this.jdbcUrl);
+			} catch (Exception ignore) {
+			} finally {
+				try {
+					if(conn != null){
+						conn.close();
+					}
+				} catch (SQLException e) {
+				}
+			}
+		}
+   }
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
