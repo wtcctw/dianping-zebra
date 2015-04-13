@@ -52,27 +52,23 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 	public void closeOrigin() throws SQLException {
 		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			if (state == DataSourceState.UP) {
-				PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
-				if (poolBackedDataSource.getNumBusyConnections() == 0) {
-					logger.info("closing old datasource [" + dsId + "]");
+			PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
+			
+			if (poolBackedDataSource.getNumBusyConnections() == 0) {
+				logger.info("closing old datasource [" + dsId + "]");
 
-					poolBackedDataSource.close();
+				poolBackedDataSource.close();
 
-					logger.info("old datasource [" + dsId + "] closed");
-					state = DataSourceState.CLOSED;
-				} else {
-					DalException exp = new DalException(String.format(
-							"Cannot close dataSource[%s] since there are busy connections.", dsId));
-					throw exp;
-				}
-			} else {
+				logger.info("old datasource [" + dsId + "] closed");
 				state = DataSourceState.CLOSED;
+			} else {
+				DalException exp = new DalException(String.format(
+				      "Cannot close dataSource[%s] since there are busy connections.", dsId));
+				throw exp;
 			}
-
 		} else {
 			Exception exp = new DalException(
-					"fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
+			      "fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
 			logger.warn(exp.getMessage(), exp);
 		}
 	}
@@ -128,8 +124,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
 				@Override
-				public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain)
-						throws SQLException {
+				public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain) throws SQLException {
 					if (index < filters.size()) {
 						return filters.get(index++).getSingleConnection(source, chain);
 					} else {
@@ -275,8 +270,8 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		try {
 			JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 
-			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(),
-					value.getUsername(), value.getPassword());
+			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
+			      value.getPassword());
 
 			Map<String, Object> props = new HashMap<String, Object>();
 
@@ -287,7 +282,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			}
 
 			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
-					unPooledDataSource, props);
+			      unPooledDataSource, props);
 
 			logger.info(String.format("New dataSource [%s] created.", value.getId()));
 			return pooledDataSource;

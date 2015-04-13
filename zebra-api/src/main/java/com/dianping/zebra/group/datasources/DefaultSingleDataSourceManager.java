@@ -1,13 +1,13 @@
 package com.dianping.zebra.group.datasources;
 
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.DalException;
-import com.dianping.zebra.group.filter.JdbcFilter;
-
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.group.filter.JdbcFilter;
 
 public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 
