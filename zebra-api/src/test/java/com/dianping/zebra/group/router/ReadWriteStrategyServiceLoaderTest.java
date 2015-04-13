@@ -6,7 +6,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-public class ReadWriteStrategyLoaderTest {
+public class ReadWriteStrategyServiceLoaderTest {
 
 	@Test
 	public void load_dpdl_readWriteStrategy(){
@@ -16,10 +16,17 @@ public class ReadWriteStrategyLoaderTest {
 		if (strategies != null) {
 			for (ReadWriteStrategy strategy : strategies) {
 				size++;
-				Assert.assertEquals(true, strategy instanceof DpdlReadWriteStrategy);
+				
+				if(size == 1){
+					Assert.assertEquals(true, strategy instanceof DpdlReadWriteStrategy);
+				}
+				
+				if(size == 2){
+					Assert.assertEquals(true, strategy instanceof LocalContextReadWriteStrategy);
+				}
 			}
 			
-			Assert.assertEquals(1, size);
+			Assert.assertEquals(2, size);
 		}
 	}
 }

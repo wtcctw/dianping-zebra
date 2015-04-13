@@ -41,4 +41,20 @@ public class DpdlReadWriteStrategyImplTest {
 		DpdlReadWriteStrategy target = new DpdlReadWriteStrategy();
 		Assert.assertFalse(target.shouldReadFromMaster());
 	}
+	
+	@Test
+	public void test_set_auth(){
+		TrackerContext trackerContext = new TrackerContext();
+		trackerContext.setAuthenticated(false);
+		trackerContext.setExtension(new HashMap<String, Object>());
+		ExecutionContextHolder.setTrackerContext(trackerContext);
+		
+		DpdlReadWriteStrategy.setReadFromMaster();
+		
+		DpdlReadWriteStrategy target = new DpdlReadWriteStrategy();
+		target.setGroupDataSourceConfig(new GroupDataSourceConfig());
+
+		System.out.println(target.shouldReadFromMaster());
+		Assert.assertTrue(target.shouldReadFromMaster());
+	}
 }
