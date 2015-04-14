@@ -97,7 +97,7 @@ public class ShardDataSource extends AbstractDataSource {
 		if (StringUtils.isNotBlank(ruleName)) {
 			if (configService == null) {
 				if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equals(configManagerType)) {
-					configService = new LionConfigService();
+					configService = LionConfigService.getInstance();
 				} else {
 					configService = new PropertyConfigService(ruleName);
 				}

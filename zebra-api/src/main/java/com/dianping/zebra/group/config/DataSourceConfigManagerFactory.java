@@ -18,13 +18,11 @@ public final class DataSourceConfigManagerFactory {
 			configService.init();
 			dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
 		} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
-			LionConfigService configService = new LionConfigService();
-			configService.init();
-			dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
+			dataSourceConfigManager = new DefaultDataSourceConfigManager(name, LionConfigService.getInstance());
 		} else {
 			throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]", configManagerType));
 		}
-		
+
 		dataSourceConfigManager.init();
 
 		return dataSourceConfigManager;

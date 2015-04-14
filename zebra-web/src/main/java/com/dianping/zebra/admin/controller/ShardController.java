@@ -90,6 +90,12 @@ public class ShardController {
 
             public void destroy() {
             }
+
+				@Override
+            public void removePropertyChangeListener(PropertyChangeListener listener) {
+	            // TODO Auto-generated method stub
+	            
+            }
         };
 
         ShardDataSource ds = new ShardDataSource();

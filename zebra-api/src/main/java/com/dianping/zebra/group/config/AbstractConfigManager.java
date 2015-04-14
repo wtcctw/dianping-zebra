@@ -17,15 +17,18 @@ public abstract class AbstractConfigManager {
 
 	protected final ConfigService configService;
 
+	protected final InnerPropertyChangeListener innerPropertyChangeListener;
+
 	protected List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
 	public AbstractConfigManager(ConfigService configService) {
 		this.configService = configService;
-		this.configService.addPropertyChangeListener(new InnerPropertyChangeListener());
+		this.innerPropertyChangeListener = new InnerPropertyChangeListener();
+		this.configService.addPropertyChangeListener(this.innerPropertyChangeListener);
 	}
 
 	public void close() {
-		configService.destroy();
+		configService.removePropertyChangeListener(innerPropertyChangeListener);
 	}
 
 	public boolean getProperty(String key, boolean defaultValue) {

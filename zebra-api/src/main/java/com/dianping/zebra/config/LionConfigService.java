@@ -19,9 +19,27 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class LionConfigService implements ConfigService {
 	private static final Logger logger = LogManager.getLogger(LionConfigService.class);
 
+	private static LionConfigService configService;
+
 	private List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 
 	private ConfigChange configChange;
+
+	private LionConfigService() {
+	}
+
+	public static LionConfigService getInstance() {
+		if (configService == null) {
+			synchronized (LionConfigService.class) {
+				if (configService == null) {
+					configService = new LionConfigService();
+					configService.init();
+				}
+			}
+		}
+
+		return configService;
+	}
 
 	@Override
 	public String getProperty(String key) {
@@ -39,6 +57,11 @@ public class LionConfigService implements ConfigService {
 	}
 
 	@Override
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		listeners.remove(listener);
+	}
+
+	@Override
 	public void init() {
 		try {
 			configChange = new ConfigChange() {
@@ -50,7 +73,7 @@ public class LionConfigService implements ConfigService {
 					      || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX)
 					      || key.startsWith(Constants.DEFAULT_SHARDING_PRFIX)) {
 
-						logger.info(String.format("receive key(%s) change notify, new value(%s)", key, value));
+						logger.info(String.format("Receive lion change notification. Key[%s], Value[%s]", key, value));
 
 						PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
 						for (PropertyChangeListener listener : listeners) {

@@ -189,6 +189,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public void close() throws SQLException {
+		dataSourceConfigManager.close();
+
 		this.close(this.readDataSource, this.writeDataSource);
 	}
 

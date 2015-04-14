@@ -26,10 +26,7 @@ public final class SystemConfigManagerFactory {
 						
 						systemConfigManager = new DefaultSystemConfigManager(configService);
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
-						LionConfigService configService = new LionConfigService();
-						configService.init();
-						
-						systemConfigManager = new DefaultSystemConfigManager(configService);
+						systemConfigManager = new DefaultSystemConfigManager(LionConfigService.getInstance());
 					} else {
 						throw new IllegalConfigException(String.format("illegal systemConfigManagerType[%s]",
 						      configManagerType));

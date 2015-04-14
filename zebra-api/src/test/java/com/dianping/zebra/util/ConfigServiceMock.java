@@ -41,4 +41,10 @@ public class ConfigServiceMock implements ConfigService {
 	   // TODO Auto-generated method stub
 	   
    }
+
+	@Override
+   public void removePropertyChangeListener(PropertyChangeListener listener) {
+	   // TODO Auto-generated method stub
+	   
+   }
 }

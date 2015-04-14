@@ -10,4 +10,6 @@ public interface ConfigService {
 	public String getProperty(String key);
 
 	public void addPropertyChangeListener(PropertyChangeListener listener);
+	
+	public void removePropertyChangeListener(PropertyChangeListener listener);
 }

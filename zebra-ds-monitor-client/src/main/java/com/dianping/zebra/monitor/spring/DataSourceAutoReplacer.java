@@ -355,6 +355,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 							getJdbcUrlInfo(info, dsConfig.getJdbcUrl());
 							info.setUsername(dsConfig.getUsername());
 						}
+						
+						manager.close();
 					}
 				}
 			}

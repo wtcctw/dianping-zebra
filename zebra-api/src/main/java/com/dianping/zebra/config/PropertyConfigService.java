@@ -154,4 +154,9 @@ public class PropertyConfigService implements ConfigService {
 	@Override
    public void destroy() {
    }
+
+	@Override
+   public void removePropertyChangeListener(PropertyChangeListener listener) {
+		listeners.remove(listener);
+   }
 }
