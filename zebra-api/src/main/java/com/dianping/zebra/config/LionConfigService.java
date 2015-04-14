@@ -49,6 +49,9 @@ public class LionConfigService implements ConfigService {
 					      || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_SQL_BLACKLIST_PRFIX)
 					      || key.startsWith(Constants.DEFAULT_DATASOURCE_ZEBRA_PRFIX)
 					      || key.startsWith(Constants.DEFAULT_SHARDING_PRFIX)) {
+
+						logger.info(String.format("receive key(%s) change notify, new value(%s)", key, value));
+
 						PropertyChangeEvent event = new AdvancedPropertyChangeEvent(this, key, null, value);
 						for (PropertyChangeListener listener : listeners) {
 							listener.propertyChange(event);

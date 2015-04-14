@@ -1,5 +1,23 @@
 package com.dianping.zebra.group.jdbc;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.ServiceLoader;
+import java.util.Set;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
@@ -21,21 +39,16 @@ import com.dianping.zebra.group.router.ReadWriteStrategy;
 import com.dianping.zebra.group.router.ReadWriteStrategyWrapper;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.AtomicRefresh;
-import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.group.util.SmoothReload;
+import com.dianping.zebra.log.LoggerLoader;
+import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.StringUtils;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.Map.Entry;
-
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
+
+	static {
+		LoggerLoader.init();
+	}
 
 	protected static final Logger logger = LogManager.getLogger(GroupDataSource.class);
 
