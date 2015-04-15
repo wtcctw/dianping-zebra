@@ -58,7 +58,6 @@ public class ConnectionServiceImpl implements ConnectionService {
                   public void destroy() {
                   }
 
-						@Override
                   public void removePropertyChangeListener(PropertyChangeListener listener) {
 	                  // TODO Auto-generated method stub
 	                  
