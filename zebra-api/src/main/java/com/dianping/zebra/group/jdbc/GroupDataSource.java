@@ -38,7 +38,6 @@ import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.ReadWriteStrategy;
 import com.dianping.zebra.group.router.ReadWriteStrategyWrapper;
 import com.dianping.zebra.group.router.RouterType;
-import com.dianping.zebra.group.util.AtomicRefresh;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.log.LoggerLoader;
 import com.dianping.zebra.util.JDBCUtils;
@@ -69,8 +68,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	// other
 	protected volatile boolean init = false;
-
-	protected AtomicRefresh atomicRefresh = new AtomicRefresh();
 
 	protected ReadWriteStrategy readWriteStrategy;
 
@@ -500,12 +497,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 	}
 
-	private void refreshUserAndPassword() {
-		atomicRefresh.reset();
-
-		refresh("user&password");
-	}
-
 	public synchronized void setAcquireIncrement(int acquireIncrement) {
 		setProperty("acquireIncrement", String.valueOf(acquireIncrement));
 	}
@@ -703,28 +694,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
-		private static final String PASSWORD_KEY = ".jdbc." + Constants.ELEMENT_PASSWORD;
-
-		private static final String USERNAME_KEY = ".jdbc." + Constants.ELEMENT_USER;
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
-			if (evt.getPropertyName().endsWith(USERNAME_KEY)) {
-				atomicRefresh.setUser(evt.getNewValue().toString());
-				if (atomicRefresh.needToRefresh()) {
-					refreshUserAndPassword();
-				}
-				return;
-			}
-
-			if (evt.getPropertyName().endsWith(PASSWORD_KEY)) {
-				atomicRefresh.setPassword(evt.getNewValue().toString());
-				if (atomicRefresh.needToRefresh()) {
-					refreshUserAndPassword();
-				}
-				return;
-			}
-
 			refresh(evt.getPropertyName());
 		}
 	}
