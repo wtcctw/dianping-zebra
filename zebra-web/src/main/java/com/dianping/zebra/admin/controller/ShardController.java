@@ -89,11 +89,9 @@ public class ShardController {
 
             }
 
-            @SuppressWarnings("unused")
             public void destroy() {
             }
 
-            @SuppressWarnings("unused")
             public void removePropertyChangeListener(PropertyChangeListener listener) {
 	            
             }
