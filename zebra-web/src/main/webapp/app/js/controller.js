@@ -4,6 +4,10 @@ zebraWeb.controller('monitor', function ($scope, $http) {
             $scope.statusList = data;
         });
         
+        $http.get('/a/mha/allMarkedDown').success(function (data, status, headers, config) {
+        	$scope.mhaList = data;
+        });
+
         $http.get('/a/monitor/history').success(function (data, status, headers, config) {
             $scope.histories = data;
         });

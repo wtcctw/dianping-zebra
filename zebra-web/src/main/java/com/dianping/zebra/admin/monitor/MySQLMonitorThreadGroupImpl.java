@@ -26,18 +26,14 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 	private Map<String, MySQLMonitorThread> monitorThreads = new ConcurrentHashMap<String, MySQLMonitorThread>();
 
 	@Override
-	public synchronized void startOrRefreshMonitor(DataSourceConfig dsConfig, boolean isMHA) {
+	public synchronized void startOrRefreshMonitor(DataSourceConfig dsConfig) {
 		String dsId = dsConfig.getId();
 		if (!this.monitorThreads.containsKey(dsId)) {
 			MySQLMonitorThread monitor = new MySQLMonitorThread(this.monitorConfig, dsConfig, hahandler);
 			monitor.setName("Dal-Monitor-Slave(" + dsConfig.getId() + ")");
 			monitor.setContextLoader(contextLoader);
 
-			if (isMHA) {
-				monitor.setCurrentState(Status.MHA_MARK_DOWN);
-			} else {
-				monitor.start();
-			}
+			monitor.start();
 
 			this.monitorThreads.put(dsId, monitor);
 		} else {
@@ -48,11 +44,7 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 			monitor.setName("Dal-Monitor-Slave(" + dsConfig.getId() + ")");
 			monitor.setContextLoader(contextLoader);
 
-			if (isMHA) {
-				monitor.setCurrentState(Status.MHA_MARK_DOWN);
-			} else {
-				monitor.start();
-			}
+			monitor.start();
 
 			this.monitorThreads.put(dsId, monitor);
 		}
@@ -77,16 +69,4 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 			thread.interrupt();
 		}
 	}
-	
-	@Override
-   public synchronized void suspendMonitor(String dsId, boolean isMHA) {
-		if(monitorThreads.containsKey(dsId)){
-			MySQLMonitorThread monitor = monitorThreads.get(dsId);
-			monitor.interrupt();
-
-			if(isMHA){
-				monitor.setCurrentState(Status.MHA_MARK_DOWN);
-			}
-		}
-   }
 }

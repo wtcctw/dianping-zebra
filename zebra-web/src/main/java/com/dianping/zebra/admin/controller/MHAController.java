@@ -1,5 +1,6 @@
 package com.dianping.zebra.admin.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +26,8 @@ import com.dianping.zebra.admin.service.LionService;
 @RequestMapping(value = "/mha")
 public class MHAController {
 
+	private static final String lionKey = "zebra.server.monitor.mha.markdown";
+
 	@Autowired
 	private MHAService mhaService;
 
@@ -42,6 +45,25 @@ public class MHAController {
 		}
 	}
 
+	@RequestMapping(value = "/allMarkedDown", method = RequestMethod.GET)
+	@ResponseBody
+	public Object listMarkDownByMHA() throws Exception {
+		String configFromZk = lionService.getConfigFromZk(lionKey);
+		
+		Map<String,String> results = new HashMap<String,String>();
+		
+		if(configFromZk != null && configFromZk.length() > 0){
+			
+			String[] dsIds = configFromZk.split(",");
+			
+			for(String dsId : dsIds){
+				results.put(dsId, dsId);
+			}
+		}
+		
+		return results;
+	}
+	
 	// 给mha集群调用
 	@RequestMapping(value = "/markdown", method = RequestMethod.GET)
 	@ResponseBody
@@ -88,8 +110,6 @@ public class MHAController {
 
 	private class MyConfigChange implements ConfigChange {
 
-		private static final String lionKey = "zebra.server.monitor.mha.markdown";
-
 		@Override
 		public void onChange(String key, String value) {
 			if (key.equalsIgnoreCase(lionKey)) {
@@ -106,7 +126,7 @@ public class MHAController {
 					}
 
 					for (String dsId : mhaMarkedDownDs.keySet()) {
-						threadGroup.suspendMonitor(dsId, true);
+						threadGroup.removeMonitor(dsId);;
 					}
 				}
 			}

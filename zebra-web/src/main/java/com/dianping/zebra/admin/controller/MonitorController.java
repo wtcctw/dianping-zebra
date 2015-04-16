@@ -149,7 +149,7 @@ public class MonitorController {
 		} catch (LionException e) {
 		}
 	}
-
+	
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
 	public Object listJdbcRef() throws Exception {
@@ -179,7 +179,7 @@ public class MonitorController {
 				}
 			}
 		}
-
+		
 		return result;
 	}
 

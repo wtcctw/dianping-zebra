@@ -17,7 +17,7 @@ public class MySQLMonitorThread extends Thread {
 
 	private MonitorConfig monitorConfig;
 
-	private volatile long lastUpdatedTime = 0L;
+	private volatile long lastUpdatedTime = System.currentTimeMillis();
 
 	private Status currentState = Status.INIT;
 

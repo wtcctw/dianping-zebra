@@ -156,10 +156,7 @@ public class MHAServiceImpl implements MHAService {
 			try {
 				String active = m_lionHttpService.getConfigByHttp(m_lionHttpService.getEnv(), "ds." + dsId + ".active");
 
-				if (active.equalsIgnoreCase("true")) {
-					// HACK! in case this ds has already marked up.
-					haHandler.markdown(dsId, Operator.ZEBRA);
-				} else {
+				if (active == null || active.equalsIgnoreCase("false")) {
 					haHandler.markup(dsId, Operator.PEOPLE);
 				}
 			} catch (IOException e) {

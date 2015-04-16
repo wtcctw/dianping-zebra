@@ -6,9 +6,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
 public interface MySQLMonitorThreadGroup {
 
-	public void startOrRefreshMonitor(DataSourceConfig dsConfig, boolean isMHA);
-
-	public void suspendMonitor(String dsId, boolean isMHA);
+	public void startOrRefreshMonitor(DataSourceConfig dsConfig);
 
 	public void removeMonitor(String dsId);
 

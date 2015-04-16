@@ -53,15 +53,21 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 					DataSourceConfig dsConfig = entryConfig.getValue();
 
 					if (dsConfig.isCanRead()) {
-						if (!dataSourceConfigs.containsKey(dsId)) {
-							dataSourceConfigs.put(dsId, dsConfig);
-							monitorThreadGroup.startOrRefreshMonitor(dsConfig, mhaService.isMarkdownByMHA(dsId));
+						if (dataSourceConfigs.containsKey(dsId)) {
+							if (mhaService.isMarkdownByMHA(dsId)) {
+								dataSourceConfigs.remove(dsId);
+								monitorThreadGroup.removeMonitor(dsId);
+							} else {
+								DataSourceConfig oldConfig = dataSourceConfigs.get(dsId);
+								if (!dsConfig.toString().equals(oldConfig.toString())) {
+									dataSourceConfigs.put(dsId, dsConfig);
+									monitorThreadGroup.startOrRefreshMonitor(dsConfig);
+								}
+							}
 						} else {
-							DataSourceConfig oldConfig = dataSourceConfigs.get(dsId);
-
-							if (!dsConfig.toString().equals(oldConfig.toString())) {
+							if (!mhaService.isMarkdownByMHA(dsId)) {
 								dataSourceConfigs.put(dsId, dsConfig);
-								monitorThreadGroup.startOrRefreshMonitor(dsConfig, mhaService.isMarkdownByMHA(dsId));
+								monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 							}
 						}
 					}
@@ -86,9 +92,10 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 			String dsId = entryConfig.getKey();
 			DataSourceConfig dsConfig = entryConfig.getValue();
 
-			if (dsConfig.isCanRead()) {
+			if (dsConfig.isCanRead() && !mhaService.isMarkdownByMHA(dsId)) {
 				dataSourceConfigs.put(dsId, dsConfig);
-				monitorThreadGroup.startOrRefreshMonitor(dsConfig, mhaService.isMarkdownByMHA(dsId));
+
+				monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 			}
 		}
 
