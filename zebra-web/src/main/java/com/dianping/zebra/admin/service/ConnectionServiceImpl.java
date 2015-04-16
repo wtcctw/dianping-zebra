@@ -8,6 +8,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.util.StringUtils;
+
 import org.springframework.stereotype.Service;
 
 import java.beans.PropertyChangeListener;
@@ -55,12 +56,12 @@ public class ConnectionServiceImpl implements ConnectionService {
 
                     }
 
+                  @SuppressWarnings("unused")
                   public void destroy() {
                   }
 
+                  @SuppressWarnings("unused")
                   public void removePropertyChangeListener(PropertyChangeListener listener) {
-	                  // TODO Auto-generated method stub
-	                  
                   }
                 });
 

@@ -7,6 +7,7 @@ import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.google.gson.Gson;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -88,11 +89,12 @@ public class ShardController {
 
             }
 
+            @SuppressWarnings("unused")
             public void destroy() {
             }
 
+            @SuppressWarnings("unused")
             public void removePropertyChangeListener(PropertyChangeListener listener) {
-	            // TODO Auto-generated method stub
 	            
             }
         };
