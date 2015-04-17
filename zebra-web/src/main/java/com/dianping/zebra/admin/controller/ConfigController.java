@@ -47,7 +47,7 @@ public class ConfigController {
     public Object env() throws Exception {
         Object responseObject;
 
-        if ("qa".equals(currentEnv)) {
+        if ("qa".equals(currentEnv) || "alpha".equals(currentEnv)) {
             responseObject = lionHttpService.getDevEnv();
         } else if ("prelease".equals(currentEnv)) {
             responseObject = new String[]{"prelease"};
