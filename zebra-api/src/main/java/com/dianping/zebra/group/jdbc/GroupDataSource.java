@@ -332,6 +332,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	public synchronized void init() {
 		if (StringUtils.isBlank(jdbcRef)) {
 			throw new DalException("jdbcRef cannot be empty");
+		} else {
+			logger.info("initialize a new GroupDataSource by using jdbcRef[" + jdbcRef + "].");
 		}
 
 		this.initConfig();
