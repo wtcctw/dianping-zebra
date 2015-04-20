@@ -454,10 +454,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
 			      this.filters);
-			newWriteDataSource.init(false);
+			newWriteDataSource.init();
 
 			preparedSwitch = true;
 		} catch (Exception e) {
+			logger.warn(e.getMessage(), e);
 			try {
 				close(newReadDataSource, newWriteDataSource);
 			} catch (Exception ignore) {
@@ -481,16 +482,17 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				logger.error(e.getMessage(), e);
 			}
 
+			// switch config
+			groupConfig = groupDataSourceConfig;
+
+			initFilters();
+			refreshReadWriteStrategyConfig();
+
 			logger.info(String.format("refresh the dataSources(%s) successfully!", jdbcRef));
 		} else {
 			logger.warn(String.format("fail to refresh the dataSource(%s)", jdbcRef));
 		}
 
-		// switch config
-		groupConfig = groupDataSourceConfig;
-
-		initFilters();
-		refreshReadWriteStrategyConfig();
 	}
 
 	private void refreshReadWriteStrategyConfig() {
@@ -647,7 +649,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void setProperty(String name, String value) {
-		logger.info(String.format("get config from lion and set c3p0 property[%s]:value[%s].", name, value));
+		logger.info(String.format("get config from lion and set c3p0 property[%s : %s].", name, value));
 
 		Any any = null;
 		for (Any a : c3p0Config.getProperties()) {
