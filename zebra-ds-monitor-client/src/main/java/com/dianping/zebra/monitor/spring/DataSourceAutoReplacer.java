@@ -444,8 +444,6 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	class DataSourceProcesser {
 		public void process(Set<String> ds, DataSourceProcesserTemplate template) {
-			List<DataSourceInfo> infos = new ArrayList<DataSourceInfo>();
-
 			for (String beanName : ds) {
 				BeanDefinition dataSourceDefinition = listableBeanFactory.getBeanDefinition(beanName);
 				DataSourceInfo info = new DataSourceInfo(beanName);
