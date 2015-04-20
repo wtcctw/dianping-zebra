@@ -647,7 +647,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	private void setProperty(String name, String value) {
-		logger.info(String.format("set property[%s] for c3p0", name));
+		logger.info(String.format("get config from lion and set c3p0 property[%s]:value[%s].", name, value));
 
 		Any any = null;
 		for (Any a : c3p0Config.getProperties()) {
