@@ -48,9 +48,6 @@ import com.dianping.zebra.monitor.util.LionUtil;
 import com.dianping.zebra.util.StringUtils;
 import com.google.gson.Gson;
 
-/**
- * Created by Dozer on 8/13/14.
- */
 public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, PriorityOrdered {
 
 	private static final Log logger = LogFactory.getLog(DataSourceAutoReplacer.class);
@@ -72,6 +69,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 	private Set<String> groupds = new HashSet<String>();
 
 	private Set<String> otherDs = new HashSet<String>();
+
+	private List<DataSourceInfo> infos = new ArrayList<DataSourceInfo>();
 
 	private static boolean hasProcessd;
 
@@ -279,6 +278,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 			} catch (ClassNotFoundException e) {
 			}
 		}
+
 		replace();
 	}
 
@@ -374,6 +374,14 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		processC3P0();
 		processGroupDs();
 		processOther();
+
+		String url = LionUtil.getLionConfig(UPLOAD_DS_INFO_KEY);
+		if (StringUtils.isBlank(url)) {
+			Exception exp = new IllegalConfigException(UPLOAD_DS_INFO_KEY + " not exists!");
+			logger.warn(exp);
+		} else {
+			uploadDataSourceInfo(url, infos);
+		}
 	}
 
 	private void setGroupDataSourceProperties(BeanDefinition dataSourceDefinition, DataSourceInfo info,
@@ -408,7 +416,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				conn.setReadTimeout(5000);
 				conn.setDoOutput(true);
 				conn.setDoInput(true);
-				
+
 				out = new PrintWriter(conn.getOutputStream());
 				out.print(rawData);
 				out.flush();
@@ -449,14 +457,6 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				}
 
 				infos.add(info);
-			}
-
-			String url = LionUtil.getLionConfig(UPLOAD_DS_INFO_KEY);
-			if (StringUtils.isBlank(url)) {
-				Exception exp = new IllegalConfigException(UPLOAD_DS_INFO_KEY + " not exists!");
-				logger.warn(exp);
-			} else {
-				uploadDataSourceInfo(url, infos);
 			}
 		}
 	}
