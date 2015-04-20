@@ -138,7 +138,6 @@ A: zebra开放出了两个接口来进行处理：
 
 #### Q：如何指定让具体某条SQL走写库？
 A: 可以在SQL前面加一个`hint`，表明这个读请求强制走写库，其中, `/*+zebra:w*/`就是hint的格式，告诉zebra这条sql必须走写库。
-。例如:
 
     /*+zebra:w*/select * from test
 
