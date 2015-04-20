@@ -1,13 +1,9 @@
 package com.dianping.zebra.monitor.model;
 
-import com.dianping.zebra.Constants;
-import com.dianping.zebra.util.AppPropertiesUtils;
-
-import org.springframework.beans.BeanUtils;
 import org.unidal.net.Networks;
 
-import java.beans.PropertyDescriptor;
-import java.net.URLEncoder;
+import com.dianping.zebra.Constants;
+import com.dianping.zebra.util.AppPropertiesUtils;
 
 /**
  * Created by Dozer on 8/13/14.
@@ -39,11 +35,11 @@ public class DataSourceInfo {
 	private String username;
 
 	public DataSourceInfo() {
-		this.app = AppPropertiesUtils.getAppName();
-		this.ip = Networks.forIp().getLocalHostAddress();
 	}
 
 	public DataSourceInfo(String beanName) {
+		this.app = AppPropertiesUtils.getAppName();
+		this.ip = Networks.forIp().getLocalHostAddress();
 		this.dataSourceBeanName = beanName;
 	}
 
@@ -145,31 +141,5 @@ public class DataSourceInfo {
 
 	public void setIp(String ip) {
 		this.ip = ip;
-	}
-
-	@Override
-	public String toString() {
-		final StringBuffer sb = new StringBuffer();
-
-		PropertyDescriptor[] props = BeanUtils.getPropertyDescriptors(this.getClass());
-		for (PropertyDescriptor prop : props) {
-			if (prop.getName().equals("class")) {
-				continue;
-			}
-			try {
-				Object value = prop.getReadMethod().invoke(this);
-
-				if (value == null) {
-					continue;
-				}
-
-				if (sb.length() > 0) {
-					sb.append("&");
-				}
-				sb.append(prop.getName()).append("=").append(URLEncoder.encode(String.valueOf(value), "utf8"));
-			} catch (Exception e) {
-			}
-		}
-		return sb.toString();
 	}
 }
