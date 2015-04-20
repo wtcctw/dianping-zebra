@@ -1,5 +1,14 @@
 ##  更新说明
 
+### 2.7.4 NEW! TO-BE-RELEASE
+* [+] 增加对`先写后读`场景的API支持
+* [+] 增加对读库进行的连接检测
+* [+] 增加日志文件输出到/data/applogs/zebra
+* [/] 修正了zebra-ds-monitor-client上报数据的逻辑
+* [/] 修正了GroupDataSource在close后仍然响应Lion的配置变更的推送的bug
+* [/] 修正了zebra-ds-monitor-client不能连接hang住的bug
+* [/] 修正了refresh配置时datasource会泄露的bug
+
 ### 2.7.2
 * [/] 修正了不能加载DpdlReadWriteStrategy
 * [/] 修正了retry逻辑的cat打点问题

@@ -114,8 +114,27 @@ A：一旦从某台读库上取连接失败，那么会自动去另外一台读�
 #### Q：如何判断重试是否成功？
 A：在CAT上的SQL报表中，可以看到重试的sql名字和原来的sql名字有区分，重试的sql名字后缀是`(retry-by-zebra)`，你可以对比原来sql的失败个数和重试sql的成功个数，一般都能对上。
 
-#### Q：如何让一个请求中的所有SQL都走写库？
-A: TODO
+#### Q：如何让一个请求中的所有SQL都走写库，或者如何处理`先写后读`的场景？
+A: zebra开放出了两个接口来进行处理：
+
+    /**
+     * 使用本地的context来设置走主库，该方式只会影响本应用内本次请求的所有sql走主库，不会影响到piegon后端服务。
+     * 调用过该方法后，一定要在请求的末尾调用clearLocalContext进行清理操作。
+     * 优先级比forceMasterInPiegonContext低。
+     */
+    ZebraForceMasterHelper.forceMasterInLocalContext();
+
+    /**
+     * 通过使用piegon的context来设置走主库，该方式将会透传到后端应用，使后端应用同样走主库，使用该方式请慎用。
+     * 因为使用piegon的context,所以piegon会自动的对该context进行清理，故调用完该方法后，无需进行清理动作。
+     * forceMasterInPiegonContext比forceMasterInLocalContext有更高的优先级。
+     */
+    ZebraForceMasterHelper.forceMasterInPiegonContext();
+
+    /**
+     * 配合forceMasterInLocalContext进行使用，在请求的末尾调用该方法，对LocalContext进行清理。
+     */
+    ZebraForceMasterHelper.clearLocalContext();
 
 #### Q：如何指定让具体某条SQL走写库？
 A: 可以在SQL前面加一个`hint`，表明这个读请求强制走写库，其中, `/*+zebra:w*/`就是hint的格式，告诉zebra这条sql必须走写库。
