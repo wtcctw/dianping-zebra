@@ -89,7 +89,6 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-
     @Override
     public AppDto getApp(String appName, boolean isProduct) {
         AppDto app = new AppDto(appName);

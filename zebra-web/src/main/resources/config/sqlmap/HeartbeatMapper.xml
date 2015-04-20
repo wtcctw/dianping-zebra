@@ -20,6 +20,10 @@
         DELETE FROM heartbeat WHERE app_name = #{app_name} and ip = #{ip} and datasource_bean_name =
         #{datasource_bean_name}
     </delete>
+    
+     <delete id="deleteHeartbeatByAppAndIp" parameterType="map">
+        DELETE FROM heartbeat WHERE app_name = #{app_name} and ip = #{ip}
+    </delete>
 
     <delete id="deleteHeartbeatById" parameterType="map">
         DELETE FROM heartbeat WHERE id = #{id}

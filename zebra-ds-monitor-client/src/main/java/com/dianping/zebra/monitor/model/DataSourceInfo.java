@@ -14,6 +14,10 @@ import java.net.URLEncoder;
  */
 public class DataSourceInfo {
 
+	private String app;
+	
+	private String ip;
+	
 	private String dataSourceBeanClass;
 
 	private String dataSourceBeanName;
@@ -35,6 +39,8 @@ public class DataSourceInfo {
 	private String username;
 
 	public DataSourceInfo() {
+		this.app = AppPropertiesUtils.getAppName();
+		this.ip = Networks.forIp().getLocalHostAddress();
 	}
 
 	public DataSourceInfo(String beanName) {
@@ -42,7 +48,7 @@ public class DataSourceInfo {
 	}
 
 	public String getApp() {
-		return AppPropertiesUtils.getAppName();
+		return app;
 	}
 
 	public String getDataSourceBeanClass() {
@@ -78,7 +84,7 @@ public class DataSourceInfo {
 	}
 
 	public String getIp() {
-		return Networks.forIp().getLocalHostAddress();
+		return ip;
 	}
 
 	public String getMaxPoolSize() {
@@ -131,6 +137,14 @@ public class DataSourceInfo {
 
 	public String getVersion() {
 		return Constants.ZEBRA_VERSION;
+	}
+
+	public void setApp(String app) {
+		this.app = app;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
 	}
 
 	@Override

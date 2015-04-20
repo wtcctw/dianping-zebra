@@ -1,7 +1,10 @@
 package com.dianping.zebra.monitor.spring;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,8 +33,6 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.util.ClassUtils;
-import org.unidal.helper.Files;
-import org.unidal.helper.Urls;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.Constants;
@@ -42,9 +43,10 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
-import com.dianping.zebra.util.StringUtils;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.dianping.zebra.monitor.util.LionUtil;
+import com.dianping.zebra.util.StringUtils;
+import com.google.gson.Gson;
 
 /**
  * Created by Dozer on 8/13/14.
@@ -58,8 +60,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	private static final String DPDL_CLASS_NAME = "com.dianping.dpdl.sql.DPDataSource";
 
-    private static final String GROUP_CLASS_NAME = "com.dianping.zebra.group.jdbc.GroupDataSource";
-    
+	private static final String GROUP_CLASS_NAME = "com.dianping.zebra.group.jdbc.GroupDataSource";
+
 	private static final String UPLOAD_DS_INFO_KEY = "zebra.server.heartbeat.url";
 
 	// datasource set
@@ -85,11 +87,6 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		info.setInitPoolSize(LionUtil.getLionValueFromBean(bean, "initialPoolSize"));
 		info.setMaxPoolSize(LionUtil.getLionValueFromBean(bean, "maxPoolSize"));
 		info.setMinPoolSize(LionUtil.getLionValueFromBean(bean, "minPoolSize"));
-	}
-
-	private String callHttp(String url) throws IOException {
-		InputStream inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
-		return Files.forIO().readFrom(inputStream, "utf-8");
 	}
 
 	private boolean canReplace(DataSourceInfo info) {
@@ -355,7 +352,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 							getJdbcUrlInfo(info, dsConfig.getJdbcUrl());
 							info.setUsername(dsConfig.getUsername());
 						}
-						
+
 						manager.close();
 					}
 				}
@@ -394,16 +391,42 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 		info.setReplaced(true);
 	}
 
-	private void uploadDataSourceInfo(DataSourceInfo info) {
-		String url = LionUtil.getLionConfig(UPLOAD_DS_INFO_KEY);
-		if (StringUtils.isBlank(url)) {
-			Exception exp = new IllegalConfigException(UPLOAD_DS_INFO_KEY + " not exists!");
-			logger.warn(exp);
-		} else {
+	protected void uploadDataSourceInfo(String url, List<DataSourceInfo> infos) {
+		try {
+			Gson gson = new Gson();
+
+			PrintWriter out = null;
+			BufferedReader in = null;
 			try {
-				callHttp(String.format("%s?%s", url, info.toString()));
-			} catch (IOException ignore) {
+				String rawData = "infos=" + gson.toJson(infos);
+
+				URL realUrl = new URL(url);
+				URLConnection conn = realUrl.openConnection();
+				conn.setRequestProperty("accept", "*/*");
+				conn.setRequestProperty("connection", "Keep-Alive");
+				conn.setConnectTimeout(1000);
+				conn.setReadTimeout(5000);
+				conn.setDoOutput(true);
+				conn.setDoInput(true);
+				
+				out = new PrintWriter(conn.getOutputStream());
+				out.print(rawData);
+				out.flush();
+				in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+				in.readLine();
+			} catch (Exception e) {
+			} finally {
+				try {
+					if (out != null) {
+						out.close();
+					}
+					if (in != null) {
+						in.close();
+					}
+				} catch (Exception ex) {
+				}
 			}
+		} catch (Exception ignore) {
 		}
 	}
 
@@ -413,6 +436,8 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 	class DataSourceProcesser {
 		public void process(Set<String> ds, DataSourceProcesserTemplate template) {
+			List<DataSourceInfo> infos = new ArrayList<DataSourceInfo>();
+
 			for (String beanName : ds) {
 				BeanDefinition dataSourceDefinition = listableBeanFactory.getBeanDefinition(beanName);
 				DataSourceInfo info = new DataSourceInfo(beanName);
@@ -423,7 +448,15 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 				} catch (Exception ignore) {
 				}
 
-				uploadDataSourceInfo(info);
+				infos.add(info);
+			}
+
+			String url = LionUtil.getLionConfig(UPLOAD_DS_INFO_KEY);
+			if (StringUtils.isBlank(url)) {
+				Exception exp = new IllegalConfigException(UPLOAD_DS_INFO_KEY + " not exists!");
+				logger.warn(exp);
+			} else {
+				uploadDataSourceInfo(url, infos);
 			}
 		}
 	}
