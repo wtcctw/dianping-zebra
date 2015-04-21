@@ -20,6 +20,7 @@ import com.dianping.zebra.util.SqlUtils;
 import com.site.helper.Stringizers;
 
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -81,9 +82,11 @@ public class CatFilter extends DefaultJdbcFilter {
             Cat.logError(exp);
             t.setStatus(exp);
 
-            if (exp.getSQLState().equalsIgnoreCase("SQL.Blacklist")) {
+            String state = exp.getSQLState();
+            if (state != null && state.equalsIgnoreCase("SQL.Blacklist")) {
                 Cat.logEvent("SQL.Blacklist", SqlAliasManager.getSqlAlias());
             }
+            
             throw exp;
         } finally {
             try {
