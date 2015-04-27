@@ -81,3 +81,17 @@
 * SELECT CityId, MAX(Id) as MaxId FROM User GROUP BY CityId
 * SELECT CityId, MIN(Id) as MinId FROM User GROUP BY CityId
 * SELECT CityId, COUNT(Id) as AllId FROM User GROUP BY CityId
+
+
+### 使用说明
+
+### 多维度支持
+
+### 迁移过程
+
+0. 项目程序升级，使用 ShardDataSource，但是配置成使用原来的数据库
+1. 在 puma-admin 上启动多维度同步任务
+2. 在 puma-admin 上启动迁移任务
+3. 在迁移任务快完成的时候，把原来的数据库设置成`readonly`，禁止写入
+4. 通过 Lion 修改程序配置，让程序使用新的分库分表数据库
+5. 关闭迁移任务，迁移完成，老数据库作废，新数据库开始运作
