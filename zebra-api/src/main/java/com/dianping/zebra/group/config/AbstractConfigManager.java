@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class AbstractConfigManager {
 
-	private static final Logger logger = LogManager.getLogger(AbstractConfigManager.class);
+	protected static final Logger logger = LogManager.getLogger(AbstractConfigManager.class);
 
 	protected final ConfigService configService;
 

@@ -77,11 +77,22 @@ public class CatFilterTest {
 	}
 
 	@Test(expected = Exception.class)
-	public void test_sql_fail() throws SQLException {
+	public void test_sql_fail_on_slave() throws SQLException {
 		GroupDataSource ds = createDs();
 
 		new Sql(ds.getConnection()).execute("select * from xxx");
 	}
+	
+//	@Test(expected = Exception.class)
+//	public void test_sql_fail_on_master() throws SQLException {
+//		GroupDataSource ds = new GroupDataSource();
+//		ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
+//		ds.setJdbcRef("sample.ds.v3");
+//		ds.setFilter("cat");
+//		ds.init();
+//
+//		new Sql(ds.getConnection()).execute("delete from xxx");
+//	}
 
 	@Test(expected = SQLException.class)
 	public void test_sql_rejected_by_flow_control() throws SQLException {

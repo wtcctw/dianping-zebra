@@ -59,24 +59,28 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 	private void buildFlowControl(SystemConfig config) {
 		String flowControlConfig = getProperty(getKey(Constants.ELEMENT_FLOW_CONTROL), null);
 		if (StringUtils.isNotBlank(flowControlConfig)) {
+			logger.info("start to build flow control...");
+
 			try {
 				SystemConfig flowControl = DefaultSaxParser.parse(flowControlConfig);
 				String appName = AppPropertiesUtils.getAppName();
 				SystemConfig tmpConfig = new SystemConfig();
-				
+
 				if (!Constants.PHOENIX_APP_NO_NAME.equals(appName)) {
 					for (Entry<String, SqlFlowControl> flowControlEntry : flowControl.getSqlFlowControls().entrySet()) {
 						SqlFlowControl sqlFlowControl = flowControlEntry.getValue();
 						String app = sqlFlowControl.getApp();
 
 						if ("_global_".equalsIgnoreCase(app) || appName.equalsIgnoreCase(app)) {
-                            tmpConfig.addSqlFlowControl(sqlFlowControl);
+							tmpConfig.addSqlFlowControl(sqlFlowControl);
+							logger.info(String.format("get new flow control [ %s : %d ]", sqlFlowControl.getSqlId(),
+							      sqlFlowControl.getAllowPercent()));
 						}
 					}
 				} else {
 					tmpConfig.getSqlFlowControls().putAll(flowControl.getSqlFlowControls());
 				}
-				
+
 				config.getSqlFlowControls().clear();
 				config.getSqlFlowControls().putAll(tmpConfig.getSqlFlowControls());
 			} catch (Exception ignore) {

@@ -33,8 +33,6 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	private volatile SingleDataSource master;
 
-	private Thread masterDataSourceMonitorThread;
-
 	public FailOverDataSource(Map<String, DataSourceConfig> configs, List<JdbcFilter> filters) {
 		this.configs = configs;
 		this.filters = filters;
@@ -42,13 +40,9 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public void close() throws SQLException {
-		if (this.masterDataSourceMonitorThread != null) {
-			masterDataSourceMonitorThread.interrupt();
-		}
-		if (master != null) {
+		if(master != null){
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}
-		super.close();
 	}
 
 	private String getConfigSummary() {
@@ -66,11 +60,8 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		if (master != null && master.isAvailable()) {
-			return master.getConnection();
-		} else {
-			throw new SQLException("Master database is in the maintaining.");
-		}
+		//因为MHA主库都配成了虚IP，一旦发生切换或者主库挂了，都会导致获取不到连接
+		return master.getConnection();
 	}
 
 	@Override
@@ -115,11 +106,6 @@ public class FailOverDataSource extends AbstractDataSource {
 		} catch (WeakReferenceGCException e) {
 			logger.error("should never be here!", e);
 		}
-
-		masterDataSourceMonitorThread = new Thread(monitor);
-		masterDataSourceMonitorThread.setDaemon(true);
-		masterDataSourceMonitorThread.setName("Dal-MasterDataSourceChecker");
-		masterDataSourceMonitorThread.start();
 	}
 
 	private boolean setMasterDb(DataSourceConfig config) {
