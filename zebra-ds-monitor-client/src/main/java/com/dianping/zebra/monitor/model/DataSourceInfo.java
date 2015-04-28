@@ -33,6 +33,8 @@ public class DataSourceInfo {
 	private String url;
 
 	private String username;
+	
+	private String version;
 
 	public DataSourceInfo() {
 	}
@@ -41,6 +43,7 @@ public class DataSourceInfo {
 		this.app = AppPropertiesUtils.getAppName();
 		this.ip = Networks.forIp().getLocalHostAddress();
 		this.dataSourceBeanName = beanName;
+		this.version = Constants.ZEBRA_VERSION;
 	}
 
 	public String getApp() {
@@ -132,7 +135,11 @@ public class DataSourceInfo {
 	}
 
 	public String getVersion() {
-		return Constants.ZEBRA_VERSION;
+		return version;
+	}
+	
+	public void setVersion(String version){
+		this.version = version;
 	}
 
 	public void setApp(String app) {
