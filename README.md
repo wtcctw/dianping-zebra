@@ -23,7 +23,7 @@
     	<version>${version}</version>
 	</dependency>
 
-目前的最新版本为`2.7.4`
+目前的最新版本为`2.7.5`
 
 ### 数据库监控功能
 如果想要在CAT上对数据库进行监控，请务必添加该组件
@@ -140,6 +140,12 @@ A: zebra开放出了两个接口来进行处理：
 A: 可以在SQL前面加一个`hint`，表明这个读请求强制走写库，其中, `/*+zebra:w*/`就是hint的格式，告诉zebra这条sql必须走写库。
 
     /*+zebra:w*/select * from test
+
+#### Q：为什么会遇到这样的异常：java.sql.SQLException: An attempt by a client to checkout a Connection has timed out. 
+A：这个错误是c3p0报出来的错误，表明c3p0尝试去连接池中拿连接超时了。一般遇到这样的错误，可以有以下几个角度去解决：
+    1. 是否是因为并发量太大的原因？如果是，请调整c3p0的参数，比如可以增加连接数，将maxIdleTime设置为0。
+    2. 是否当时有慢查询，导致数据库拥堵？如果是，请联系DBA抓取慢查询，对sql进行优化。
+    3. 是否当时网络有问题，比如网络拥堵了一下？如果是，请联系DBA排查。
 
 #### Q：什么是数据源自动替换？
 A：为了方便升级，不用业务修改代码，zebra可以对数据库级别对数据源进行动态替换。替换的技术是Spring加载完bean的时候对DataSource这个类型的bean进行替换。过程如下：
