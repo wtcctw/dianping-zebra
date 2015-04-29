@@ -7,6 +7,8 @@ public class ConfigDto {
 	private String value;
 	
 	private boolean isAutoReplaced;
+	
+	private boolean shouldAlert;
 
 	public String getJdbcRef() {
 		return jdbcRef;
@@ -30,5 +32,13 @@ public class ConfigDto {
 
 	public void setAutoReplaced(boolean isAutoReplaced) {
 		this.isAutoReplaced = isAutoReplaced;
+	}
+
+	public boolean isShouldAlert() {
+		return shouldAlert;
+	}
+
+	public void setShouldAlert(boolean shouldAlert) {
+		this.shouldAlert = shouldAlert;
 	}
 }

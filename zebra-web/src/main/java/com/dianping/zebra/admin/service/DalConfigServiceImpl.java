@@ -110,8 +110,12 @@ public class DalConfigServiceImpl implements DalConfigService {
 			final Map<String, DefaultDataSourceConfigManager.ReadOrWriteRole> groupConfig = DefaultDataSourceConfigManager.ReadOrWriteRole
 			      .parseConfig(result.getConfig());
 
+			if(groupId.toLowerCase().startsWith("dpreview")){
+				groupId = "DPReview";
+			}
+			
 			final String originGroupId = groupId.split("\\.")[0];
-
+			
 			HashMap<String, String> configs = m_lionHttpService.getConfigByProject(env, "ds");
 			List<String> keys = Lists.newArrayList(Iterables.filter(configs.keySet(), new Predicate<String>() {
 				@Override
