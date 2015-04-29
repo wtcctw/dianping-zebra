@@ -48,18 +48,18 @@ public class CatFilterTest {
 		new Sql(ds.getConnection()).execute("select 1");
 	}
 
-	@Test
-	public void test_connect_retry() throws SQLException {
-		GroupDataSource ds = new GroupDataSource();
-		ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
-		ds.setJdbcRef("sample.ds.retry");
-		ds.setFilter("cat");
-		ds.init();
-
-		ExecutionContextHolder.getContext().add("sql_statement_name", "testPreparedStatementQuery");
-
-		new Sql(ds.getConnection()).execute("select 1");
-	}
+//	@Test
+//	public void test_connect_retry() throws SQLException {
+//		GroupDataSource ds = new GroupDataSource();
+//		ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);
+//		ds.setJdbcRef("sample.ds.retry");
+//		ds.setFilter("cat");
+//		ds.init();
+//
+//		ExecutionContextHolder.getContext().add("sql_statement_name", "testPreparedStatementQuery");
+//
+//		new Sql(ds.getConnection()).execute("select 1");
+//	}
 
 	@Test
 	public void test_sql_success() throws SQLException {
