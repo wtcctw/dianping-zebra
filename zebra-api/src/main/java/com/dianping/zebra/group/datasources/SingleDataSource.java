@@ -57,7 +57,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			if (poolBackedDataSource.getNumBusyConnections() == 0) {
 				logger.info("closing old datasource [" + dsId + "]");
 
-				poolBackedDataSource.close();
+				DataSources.destroy(poolBackedDataSource);
 
 				logger.info("old datasource [" + dsId + "] closed");
 				state = DataSourceState.CLOSED;

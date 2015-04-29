@@ -1,5 +1,17 @@
 package com.dianping.zebra.group.datasources;
 
+import java.lang.ref.WeakReference;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
@@ -10,21 +22,10 @@ import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.dianping.zebra.util.StringUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
-import java.lang.ref.WeakReference;
-import java.sql.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * features: 1. auto-detect master database by select @@read_only</br> 
- * 2. auto check the master database.</br> 
- * 3. if cannot find any master database in the initial phase, fail fast.</br>
+ * features: 1. auto-detect master database by select @@read_only</br> 2. auto check the master database.</br> 3. if cannot find any
+ * master database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
 	private final static Logger logger = LogManager.getLogger(FailOverDataSource.class);
@@ -40,7 +41,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public void close() throws SQLException {
-		if(master != null){
+		if (master != null) {
 			SingleDataSourceManagerFactory.getDataSourceManager().destoryDataSource(master);
 		}
 	}
@@ -60,7 +61,7 @@ public class FailOverDataSource extends AbstractDataSource {
 
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		//因为MHA主库都配成了虚IP，一旦发生切换或者主库挂了，都会导致获取不到连接
+		// 因为MHA主库都配成了虚IP，一旦发生切换或者主库挂了，都会导致获取不到连接
 		return master.getConnection();
 	}
 
@@ -182,49 +183,11 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 	}
 
-	public static class MasterDataSourceMonitor implements Runnable {
-		private final Logger logger = LogManager.getLogger(this.getClass());
-
-		private final int maxTransactionTryLimits = 60 * 10; // 10 minute
-
-		private AtomicInteger atomicSleepTimes = new AtomicInteger(0);
-
-		private Map<String, Connection> cachedConnection = new HashMap<String, Connection>();
-
+	public static class MasterDataSourceMonitor {
 		private WeakReference<FailOverDataSource> ref;
-
-		private int transactionTryLimits = 0;
 
 		public MasterDataSourceMonitor(FailOverDataSource dsRef) {
 			this.ref = new WeakReference<FailOverDataSource>(dsRef);
-		}
-
-		private void checkIfFailOverDataSourceHasGC() throws WeakReferenceGCException {
-			getWeakFailOverDataSource();
-		}
-
-		protected void closeConnection(String id) {
-			if (!cachedConnection.containsKey(id)) {
-				return;
-			}
-
-			try {
-				cachedConnection.get(id).close();
-			} catch (SQLException ignore) {
-			} finally {
-				cachedConnection.remove(id);
-			}
-		}
-
-		protected void closeConnections() {
-			for (Map.Entry<String, Connection> entity : cachedConnection.entrySet()) {
-				try {
-					entity.getValue().close();
-				} catch (SQLException ignore) {
-				}
-			}
-
-			cachedConnection.clear();
 		}
 
 		private FindMasterDataSourceResult findMasterDataSourceOrigin() throws WeakReferenceGCException {
@@ -277,17 +240,9 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 
 		protected Connection getConnection(DataSourceConfig config) throws SQLException {
-			if (!cachedConnection.containsKey(config.getId())) {
-				JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
-				cachedConnection.put(config.getId(),
-				      DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword()));
-			}
+			JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 
-			return cachedConnection.get(config.getId());
-		}
-
-		public int getSleepTimes() {
-			return atomicSleepTimes.get();
+			return DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
 		}
 
 		private FailOverDataSource getWeakFailOverDataSource() throws WeakReferenceGCException {
@@ -296,13 +251,6 @@ public class FailOverDataSource extends AbstractDataSource {
 				throw new WeakReferenceGCException();
 			}
 			return weak;
-		}
-
-		private void increaseTransactionTryTimes() throws WeakReferenceGCException {
-			transactionTryLimits++;
-			if (transactionTryLimits >= maxTransactionTryLimits) {
-				transactionTryLimits = 0;
-			}
 		}
 
 		private boolean isMaster(ResultSet rs) throws SQLException {
@@ -314,11 +262,13 @@ public class FailOverDataSource extends AbstractDataSource {
 		}
 
 		protected CheckMasterDataSourceResult isMasterDataSource(DataSourceConfig config) {
+			Connection conn = null;
 			Statement stmt = null;
 			ResultSet rs = null;
 
 			try {
-				stmt = getConnection(config).createStatement();
+				conn = getConnection(config);
+				stmt = conn.createStatement();
 				rs = stmt.executeQuery(config.getTestReadOnlySql());
 
 				if (isMaster(rs)) {
@@ -328,7 +278,6 @@ public class FailOverDataSource extends AbstractDataSource {
 				}
 			} catch (SQLException e) {
 				logger.error(e.getMessage(), e);
-				closeConnection(config.getId());
 
 				CheckMasterDataSourceResult result = CheckMasterDataSourceResult.ERROR;
 				result.setException(e);
@@ -347,51 +296,13 @@ public class FailOverDataSource extends AbstractDataSource {
 					} catch (SQLException ignore) {
 					}
 				}
-			}
-		}
-
-		@Override
-		public void run() {
-			while (!Thread.interrupted()) {
-				try {
-					sleepForSeconds(1);
-					checkIfFailOverDataSourceHasGC();
-
-					FindMasterDataSourceResult result = findMasterDataSource();
-					if (!result.isMasterExist()) {
-						increaseTransactionTryTimes();
-					} else {
-						closeConnections();
-						while (!Thread.interrupted()) {
-							sleepForSeconds(5);
-
-							if (isMasterDataSource(getWeakFailOverDataSource().configs.get(getWeakFailOverDataSource().master
-							      .getId())) != CheckMasterDataSourceResult.READ_WRITE) {
-								closeConnections();
-								break;
-							}
-						}
+				if (conn != null) {
+					try {
+						conn.close();
+					} catch (SQLException ignore) {
 					}
-				} catch (WeakReferenceGCException e) {
-					logger.error("FailOverDataSource has be GC", e);
-					break;
-				} catch (InterruptedException ignore) {
-					break;
-				} catch (Exception e) {
-					logger.error(e);
 				}
 			}
-
-			closeConnections();
-		}
-
-		private void sleepForSeconds(long seconds) throws InterruptedException {
-			atomicSleepTimes.incrementAndGet();
-			if (atomicSleepTimes.get() > 100) {
-				atomicSleepTimes.set(0);
-			}
-
-			TimeUnit.SECONDS.sleep(seconds);
 		}
 	}
 }
