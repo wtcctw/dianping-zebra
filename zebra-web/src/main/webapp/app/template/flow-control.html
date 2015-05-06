@@ -1,5 +1,14 @@
-<br />
-<h4>流控列表<button class="btn btn-default" ng-click="addFlowControl()">新增流控规则</button></h4>
+<div class="page-header">
+	<div class="row">
+	    <div class="col-xs-12">
+	        <form class="form-inline" role="form">
+	        	<label class="label label-lg label-primary arrowed-right" for="form-field-1">环境</label>
+	            <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs"></select>
+				<button class="btn btn-primary btn-sm" ng-click="addFlowControl()">新增流控规则</button>
+	        </form>
+	    </div>
+	</div>
+</div>
 <div class="row">
 	<div class="col-xs-12">
 		<table class="table table-bordered table-hover table-condensed">
@@ -28,8 +37,8 @@
 				          </button>
 				        </form>
 				        <div class="buttons" ng-show="!rowform.$visible">
-				          <button class="btn btn-primary" ng-click="rowform.$show();rowform.$show();">编辑</button>
-				          <button class="btn btn-danger" ng-click="remove(item.$key)">删除</button>
+				          <button class="btn btn-primary btn-sm" ng-click="rowform.$show();rowform.$show();">编辑</button>
+				          <button class="btn btn-danger  btn-sm" ng-click="remove(item.$key)">删除</button>
 				        </div>  
 					</td>
 				</tr>

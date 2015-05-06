@@ -1,30 +1,31 @@
-<div class="row">
-    <div class="col-xs-12">
-        <div class="progress">
-            <div popover="完全升级:{{report.successDatabase}}" popover-trigger="mouseenter"
-                 class="progress-bar progress-bar-success progress-bar-striped"
-                 style="width: {{report.successDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
-            </div>
-            <div popover="部分升级:{{report.halfDoneDatabase}}" popover-trigger="mouseenter"
-                 class="progress-bar progress-bar-warning progress-bar-striped"
-                 style="width: {{report.halfDoneDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
-            </div>
-            <div popover="未升级:{{report.failureDatabase}}" popover-trigger="mouseenter"
-                 class="progress-bar progress-bar-danger progress-bar-striped"
-                 style="width: {{report.failureDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
-            </div>
-        </div>
-    </div>
+<div class="page-header">
+	<div class="row">
+	    <div class="col-xs-12">
+	        <div class="progress">
+	            <div popover="完全升级:{{report.successDatabase}}" popover-trigger="mouseenter"
+	                 class="progress-bar progress-bar-success progress-bar-striped"
+	                 style="width: {{report.successDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
+	            </div>
+	            <div popover="部分升级:{{report.halfDoneDatabase}}" popover-trigger="mouseenter"
+	                 class="progress-bar progress-bar-warning progress-bar-striped"
+	                 style="width: {{report.halfDoneDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
+	            </div>
+	            <div popover="未升级:{{report.failureDatabase}}" popover-trigger="mouseenter"
+	                 class="progress-bar progress-bar-danger progress-bar-striped"
+	                 style="width: {{report.failureDatabase * 100 / (report.successDatabase + report.halfDoneDatabase + report.failureDatabase)}}%">
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<div class="row">
+	    <div class="col-xs-12">
+	        <form class="form-inline" role="form">
+	            <input class="form-control input-sm" placeholder="搜索" ng-model="searchTest"/>
+	        </form>
+	    </div>
+	</div>
 </div>
-<div class="row">
-    <div class="col-xs-12">
-        <form class="form-inline" role="form">
-            <input class="form-control input-sm" placeholder="搜索" ng-model="searchTest"/>
-        </form>
-    </div>
-</div>
-<br/>
-<br/>
+
 <div class="row">
     <div class="col-xs-12">
         <table class="table table-striped table-condensed">
@@ -54,7 +55,7 @@
                 <td>{{database.replacedDpdlDataSource}}/{{database.dpdlDataSource}}</td>
                 <td>{{database.groupDataSource }}</td>
                 <td>
-                    <span class="badge alert-{{database.updateStatus == -1?'danger':(database.updateStatus == 0 ?'success': (database.updateStatus == 2 ? 'info' : 'warning'))}}">{{database.totalDataSource}}</span>
+                    <span class="badge badge-{{database.updateStatus == -1?'danger':(database.updateStatus == 0 ?'success': (database.updateStatus == 2 ? 'info' : 'warning'))}}">{{database.totalDataSource}}</span>
                 </td>
                 <td>
                 	<span ng-show="database.isInWhiteList" class="badge">自动替换</span>

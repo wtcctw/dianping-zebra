@@ -62,7 +62,7 @@
                 <td>{{datasources.maxPoolSize }}</td>
                 <td>{{datasources.minPoolSize }}</td>
                 <td><span
-                        class="badge alert-{{datasources.type.indexOf('GroupDataSource') >= 0 || datasources.replaced ? 'success' : 'warning'}}">{{datasources.type.indexOf('GroupDataSource') >= 0  || datasources.replaced == true ? '是':'否'}}</span>
+                        class="badge badge-{{datasources.type.indexOf('GroupDataSource') >= 0 || datasources.replaced ? 'success' : 'warning'}}">{{datasources.type.indexOf('GroupDataSource') >= 0  || datasources.replaced == true ? '是':'否'}}</span>
                 </td>
                 <td>
                     <button class="btn btn-danger btn-xs" ng-click="deleteInfo(ip,name)">删除</button>
