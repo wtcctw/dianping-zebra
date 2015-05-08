@@ -34,7 +34,7 @@ public class ConfigController {
 	private final static String currentEnv = EnvZooKeeperConfig.getEnv();
 
 	@Autowired
-	private LionService lionHttpService;
+	private LionService lionService;
 
 	@Autowired
 	private DalConfigService dalConfigService;
@@ -48,13 +48,13 @@ public class ConfigController {
 		Object responseObject;
 
 		if ("qa".equals(currentEnv) || "alpha".equals(currentEnv)) {
-			responseObject = lionHttpService.getDevEnv();
+			responseObject = lionService.getDevEnv();
 		} else if ("prelease".equals(currentEnv)) {
 			responseObject = new String[] { "prelease" };
-		} else if (lionHttpService.isDev()) {
+		} else if (lionService.isDev()) {
 			responseObject = new String[] { "dev" };
 		} else {
-			responseObject = lionHttpService.getAllEnv();
+			responseObject = lionService.getAllEnv();
 		}
 
 		return responseObject;
@@ -65,7 +65,7 @@ public class ConfigController {
 	public Object index(String env) throws Exception {
 		HashMap<String, ConfigDto> configs = new HashMap<String, ConfigDto>();
 
-		HashMap<String, String> jdbcRefs = lionHttpService.getConfigByProject(env, "groupds");
+		HashMap<String, String> jdbcRefs = lionService.getConfigByProject(env, "groupds");
 		Set<String> whiteList = dalConfigService.getWhiteList(env);
 
 		for (Entry<String, String> entry : jdbcRefs.entrySet()) {
@@ -141,9 +141,9 @@ public class ConfigController {
 			}
 			String dskey = String.format("groupds.%s.mapping", key.toLowerCase());
 
-			lionHttpService.createKey("groupds", dskey);
+			lionService.createKey("groupds", dskey);
 
-			lionHttpService.removeUnset(dskey);
+			lionService.removeUnset(dskey);
 
 		} else if (project.equals("ds")) {
 		}
@@ -163,7 +163,7 @@ public class ConfigController {
 		key = convertKey(key);
 
 		if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
-			return connectionService.getConnectionResult(key, null);
+			return connectionService.getConnectionResult(lionService.isProduct(), key, null);
 		} else {
 			String host = getHost(env);
 			if (Strings.isNullOrEmpty(host)) {
@@ -184,7 +184,7 @@ public class ConfigController {
 		key = convertKey(key);
 
 		if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
-			return connectionService.getConnectionResult(key, dsConfig);
+			return connectionService.getConnectionResult(lionService.isProduct(), key, dsConfig);
 		} else {
 			String host = getHost(env);
 			if (Strings.isNullOrEmpty(host)) {

@@ -20,112 +20,115 @@ import java.util.Map;
 @Service
 public class ConnectionServiceImpl implements ConnectionService {
 
-    @Override
-    public ConnectionStatusDto getConnectionResult(final String jdbcRef, final DalConfigService.GroupConfigModel modal) {
-        ConnectionStatusDto result = new ConnectionStatusDto();
+	@Override
+	public ConnectionStatusDto getConnectionResult(boolean isProduct, final String jdbcRef, final DalConfigService.GroupConfigModel modal) {
+		ConnectionStatusDto result = new ConnectionStatusDto();
 
-        GroupDataSource ds = null;
-        try {
+		GroupDataSource ds = null;
+		try {
 
-            if (modal != null) {
-                GroupDataSourceExtend ext = new GroupDataSourceExtend();
-                ext.setJdbcRef(modal.getId());
-                ext.setDataSourceConfigManager(new ConfigService() {
-                    @Override
-                    public void addPropertyChangeListener(PropertyChangeListener listener) {
+			if (modal != null) {
+				GroupDataSourceExtend ext = new GroupDataSourceExtend();
+				ext.setJdbcRef(modal.getId());
+				ext.setDataSourceConfigManager(new ConfigService() {
+					@Override
+					public void addPropertyChangeListener(PropertyChangeListener listener) {
 
-                    }
+					}
 
-                    @Override
-                    public String getProperty(String key) {
-                        if (key.equals(String.format("groupds.%s.mapping", modal.getId()))) {
-                            return modal.getConfig();
-                        }
-                        for (DalConfigService.DsConfigModel dsConfig : modal.getConfigs()) {
-                            for (DalConfigService.ConfigProperty prop : dsConfig.getProperties()) {
-                                if (key.equals(prop.getKey())) {
-                                    return prop.getNewValue();
-                                }
-                            }
-                        }
-                        return null;
-                    }
+					@Override
+					public String getProperty(String key) {
+						if (key.equals(String.format("groupds.%s.mapping", modal.getId()))) {
+							return modal.getConfig();
+						}
+						for (DalConfigService.DsConfigModel dsConfig : modal.getConfigs()) {
+							for (DalConfigService.ConfigProperty prop : dsConfig.getProperties()) {
+								if (key.equals(prop.getKey())) {
+									return prop.getNewValue();
+								}
+							}
+						}
+						return null;
+					}
 
-                    @Override
-                    public void init() {
+					@Override
+					public void init() {
 
-                    }
+					}
 
-                  public void destroy() {
-                  }
+					public void destroy() {
+					}
 
-                  public void removePropertyChangeListener(PropertyChangeListener listener) {
-                  }
-                });
+					public void removePropertyChangeListener(PropertyChangeListener listener) {
+					}
+				});
 
-                ds = ext;
-            } else {
-                ds = new GroupDataSource(jdbcRef);
-                ds.setJdbcRef(jdbcRef);
-            }
+				ds = ext;
+			} else {
+				ds = new GroupDataSource(jdbcRef);
+				ds.setJdbcRef(jdbcRef);
+			}
 
-            ds.setFilter("cat");
-            ds.init();
+			ds.setFilter("cat");
+			ds.init();
 
-            testDs(ds);
+			testDs(ds);
 
-            result.setConnected(true);
-        } catch (Exception t) {
-            Cat.logError(t);
-            result.setConnected(false);
+			result.setConnected(true);
+		} catch (Exception t) {
+			Cat.logError(t);
+			result.setConnected(false);
 
-            StringBuffer sb = new StringBuffer();
-            Throwable exp = t;
-            while (exp != null) {
-                sb.append(exp.getMessage());
-                sb.append("\r\n");
-                exp = exp.getCause();
-            }
+			StringBuffer sb = new StringBuffer();
+			Throwable exp = t;
+			while (exp != null) {
+				sb.append(exp.getMessage());
+				sb.append("\r\n");
+				exp = exp.getCause();
+			}
 
-            result.setException(sb.toString());
-        } finally {
-            if (ds != null) {
-                try {
-                    ds.close();
-                } catch (Exception ignore) {
-                }
-            }
-        }
+			result.setException(sb.toString());
+		} finally {
+			if (ds != null) {
+				try {
+					ds.close();
+				} catch (Exception ignore) {
+				}
+			}
+		}
 
-        hidePassword(ds.getConfig());
-        result.setConfig(ds.getConfig().toString());
+		if(isProduct){
+			hidePassword(ds.getConfig());
+		}
+		
+		result.setConfig(ds.getConfig().toString());
 
-        return result;
-    }
+		return result;
+	}
 
-    public void hidePassword(GroupDataSourceConfig configs) {
-        for (Map.Entry<String, DataSourceConfig> config : configs.getDataSourceConfigs().entrySet()) {
-            config.getValue().setPassword(config.getValue().getPassword() != null ?
-                    StringUtils.repeat("*", config.getValue().getPassword().length()) :
-                    null);
-        }
-    }
+	public void hidePassword(GroupDataSourceConfig configs) {
+		for (Map.Entry<String, DataSourceConfig> config : configs.getDataSourceConfigs().entrySet()) {
+			config.getValue().setPassword(
+			      config.getValue().getPassword() != null ? StringUtils.repeat("*", config.getValue().getPassword()
+			            .length()) : null);
+		}
+	}
 
-    public void testDs(GroupDataSource ds) throws SQLException {
-        Connection conn = null;
-        Statement stmt = null;
-        try {
-            conn = ds.getConnection();
-            stmt = conn.createStatement();
-            stmt.executeQuery("select 1");
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-        }
+	public void testDs(GroupDataSource ds) throws SQLException {
+		Connection conn = null;
+		Statement stmt = null;
+		try {
+			conn = ds.getConnection();
+			stmt = conn.createStatement();
+			stmt.executeQuery("select 1");
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
+		}
 
-    }
+	}
 }
