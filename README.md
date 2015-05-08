@@ -68,6 +68,10 @@ SQL调用依赖需要加载一个配置文件 /config/spring/common/appcontext-d
 		<property name="jdbcRef" value="tuangou2010" /> 
     </bean>
 
+### 迁移说明
+
+一般情况下，业务使用的c3p0或者DPDL这两种数据源可以直接删除，改成上面的数据源，并保证bean的id不变即可完成迁移。
+
 ### 配置说明
 
 其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，一般是数据库名的全小写，`zebra`会自动根据这个名字到`Lion`上查找`jdbcUrl`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
@@ -75,8 +79,9 @@ SQL调用依赖需要加载一个配置文件 /config/spring/common/appcontext-d
 2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
 3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
-### 额外配置
-1.如果业务需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。一般情况下，如果对主从延迟敏感的应用，建议`使用`该配置。
+### 特殊情况配置
+1.如果业务对主从延迟要求很高，不能容忍一点延迟，比如支付等业务，可以根据需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。
+一般情况下，除非对主从延迟要求很高，一般应用`不建议`使用该配置。
 
     <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
     	<property name="jdbcRef" value="tuangou2010" /> 
