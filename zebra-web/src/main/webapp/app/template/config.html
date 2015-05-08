@@ -31,8 +31,8 @@
                     <button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit(group.$key)">编辑</button>
                     <button class="btn btn-xs btn-success" ng-click="test(group.$key)">测试连接</button>
                     <button ng-show="isLogin" class="btn btn-xs btn-warning" ng-click="merge(group.$key)">配置合并</button>
-                    <button ng-show="isLogin" class="btn btn-xs btn-info" ng-show="group.isAutoReplaced" ng-click="autoreplace(group.$key,false)">取消替换</button>
-                    <button ng-show="isLogin" class="btn btn-xs btn-danger" ng-show="!group.isAutoReplaced && group.jdbcRef.indexOf('.') < 0" ng-click="autoreplace(group.$key,true)">自动替换</button>
+                    <button class="btn btn-xs btn-info" ng-show="group.isAutoReplaced && isLogin" ng-click="autoreplace(group.$key,false)">取消替换</button>
+                    <button class="btn btn-xs btn-danger" ng-show="!group.isAutoReplaced && group.jdbcRef.indexOf('.') < 0 && isLogin" ng-click="autoreplace(group.$key,true)">自动替换</button>
                 </td>
             </tr>
             </tbody>
