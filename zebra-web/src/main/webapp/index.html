@@ -51,17 +51,24 @@
         <div class="navbar-buttons navbar-header pull-right" role="navigation">
         	<ul class="nav ace-nav">
         		<li class="light-blue">
-					<a data-toggle="dropdown" href="#" class="dropdown-toggle">
-						<img class="nav-user-photo" src="assets/avatars/user.jpg" alt="Jason's Photo" />
-						<span class="user-info">
-							<small>DBA登录</small>
-						</span>
+       		        <a href="http://code.dianpingoa.com/arch/zebra" target="_blank">
+						<i class="ace-icon glyphicon glyphicon-star"></i>
+						<span>项目地址</span>
+					</a>
+        		</li>
+        		<li class="light-blue">
+        			<a ng-show="!isLogin" data-toggle="dropdown" href="#login" ng-click="login()" class="dropdown-toggle">
+						登录
+					</a>
+					<a ng-show="isLogin"  data-toggle="dropdown" href="#logout" ng-click="logout()" class="dropdown-toggle">
+						注销
 					</a>
 				</li>
         	</ul>
         </div>
     </div>
 </div>
+
 <div class="main-container">
     <nav id="sidebar" class="sidebar responsive" role="navigation" ng-controller="header">
 		<script type="text/javascript">
@@ -71,7 +78,7 @@
         <ul class="nav nav-list">
             <li active-link="active"><a href="#/config">
             	<i class="menu-icon fa fa-tachometer"></i>
-            	<span class="menu-text"> 数据库配置</span></a>
+            	<span class="menu-text"> 基本配置</span></a>
             	<b class="arrow"></b>
             </li>
             <li active-link="active"><a href="#/shard">
@@ -89,7 +96,7 @@
 				<span class="menu-text"> 升级进度 </span></a>
 				<b class="arrow"></b>
 			</li>
-            <li active-link="active"><a href="#/monitor"><i class="menu-icon fa fa-tag"></i>
+            <li ng-show="isLogin" active-link="active"><a href="#/monitor"><i class="menu-icon fa fa-tag"></i>
 				<span class="menu-text"> 监控 </span></a>
 				<b class="arrow"></b>
 			</li>

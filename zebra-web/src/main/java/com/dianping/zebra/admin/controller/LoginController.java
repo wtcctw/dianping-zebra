@@ -31,4 +31,20 @@ public class LoginController {
 			throw new Exception("password error!");
 		}
 	}
+
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	public Object isLogin(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals("AuthorizationFilter")) {
+					return cookie.getValue().equals("AuthorizationFilter");
+				}
+			}
+		}
+		
+		return false;
+	}
 }

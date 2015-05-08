@@ -5,8 +5,8 @@
 	        	<label class="label label-lg label-primary arrowed-right" for="form-field-1">环境</label>
 	            <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs"></select>
 	            <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="搜索">
-	            <input required class="form-control input-sm" ng-model="addText" type="text" placeholder="New Shard Rule Name">
-	            <button ng-click="createGroupDs()" class="btn btn-primary btn-sm">创建</button>
+	            <input ng-show="isLogin"  required class="form-control input-sm" ng-model="addText" type="text" placeholder="New Shard Rule Name">
+	            <button ng-show="isLogin" ng-click="createGroupDs()" class="btn btn-primary btn-sm">创建</button>
 	        </form>
 	    </div>
 	</div>
@@ -24,9 +24,9 @@
                 <tr ng-repeat="shard in data | toArray | filter:{$key:'.shard'} | filter:{$key:searchText}">
                     <td>{{shard.$key}}</td>
                     <td>
-                        <button class="btn btn-xs btn-primary" ng-click="edit(shard.$key,shard)">编辑</button>
+                        <button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit(shard.$key,shard)">编辑</button>
                         <button class="btn btn-xs btn-success" ng-click="test(shard.$key)">测试</button>
-                        <button class="btn btn-xs btn-danger" ng-click="debug(shard.$key)">调试</button>
+                        <button ng-show="isLogin" class="btn btn-xs btn-danger" ng-click="debug(shard.$key)">调试</button>
                     </td>
                 </tr>
             </tbody>

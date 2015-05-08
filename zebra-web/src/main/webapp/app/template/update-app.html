@@ -40,7 +40,7 @@
                 <th>max</th>
                 <th>min</th>
                 <th>Update Dal</th>
-                <th>Delete</th>
+                <th ng-show="isLogin" >Delete</th>
             </tr>
             </thead>
             <tbody ng-repeat="(ip,machine) in app.machines">
@@ -64,7 +64,7 @@
                 <td><span
                         class="badge badge-{{datasources.type.indexOf('GroupDataSource') >= 0 || datasources.replaced ? 'success' : 'warning'}}">{{datasources.type.indexOf('GroupDataSource') >= 0  || datasources.replaced == true ? '是':'否'}}</span>
                 </td>
-                <td>
+                <td  ng-show="isLogin">
                     <button class="btn btn-danger btn-xs" ng-click="deleteInfo(ip,name)">删除</button>
                 </td>
             </tr>

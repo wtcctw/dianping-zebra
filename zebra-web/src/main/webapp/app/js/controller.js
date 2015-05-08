@@ -466,12 +466,19 @@ zebraWeb.controller('header', function ($rootScope, $scope, $cookies, $http, log
                 envs: data,
                 env: $cookies.env ? $cookies.env : data[0]
             }
-        }).error(function (data, status, headers, config) {
-            if (status == 401) {
-                loginService.login();
-            }
         });
+        
+        loginService.isLogin();
     }
+    
+    $scope.login = function(){
+    	loginService.login();
+    } 
+    
+    $scope.logout = function(){
+    	loginService.logout();
+    }
+    
     $scope.load();
 });
 
@@ -522,18 +529,18 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
 
 zebraWeb.controller('login', function ($rootScope, $scope, $http) {
     $scope.login = function () {
-        $http.post('/a/login', {
-                username: $scope.username,
-                password: $scope.password
-            })
-            .success(function (data, status, headers, config) {
-                alert('登陆成功!')
-                location.reload();
-            }).error(function () {
-                alert('登陆失败!')
-                $scope.username = '';
-                $scope.password = '';
-            });
+	    $http.post('/a/login', {
+	            username: $scope.username,
+	            password: $scope.password
+	        })
+	        .success(function (data, status, headers, config) {
+	            alert('登陆成功!')
+	            location.reload();
+	        }).error(function () {
+	            alert('登陆失败!')
+	            $scope.username = '';
+	            $scope.password = '';
+	        });
     }
 });
 

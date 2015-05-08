@@ -91,16 +91,31 @@ zebraWeb.service('configService', function($modal) {
 });
 
 
-zebraWeb.service('loginService', function($modal, $rootScope) {
+zebraWeb.service('loginService', function($modal, $rootScope, $http) {
     this.login = function() {
         if ($rootScope.isLogin) {
             return;
         }
 
-        $rootScope.isLogin = true;
         $modal.open({
             templateUrl: 'app/template/login.html',
             controller: 'login'
         });
     };
+    
+    this.logout = function() {
+        if ($rootScope.isLogin == false) {
+            return;
+        }
+
+        $http.get('/a/logout').success(function (data) {
+     		$rootScope.isLogin = false;
+     	});
+    };
+    
+    this.isLogin = function() {
+    	$http.get('/a/login').success(function (data) {
+     		$rootScope.isLogin = data;
+     	});
+    }
 });

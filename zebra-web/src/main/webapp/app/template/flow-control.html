@@ -4,7 +4,7 @@
 	        <form class="form-inline" role="form">
 	        	<label class="label label-lg label-primary arrowed-right" for="form-field-1">环境</label>
 	            <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs"></select>
-				<button class="btn btn-primary btn-sm" ng-click="addFlowControl()">新增流控规则</button>
+				<button ng-show="isLogin" class="btn btn-primary btn-sm" ng-click="addFlowControl()">新增流控规则</button>
 	        </form>
 	    </div>
 	</div>
@@ -17,7 +17,7 @@
 				<th style="width:10%">放入流量(%)</th>
 				<th style="width:10%">作用范围</th>
 				<th style="width:55%">Sql语句</th>
-				<th style="width:25%">操作</th>
+				<th  ng-show="isLogin" style="width:25%">操作</th>
 			</thead>
 			<tbody>
 				<tr ng-repeat="item in blackList | toArray ">
@@ -27,7 +27,7 @@
 					</td>
 					<td><span editable-text="item.m_app" e-name="m_app" e-form="rowform">{{item.m_app}}</span></td>
 					<td><span editable-text="item.sql" e-name="sql" e-form="rowform">{{item.sql}}</span></td>
-					<td>
+					<td ng-show="isLogin" >
 				        <form editable-form name="rowform" onbeforesave="save($data)" ng-show="rowform.$visible" class="form-buttons form-inline" shown="inserted == item">
 				          <button type="submit" ng-disabled="rowform.$waiting" class="btn btn-primary">
 				            保存

@@ -105,5 +105,3 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         controller: 'monitor'
     });
 });
-
-
