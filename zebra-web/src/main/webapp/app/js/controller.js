@@ -383,23 +383,81 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         close();
     }
 
-    $scope.addDs = function () {
-        if (!$scope.newDsName) {
+    $scope.addDs = function (oldProperties,fromId, toId) {
+        if (!toId) {
             return;
         }
-        if ($scope.newDsName.indexOf($scope.name) != 0) {
+        if (toId.indexOf($scope.name) != 0) {
             alert('请以 ' + $scope.name + ' 开头！');
             return;
         }
+        
+        if(toId == fromId){
+        	return;
+        }
+        
+        var configs = $scope.data.configs;
+        var newProperties = [];
+        
+        angular.forEach(oldProperties, function(property) {
+        	var newKey = property['key'].replace(fromId, toId);
+        	var newProperty = {
+        			key: newKey,
+        			value: '',
+        			isCreate: true,
+        			newValue: property["value"]
+        	}
+        	newProperties.push(newProperty);
+        });
+        
+//        var propertiesTmp = [];
+//        propertiesTmp.push({
+//        	key: 'ds.' + toId + '.jdbc.url',
+//            value: '',
+//            isCreate: true,
+//            newValue: ""
+//        });
+//        propertiesTmp.push({
+//        	key: 'ds.' + toId + '.jdbc.uername',
+//            value: '',
+//            isCreate: true,
+//            newValue: ""
+//        });
+//        propertiesTmp.push({
+//        	key: 'ds.' + toId + '.jdbc.password',
+//            value: '',
+//            isCreate: true,
+//            newValue: ""
+//        });
+//        propertiesTmp.push({
+//        	key: 'ds.' + toId + '.jdbc.driverClass',
+//            value: '',
+//            isCreate: true,
+//            newValue: "com.mysql.jdbc.Driver"
+//        });
+//        propertiesTmp.push({
+//        	key: 'ds.' + toId + '.jdbc.properties',
+//            value: '',
+//            isCreate: true,
+//            newValue: "${ds.datasource.properties}"
+//        });
+//        propertiesTmp.push({
+//        	key: 'ds.' + toId + '.jdbc.active',
+//            value: '',
+//            isCreate: true,
+//            newValue: "true"
+//        });
+        
         $scope.data.configs.push({
-            id: $scope.newDsName,
+            id: toId,
             role: {
                 isWrite: false,
                 isRead: false,
                 weight: 0
             },
-            properties: []
+            properties: newProperties
         });
+        
         $scope.newDsName = '';
     }
 

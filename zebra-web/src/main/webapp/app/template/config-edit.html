@@ -17,8 +17,6 @@
         <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs">
         </select>
         <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="搜索" /> &nbsp;&nbsp;&nbsp;
-        <input required class="form-control input-sm" placeholder="DataSource Id" ng-model="newDsName" />
-        <button type="submit" class="btn btn-primary btn-sm" ng-click="addDs()">添加DS配置组</button>
         <div class="form-group pull-right">
             <div class="btn-group" dropdown class="">
                 <button type="button" class="btn btn-success btn-sm" ng-click="save()">保存</button>
@@ -49,6 +47,8 @@
                                     <label ng-class="{'btn-primary':config.role.isRead,'btn-default':!config.role.isRead}" class="btn" ng-model="config.role.isRead" btn-checkbox>可读</label>
                                 </div>
                                 <input ng- placeholder="读库权重" class="form-control" ng-model="config.role.weight" type="number" min="-1" max="10" step="1" style="width: 100px" />
+                                <input required class="form-control" placeholder="DataSource Id" ng-model="newDsName" />
+        						<button type="submit" class="btn btn-primary" ng-click="addDs(config.properties,config.id,newDsName)">复制</button>
                             </form>
                         </td>
                         <td>
