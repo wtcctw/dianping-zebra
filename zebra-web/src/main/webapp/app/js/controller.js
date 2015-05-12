@@ -484,44 +484,6 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         	newProperties.push(newProperty);
         });
         
-//        var propertiesTmp = [];
-//        propertiesTmp.push({
-//        	key: 'ds.' + toId + '.jdbc.url',
-//            value: '',
-//            isCreate: true,
-//            newValue: ""
-//        });
-//        propertiesTmp.push({
-//        	key: 'ds.' + toId + '.jdbc.uername',
-//            value: '',
-//            isCreate: true,
-//            newValue: ""
-//        });
-//        propertiesTmp.push({
-//        	key: 'ds.' + toId + '.jdbc.password',
-//            value: '',
-//            isCreate: true,
-//            newValue: ""
-//        });
-//        propertiesTmp.push({
-//        	key: 'ds.' + toId + '.jdbc.driverClass',
-//            value: '',
-//            isCreate: true,
-//            newValue: "com.mysql.jdbc.Driver"
-//        });
-//        propertiesTmp.push({
-//        	key: 'ds.' + toId + '.jdbc.properties',
-//            value: '',
-//            isCreate: true,
-//            newValue: "${ds.datasource.properties}"
-//        });
-//        propertiesTmp.push({
-//        	key: 'ds.' + toId + '.jdbc.active',
-//            value: '',
-//            isCreate: true,
-//            newValue: "true"
-//        });
-        
         $scope.data.configs.push({
             id: toId,
             role: {
