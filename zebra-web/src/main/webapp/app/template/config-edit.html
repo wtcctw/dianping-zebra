@@ -3,6 +3,8 @@
         <form class="form-inline" role="form">
             <span>{{name}}</span> <input class="form-control input-sm" ng-model="changedName" type="text" placeholder="Other Name"/>
             <button type="submit" class="btn btn-primary btn-sm" ng-click="changeName()">搜索</button>
+            <input required class="form-control" placeholder="DataSource Id" ng-model="newDsName1" />
+        	<button type="submit" class="btn btn-primary" ng-click="newDs()">创建</button>
         </form>
     </h4>
 </div>

@@ -397,6 +397,66 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         close();
     }
 
+    $scope.newDs = function() {
+        if (!$scope.newDsName1) {
+            return;
+        }
+        if ($scope.newDsName1.indexOf($scope.name) != 0) {
+            alert('请以 ' + $scope.name + ' 开头！');
+            return;
+        }
+        
+        var propertiesTmp = [];
+        propertiesTmp.push({
+        	key: 'ds.' + $scope.newDsName1 + '.jdbc.url',
+            value: '',
+            isCreate: true,
+            newValue: ""
+        });
+        propertiesTmp.push({
+        	key: 'ds.' + $scope.newDsName1 + '.jdbc.uername',
+            value: '',
+            isCreate: true,
+            newValue: ""
+        });
+        propertiesTmp.push({
+        	key: 'ds.' + $scope.newDsName1 + '.jdbc.password',
+            value: '',
+            isCreate: true,
+            newValue: ""
+        });
+        propertiesTmp.push({
+        	key: 'ds.' + $scope.newDsName1 + '.jdbc.driverClass',
+            value: '',
+            isCreate: true,
+            newValue: "com.mysql.jdbc.Driver"
+        });
+        propertiesTmp.push({
+        	key: 'ds.' + $scope.newDsName1 + '.jdbc.properties',
+            value: '',
+            isCreate: true,
+            newValue: "${ds.datasource.properties}"
+        });
+        propertiesTmp.push({
+        	key: 'ds.' + $scope.newDsName1 + '.jdbc.active',
+            value: '',
+            isCreate: true,
+            newValue: "true"
+        });
+        
+        $scope.data.configs.push({
+            id: $scope.newDsName1,
+            role: {
+                isWrite: false,
+                isRead: false,
+                weight: 0
+            },
+            properties: propertiesTmp
+        });
+        
+        $scope.newDsName1 = '';
+    }
+    
     $scope.addDs = function (oldProperties,fromId, toId) {
         if (!toId) {
             return;
