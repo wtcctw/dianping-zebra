@@ -1,3 +1,9 @@
+zebraWeb.controller('doc', function($scope,$location){
+	$scope.isActive = function (viewLocation) { 
+        return viewLocation === $location.path();
+    };
+});
+
 zebraWeb.controller('monitor', function ($scope, $http) {
     $scope.load = function () {
         $http.get('/a/monitor/list').success(function (data, status, headers, config) {
@@ -18,6 +24,14 @@ zebraWeb.controller('monitor', function ($scope, $http) {
 	$scope.addJdbcRef = function() {
         if ($scope.jdbcRef) {
         	 $http.get('/a/monitor/add?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+        		 $scope.load();
+        	 });
+        }
+	}
+	
+	$scope.removeJdbcRef = function(){
+       if ($scope.jdbcRef) {
+        	 $http.get('/a/monitor/remove?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
         		 $scope.load();
         	 });
         }

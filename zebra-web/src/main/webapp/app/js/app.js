@@ -106,5 +106,6 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
     }).state('doc', {
         url: '/doc',
         templateUrl: 'app/template/doc.html',
+        controller: 'doc'
     });
 });

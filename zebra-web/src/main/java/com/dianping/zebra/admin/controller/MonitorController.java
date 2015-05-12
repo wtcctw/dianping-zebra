@@ -101,15 +101,19 @@ public class MonitorController {
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
 
 		if (ipWithJdbcRef != null) {
-			Set<String> jdbcRefs = ipWithJdbcRef.get(localIpAddress);
-
-			if (jdbcRefs != null) {
-				if (jdbcRefs.contains(jdbcRef)) {
-					jdbcRefs.remove(jdbcRef);
-
-					String json = gson.toJson(ipWithJdbcRef);
-
-					lionService.setConfig(lionService.getEnv(), LION_KEY, json);
+			for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+				for (String jdbcRef2 : entry.getValue()) {
+					if (jdbcRef2.equalsIgnoreCase(jdbcRef)) {
+						entry.getValue().remove(jdbcRef);
+						
+						if(entry.getValue().isEmpty()){
+							ipWithJdbcRef.remove(entry.getKey());
+						}
+						
+						String json = gson.toJson(ipWithJdbcRef);
+						lionService.setConfig(lionService.getEnv(), LION_KEY, json);
+						return;
+					}
 				}
 			}
 		}
@@ -238,6 +242,14 @@ public class MonitorController {
 							}
 						}
 
+					}
+				}else{
+					synchronized (currentJdbcRefs) {
+						for (String jdbcRef : currentJdbcRefs) {
+							monitorServer.removeJdbcRef(jdbcRef);
+						}
+
+						currentJdbcRefs.clear();
 					}
 				}
 			}

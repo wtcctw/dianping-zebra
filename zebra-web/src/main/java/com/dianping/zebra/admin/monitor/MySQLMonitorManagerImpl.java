@@ -28,6 +28,20 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 	private Map<String, GroupDataSourceConfig> groupDataSourceConfigs = new ConcurrentHashMap<String, GroupDataSourceConfig>();
 
+	private Map<String, DataSourceConfigManager> configManagers = new ConcurrentHashMap<String, DataSourceConfigManager>();
+
+	private synchronized DataSourceConfigManager findOrCreate(String jdbcRef) {
+		if (!configManagers.containsKey(jdbcRef)) {
+			DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager("remote", jdbcRef);
+
+			configManagers.put(jdbcRef, configManager);
+
+			return configManager;
+		} else {
+			return configManagers.get(jdbcRef);
+		}
+	}
+
 	public class DalConfigChangedListener implements PropertyChangeListener {
 		private String jdbcRef;
 
@@ -44,7 +58,7 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 			int pos = evt.getPropertyName().indexOf(jdbcRef);
 
 			if (pos > 0) {
-				DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager("remote", jdbcRef);
+				DataSourceConfigManager configManager = findOrCreate(jdbcRef);
 				GroupDataSourceConfig newGroupDataSourceConfig = configManager.getGroupDataSourceConfig();
 				Map<String, DataSourceConfig> newDataSourceConfigs = newGroupDataSourceConfig.getDataSourceConfigs();
 
@@ -73,19 +87,32 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 					}
 				}
 
-				for (String dsId : groupDataSourceConfigs.get(jdbcRef).getDataSourceConfigs().keySet()) {
-					if (!newDataSourceConfigs.containsKey(dsId)) {
-						dataSourceConfigs.remove(dsId);
-						monitorThreadGroup.removeMonitor(dsId);
+				for (Entry<String, DataSourceConfig> entry : groupDataSourceConfigs.get(jdbcRef).getDataSourceConfigs()
+				      .entrySet()) {
+					String dsId = entry.getKey();
+					if (entry.getValue().isCanRead()) {
+						DataSourceConfig newDataSourceConfig = newDataSourceConfigs.get(dsId);
+
+						if(newDataSourceConfig == null){
+							dataSourceConfigs.remove(dsId);
+							monitorThreadGroup.removeMonitor(dsId);
+						}else{
+							if(!newDataSourceConfig.isCanRead()){
+								dataSourceConfigs.remove(dsId);
+								monitorThreadGroup.removeMonitor(dsId);
+							}
+						}
 					}
 				}
+				
+				groupDataSourceConfigs.put(jdbcRef, newGroupDataSourceConfig);
 			}
 		}
 	}
 
 	@Override
 	public synchronized void addJdbcRef(String jdbcRef) {
-		DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager("remote", jdbcRef);
+		DataSourceConfigManager configManager = findOrCreate(jdbcRef);
 		GroupDataSourceConfig groupDataSourceConfig = configManager.getGroupDataSourceConfig();
 
 		for (Map.Entry<String, DataSourceConfig> entryConfig : groupDataSourceConfig.getDataSourceConfigs().entrySet()) {
@@ -105,7 +132,7 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 	@Override
 	public synchronized void removeJdbcRef(String jdbcRef) {
-		DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager("remote", jdbcRef);
+		DataSourceConfigManager configManager = findOrCreate(jdbcRef);
 		GroupDataSourceConfig groupDataSourceConfig = configManager.getGroupDataSourceConfig();
 
 		for (Map.Entry<String, DataSourceConfig> entryConfig : groupDataSourceConfig.getDataSourceConfigs().entrySet()) {
@@ -119,6 +146,7 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 		}
 
 		this.groupDataSourceConfigs.remove(jdbcRef);
+		configManager.close();
 	}
 
 	@Override
