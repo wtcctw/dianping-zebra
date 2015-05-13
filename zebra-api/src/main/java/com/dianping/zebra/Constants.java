@@ -6,12 +6,16 @@
  */
 package com.dianping.zebra;
 
+import com.dianping.zebra.util.AppPropertiesUtils;
+
 public final class Constants {
 	public static final String ZEBRA_VERSION = "2.7.6";
 
 	public static final String SQL_FORCE_WRITE_HINT = "/*+zebra:w*/";
 
 	public static final String CONNECTION_POOL_TYPE_C3P0 = "c3p0";
+
+	public static final String CONNECTION_POOL_TYPE_TOMCAT_JDBC = "tomcat-jdbc";
 
 	public static final String CONFIG_MANAGER_TYPE_REMOTE = "remote";
 
@@ -35,7 +39,7 @@ public final class Constants {
 	public static final String SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN = "forceWriteOnLogin";
 
 	public static final String SPRING_PROPERTY_EXTRA_JDBC_URL_PARAMS = "extraJdbcUrlParams";
-
+	
 	// DataSource
 	public static final String ELEMENT_APP_REFRESH_FLAG = "appkey.refresh.time";
 
@@ -58,6 +62,8 @@ public final class Constants {
 	public static final String ELEMENT_USER = "username";
 
 	public static final String ELEMENT_PROPERTIES = "properties";
+	
+	public static final String ELEMENT_POOL_TYPE = AppPropertiesUtils.getAppName() + ".zebra.pool.type";
 
 	// System
 	public static final String ELEMENT_RETRY_TIMES = "retryTimes";

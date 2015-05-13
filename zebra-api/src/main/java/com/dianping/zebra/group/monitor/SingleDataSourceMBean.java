@@ -18,18 +18,4 @@ public interface SingleDataSourceMBean {
 	public int getNumBusyConnection();
 
 	public int getNumIdleConnection();
-
-	public int getNumUnClosedOrphanedConnections();
-
-	public long getNumFailedCheckins();
-
-	public long getNumFailedCheckouts();
-
-	public int getThreadPoolSize();
-
-	public int getThreadPoolNumActiveThreads();
-
-	public int getThreadPoolNumIdleThreads();
-
-	public int getThreadPoolNumTasksPending();
 }

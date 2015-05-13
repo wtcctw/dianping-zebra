@@ -1,5 +1,18 @@
 package com.dianping.zebra.group.datasources;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+
+import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.DalException;
@@ -12,25 +25,16 @@ import com.dianping.zebra.group.util.DataSourceState;
 import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class SingleDataSource extends AbstractDataSource implements MarkableDataSource, SingleDataSourceMBean {
 
-	private final Logger logger = LogManager.getLogger(this.getClass());
+	private static final Logger logger = LogManager.getLogger(SingleDataSource.class);
+
+	private String dsId;
 
 	private DataSourceConfig config;
 
 	private DataSource dataSource;
-
-	private String dsId;
 
 	private CountPunisher punisher;
 
@@ -47,29 +51,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	private void checkState() throws SQLException {
 		if (state == DataSourceState.CLOSED || state == DataSourceState.DOWN) {
 			throw new SQLException(String.format("dataSource is not avaiable, current state is [%s]", state));
-		}
-	}
-
-	public void closeOrigin() throws SQLException {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
-			
-			if (poolBackedDataSource.getNumBusyConnections() == 0) {
-				logger.info("closing old datasource [" + dsId + "]");
-
-				DataSources.destroy(poolBackedDataSource);
-
-				logger.info("old datasource [" + dsId + "] closed");
-				state = DataSourceState.CLOSED;
-			} else {
-				DalException exp = new DalException(String.format(
-				      "Cannot close dataSource[%s] since there are busy connections.", dsId));
-				throw exp;
-			}
-		} else {
-			Exception exp = new DalException(
-			      "fail to close dataSource since dataSource is null or dataSource is not an instance of PoolBackedDataSource.");
-			logger.warn(exp.getMessage(), exp);
 		}
 	}
 
@@ -92,6 +73,49 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		}
 	}
 
+	public void closeOrigin() throws SQLException {
+		if (dataSource != null) {
+			if (dataSource instanceof PoolBackedDataSource) {
+				PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
+
+				if (poolBackedDataSource.getNumBusyConnections() == 0) {
+					logger.info("closing old datasource [" + dsId + "]");
+
+					DataSources.destroy(poolBackedDataSource);
+
+					logger.info("old datasource [" + dsId + "] closed");
+					state = DataSourceState.CLOSED;
+				} else {
+					DalException exp = new DalException(String.format(
+					      "Cannot close dataSource[%s] since there are busy connections.", dsId));
+					throw exp;
+				}
+			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
+				org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
+
+				if (ds.getActive() == 0) {
+					logger.info("closing old datasource [" + dsId + "]");
+
+					ds.close();
+
+					logger.info("old datasource [" + dsId + "] closed");
+					state = DataSourceState.CLOSED;
+				} else {
+					DalException exp = new DalException(String.format(
+					      "Cannot close dataSource[%s] since there are busy connections.", dsId));
+					throw exp;
+				}
+			} else {
+				Exception exp = new DalException(
+				      "fail to close dataSource since dataSource is not an instance of C3P0 or Tomcat-Jdbc.");
+				logger.warn(exp.getMessage(), exp);
+			}
+		} else {
+			Exception exp = new DalException("fail to close dataSource since dataSource is null.");
+			logger.warn(exp.getMessage(), exp);
+		}
+	}
+
 	public synchronized DataSourceConfig getConfig() {
 		return this.config;
 	}
@@ -100,23 +124,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	public Connection getConnection() throws SQLException {
 		checkState();
 		return getConnection(null, null);
-	}
-
-	private SingleConnection getConnectionOrigin(String username, String password) throws SQLException {
-		checkState();
-		Connection conn;
-		try {
-			conn = dataSource.getConnection();
-		} catch (SQLException e) {
-			punisher.countAndPunish(e);
-			throw e;
-		}
-
-		if (state == DataSourceState.INITIAL) {
-			state = DataSourceState.UP;
-		}
-
-		return new SingleConnection(this, this.config, conn, this.filters);
 	}
 
 	@Override
@@ -138,6 +145,23 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		}
 	}
 
+	private SingleConnection getConnectionOrigin(String username, String password) throws SQLException {
+		checkState();
+		Connection conn;
+		try {
+			conn = dataSource.getConnection();
+		} catch (SQLException e) {
+			punisher.countAndPunish(e);
+			throw e;
+		}
+
+		if (state == DataSourceState.INITIAL) {
+			state = DataSourceState.UP;
+		}
+
+		return new SingleConnection(this, this.config, conn, this.filters);
+	}
+
 	@Override
 	public String getCurrentState() {
 		return state.toString();
@@ -147,69 +171,70 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		return this.dsId;
 	}
 
-	@Override
-	public int getNumBusyConnection() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getNumBusyConnections();
-			} catch (SQLException e) {
+	public int getIntProperty(DataSourceConfig config, String name, int defaultValue) {
+		for (Any any : config.getProperties()) {
+			if (any.getName().equalsIgnoreCase(name)) {
+				return Integer.parseInt(any.getValue());
 			}
 		}
+
+		return defaultValue;
+	}
+
+	@Override
+	public int getNumBusyConnection() {
+		if (dataSource != null) {
+			if (dataSource instanceof PoolBackedDataSource) {
+				try {
+					return ((PoolBackedDataSource) dataSource).getNumBusyConnections();
+				} catch (SQLException e) {
+				}
+			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
+				try {
+					return ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).getActive();
+				} catch (Exception e) {
+				}
+			}
+		}
+
 		return 0;
 	}
 
 	@Override
 	public int getNumConnections() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getNumConnections();
-			} catch (SQLException e) {
+		if (dataSource != null) {
+			if (dataSource instanceof PoolBackedDataSource) {
+				try {
+					return ((PoolBackedDataSource) dataSource).getNumConnections();
+				} catch (SQLException e) {
+				}
+			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
+				try {
+					return ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).getSize();
+				} catch (Exception e) {
+				}
 			}
 		}
-		return 0;
-	}
 
-	@Override
-	public long getNumFailedCheckins() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getNumFailedCheckinsDefaultUser();
-			} catch (SQLException e) {
-			}
-		}
-		return 0;
-	}
-
-	@Override
-	public long getNumFailedCheckouts() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getNumFailedCheckoutsDefaultUser();
-			} catch (SQLException e) {
-			}
-		}
 		return 0;
 	}
 
 	@Override
 	public int getNumIdleConnection() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getNumIdleConnections();
-			} catch (SQLException e) {
+		if (dataSource != null) {
+			if (dataSource instanceof PoolBackedDataSource) {
+				try {
+					return ((PoolBackedDataSource) dataSource).getNumIdleConnections();
+				} catch (SQLException e) {
+				}
+			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
+				try {
+					return ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).getIdle();
+				} catch (Exception e) {
+				}
 			}
 		}
-		return 0;
-	}
 
-	@Override
-	public int getNumUnClosedOrphanedConnections() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getNumUnclosedOrphanedConnections();
-			} catch (SQLException e) {
-			}
-		}
 		return 0;
 	}
 
@@ -222,75 +247,14 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		return this.state;
 	}
 
-	@Override
-	public int getThreadPoolNumActiveThreads() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getThreadPoolNumActiveThreads();
-			} catch (SQLException e) {
+	public String getStringProperty(DataSourceConfig config, String name, String defaultValue) {
+		for (Any any : config.getProperties()) {
+			if (any.getName().equalsIgnoreCase(name)) {
+				return any.getValue();
 			}
 		}
-		return 0;
-	}
 
-	@Override
-	public int getThreadPoolNumIdleThreads() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getThreadPoolNumIdleThreads();
-			} catch (SQLException e) {
-			}
-		}
-		return 0;
-	}
-
-	@Override
-	public int getThreadPoolNumTasksPending() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getThreadPoolNumTasksPending();
-			} catch (SQLException e) {
-			}
-		}
-		return 0;
-	}
-
-	@Override
-	public int getThreadPoolSize() {
-		if (dataSource != null && (dataSource instanceof PoolBackedDataSource)) {
-			try {
-				return ((PoolBackedDataSource) dataSource).getThreadPoolSize();
-			} catch (SQLException e) {
-			}
-		}
-		return 0;
-	}
-
-	private DataSource initDataSourceOrigin(DataSourceConfig value) {
-		try {
-			JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
-
-			DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
-			      value.getPassword());
-
-			Map<String, Object> props = new HashMap<String, Object>();
-
-			props.put("driverClass", value.getDriverClass());
-
-			for (Any any : value.getProperties()) {
-				props.put(any.getName(), any.getValue());
-			}
-
-			PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
-			      unPooledDataSource, props);
-
-			logger.info(String.format("New dataSource [%s] created.", value.getId()));
-			return pooledDataSource;
-		} catch (IllegalConfigException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new IllegalConfigException(e);
-		}
+		return defaultValue;
 	}
 
 	private DataSource initDataSource(final DataSourceConfig value) {
@@ -308,6 +272,67 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			return chain.initSingleDataSource(this, chain);
 		} else {
 			return initDataSourceOrigin(value);
+		}
+	}
+
+	private DataSource initDataSourceOrigin(DataSourceConfig value) {
+		try {
+			JdbcDriverClassHelper.loadDriverClass(value.getDriverClass(), value.getJdbcUrl());
+			if (value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_C3P0)) {
+				DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
+				      value.getPassword());
+
+				Map<String, Object> props = new HashMap<String, Object>();
+
+				props.put("driverClass", value.getDriverClass());
+
+				for (Any any : value.getProperties()) {
+					props.put(any.getName(), any.getValue());
+				}
+
+				PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
+				      unPooledDataSource, props);
+
+				logger.info(String.format("New dataSource [%s] created.", value.getId()));
+
+				return pooledDataSource;
+			} else if (value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_TOMCAT_JDBC)) {
+				PoolProperties p = new PoolProperties();
+				p.setUrl(value.getJdbcUrl());
+				p.setDriverClassName(value.getDriverClass());
+				p.setUsername(value.getUsername());
+				p.setPassword(value.getPassword());
+
+				p.setInitialSize(getIntProperty(value, "initialPoolSize", 5));
+				p.setMaxActive(getIntProperty(value, "maxPoolSize", 20));
+				p.setMinIdle(getIntProperty(value, "minPoolSize", 5));
+				p.setMaxIdle(getIntProperty(value, "maxPoolSize", 20));
+				p.setMaxWait(getIntProperty(value, "checkoutTimeout", 1000));
+
+				p.setRemoveAbandoned(true);
+				p.setRemoveAbandonedTimeout(60);
+				p.setTestOnBorrow(true);
+				p.setTestOnReturn(false);
+				p.setTestWhileIdle(true);
+				p.setValidationQuery(getStringProperty(value, "preferredTestQuery", "SELECT 1"));
+				p.setValidationInterval(30000); // 5 min
+				p.setTimeBetweenEvictionRunsMillis(300000); // 30 min
+				p.setMinEvictableIdleTimeMillis(1800000);
+				p.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.StatementCache");
+
+				org.apache.tomcat.jdbc.pool.DataSource datasource = new org.apache.tomcat.jdbc.pool.DataSource();
+				datasource.setPoolProperties(p);
+
+				logger.info(String.format("New dataSource [%s] created.", value.getId()));
+
+				return datasource;
+			} else {
+				throw new IllegalConfigException("illegal datasource pool type : " + value.getType());
+			}
+		} catch (IllegalConfigException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IllegalConfigException(e);
 		}
 	}
 

@@ -132,6 +132,7 @@ public class CatFilter extends DefaultJdbcFilter {
     public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
         DataSource result = chain.initSingleDataSource(source, chain);
         Cat.logEvent("DataSource.Created", source.getConfig().getId());
+        Cat.logEvent("DataSource.Type", source.getConfig().getType());
         return result;
     }
 

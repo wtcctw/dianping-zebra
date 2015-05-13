@@ -1,5 +1,5 @@
 <group-data-source-config filters="statFilter" router-strategy="roundrobin">
-	<data-source-config id="db1" weight="0" canRead="false" canWrite="true" active="true">
+	<data-source-config id="db1" weight="0" canRead="false" canWrite="true" active="true" type="tomcat-jdbc">
 		<test-read-only-sql>call readonly()</test-read-only-sql>
 		<time-window>1000</time-window>
 		<punish-limit>100</punish-limit>
@@ -12,7 +12,7 @@
    		<acquireRetryDelay>300</acquireRetryDelay>
    		<maxStatements>0</maxStatements>
 	</data-source-config>
-	<data-source-config id="db2" weight="1" canRead="true" canWrite="true" active="true">
+	<data-source-config id="db2" weight="1" canRead="true" canWrite="true" active="true" type="tomcat-jdbc">
 		<test-read-only-sql>call readonly()</test-read-only-sql>
 		<time-window>0</time-window>
 		<punish-limit>0</punish-limit>
@@ -21,7 +21,7 @@
 		<driver-class>org.h2.Driver</driver-class>
 		<password></password>
 	</data-source-config>
-	<data-source-config id="db3" weight="1" canRead="true" canWrite="false" active="true">
+	<data-source-config id="db3" weight="1" canRead="true" canWrite="false" active="true" type="tomcat-jdbc">
 		<test-read-only-sql>call readonly()</test-read-only-sql>
 		<time-window>0</time-window>
 		<punish-limit>0</punish-limit>

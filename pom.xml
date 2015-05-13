@@ -5,7 +5,7 @@
     <groupId>com.dianping.zebra</groupId>
     <artifactId>zebra-all</artifactId>
     <packaging>pom</packaging>
-    <version>2.7.5</version>
+    <version>2.7.6-SNAPSHOT</version>
     <name>zebra-all</name>
     <organization>
         <name>dianping</name>
@@ -100,6 +100,16 @@
                 <groupId>c3p0</groupId>
                 <artifactId>c3p0</artifactId>
                 <version>0.9.1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-jdbc</artifactId>
+                <version>7.0.61</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat</groupId>
+                <artifactId>tomcat-juli</artifactId>
+                <version>7.0.57</version>
             </dependency>
             <dependency>
                 <groupId>mysql</groupId>

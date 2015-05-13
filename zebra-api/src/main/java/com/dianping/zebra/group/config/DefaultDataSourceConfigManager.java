@@ -230,6 +230,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			      dsConfig.getWarmupTime()));
 			dsConfig
 			      .setUsername(getProperty(getSingleDataSourceKey(Constants.ELEMENT_USER, dsId), dsConfig.getUsername()));
+			dsConfig.setType(getProperty(Constants.ELEMENT_POOL_TYPE, Constants.CONNECTION_POOL_TYPE_C3P0));
 
 			String properies = getProperty(getSingleDataSourceKey(Constants.ELEMENT_PROPERTIES, dsId), null);
 

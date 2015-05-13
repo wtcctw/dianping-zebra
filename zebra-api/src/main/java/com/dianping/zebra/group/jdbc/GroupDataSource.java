@@ -54,6 +54,9 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	// config
 	protected String jdbcRef;
 
+	// support two type : "c3p0" and "tomcat-jdbc"
+	protected String poolType;
+
 	protected RouterType routerType = RouterType.ROUND_ROBIN;
 
 	protected DataSourceConfig c3p0Config = new DataSourceConfig();
@@ -171,8 +174,17 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	protected GroupDataSourceConfig buildGroupConfig(GroupDataSourceConfig newGroupConfig) {
 		buildC3P0Properties(newGroupConfig);
 		buildSpringPropertyConfig(newGroupConfig);
+		buildPoolType(newGroupConfig);
 
 		return newGroupConfig;
+	}
+
+	private void buildPoolType(GroupDataSourceConfig newGroupConfig) {
+		if (StringUtils.isNotBlank(this.poolType)) {
+			for (DataSourceConfig config : newGroupConfig.getDataSourceConfigs().values()) {
+				config.setType(this.poolType);
+			}
+		}
 	}
 
 	protected void buildSpringPropertyConfig(GroupDataSourceConfig newGroupConfig) {
@@ -636,6 +648,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public synchronized void setOverrideDefaultUser(String overrideDefaultUser) {
 		setProperty("overrideDefaultUser", overrideDefaultUser);
+	}
+
+	public synchronized void setPoolType(String poolType) {
+		this.poolType = poolType;
 	}
 
 	public synchronized void setPreferredTestQuery(String preferredTestQuery) {
