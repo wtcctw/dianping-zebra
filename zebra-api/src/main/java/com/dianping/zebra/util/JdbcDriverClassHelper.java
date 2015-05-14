@@ -7,7 +7,7 @@ import com.dianping.zebra.group.exception.IllegalConfigException;
  */
 public class JdbcDriverClassHelper {
 
-	private static String getDriverClassNameByJdbcUrl(String url) {
+	public static String getDriverClassNameByJdbcUrl(String url) {
 		if (url.startsWith("jdbc:mysql:")) {
 			return "com.mysql.jdbc.Driver";
 		} else if (url.startsWith("jdbc:postgresql:")) {

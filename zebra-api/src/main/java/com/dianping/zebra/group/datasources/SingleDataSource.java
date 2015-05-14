@@ -184,16 +184,13 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	@Override
 	public int getNumBusyConnection() {
 		if (dataSource != null) {
-			if (dataSource instanceof PoolBackedDataSource) {
-				try {
+			try {
+				if (dataSource instanceof PoolBackedDataSource) {
 					return ((PoolBackedDataSource) dataSource).getNumBusyConnections();
-				} catch (SQLException e) {
-				}
-			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
-				try {
+				} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
 					return ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).getActive();
-				} catch (Exception e) {
 				}
+			} catch (Exception e) {
 			}
 		}
 
@@ -203,16 +200,13 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	@Override
 	public int getNumConnections() {
 		if (dataSource != null) {
-			if (dataSource instanceof PoolBackedDataSource) {
-				try {
+			try {
+				if (dataSource instanceof PoolBackedDataSource) {
 					return ((PoolBackedDataSource) dataSource).getNumConnections();
-				} catch (SQLException e) {
-				}
-			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
-				try {
+				} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
 					return ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).getSize();
-				} catch (Exception e) {
 				}
+			} catch (Exception e) {
 			}
 		}
 
@@ -222,16 +216,13 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	@Override
 	public int getNumIdleConnection() {
 		if (dataSource != null) {
-			if (dataSource instanceof PoolBackedDataSource) {
-				try {
+			try {
+				if (dataSource instanceof PoolBackedDataSource) {
 					return ((PoolBackedDataSource) dataSource).getNumIdleConnections();
-				} catch (SQLException e) {
-				}
-			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
-				try {
+				} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
 					return ((org.apache.tomcat.jdbc.pool.DataSource) dataSource).getIdle();
-				} catch (Exception e) {
 				}
+			} catch (Exception e) {
 			}
 		}
 

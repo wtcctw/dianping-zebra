@@ -26,7 +26,7 @@ public class GroupConnection implements Connection {
 
 	private List<JdbcFilter> filters;
 
-	private Set<Statement> openedStatements = new HashSet<Statement>();
+	private List<Statement> openedStatements = new ArrayList<Statement>();
 
 	private Connection rConnection;
 

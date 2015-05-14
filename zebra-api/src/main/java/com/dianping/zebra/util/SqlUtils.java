@@ -21,11 +21,11 @@ public final class SqlUtils {
 		}
 
 		if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "select")) {
-			if (noCommentsSql.toLowerCase().contains(" for ")
-			      && SELECT_FOR_UPDATE_PATTERN.matcher(noCommentsSql).matches()) {
+			String lowerCaseSql = noCommentsSql.toLowerCase();
+			
+			if (lowerCaseSql.contains(" for ") && SELECT_FOR_UPDATE_PATTERN.matcher(noCommentsSql).matches()) {
 				sqlType = SqlType.SELECT_FOR_UPDATE;
-			} else if (noCommentsSql.toLowerCase().contains("@@identity")
-			      || noCommentsSql.toLowerCase().contains("last_insert_id()")) {
+			} else if (lowerCaseSql.contains("@@identity") || lowerCaseSql.contains("last_insert_id()")) {
 				sqlType = SqlType.SELECT_FOR_IDENTITY;
 			} else {
 				sqlType = SqlType.SELECT;
@@ -54,8 +54,6 @@ public final class SqlUtils {
 			sqlType = SqlType.EXECUTE;
 		} else {
 			sqlType = SqlType.DEFAULT_SQL_TYPE;
-			// throw new SQLException(
-			// "only select, insert, update, delete,replace,truncate,create,drop,load,merge,call sql is supported");
 		}
 
 		return sqlType;

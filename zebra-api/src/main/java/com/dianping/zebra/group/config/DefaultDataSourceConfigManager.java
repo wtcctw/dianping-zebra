@@ -8,6 +8,7 @@ import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.BaseVisitor;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.util.AppPropertiesUtils;
+import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.dianping.zebra.util.Splitters;
 import com.dianping.zebra.util.StringUtils;
 
@@ -220,10 +221,17 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			      dsConfig.getPunishLimit()));
 			dsConfig.setTimeWindow(getProperty(getSingleDataSourceKey(Constants.ELEMENT_TIME_WINDOW, dsId),
 			      dsConfig.getTimeWindow()));
-			dsConfig.setDriverClass(getProperty(getSingleDataSourceKey(Constants.ELEMENT_DRIVER_CLASS, dsId),
-			      dsConfig.getDriverClass()));
-			dsConfig.setJdbcUrl(getProperty(getSingleDataSourceKey(Constants.ELEMENT_JDBC_URL, dsId),
-			      dsConfig.getJdbcUrl()));
+
+			String jdbcUrl = getProperty(getSingleDataSourceKey(Constants.ELEMENT_JDBC_URL, dsId), dsConfig.getJdbcUrl());
+			dsConfig.setJdbcUrl(jdbcUrl);
+
+			String driverClass = getProperty(getSingleDataSourceKey(Constants.ELEMENT_DRIVER_CLASS, dsId),
+			      dsConfig.getDriverClass());
+			if (StringUtils.isBlank(driverClass)) {
+				driverClass = JdbcDriverClassHelper.getDriverClassNameByJdbcUrl(jdbcUrl);
+			}
+
+			dsConfig.setDriverClass(driverClass);
 			dsConfig.setPassword(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PASSWORD, dsId),
 			      dsConfig.getPassword()));
 			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),
