@@ -1,17 +1,18 @@
 ## Zebra 
 
 ## 简介
-`Zebra`是在C3P0基础上进行包装成的点评内部使用的`动态数据源`，它有以下的功能点：
+`Zebra`是在`c3p0`和`tomcat-jdbc`基础上进行包装成的点评内部使用的`动态数据源`，它有以下的功能点：
 1. 简化数据源的jdbc相关配置，业务无需关系主库或者从库的位置、数量、用户名以及密码，拿到`jdbcRef`即可使用
 2. 纯粹的读写分离，支持SQL语句hint
 3. 配置变化后，Zebra能够动态自刷新，无需应用进行重启
 4. 支持分库分表，具体接入请参考文档[README_SHARD.md](/arch/zebra/blob/master/README_SHARD.md)
-5. 更丰富的监控信息在`CAT`上呈现 : 在heartbeat中能够看到连接池的信息
-6. 集成Phoenix Inspect页面，方便看到DataSource的实时信息
-7. DBA可以更加方便的进行数据库维护，如写库切换，读库上线下线，用户名密码变更等操作
-8. 兼容点评内老的DPDL强制走主库的逻辑
-9. 支持SQL流控，DBA可以在后台按照比例对指定SQL语句进行限制访问
-10. 业务可以更加方便的进行`迁库/拆库`的操作，具体请见[Database_Migrate.md](/arch/zebra/blob/master/Database_Migrate.md)
+5. 业务可以自主选择使用c3p0或者tomcat-jdbc数据源，接口保持一致。
+6. 更丰富的监控信息在`CAT`上呈现 : 在heartbeat中能够看到连接池的信息
+7. 集成Phoenix Inspect页面，方便看到DataSource的实时信息
+8. DBA可以更加方便的进行数据库维护，如写库切换，读库上线下线，用户名密码变更等操作
+9. 兼容点评内老的DPDL强制走主库的逻辑
+10. 支持SQL流控，DBA可以在后台按照比例对指定SQL语句进行限制访问
+11. 业务可以更加方便的进行`迁库/拆库`的操作，具体请见[Database_Migrate.md](/arch/zebra/blob/master/Database_Migrate.md)
 
 ## 使用说明
 
@@ -23,7 +24,7 @@
     	<version>${version}</version>
 	</dependency>
 
-目前的最新版本为`2.7.5`
+目前的最新版本为`2.7.6`
 
 ### 数据库监控功能
 如果想要在CAT上对数据库进行监控，请务必添加该组件
@@ -46,10 +47,18 @@ SQL调用依赖需要加载一个配置文件 /config/spring/common/appcontext-d
 ### 在 Spring 中 DataSource 的配置
 
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<property name="jdbcRef" value="tuangou2010" /> <!-- 唯一确定数据库的key -->
+        <!-- 唯一确定数据库的key，请咨询DBA使用哪个key -->
+		<property name="jdbcRef" value="tuangou2010" /> 
+        <!-- 选择使用背后使用哪种数据源，"c3p0"或者"tomcat-jdbc"，可以不配，默认值为"c3p0" -->
+        <property name="poolType" value="c3p0" /> 
+        <!-- 该值对应tomcat-jdbc的"minIdle" -->
 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
+        <!-- 该值对应tomcat-jdbc的"maxActive" -->
 		<property name="maxPoolSize" value="${lion.key.maxPoolSize}" />
+        <!-- 该值对应tomcat-jdbc的"initialSize" -->
         <property name="initialPoolSize" value="${lion.key.initialPoolSize}" />
+        <!-- 该值对应tomcat-jdbc的"maxWait" -->
+        <property name="checkoutTimeout" value="1000" />
     	<property name="maxIdleTime" value="1800" />
 		<property name="idleConnectionTestPeriod" value="60" />
 		<property name="acquireRetryAttempts" value="3" />
@@ -59,8 +68,10 @@ SQL调用依赖需要加载一个配置文件 /config/spring/common/appcontext-d
 		<property name="numHelperThreads" value="6" />
 		<property name="maxAdministrativeTaskTime" value="5" />
 		<property name="preferredTestQuery" value="SELECT 1" />  
-        <property name="checkoutTimeout" value="1000" />
 	</bean>
+
+支持c3p0所有数据源配置，而对于tomcat-jdbc，仅支持上述几个连接池大小的配置。
+对于tomcat-jdbc的其他配置，zebra配置了一套默认值。
 
 ### 在 Spring 中使用默认 DataSource 的配置
 
