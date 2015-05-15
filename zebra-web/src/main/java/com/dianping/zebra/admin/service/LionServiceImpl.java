@@ -46,7 +46,6 @@ public class LionServiceImpl implements LionService {
 		PRODUCT_ENV.add("product");
 		PRODUCT_ENV.add("product-hm");
 		DEV_ENV = new LinkedHashSet<String>();
-		DEV_ENV.add("dev");
 		DEV_ENV.add("alpha");
 		DEV_ENV.add("qa");
 		DEV_ENV.add("performance");

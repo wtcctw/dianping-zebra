@@ -4,10 +4,14 @@ zebraWeb.controller('doc', function($scope,$location){
     };
 });
 
-zebraWeb.controller('monitor', function ($scope, $http) {
+zebraWeb.controller('monitor', function ($scope, $http,loginService) {
     $scope.load = function () {
         $http.get('/a/monitor/list').success(function (data, status, headers, config) {
             $scope.statusList = data;
+        }).error(function (data, status, headers, config) {
+            if (status == 401) {
+                loginService.login();
+            }
         });
         
         $http.get('/a/mha/allMarkedDown').success(function (data, status, headers, config) {
@@ -46,12 +50,15 @@ zebraWeb.controller('monitor', function ($scope, $http) {
 	}
 });
 
-zebraWeb.controller('update', function ($scope, $http) {
+zebraWeb.controller('update', function ($scope, $http, loginService) {
     $http.get('/a/update/index').success(function (data, status, headers, config) {
         $scope.predicate = 'name';
         $scope.report = data;
+    }).error(function (data, status, headers, config) {
+        if (status == 401) {
+            loginService.login();
+        }
     });
-
 });
 
 zebraWeb.controller('shard', function ($scope, $http, shardService) {
@@ -311,6 +318,10 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window
         $http.get('/a/update/delete-info?app=' + $stateParams.name + '&ip=' + ip + '&beanName=' + beanName).success(function (data) {
             if (!!data) {
                 $scope.load();
+            }
+        }).error(function (data, status, headers, config) {
+            if (status == 401) {
+                loginService.login();
             }
         });
     }

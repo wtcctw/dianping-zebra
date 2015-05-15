@@ -44,22 +44,116 @@ public class ConfigController {
 	@Autowired
 	private ConnectionService connectionService;
 
+	@RequestMapping(value = "/autoreplace", method = RequestMethod.POST)
+	@ResponseBody
+	public Object autoReplace(String jdbcRef, String env, boolean isNew) throws Exception {
+		if (isNew) {
+			dalConfigService.addItemIntoWhiteList(env, jdbcRef);
+		} else {
+			dalConfigService.deleteItemFromWhiteList(env, jdbcRef);
+		}
+
+		return null;
+	}
+
+	private String convertEnv(String env) {
+		if (Strings.isNullOrEmpty(env)) {
+			env = EnvZooKeeperConfig.getEnv();
+		}
+		return env;
+	}
+
+	private String convertKey(String key) {
+		if (!Strings.isNullOrEmpty(key) && key.equals("dpreview")) {
+			key = "DPReview";
+		}
+		return key;
+	}
+
+	@RequestMapping(value = "/create", method = RequestMethod.POST)
+	@ResponseBody
+	public Object create(String project, String key) throws Exception {
+		if (project.equals("groupds")) {
+			if (Strings.isNullOrEmpty(key)) {
+				throw new NullPointerException("key");
+			}
+			String dskey = String.format("groupds.%s.mapping", key.toLowerCase());
+
+			lionService.createKey("groupds", dskey);
+			lionService.removeUnset(dskey);
+		} else if (project.equals("ds")) {
+		}
+		return null;
+	}
+
+	@RequestMapping(value = "/ds", method = RequestMethod.GET)
+	@ResponseBody
+	public Object ds(String env, String key, String otherkey) throws Exception {
+		return dalConfigService.getDsConfig(env, key, otherkey);
+	}
+
 	@RequestMapping(value = "/env", method = RequestMethod.GET)
 	@ResponseBody
 	public Object env() throws Exception {
 		Object responseObject;
 
-		if ("qa".equals(currentEnv) || "alpha".equals(currentEnv)) {
+		if (lionService.isDev()) {
 			responseObject = lionService.getDevEnv();
 		} else if ("prelease".equals(currentEnv)) {
 			responseObject = new String[] { "prelease" };
-		} else if (lionService.isDev()) {
-			responseObject = new String[] { "dev" };
 		} else {
 			responseObject = lionService.getAllEnv();
 		}
 
 		return responseObject;
+	}
+
+	@RequestMapping(value = "/getConfig", method = RequestMethod.GET)
+	@ResponseBody
+	public ConnectionStatusDto getConfig(String env, String key) throws Exception {
+		env = convertEnv(env);
+		key = convertKey(key.toLowerCase());
+
+		if (env.equalsIgnoreCase(currentEnv)) {
+			DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager("remote", key);
+
+			ConnectionStatusDto dto = new ConnectionStatusDto();
+			dto.setConfig(configManager.getGroupDataSourceConfig().toString());
+			dto.setConnected(true);
+
+			configManager.close();
+
+			return dto;
+		} else {
+			String host = getHost(env);
+			if (Strings.isNullOrEmpty(host)) {
+				throw new NullPointerException("host");
+			}
+			String url = getUrl(env, key, host);
+
+			RestTemplate client = new RestTemplate();
+			return client.exchange(url, HttpMethod.GET, null, ConnectionStatusDto.class).getBody();
+		}
+	}
+
+	private String getHost(String env) throws Exception {
+		String host = "";
+		if ("alpha".equals(env)) {
+			host = "http://192.168.214.228:8080";
+		} else if ("qa".equals(env)) {
+			host = "http://192.168.217.69:8080";
+		} else if ("prelease".equals(env)) {
+			host = "http://10.2.8.65:8080";
+		} else if ("product".equals(env)) {
+			host = "http://zebra.dp";
+		} else {
+			throw new Exception("Error: unrecognized lion env!");
+		}
+		return host;
+	}
+
+	private String getUrl(String env, String key, String host) {
+		return host + "/a/config/test?key=" + key + "&env=" + env;
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
@@ -115,56 +209,13 @@ public class ConfigController {
 		return false;
 	}
 
-	@RequestMapping(value = "/updateds", method = RequestMethod.POST)
-	@ResponseBody
-	public Object updateds(boolean force, @RequestBody DalConfigService.GroupConfigModel dsConfig) throws Exception {
-		dalConfigService.updateDsConfig(dsConfig, force);
-		return null;
-	}
-
-	@RequestMapping(value = "/autoreplace", method = RequestMethod.POST)
-	@ResponseBody
-	public Object autoReplace(String jdbcRef, String env, boolean isNew) throws Exception {
-		if (isNew) {
-			dalConfigService.addItemIntoWhiteList(env, jdbcRef);
-		} else {
-			dalConfigService.deleteItemFromWhiteList(env, jdbcRef);
-		}
-
-		return null;
-	}
-
-	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	@ResponseBody
-	public Object create(String project, String key) throws Exception {
-		if (project.equals("groupds")) {
-			if (Strings.isNullOrEmpty(key)) {
-				throw new NullPointerException("key");
-			}
-			String dskey = String.format("groupds.%s.mapping", key.toLowerCase());
-
-			lionService.createKey("groupds", dskey);
-
-			lionService.removeUnset(dskey);
-
-		} else if (project.equals("ds")) {
-		}
-		return null;
-	}
-
-	@RequestMapping(value = "/ds", method = RequestMethod.GET)
-	@ResponseBody
-	public Object ds(String env, String key, String otherkey) throws Exception {
-		return dalConfigService.getDsConfig(env, key, otherkey);
-	}
-
 	@RequestMapping(value = "/test", method = RequestMethod.GET)
 	@ResponseBody
 	public ConnectionStatusDto test(String env, String key) throws Exception {
 		env = convertEnv(env);
 		key = convertKey(key.toLowerCase());
 
-		if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
+		if (env.equalsIgnoreCase(currentEnv)) {
 			return connectionService.getConnectionResult(lionService.isProduct(), key, null);
 		} else {
 			String host = getHost(env);
@@ -185,7 +236,7 @@ public class ConfigController {
 		env = convertEnv(env);
 		key = convertKey(key.toLowerCase());
 
-		if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
+		if (env.equalsIgnoreCase(currentEnv)) {
 			return connectionService.getConnectionResult(lionService.isProduct(), key, dsConfig);
 		} else {
 			String host = getHost(env);
@@ -199,66 +250,11 @@ public class ConfigController {
 			      ConnectionStatusDto.class).getBody();
 		}
 	}
-	
-	@RequestMapping(value = "/getConfig", method = RequestMethod.GET)
+
+	@RequestMapping(value = "/updateds", method = RequestMethod.POST)
 	@ResponseBody
-	public ConnectionStatusDto getConfig(String env, String key) throws Exception {
-		env = convertEnv(env);
-		key = convertKey(key.toLowerCase());
-
-		if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
-			DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager("remote", key);
-			
-			ConnectionStatusDto dto = new ConnectionStatusDto();
-			dto.setConfig(configManager.getGroupDataSourceConfig().toString());
-			dto.setConnected(true);
-			
-			configManager.close();
-			
-			return dto;
-		} else {
-			String host = getHost(env);
-			if (Strings.isNullOrEmpty(host)) {
-				throw new NullPointerException("host");
-			}
-			String url = getUrl(env, key, host);
-
-			RestTemplate client = new RestTemplate();
-			return client.exchange(url, HttpMethod.GET, null, ConnectionStatusDto.class).getBody();
-		}
-	}
-
-	private String getUrl(String env, String key, String host) {
-		return host + "/a/config/test?key=" + key + "&env=" + env;
-	}
-
-	private String getHost(String env) throws Exception {
-		String host = "";
-		if ("alpha".equals(env)) {
-			host = "http://192.168.214.228:8080";
-		} else if ("qa".equals(env)) {
-			host = "http://192.168.217.69:8080";
-		} else if ("prelease".equals(env)) {
-			host = "http://10.2.8.65:8080";
-		} else if ("product".equals(env)) {
-			host = "http://zebra.dp";
-		} else {
-			throw new Exception("Error: unrecognized lion env!");
-		}
-		return host;
-	}
-
-	private String convertKey(String key) {
-		if (!Strings.isNullOrEmpty(key) && key.equals("dpreview")) {
-			key = "DPReview";
-		}
-		return key;
-	}
-
-	private String convertEnv(String env) {
-		if (Strings.isNullOrEmpty(env)) {
-			env = EnvZooKeeperConfig.getEnv();
-		}
-		return env;
+	public Object updateds(boolean force, @RequestBody DalConfigService.GroupConfigModel dsConfig) throws Exception {
+		dalConfigService.updateDsConfig(dsConfig, force);
+		return null;
 	}
 }
