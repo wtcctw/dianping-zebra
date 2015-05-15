@@ -21,6 +21,8 @@ import com.dianping.zebra.admin.dto.ConnectionStatusDto;
 import com.dianping.zebra.admin.service.ConnectionService;
 import com.dianping.zebra.admin.service.DalConfigService;
 import com.dianping.zebra.admin.service.LionService;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager.ReadOrWriteRole;
 import com.google.common.base.Strings;
 
@@ -160,7 +162,7 @@ public class ConfigController {
 	@ResponseBody
 	public ConnectionStatusDto test(String env, String key) throws Exception {
 		env = convertEnv(env);
-		key = convertKey(key);
+		key = convertKey(key.toLowerCase());
 
 		if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
 			return connectionService.getConnectionResult(lionService.isProduct(), key, null);
@@ -181,7 +183,7 @@ public class ConfigController {
 	public Object testWithConfig(String env, String key, @RequestBody DalConfigService.GroupConfigModel dsConfig)
 	      throws Exception {
 		env = convertEnv(env);
-		key = convertKey(key);
+		key = convertKey(key.toLowerCase());
 
 		if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
 			return connectionService.getConnectionResult(lionService.isProduct(), key, dsConfig);
@@ -195,6 +197,34 @@ public class ConfigController {
 			RestTemplate client = new RestTemplate();
 			return client.exchange(url, HttpMethod.POST, new HttpEntity<DalConfigService.GroupConfigModel>(dsConfig),
 			      ConnectionStatusDto.class).getBody();
+		}
+	}
+	
+	@RequestMapping(value = "/getConfig", method = RequestMethod.GET)
+	@ResponseBody
+	public ConnectionStatusDto getConfig(String env, String key) throws Exception {
+		env = convertEnv(env);
+		key = convertKey(key.toLowerCase());
+
+		if (env.equalsIgnoreCase(currentEnv) || "dev".equals(env)) {
+			DataSourceConfigManager configManager = DataSourceConfigManagerFactory.getConfigManager("remote", key);
+			
+			ConnectionStatusDto dto = new ConnectionStatusDto();
+			dto.setConfig(configManager.getGroupDataSourceConfig().toString());
+			dto.setConnected(true);
+			
+			configManager.close();
+			
+			return dto;
+		} else {
+			String host = getHost(env);
+			if (Strings.isNullOrEmpty(host)) {
+				throw new NullPointerException("host");
+			}
+			String url = getUrl(env, key, host);
+
+			RestTemplate client = new RestTemplate();
+			return client.exchange(url, HttpMethod.GET, null, ConnectionStatusDto.class).getBody();
 		}
 	}
 
@@ -219,7 +249,7 @@ public class ConfigController {
 	}
 
 	private String convertKey(String key) {
-		if (!Strings.isNullOrEmpty(key) && key.toLowerCase().equals("dpreview")) {
+		if (!Strings.isNullOrEmpty(key) && key.equals("dpreview")) {
 			key = "DPReview";
 		}
 		return key;

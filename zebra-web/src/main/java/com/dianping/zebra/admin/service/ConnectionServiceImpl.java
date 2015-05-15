@@ -12,9 +12,6 @@ import com.dianping.zebra.util.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.beans.PropertyChangeListener;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 
 @Service
@@ -72,8 +69,6 @@ public class ConnectionServiceImpl implements ConnectionService {
 			ds.setFilter("cat");
 			ds.init();
 
-			testDs(ds);
-
 			result.setConnected(true);
 		} catch (Exception t) {
 			Cat.logError(t);
@@ -112,23 +107,5 @@ public class ConnectionServiceImpl implements ConnectionService {
 			      config.getValue().getPassword() != null ? StringUtils.repeat("*", config.getValue().getPassword()
 			            .length()) : null);
 		}
-	}
-
-	public void testDs(GroupDataSource ds) throws SQLException {
-		Connection conn = null;
-		Statement stmt = null;
-		try {
-			conn = ds.getConnection();
-			stmt = conn.createStatement();
-			stmt.executeQuery("select 1");
-		} finally {
-			if (conn != null) {
-				conn.close();
-			}
-			if (stmt != null) {
-				stmt.close();
-			}
-		}
-
 	}
 }
