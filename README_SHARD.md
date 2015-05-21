@@ -1,5 +1,32 @@
 ## DAL SHARD 使用手册
 
+### 如何接入
+用户只需要将在spring中加入以下的datasource即可，不需关系分库细节。目前还没有做到动态修改分库分表的规则，未来要实现。
+
+	<bean id="shardDs" class="com.dianping.zebra.shard.jdbc.ShardDataSource" init-method="init">
+		<!--ruleName是分库分布的规则名，该规则可以在lion上看到-->
+		<property name="ruleName" value="welife" />   
+	</bean>
+
+#### 分库分表规则
+每个规则都有一个名字，比如`tgorderRule`，该规则可以在lion上的shardds.welife.shard看到。规则类似如下：
+
+	{
+		"tableShardConfigs":[
+			{"tableName":"welife_users","dimensionConfigs":[
+				{"dbRule":"crc32(#bid#) %10","dbIndexes":"welife0,welife1,welife2,welife3,welife4,welife5,welife6,welife7,welife8,welife9","tbRule":"(crc32(#bid#)/10).toLong()%10","tbSuffix":"everydb:[0,9]","isMaster":true}
+			],"generatedPK":"pk"}
+		]
+	}
+
+	tableName: 需要分库分表的表名
+	dimensionConfigs: 具体对这个表的分库分表的规则
+	dbRule: 是库名的路由规则，值是一个groovy脚本计算得出
+	dbIndexes: 对应的是GroupDataSource的jdbcRef，即相应的数据库
+	tbRule: 是分表的路由规则，值是groovy脚本计算得出
+	generatedPK: 是否生成主键，目前未使用。
+	
+
 ### SQL 支持列表
 
 假设有一张表：User，主维度是：Id，辅维度是：CityId
