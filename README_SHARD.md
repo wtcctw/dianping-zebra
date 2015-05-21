@@ -1,7 +1,7 @@
 ## DAL SHARD 使用手册
 
 ### 如何接入
-用户只需要将在spring中加入以下的datasource即可，不需关系分库细节。目前还没有做到动态修改分库分表的规则，未来要实现。
+用户只需要将在spring中加入以下的datasource即可，不需关系分库细节。
 
 	<bean id="shardDs" class="com.dianping.zebra.shard.jdbc.ShardDataSource" init-method="init">
 		<!--ruleName是分库分布的规则名，该规则可以在lion上看到-->
