@@ -14,7 +14,11 @@
 	{
 		"tableShardConfigs":[
 			{"tableName":"welife_users","dimensionConfigs":[
-				{"dbRule":"crc32(#bid#) %10","dbIndexes":"welife0,welife1,welife2,welife3,welife4,welife5,welife6,welife7,welife8,welife9","tbRule":"(crc32(#bid#)/10).toLong()%10","tbSuffix":"everydb:[0,9]","isMaster":true}
+				{"dbRule":"crc32(#bid#) %10",
+				"dbIndexes":"welife0,welife1,welife2,welife3,welife4,welife5,welife6,welife7,welife8,welife9",
+				"tbRule":"(crc32(#bid#)/10).toLong()%10",
+				"tbSuffix":"everydb:[0,9]",
+				"isMaster":true}
 			],"generatedPK":"pk"}
 		]
 	}
@@ -24,6 +28,7 @@
 	dbRule: 是库名的路由规则，值是一个groovy脚本计算得出
 	dbIndexes: 对应的是GroupDataSource的jdbcRef，即相应的数据库
 	tbRule: 是分表的路由规则，值是groovy脚本计算得出
+	tbSuffix: 是表的后缀命名规则，分[everydb | alldb]。everydb指任何库上的表名都相同，从welife_users0到welife_users9，而alldb是指10表名在十个库上都不一样。
 	generatedPK: 是否生成主键，目前未使用。
 	
 
