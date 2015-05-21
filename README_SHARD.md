@@ -9,7 +9,7 @@
 	</bean>
 
 #### 分库分表规则
-每个规则都有一个名字，比如`welife`，该规则可以在lion上的shardds.welife.shard看到。规则类似如下：
+每个规则都有一个名字，比如`welife`，该规则可以在lion上的`shardds.welife.shard`看到。规则类似如下：
 
 	{
 		"tableShardConfigs":[
