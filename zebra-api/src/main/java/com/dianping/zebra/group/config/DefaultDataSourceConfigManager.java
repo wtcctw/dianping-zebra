@@ -252,6 +252,15 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 
 					dsConfig.getProperties().add(any);
 				}
+
+				// hack for maxStatementsPerConnection, since the lion key ${ds.$.jdbc.properties} does not set this value.
+				if (!sysMap.containsKey("maxStatementsPerConnection")) {
+					Any any = new Any();
+					any.setName("maxStatementsPerConnection");
+					any.setValue("100");
+
+					dsConfig.getProperties().add(any);
+				}
 			}
 		}
 

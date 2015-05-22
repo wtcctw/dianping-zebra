@@ -54,8 +54,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	// config
 	protected String jdbcRef;
 
-	// support two type : "c3p0" and "tomcat-jdbc"
-	protected String poolType;
+	protected String poolType;// support two type : "c3p0" and "tomcat-jdbc"
 
 	protected RouterType routerType = RouterType.ROUND_ROBIN;
 
