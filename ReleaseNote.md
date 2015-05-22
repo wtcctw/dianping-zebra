@@ -1,6 +1,10 @@
 ##  更新说明
 
-### 2.7.5 NEW!
+### 2.7.6 NEW!
+* [+] 增加底层对tomcat-jdbc的支持
+* [+] 增加配置支持GroupDataSource可以选择底层用c3p0还是tomcat-jdbc
+
+### 2.7.5
 * [/] 修正了无法正确关闭写库连接的bug
 * [+] 增加了在写库切换时取不到连接时打点到CAT
 * [/] 修正了zebra-ds-monitor-client上报数据时版本上报错误的bug
