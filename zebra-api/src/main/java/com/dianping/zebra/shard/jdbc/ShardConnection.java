@@ -252,8 +252,24 @@ public class ShardConnection implements Connection {
 		throw new UnsupportedOperationException("Zebra unsupport createStruct");
 	}
 
-	public Map<String, Connection> getActualConnections() {
-		return actualConnections;
+	public Connection getRealConnection(String jdbcRef) {
+		return actualConnections.get(jdbcRef);
+	}
+
+	public void setRealConnection(String jdbcRef, Connection conn) {
+		if (actualConnections.containsKey(jdbcRef)) {
+			// in case connection leak
+			Connection deadConn = actualConnections.get(jdbcRef);
+
+			if (deadConn != null) {
+				try {
+					deadConn.close();
+				} catch (SQLException ignore) {
+				}
+			}
+		}
+
+		actualConnections.put(jdbcRef, conn);
 	}
 
 	public Set<Statement> getAttachedStatements() {

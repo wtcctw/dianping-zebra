@@ -184,12 +184,12 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
-					Connection conn = getShardConnection().getActualConnections().get(targetedSql.getDataSourceName());
+					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						conn = targetedSql.getDataSource().getConnection();
 						conn.setAutoCommit(autoCommit);
 
-						getShardConnection().getActualConnections().put(targetedSql.getDataSourceName(), conn);
+						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
 					}
 					PreparedStatement stmt = _prepareStatement(conn, executableSql);
 					actualStatements.add(stmt);
@@ -218,7 +218,6 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 	 */
 	@Override
 	public int executeUpdate() throws SQLException {
-
 		checkClosed();
 
 		RouterTarget routerTarget = routingAndCheck(sql, getParams());
@@ -231,12 +230,12 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
-					Connection conn = getShardConnection().getActualConnections().get(targetedSql.getDataSourceName());
+					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						conn = targetedSql.getDataSource().getConnection();
 						conn.setAutoCommit(autoCommit);
 
-						getShardConnection().getActualConnections().put(targetedSql.getDataSourceName(), conn);
+						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
 					}
 					PreparedStatement stmt = _prepareStatement(conn, executableSql);
 					actualStatements.add(stmt);

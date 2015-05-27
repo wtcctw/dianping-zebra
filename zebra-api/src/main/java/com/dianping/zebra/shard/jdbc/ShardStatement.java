@@ -42,7 +42,7 @@ public class ShardStatement implements Statement {
 
 	private DataSourceRouter router;
 
-	private ShardConnection connection;
+	protected ShardConnection connection;
 
 	private boolean closed;
 
@@ -56,7 +56,9 @@ public class ShardStatement implements Statement {
 
 	private int resultSetHoldability = -1;
 
-	private static final String SELECT_GENERATEDKEY_SQL_PATTERN = "@@IDENTITY";
+	private static final String SELECT_GENERATEDKEY_SQL_PATTERN = "@@identity";
+
+	private static final String SELECT_LAST_INSERT_ID = "last_insert_id()";
 
 	private static final Map<String, JudgeSQLRetVal> judgeSqlRetValCache = Collections
 	      .synchronizedMap(new LRUCache<String, JudgeSQLRetVal>(1000));
@@ -109,12 +111,12 @@ public class ShardStatement implements Statement {
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
-					Connection conn = getShardConnection().getActualConnections().get(targetedSql.getDataSourceName());
+					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						conn = targetedSql.getDataSource().getConnection();
-
 						conn.setAutoCommit(autoCommit);
-						getShardConnection().getActualConnections().put(targetedSql.getDataSourceName(), conn);
+
+						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
 					}
 					Statement stmt = createStatementInternal(conn);
 					actualStatements.add(stmt);
@@ -169,8 +171,10 @@ public class ShardStatement implements Statement {
 	protected ResultSet beforeQuery(String sql) throws SQLException {
 		// 特殊处理 SELECT @@IDENTITY AS A
 		// 这种SQL，因为这种SQL需要从同一个DPConnection会话中获得上次Insert语句的返回值
-		ResultSet generatedKey = getShardConnection().getGeneratedKey();
-		if (generatedKey != null && sql != null && sql.indexOf(SELECT_GENERATEDKEY_SQL_PATTERN) >= 0) {
+		ResultSet generatedKey = connection.getGeneratedKey();
+		sql = sql.toLowerCase();
+		if (generatedKey != null && sql != null
+		      && (sql.indexOf(SELECT_GENERATEDKEY_SQL_PATTERN) >= 0 || sql.indexOf(SELECT_LAST_INSERT_ID) >= 0)) {
 			List<ResultSet> rsList = new ArrayList<ResultSet>();
 			generatedKey.beforeFirst();
 			rsList.add(generatedKey);
@@ -378,12 +382,12 @@ public class ShardStatement implements Statement {
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
-					Connection conn = getShardConnection().getActualConnections().get(targetedSql.getDataSourceName());
+					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						conn = targetedSql.getDataSource().getConnection();
 						conn.setAutoCommit(autoCommit);
 
-						getShardConnection().getActualConnections().put(targetedSql.getDataSourceName(), conn);
+						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
 					}
 					Statement stmt = createStatementInternal(conn);
 					actualStatements.add(stmt);
@@ -453,9 +457,9 @@ public class ShardStatement implements Statement {
 	protected void getAndSetGeneratedKeys(Statement stmt) throws SQLException {
 		ResultSet rs = stmt.getGeneratedKeys();
 		if (rs.next()) {
-			getShardConnection().setGeneratedKey(rs);
+			connection.setGeneratedKey(rs);
 		} else {
-			getShardConnection().setGeneratedKey(null);
+			connection.setGeneratedKey(null);
 		}
 	}
 
@@ -598,10 +602,6 @@ public class ShardStatement implements Statement {
 
 	public DataSourceRouter getRouter() {
 		return router;
-	}
-
-	public ShardConnection getShardConnection() {
-		return connection;
 	}
 
 	/*

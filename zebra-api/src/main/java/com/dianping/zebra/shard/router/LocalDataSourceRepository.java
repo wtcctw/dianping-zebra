@@ -39,11 +39,11 @@ public class LocalDataSourceRepository implements DataSourceRepository {
 			String dbIndex = dataSourceEntry.getKey();
 			DataSource dataSource = dataSourceEntry.getValue();
 
-			registerDataSource(dbIndex, dataSource, null);
+			registerDataSource(dbIndex, dataSource);
 		}
 	}
 
-	private void registerDataSource(String name, DataSource dataSource, String alias) {
+	private void registerDataSource(String name, DataSource dataSource) {
 		dataSources.put(name.toLowerCase(), new NamedDataSource(name, dataSource));
 	}
 
