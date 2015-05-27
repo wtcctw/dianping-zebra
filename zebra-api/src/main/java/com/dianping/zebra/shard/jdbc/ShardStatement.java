@@ -482,10 +482,6 @@ public class ShardStatement implements Statement {
 		return connection;
 	}
 
-	public ShardConnection getShardConnection() {
-		return connection;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -608,6 +604,10 @@ public class ShardStatement implements Statement {
 
 	public DataSourceRouter getRouter() {
 		return router;
+	}
+
+	public ShardConnection getShardConnection() {
+		return connection;
 	}
 
 	/*

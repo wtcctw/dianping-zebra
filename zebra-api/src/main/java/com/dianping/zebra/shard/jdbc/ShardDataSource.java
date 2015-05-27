@@ -57,30 +57,6 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private ConfigService configService;
 
-	@Override
-	public Connection getConnection() throws SQLException {
-		return getConnection(null, null);
-	}
-
-	public Connection getConnection(boolean switchOn) throws SQLException {
-		return getConnection(null, null, switchOn);
-	}
-
-	public Connection getConnection(String username, String password, boolean switchOn) throws SQLException {
-		if (switchOn) {
-			ShardConnection connection = new ShardConnection(username, password);
-			connection.setRouter(router);
-			return connection;
-		} else {
-			return originDataSource.getConnection();
-		}
-	}
-
-	@Override
-	public Connection getConnection(String username, String password) throws SQLException {
-		return getConnection(username, password, this.switchOn);
-	}
-
 	public void close() {
 		for (DataSource ds : dataSourcePool.values()) {
 			if (ds instanceof GroupDataSource) {
@@ -97,6 +73,38 @@ public class ShardDataSource extends AbstractDataSource {
 			} catch (SQLException ignore) {
 			}
 		}
+	}
+
+	@Override
+	public Connection getConnection() throws SQLException {
+		return getConnection(null, null);
+	}
+
+	public Connection getConnection(boolean switchOn) throws SQLException {
+		return getConnection(null, null, switchOn);
+	}
+
+	@Override
+	public Connection getConnection(String username, String password) throws SQLException {
+		return getConnection(username, password, this.switchOn);
+	}
+
+	public Connection getConnection(String username, String password, boolean switchOn) throws SQLException {
+		if (switchOn) {
+			ShardConnection connection = new ShardConnection(username, password);
+			connection.setRouter(router);
+			return connection;
+		} else {
+			return originDataSource.getConnection();
+		}
+	}
+
+	public DataSource getOriginDataSource() {
+		return originDataSource;
+	}
+
+	public DataSourceRouter getRouter() {
+		return router;
 	}
 
 	public void init() {
@@ -152,39 +160,31 @@ public class ShardDataSource extends AbstractDataSource {
 		logger.info(String.format("ShardDataSource(%s) successfully initialized.", ruleName));
 	}
 
-	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
-		this.dataSourcePool = dataSourcePool;
-	}
-
-	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
-		this.routerFactory = routerFactory;
-	}
-
-	public void setSwitchOn(boolean switchOn) {
-		this.switchOn = switchOn;
-	}
-
-	public void setRuleName(String ruleName) {
-		this.ruleName = ruleName;
+	public void setConfigService(ConfigService configService) {
+		this.configService = configService;
 	}
 
 	public void setConfigType(String configType) {
 		this.configManagerType = configType;
 	}
 
-	public void setConfigService(ConfigService configService) {
-		this.configService = configService;
+	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
+		this.dataSourcePool = dataSourcePool;
 	}
 
 	public void setOriginDataSource(DataSource originDataSource) {
 		this.originDataSource = originDataSource;
 	}
 
-	public DataSource getOriginDataSource() {
-		return originDataSource;
+	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
+		this.routerFactory = routerFactory;
 	}
 
-	public DataSourceRouter getRouter() {
-		return router;
+	public void setRuleName(String ruleName) {
+		this.ruleName = ruleName;
+	}
+
+	public void setSwitchOn(boolean switchOn) {
+		this.switchOn = switchOn;
 	}
 }
