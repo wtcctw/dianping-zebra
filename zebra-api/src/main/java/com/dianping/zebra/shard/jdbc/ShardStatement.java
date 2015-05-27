@@ -25,36 +25,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import com.dianping.zebra.shard.jdbc.data.DataPool;
-import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
-import com.dianping.zebra.util.StringUtils;
 import com.dianping.zebra.shard.router.DataSourceRouteException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.shard.router.TargetedSql;
+import com.dianping.zebra.util.JDBCUtils;
+import com.dianping.zebra.util.StringUtils;
 
 /**
- * Zebra的Statement wrapper
- * 
  * @author Leo Liang
  * 
  */
 public class ShardStatement implements Statement {
 
-	private static final Logger log = Logger.getLogger(ShardStatement.class);
-
 	private DataSourceRouter router;
 
-	private ShardConnection connectionWrapper;
+	private ShardConnection connection;
 
 	private boolean closed;
 
 	private boolean readOnly;
 
-	private boolean autoCommit = true;
+	protected boolean autoCommit = true;
 
 	private int resultSetType = -1;
 
@@ -117,10 +111,12 @@ public class ShardStatement implements Statement {
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
-					Connection conn = getConnectionWrapper().getActualConnections().get(targetedSql.getDataSourceName());
+					Connection conn = getShardConnection().getActualConnections().get(targetedSql.getDataSourceName());
 					if (conn == null) {
 						conn = targetedSql.getDataSource().getConnection();
-						getConnectionWrapper().getActualConnections().put(targetedSql.getDataSourceName(), conn);
+
+						conn.setAutoCommit(autoCommit);
+						getShardConnection().getActualConnections().put(targetedSql.getDataSourceName(), conn);
 					}
 					Statement stmt = createStatementInternal(conn);
 					actualStatements.add(stmt);
@@ -143,8 +139,6 @@ public class ShardStatement implements Statement {
 					}
 				} catch (SQLException e) {
 					exceptions.add(e);
-
-					log.error(e);
 				}
 			}
 		}
@@ -178,17 +172,18 @@ public class ShardStatement implements Statement {
 	protected ResultSet beforeQuery(String sql) throws SQLException {
 		// 特殊处理 SELECT @@IDENTITY AS A
 		// 这种SQL，因为这种SQL需要从同一个DPConnection会话中获得上次Insert语句的返回值
-		if (getConnectionWrapper().getGeneratedKey() != null && sql != null
-		      && sql.indexOf(SELECT_GENERATEDKEY_SQL_PATTERN) >= 0) {
-
-			ShardResultSet rs = new ShardResultSet();
-			rs.setStatementWrapper(this);
-			DataPool dataPool = new DataPool();
+		ResultSet generatedKey = getShardConnection().getGeneratedKey();
+		if (generatedKey != null && sql != null && sql.indexOf(SELECT_GENERATEDKEY_SQL_PATTERN) >= 0) {
 			List<ResultSet> rsList = new ArrayList<ResultSet>();
-			getConnectionWrapper().getGeneratedKey().beforeFirst();
-			rsList.add(getConnectionWrapper().getGeneratedKey());
+			generatedKey.beforeFirst();
+			rsList.add(generatedKey);
+
+			DataPool dataPool = new DataPool();
 			dataPool.setResultSets(rsList);
 			dataPool.setInMemory(false);
+
+			ShardResultSet rs = new ShardResultSet();
+			rs.setStatement(this);
 			rs.setDataPool(dataPool);
 
 			attachedResultSets.add(rs);
@@ -263,7 +258,6 @@ public class ShardStatement implements Statement {
 					resultSet.close();
 				} catch (SQLException e) {
 					exceptions.add(e);
-					log.error(e);
 				}
 			}
 
@@ -272,7 +266,6 @@ public class ShardStatement implements Statement {
 					stmt.close();
 				} catch (SQLException e) {
 					exceptions.add(e);
-					log.error(e);
 				}
 			}
 		} finally {
@@ -380,7 +373,7 @@ public class ShardStatement implements Statement {
 		RouterTarget routerTarget = routingAndCheck(sql, null);
 
 		ShardResultSet rs = new ShardResultSet();
-		rs.setStatementWrapper(this);
+		rs.setStatement(this);
 		rs.setRouterTarget(routerTarget);
 
 		attachedResultSets.add(rs);
@@ -390,17 +383,18 @@ public class ShardStatement implements Statement {
 		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
-					Connection conn = getConnectionWrapper().getActualConnections().get(targetedSql.getDataSourceName());
+					Connection conn = getShardConnection().getActualConnections().get(targetedSql.getDataSourceName());
 					if (conn == null) {
 						conn = targetedSql.getDataSource().getConnection();
-						getConnectionWrapper().getActualConnections().put(targetedSql.getDataSourceName(), conn);
+						conn.setAutoCommit(autoCommit);
+
+						getShardConnection().getActualConnections().put(targetedSql.getDataSourceName(), conn);
 					}
 					Statement stmt = createStatementInternal(conn);
 					actualStatements.add(stmt);
 					rs.getActualResultSets().add(stmt.executeQuery(executableSql));
 				} catch (SQLException e) {
 					exceptions.add(e);
-					log.error(e);
 				}
 			}
 
@@ -409,7 +403,12 @@ public class ShardStatement implements Statement {
 		this.results = rs;
 		this.moreResults = false;
 		this.updateCount = -1;
-		rs.init();
+
+		try {
+			rs.init();
+		} catch (SQLException e) {
+			exceptions.add(e);
+		}
 
 		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
 
@@ -460,9 +459,9 @@ public class ShardStatement implements Statement {
 	protected void getAndSetGeneratedKeys(Statement stmt) throws SQLException {
 		ResultSet rs = stmt.getGeneratedKeys();
 		if (rs.next()) {
-			getConnectionWrapper().setGeneratedKey(rs);
+			getShardConnection().setGeneratedKey(rs);
 		} else {
-			getConnectionWrapper().setGeneratedKey(null);
+			getShardConnection().setGeneratedKey(null);
 		}
 	}
 
@@ -480,11 +479,11 @@ public class ShardStatement implements Statement {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		return connectionWrapper;
+		return connection;
 	}
 
-	public ShardConnection getConnectionWrapper() {
-		return connectionWrapper;
+	public ShardConnection getShardConnection() {
+		return connection;
 	}
 
 	/*
@@ -739,8 +738,8 @@ public class ShardStatement implements Statement {
 		this.autoCommit = autoCommit;
 	}
 
-	public void setConnectionWrapper(ShardConnection dpConnection) {
-		this.connectionWrapper = dpConnection;
+	public void setConnection(ShardConnection dpConnection) {
+		this.connection = dpConnection;
 	}
 
 	/*

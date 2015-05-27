@@ -12,33 +12,42 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import com.dianping.zebra.shard.jdbc.data.DataMerger;
-import com.dianping.zebra.shard.jdbc.data.DataPool;
-import com.dianping.zebra.shard.jdbc.data.DefaultDataMerger;
-import com.dianping.zebra.util.JDBCUtils;
-import com.dianping.zebra.shard.router.RouterTarget;
-
-import org.apache.log4j.Logger;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
+import com.dianping.zebra.shard.jdbc.data.DataMerger;
+import com.dianping.zebra.shard.jdbc.data.DataPool;
+import com.dianping.zebra.shard.jdbc.data.DefaultDataMerger;
+import com.dianping.zebra.shard.router.RouterTarget;
+import com.dianping.zebra.util.JDBCUtils;
+
 /**
- * Zebra的ResultSet wrapper
  * 
  * @author Leo Liang
  * 
  */
 public class ShardResultSet implements ResultSet {
-
-	private static Logger log = Logger.getLogger(ShardResultSet.class);
 
 	private ShardStatement statementWrapper;
 
@@ -134,7 +143,6 @@ public class ShardResultSet implements ResultSet {
 					actualResultSets.get(i).close();
 				} catch (SQLException e) {
 					exceptions.add(e);
-					log.error(e);
 				}
 			}
 		} finally {
@@ -1263,7 +1271,7 @@ public class ShardResultSet implements ResultSet {
 		this.routerTarget = routerTarget;
 	}
 
-	public void setStatementWrapper(ShardStatement statementWrapper) {
+	public void setStatement(ShardStatement statementWrapper) {
 		this.statementWrapper = statementWrapper;
 	}
 

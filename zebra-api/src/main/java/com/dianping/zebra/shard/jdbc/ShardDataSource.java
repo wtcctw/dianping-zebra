@@ -12,6 +12,17 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionConfigService;
@@ -24,18 +35,13 @@ import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 import com.dianping.zebra.util.StringUtils;
 
-import javax.sql.DataSource;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
-
 /**
  * @author Leo Liang
  * @author hao.zhu
  */
 public class ShardDataSource extends AbstractDataSource {
+
+	private static final Logger logger = LogManager.getLogger(ShardDataSource.class);
 
 	private Map<String, DataSource> dataSourcePool;
 
@@ -111,13 +117,13 @@ public class ShardDataSource extends AbstractDataSource {
 				dataSourcePool = routerFactory.getDataSourcePool();
 			}
 
-			String originDataSourceName = configService.getProperty(LionKey.getShardOriginDatasourceKey(ruleName));
+			String originJdbcRef = configService.getProperty(LionKey.getShardOriginDatasourceKey(ruleName));
 			final String switchOnValue = configService.getProperty(LionKey.getShardSiwtchOnKey(ruleName));
 
 			this.switchOn = "true".equals(switchOnValue);
 
-			if (originDataSource == null && StringUtils.isNotBlank(originDataSourceName)) {
-				GroupDataSource groupDataSource = new GroupDataSource(originDataSourceName);
+			if (originDataSource == null && StringUtils.isNotBlank(originJdbcRef)) {
+				GroupDataSource groupDataSource = new GroupDataSource(originJdbcRef);
 				groupDataSource.init();
 				this.originDataSource = groupDataSource;
 			}
@@ -142,6 +148,8 @@ public class ShardDataSource extends AbstractDataSource {
 		this.router = routerFactory.getRouter();
 		this.router.setDataSourcePool(dataSourcePool);
 		this.router.init();
+
+		logger.info(String.format("ShardDataSource(%s) successfully initialized.", ruleName));
 	}
 
 	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {

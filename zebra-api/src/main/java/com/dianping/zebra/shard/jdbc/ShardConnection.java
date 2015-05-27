@@ -15,8 +15,6 @@ package com.dianping.zebra.shard.jdbc;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 
-import org.apache.log4j.Logger;
-
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Executor;
@@ -27,8 +25,6 @@ import java.util.concurrent.Executor;
  * 
  */
 public class ShardConnection implements Connection {
-
-	private static final Logger log = Logger.getLogger(ShardConnection.class);
 
 	private DataSourceRouter router;
 
@@ -92,7 +88,6 @@ public class ShardConnection implements Connection {
 					generatedKey.close();
 				} catch (SQLException e) {
 					innerExceptions.add(e);
-					log.error(e);
 				}
 			}
 
@@ -101,18 +96,14 @@ public class ShardConnection implements Connection {
 					stmt.close();
 				} catch (SQLException e) {
 					innerExceptions.add(e);
-					log.error(e);
 				}
 			}
-
-			String errorMsgPrefix = "DS : ";
 
 			for (Map.Entry<String, Connection> entry : actualConnections.entrySet()) {
 				try {
 					entry.getValue().close();
 				} catch (SQLException e) {
 					innerExceptions.add(e);
-					log.error(errorMsgPrefix + entry.getKey(), e);
 				}
 			}
 		} finally {
@@ -139,14 +130,12 @@ public class ShardConnection implements Connection {
 		}
 
 		List<SQLException> innerExceptions = new ArrayList<SQLException>();
-		String errorMsgPrefix = "DS : ";
 
 		for (Map.Entry<String, Connection> entry : actualConnections.entrySet()) {
 			try {
 				entry.getValue().commit();
 			} catch (SQLException e) {
 				innerExceptions.add(e);
-				log.error(errorMsgPrefix + entry.getKey(), e);
 			}
 		}
 
@@ -216,7 +205,7 @@ public class ShardConnection implements Connection {
 		stmt.setRouter(router);
 		stmt.setAutoCommit(autoCommit);
 		stmt.setReadOnly(readOnly);
-		stmt.setConnectionWrapper(this);
+		stmt.setConnection(this);
 
 		attachedStatements.add(stmt);
 
@@ -475,7 +464,7 @@ public class ShardConnection implements Connection {
 		stmt.setRouter(router);
 		stmt.setAutoCommit(autoCommit);
 		stmt.setReadOnly(readOnly);
-		stmt.setConnectionWrapper(this);
+		stmt.setConnection(this);
 		stmt.setSql(sql);
 
 		attachedStatements.add(stmt);
@@ -571,16 +560,12 @@ public class ShardConnection implements Connection {
 		}
 
 		List<SQLException> exceptions = new ArrayList<SQLException>();
-		String errorMsgPrefix = "DS : ";
 
 		for (Map.Entry<String, Connection> entry : actualConnections.entrySet()) {
 			try {
 				entry.getValue().rollback();
 			} catch (SQLException e) {
-
 				exceptions.add(e);
-
-				log.error(errorMsgPrefix + entry.getKey(), e);
 			}
 		}
 

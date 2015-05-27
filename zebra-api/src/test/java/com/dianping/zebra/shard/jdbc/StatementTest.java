@@ -110,7 +110,7 @@ public class StatementTest extends ZebraBaseTestCase {
 		field.set(stmt, actualStmts);
 
 		ShardConnection conn = new ShardConnection();
-		stmt.setConnectionWrapper(conn);
+		stmt.setConnection(conn);
 		Set<Statement> attachedStatements = new HashSet<Statement>();
 		attachedStatements.add(stmt);
 		conn.setAttachedStatements(attachedStatements);
@@ -156,7 +156,7 @@ public class StatementTest extends ZebraBaseTestCase {
 		field.set(stmt, actualStmts);
 
 		ShardConnection conn = new ShardConnection();
-		stmt.setConnectionWrapper(conn);
+		stmt.setConnection(conn);
 		Set<Statement> attachedStatements = new HashSet<Statement>();
 		attachedStatements.add(stmt);
 		conn.setAttachedStatements(attachedStatements);
@@ -205,7 +205,7 @@ public class StatementTest extends ZebraBaseTestCase {
 		field.set(stmt, actualStmts);
 
 		ShardConnection conn = new ShardConnection();
-		stmt.setConnectionWrapper(conn);
+		stmt.setConnection(conn);
 		Set<Statement> attachedStatements = new HashSet<Statement>();
 		attachedStatements.add(stmt);
 		conn.setAttachedStatements(attachedStatements);
