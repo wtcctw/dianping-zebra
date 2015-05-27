@@ -42,9 +42,9 @@ public class StatementTest extends ZebraBaseTestCase {
 	protected String[] getSupportedOps() {
 		return new String[] { "getEventNotifier", "setSyncEventNotifier", "getAttachedResultSets",
 				"setAttachedResultSets", "setResultSetType", "setResultSetConcurrency", "setResultSetHoldability",
-				"getConnectionWrapper", "setConnectionWrapper", "isReadOnly", "setReadOnly", "isAutoCommit",
+				"getConnectionWrapper", "setConnection", "isReadOnly", "setReadOnly", "isAutoCommit",
 				"setAutoCommit", "getRouter", "setRouter", "checkClosed", "addBatch", "clearBatch", "close", "execute",
-				"executeQuery", "executeUpdate", "getConnection", "getMoreResults", "getResultSet",
+				"executeQuery", "executeUpdate", "getConnection", "getShardConnection", "getMoreResults", "getResultSet",
 				"getResultSetConcurrency", "getResultSetHoldability", "getResultSetType", "getUpdateCount", "isClosed"};
 	}
 

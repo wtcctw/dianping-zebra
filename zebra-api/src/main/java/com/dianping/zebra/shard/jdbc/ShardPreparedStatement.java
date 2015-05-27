@@ -135,14 +135,16 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 	 */
 	@Override
 	public boolean execute() throws SQLException {
-
 		JudgeSQLRetVal judgeSQLRetVal = judgeSQLType(sql);
+
 		if (judgeSQLRetVal.getSqlType() == SQLType.SELECT) {
 			executeQuery();
+
 			return true;
 		} else if (judgeSQLRetVal.getSqlType() == SQLType.INSERT || judgeSQLRetVal.getSqlType() == SQLType.UPDATE
 		      || judgeSQLRetVal.getSqlType() == SQLType.DELETE) {
 			executeUpdate();
+
 			return false;
 		} else {
 			throw new SQLException("only select, insert, update, delete sql is supported");
@@ -156,15 +158,14 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 	 */
 	@Override
 	public ResultSet executeQuery() throws SQLException {
-
 		checkClosed();
 
 		ResultSet specRS = beforeQuery(sql);
 		if (specRS != null) {
 			this.results = specRS;
-			this.moreResults = false;
 			this.updateCount = -1;
 			attachedResultSets.add(specRS);
+			
 			return this.results;
 		}
 
@@ -201,8 +202,8 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 		}
 
 		this.results = rs;
-		this.moreResults = false;
 		this.updateCount = -1;
+		
 		rs.init();
 
 		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
@@ -254,7 +255,6 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 		}
 
 		this.results = null;
-		this.moreResults = false;
 		this.updateCount = affectedRows;
 
 		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);

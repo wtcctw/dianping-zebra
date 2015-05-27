@@ -49,7 +49,7 @@ import com.dianping.zebra.util.JDBCUtils;
  */
 public class ShardResultSet implements ResultSet {
 
-	private ShardStatement statementWrapper;
+	private ShardStatement statement;
 
 	private DataPool dataPool = new DataPool();
 
@@ -852,11 +852,11 @@ public class ShardResultSet implements ResultSet {
 	 */
 	@Override
 	public Statement getStatement() throws SQLException {
-		return statementWrapper;
+		return statement;
 	}
 
-	public ShardStatement getStatementWrapper() {
-		return statementWrapper;
+	public ShardStatement getShardStatement() {
+		return statement;
 	}
 
 	/*
@@ -1272,7 +1272,7 @@ public class ShardResultSet implements ResultSet {
 	}
 
 	public void setStatement(ShardStatement statementWrapper) {
-		this.statementWrapper = statementWrapper;
+		this.statement = statementWrapper;
 	}
 
 	/*
