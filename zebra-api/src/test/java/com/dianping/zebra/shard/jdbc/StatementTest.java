@@ -45,7 +45,7 @@ public class StatementTest extends ZebraBaseTestCase {
 				"getConnectionWrapper", "setConnection", "isReadOnly", "setReadOnly", "isAutoCommit",
 				"setAutoCommit", "getRouter", "setRouter", "checkClosed", "addBatch", "clearBatch", "close", "execute",
 				"executeQuery", "executeUpdate", "getConnection", "getMoreResults", "getResultSet",
-				"getResultSetConcurrency", "getResultSetHoldability", "getResultSetType", "getUpdateCount", "isClosed"};
+				"getResultSetConcurrency", "getResultSetHoldability", "getResultSetType", "getUpdateCount", "isClosed","getGeneratedKeys"};
 	}
 
 	protected Object getTestObj() {

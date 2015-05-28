@@ -26,6 +26,9 @@ import org.junit.runners.Suite.SuiteClasses;
         SingleDBPreparedStatementLifeCycleTest.class,
         SpecialSQLTest.class,
         StatementTest.class,
+        ShardConnectionTest.class,
+        ShardStatementTest.class,
+        ShardPreparedStatementTest.class,
 
         //parser
         SelectTest.class,

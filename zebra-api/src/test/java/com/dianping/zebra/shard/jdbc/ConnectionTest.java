@@ -38,11 +38,10 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	protected String[] getSupportedOps() {
 		return new String[] { "DPConnection", "getAttachedStatements", "setAttachedStatements", "setClosed",
-				"getActualConnections", "setActualConnections", "getUsername", "setUsername", "getPassword",
+				"getRealConnection", "setRealConnection","setActualConnections","getUsername", "setUsername", "getPassword",
 				"setPassword", "getRouter", "setRouter", "close", "commit", "createStatement", "getAutoCommit",
 				"getMetaData", "getTransactionIsolation", "isClosed", "isReadOnly", "prepareStatement", "rollback",
-				"setAutoCommit", "setReadOnly", "setTransactionIsolation", "setSyncEventNotifier", "getEventNotifier",
-				"getGeneratedKey", "setGeneratedKey"};
+				"setAutoCommit", "setReadOnly", "setTransactionIsolation", "setSyncEventNotifier", "getEventNotifier"};
 	}
 
 	protected Object getTestObj() {

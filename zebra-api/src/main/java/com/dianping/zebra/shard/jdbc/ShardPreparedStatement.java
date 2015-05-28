@@ -245,7 +245,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 
 					// 把insert语句返回的生成key保存在当前会话中
 					if (executableSql.trim().charAt(0) == 'i' || executableSql.trim().charAt(0) == 'I') {
-						getAndSetGeneratedKeys(stmt);
+						this.generatedKey = stmt.getGeneratedKeys();
 					}
 				} catch (SQLException e) {
 					exceptions.add(e);

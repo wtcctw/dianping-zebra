@@ -40,8 +40,6 @@ public class ShardConnection implements Connection {
 
 	private int transactionIsolation = -1;
 
-	protected ResultSet generatedKey;
-
 	public ShardConnection() {
 	}
 
@@ -83,14 +81,6 @@ public class ShardConnection implements Connection {
 		List<SQLException> innerExceptions = new ArrayList<SQLException>();
 
 		try {
-			if (generatedKey != null) {
-				try {
-					generatedKey.close();
-				} catch (SQLException e) {
-					innerExceptions.add(e);
-				}
-			}
-
 			for (Statement stmt : attachedStatements) {
 				try {
 					stmt.close();
@@ -108,7 +98,6 @@ public class ShardConnection implements Connection {
 			}
 		} finally {
 			closed = true;
-			generatedKey = null;
 			attachedStatements.clear();
 			actualConnections.clear();
 		}
@@ -314,13 +303,6 @@ public class ShardConnection implements Connection {
 	@Override
 	public String getClientInfo(String name) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport getClientInfo");
-	}
-
-	/**
-	 * @return the generatedKey
-	 */
-	public ResultSet getGeneratedKey() {
-		return generatedKey;
 	}
 
 	/*
@@ -645,14 +627,6 @@ public class ShardConnection implements Connection {
 	@Override
 	public void setClientInfo(String name, String value) throws SQLClientInfoException {
 		throw new UnsupportedOperationException("Zebra unsupport setClientInfo");
-	}
-
-	/**
-	 * @param generatedKey
-	 *           the generatedKey to set
-	 */
-	public void setGeneratedKey(ResultSet generatedKey) {
-		this.generatedKey = generatedKey;
 	}
 
 	/*
