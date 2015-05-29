@@ -1,7 +1,6 @@
 package com.dianping.zebra.shard.jdbc;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -59,5 +58,82 @@ public class ShardConnectionTest extends ZebraMultiDBBaseTestCase {
 		assertTrue((conn.prepareStatement("sql", Statement.RETURN_GENERATED_KEYS) instanceof ShardPreparedStatement));
 		assertTrue((conn.prepareStatement("sql", new int[0]) instanceof ShardPreparedStatement));
 		assertTrue((conn.prepareStatement("sql", new String[0]) instanceof ShardPreparedStatement));
+
+		conn.close();
+	}
+
+	@Test
+	public void test_transaction_when_hit_specified_conn() throws SQLException {
+		Connection conn = getDataSource().getConnection();
+		conn.setAutoCommit(false);
+
+		Connection conn1 = getDataSource().getConnection();
+
+		Statement stmt = conn.createStatement();
+
+		stmt.executeUpdate("insert into test(id, name, score, type, classid) values(100, 'damon.zhu', 1, 'a', 1)");
+		stmt.close();
+
+		Statement stmt1 = conn1.createStatement();
+		stmt1.execute("select * from test where id = 100");
+
+		ResultSet executeSelectSql1 = stmt1.getResultSet();
+
+		assertEquals(executeSelectSql1.next(), false);
+
+		conn.commit();
+
+		stmt1.execute("select * from test where id = 100");
+
+		executeSelectSql1 = stmt1.getResultSet();
+
+		assertEquals(executeSelectSql1.next(), true);
+
+		assertEquals(executeSelectSql1.getString(2), "damon.zhu");
+
+		stmt.close();
+		stmt1.close();
+		conn.close();
+		conn1.close();
+	}
+
+	@Test
+	public void test_transaction_when_hit_specified_conn2() throws SQLException {
+		Connection conn = getDataSource().getConnection();
+		conn.setAutoCommit(false);
+
+		Connection conn1 = getDataSource().getConnection();
+
+		Statement stmt = conn.createStatement();
+
+		stmt.executeUpdate("insert into test(id, name, score, type, classid) values(100, 'damon.zhu', 1, 'a', 1)");
+		stmt.executeUpdate("insert into test(id, name, score, type, classid) values(92, 'damon.zhu', 1, 'a', 1)");
+		stmt.close();
+
+		Statement stmt1 = conn1.createStatement();
+		stmt1.execute("select * from test where id = 100");
+		ResultSet executeSelectSql1 = stmt1.getResultSet();
+		assertEquals(executeSelectSql1.next(), false);
+
+		stmt1.execute("select * from test where id = 92");
+		executeSelectSql1 = stmt1.getResultSet();
+		assertEquals(executeSelectSql1.next(), false);
+
+		conn.commit();
+
+		stmt1.execute("select * from test where id = 100");
+		executeSelectSql1 = stmt1.getResultSet();
+		assertEquals(executeSelectSql1.next(), true);
+		assertEquals(executeSelectSql1.getString(2), "damon.zhu");
+
+		stmt1.execute("select * from test where id = 92");
+		executeSelectSql1 = stmt1.getResultSet();
+		assertEquals(executeSelectSql1.next(), true);
+		assertEquals(executeSelectSql1.getString(2), "damon.zhu");
+
+		stmt.close();
+		stmt1.close();
+		conn.close();
+		conn1.close();
 	}
 }

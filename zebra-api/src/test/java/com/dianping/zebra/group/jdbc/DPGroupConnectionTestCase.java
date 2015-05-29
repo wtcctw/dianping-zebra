@@ -338,6 +338,7 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		try {
 			conn = getDataSource().getConnection();
 			conn.setAutoCommit(false);
+			executeSelectSql(conn, "select * from PERSON");
 			assertResultInWriteDs(executeSelectSql(conn, "select * from PERSON"));
 			executeOneRowUpdateSql(conn, "update PERSON set NAME = 'writer-new1'");
 			assertResultInWriteDs(executeSelectSql(conn, "select * from PERSON"));

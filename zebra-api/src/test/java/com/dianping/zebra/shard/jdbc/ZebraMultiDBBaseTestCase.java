@@ -82,7 +82,7 @@ public abstract class ZebraMultiDBBaseTestCase {
 			Connection conn = null;
 			Statement stmt = null;
 			try {
-				conn = DriverManager.getConnection(getDBBaseUrl() + entry.getDbName() + ";DB_CLOSE_DELAY=-1");
+				conn = DriverManager.getConnection(getDBBaseUrl() + entry.getDbName() + ";MVCC=TRUE;DB_CLOSE_DELAY=-1");
 				stmt = conn.createStatement();
 				int count = 0;
 				for (Map.Entry<String, String> table : entry.getTableNameScriptMapping().entrySet()) {
@@ -150,7 +150,7 @@ public abstract class ZebraMultiDBBaseTestCase {
 			Connection conn = null;
 			Statement stmt = null;
 			try {
-				conn = DriverManager.getConnection(getDBBaseUrl() + entry.getDbName() + ";DB_CLOSE_DELAY=-1");
+				conn = DriverManager.getConnection(getDBBaseUrl() + entry.getDbName() + ";MVCC=TRUE;DB_CLOSE_DELAY=-1");
 				stmt = conn.createStatement();
 				int count = 0;
 				for (String script : entry.getScripts()) {
@@ -188,7 +188,7 @@ public abstract class ZebraMultiDBBaseTestCase {
 			Connection conn = null;
 			Statement stmt = null;
 			try {
-				conn = DriverManager.getConnection(getDBBaseUrl() + entry.getDbName() + ";DB_CLOSE_DELAY=-1");
+				conn = DriverManager.getConnection(getDBBaseUrl() + entry.getDbName() + ";MVCC=TRUE;DB_CLOSE_DELAY=-1");
 				stmt = conn.createStatement();
 				int count = 0;
 				for (Map.Entry<String, String> table : entry.getTableNameScriptMapping().entrySet()) {
