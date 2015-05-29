@@ -136,4 +136,33 @@ public class ShardConnectionTest extends ZebraMultiDBBaseTestCase {
 		conn.close();
 		conn1.close();
 	}
+
+	//连真实的mysql数据库可测，这里是连beta环境的welife
+	//@Test 
+	public void test_select_idendity() throws SQLException{
+		ShardDataSource ds = new ShardDataSource();
+		ds.setRuleName("welife");
+		
+		ds.init();
+		
+		Connection conn = ds.getConnection();
+		
+		Statement stmt = conn.createStatement();
+		
+		int executeUpdate = stmt.executeUpdate("insert into welife_users(uid,bid) values (16,2127114697)");
+		
+		assertEquals(1, executeUpdate);
+		
+		ResultSet rs = stmt.executeQuery("select @@identity");
+		
+		assertEquals(rs.next(), true);
+		
+		System.out.println(rs.getInt(1));
+		
+		rs = stmt.executeQuery("select last_insert_id()");
+		
+		assertEquals(rs.next(), true);
+		
+		System.out.println(rs.getInt(1));
+	}
 }
