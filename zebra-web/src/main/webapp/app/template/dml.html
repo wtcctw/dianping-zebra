@@ -1,1 +1,18 @@
-dml查询
+<div class="page-header">
+	<div class="row">
+	    <div class="col-xs-12">
+	        <form class="form-inline" role="form">
+	        <label class="label label-lg label-primary arrowed-right" for="form-field-1">环境</label>
+	            <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs"></select>
+	        </form>
+	    </div>
+	</div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+    	 <form class="form-inline" role="form">
+	        <label class="label label-lg label-primary arrowed-right" for="form-field-1">环境</label>
+	        <select class="form-control input-sm" ng-model="shardRule" ng-options="rule for rule in shardRules"></select>
+	    </form>
+    </div>
+</div>

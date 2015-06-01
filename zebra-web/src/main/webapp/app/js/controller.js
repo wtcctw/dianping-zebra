@@ -1,3 +1,13 @@
+zebraWeb.controller('dml', function($scope, $http){
+    $scope.load = function () {
+        $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
+            $scope.shardRules = data;
+        });
+    }
+    
+    $scope.$watch('config.env', $scope.load);
+});
+
 zebraWeb.controller('doc', function($scope,$location){
 	$scope.isActive = function (viewLocation) { 
         return viewLocation === $location.path();
@@ -70,12 +80,6 @@ zebraWeb.controller('shard', function ($scope, $http, shardService) {
 
     $scope.edit = function (key, config) {
         shardService.openEditModal(key)
-    }
-
-    $scope.test = function (key) {
-        $http.get('/a/shard/' + $scope.config.env + '/test?key=' + key).success(function (data, status, headers, config) {
-            alert(data.message);
-        });
     }
 
     $scope.load();
