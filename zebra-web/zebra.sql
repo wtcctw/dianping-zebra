@@ -43,6 +43,7 @@ CREATE TABLE `monitor_history` (
 CREATE TABLE `ShardDumpTask` (
   `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `Name` varchar(100) NOT NULL,
+  `Executor` varchar(45) NOT NULL,
   `SrcDbName` varchar(45) NOT NULL,
   `DstDbName` varchar(45) NOT NULL,
   `DataBase` varchar(45) NOT NULL,

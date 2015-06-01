@@ -5,6 +5,8 @@ import java.util.List;
 
 public class ShardDumpTaskEntity {
 
+    private String executor;
+
     private String name;
 
     private String srcDbName;
@@ -28,6 +30,10 @@ public class ShardDumpTaskEntity {
     private long indexIncrease = 1000000;
 
     private long maxKey;
+
+    private ShardDumpDbEntity srcDbEntity;
+
+    private ShardDumpDbEntity dstDbEntity;
 
     private List<String> options = Arrays
             .asList("--master-data=2", "--disable-keys", "--skip-comments", "--quick", "--add-drop-database=false",
@@ -136,5 +142,29 @@ public class ShardDumpTaskEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(String executor) {
+        this.executor = executor;
+    }
+
+    public ShardDumpDbEntity getSrcDbEntity() {
+        return srcDbEntity;
+    }
+
+    public void setSrcDbEntity(ShardDumpDbEntity srcDbEntity) {
+        this.srcDbEntity = srcDbEntity;
+    }
+
+    public ShardDumpDbEntity getDstDbEntity() {
+        return dstDbEntity;
+    }
+
+    public void setDstDbEntity(ShardDumpDbEntity dstDbEntity) {
+        this.dstDbEntity = dstDbEntity;
     }
 }
