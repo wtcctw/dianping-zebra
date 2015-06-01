@@ -107,5 +107,13 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/doc',
         templateUrl: 'app/template/doc.html',
         controller: 'doc'
+    }).state('dml', {
+        url: '/dml',
+        templateUrl: 'app/template/dml.html',
+        controller: 'dml'
+    }).state('shard-migrate', {
+        url: '/shard-migrate',
+        templateUrl: 'app/template/shard-migrate.html',
+        controller: 'shard-migrate'
     });
 });
