@@ -67,6 +67,8 @@ public class ShardDumpTaskExecutor {
         //                "/tmp/" :
         //                SyncServerConfig.getInstance().getTempDir() + "/dump/") + task.getName() + "/";
         this.dumpOutputDir = "/tmp/";
+        this.srcDBInstance = task.getSrcDbEntity();
+        this.dstDBInstance = task.getDstDbEntity();
     }
 
     private boolean checkFinish() {
@@ -415,14 +417,6 @@ public class ShardDumpTaskExecutor {
             FileUtils.deleteDirectory(new File(dumpOutputDir));
         } catch (IOException e) {
         }
-    }
-
-    public void setSrcDBInstance(ShardDumpDbEntity srcDBInstance) {
-        this.srcDBInstance = srcDBInstance;
-    }
-
-    public void setDstDBInstance(ShardDumpDbEntity dstDBInstance) {
-        this.dstDBInstance = dstDBInstance;
     }
 
     public void setShardDumpService(ShardDumpService shardDumpService) {
