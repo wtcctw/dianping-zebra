@@ -24,9 +24,10 @@
                 <tr ng-repeat="shard in data | toArray | filter:{$key:'.shard'} | filter:{$key:searchText}">
                     <td>{{shard.$key}}</td>
                     <td>
-                        <button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit(shard.$key,shard)">编辑</button>
+                        <button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit(shard.$key,shard)">配置编辑</button>
                         <button class="btn btn-xs btn-success" ng-click="test(shard.$key)">测试</button>
                         <button ng-show="isLogin" class="btn btn-xs btn-danger" ng-click="debug(shard.$key)">调试</button>
+                        <a ng-show="isLogin" class="btn btn-xs btn-success" herf="#/shard-migrate">初始化状态</a>
                     </td>
                 </tr>
             </tbody>

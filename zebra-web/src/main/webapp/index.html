@@ -81,13 +81,31 @@
             	<span class="menu-text"> 基本配置</span></a>
             	<b class="arrow"></b>
             </li>
-            <li active-link="active"><a href="#/shard">
+            <li class="open"><a href="#/shard">
             	<i class="menu-icon fa fa-desktop"></i>
 				<span class="menu-text">分库分表</span></a>
 				<b class="arrow"></b>
+								
+				<ul class="submenu  nav-show">
+					<li active-link="active">
+						<a href="#/shard">
+							<i class="menu-icon fa fa-caret-right"></i>
+							分表规则
+						</a>
+						<b class="arrow"></b>
+					</li>
+					<li active-link="active" >
+						<a href="#/dml">
+							<i class="menu-icon fa fa-caret-right"></i>
+							DML查询
+						</a>
+						<b class="arrow"></b>
+					</li>
+				</ul>
 			</li>
+			
             <li active-link="active"><a href="#/flow">
-            	<i class="menu-icon fa fa-list-alt"></i>
+           		<i class="menu-icon fa fa-list-alt"></i>
 				<span class="menu-text"> SQL流控 </span></a>
 				<b class="arrow"></b>
             </li>
