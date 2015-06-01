@@ -7,7 +7,7 @@ public class ShardDumpTaskEntity {
 
     private String binlogFile;
 
-    private String binlogPos;
+    private long binlogPos;
 
     private String status;
 
@@ -182,11 +182,11 @@ public class ShardDumpTaskEntity {
         this.binlogFile = binlogFile;
     }
 
-    public String getBinlogPos() {
+    public long getBinlogPos() {
         return binlogPos;
     }
 
-    public void setBinlogPos(String binlogPos) {
+    public void setBinlogPos(long binlogPos) {
         this.binlogPos = binlogPos;
     }
 

@@ -56,7 +56,7 @@ CREATE TABLE `ShardDumpTask` (
   `IndexIncrease` int(11) NOT NULL,
   `MaxKey` int(11) NOT NULL,
   `BinlogFile` VARCHAR(45) NULL,
-  `BinlogPos` VARCHAR(45) NULL,
+  `BinlogPos` BIGINT(64) NOT NULL DEFAULT 0,
   `Status` VARCHAR(100) NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

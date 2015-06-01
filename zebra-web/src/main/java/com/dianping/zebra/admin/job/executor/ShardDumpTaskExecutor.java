@@ -3,6 +3,7 @@ package com.dianping.zebra.admin.job.executor;
 import com.dianping.cat.Cat;
 import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
+import com.dianping.zebra.admin.service.ShardDumpService;
 import com.dianping.zebra.admin.util.ProcessBuilderWrapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
@@ -34,6 +35,8 @@ public class ShardDumpTaskExecutor {
     private static final Logger logger = LoggerFactory.getLogger(ShardDumpTaskExecutor.class);
 
     private static final Charset DEFAULT_CJARSET = Charset.forName("utf8");
+
+    private ShardDumpService shardDumpService;
 
     private static final Pattern BINLOG_PATTERN = Pattern
             .compile(".*MASTER_LOG_FILE='([^']+)', MASTER_LOG_POS=(\\d+).*");
@@ -90,7 +93,7 @@ public class ShardDumpTaskExecutor {
     }
 
     protected synchronized void saveTask() {
-        //        shardDumpTaskService.update(this.task);
+        shardDumpService.updateTaskStatus(this.task);
     }
 
     protected void createOutPutDir() {
@@ -242,27 +245,25 @@ public class ShardDumpTaskExecutor {
         }
 
         protected void checkAndUpdateBinlogInfo(String binlog, long position) throws IOException {
-            //            boolean needToSet = false;
-            //
-            //            if (task.getBinlogInfo() == null) {
-            //                needToSet = true;
-            //            } else {
-            //                int oldBinlogIndex = getBinlogIndex(task.getBinlogInfo().getBinlogFile());
-            //                int newBinlogIndex = getBinlogIndex(binlog);
-            //
-            //                if (newBinlogIndex < oldBinlogIndex || (newBinlogIndex == oldBinlogIndex && position < task
-            //                        .getBinlogInfo().getBinlogPosition())) {
-            //                    needToSet = true;
-            //                }
-            //            }
-            //
-            //            if (needToSet) {
-            //                BinlogInfo info = new BinlogInfo();
-            //                info.setBinlogFile(binlog);
-            //                info.setBinlogPosition(position);
-            //                task.setBinlogInfo(info);
-            //                saveTask();
-            //            }
+            boolean needToSet = false;
+
+            if (Strings.isNullOrEmpty(task.getBinlogFile())) {
+                needToSet = true;
+            } else {
+                int oldBinlogIndex = getBinlogIndex(task.getBinlogFile());
+                int newBinlogIndex = getBinlogIndex(binlog);
+
+                if (newBinlogIndex < oldBinlogIndex || (newBinlogIndex == oldBinlogIndex && position < task
+                        .getBinlogPos())) {
+                    needToSet = true;
+                }
+            }
+
+            if (needToSet) {
+                task.setBinlogFile(binlog);
+                task.setBinlogPos(position);
+                saveTask();
+            }
         }
 
         protected int getBinlogIndex(String binlog) throws IOException {
@@ -424,7 +425,7 @@ public class ShardDumpTaskExecutor {
         this.dstDBInstance = dstDBInstance;
     }
 
-    //    public void setShardDumpTaskService(ShardDumpTaskService shardDumpTaskService) {
-    //        this.shardDumpTaskService = shardDumpTaskService;
-    //    }
+    public void setShardDumpService(ShardDumpService shardDumpService) {
+        this.shardDumpService = shardDumpService;
+    }
 }

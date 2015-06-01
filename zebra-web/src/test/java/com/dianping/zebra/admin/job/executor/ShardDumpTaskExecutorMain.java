@@ -8,6 +8,7 @@ import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
+
 public class ShardDumpTaskExecutorMain {
     public static void main(String... args) throws InterruptedException {
         ShardDumpTaskEntity task = new ShardDumpTaskEntity();

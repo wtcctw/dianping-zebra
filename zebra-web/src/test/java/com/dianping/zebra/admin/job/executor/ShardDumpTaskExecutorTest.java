@@ -20,9 +20,13 @@ import static org.mockito.Mockito.*;
  */
 public class ShardDumpTaskExecutorTest {
     ShardDumpTaskEntity task;
+
     ShardDumpTaskExecutor target;
+
     ShardDumpTaskExecutor.DumpWorker dumpWorker;
+
     static final String FILE_NAME = "/tmp/ShardDumpTaskExecutorTest.tmp";
+
     File file = new File(FILE_NAME);
 
     @Before
@@ -45,8 +49,8 @@ public class ShardDumpTaskExecutorTest {
 
     @Test
     public void testGetPositionFromContent() throws Exception {
-        doReturn("-- CHANGE MASTER TO MASTER_LOG_FILE='mysqlbin.log.000010', MASTER_LOG_POS=91841517;")
-                .when(dumpWorker).readFirstLine(anyInt());
+        doReturn("-- CHANGE MASTER TO MASTER_LOG_FILE='mysqlbin.log.000010', MASTER_LOG_POS=91841517;").when(dumpWorker)
+                .readFirstLine(anyInt());
         doNothing().when(dumpWorker).checkAndUpdateBinlogInfo("mysqlbin.log.000010", 91841517);
 
         dumpWorker.checkAndUpdateBinlogInfo(1);
@@ -54,37 +58,33 @@ public class ShardDumpTaskExecutorTest {
         verify(dumpWorker, times(1)).checkAndUpdateBinlogInfo("mysqlbin.log.000010", 91841517);
     }
 
-//    @Test
-    //    public void testBinlogNotNeedToUpdate() throws Exception {
-    //        BinlogInfo info = new BinlogInfo();
-    //        info.setBinlogFile("xxxx.0010");
-    //        info.setBinlogPosition(10l);
-    //        this.task.setBinlogInfo(info);
-    //
-    //        doNothing().when(target).saveTask();
-    //
-    //        dumpWorker.checkAndUpdateBinlogInfo("xxxx.0010", 11l);
-    //        verify(target, times(0)).saveTask();
-    //
-    //        dumpWorker.checkAndUpdateBinlogInfo("xxxx.0011", 1l);
-    //        verify(target, times(0)).saveTask();
-    //    }
-    //
-    //    @Test
-    //    public void testBinlogNeedToUpdate() throws Exception {
-    //        BinlogInfo info = new BinlogInfo();
-    //        info.setBinlogFile("xxxx.0010");
-    //        info.setBinlogPosition(10l);
-    //        this.task.setBinlogInfo(info);
-    //
-    //        doNothing().when(target).saveTask();
-    //
-    //        dumpWorker.checkAndUpdateBinlogInfo("xxxx.0010", 9l);
-    //        verify(target, times(1)).saveTask();
-    //
-    //        dumpWorker.checkAndUpdateBinlogInfo("xxxx.0009", 100l);
-    //        verify(target, times(2)).saveTask();
-    //    }
+    @Test
+    public void testBinlogNotNeedToUpdate() throws Exception {
+        this.task.setBinlogFile("xxxx.0010");
+        this.task.setBinlogPos(10l);
+
+        doNothing().when(target).saveTask();
+
+        dumpWorker.checkAndUpdateBinlogInfo("xxxx.0010", 11l);
+        verify(target, times(0)).saveTask();
+
+        dumpWorker.checkAndUpdateBinlogInfo("xxxx.0011", 1l);
+        verify(target, times(0)).saveTask();
+    }
+
+    @Test
+    public void testBinlogNeedToUpdate() throws Exception {
+        this.task.setBinlogFile("xxxx.0010");
+        this.task.setBinlogPos(10l);
+
+        doNothing().when(target).saveTask();
+
+        dumpWorker.checkAndUpdateBinlogInfo("xxxx.0010", 9l);
+        verify(target, times(1)).saveTask();
+
+        dumpWorker.checkAndUpdateBinlogInfo("xxxx.0009", 100l);
+        verify(target, times(2)).saveTask();
+    }
 
     @Test
     public void testcheckData_no_file() throws Exception {
