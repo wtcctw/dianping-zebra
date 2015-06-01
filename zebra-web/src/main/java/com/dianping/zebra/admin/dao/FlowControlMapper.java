@@ -1,18 +1,17 @@
 package com.dianping.zebra.admin.dao;
 
-import java.util.List;
-
+import com.dianping.zebra.admin.entity.FlowControlEntity;
 import org.apache.ibatis.annotations.Param;
 
-import com.dianping.zebra.admin.entity.FlowControlEntity;
+import java.util.List;
 
 public interface FlowControlMapper {
 
-	public List<FlowControlEntity> findAllActiveFlowControlByEnv(String env);
-	
-	public List<FlowControlEntity> findAllDeletedFlowControlByEnv(String env);
+    List<FlowControlEntity> findAllActiveFlowControlByEnv(@Param("env") String env);
 
-	public void insertFlowControl(FlowControlEntity entity);
+    List<FlowControlEntity> findAllDeletedFlowControlByEnv(@Param("env") String env);
 
-	public void deleteFlowControl(@Param("sqlId")String sqlId, @Param("env")String env);
+    void insertFlowControl(FlowControlEntity entity);
+
+    void deleteFlowControl(@Param("sqlId") String sqlId, @Param("env") String env);
 }
