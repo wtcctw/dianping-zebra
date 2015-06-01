@@ -4,6 +4,15 @@
 
 <mapper namespace="com.dianping.zebra.admin.dao.ShardDumpTaskMapper">
         <select id="getByExecutor" parameterType="map" resultType="ShardDumpTaskEntity">
-                SELECT * FROM ShardDumpTask WHERE Executor = #{executor}
+            SELECT * FROM ShardDumpTask WHERE Executor = #{executor}
         </select>
+
+        <update id="updateStatus" parameterType="ShardDumpTaskEntity">
+            Update ShardDumpTaskEntity SET
+                BinlogFile = #{binlogFile},
+                BinlogPos = #{binlogPos},
+                IndexKey = #{indexKey},
+                Status = #{status}
+            WHERE ID = #{id}
+        </update>
 </mapper>

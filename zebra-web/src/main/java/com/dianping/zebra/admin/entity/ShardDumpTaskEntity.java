@@ -5,6 +5,12 @@ import java.util.List;
 
 public class ShardDumpTaskEntity {
 
+    private String binlogFile;
+
+    private String binlogPos;
+
+    private String status;
+
     private String executor;
 
     private String name;
@@ -166,5 +172,29 @@ public class ShardDumpTaskEntity {
 
     public void setDstDbEntity(ShardDumpDbEntity dstDbEntity) {
         this.dstDbEntity = dstDbEntity;
+    }
+
+    public String getBinlogFile() {
+        return binlogFile;
+    }
+
+    public void setBinlogFile(String binlogFile) {
+        this.binlogFile = binlogFile;
+    }
+
+    public String getBinlogPos() {
+        return binlogPos;
+    }
+
+    public void setBinlogPos(String binlogPos) {
+        this.binlogPos = binlogPos;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

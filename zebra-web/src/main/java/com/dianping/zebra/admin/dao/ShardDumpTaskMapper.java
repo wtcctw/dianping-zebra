@@ -1,6 +1,6 @@
 package com.dianping.zebra.admin.dao;
 
-import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
+import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -11,5 +11,7 @@ import java.util.List;
  * http://www.dozer.cc
  */
 public interface ShardDumpTaskMapper {
-    List<ShardDumpDbEntity> getByExecutor(@Param("executor") String executor);
+    List<ShardDumpTaskEntity> getByExecutor(@Param("executor") String executor);
+
+    void updateStatus(ShardDumpTaskEntity entity);
 }
