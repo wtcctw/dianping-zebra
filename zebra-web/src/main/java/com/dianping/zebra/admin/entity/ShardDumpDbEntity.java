@@ -2,6 +2,8 @@ package com.dianping.zebra.admin.entity;
 
 public class ShardDumpDbEntity {
 
+    private String name;
+
     private String host;
 
     private int port;
@@ -40,5 +42,13 @@ public class ShardDumpDbEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

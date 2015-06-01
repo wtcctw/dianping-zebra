@@ -40,3 +40,30 @@ CREATE TABLE `monitor_history` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
+CREATE TABLE `ShardDumpTask` (
+  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `Name` varchar(100) NOT NULL,
+  `SrcDbName` varchar(45) NOT NULL,
+  `DstDbName` varchar(45) NOT NULL,
+  `DataBase` varchar(45) NOT NULL,
+  `TargetDataBase` varchar(45) NOT NULL,
+  `TableName` varchar(45) NOT NULL,
+  `TargetTableName` varchar(45) NOT NULL,
+  `ShardRule` varchar(45) NOT NULL,
+  `IndexColumnName` varchar(45) NOT NULL,
+  `IndexKey` int(11) NOT NULL,
+  `IndexIncrease` int(11) NOT NULL,
+  `MaxKey` int(11) NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `ShardDumpDb` (
+  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `Name` varchar(45) NOT NULL,
+  `Host` varchar(100) NOT NULL,
+  `Port` int(11) NOT NULL,
+  `Username` varchar(45) NOT NULL,
+  `Password` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
