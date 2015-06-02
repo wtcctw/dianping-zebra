@@ -2,6 +2,11 @@ package com.dianping.zebra.admin.job.executor;
 
 import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
+import com.dianping.zebra.admin.service.ShardDumpService;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Dozer @ 2015-02
@@ -41,19 +46,19 @@ public class ShardDumpTaskExecutorMain {
 
         ShardDumpTaskExecutor target = new ShardDumpTaskExecutor(task);
 
-        //        ShardDumpTaskService service = mock(ShardDumpTaskService.class);
+        ShardDumpService service = mock(ShardDumpService.class);
 
-        //        doAnswer(new Answer() {
-        //            @Override
-        //            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        //                ShardDumpTask temp = (ShardDumpTask) invocationOnMock.getArguments()[0];
-        //                System.out.println(temp.getBinlogInfo().getBinlogFile());
-        //                System.out.println(temp.getBinlogInfo().getBinlogPosition());
-        //                return null;
-        //            }
-        //        }).when(service).update(any(ShardDumpTask.class));
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                ShardDumpTaskEntity temp = (ShardDumpTaskEntity) invocationOnMock.getArguments()[0];
+                System.out.println(temp.getBinlogFile());
+                System.out.println(temp.getBinlogPos());
+                return null;
+            }
+        }).when(service).updateTaskStatus(any(ShardDumpTaskEntity.class));
 
-        //        target.setShardDumpTaskService(service);
+        target.setShardDumpService(service);
         target.init();
         target.start();
 
