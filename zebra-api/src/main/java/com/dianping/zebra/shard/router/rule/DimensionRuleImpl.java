@@ -84,6 +84,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
         boolean onlyMatchMaster = matchContext.onlyMatchMaster();
         boolean onlyMatchOnce = matchContext.onlyMatchOnce();
         String basedColumn = basedColumns.iterator().next();
+        matchContext.getMatchResult().setBasedColumn(basedColumn);
         Set<Object> shardColValues = ShardColumnValueUtil
                 .eval(matchContext.getDmlSql(), tableName, basedColumn, matchContext.getParams());
         if (shardColValues == null || shardColValues.isEmpty()) {

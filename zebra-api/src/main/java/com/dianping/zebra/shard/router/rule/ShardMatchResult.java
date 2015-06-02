@@ -27,6 +27,8 @@ import java.util.Set;
  */
 public class ShardMatchResult {
 	
+	private String basedColumn;
+	
 	private Map<String, Set<String>> dbAndTables = new HashMap<String, Set<String>>(4);
 	private boolean dbAndTablesSetted;
 	
@@ -112,4 +114,11 @@ public class ShardMatchResult {
 		this.potentialDBAndTbsSetted = potentialDBAndTbsSetted;
 	}
 
+	public String getBasedColumn() {
+		return basedColumn;
+	}
+
+	public void setBasedColumn(String basedColumn) {
+		this.basedColumn = basedColumn;
+	}
 }

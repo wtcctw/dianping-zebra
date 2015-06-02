@@ -15,11 +15,12 @@
  */
 package com.dianping.zebra.shard.router;
 
+import java.util.List;
+
 import com.dianping.zebra.shard.parser.sqlParser.Columns;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
 import com.dianping.zebra.shard.parser.sqlParser.OrderBy;
-
-import java.util.List;
+import com.dianping.zebra.shard.router.rule.ShardMatchResult;
 
 /**
  * @author danson.liu
@@ -55,6 +56,16 @@ public class RouterTarget {
 	
 	private List<Object> newParams;
 	
+	private ShardMatchResult shardResult;
+	
+	public ShardMatchResult getShardResult() {
+		return shardResult;
+	}
+
+	public void setShardResult(ShardMatchResult shardResult) {
+		this.shardResult = shardResult;
+	}
+
 	public List<TargetedSql> getTargetedSqls() {
 		return targetedSqls;
 	}

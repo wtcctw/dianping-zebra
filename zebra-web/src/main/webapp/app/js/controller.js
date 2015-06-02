@@ -4,8 +4,28 @@ zebraWeb.controller('dml', function ($scope, $http) {
             $scope.shardRules = data;
         });
     }
+    
+    $scope.analyze = function (){
+    	if(!$scope.shardRule){
+    		alert("请选择正确的分表规则");
+    		return;
+    	}
+    	
+    	if(!$scope.shardSql){
+    		alert("请输入sql语句");
+    		return;
+    	}
+    	
+    	$http.post('/a/dml/analyze', {
+            ruleName: $scope.shardRule,
+            sql: $scope.shardSql,
+        }).success(
+            function (data, status, headers, config) {
+            	$scope.data = data;
+        });
+    }
 
-    $scope.$watch('config.env', $scope.load);
+    $scope.load();
 });
 
 zebraWeb.controller('migratedb', function ($scope, $http) {

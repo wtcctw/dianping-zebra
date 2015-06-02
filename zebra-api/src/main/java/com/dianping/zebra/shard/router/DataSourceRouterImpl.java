@@ -59,15 +59,17 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 			int max = dmlSql.getMax(params);
 			Set<String> relatedTables = dmlSql.getRelatedTables();
 			TableShardRule tableShardRule = getAppliedShardRule(relatedTables);
-			
+
 			if (tableShardRule != null) {
 				ShardMatchResult matchResult = tableShardRule.match(dmlSql, params);
 				Map<String, Set<String>> dbAndTables = matchResult.getDbAndTables();
 				boolean acrossTable = dbAndTables.size() > 1
 				      || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
+
 				target.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
 				      tableShardRule.getTableName(), skip, max));
 				target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
+				target.setShardResult(matchResult);
 			} else {
 				throw new DataSourceRouteException("Cannot find any Shard Rule for table " + relatedTables);
 			}
