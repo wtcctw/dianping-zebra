@@ -1,15 +1,11 @@
 package com.dianping.zebra.admin.job.executor;
 
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
-import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import static org.mockito.Mockito.*;
 
@@ -18,7 +14,7 @@ import static org.mockito.Mockito.*;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardDumpTaskExecutorImplTest {
+public class ShardDumpTaskExecutorTest {
     ShardDumpTaskEntity task;
 
     ShardDumpTaskExecutor target;
@@ -50,7 +46,7 @@ public class ShardDumpTaskExecutorImplTest {
     @Test
     public void testGetPositionFromContent() throws Exception {
         doReturn("-- CHANGE MASTER TO MASTER_LOG_FILE='mysqlbin.log.000010', MASTER_LOG_POS=91841517;").when(dumpWorker)
-                .readFirstLine(anyInt());
+            .readFirstLine(anyInt());
         doNothing().when(dumpWorker).checkAndUpdateBinlogInfo("mysqlbin.log.000010", 91841517);
 
         dumpWorker.checkAndUpdateBinlogInfo(1);
@@ -84,73 +80,6 @@ public class ShardDumpTaskExecutorImplTest {
 
         dumpWorker.checkAndUpdateBinlogInfo("xxxx.0009", 100l);
         verify(target, times(2)).saveTask();
-    }
-
-    @Test
-    public void testcheckData_no_file() throws Exception {
-        Assert.assertFalse(dumpWorker.checkHasData(1));
-        verify(target, times(1)).getDumpFile(anyInt());
-    }
-
-    @Test
-    public void testcheckData_empty_file() throws Exception {
-        file.createNewFile();
-
-        Assert.assertTrue(file.exists());
-        Assert.assertFalse(dumpWorker.checkHasData(1));
-        verify(target, times(1)).getDumpFile(anyInt());
-    }
-
-    @Test
-    public void testcheckData_file_with_comment() throws Exception {
-        file.createNewFile();
-        writeLine("--XXXXXXXXXX");
-
-        Assert.assertTrue(file.length() > 0);
-        Assert.assertFalse(dumpWorker.checkHasData(1));
-        verify(target, times(1)).getDumpFile(anyInt());
-    }
-
-    @Test
-    public void testcheckData_file_with_insert() throws Exception {
-        file.createNewFile();
-        writeLine("INSERT INTO XXX");
-
-        Assert.assertTrue(file.length() > 0);
-        Assert.assertTrue(dumpWorker.checkHasData(1));
-        verify(target, times(1)).getDumpFile(anyInt());
-    }
-
-    @Test
-    public void testcheckData_file_with_insert_and_comment() throws Exception {
-        file.createNewFile();
-        writeLine("--XXXXXXXXXX");
-        writeLine("INSERT INTO XXX");
-
-        Assert.assertTrue(file.length() > 0);
-        Assert.assertTrue(dumpWorker.checkHasData(1));
-        verify(target, times(1)).getDumpFile(anyInt());
-    }
-
-    @Test
-    public void testcheckData_file_with_big_file() throws Exception {
-        file.createNewFile();
-
-        while (file.length() < 1024 * 8) {
-            writeLine("--XXXXXXXXXX");
-        }
-
-        Assert.assertTrue(file.length() > 0);
-        Assert.assertTrue(dumpWorker.checkHasData(1));
-        verify(target, times(1)).getDumpFile(anyInt());
-    }
-
-    private void writeLine(String content) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-        writer.write(content);
-        writer.newLine();
-        writer.flush();
-        writer.close();
     }
 
     private void deleteFile() {

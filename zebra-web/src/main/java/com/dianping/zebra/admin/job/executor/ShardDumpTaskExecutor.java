@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class ShardDumpTaskExecutor {
     private ShardDumpService shardDumpService;
 
     private static final Pattern BINLOG_PATTERN = Pattern
-            .compile(".*MASTER_LOG_FILE='([^']+)', MASTER_LOG_POS=(\\d+).*");
+        .compile(".*MASTER_LOG_FILE='([^']+)', MASTER_LOG_POS=(\\d+).*");
 
     protected final ShardDumpTaskEntity task;
 
@@ -122,33 +121,33 @@ public class ShardDumpTaskExecutor {
             this.lastIndex = task.getIndexKey();
         }
 
-        protected boolean checkHasData(long index) {
-            FileInputStream reader = null;
-            boolean hasData = false;
-            File file = null;
-            try {
-                file = new File(getDumpFile(index));
-                if (file.length() >= 1024 * 8) {
-                    hasData = true;
-                    return hasData;
-                }
-                hasData = FileUtils.readFileToString(file).contains("INSERT");
-                return hasData;
-            } catch (IOException e) {
-                hasData = false;
-                return hasData;
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException ignore) {
-                    }
-                }
-                if (!hasData && file != null) {
-                    file.delete();
-                }
-            }
-        }
+        //        protected boolean checkHasData(long index) {
+        //            FileInputStream reader = null;
+        //            boolean hasData = false;
+        //            File file = null;
+        //            try {
+        //                file = new File(getDumpFile(index));
+        //                if (file.length() >= 1024 * 8) {
+        //                    hasData = true;
+        //                    return hasData;
+        //                }
+        //                hasData = FileUtils.readFileToString(file).contains("INSERT");
+        //                return hasData;
+        //            } catch (IOException e) {
+        //                hasData = false;
+        //                return hasData;
+        //            } finally {
+        //                if (reader != null) {
+        //                    try {
+        //                        reader.close();
+        //                    } catch (IOException ignore) {
+        //                    }
+        //                }
+        //                if (!hasData && file != null) {
+        //                    file.delete();
+        //                }
+        //            }
+        //        }
 
         @Override
         public void run() {
@@ -162,12 +161,12 @@ public class ShardDumpTaskExecutor {
                     if (!Strings.isNullOrEmpty(output)) {
                         //hack,ignore this warning
                         if (!output
-                                .contains("Warning: Using a password on the command line interface can be insecure.")) {
+                            .contains("Warning: Using a password on the command line interface can be insecure.")) {
                             throw new IOException(output);
                         }
                     }
 
-                    if (!checkHasData(this.lastIndex)) {
+                    if (lastIndex > task.getMaxKey()) {
                         dumpPersent = 100;
                         waitForLoadQueue.put(FINISH_INDEX);
                         break;
@@ -213,9 +212,8 @@ public class ShardDumpTaskExecutor {
             cmdlist.add("--user=" + srcDBInstance.getUsername());
             cmdlist.add("--password=" + srcDBInstance.getPassword());
             cmdlist.add("--where=" + String
-                    .format("%s AND %s > %d AND %s <= %d AND %s <= %d", task.getShardRule(), task.getIndexColumnName(),
-                            lastIndex, task.getIndexColumnName(), nextIndex, task.getIndexColumnName(),
-                            task.getMaxKey()));
+                .format("%s AND %s > %d AND %s <= %d", task.getShardRule(), task.getIndexColumnName(), lastIndex,
+                    task.getIndexColumnName(), nextIndex));
 
             cmdlist.addAll(task.getOptions());
             cmdlist.add("--result-file=" + getDumpFile(lastIndex));
@@ -231,8 +229,8 @@ public class ShardDumpTaskExecutor {
             cmdlist.add("-i");
             cmdlist.add("-p");
             cmdlist.add("-e");
-            cmdlist.add(
-                    "s/(^INSERT )(INTO )(`)([^`]+)(`)(.*$)/\\1IGNORE \\2\\3" + task.getTargetTableName() + "\\5\\6/g");
+            cmdlist
+                .add("s/(^INSERT )(INTO )(`)([^`]+)(`)(.*$)/\\1IGNORE \\2\\3" + task.getTargetTableName() + "\\5\\6/g");
             cmdlist.add(getDumpFile(index));
             return executeByProcessBuilder(cmdlist);
         }
@@ -262,7 +260,7 @@ public class ShardDumpTaskExecutor {
                 int newBinlogIndex = getBinlogIndex(binlog);
 
                 if (newBinlogIndex < oldBinlogIndex || (newBinlogIndex == oldBinlogIndex && position < task
-                        .getBinlogPos())) {
+                    .getBinlogPos())) {
                     needToSet = true;
                 }
             }
@@ -313,7 +311,7 @@ public class ShardDumpTaskExecutor {
                     if (!Strings.isNullOrEmpty(output)) {
                         //hack,ignore this warning
                         if (!output
-                                .contains("Warning: Using a password on the command line interface can be insecure.")) {
+                            .contains("Warning: Using a password on the command line interface can be insecure.")) {
                             throw new IOException(output);
                         }
                     }
@@ -380,7 +378,7 @@ public class ShardDumpTaskExecutor {
         }
 
         return String.format("dump:%s load:%s (%d%%)", dumpStatus.getDesc(), loadStatus.getDesc(),
-                ((loadPersent + dumpPersent) / 2));
+            ((loadPersent + dumpPersent) / 2));
     }
 
     public synchronized void stop() {
