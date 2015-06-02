@@ -36,6 +36,9 @@ public class ShardDumpTaskExecutorMain {
         dst.setUsername("root");
         dst.setPassword("root");
 
+        task.setSrcDbEntity(src);
+        task.setDstDbEntity(dst);
+
         ShardDumpTaskExecutor target = new ShardDumpTaskExecutor(task);
 
         //        ShardDumpTaskService service = mock(ShardDumpTaskService.class);
