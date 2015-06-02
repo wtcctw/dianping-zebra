@@ -51,8 +51,6 @@ public class ShardDumpTaskExecutorMain {
         //        }).when(service).update(any(ShardDumpTask.class));
 
         //        target.setShardDumpTaskService(service);
-        target.setSrcDBInstance(src);
-        target.setDstDBInstance(dst);
         target.init();
         target.start();
 
