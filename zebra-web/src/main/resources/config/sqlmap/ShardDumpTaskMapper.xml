@@ -8,7 +8,7 @@
         </select>
 
         <update id="updateStatus" parameterType="ShardDumpTaskEntity">
-            Update ShardDumpTaskEntity SET
+            Update ShardDumpTask SET
                 BinlogFile = #{binlogFile},
                 BinlogPos = #{binlogPos},
                 IndexKey = #{indexKey},

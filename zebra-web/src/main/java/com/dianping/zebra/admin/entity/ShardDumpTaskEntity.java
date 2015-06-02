@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ShardDumpTaskEntity {
+    private int id;
 
     private String binlogFile;
 
@@ -42,9 +43,9 @@ public class ShardDumpTaskEntity {
     private ShardDumpDbEntity dstDbEntity;
 
     private List<String> options = Arrays
-            .asList("--master-data=2", "--disable-keys", "--skip-comments", "--quick", "--add-drop-database=false",
-                    "--no-create-info", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
-                    "--max_allowed_packet=1073741824", "-i", "--single-transaction", "--hex-blob", "--compact");
+        .asList("--master-data=2", "--disable-keys", "--skip-comments", "--quick", "--add-drop-database=false",
+            "--no-create-info", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
+            "--max_allowed_packet=1073741824", "-i", "--single-transaction", "--hex-blob", "--compact");
 
     public List<String> getOptions() {
         return options;
@@ -196,5 +197,13 @@ public class ShardDumpTaskEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
