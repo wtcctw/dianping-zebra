@@ -54,6 +54,7 @@ public class ShardDumpTaskExecutorMain {
                 ShardDumpTaskEntity temp = (ShardDumpTaskEntity) invocationOnMock.getArguments()[0];
                 System.out.println(temp.getBinlogFile());
                 System.out.println(temp.getBinlogPos());
+                System.out.println(temp.getStatus());
                 return null;
             }
         }).when(service).updateTaskStatus(any(ShardDumpTaskEntity.class));

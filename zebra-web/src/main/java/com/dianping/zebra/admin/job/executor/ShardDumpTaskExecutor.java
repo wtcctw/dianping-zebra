@@ -57,24 +57,29 @@ public class ShardDumpTaskExecutor {
 
     protected Thread loadWorker;
 
+    protected volatile Status dumpStatus = Status.UNKNOW;
+
+    protected volatile Status loadStatus = Status.UNKNOW;
+
+    protected volatile int dumpPersent;
+
+    protected volatile int loadPersent;
+
     public ShardDumpTaskExecutor(ShardDumpTaskEntity task) {
         checkNotNull(task, "task");
         checkNotNull(task.getTableName(), "task.tableName");
         checkNotNull(task.getIndexColumnName(), "task.indexColumnName");
 
         this.task = task;
-        //        this.dumpOutputDir = (SyncServerConfig.getInstance() == null ?
-        //                "/tmp/" :
-        //                SyncServerConfig.getInstance().getTempDir() + "/dump/") + task.getName() + "/";
-        this.dumpOutputDir = "/tmp/";
+        this.dumpOutputDir = "/tmp/" + task.getName() + "/";
         this.srcDBInstance = task.getSrcDbEntity();
         this.dstDBInstance = task.getDstDbEntity();
     }
 
     private boolean checkFinish() {
         if (this.task.getIndexKey() == FINISH_INDEX) {
-            //            loadStatus.setStatus(Status.SUCCESS);
-            //            dumpStatus.setStatus(Status.SUCCESS);
+            loadStatus = Status.SUCCESS;
+            dumpStatus = Status.SUCCESS;
             return true;
         }
         return false;
@@ -95,6 +100,7 @@ public class ShardDumpTaskExecutor {
     }
 
     protected synchronized void saveTask() {
+        this.task.setStatus(getTaskState());
         shardDumpService.updateTaskStatus(this.task);
     }
 
@@ -146,7 +152,7 @@ public class ShardDumpTaskExecutor {
 
         @Override
         public void run() {
-            //            dumpStatus.setStatus(Status.RUNNING);
+            dumpStatus = Status.RUNNING;
 
             while (true) {
                 long nextIndex = increaseIndex();
@@ -162,7 +168,7 @@ public class ShardDumpTaskExecutor {
                     }
 
                     if (!checkHasData(this.lastIndex)) {
-                        //                        dumpStatus.setPercent(ShardSyncTaskState.PERCENT_MAX);
+                        dumpPersent = 100;
                         waitForLoadQueue.put(FINISH_INDEX);
                         break;
                     }
@@ -174,18 +180,18 @@ public class ShardDumpTaskExecutor {
 
                     checkAndUpdateBinlogInfo(this.lastIndex);
 
-                    //                    dumpStatus.setPercent((int) (this.lastIndex * 100 / task.getMaxKey()));
+                    dumpPersent = (int) (this.lastIndex * 100 / task.getMaxKey());
                     waitForLoadQueue.put(lastIndex);
                     this.lastIndex = nextIndex;
 
                 } catch (InterruptedException e) {
-                    //                    dumpStatus.setStatus(Status.SUSPENDED);
+                    dumpStatus = Status.STOPPED;
                     break;
                 } catch (Exception e) {
                     String msg = "Dump Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
-                    //                    dumpStatus.setStatus(Status.FAILED);
+                    dumpStatus = Status.FAILED;
                     break;
                 }
             }
@@ -291,16 +297,15 @@ public class ShardDumpTaskExecutor {
 
         @Override
         public void run() {
-            //            loadStatus.setStatus(Status.RUNNING);
+            loadStatus = Status.RUNNING;
 
             while (true) {
                 try {
                     Long index = waitForLoadQueue.take();
                     if (index == FINISH_INDEX) {
-                        //finish
                         cleanUp(index);
                         cleanup();
-                        //                        loadStatus.setPercent(ShardSyncTaskState.PERCENT_MAX);
+                        loadPersent = 100;
                         break;
                     }
 
@@ -313,15 +318,15 @@ public class ShardDumpTaskExecutor {
                         }
                     }
                     cleanUp(index);
-                    //                    loadStatus.setPercent((int) (index * 100 / task.getMaxKey()));
+                    loadPersent = (int) (index * 100 / task.getMaxKey());
                 } catch (InterruptedException e) {
-                    //                    loadStatus.setStatus(Status.SUSPENDED);
+                    loadStatus = Status.STOPPED;
                     break;
                 } catch (Exception e) {
                     String msg = "Load Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
-                    //                    loadStatus.setStatus(Status.FAILED);
+                    loadStatus = Status.FAILED;
                     break;
                 }
             }
@@ -367,36 +372,16 @@ public class ShardDumpTaskExecutor {
         return this.task;
     }
 
-    /*
-    @Override
-    public ShardSyncTaskState getTaskState() {
+    public String getTaskState() {
         checkFinish();
 
-        ShardSyncTaskState status = new ShardSyncTaskState();
-        status.setTaskName(this.task.getName());
-
-        if (Status.SUCCESS.equals(dumpStatus.getStatus()) && Status.SUCCESS.equals(loadStatus.getStatus())) {
-            status.setStatus(Status.SUCCESS);
-            status.setPercent(ShardSyncTaskState.PERCENT_MAX);
-            return status;
+        if (Status.SUCCESS.equals(dumpStatus) && Status.SUCCESS.equals(loadStatus)) {
+            return Status.SUCCESS.getDesc();
         }
 
-        if (!dumpStatus.getStatus().equals(Status.RUNNING)) {
-            status.setStatus(dumpStatus.getStatus());
-        } else if (!loadStatus.getStatus().equals(Status.RUNNING)) {
-            status.setStatus(loadStatus.getStatus());
-        } else {
-            status.setStatus(Status.RUNNING);
-        }
-
-        status.setPercent((dumpStatus.getPercent() + loadStatus.getPercent()) / 2);
-        return status;
+        return String.format("dump:%s load:%s (%d%%)", dumpStatus.getDesc(), loadStatus.getDesc(),
+                ((loadPersent + dumpPersent) / 2));
     }
-
-    @Override
-    public void setTaskState(ShardSyncTaskState taskState) {
-
-    }*/
 
     public void stop() {
         dumpWorker.interrupt();
@@ -421,5 +406,23 @@ public class ShardDumpTaskExecutor {
 
     public void setShardDumpService(ShardDumpService shardDumpService) {
         this.shardDumpService = shardDumpService;
+    }
+
+    enum Status {
+        UNKNOW("未知"),
+        RUNNING("运行中"),
+        STOPPED("已停止"),
+        SUCCESS("已成功"),
+        FAILED("已失败");
+
+        private final String desc;
+
+        Status(String desc) {
+            this.desc = desc;
+        }
+
+        public String getDesc() {
+            return desc;
+        }
     }
 }
