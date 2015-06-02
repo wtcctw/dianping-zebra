@@ -43,6 +43,16 @@ public class ShardDumpServiceImpl implements ShardDumpService {
         return shardDumpDbMapper.getAll();
     }
 
+    @Override
+    public void createDb(ShardDumpDbEntity entity){
+        shardDumpDbMapper.create(entity);
+    }
+
+    @Override
+    public void deleteDb(int id){
+        shardDumpDbMapper.delete(id);
+    }
+
     protected ShardDumpDbEntity getDbByName(String name) {
         List<ShardDumpDbEntity> dbs = shardDumpDbMapper.getDbByName(name);
         Preconditions.checkArgument(dbs != null && dbs.size() == 1, "the db %s is not exist or more than one", name);

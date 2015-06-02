@@ -16,4 +16,8 @@ public interface ShardDumpService {
     List<ShardDumpTaskEntity> getTaskByIp(String ip);
 
     List<ShardDumpDbEntity> getAllDb();
+
+    void createDb(ShardDumpDbEntity entity);
+
+    void deleteDb(int id);
 }

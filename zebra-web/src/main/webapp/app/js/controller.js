@@ -9,9 +9,26 @@ zebraWeb.controller('dml', function ($scope, $http) {
 });
 
 zebraWeb.controller('migratedb', function ($scope, $http) {
+    $scope.newDb = {};
+
     $http.get('/a/migratedb').success(function (data, status, headers, config) {
         $scope.data = data;
     });
+
+    $scope.createDb = function () {
+        $http.post('/a/migratedb', $scope.newDb).success(function (data, status, headers, config) {
+            alert("创建成功！");
+            $scope.data = data;
+            $scope.newDb = {};
+        });
+    }
+
+    $scope.delete = function (id) {
+        $http.delete('/a/migratedb/' + id).success(function (data, status, headers, config) {
+            alert("删除成功！");
+            $scope.data = data;
+        });
+    }
 });
 
 zebraWeb.controller('doc', function ($scope, $location) {

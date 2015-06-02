@@ -1,1 +1,42 @@
-hello world
+<div class="page-header">
+    <div class="row">
+        <div class="col-xs-12">
+            <form class="form-inline" role="form">
+                <input required class="form-control input-sm" ng-model="newDb.name" type="text" placeholder="Name">
+                <input required class="form-control input-sm" ng-model="newDb.host" type="text" placeholder="Host">
+                <input required class="form-control input-sm" ng-model="newDb.port" type="number" placeholder="Port">
+                <input required class="form-control input-sm" ng-model="newDb.username" type="text" placeholder="Username">
+                <input required class="form-control input-sm" ng-model="newDb.password" type="password" placeholder="Password">
+                <button ng-click="createDb()" class="btn btn-primary btn-sm">创建</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="row">
+    <div class="col-xs-12">
+        <table id="dynamic-table" class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>地址</th>
+                    <th>用户名</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="item in data">
+                    <td>{{item.name}}</td>
+                    <td>{{item.host}}:{{item.port}}</td>
+                    <td>{{item.username}}</td>
+                    <td>
+                        <button class="btn btn-xs btn-danger" ng-click="delete(item.id)">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

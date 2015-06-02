@@ -10,4 +10,15 @@
     <select id="getAll" resultType="ShardDumpDbEntity">
         SELECT * FROM ShardDumpDb
     </select>
+
+    <delete id="delete" parameterType="map">
+        DELETE FROM ShardDumpDb WHERE Id = #{id}
+    </delete>
+
+    <insert id="create" parameterType="ShardDumpDbEntity">
+        INSERT ShardDumpDb
+        (Name,Host,Port,Username,Password)
+        VALUES
+        (#{name},#{host},#{port},#{username},#{password})
+    </insert>
 </mapper>

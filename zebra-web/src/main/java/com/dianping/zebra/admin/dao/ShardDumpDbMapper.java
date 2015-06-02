@@ -16,4 +16,7 @@ public interface ShardDumpDbMapper {
 
     List<ShardDumpDbEntity> getAll();
 
+    void create(ShardDumpDbEntity entity);
+
+    void delete(@Param("id") int id);
 }
