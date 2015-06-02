@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardDumpTaskExecutorTest {
+public class ShardDumpTaskExecutorImplTest {
     ShardDumpTaskEntity task;
 
     ShardDumpTaskExecutor target;

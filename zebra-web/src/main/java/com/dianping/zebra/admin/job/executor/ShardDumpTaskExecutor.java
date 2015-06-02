@@ -76,7 +76,7 @@ public class ShardDumpTaskExecutor {
         this.dstDBInstance = task.getDstDbEntity();
     }
 
-    private boolean checkFinish() {
+    public boolean isFinish() {
         if (this.task.getIndexKey() == FINISH_INDEX) {
             loadStatus = Status.SUCCESS;
             dumpStatus = Status.SUCCESS;
@@ -85,8 +85,8 @@ public class ShardDumpTaskExecutor {
         return false;
     }
 
-    public void init() {
-        if (checkFinish()) {
+    public synchronized void init() {
+        if (isFinish()) {
             return;
         }
 
@@ -359,8 +359,8 @@ public class ShardDumpTaskExecutor {
         return pbd.getErrors();
     }
 
-    public void start() {
-        if (checkFinish()) {
+    public synchronized void start() {
+        if (isFinish()) {
             return;
         }
 
@@ -373,7 +373,7 @@ public class ShardDumpTaskExecutor {
     }
 
     public String getTaskState() {
-        checkFinish();
+        isFinish();
 
         if (Status.SUCCESS.equals(dumpStatus) && Status.SUCCESS.equals(loadStatus)) {
             return Status.SUCCESS.getDesc();
@@ -383,7 +383,7 @@ public class ShardDumpTaskExecutor {
                 ((loadPersent + dumpPersent) / 2));
     }
 
-    public void stop() {
+    public synchronized void stop() {
         dumpWorker.interrupt();
         loadWorker.interrupt();
 

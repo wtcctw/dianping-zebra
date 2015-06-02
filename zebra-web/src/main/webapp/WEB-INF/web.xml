@@ -39,14 +39,11 @@
         <url-pattern>/a/monitor/database/*</url-pattern>
         <url-pattern>/a/mha/*</url-pattern>
     </filter-mapping>
-    
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath*:config/spring/common/appcontext-*.xml,
-            classpath:config/spring/appcontext-db.xml,
-            classpath:config/spring/appcontext-dao.xml,
-            classpath:config/spring/appcontext-mapper.xml,
+            classpath:config/spring/common/appcontext-*.xml,
+            classpath:config/spring/appcontext-*.xml
         </param-value>
     </context-param>
     <listener>

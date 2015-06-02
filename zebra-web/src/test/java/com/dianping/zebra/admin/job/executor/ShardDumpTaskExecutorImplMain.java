@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
  * http://www.dozer.cc
  */
 
-public class ShardDumpTaskExecutorMain {
+public class ShardDumpTaskExecutorImplMain {
     public static void main(String... args) throws InterruptedException {
         ShardDumpTaskEntity task = new ShardDumpTaskEntity();
 
