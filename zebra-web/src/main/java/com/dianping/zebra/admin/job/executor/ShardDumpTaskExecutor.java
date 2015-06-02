@@ -57,9 +57,9 @@ public class ShardDumpTaskExecutor {
 
     protected Thread loadWorker;
 
-    protected volatile Status dumpStatus = Status.UNKNOW;
+    protected volatile Status dumpStatus = Status.UNKNOWN;
 
-    protected volatile Status loadStatus = Status.UNKNOW;
+    protected volatile Status loadStatus = Status.UNKNOWN;
 
     protected volatile int dumpPersent;
 
@@ -141,7 +141,7 @@ public class ShardDumpTaskExecutor {
                 if (reader != null) {
                     try {
                         reader.close();
-                    } catch (IOException ignoire) {
+                    } catch (IOException ignore) {
                     }
                 }
                 if (!hasData && file != null) {
@@ -409,7 +409,7 @@ public class ShardDumpTaskExecutor {
     }
 
     enum Status {
-        UNKNOW("未知"),
+        UNKNOWN("未知"),
         RUNNING("运行中"),
         STOPPED("已停止"),
         SUCCESS("已成功"),
