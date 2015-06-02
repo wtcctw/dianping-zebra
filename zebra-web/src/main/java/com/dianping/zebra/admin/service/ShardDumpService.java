@@ -1,5 +1,6 @@
 package com.dianping.zebra.admin.service;
 
+import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface ShardDumpService {
     void updateTaskStatus(ShardDumpTaskEntity entity);
 
     List<ShardDumpTaskEntity> getTaskByIp(String ip);
+
+    List<ShardDumpDbEntity> getAllDb();
 }

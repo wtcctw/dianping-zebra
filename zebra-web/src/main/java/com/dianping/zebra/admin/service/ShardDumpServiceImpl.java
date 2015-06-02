@@ -38,6 +38,11 @@ public class ShardDumpServiceImpl implements ShardDumpService {
         return result;
     }
 
+    @Override
+    public List<ShardDumpDbEntity> getAllDb() {
+        return shardDumpDbMapper.getAll();
+    }
+
     protected ShardDumpDbEntity getDbByName(String name) {
         List<ShardDumpDbEntity> dbs = shardDumpDbMapper.getDbByName(name);
         Preconditions.checkArgument(dbs != null && dbs.size() == 1, "the db %s is not exist or more than one", name);

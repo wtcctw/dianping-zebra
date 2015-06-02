@@ -14,4 +14,6 @@ public interface ShardDumpDbMapper {
 
     List<ShardDumpDbEntity> getDbByName(@Param("name") String name);
 
+    List<ShardDumpDbEntity> getAll();
+
 }

@@ -111,6 +111,10 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/dml',
         templateUrl: 'app/template/dml.html',
         controller: 'dml'
+    }).state('migratedb', {
+        url: '/migratedb',
+        templateUrl: 'app/template/migratedb.html',
+        controller: 'migratedb'
     }).state('shard-migrate', {
         url: '/shard-migrate',
         templateUrl: 'app/template/shard-migrate.html',

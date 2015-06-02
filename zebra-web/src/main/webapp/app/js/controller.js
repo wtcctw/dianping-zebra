@@ -1,20 +1,26 @@
-zebraWeb.controller('dml', function($scope, $http){
+zebraWeb.controller('dml', function ($scope, $http) {
     $scope.load = function () {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.shardRules = data;
         });
     }
-    
+
     $scope.$watch('config.env', $scope.load);
 });
 
-zebraWeb.controller('doc', function($scope,$location){
-	$scope.isActive = function (viewLocation) { 
+zebraWeb.controller('migratedb', function ($scope, $http) {
+    $http.get('/a/migratedb').success(function (data, status, headers, config) {
+        $scope.data = data;
+    });
+});
+
+zebraWeb.controller('doc', function ($scope, $location) {
+    $scope.isActive = function (viewLocation) {
         return viewLocation === $location.path();
     };
 });
 
-zebraWeb.controller('monitor', function ($scope, $http,loginService) {
+zebraWeb.controller('monitor', function ($scope, $http, loginService) {
     $scope.load = function () {
         $http.get('/a/monitor/list').success(function (data, status, headers, config) {
             $scope.statusList = data;
@@ -23,41 +29,41 @@ zebraWeb.controller('monitor', function ($scope, $http,loginService) {
                 loginService.login();
             }
         });
-        
+
         $http.get('/a/mha/allMarkedDown').success(function (data, status, headers, config) {
-        	$scope.mhaList = data;
+            $scope.mhaList = data;
         });
 
         $http.get('/a/monitor/history').success(function (data, status, headers, config) {
             $scope.histories = data;
         });
     }
-    
+
     $scope.load();
 
-	$scope.addJdbcRef = function() {
+    $scope.addJdbcRef = function () {
         if ($scope.jdbcRef) {
-        	 $http.get('/a/monitor/add?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
-        		 $scope.load();
-        	 });
+            $http.get('/a/monitor/add?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+                $scope.load();
+            });
         }
-	}
-	
-	$scope.removeJdbcRef = function(){
-       if ($scope.jdbcRef) {
-        	 $http.get('/a/monitor/remove?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
-        		 $scope.load();
-        	 });
+    }
+
+    $scope.removeJdbcRef = function () {
+        if ($scope.jdbcRef) {
+            $http.get('/a/monitor/remove?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
+                $scope.load();
+            });
         }
-	}
-	
-	$scope.markup = function(dsId){
-		if(dsId){
-       	 $http.get('/a/mha/markup?dsId=' + dsId).success(function (data, status, headers, config) {
-    		 $scope.load();
-    	 });
-		}
-	}
+    }
+
+    $scope.markup = function (dsId) {
+        if (dsId) {
+            $http.get('/a/mha/markup?dsId=' + dsId).success(function (data, status, headers, config) {
+                $scope.load();
+            });
+        }
+    }
 });
 
 zebraWeb.controller('update', function ($scope, $http, loginService) {
@@ -248,10 +254,10 @@ zebraWeb.controller('flow', function ($scope, $http, $filter) {
             });
         }
 
-        if(item.index == 0){
-        	return "0";
+        if (item.index == 0) {
+            return "0";
         }
-        
+
         return selected.length ? selected[0].text : 'Not set';
     };
 
@@ -373,7 +379,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         var readList = '';
         var readListHasWrite = false;
         var readListLength = 0;
-        
+
         $scope.data.configs.forEach(function (config) {
             if (!config.role) {
                 return;
@@ -387,24 +393,24 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
                 }
                 var temp = config.id + ':' + config.role.weight;
                 readList += readList ? ',' + temp : temp;
-                
-                if(config.id.indexOf("write") >= 0){
-                	readListHasWrite = true;
+
+                if (config.id.indexOf("write") >= 0) {
+                    readListHasWrite = true;
                 }
-                
+
                 readListLength++;
             }
         });
         $scope.data.config = '(' + readList + '),(' + writeList + ')';
-        
+
         $scope.data.alert = "";
-        
-        if(readListHasWrite == true){
-        	$scope.data.alert = "含有不合法的读role，只允许读账号作为读role。"
+
+        if (readListHasWrite == true) {
+            $scope.data.alert = "含有不合法的读role，只允许读账号作为读role。"
         }
-        
-        if(readListLength <=  1){
-        	$scope.data.alert = $scope.data.alert + "配置的读role少于2个，将不具有读HA。"
+
+        if (readListLength <= 1) {
+            $scope.data.alert = $scope.data.alert + "配置的读role少于2个，将不具有读HA。"
         }
     }
 
@@ -412,7 +418,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         close();
     }
 
-    $scope.newDs = function() {
+    $scope.newDs = function () {
         if (!$scope.newDsName1) {
             return;
         }
@@ -420,45 +426,45 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             alert('请以 ' + $scope.name + ' 开头！');
             return;
         }
-        
+
         var propertiesTmp = [];
         propertiesTmp.push({
-        	key: 'ds.' + $scope.newDsName1 + '.jdbc.url',
+            key: 'ds.' + $scope.newDsName1 + '.jdbc.url',
             value: '',
             isCreate: true,
             newValue: ""
         });
         propertiesTmp.push({
-        	key: 'ds.' + $scope.newDsName1 + '.jdbc.uername',
+            key: 'ds.' + $scope.newDsName1 + '.jdbc.uername',
             value: '',
             isCreate: true,
             newValue: ""
         });
         propertiesTmp.push({
-        	key: 'ds.' + $scope.newDsName1 + '.jdbc.password',
+            key: 'ds.' + $scope.newDsName1 + '.jdbc.password',
             value: '',
             isCreate: true,
             newValue: ""
         });
         propertiesTmp.push({
-        	key: 'ds.' + $scope.newDsName1 + '.jdbc.driverClass',
+            key: 'ds.' + $scope.newDsName1 + '.jdbc.driverClass',
             value: '',
             isCreate: true,
             newValue: "com.mysql.jdbc.Driver"
         });
         propertiesTmp.push({
-        	key: 'ds.' + $scope.newDsName1 + '.jdbc.properties',
+            key: 'ds.' + $scope.newDsName1 + '.jdbc.properties',
             value: '',
             isCreate: true,
             newValue: "${ds.datasource.properties}"
         });
         propertiesTmp.push({
-        	key: 'ds.' + $scope.newDsName1 + '.jdbc.active',
+            key: 'ds.' + $scope.newDsName1 + '.jdbc.active',
             value: '',
             isCreate: true,
             newValue: "true"
         });
-        
+
         $scope.data.configs.push({
             id: $scope.newDsName1,
             role: {
@@ -468,11 +474,11 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             },
             properties: propertiesTmp
         });
-        
+
         $scope.newDsName1 = '';
     }
-    
-    $scope.addDs = function (oldProperties,fromId, toId) {
+
+    $scope.addDs = function (oldProperties, fromId, toId) {
         if (!toId) {
             return;
         }
@@ -480,25 +486,25 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             alert('请以 ' + $scope.name + ' 开头！');
             return;
         }
-        
-        if(toId == fromId){
-        	return;
+
+        if (toId == fromId) {
+            return;
         }
-        
+
         var configs = $scope.data.configs;
         var newProperties = [];
-        
-        angular.forEach(oldProperties, function(property) {
-        	var newKey = property['key'].replace(fromId, toId);
-        	var newProperty = {
-        			key: newKey,
-        			value: '',
-        			isCreate: true,
-        			newValue: property["value"]
-        	}
-        	newProperties.push(newProperty);
+
+        angular.forEach(oldProperties, function (property) {
+            var newKey = property['key'].replace(fromId, toId);
+            var newProperty = {
+                key: newKey,
+                value: '',
+                isCreate: true,
+                newValue: property["value"]
+            }
+            newProperties.push(newProperty);
         });
-        
+
         $scope.data.configs.push({
             id: toId,
             role: {
@@ -508,7 +514,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             },
             properties: newProperties
         });
-        
+
         $scope.newDsName = '';
     }
 
@@ -576,18 +582,18 @@ zebraWeb.controller('header', function ($rootScope, $scope, $cookies, $http, log
                 env: $cookies.env ? $cookies.env : data[0]
             }
         });
-        
+
         loginService.isLogin();
     }
-    
-    $scope.login = function(){
-    	loginService.login();
-    } 
-    
-    $scope.logout = function(){
-    	loginService.logout();
+
+    $scope.login = function () {
+        loginService.login();
     }
-    
+
+    $scope.logout = function () {
+        loginService.logout();
+    }
+
     $scope.load();
 });
 
@@ -607,13 +613,13 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
     $scope.test = function (key) {
         configService.openTestModal(convertKey(key));
     };
-    
-    $scope.autoreplace = function(jdbcRef,isNew){
-    	 if (jdbcRef && $scope.config.env) {
-             $http.post('/a/config/autoreplace?env=' + $scope.config.env + '&jdbcRef=' + jdbcRef + '&isNew=' + isNew).success(function (data, status, headers, config) {
-            	 $scope.load();
-             });
-         }
+
+    $scope.autoreplace = function (jdbcRef, isNew) {
+        if (jdbcRef && $scope.config.env) {
+            $http.post('/a/config/autoreplace?env=' + $scope.config.env + '&jdbcRef=' + jdbcRef + '&isNew=' + isNew).success(function (data, status, headers, config) {
+                $scope.load();
+            });
+        }
     }
 
     $scope.load = function () {
@@ -638,18 +644,18 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
 
 zebraWeb.controller('login', function ($rootScope, $scope, $http) {
     $scope.login = function () {
-	    $http.post('/a/login', {
-	            username: $scope.username,
-	            password: $scope.password
-	        })
-	        .success(function (data, status, headers, config) {
-	            alert('登陆成功!')
-	            location.reload();
-	        }).error(function () {
-	            alert('登陆失败!')
-	            $scope.username = '';
-	            $scope.password = '';
-	        });
+        $http.post('/a/login', {
+                username: $scope.username,
+                password: $scope.password
+            })
+            .success(function (data, status, headers, config) {
+                alert('登陆成功!')
+                location.reload();
+            }).error(function () {
+                alert('登陆失败!')
+                $scope.username = '';
+                $scope.password = '';
+            });
     }
 });
 

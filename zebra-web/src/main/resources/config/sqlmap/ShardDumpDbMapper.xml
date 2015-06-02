@@ -6,4 +6,8 @@
     <select id="getDbByName" parameterType="map" resultType="ShardDumpDbEntity">
         SELECT * FROM ShardDumpDb WHERE Name = #{name}
     </select>
+
+    <select id="getAll" resultType="ShardDumpDbEntity">
+        SELECT * FROM ShardDumpDb
+    </select>
 </mapper>
