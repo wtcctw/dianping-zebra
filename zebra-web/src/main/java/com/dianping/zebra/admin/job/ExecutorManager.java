@@ -22,7 +22,7 @@ public class ExecutorManager implements Runnable {
     @Autowired
     private ShardDumpService shardDumpService;
 
-    private Map<String, ShardDumpTaskExecutor> shardDumpTaskExecutorMap = new ConcurrentHashMap<String, ShardDumpTaskExecutor>();
+    private Map<Integer, ShardDumpTaskExecutor> shardDumpTaskExecutorMap = new ConcurrentHashMap<Integer, ShardDumpTaskExecutor>();
 
     private Thread runner;
 
@@ -38,7 +38,7 @@ public class ExecutorManager implements Runnable {
             List<ShardDumpTaskEntity> tasks = shardDumpService.getTaskByIp(InetAddress.getLocalHost().getHostAddress());
 
             for (ShardDumpTaskEntity task : tasks) {
-                if (shardDumpTaskExecutorMap.containsKey(task.getName())) {
+                if (shardDumpTaskExecutorMap.containsKey(task.getId())) {
                     continue;
                 }
 
@@ -47,7 +47,7 @@ public class ExecutorManager implements Runnable {
                 executor.init();
                 executor.start();
 
-                shardDumpTaskExecutorMap.put(task.getName(), executor);
+                shardDumpTaskExecutorMap.put(task.getId(), executor);
             }
 
         } catch (UnknownHostException e) {
