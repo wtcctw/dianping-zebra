@@ -70,7 +70,7 @@ public class ShardDumpTaskExecutor {
         checkNotNull(task.getIndexColumnName(), "task.indexColumnName");
 
         this.task = task;
-        this.dumpOutputDir = "/tmp/" + task.getName() + "/";
+        this.dumpOutputDir = "/tmp/" + task.getId() + "/";
         this.srcDBInstance = task.getSrcDbEntity();
         this.dstDBInstance = task.getDstDbEntity();
     }

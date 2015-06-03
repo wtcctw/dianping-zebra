@@ -1,15 +1,15 @@
 <div class="page-header">
-	<div class="row">
-	    <div class="col-xs-12">
-	        <form class="form-inline" role="form">
-	        	<label class="label label-lg label-primary arrowed-right" for="form-field-1">环境</label>
-	            <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs"></select>
-	            <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="搜索">
-	            <input ng-show="isLogin"  required class="form-control input-sm" ng-model="addText" type="text" placeholder="New Shard Rule Name">
-	            <button ng-show="isLogin" ng-click="createGroupDs()" class="btn btn-primary btn-sm">创建</button>
-	        </form>
-	    </div>
-	</div>
+    <div class="row">
+        <div class="col-xs-12">
+            <form class="form-inline" role="form">
+                <label class="label label-lg label-primary arrowed-right" for="form-field-1">环境</label>
+                <select class="form-control input-sm" ng-model="config.env" ng-options="env for env in config.envs"></select>
+                <input class="form-control input-sm" ng-model="searchText" type="text" placeholder="搜索">
+                <input ng-show="isLogin" required class="form-control input-sm" ng-model="addText" type="text" placeholder="New Shard Rule Name">
+                <button ng-show="isLogin" ng-click="createGroupDs()" class="btn btn-primary btn-sm">创建</button>
+            </form>
+        </div>
+    </div>
 </div>
 <div class="row">
     <div class="col-xs-12">
@@ -24,8 +24,8 @@
                 <tr ng-repeat="shard in data | filter:{$key:searchText}">
                     <td>{{shard}}</td>
                     <td>
-                        <button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit(shard,shard)">配置编辑</button>
-                        <a ng-show="isLogin" class="btn btn-xs btn-success" herf="#/shard-migrate">初始化状态</a>
+                        <button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit(shard)">配置编辑</button>
+                        <a ng-show="isLogin" class="btn btn-xs btn-success" ng-click="migrate(shard)">初始化状态</a>
                     </td>
                 </tr>
             </tbody>
