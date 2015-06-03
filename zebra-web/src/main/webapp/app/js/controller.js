@@ -1,9 +1,32 @@
 zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
     $http.get('/a/shard/migrate/process/' + name).success(function (data, status, headers, config) {
         $scope.process = data;
+        if ($scope.process) {
+            if (!$scope.process.initFinish) {
+                $scope.process.currentStop = 1;
+            } else if (!$scope.process.dumpFinish) {
+                $scope.process.currentStop = 2;
+            } else if ($scope.process.needSync && !$scope.process.syncCreateFinish) {
+                $scope.process.currentStop = 3;
+            } else if (!$scope.process.catchUpFinish) {
+                $scope.process.currentStop = 4;
+            }
+        }
     });
 
     $scope.close = close;
+
+    $scope.next = function () {
+        if ($scope.process.currentStop < 4) {
+            $scope.process.currentStop++;
+        }
+    }
+
+    $scope.prev = function () {
+        if ($scope.process.currentStop > 1) {
+            $scope.process.currentStop--;
+        }
+    }
 });
 
 
@@ -12,7 +35,7 @@ zebraWeb.controller('dml', function ($scope, $http) {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.shardRules = data;
         });
-        
+
         $scope.isDisabled = false;
     }
 
@@ -34,18 +57,18 @@ zebraWeb.controller('dml', function ($scope, $http) {
             sql: $scope.shardSql,
         }).success(
             function (data, status, headers, config) {
-            	$scope.data = data;
-            	$scope.isInQuery = true;
-            	$scope.isDisabled = false;
-        });
-    	
+                $scope.data = data;
+                $scope.isInQuery = true;
+                $scope.isDisabled = false;
+            });
+
     }
-    
-    $scope.analyzeSample = function (){
-    	$scope.shardRule = "unifiedorder";
-    	$scope.shardSql = "select UserID,OrderID,SkuID from UOD_OrderSKU where OrderID='1432878940034432510782'";
-    	
-    	$scope.analyze();
+
+    $scope.analyzeSample = function () {
+        $scope.shardRule = "unifiedorder";
+        $scope.shardSql = "select UserID,OrderID,SkuID from UOD_OrderSKU where OrderID='1432878940034432510782'";
+
+        $scope.analyze();
     }
 
     $scope.load();
