@@ -2,22 +2,22 @@
     <div id="modal-wizard-container" class="">
         <div class="modal-header">
             <ul class="steps">
-                <li ng-class="{'active':process.currentStop>=1, 'complete':process.initFinish}">
+                <li ng-class="{'active':currentStop>=1, 'complete':process.initFinish}">
                     <span class="step">1</span>
                     <span class="title">数据库和表</span>
                 </li>
 
-                <li ng-class="{'active':process.currentStop>=2, 'complete':process.dumpFinish}">
+                <li ng-class="{'active':currentStop>=2, 'complete':process.dumpFinish}">
                     <span class="step">2</span>
                     <span class="title">迁移数据</span>
                 </li>
 
-                <li ng-class="{'active':process.currentStop>=3, 'complete':!process.needSync || process.syncCreateFinish}">
+                <li ng-class="{'active':currentStop>=3, 'complete':!process.needSync || process.syncCreateFinish}">
                     <span class="step">3</span>
                     <span class="title">多维度同步任务</span>
                 </li>
 
-                <li ng-class="{'active':process.currentStop>=4, 'complete':process.catchUpFinish}">
+                <li ng-class="{'active':currentStop>=4, 'complete':process.catchUpFinish}">
                     <span class="step">4</span>
                     <span class="title">迁移数据追赶任务</span>
                 </li>
@@ -25,25 +25,25 @@
         </div>
 
         <div class="modal-body step-content">
-            <div class="step-pane" ng-class="{'active':process.currentStop == 1}">
+            <div class="step-pane" ng-class="{'active':currentStop == 1}">
                 <div class="center">
                     <h4 class="blue">数据库和表</h4>
                 </div>
             </div>
 
-            <div class="step-pane" ng-class="{'active':process.currentStop == 2}">
+            <div class="step-pane" ng-class="{'active':currentStop == 2}">
                 <div class="center">
                     <h4 class="blue">迁移数据</h4>
                 </div>
             </div>
 
-            <div class="step-pane" ng-class="{'active':process.currentStop == 3}">
+            <div class="step-pane" ng-class="{'active':currentStop == 3}">
                 <div class="center">
                     <h4 class="blue">多维度同步任务</h4>
                 </div>
             </div>
 
-            <div class="step-pane" ng-class="{'active':process.currentStop == 4}">
+            <div class="step-pane" ng-class="{'active':currentStop == 4}">
                 <div class="center">
                     <h4 class="blue">迁移数据追赶任务</h4>
                 </div>
@@ -52,11 +52,11 @@
     </div>
 
     <div class="modal-footer wizard-actions">
-        <button ng-click="prev()" class="btn btn-sm btn-prev" ng-class="{'btn-success':process.currentStop > 1}">
+        <button ng-click="prev()" class="btn btn-sm btn-prev" ng-class="{'btn-success':currentStop > 1}">
             <i class="ace-icon fa fa-arrow-left"></i>上一步
         </button>
 
-        <button ng-click="next()" class="btn btn-sm btn-next" ng-class="{'btn-success':process.currentStop < 4}">
+        <button ng-click="next()" class="btn btn-sm btn-next" ng-class="{'btn-success':currentStop < 4}">
             下一步
             <i class="ace-icon fa fa-arrow-right icon-on-right"></i>
         </button>

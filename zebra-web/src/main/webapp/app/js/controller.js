@@ -3,13 +3,13 @@ zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
         $scope.process = data;
         if ($scope.process) {
             if (!$scope.process.initFinish) {
-                $scope.process.currentStop = 1;
+                $scope.currentStop = 1;
             } else if (!$scope.process.dumpFinish) {
-                $scope.process.currentStop = 2;
+                $scope.currentStop = 2;
             } else if ($scope.process.needSync && !$scope.process.syncCreateFinish) {
-                $scope.process.currentStop = 3;
+                $scope.currentStop = 3;
             } else if (!$scope.process.catchUpFinish) {
-                $scope.process.currentStop = 4;
+                $scope.currentStop = 4;
             }
         }
     });
@@ -17,14 +17,14 @@ zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
     $scope.close = close;
 
     $scope.next = function () {
-        if ($scope.process.currentStop < 4) {
-            $scope.process.currentStop++;
+        if ($scope.currentStop < 4) {
+            $scope.currentStop++;
         }
     }
 
     $scope.prev = function () {
-        if ($scope.process.currentStop > 1) {
-            $scope.process.currentStop--;
+        if ($scope.currentStop > 1) {
+            $scope.currentStop--;
         }
     }
 });
@@ -175,6 +175,7 @@ zebraWeb.controller('shard', function ($scope, $http, $modal, shardService) {
         var modal = $modal.open({
             templateUrl: 'app/template/shard-migrate.html',
             controller: 'shard-migrate',
+            size: 'lg',
             resolve: {
                 name: function () {
                     return name;
