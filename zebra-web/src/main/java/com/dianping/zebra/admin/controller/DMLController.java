@@ -5,7 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -21,9 +23,13 @@ import com.dianping.zebra.admin.dto.DmlResultDto.RouterItem;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
+import com.dianping.zebra.shard.router.DataSourceRouteException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.shard.router.TargetedSql;
+import com.dianping.zebra.shard.router.rule.DimensionRule;
+import com.dianping.zebra.shard.router.rule.RouterRule;
+import com.dianping.zebra.shard.router.rule.TableShardRule;
 import com.dianping.zebra.util.SqlType;
 import com.dianping.zebra.util.SqlUtils;
 
@@ -63,9 +69,30 @@ public class DMLController {
 			isCrossDb = true;
 		}
 
-		for (Entry<String, Set<String>> entry : target.getShardResult().getDbAndTables().entrySet()) {
-			totalTableCount += entry.getValue().size();
-		}
+		RouterRule routerRule = router.getRouterRule();
+      try {
+      	DMLCommon dml = DPMySQLParser.parse(dto.getSql()).obj;
+      	Set<String> relatedTables = dml.getRelatedTables();
+      	TableShardRule tableShardRule = getAppliedShardRule(routerRule,relatedTables);
+      	
+      	if(tableShardRule != null){
+      		DimensionRule dimensionRule = tableShardRule.getDimensionRules().get(0);
+      		for(Entry<String,Set<String>> shard : dimensionRule.getAllDBAndTables().entrySet()){
+      			totalTableCount += shard.getValue().size();
+      		}
+      	}else{
+      		dto.setSuccess(false);
+      		dto.setErrorMsg("Cannot found any sharding rule for this sql");
+      		
+      		return dto;
+      	}
+      } catch (Exception e) {
+      	dto.setSuccess(false);
+      	dto.setErrorMsg(e.getCause().getMessage());
+      	
+      	return dto;
+      }
+		
 		if (targetSqlCount == totalTableCount) {
 			isFullTableScan = true;
 		}
@@ -101,6 +128,11 @@ public class DMLController {
 				ResultSet rs = stmt.executeQuery(dto.getSql());
 
 				int columnCount = rs.getMetaData().getColumnCount();
+
+				for(int i = 1 ; i <= columnCount ; i++ ){
+					dto.addDataHeader(rs.getMetaData().getColumnName(i));
+				}
+				
 				while (rs.next()) {
 					DataRow dataRow = new DataRow();
 
@@ -110,6 +142,7 @@ public class DMLController {
 
 					dto.addDataRow(dataRow);
 				}
+				
 			} else {
 				int executeUpdate = stmt.executeUpdate(dto.getSql());
 
@@ -121,5 +154,20 @@ public class DMLController {
 		ds.close();
 
 		return dto;
+	}
+	
+	private TableShardRule getAppliedShardRule(RouterRule routerRule, Set<String> relatedTables) throws DataSourceRouteException {
+		Map<String, TableShardRule> shardRules = new HashMap<String, TableShardRule>(5);
+		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
+		for (String relatedTable : relatedTables) {
+			TableShardRule tableShardRule = tableShardRules.get(relatedTable);
+			if (tableShardRule != null) {
+				shardRules.put(relatedTable, tableShardRule);
+			}
+		}
+		if (shardRules.size() > 1) {
+			throw new DataSourceRouteException("Sql contains more than one shard-related table is not supported now.");
+		}
+		return !shardRules.isEmpty() ? shardRules.values().iterator().next() : null;
 	}
 }

@@ -19,11 +19,21 @@ public class DmlResultDto {
 
 	private List<RouterItem> routerItems = new LinkedList<RouterItem>();
 
+	private List<String> dataHeaders = new LinkedList<String>();
+	
 	private List<DataRow> dataRows = new LinkedList<DataRow>();
 
 	private boolean isSuccess = true;
 
 	private String errorMsg;
+
+	public void addDataHeader(String header){
+		this.dataHeaders.add(header);
+	}
+	
+	public List<String> getDataHeaders() {
+		return dataHeaders;
+	}
 
 	public void addRouterItem(RouterItem item){
 		this.routerItems.add(item);

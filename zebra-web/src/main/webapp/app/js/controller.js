@@ -3,6 +3,8 @@ zebraWeb.controller('dml', function ($scope, $http) {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.shardRules = data;
         });
+        
+        $scope.isDisabled = false;
     }
     
     $scope.analyze = function (){
@@ -16,13 +18,25 @@ zebraWeb.controller('dml', function ($scope, $http) {
     		return;
     	}
     	
+    	$scope.isDisabled = true;
+    	
     	$http.post('/a/dml/analyze', {
             ruleName: $scope.shardRule,
             sql: $scope.shardSql,
         }).success(
             function (data, status, headers, config) {
             	$scope.data = data;
+            	$scope.isInQuery = true;
+            	$scope.isDisabled = false;
         });
+    	
+    }
+    
+    $scope.analyzeSample = function (){
+    	$scope.shardRule = "unifiedorder";
+    	$scope.shardSql = "select UserID,OrderID,SkuID from UOD_OrderSKU where OrderID='1432878940034432510782'";
+    	
+    	$scope.analyze();
     }
 
     $scope.load();

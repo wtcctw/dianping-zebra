@@ -38,7 +38,6 @@ public class RouterRuleBuilder {
 				shardRule.setGeneratedPK(ruleConfig.getGeneratedPK());
 				arrangeDimensionConfigs(dimensionConfigs);
 				for (TableShardDimensionConfig dimensionConfig : dimensionConfigs) {
-//					String dimensionId = ruleConfig.getTableName() + index++;
 					shardRule.addDimensionRule(buildDimensionRule(dimensionConfig));
 				}
 				tableShardRules.put(ruleConfig.getTableName(), shardRule);

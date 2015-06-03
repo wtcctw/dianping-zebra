@@ -224,4 +224,8 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		this.routerRule = routerRule;
 	}
 
+	@Override
+   public RouterRule getRouterRule() {
+	   return this.routerRule;
+   }
 }
