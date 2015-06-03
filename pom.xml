@@ -27,6 +27,8 @@
         <module>zebra-api</module>
         <module>zebra-web</module>
         <module>zebra-ds-monitor-client</module>
+        <module>zebra-biz</module>
+        <module>zebra-sync-service</module>
     </modules>
     <description>zebra</description>
     <dependencyManagement>
