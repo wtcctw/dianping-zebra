@@ -15,5 +15,5 @@ public interface ShardMigrateProcessMapper {
 
     void update(ShardMigrateProcessEntity entity);
 
-    int create(ShardMigrateProcessEntity entity);
+    void create(ShardMigrateProcessEntity entity);
 }

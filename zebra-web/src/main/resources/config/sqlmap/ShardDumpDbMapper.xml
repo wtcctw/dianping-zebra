@@ -15,7 +15,8 @@
         DELETE FROM ShardDumpDb WHERE Id = #{id}
     </delete>
 
-    <insert id="create" parameterType="ShardDumpDbEntity">
+    <insert id="create" parameterType="ShardDumpDbEntity"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT ShardDumpDb
         (Name,Host,Port,Username,Password)
         VALUES

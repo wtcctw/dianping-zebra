@@ -1,4 +1,8 @@
-zebraWeb.controller('shard-migrate', function ($scope, name, close) {
+zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
+    $http.get('/a/shard/migrate/process/' + name).success(function (data, status, headers, config) {
+        $scope.process = data;
+    });
+
     $scope.close = close;
 });
 

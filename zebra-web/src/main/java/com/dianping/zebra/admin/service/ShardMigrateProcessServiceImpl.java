@@ -27,7 +27,7 @@ public class ShardMigrateProcessServiceImpl implements ShardMigrateProcessServic
         if (result.size() == 0) {
             entity = new ShardMigrateProcessEntity();
             entity.setName(name);
-            entity.setId(shardMigrateProcessMapper.create(entity));
+            shardMigrateProcessMapper.create(entity);
         } else {
             entity = result.get(0);
         }

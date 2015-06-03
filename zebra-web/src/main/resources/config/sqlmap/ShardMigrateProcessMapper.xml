@@ -11,15 +11,16 @@
     <update id="update" parameterType="ShardMigrateProcessEntity">
         UPDATE ShardMigrateProcess
         SET
-            name=#{name},
-            initFinish=#{initFinish},
-            dumpFinish=#{dumpFinish},
-            syncCreateFinish = #{syncCreateFinish},
-            catchUpFinish =#{catchUpFinish}
+        name=#{name},
+        initFinish=#{initFinish},
+        dumpFinish=#{dumpFinish},
+        syncCreateFinish = #{syncCreateFinish},
+        catchUpFinish =#{catchUpFinish}
         WHRER Id = #{id}
     </update>
 
-    <insert id="create" parameterType="ShardMigrateProcessEntity">
+    <insert id="create" parameterType="ShardMigrateProcessEntity"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO ShardMigrateProcess
         (name,initFinish,dumpFinish,syncCreateFinish,catchUpFinish)
         VALUES
