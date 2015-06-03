@@ -1,28 +1,33 @@
+zebraWeb.controller('shard-migrate', function ($scope, name, close) {
+    $scope.close = close;
+});
+
+
 zebraWeb.controller('dml', function ($scope, $http) {
     $scope.load = function () {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.shardRules = data;
         });
     }
-    
-    $scope.analyze = function (){
-    	if(!$scope.shardRule){
-    		alert("请选择正确的分表规则");
-    		return;
-    	}
-    	
-    	if(!$scope.shardSql){
-    		alert("请输入sql语句");
-    		return;
-    	}
-    	
-    	$http.post('/a/dml/analyze', {
+
+    $scope.analyze = function () {
+        if (!$scope.shardRule) {
+            alert("请选择正确的分表规则");
+            return;
+        }
+
+        if (!$scope.shardSql) {
+            alert("请输入sql语句");
+            return;
+        }
+
+        $http.post('/a/dml/analyze', {
             ruleName: $scope.shardRule,
             sql: $scope.shardSql,
         }).success(
             function (data, status, headers, config) {
-            	$scope.data = data;
-        });
+                $scope.data = data;
+            });
     }
 
     $scope.load();
@@ -114,15 +119,34 @@ zebraWeb.controller('update', function ($scope, $http, loginService) {
     });
 });
 
-zebraWeb.controller('shard', function ($scope, $http, shardService) {
+zebraWeb.controller('shard', function ($scope, $http, $modal, shardService) {
     $scope.load = function () {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.data = data;
         });
     }
 
-    $scope.edit = function (key, config) {
+    $scope.edit = function (key) {
         shardService.openEditModal(key)
+    }
+
+    $scope.migrate = function (name) {
+        var modal = $modal.open({
+            templateUrl: 'app/template/shard-migrate.html',
+            controller: 'shard-migrate',
+            resolve: {
+                name: function () {
+                    return name;
+                },
+                close: function () {
+                    return function () {
+                        if (modal) {
+                            modal.close();
+                        }
+                    };
+                }
+            }
+        });
     }
 
     $scope.load();
