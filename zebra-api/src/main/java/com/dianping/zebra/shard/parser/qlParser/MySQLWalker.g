@@ -8,36 +8,38 @@ rewrite=true;
 }
 @header
 {
-package com.dianping.zebra.parser.qlParser;
+package com.dianping.zebra.shard.parser.qlParser;
 
-import static com.dianping.zebra.parser.util.DbFunctions.*;
-import com.dianping.zebra.parser.sqlParser.*;
-import com.dianping.zebra.parser.valueobject.ValueObject;
-import com.dianping.zebra.parser.condition.ExpressionGroup;
-import com.dianping.zebra.parser.condition.WhereCondition;
-
-import com.dianping.zebra.parser.sqlParser.mySql.MyWhereCondition;
-import com.dianping.zebra.parser.condition.BindIndexHolder;
-import com.dianping.zebra.parser.util.DbFunctions;
-import com.dianping.zebra.parser.condition.OrExpressionGroup;
-import com.dianping.zebra.parser.condition.BetweenPair;
-
-import com.dianping.zebra.parser.valueobject.FunctionConvertor;
-import com.dianping.zebra.parser.sqlParser.DMLCommon;
-import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.math.BigDecimal;
-import com.dianping.zebra.parser.sqlParser.groupFunction.GroupFunction;
-import com.dianping.zebra.parser.sqlParser.groupFunction.Count;
-import com.dianping.zebra.parser.sqlParser.groupFunction.Concat;
-import com.dianping.zebra.parser.sqlParser.mySql.MySelect;
-import com.dianping.zebra.parser.sqlParser.mySql.MyDelete;
-import com.dianping.zebra.parser.sqlParser.mySql.MyUpdate;
 
-import com.dianping.zebra.parser.sqlParser.groupFunction.GroupFunctionRegister;
-import com.dianping.zebra.parser.valueobject.ColumnObject;
+import static com.dianping.zebra.shard.parser.util.DbFunctions.*;
+
+import com.dianping.zebra.shard.parser.condition.ExpressionGroup;
+import com.dianping.zebra.shard.parser.condition.WhereCondition;
+import com.dianping.zebra.shard.parser.condition.BindIndexHolder;
+import com.dianping.zebra.shard.parser.condition.OrExpressionGroup;
+import com.dianping.zebra.shard.parser.condition.BetweenPair;
+
+import com.dianping.zebra.shard.parser.sqlParser.*;
+import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
+import com.dianping.zebra.shard.parser.sqlParser.mySql.MyWhereCondition;
+import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Count;
+import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Concat;
+import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunction;
+import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunctionRegister;
+
+import com.dianping.zebra.shard.parser.sqlParser.mySql.MySelect;
+import com.dianping.zebra.shard.parser.sqlParser.mySql.MyDelete;
+import com.dianping.zebra.shard.parser.sqlParser.mySql.MyUpdate;
+
+import com.dianping.zebra.shard.parser.valueObject.ColumnObject;
+import com.dianping.zebra.shard.parser.valueObject.ValueObject;
+import com.dianping.zebra.shard.parser.valueObject.FunctionConvertor;
+
+import com.dianping.zebra.shard.parser.util.DbFunctions;
 }
 @members{
 		protected  GroupFunctionRegister groupFunc;

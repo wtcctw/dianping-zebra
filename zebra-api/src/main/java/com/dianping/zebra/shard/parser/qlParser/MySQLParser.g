@@ -56,16 +56,16 @@ the refactor easily.-----------------------------*/
 	SKIP;
 	RANGE;
 }
-@lexer::header{ package  com.dianping.zebra.parser.qlParser; } 
+@lexer::header{ package  com.dianping.zebra.shard.parser.qlParser; } 
 @header{
-package com.dianping.zebra.parser.qlParser;
+package com.dianping.zebra.shard.parser.qlParser;
 
-//import com.taobao.tddl.client.valueobject.FunctionConvertor;
 import java.util.Map;
 import java.util.HashMap;
-import com.dianping.zebra.parser.sqlParser.groupFunction.GroupFunction;
-import com.dianping.zebra.parser.valueobject.FunctionConvertor;
-import com.dianping.zebra.parser.sqlParser.groupFunction.GroupFunctionRegister;
+
+import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunction;
+import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunctionRegister;
+import com.dianping.zebra.shard.parser.valueObject.FunctionConvertor;
 }
 @members{
 	protected  Map<String, FunctionConvertor> functionMap;
