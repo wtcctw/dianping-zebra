@@ -7,4 +7,22 @@
     <select id="getByName" parameterType="map" resultType="ShardMigrateProcessEntity">
         SELECT * FROM ShardMigrateProcess WHERE Name = #{name}
     </select>
+
+    <update id="update" parameterType="ShardMigrateProcessEntity">
+        UPDATE ShardMigrateProcess
+        SET
+            name=#{name},
+            initFinish=#{initFinish},
+            dumpFinish=#{dumpFinish},
+            syncCreateFinish = #{syncCreateFinish},
+            catchUpFinish =#{catchUpFinish}
+        WHRER Id = #{id}
+    </update>
+
+    <insert id="create" parameterType="ShardMigrateProcessEntity">
+        INSERT INTO ShardMigrateProcess
+        (name,initFinish,dumpFinish,syncCreateFinish,catchUpFinish)
+        VALUES
+        (#{name},#{initFinish},#{dumpFinish},#{syncCreateFinish},#{catchUpFinish})
+    </insert>
 </mapper>

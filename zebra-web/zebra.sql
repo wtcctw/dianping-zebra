@@ -71,3 +71,13 @@ CREATE TABLE `ShardDumpDb` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+CREATE TABLE `ShardMigrateProcess` (
+  `Id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `Name` varchar(45) NOT NULL,
+  `InitFinish` tinyint(1) NOT NULL DEFAULT '0',
+  `DumpFinish` tinyint(1) NOT NULL DEFAULT '0',
+  `SyncCreateFinish` tinyint(1) NOT NULL DEFAULT '0',
+  `CatchUpFinish` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
