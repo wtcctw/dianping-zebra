@@ -12,4 +12,8 @@ import java.util.List;
  */
 public interface ShardMigrateProcessMapper {
     List<ShardMigrateProcessEntity> getByName(@Param(value = "name") String name);
+
+    void update(ShardMigrateProcessEntity entity);
+
+    void create(ShardMigrateProcessEntity entity);
 }

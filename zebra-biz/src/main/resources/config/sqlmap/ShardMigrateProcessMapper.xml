@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.zebra.admin.dao.ShardMigrateProcessMapper">
+
+    <select id="getByName" parameterType="map" resultType="ShardMigrateProcessEntity">
+        SELECT * FROM ShardMigrateProcess WHERE Name = #{name}
+    </select>
+
+    <update id="update" parameterType="ShardMigrateProcessEntity">
+        UPDATE ShardMigrateProcess
+        SET
+        name=#{name},
+        initFinish=#{initFinish},
+        dumpFinish=#{dumpFinish},
+        syncCreateFinish = #{syncCreateFinish},
+        catchUpFinish =#{catchUpFinish}
+        WHRER Id = #{id}
+    </update>
+
+    <insert id="create" parameterType="ShardMigrateProcessEntity"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO ShardMigrateProcess
+        (name,initFinish,dumpFinish,syncCreateFinish,catchUpFinish)
+        VALUES
+        (#{name},#{initFinish},#{dumpFinish},#{syncCreateFinish},#{catchUpFinish})
+    </insert>
+</mapper>
