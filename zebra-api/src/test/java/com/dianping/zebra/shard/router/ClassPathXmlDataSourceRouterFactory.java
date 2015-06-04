@@ -20,13 +20,10 @@ import com.dianping.zebra.shard.config.XmlDataSourceRouterConfigLoader;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
 
-import javax.sql.DataSource;
-import java.util.Map;
-
 /**
  * @author danson.liu
  */
-public class ClassPathXmlDataSourceRouterFactory extends AbstractDataSourceRouterFactory {
+public class ClassPathXmlDataSourceRouterFactory implements DataSourceRouterFactory {
 
     private final String routerRuleFile;
 
@@ -51,10 +48,4 @@ public class ClassPathXmlDataSourceRouterFactory extends AbstractDataSourceRoute
         router.setRouterRule(routerRule);
         return router;
     }
-
-    @Override
-    public Map<String, DataSource> getDataSourcePool() {
-        return getDataSourcePoolFromConfig(routerConfigLoader.loadConfig(routerRuleFile));
-    }
-
 }

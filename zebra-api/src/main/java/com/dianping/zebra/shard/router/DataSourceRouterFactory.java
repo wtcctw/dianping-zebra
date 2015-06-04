@@ -15,16 +15,12 @@
  */
 package com.dianping.zebra.shard.router;
 
-import javax.sql.DataSource;
-import java.util.Map;
-
 /**
  * @author danson.liu
  *
  */
 public interface DataSourceRouterFactory {
-
+	
 	DataSourceRouter getRouter();
 
-    Map<String, DataSource> getDataSourcePool();
 }

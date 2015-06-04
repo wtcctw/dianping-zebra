@@ -9,14 +9,10 @@ import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
 import com.google.gson.Gson;
 
-import javax.sql.DataSource;
-
-import java.util.Map;
-
-public class ConfigServiceDataSourceRouterFactory extends AbstractDataSourceRouterFactory {
+public class DataSourceLionRouterFactory implements DataSourceRouterFactory {
 	private final RouterRuleConfig routerConfig;
 
-	public ConfigServiceDataSourceRouterFactory(ConfigService configService, String ruleName) {
+	public DataSourceLionRouterFactory(ConfigService configService, String ruleName) {
 		this.routerConfig = new Gson().fromJson(configService.getProperty(LionKey.getShardConfigKey(ruleName)),
 		      RouterRuleConfig.class);
 
@@ -36,11 +32,7 @@ public class ConfigServiceDataSourceRouterFactory extends AbstractDataSourceRout
 		DataSourceRouterImpl router = new DataSourceRouterImpl();
 		RouterRule routerRule = RouterRuleBuilder.build(routerConfig);
 		router.setRouterRule(routerRule);
+		
 		return router;
-	}
-
-	@Override
-	public Map<String, DataSource> getDataSourcePool() {
-		return getDataSourcePoolFromConfig(routerConfig);
 	}
 }

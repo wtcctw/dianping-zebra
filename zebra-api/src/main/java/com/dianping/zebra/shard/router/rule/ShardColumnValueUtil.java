@@ -22,7 +22,7 @@ import com.dianping.zebra.shard.parser.sqlParser.*;
 import com.dianping.zebra.shard.parser.tableObject.TableName;
 import com.dianping.zebra.shard.parser.tableObject.imp.TableNameSubQueryImp;
 import com.dianping.zebra.shard.parser.valueObject.ValueObject;
-import com.dianping.zebra.shard.router.DataSourceRouteException;
+import com.dianping.zebra.shard.router.DataSourceRouterException;
 import org.antlr.runtime.RecognitionException;
 
 import java.io.IOException;
@@ -169,7 +169,7 @@ public class ShardColumnValueUtil {
 			}
 		}
 		if (evalSet.isEmpty()) {
-			throw new DataSourceRouteException(
+			throw new DataSourceRouterException(
 				"Router column[" + column + "] not found in insert sql[" + insertSql + "].");
 		}
 		return evalSet;

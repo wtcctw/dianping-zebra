@@ -19,21 +19,21 @@ package com.dianping.zebra.shard.router;
  * @author danson.liu
  *
  */
-public class DataSourceRouteException extends RuntimeException {
+public class DataSourceRouterException extends RuntimeException {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8724570679105220336L;
 
-	public DataSourceRouteException() {
+	public DataSourceRouterException() {
 		super();
 	}
 
 	/**
 	 * Constructs a new runtime exception with the specified detail message.
 	 */
-	public DataSourceRouteException(String message) {
+	public DataSourceRouterException(String message) {
 		super(message);
 	}
 
@@ -41,14 +41,14 @@ public class DataSourceRouteException extends RuntimeException {
 	 * Constructs a new runtime exception with the specified detail message and
 	 * cause.
 	 */
-	public DataSourceRouteException(String message, Throwable cause) {
+	public DataSourceRouterException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
 	 * Constructs a new runtime exception with the specified cause.
 	 */
-	public DataSourceRouteException(Throwable cause) {
+	public DataSourceRouterException(Throwable cause) {
 		super(cause);
 	}
 	

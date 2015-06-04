@@ -23,7 +23,7 @@ import com.dianping.zebra.admin.dto.DmlResultDto.RouterItem;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.router.DataSourceRouteException;
+import com.dianping.zebra.shard.router.DataSourceRouterException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.RouterContext;
 import com.dianping.zebra.shard.router.RouterTarget;
@@ -156,7 +156,7 @@ public class DMLController {
 		return dto;
 	}
 	
-	private TableShardRule getAppliedShardRule(RouterRule routerRule, Set<String> relatedTables) throws DataSourceRouteException {
+	private TableShardRule getAppliedShardRule(RouterRule routerRule, Set<String> relatedTables) throws DataSourceRouterException {
 		Map<String, TableShardRule> shardRules = new HashMap<String, TableShardRule>(5);
 		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
 		for (String relatedTable : relatedTables) {
@@ -166,7 +166,7 @@ public class DMLController {
 			}
 		}
 		if (shardRules.size() > 1) {
-			throw new DataSourceRouteException("Sql contains more than one shard-related table is not supported now.");
+			throw new DataSourceRouterException("Sql contains more than one shard-related table is not supported now.");
 		}
 		return !shardRules.isEmpty() ? shardRules.values().iterator().next() : null;
 	}

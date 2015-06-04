@@ -17,7 +17,7 @@ package com.dianping.zebra.shard.router.rule;
 
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
 import com.dianping.zebra.shard.parser.sqlParser.Insert;
-import com.dianping.zebra.shard.router.DataSourceRouteException;
+import com.dianping.zebra.shard.router.DataSourceRouterException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +77,7 @@ public class TableShardRule {
 		ShardMatchResult matchResult = matchContext.getMatchResult();
 		boolean dbAndTbsIsEmpty = matchResult.isDbAndTbsEmpty();
 		if (dmlSql instanceof Insert && dbAndTbsIsEmpty) {
-			throw new DataSourceRouteException("Insert clause[" + dmlSql + "] can't be routed.");
+			throw new DataSourceRouterException("Insert clause[" + dmlSql + "] can't be routed.");
 		}
 		Map<String, Set<String>> potentialDBAndTbs = matchResult.getPotentialDBAndTbs();
 		if (potentialDBAndTbs != null && !potentialDBAndTbs.isEmpty()) {

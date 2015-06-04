@@ -46,7 +46,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	private static final String SKIP_MAX_STUB = "?";
 
 	@Override
-	public RouterContext getTarget(String sql, List<Object> params) throws DataSourceRouteException {
+	public RouterContext getTarget(String sql, List<Object> params) throws DataSourceRouterException {
 		try {
 			RouterContext target = new RouterContext();
 			DMLCommon dmlSql = parseSqlClause(sql);
@@ -66,13 +66,13 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 				target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
 				target.setShardResult(matchResult);
 			} else {
-				throw new DataSourceRouteException("Cannot find any Shard Rule for table " + relatedTables);
+				throw new DataSourceRouterException("Cannot find any Shard Rule for table " + relatedTables);
 			}
 
 			return enrichRouterTarget(target, dmlSql, tableShardRule == null ? null : tableShardRule.getGeneratedPK(),
 			      skip, max);
 		} catch (Exception e) {
-			throw new DataSourceRouteException("DataSource route failed, cause: ", e);
+			throw new DataSourceRouterException("DataSource route failed, cause: ", e);
 		}
 	}
 
@@ -190,7 +190,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		return where != null ? where.limitInfo : null;
 	}
 
-	private TableShardRule getAppliedShardRule(Set<String> relatedTables) throws DataSourceRouteException {
+	private TableShardRule getAppliedShardRule(Set<String> relatedTables) throws DataSourceRouterException {
 		Map<String, TableShardRule> shardRules = new HashMap<String, TableShardRule>(5);
 		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
 		for (String relatedTable : relatedTables) {
@@ -200,7 +200,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 			}
 		}
 		if (shardRules.size() > 1) {
-			throw new DataSourceRouteException("Sql contains more than one shard-related table is not supported now.");
+			throw new DataSourceRouterException("Sql contains more than one shard-related table is not supported now.");
 		}
 		return !shardRules.isEmpty() ? shardRules.values().iterator().next() : null;
 	}

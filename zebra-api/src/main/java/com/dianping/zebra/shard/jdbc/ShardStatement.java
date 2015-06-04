@@ -27,7 +27,7 @@ import java.util.Set;
 
 import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
-import com.dianping.zebra.shard.router.DataSourceRouteException;
+import com.dianping.zebra.shard.router.DataSourceRouterException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.shard.router.RouterContext;
@@ -710,7 +710,7 @@ public class ShardStatement implements Statement {
 
 			executableCheck(routerTarget);
 
-		} catch (DataSourceRouteException e) {
+		} catch (DataSourceRouterException e) {
 			throw new SQLException(e);
 		}
 		return routerTarget;

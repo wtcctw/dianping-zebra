@@ -30,7 +30,7 @@ import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.config.PropertyConfigService;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.shard.router.ConfigServiceDataSourceRouterFactory;
+import com.dianping.zebra.shard.router.DataSourceLionRouterFactory;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 import com.dianping.zebra.shard.router.DataSourceRepository;
@@ -119,11 +119,7 @@ public class ShardDataSource extends AbstractDataSource {
 			}
 
 			if (routerFactory == null) {
-				routerFactory = new ConfigServiceDataSourceRouterFactory(configService, ruleName);
-			}
-
-			if (dataSourcePool == null) {
-				dataSourcePool = routerFactory.getDataSourcePool();
+				routerFactory = new DataSourceLionRouterFactory(configService, ruleName);
 			}
 
 			String originJdbcRef = configService.getProperty(LionKey.getShardOriginDatasourceKey(ruleName));
@@ -154,7 +150,11 @@ public class ShardDataSource extends AbstractDataSource {
 			throw new IllegalArgumentException("routerRuleFile must be set.");
 		}
 
-		DataSourceRepository.init(dataSourcePool);
+		if(dataSourcePool != null){
+			DataSourceRepository.init(dataSourcePool);
+		}else{
+			DataSourceRepository.init(router.getRouterRule());
+		}
 		
 		this.router = routerFactory.getRouter();
 		this.router.init();

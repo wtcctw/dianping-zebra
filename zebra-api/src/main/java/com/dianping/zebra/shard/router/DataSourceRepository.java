@@ -21,6 +21,11 @@ import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
+import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.shard.router.rule.DimensionRule;
+import com.dianping.zebra.shard.router.rule.RouterRule;
+import com.dianping.zebra.shard.router.rule.TableShardRule;
+
 /**
  * @author hao.zhu <br>
  *
@@ -39,6 +44,22 @@ public class DataSourceRepository {
 		}
 	}
 
+	public static void init(RouterRule routerRule) {
+		for(TableShardRule shardRule : routerRule.getTableShardRules().values()){
+			for(DimensionRule dimensionRule : shardRule.getDimensionRules()){
+				for(String jdbcRef : dimensionRule.getAllDBAndTables().keySet()){
+					if(!dataSources.containsKey(jdbcRef)){
+						GroupDataSource groupDataSource = new GroupDataSource(jdbcRef);
+						
+						groupDataSource.setForceWriteOnLogin(false); // HACK turn off
+						groupDataSource.init();
+						dataSources.put(jdbcRef, groupDataSource);
+					}
+				}
+			}
+		}
+	}
+	
 	public static DataSource getDataSource(String dsName) {
 		return dataSources.get(dsName.toLowerCase());
 	}
