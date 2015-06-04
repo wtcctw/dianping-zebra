@@ -46,9 +46,9 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	private static final String SKIP_MAX_STUB = "?";
 
 	@Override
-	public RouterTarget getTarget(String sql, List<Object> params) throws DataSourceRouteException {
+	public RouterContext getTarget(String sql, List<Object> params) throws DataSourceRouteException {
 		try {
-			RouterTarget target = new RouterTarget();
+			RouterContext target = new RouterContext();
 			DMLCommon dmlSql = parseSqlClause(sql);
 			int skip = dmlSql.getSkip(params);
 			int max = dmlSql.getMax(params);
@@ -86,7 +86,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		return parsedResult;
 	}
 
-	private RouterTarget enrichRouterTarget(RouterTarget target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
+	private RouterContext enrichRouterTarget(RouterContext target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
 		target.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
 		target.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
 		target.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);
@@ -97,25 +97,25 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		return target;
 	}
 
-	private List<TargetedSql> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable, String sql,
+	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable, String sql,
 	      DMLCommon dmlSql, String logicTable, int skip, int max) {
-		Map<String, TargetedSql> targetedSqlMap = new HashMap<String, TargetedSql>();
+		Map<String, RouterTarget> targetedSqlMap = new HashMap<String, RouterTarget>();
 		sql = reconstructSqlLimit(acrossTable, sql, dmlSql, skip, max);
 
 		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
 			String jdbcRef = entry.getKey();
 
 			if (!targetedSqlMap.containsKey(jdbcRef)) {
-				targetedSqlMap.put(jdbcRef, new TargetedSql(jdbcRef));
+				targetedSqlMap.put(jdbcRef, new RouterTarget(jdbcRef));
 			}
 
-			TargetedSql targetedSql = targetedSqlMap.get(jdbcRef);
+			RouterTarget targetedSql = targetedSqlMap.get(jdbcRef);
 			for (String physicalTable : entry.getValue()) {
 				targetedSql.addSql(replaceSqlTableName(sql, dmlSql, logicTable, physicalTable));
 			}
 		}
 
-		return new ArrayList<TargetedSql>(targetedSqlMap.values());
+		return new ArrayList<RouterTarget>(targetedSqlMap.values());
 	}
 
 	private String replaceSqlTableName(String sql, DMLCommon dmlSql, String logicTable, String physicalTable) {
@@ -132,14 +132,14 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	private String reconstructSqlLimit(boolean acrossTable, String sql, DMLCommon dmlSql, int skip, int max) {
 		// 如果既有limit又有groupby，那么需要去掉limit。by Leo Liang
 		// Note: 其实应该加上一个过滤条件，groupby里面没有分区键
-		if ((dmlSql instanceof Select) && acrossTable && (max != RouterTarget.NO_MAX || skip != RouterTarget.NO_SKIP)) {
+		if ((dmlSql instanceof Select) && acrossTable && (max != RouterContext.NO_MAX || skip != RouterContext.NO_SKIP)) {
 			if (((Select) dmlSql).getWhere().getGroupByColumns() != null
 			      && !((Select) dmlSql).getWhere().getGroupByColumns().isEmpty()) {
 				return sql.substring(0, sql.toLowerCase().lastIndexOf(" limit "));
 			}
 		}
 
-		if (acrossTable && !(dmlSql instanceof Insert) && max != RouterTarget.NO_MAX && skip > 0) {
+		if (acrossTable && !(dmlSql instanceof Insert) && max != RouterContext.NO_MAX && skip > 0) {
 			MyWhereCondition.LimitInfo limitInfo = getLimitInfo(dmlSql);
 
 			int skipLen = String.valueOf(skip).length();
@@ -161,7 +161,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
-			if (acrossTable && !(dmlSql instanceof Insert) && max != RouterTarget.NO_MAX && skip > 0) {
+			if (acrossTable && !(dmlSql instanceof Insert) && max != RouterContext.NO_MAX && skip > 0) {
 				MyWhereCondition where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
 				Object start = where.getStart();
 				if (start instanceof BindVar) {

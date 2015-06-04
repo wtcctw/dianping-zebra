@@ -29,9 +29,9 @@ import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
 import com.dianping.zebra.shard.router.DataSourceRouteException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
-import com.dianping.zebra.shard.router.LocalDataSourceRepository;
+import com.dianping.zebra.shard.router.DataSourceRepository;
+import com.dianping.zebra.shard.router.RouterContext;
 import com.dianping.zebra.shard.router.RouterTarget;
-import com.dianping.zebra.shard.router.TargetedSql;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.StringUtils;
 
@@ -106,18 +106,18 @@ public class ShardStatement implements Statement {
 	      throws SQLException {
 		checkClosed();
 
-		RouterTarget routerTarget = routingAndCheck(sql, null);
+		RouterContext routerTarget = routingAndCheck(sql, null);
 
 		int affectedRows = 0;
 		List<SQLException> exceptions = new ArrayList<SQLException>();
 
-		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
+		for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						String dbIndex = targetedSql.getDataSourceName();
-						conn = LocalDataSourceRepository.getDataSource(dbIndex).getConnection();
+						conn = DataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
@@ -299,7 +299,7 @@ public class ShardStatement implements Statement {
 		return stmt;
 	}
 
-	protected void executableCheck(RouterTarget routerTarget) throws SQLException {
+	protected void executableCheck(RouterContext routerTarget) throws SQLException {
 		if (routerTarget == null) {
 			throw new SQLException("No router return value.");
 		}
@@ -373,7 +373,7 @@ public class ShardStatement implements Statement {
 			return this.results;
 		}
 
-		RouterTarget routerTarget = routingAndCheck(sql, null);
+		RouterContext routerTarget = routingAndCheck(sql, null);
 
 		ShardResultSet rs = new ShardResultSet();
 		rs.setStatement(this);
@@ -383,13 +383,13 @@ public class ShardStatement implements Statement {
 
 		List<SQLException> exceptions = new ArrayList<SQLException>();
 
-		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
+		for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						String dbIndex = targetedSql.getDataSourceName();
-						conn = LocalDataSourceRepository.getDataSource(dbIndex).getConnection();
+						conn = DataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
@@ -700,9 +700,9 @@ public class ShardStatement implements Statement {
 	 * @return
 	 * @throws java.sql.SQLException
 	 */
-	protected RouterTarget routingAndCheck(String sql, List<Object> params) throws SQLException {
+	protected RouterContext routingAndCheck(String sql, List<Object> params) throws SQLException {
 
-		RouterTarget routerTarget = null;
+		RouterContext routerTarget = null;
 		try {
 			JudgeSQLRetVal judgeSQLRetVal = judgeSQLType(sql);
 

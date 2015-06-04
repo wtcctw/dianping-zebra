@@ -5,6 +5,7 @@ import com.dianping.zebra.shard.jdbc.*;
 import com.dianping.zebra.shard.parser.SelectTest;
 import com.dianping.zebra.shard.router.DataSourceRouterImplTest;
 import com.dianping.zebra.shard.router.rule.GroovyRuleEngineTest;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -13,7 +14,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
         //config
         XmlDataSourceRouterConfigLoaderTest.class,
-
 
         //jdbc
         ConnectionTest.class,
@@ -37,8 +37,6 @@ import org.junit.runners.Suite.SuiteClasses;
         DataSourceRouterImplTest.class,
         ShardSupportedCaseTest.class,
         GroovyRuleEngineTest.class
-
-
 })
 public class AllTests {
 

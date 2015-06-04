@@ -1,6 +1,5 @@
-package com.dianping.zebra.shard;
+package com.dianping.zebra.shard.jdbc;
 
-import com.dianping.zebra.shard.jdbc.ZebraMultiDBBaseTestCase;
 import com.dianping.zebra.util.SqlExecuteHelper;
 import com.google.common.collect.Lists;
 

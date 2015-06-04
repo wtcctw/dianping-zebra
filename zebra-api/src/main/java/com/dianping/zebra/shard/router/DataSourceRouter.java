@@ -23,7 +23,7 @@ import com.dianping.zebra.shard.router.rule.RouterRule;
  */
 public interface DataSourceRouter {
 
-    RouterTarget getTarget(String sql, List<Object> params) throws DataSourceRouteException;
+    RouterContext getTarget(String sql, List<Object> params) throws DataSourceRouteException;
     
     RouterRule getRouterRule();
 

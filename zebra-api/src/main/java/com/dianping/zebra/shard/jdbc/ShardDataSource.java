@@ -33,7 +33,7 @@ import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.router.ConfigServiceDataSourceRouterFactory;
 import com.dianping.zebra.shard.router.DataSourceRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
-import com.dianping.zebra.shard.router.LocalDataSourceRepository;
+import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.util.StringUtils;
 
 /**
@@ -154,7 +154,7 @@ public class ShardDataSource extends AbstractDataSource {
 			throw new IllegalArgumentException("routerRuleFile must be set.");
 		}
 
-		LocalDataSourceRepository.init(dataSourcePool);
+		DataSourceRepository.init(dataSourcePool);
 		
 		this.router = routerFactory.getRouter();
 		this.router.init();

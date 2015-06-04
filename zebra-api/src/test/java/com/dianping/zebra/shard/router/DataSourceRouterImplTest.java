@@ -38,23 +38,23 @@ public class DataSourceRouterImplTest {
 
 	@BeforeClass
 	public static void setUp() {
-		LocalDataSourceRepository.init(createDataSourcePool());
+		DataSourceRepository.init(createDataSourcePool());
 		DataSourceRouterFactory routerFactory = new ClassPathXmlDataSourceRouterFactory("db-router-rule.xml");
 		router = routerFactory.getRouter();
 		router.init();
 	}
 
 	public void baseTest(String sql, List<Object> params) {
-		RouterTarget target = router.getTarget(sql, params);
+		RouterContext target = router.getTarget(sql, params);
 		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		List<RouterTarget> targetedSqls = target.getTargetedSqls();
 		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
 		assertTrue(!target.getNewParams().isEmpty());
 	}
 
-	private void printSql(List<TargetedSql> targetedSqls) {
-		for (TargetedSql targetedSql : targetedSqls) {
+	private void printSql(List<RouterTarget> targetedSqls) {
+		for (RouterTarget targetedSql : targetedSqls) {
 			for (String sql : targetedSql.getSqls()) {
 				System.out.println(String.format("[%s]  %s", targetedSql.getDataSourceName(), sql));
 			}
@@ -62,14 +62,14 @@ public class DataSourceRouterImplTest {
 	}
 
 	public void singleTargetTest(String sql, List<Object> params, String targetDs, String targetTable) {
-		RouterTarget target = router.getTarget(sql, params);
+		RouterContext target = router.getTarget(sql, params);
 		assertNotNull(target);
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		List<RouterTarget> targetedSqls = target.getTargetedSqls();
 		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty() && targetedSqls.size() == 1);
 		assertTrue(!target.getNewParams().isEmpty());
 
-		TargetedSql targetedSql = targetedSqls.get(0);
+		RouterTarget targetedSql = targetedSqls.get(0);
 		assertTrue(targetedSql.getDataSourceName().equalsIgnoreCase(targetDs)
 		      && targetedSql.getSqls().get(0).contains(targetTable));
 	}

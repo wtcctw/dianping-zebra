@@ -69,9 +69,9 @@ import com.dianping.zebra.group.jdbc.param.TimeParamContext;
 import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
 import com.dianping.zebra.group.jdbc.param.UnicodeStreamParamContext;
-import com.dianping.zebra.shard.router.LocalDataSourceRepository;
+import com.dianping.zebra.shard.router.DataSourceRepository;
+import com.dianping.zebra.shard.router.RouterContext;
 import com.dianping.zebra.shard.router.RouterTarget;
-import com.dianping.zebra.shard.router.TargetedSql;
 import com.dianping.zebra.util.JDBCUtils;
 
 /**
@@ -170,7 +170,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 			return this.results;
 		}
 
-		RouterTarget routerTarget = routingAndCheck(sql, getParams());
+		RouterContext routerTarget = routingAndCheck(sql, getParams());
 
 		rewriteAndMergeParms(routerTarget.getNewParams());
 
@@ -182,13 +182,13 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 
 		List<SQLException> exceptions = new ArrayList<SQLException>();
 
-		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
+		for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						String dbIndex = targetedSql.getDataSourceName();
-						conn = LocalDataSourceRepository.getDataSource(dbIndex).getConnection();
+						conn = DataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
@@ -222,20 +222,20 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 	public int executeUpdate() throws SQLException {
 		checkClosed();
 
-		RouterTarget routerTarget = routingAndCheck(sql, getParams());
+		RouterContext routerTarget = routingAndCheck(sql, getParams());
 
 		rewriteAndMergeParms(routerTarget.getNewParams());
 
 		int affectedRows = 0;
 		List<SQLException> exceptions = new ArrayList<SQLException>();
 
-		for (TargetedSql targetedSql : routerTarget.getTargetedSqls()) {
+		for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						String dbIndex = targetedSql.getDataSourceName();
-						conn = LocalDataSourceRepository.getDataSource(dbIndex).getConnection();
+						conn = DataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);

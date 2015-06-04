@@ -25,8 +25,8 @@ import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
 import com.dianping.zebra.shard.router.DataSourceRouteException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
+import com.dianping.zebra.shard.router.RouterContext;
 import com.dianping.zebra.shard.router.RouterTarget;
-import com.dianping.zebra.shard.router.TargetedSql;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
@@ -45,7 +45,7 @@ public class DMLController {
 		ds.init();
 
 		DataSourceRouter router = ds.getRouter();
-		RouterTarget target = null;
+		RouterContext target = null;
 
 		try {
 			target = router.getTarget(dto.getSql(), new ArrayList<Object>());
@@ -61,7 +61,7 @@ public class DMLController {
 		boolean isCrossDb = false;
 		boolean isFullTableScan = false;
 
-		for (TargetedSql targetedSql : target.getTargetedSqls()) {
+		for (RouterTarget targetedSql : target.getTargetedSqls()) {
 			targetSqlCount += targetedSql.getSqls().size();
 		}
 
@@ -102,9 +102,9 @@ public class DMLController {
 		dto.setFullTableScan(isFullTableScan);
 		dto.setPk(target.getShardResult().getBasedColumn());
 
-		List<TargetedSql> targetedSqls = target.getTargetedSqls();
+		List<RouterTarget> targetedSqls = target.getTargetedSqls();
 
-		for (TargetedSql targetedSql : targetedSqls) {
+		for (RouterTarget targetedSql : targetedSqls) {
 			for (String _sql : targetedSql.getSqls()) {
 				try {
 					DMLCommon parsedResult = DPMySQLParser.parse(_sql).obj;

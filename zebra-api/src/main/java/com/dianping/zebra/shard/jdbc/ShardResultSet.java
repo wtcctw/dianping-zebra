@@ -39,7 +39,7 @@ import java.util.Map;
 import com.dianping.zebra.shard.jdbc.data.DataMerger;
 import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.shard.jdbc.data.DefaultDataMerger;
-import com.dianping.zebra.shard.router.RouterTarget;
+import com.dianping.zebra.shard.router.RouterContext;
 import com.dianping.zebra.util.JDBCUtils;
 
 /**
@@ -57,7 +57,7 @@ public class ShardResultSet implements ResultSet {
 
 	private boolean dataInited = false;
 
-	private RouterTarget routerTarget;
+	private RouterContext routerTarget;
 
 	private List<ResultSet> actualResultSets = new ArrayList<ResultSet>();
 
@@ -1267,7 +1267,7 @@ public class ShardResultSet implements ResultSet {
 	 * @param routerTarget
 	 *           the routerTarget to set
 	 */
-	public void setRouterTarget(RouterTarget routerTarget) {
+	public void setRouterTarget(RouterContext routerTarget) {
 		this.routerTarget = routerTarget;
 	}
 

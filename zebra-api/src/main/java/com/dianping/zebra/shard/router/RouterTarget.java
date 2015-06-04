@@ -1,7 +1,7 @@
 /**
- * Project: ${zebra-client.aid}
+ * Project: com.dianping.zebra.zebra-client-0.1.0
  * 
- * File Created at 2011-6-7
+ * File Created at 2011-6-14
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -15,126 +15,43 @@
  */
 package com.dianping.zebra.shard.router;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.dianping.zebra.shard.parser.sqlParser.Columns;
-import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.parser.sqlParser.OrderBy;
-import com.dianping.zebra.shard.router.rule.ShardMatchResult;
-
 /**
- * @author danson.liu
- *
+ * @author hao.zhu 
+ * 
  */
 public class RouterTarget {
 
-	/**
-	 * 无需考虑skip时的返回值，a: sql中确实没有, b: 只有一条select sql，无需考虑result sets merge
-	 */
-	public static final int NO_SKIP = DMLCommon.DEFAULT_SKIP_MAX;
+	private String dbIndex;
 
-	public static final int NO_MAX = DMLCommon.DEFAULT_SKIP_MAX;
+	private List<String> sqls;
 
-	private List<TargetedSql> targetedSqls;
+	public RouterTarget(String dbIndex) {
+		this.dbIndex = dbIndex;
+	}
 	
-	private List<OrderBy> orderBys;
-	
-	private int skip = NO_SKIP;
-	
-	private int max = NO_MAX;
-	
-	private Columns columns;
-	
-	/**
-	 * 路由涉及到的拆分表的自增主键名
-	 */
-	private String generatedPK;
-	
-	private List<String> groupBys;
-	
-	private boolean hasDistinct;
-	
-	private List<Object> newParams;
-	
-	private ShardMatchResult shardResult;
-	
-	public ShardMatchResult getShardResult() {
-		return shardResult;
+	public String getDataSourceName() {
+		return dbIndex;
 	}
 
-	public void setShardResult(ShardMatchResult shardResult) {
-		this.shardResult = shardResult;
+	public void setDataSourceName(String dbIndex) {
+		this.dbIndex = dbIndex;
 	}
 
-	public List<TargetedSql> getTargetedSqls() {
-		return targetedSqls;
+	public List<String> getSqls() {
+		return sqls;
 	}
 
-	public void setTargetedSqls(List<TargetedSql> targetedSqls) {
-		this.targetedSqls = targetedSqls;
+	public void setSqls(List<String> sqls) {
+		this.sqls = sqls;
 	}
 
-	public List<OrderBy> getOrderBys() {
-		return orderBys;
-	}
-
-	public void setOrderBys(List<OrderBy> orderBys) {
-		this.orderBys = orderBys;
-	}
-
-	public int getSkip() {
-		return skip;
-	}
-
-	public void setSkip(int skip) {
-		this.skip = skip;
-	}
-
-	public int getMax() {
-		return max;
-	}
-
-	public void setMax(int max) {
-		this.max = max;
-	}
-
-	public Columns getColumns() {
-		return columns;
-	}
-
-	public void setColumns(Columns columns) {
-		this.columns = columns;
-	}
-
-	public List<Object> getNewParams() {
-		return newParams;
-	}
-
-	public void setNewParams(List<Object> newParams) {
-		this.newParams = newParams;
-	}
-
-	public List<String> getGroupBys() {
-		return groupBys;
-	}
-
-	public void setGroupBys(List<String> groupBys) {
-		this.groupBys = groupBys;
-	}
-
-	public boolean isHasDistinct() {
-		return hasDistinct;
-	}
-
-	public void setHasDistinct(boolean hasDistinct) {
-		this.hasDistinct = hasDistinct;
-	}
-
-	public String getGeneratedPK() {
-		return generatedPK;
-	}
-
-	public void setGeneratedPK(String generatedPK) {
-		this.generatedPK = generatedPK;
+	public void addSql(String sql) {
+		if (this.sqls == null) {
+			this.sqls = new ArrayList<String>();
+		}
+		this.sqls.add(sql);
 	}
 }

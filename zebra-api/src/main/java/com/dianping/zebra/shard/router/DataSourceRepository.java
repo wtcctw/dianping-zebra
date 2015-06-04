@@ -15,16 +15,31 @@
  */
 package com.dianping.zebra.shard.router;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.sql.DataSource;
 
-
 /**
- * @author danson.liu
+ * @author hao.zhu <br>
  *
  */
-public interface DataSourceRepository {
-	
-	String DEFAULT_DS_NAME = "default";
 
-	DataSource getDataSource(String dsName);
+public class DataSourceRepository {
+
+	private static Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
+
+	public static void init(Map<String, DataSource> dataSourcePool) {
+		for (Entry<String, DataSource> dataSourceEntry : dataSourcePool.entrySet()) {
+			String dbIndex = dataSourceEntry.getKey();
+			DataSource dataSource = dataSourceEntry.getValue();
+
+			dataSources.put(dbIndex, dataSource);
+		}
+	}
+
+	public static DataSource getDataSource(String dsName) {
+		return dataSources.get(dsName.toLowerCase());
+	}
 }
