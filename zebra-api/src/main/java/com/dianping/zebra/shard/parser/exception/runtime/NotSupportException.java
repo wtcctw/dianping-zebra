@@ -12,7 +12,7 @@
  */
 package com.dianping.zebra.shard.parser.exception.runtime;
 
-public class NotSupportException extends TDLRunTimeException{
+public class NotSupportException extends DalRunTimeException{
 	/**
 	 * serialVersionUID
 	 */

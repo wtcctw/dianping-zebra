@@ -12,7 +12,7 @@
  */
 package com.dianping.zebra.shard.parser.exception.runtime;
 
-public class InputStringIsNotValidException extends TDLRunTimeException {
+public class InputStringIsNotValidException extends DalRunTimeException {
 
 	/**
 	 * serialVersionUID

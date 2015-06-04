@@ -12,22 +12,22 @@
  */
 package com.dianping.zebra.shard.parser.exception.runtime;
 
-public class TDLRunTimeException extends RuntimeException{
+public class DalRunTimeException extends RuntimeException{
 
 	/**
 	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = -2139691156552402165L;
-	public TDLRunTimeException(String arg) {
+	public DalRunTimeException(String arg) {
 		super(arg);
 	}
-	public TDLRunTimeException() {
+	public DalRunTimeException() {
 		super();
 	}
-    public TDLRunTimeException(String message, Throwable cause) {
+    public DalRunTimeException(String message, Throwable cause) {
         super(message, cause);
     }
-	public TDLRunTimeException(Throwable throwable){
+	public DalRunTimeException(Throwable throwable){
 		super(throwable);
 	}
 }
