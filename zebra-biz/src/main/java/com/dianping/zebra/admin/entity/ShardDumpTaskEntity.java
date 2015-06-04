@@ -6,14 +6,19 @@ import java.util.List;
 public class ShardDumpTaskEntity {
     private int id;
 
+    //binlog文件
     private String binlogFile;
 
+    //binlog位置
     private long binlogPos;
 
+    //状态
     private String status;
 
+    //执行的机器
     private String executor;
 
+    //rule name
     private String name;
 
     private String srcDbName;
@@ -30,30 +35,22 @@ public class ShardDumpTaskEntity {
 
     private String shardRule;
 
+
+
     private String indexColumnName;
 
     private long indexKey;
 
+    //需要自动调整
     private long indexIncrease = 1000000;
 
     private long maxKey;
 
+
+
     private ShardDumpDbEntity srcDbEntity;
 
     private ShardDumpDbEntity dstDbEntity;
-
-    private List<String> options = Arrays
-        .asList("--master-data=2", "--disable-keys", "--skip-comments", "--quick", "--add-drop-database=false",
-            "--no-create-info", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
-            "--max_allowed_packet=1073741824", "-i", "--single-transaction", "--hex-blob", "--compact");
-
-    public List<String> getOptions() {
-        return options;
-    }
-
-    public void setOptions(List<String> options) {
-        this.options = options;
-    }
 
     public String getShardRule() {
         return shardRule;

@@ -38,6 +38,11 @@ public class SyncServerMonitorServiceImpl implements SyncServerMonitorService {
     }
 
     @Override
+    public List<SyncServerMonitorEntity> getAllAlive() {
+        return syncServerMonitorMapper.getAllAlive();
+    }
+
+    @Override
     public void uploadStatus() {
         SyncServerMonitorEntity item = new SyncServerMonitorEntity();
         try {

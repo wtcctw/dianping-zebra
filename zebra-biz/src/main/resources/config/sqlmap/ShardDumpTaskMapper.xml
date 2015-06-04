@@ -3,16 +3,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.dianping.zebra.admin.dao.ShardDumpTaskMapper">
-        <select id="getByExecutor" parameterType="map" resultType="ShardDumpTaskEntity">
-            SELECT * FROM ShardDumpTask WHERE Executor = #{executor}
-        </select>
+    <select id="getByExecutor" parameterType="map" resultType="ShardDumpTaskEntity">
+        SELECT * FROM ShardDumpTask WHERE Executor = #{executor}
+    </select>
 
-        <update id="updateStatus" parameterType="ShardDumpTaskEntity">
-            Update ShardDumpTask SET
-                BinlogFile = #{binlogFile},
-                BinlogPos = #{binlogPos},
-                IndexKey = #{indexKey},
-                Status = #{status}
-            WHERE ID = #{id}
-        </update>
+    <select id="getByName" parameterType="map" resultType="ShardDumpTaskEntity">
+        SELECT * FROM ShardDumpTask WHERE Name = #{name}
+    </select>
+
+    <update id="updateStatus" parameterType="ShardDumpTaskEntity">
+        Update ShardDumpTask SET
+        BinlogFile = #{binlogFile},
+        BinlogPos = #{binlogPos},
+        IndexKey = #{indexKey},
+        Status = #{status}
+        WHERE ID = #{id}
+    </update>
 </mapper>

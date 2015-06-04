@@ -31,6 +31,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * http://www.dozer.cc
  */
 public class ShardDumpTaskExecutor {
+    private List<String> options = Lists
+        .newArrayList("--master-data=2", "--disable-keys", "--skip-comments", "--quick", "--add-drop-database=false",
+            "--no-create-info", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",
+            "--max_allowed_packet=1073741824", "-i", "--single-transaction", "--hex-blob", "--compact");
+
     private static final Logger logger = LoggerFactory.getLogger(ShardDumpTaskExecutor.class);
 
     private static final Charset DEFAULT_CJARSET = Charset.forName("utf8");
@@ -215,7 +220,7 @@ public class ShardDumpTaskExecutor {
                 .format("%s AND %s > %d AND %s <= %d", task.getShardRule(), task.getIndexColumnName(), lastIndex,
                     task.getIndexColumnName(), nextIndex));
 
-            cmdlist.addAll(task.getOptions());
+            cmdlist.addAll(options);
             cmdlist.add("--result-file=" + getDumpFile(lastIndex));
             cmdlist.add(task.getDataBase());
             cmdlist.add(task.getTableName());

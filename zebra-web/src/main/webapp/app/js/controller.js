@@ -1,4 +1,38 @@
+zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
+    $scope.load = function () {
+        $http.get('/a/shard/migrate/dump/' + $scope.name).success(function (data, status, headers, config) {
+            $scope.dump = data;
+        });
+    }
+
+    $http.get('/a/migratedb').success(function (data, status, headers, config) {
+        $scope.dbs = data;
+    });
+
+    $scope.newTask = {};
+
+    $scope.load();
+
+    $scope.addNewTarget = function () {
+        if (!$scope.newTask.targets) {
+            $scope.newTask.targets = [];
+        }
+        $scope.newTask.targets.push({});
+    }
+
+    $scope.removeTarget = function (index) {
+        $scope.newTask.targets.splice(index, 1);
+    }
+
+    $scope.commitTask = function () {
+        
+    }
+});
+
+
 zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
+    $scope.name = name;
+
     $http.get('/a/shard/migrate/process/' + name).success(function (data, status, headers, config) {
         $scope.process = data;
         if ($scope.process) {
