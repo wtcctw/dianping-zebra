@@ -83,6 +83,8 @@ public class DataSourceRepository {
 				}
 			}
 		}
+		
+		dataSources.clear();
 
 		JDBCUtils.throwSQLExceptionIfNeeded(exps);
 	}

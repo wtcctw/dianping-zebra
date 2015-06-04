@@ -149,6 +149,7 @@ public class DMLController {
 				dto.addDataRow(new DataRow(executeUpdate));
 			}
 		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		
 		try {
