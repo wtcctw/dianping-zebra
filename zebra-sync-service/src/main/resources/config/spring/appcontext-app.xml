@@ -4,17 +4,4 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
 
-
-    <bean class="com.dianping.dpsf.spring.ServiceRegistry"
-          init-method="init">
-        <property name="port" value="4040"/>
-        <property name="services">
-            <map>
-                <entry key="com.dianping.zebra.admin.service.ZebraSyncService"
-                       value-ref="zebraSyncServiceImpl"/>
-            </map>
-        </property>
-    </bean>
-    <bean id="zebraSyncServiceImpl" class="com.dianping.zebra.admin.service.impl.ZebraSyncServiceImpl"/>
-
 </beans>

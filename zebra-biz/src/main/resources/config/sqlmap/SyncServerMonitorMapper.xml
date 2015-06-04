@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.zebra.admin.dao.SyncServerMonitorMapper">
+
+    <select id="getAllAlive" parameterType="map" resultType="SyncServerMonitorEntity">
+        SELECT * FROM SyncServerMonitor where UpdateTime > DATE_SUB(NOW(),INTERVAL 15 MINUTE)
+    </select>
+
+    <insert id="create" parameterType="ShardDumpTaskEntity">
+        INSERT INTO SyncServerMonitor
+        (Name,Load,UpdateTime)
+        VALUES
+        (#{name},#{load},NOW())
+    </insert>
+
+    <update id="update" parameterType="ShardDumpTaskEntity">
+        Update SyncServerMonitor SET
+        Name = #{name},
+        Load = #{load},
+        UpdateTime = NOW(),
+        WHERE ID = #{id}
+    </update>
+</mapper>
