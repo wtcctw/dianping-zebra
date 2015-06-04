@@ -1,8 +1,10 @@
 package com.dianping.zebra.admin.controller;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
 import com.dianping.zebra.admin.entity.ShardMigrateProcessEntity;
 import com.dianping.zebra.admin.service.LionService;
+import com.dianping.zebra.admin.service.ShardDumpService;
 import com.dianping.zebra.admin.service.ShardMigrateProcessService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,6 +28,9 @@ public class ShardController {
 
     @Autowired
     private ShardMigrateProcessService shardMigrateProcessService;
+
+    @Autowired
+    private ShardDumpService shardDumpService;
 
     private final Gson gson = new Gson();
 
@@ -73,5 +79,11 @@ public class ShardController {
     @ResponseBody
     public ShardMigrateProcessEntity migrateProcess(@PathVariable String name) {
         return shardMigrateProcessService.getProcessByName(name);
+    }
+
+    @RequestMapping(value = "/migrate/dump/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ShardDumpTaskEntity> migrateDumpStatus(@PathVariable String name) {
+        return shardDumpService.getTaskByName(name);
     }
 }

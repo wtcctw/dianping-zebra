@@ -33,7 +33,9 @@
 
             <div class="step-pane" ng-class="{'active':currentStop == 2}">
                 <div class="center">
-                    <h4 class="blue">迁移数据</h4>
+                    <div ng-app="" ng-controller="shard-migrate-dump">
+                        <div ng-include="'app/template/shard-migrate-dump.html'"></div>
+                    </div>
                 </div>
             </div>
 

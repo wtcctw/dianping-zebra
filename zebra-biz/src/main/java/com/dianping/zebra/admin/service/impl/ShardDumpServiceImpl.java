@@ -40,17 +40,22 @@ public class ShardDumpServiceImpl implements ShardDumpService {
     }
 
     @Override
+    public List<ShardDumpTaskEntity> getTaskByName(String name) {
+        return shardDumpTaskMapper.getByName(name);
+    }
+
+    @Override
     public List<ShardDumpDbEntity> getAllDb() {
         return shardDumpDbMapper.getAll();
     }
 
     @Override
-    public void createDb(ShardDumpDbEntity entity){
+    public void createDb(ShardDumpDbEntity entity) {
         shardDumpDbMapper.create(entity);
     }
 
     @Override
-    public void deleteDb(int id){
+    public void deleteDb(int id) {
         shardDumpDbMapper.delete(id);
     }
 

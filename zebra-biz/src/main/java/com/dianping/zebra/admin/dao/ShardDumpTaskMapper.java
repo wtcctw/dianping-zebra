@@ -13,5 +13,7 @@ import java.util.List;
 public interface ShardDumpTaskMapper {
     List<ShardDumpTaskEntity> getByExecutor(@Param("executor") String executor);
 
+    List<ShardDumpTaskEntity> getByName(@Param("name") String name);
+
     void updateStatus(ShardDumpTaskEntity entity);
 }
