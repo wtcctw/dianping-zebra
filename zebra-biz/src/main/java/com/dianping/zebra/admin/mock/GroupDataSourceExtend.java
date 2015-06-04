@@ -13,7 +13,7 @@ public class GroupDataSourceExtend extends GroupDataSource {
 	@Override
 	protected void initConfig() {
 		this.groupConfig = buildGroupConfig();
-		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configType);
+		this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType);
 	}
 
 	public void setDataSourceConfigManager(ConfigService configService) {
