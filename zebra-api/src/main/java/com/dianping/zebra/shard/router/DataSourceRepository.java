@@ -35,6 +35,13 @@ public class DataSourceRepository {
 
 	private static Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
 
+	private DataSourceRepository(){
+	}
+
+	public static DataSource getDataSource(String dsName) {
+		return dataSources.get(dsName.toLowerCase());
+	}
+
 	public static void init(Map<String, DataSource> dataSourcePool) {
 		for (Entry<String, DataSource> dataSourceEntry : dataSourcePool.entrySet()) {
 			String dbIndex = dataSourceEntry.getKey();
@@ -45,22 +52,18 @@ public class DataSourceRepository {
 	}
 
 	public static void init(RouterRule routerRule) {
-		for(TableShardRule shardRule : routerRule.getTableShardRules().values()){
-			for(DimensionRule dimensionRule : shardRule.getDimensionRules()){
-				for(String jdbcRef : dimensionRule.getAllDBAndTables().keySet()){
-					if(!dataSources.containsKey(jdbcRef)){
+		for (TableShardRule shardRule : routerRule.getTableShardRules().values()) {
+			for (DimensionRule dimensionRule : shardRule.getDimensionRules()) {
+				for (String jdbcRef : dimensionRule.getAllDBAndTables().keySet()) {
+					if (!dataSources.containsKey(jdbcRef)) {
 						GroupDataSource groupDataSource = new GroupDataSource(jdbcRef);
-						
 						groupDataSource.setForceWriteOnLogin(false); // HACK turn off
 						groupDataSource.init();
+
 						dataSources.put(jdbcRef, groupDataSource);
 					}
 				}
 			}
 		}
-	}
-	
-	public static DataSource getDataSource(String dsName) {
-		return dataSources.get(dsName.toLowerCase());
 	}
 }

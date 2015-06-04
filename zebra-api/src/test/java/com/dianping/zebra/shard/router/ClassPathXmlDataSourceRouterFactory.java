@@ -18,12 +18,11 @@ package com.dianping.zebra.shard.router;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.XmlDataSourceRouterConfigLoader;
 import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
 
 /**
  * @author danson.liu
  */
-public class ClassPathXmlDataSourceRouterFactory implements DataSourceRouterFactory {
+public class ClassPathXmlDataSourceRouterFactory extends AbstractDataSourceRouterFactory implements DataSourceRouterFactory {
 
     private final String routerRuleFile;
 
@@ -44,7 +43,7 @@ public class ClassPathXmlDataSourceRouterFactory implements DataSourceRouterFact
     public DataSourceRouter getRouter() {
         DataSourceRouterImpl router = new DataSourceRouterImpl();
         RouterRuleConfig routerConfig = routerConfigLoader.loadConfig(routerRuleFile);
-        RouterRule routerRule = RouterRuleBuilder.build(routerConfig);
+        RouterRule routerRule = build(routerConfig);
         router.setRouterRule(routerRule);
         return router;
     }

@@ -6,10 +6,9 @@ import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.RouterRuleBuilder;
 import com.google.gson.Gson;
 
-public class DataSourceLionRouterFactory implements DataSourceRouterFactory {
+public class DataSourceLionRouterFactory extends AbstractDataSourceRouterFactory implements DataSourceRouterFactory {
 	private final RouterRuleConfig routerConfig;
 
 	public DataSourceLionRouterFactory(ConfigService configService, String ruleName) {
@@ -30,9 +29,9 @@ public class DataSourceLionRouterFactory implements DataSourceRouterFactory {
 	@Override
 	public DataSourceRouter getRouter() {
 		DataSourceRouterImpl router = new DataSourceRouterImpl();
-		RouterRule routerRule = RouterRuleBuilder.build(routerConfig);
+		RouterRule routerRule = build(routerConfig);
 		router.setRouterRule(routerRule);
-		
+
 		return router;
 	}
 }

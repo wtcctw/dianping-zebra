@@ -44,17 +44,17 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private static final Logger logger = LogManager.getLogger(ShardDataSource.class);
 
+	private String ruleName;
+
 	private Map<String, DataSource> dataSourcePool;
 
 	private DataSourceRouterFactory routerFactory;
-	
+
 	private DataSourceRouter router;
 
 	private volatile boolean switchOn = true;
 
 	private DataSource originDataSource;
-
-	private String ruleName;
 
 	private ConfigService configService;
 
@@ -74,6 +74,8 @@ public class ShardDataSource extends AbstractDataSource {
 			} catch (SQLException ignore) {
 			}
 		}
+
+		logger.info(String.format("ShardDataSource(%s) successfully closed.", ruleName));
 	}
 
 	@Override
@@ -94,6 +96,7 @@ public class ShardDataSource extends AbstractDataSource {
 		if (switchOn) {
 			ShardConnection connection = new ShardConnection(username, password);
 			connection.setRouter(router);
+
 			return connection;
 		} else {
 			return originDataSource.getConnection();
@@ -150,12 +153,12 @@ public class ShardDataSource extends AbstractDataSource {
 			throw new IllegalArgumentException("routerRuleFile must be set.");
 		}
 
-		if(dataSourcePool != null){
+		if (dataSourcePool != null) {
 			DataSourceRepository.init(dataSourcePool);
-		}else{
+		} else {
 			DataSourceRepository.init(router.getRouterRule());
 		}
-		
+
 		this.router = routerFactory.getRouter();
 		this.router.init();
 
