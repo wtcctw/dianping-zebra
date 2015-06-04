@@ -15,7 +15,10 @@
  */
 package com.dianping.zebra.shard.router;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -25,6 +28,7 @@ import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.util.JDBCUtils;
 
 /**
  * @author hao.zhu <br>
@@ -35,7 +39,7 @@ public class DataSourceRepository {
 
 	private static Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
 
-	private DataSourceRepository(){
+	private DataSourceRepository() {
 	}
 
 	public static DataSource getDataSource(String dsName) {
@@ -65,5 +69,21 @@ public class DataSourceRepository {
 				}
 			}
 		}
+	}
+
+	public static void close() throws SQLException {
+		List<SQLException> exps = new ArrayList<SQLException>();
+
+		for (DataSource ds : dataSources.values()) {
+			if (ds instanceof GroupDataSource) {
+				try {
+					((GroupDataSource) ds).close();
+				} catch (SQLException e) {
+					exps.add(e);
+				}
+			}
+		}
+
+		JDBCUtils.throwSQLExceptionIfNeeded(exps);
 	}
 }

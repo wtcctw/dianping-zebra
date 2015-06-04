@@ -58,15 +58,8 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private ConfigService configService;
 
-	public void close() {
-		for (DataSource ds : dataSourcePool.values()) {
-			if (ds instanceof GroupDataSource) {
-				try {
-					((GroupDataSource) ds).close();
-				} catch (SQLException ignore) {
-				}
-			}
-		}
+	public void close() throws SQLException {
+		DataSourceRepository.close();
 
 		if (originDataSource instanceof GroupDataSource) {
 			try {
