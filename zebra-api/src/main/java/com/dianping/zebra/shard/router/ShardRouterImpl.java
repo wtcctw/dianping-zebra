@@ -37,7 +37,7 @@ import java.util.Map.Entry;
 /**
  * @author danson.liu
  */
-public class DataSourceRouterImpl implements DataSourceRouter {
+public class ShardRouterImpl implements ShardRouter {
 
 	private RouterRule routerRule;
 
@@ -46,9 +46,9 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	private static final String SKIP_MAX_STUB = "?";
 
 	@Override
-	public RouterContext getTarget(String sql, List<Object> params) throws DataSourceRouterException {
+	public RouterResult router(String sql, List<Object> params) throws ShardRouterException {
 		try {
-			RouterContext target = new RouterContext();
+			RouterResult target = new RouterResult();
 			DMLCommon dmlSql = parseSqlClause(sql);
 			int skip = dmlSql.getSkip(params);
 			int max = dmlSql.getMax(params);
@@ -66,13 +66,13 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 				target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
 				target.setShardResult(matchResult);
 			} else {
-				throw new DataSourceRouterException("Cannot find any Shard Rule for table " + relatedTables);
+				throw new ShardRouterException("Cannot find any Shard Rule for table " + relatedTables);
 			}
 
 			return enrichRouterTarget(target, dmlSql, tableShardRule == null ? null : tableShardRule.getGeneratedPK(),
 			      skip, max);
 		} catch (Exception e) {
-			throw new DataSourceRouterException("DataSource route failed, cause: ", e);
+			throw new ShardRouterException("DataSource route failed, cause: ", e);
 		}
 	}
 
@@ -86,7 +86,8 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		return parsedResult;
 	}
 
-	private RouterContext enrichRouterTarget(RouterContext target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
+	private RouterResult enrichRouterTarget(RouterResult target, DMLCommon dmlSql, String generatedPK, int skip,
+	      int max) {
 		target.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
 		target.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
 		target.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);
@@ -132,14 +133,14 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	private String reconstructSqlLimit(boolean acrossTable, String sql, DMLCommon dmlSql, int skip, int max) {
 		// 如果既有limit又有groupby，那么需要去掉limit。by Leo Liang
 		// Note: 其实应该加上一个过滤条件，groupby里面没有分区键
-		if ((dmlSql instanceof Select) && acrossTable && (max != RouterContext.NO_MAX || skip != RouterContext.NO_SKIP)) {
+		if ((dmlSql instanceof Select) && acrossTable && (max != RouterResult.NO_MAX || skip != RouterResult.NO_SKIP)) {
 			if (((Select) dmlSql).getWhere().getGroupByColumns() != null
 			      && !((Select) dmlSql).getWhere().getGroupByColumns().isEmpty()) {
 				return sql.substring(0, sql.toLowerCase().lastIndexOf(" limit "));
 			}
 		}
 
-		if (acrossTable && !(dmlSql instanceof Insert) && max != RouterContext.NO_MAX && skip > 0) {
+		if (acrossTable && !(dmlSql instanceof Insert) && max != RouterResult.NO_MAX && skip > 0) {
 			MyWhereCondition.LimitInfo limitInfo = getLimitInfo(dmlSql);
 
 			int skipLen = String.valueOf(skip).length();
@@ -161,7 +162,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
-			if (acrossTable && !(dmlSql instanceof Insert) && max != RouterContext.NO_MAX && skip > 0) {
+			if (acrossTable && !(dmlSql instanceof Insert) && max != RouterResult.NO_MAX && skip > 0) {
 				MyWhereCondition where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
 				Object start = where.getStart();
 				if (start instanceof BindVar) {
@@ -190,7 +191,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		return where != null ? where.limitInfo : null;
 	}
 
-	private TableShardRule getAppliedShardRule(Set<String> relatedTables) throws DataSourceRouterException {
+	private TableShardRule getAppliedShardRule(Set<String> relatedTables) throws ShardRouterException {
 		Map<String, TableShardRule> shardRules = new HashMap<String, TableShardRule>(5);
 		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
 		for (String relatedTable : relatedTables) {
@@ -200,7 +201,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 			}
 		}
 		if (shardRules.size() > 1) {
-			throw new DataSourceRouterException("Sql contains more than one shard-related table is not supported now.");
+			throw new ShardRouterException("Sql contains more than one shard-related table is not supported now.");
 		}
 		return !shardRules.isEmpty() ? shardRules.values().iterator().next() : null;
 	}

@@ -18,7 +18,7 @@ import org.junit.Test;
 import com.dianping.zebra.shard.jdbc.MockDataSource;
 
 public class DataSourceRouterImplTest {
-	private static DataSourceRouter router;
+	private static ShardRouter router;
 
 	private static Map<String, DataSource> createDataSourcePool() {
 		Map<String, DataSource> dsPool = new HashMap<String, DataSource>();
@@ -45,7 +45,7 @@ public class DataSourceRouterImplTest {
 	}
 
 	public void baseTest(String sql, List<Object> params) {
-		RouterContext target = router.getTarget(sql, params);
+		RouterResult target = router.router(sql, params);
 		assertNotNull(target);
 		List<RouterTarget> targetedSqls = target.getTargetedSqls();
 		printSql(targetedSqls);
@@ -62,7 +62,7 @@ public class DataSourceRouterImplTest {
 	}
 
 	public void singleTargetTest(String sql, List<Object> params, String targetDs, String targetTable) {
-		RouterContext target = router.getTarget(sql, params);
+		RouterResult target = router.router(sql, params);
 		assertNotNull(target);
 		List<RouterTarget> targetedSqls = target.getTargetedSqls();
 		printSql(targetedSqls);

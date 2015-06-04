@@ -40,8 +40,8 @@ public class ClassPathXmlDataSourceRouterFactory extends AbstractDataSourceRoute
     }
 
     @Override
-    public DataSourceRouter getRouter() {
-        DataSourceRouterImpl router = new DataSourceRouterImpl();
+    public ShardRouter getRouter() {
+        ShardRouterImpl router = new ShardRouterImpl();
         RouterRuleConfig routerConfig = routerConfigLoader.loadConfig(routerRuleFile);
         RouterRule routerRule = build(routerConfig);
         router.setRouterRule(routerRule);

@@ -21,6 +21,6 @@ package com.dianping.zebra.shard.router;
  */
 public interface DataSourceRouterFactory {
 	
-	DataSourceRouter getRouter();
+	ShardRouter getRouter();
 
 }

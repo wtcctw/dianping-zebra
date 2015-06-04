@@ -13,7 +13,7 @@
 package com.dianping.zebra.shard.jdbc;
 
 import com.dianping.zebra.util.JDBCUtils;
-import com.dianping.zebra.shard.router.DataSourceRouter;
+import com.dianping.zebra.shard.router.ShardRouter;
 
 import java.sql.*;
 import java.util.*;
@@ -26,7 +26,7 @@ import java.util.concurrent.Executor;
  */
 public class ShardConnection implements Connection {
 
-	private DataSourceRouter router;
+	private ShardRouter router;
 
 	private Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 
@@ -330,7 +330,7 @@ public class ShardConnection implements Connection {
 		throw new UnsupportedOperationException("getNetworkTimeout");
 	}
 
-	public DataSourceRouter getRouter() {
+	public ShardRouter getRouter() {
 		return router;
 	}
 
@@ -655,7 +655,7 @@ public class ShardConnection implements Connection {
 		this.readOnly = readOnly;
 	}
 
-	public void setRouter(DataSourceRouter router) {
+	public void setRouter(ShardRouter router) {
 		this.router = router;
 	}
 

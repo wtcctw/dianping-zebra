@@ -21,9 +21,9 @@ import com.dianping.zebra.shard.router.rule.RouterRule;
  *
  * @author damonzhu
  */
-public interface DataSourceRouter {
+public interface ShardRouter {
 
-    RouterContext getTarget(String sql, List<Object> params) throws DataSourceRouterException;
+    RouterResult router(String sql, List<Object> params) throws ShardRouterException;
     
     RouterRule getRouterRule();
 

@@ -22,7 +22,7 @@ import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Count;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Max;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Min;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Sum;
-import com.dianping.zebra.shard.router.RouterContext;
+import com.dianping.zebra.shard.router.RouterResult;
 
 import java.sql.ResultSet;
 import java.sql.RowId;
@@ -58,7 +58,7 @@ public class DefaultDataMerger implements DataMerger {
 	 * </ol>
 	 * </p>
 	 */
-	public void merge(DataPool dataPool, RouterContext routerTarget, List<ResultSet> actualResultSets)
+	public void merge(DataPool dataPool, RouterResult routerTarget, List<ResultSet> actualResultSets)
 		throws SQLException {
 		if (routerTarget.getTargetedSqls() == null || routerTarget.getTargetedSqls().size() == 0) {
 			throw new SQLException("Can not proc merge, since no router result.");
@@ -103,7 +103,7 @@ public class DefaultDataMerger implements DataMerger {
 
 	}
 
-	private List<RowData> procDistinct(List<RowData> sourceData, RouterContext routerTarget) {
+	private List<RowData> procDistinct(List<RowData> sourceData, RouterResult routerTarget) {
 		Set<RowData> distinctRowSet = new HashSet<RowData>();
 		for (RowData row : sourceData) {
 			distinctRowSet.add(row);
@@ -111,7 +111,7 @@ public class DefaultDataMerger implements DataMerger {
 		return new ArrayList<RowData>(distinctRowSet);
 	}
 
-	private List<RowData> procOrderBy(List<RowData> sourceData, final RouterContext routerTarget) throws SQLException {
+	private List<RowData> procOrderBy(List<RowData> sourceData, final RouterResult routerTarget) throws SQLException {
 		if (routerTarget.getOrderBys() != null && routerTarget.getOrderBys().size() > 0) {
 
 			Collections.sort(sourceData, new Comparator<RowData>() {
@@ -161,7 +161,7 @@ public class DefaultDataMerger implements DataMerger {
 		return sourceData;
 	}
 
-	private List<RowData> procAggregateFunction(List<RowData> sourceData, RouterContext routerTarget)
+	private List<RowData> procAggregateFunction(List<RowData> sourceData, RouterResult routerTarget)
 		throws SQLException {
 		List<RowData> processedDatas = new ArrayList<RowData>();
 
@@ -194,7 +194,7 @@ public class DefaultDataMerger implements DataMerger {
 		return processedDatas;
 	}
 
-	private void procGroupBy(List<RowData> sourceData, RouterContext routerTarget, List<RowData> processedDatas,
+	private void procGroupBy(List<RowData> sourceData, RouterResult routerTarget, List<RowData> processedDatas,
 		Map<String, Class<?>> columnNameFunctionMapping) throws SQLException {
 		// 因为group by后面跟的只能是列名，但是如果select中包含别名，则ColumnData中存放的是别名
 		// 所以先获得列名和别名的map
@@ -264,7 +264,7 @@ public class DefaultDataMerger implements DataMerger {
 		}
 	}
 
-	private List<RowData> popResultSets(List<ResultSet> actualResultSets, RouterContext routerTarget)
+	private List<RowData> popResultSets(List<ResultSet> actualResultSets, RouterResult routerTarget)
 		throws SQLException {
 
 		List<RowData> rows = new ArrayList<RowData>();
@@ -300,7 +300,7 @@ public class DefaultDataMerger implements DataMerger {
 
 	}
 
-	private boolean hasGroupByFunctionColumns(RouterContext routerTarget) {
+	private boolean hasGroupByFunctionColumns(RouterResult routerTarget) {
 		for (Column col : routerTarget.getColumns().getColumns()) {
 			if (col instanceof Sum || col instanceof Count || col instanceof Max || col instanceof Min) {
 				return true;

@@ -70,7 +70,7 @@ import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
 import com.dianping.zebra.group.jdbc.param.UnicodeStreamParamContext;
 import com.dianping.zebra.shard.router.DataSourceRepository;
-import com.dianping.zebra.shard.router.RouterContext;
+import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.util.JDBCUtils;
 
@@ -170,7 +170,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 			return this.results;
 		}
 
-		RouterContext routerTarget = routingAndCheck(sql, getParams());
+		RouterResult routerTarget = routingAndCheck(sql, getParams());
 
 		rewriteAndMergeParms(routerTarget.getNewParams());
 
@@ -222,7 +222,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 	public int executeUpdate() throws SQLException {
 		checkClosed();
 
-		RouterContext routerTarget = routingAndCheck(sql, getParams());
+		RouterResult routerTarget = routingAndCheck(sql, getParams());
 
 		rewriteAndMergeParms(routerTarget.getNewParams());
 

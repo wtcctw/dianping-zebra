@@ -30,8 +30,8 @@ import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.config.PropertyConfigService;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.shard.router.DataSourceLionRouterFactory;
-import com.dianping.zebra.shard.router.DataSourceRouter;
+import com.dianping.zebra.shard.router.LionDataSourceRouterFactory;
+import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.util.StringUtils;
@@ -50,7 +50,7 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private DataSourceRouterFactory routerFactory;
 
-	private DataSourceRouter router;
+	private ShardRouter router;
 
 	private volatile boolean switchOn = true;
 
@@ -100,7 +100,7 @@ public class ShardDataSource extends AbstractDataSource {
 		return originDataSource;
 	}
 
-	public DataSourceRouter getRouter() {
+	public ShardRouter getRouter() {
 		return router;
 	}
 
@@ -115,7 +115,7 @@ public class ShardDataSource extends AbstractDataSource {
 			}
 
 			if (routerFactory == null) {
-				routerFactory = new DataSourceLionRouterFactory(configService, ruleName);
+				routerFactory = new LionDataSourceRouterFactory(configService, ruleName);
 			}
 
 			final String switchOnValue = configService.getProperty(LionKey.getShardSiwtchOnKey(ruleName));

@@ -26,7 +26,7 @@ import com.dianping.zebra.shard.router.rule.ShardMatchResult;
  * @author danson.liu
  *
  */
-public class RouterContext {
+public class RouterResult {
 
 	/**
 	 * 无需考虑skip时的返回值，a: sql中确实没有, b: 只有一条select sql，无需考虑result sets merge

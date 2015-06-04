@@ -16,7 +16,7 @@
 package com.dianping.zebra.shard.jdbc.data;
 
 
-import com.dianping.zebra.shard.router.RouterContext;
+import com.dianping.zebra.shard.router.RouterResult;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +40,7 @@ public interface DataMerger {
 	 * @param actualResultSets
 	 * @throws java.sql.SQLException
 	 */
-	public void merge(DataPool dataPool, RouterContext routerTarget, List<ResultSet> actualResultSets)
+	public void merge(DataPool dataPool, RouterResult routerTarget, List<ResultSet> actualResultSets)
 			throws SQLException;
 
 }

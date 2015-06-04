@@ -15,7 +15,7 @@
  */
 package com.dianping.zebra.shard.jdbc.data;
 
-import com.dianping.zebra.shard.router.RouterContext;
+import com.dianping.zebra.shard.router.RouterResult;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -57,9 +57,9 @@ public class DataPool {
 
 	private int rowNum = 0;
 
-	private int skip = RouterContext.NO_SKIP;
+	private int skip = RouterResult.NO_SKIP;
 
-	private int max = RouterContext.NO_MAX;
+	private int max = RouterResult.NO_MAX;
 
 	private boolean wasNull = false;
 
@@ -72,7 +72,7 @@ public class DataPool {
 	public boolean next() throws SQLException {
 		rowNum++;
 		if (!inMemory) {
-			if (max != RouterContext.NO_MAX && rowNum > max) {
+			if (max != RouterResult.NO_MAX && rowNum > max) {
 				return false;
 			}
 			if (!resultSets.get(resultSetIndex).next()) {
@@ -163,18 +163,18 @@ public class DataPool {
 	 */
 	public void procLimit() throws SQLException {
 		if (inMemory) {
-			int fromIndex = skip == RouterContext.NO_SKIP ? 0 : skip;
+			int fromIndex = skip == RouterResult.NO_SKIP ? 0 : skip;
 			if (fromIndex >= memoryData.size()) {
 				this.memoryData = new ArrayList<RowData>();
 				return;
 			}
-			int toIndex = max == RouterContext.NO_MAX ? memoryData.size() : fromIndex + max;
+			int toIndex = max == RouterResult.NO_MAX ? memoryData.size() : fromIndex + max;
 			toIndex = toIndex > memoryData.size() ? memoryData.size() : toIndex;
 			List<RowData> subDataList = memoryData.subList(fromIndex, toIndex);
 
 			this.memoryData = new ArrayList<RowData>(subDataList);
 		} else {
-			if (skip != RouterContext.NO_SKIP) {
+			if (skip != RouterResult.NO_SKIP) {
 				int rowSkipped = 0;
 				for (int i = 0; i < resultSets.size(); i++) {
 					resultSetIndex = i;

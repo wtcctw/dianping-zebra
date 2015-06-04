@@ -27,10 +27,10 @@ import java.util.Set;
 
 import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
-import com.dianping.zebra.shard.router.DataSourceRouterException;
-import com.dianping.zebra.shard.router.DataSourceRouter;
+import com.dianping.zebra.shard.router.ShardRouterException;
+import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.shard.router.DataSourceRepository;
-import com.dianping.zebra.shard.router.RouterContext;
+import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.StringUtils;
@@ -41,7 +41,7 @@ import com.dianping.zebra.util.StringUtils;
  */
 public class ShardStatement implements Statement {
 
-	private DataSourceRouter router;
+	private ShardRouter router;
 
 	protected ShardConnection connection;
 
@@ -106,7 +106,7 @@ public class ShardStatement implements Statement {
 	      throws SQLException {
 		checkClosed();
 
-		RouterContext routerTarget = routingAndCheck(sql, null);
+		RouterResult routerTarget = routingAndCheck(sql, null);
 
 		int affectedRows = 0;
 		List<SQLException> exceptions = new ArrayList<SQLException>();
@@ -299,7 +299,7 @@ public class ShardStatement implements Statement {
 		return stmt;
 	}
 
-	protected void executableCheck(RouterContext routerTarget) throws SQLException {
+	protected void executableCheck(RouterResult routerTarget) throws SQLException {
 		if (routerTarget == null) {
 			throw new SQLException("No router return value.");
 		}
@@ -373,7 +373,7 @@ public class ShardStatement implements Statement {
 			return this.results;
 		}
 
-		RouterContext routerTarget = routingAndCheck(sql, null);
+		RouterResult routerTarget = routingAndCheck(sql, null);
 
 		ShardResultSet rs = new ShardResultSet();
 		rs.setStatement(this);
@@ -596,7 +596,7 @@ public class ShardStatement implements Statement {
 		return resultSetType;
 	}
 
-	public DataSourceRouter getRouter() {
+	public ShardRouter getRouter() {
 		return router;
 	}
 
@@ -700,17 +700,17 @@ public class ShardStatement implements Statement {
 	 * @return
 	 * @throws java.sql.SQLException
 	 */
-	protected RouterContext routingAndCheck(String sql, List<Object> params) throws SQLException {
+	protected RouterResult routingAndCheck(String sql, List<Object> params) throws SQLException {
 
-		RouterContext routerTarget = null;
+		RouterResult routerTarget = null;
 		try {
 			JudgeSQLRetVal judgeSQLRetVal = judgeSQLType(sql);
 
-			routerTarget = router.getTarget(judgeSQLRetVal.getSqlWithoutComment(), params);
+			routerTarget = router.router(judgeSQLRetVal.getSqlWithoutComment(), params);
 
 			executableCheck(routerTarget);
 
-		} catch (DataSourceRouterException e) {
+		} catch (ShardRouterException e) {
 			throw new SQLException(e);
 		}
 		return routerTarget;
@@ -828,7 +828,7 @@ public class ShardStatement implements Statement {
 		this.resultSetType = resultSetType;
 	}
 
-	public void setRouter(DataSourceRouter router) {
+	public void setRouter(ShardRouter router) {
 		this.router = router;
 	}
 

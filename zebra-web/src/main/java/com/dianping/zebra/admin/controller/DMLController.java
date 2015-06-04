@@ -23,9 +23,9 @@ import com.dianping.zebra.admin.dto.DmlResultDto.RouterItem;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
 import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.router.DataSourceRouterException;
-import com.dianping.zebra.shard.router.DataSourceRouter;
-import com.dianping.zebra.shard.router.RouterContext;
+import com.dianping.zebra.shard.router.ShardRouterException;
+import com.dianping.zebra.shard.router.ShardRouter;
+import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 import com.dianping.zebra.shard.router.rule.RouterRule;
@@ -44,11 +44,11 @@ public class DMLController {
 		ds.setRuleName(dto.getRuleName());
 		ds.init();
 
-		DataSourceRouter router = ds.getRouter();
-		RouterContext target = null;
+		ShardRouter router = ds.getRouter();
+		RouterResult target = null;
 
 		try {
-			target = router.getTarget(dto.getSql(), new ArrayList<Object>());
+			target = router.router(dto.getSql(), new ArrayList<Object>());
 		} catch (Exception e) {
 			dto.setSuccess(false);
 			dto.setErrorMsg(e.getCause().getMessage());
@@ -163,7 +163,7 @@ public class DMLController {
 		return dto;
 	}
 	
-	private TableShardRule getAppliedShardRule(RouterRule routerRule, Set<String> relatedTables) throws DataSourceRouterException {
+	private TableShardRule getAppliedShardRule(RouterRule routerRule, Set<String> relatedTables) throws ShardRouterException {
 		Map<String, TableShardRule> shardRules = new HashMap<String, TableShardRule>(5);
 		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
 		for (String relatedTable : relatedTables) {
@@ -173,7 +173,7 @@ public class DMLController {
 			}
 		}
 		if (shardRules.size() > 1) {
-			throw new DataSourceRouterException("Sql contains more than one shard-related table is not supported now.");
+			throw new ShardRouterException("Sql contains more than one shard-related table is not supported now.");
 		}
 		return !shardRules.isEmpty() ? shardRules.values().iterator().next() : null;
 	}
