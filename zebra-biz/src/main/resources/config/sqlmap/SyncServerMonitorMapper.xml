@@ -10,16 +10,15 @@
 
     <insert id="create" parameterType="ShardDumpTaskEntity">
         INSERT INTO SyncServerMonitor
-        (Name,Load,UpdateTime)
+        (Name,`Load`,UpdateTime)
         VALUES
         (#{name},#{load},NOW())
     </insert>
 
     <update id="update" parameterType="ShardDumpTaskEntity">
-        Update SyncServerMonitor SET
-        Name = #{name},
-        Load = #{load},
-        UpdateTime = NOW(),
-        WHERE ID = #{id}
+        UPDATE SyncServerMonitor SET
+        `Load` = #{load},
+        UpdateTime = NOW()
+        WHERE Name = #{name}
     </update>
 </mapper>
