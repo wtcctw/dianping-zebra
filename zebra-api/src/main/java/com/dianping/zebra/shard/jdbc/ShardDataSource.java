@@ -125,15 +125,20 @@ public class ShardDataSource extends AbstractDataSource {
 				routerFactory = new DataSourceLionRouterFactory(configService, ruleName);
 			}
 
-			String originJdbcRef = configService.getProperty(LionKey.getShardOriginDatasourceKey(ruleName));
 			final String switchOnValue = configService.getProperty(LionKey.getShardSiwtchOnKey(ruleName));
 
 			this.switchOn = "true".equals(switchOnValue);
 
-			if (originDataSource == null && StringUtils.isNotBlank(originJdbcRef)) {
-				GroupDataSource groupDataSource = new GroupDataSource(originJdbcRef);
-				groupDataSource.init();
-				this.originDataSource = groupDataSource;
+			if (originDataSource == null) {
+				String originJdbcRef = configService.getProperty(LionKey.getShardOriginDatasourceKey(ruleName));
+
+				if (StringUtils.isNotBlank(originJdbcRef)) {
+					GroupDataSource groupDataSource = new GroupDataSource(originJdbcRef);
+					groupDataSource.setForceWriteOnLogin(false);
+					groupDataSource.init();
+
+					this.originDataSource = groupDataSource;
+				}
 			}
 
 			configService.addPropertyChangeListener(new PropertyChangeListener() {
@@ -144,23 +149,24 @@ public class ShardDataSource extends AbstractDataSource {
 					}
 				}
 			});
-		}
-
-		if (dataSourcePool == null || dataSourcePool.isEmpty()) {
-			throw new IllegalArgumentException("dataSourcePool is required.");
-		}
-		if (routerFactory == null) {
-			throw new IllegalArgumentException("routerRuleFile must be set.");
-		}
-
-		if (dataSourcePool != null) {
-			DataSourceRepository.init(dataSourcePool);
 		} else {
-			DataSourceRepository.init(router.getRouterRule());
+			if (dataSourcePool == null || dataSourcePool.isEmpty()) {
+				throw new IllegalArgumentException("dataSourcePool is required.");
+			}
+
+			if (routerFactory == null) {
+				throw new IllegalArgumentException("routerRuleFile must be set.");
+			}
 		}
 
 		this.router = routerFactory.getRouter();
 		this.router.init();
+
+		if (dataSourcePool != null) {
+			DataSourceRepository.init(dataSourcePool);
+		} else {
+			DataSourceRepository.init(this.router.getRouterRule());
+		}
 
 		logger.info(String.format("ShardDataSource(%s) successfully initialized.", ruleName));
 	}
