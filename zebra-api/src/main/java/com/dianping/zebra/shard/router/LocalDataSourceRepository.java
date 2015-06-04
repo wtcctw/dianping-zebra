@@ -30,43 +30,20 @@ import java.util.Map.Entry;
  *
  */
 
-public class LocalDataSourceRepository implements DataSourceRepository {
+public class LocalDataSourceRepository{
 
-	private Map<String, NamedDataSource> dataSources = new HashMap<String, NamedDataSource>();
+	private static Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
 
-	public LocalDataSourceRepository(Map<String, DataSource> dataSourcePool) {
+	public static void init(Map<String, DataSource> dataSourcePool){
 		for (Entry<String, DataSource> dataSourceEntry : dataSourcePool.entrySet()) {
 			String dbIndex = dataSourceEntry.getKey();
 			DataSource dataSource = dataSourceEntry.getValue();
 
-			registerDataSource(dbIndex, dataSource);
+			dataSources.put(dbIndex, dataSource);
 		}
 	}
 
-	private void registerDataSource(String name, DataSource dataSource) {
-		dataSources.put(name.toLowerCase(), new NamedDataSource(name, dataSource));
-	}
-
-	@Override
-	public NamedDataSource getDataSource(String dsName) {
+	public static DataSource getDataSource(String dsName) {
 		return dataSources.get(dsName.toLowerCase());
-	}
-}
-
-/**
- * 返回带identity标记的DataSource，方便JDBC层在该Datasource级别执行多条SQL语句时复用Connection, 针对一条SQL被拆成多个表，而其中有多个表在同一个DataSource上，那么对于最上层的一次JDBC API调用
- * 提供底层的Connection复用
- * 
- * @author danson.liu
- *
- */
-class NamedDataSource {
-	String identity;
-
-	DataSource dataSource;
-
-	public NamedDataSource(String identity, DataSource dataSource) {
-		this.identity = identity;
-		this.dataSource = dataSource;
 	}
 }

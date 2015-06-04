@@ -29,6 +29,7 @@ import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
 import com.dianping.zebra.shard.router.DataSourceRouteException;
 import com.dianping.zebra.shard.router.DataSourceRouter;
+import com.dianping.zebra.shard.router.LocalDataSourceRepository;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.shard.router.TargetedSql;
 import com.dianping.zebra.util.JDBCUtils;
@@ -115,7 +116,8 @@ public class ShardStatement implements Statement {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
-						conn = targetedSql.getDataSource().getConnection();
+						String dbIndex = targetedSql.getDataSourceName();
+						conn = LocalDataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
@@ -386,7 +388,8 @@ public class ShardStatement implements Statement {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
-						conn = targetedSql.getDataSource().getConnection();
+						String dbIndex = targetedSql.getDataSourceName();
+						conn = LocalDataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);

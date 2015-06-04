@@ -30,7 +30,6 @@ import com.dianping.zebra.shard.router.rule.ShardMatchResult;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
 import org.antlr.runtime.RecognitionException;
 
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -41,10 +40,6 @@ import java.util.Map.Entry;
 public class DataSourceRouterImpl implements DataSourceRouter {
 
 	private RouterRule routerRule;
-
-	private Map<String, DataSource> dataSourcePool;
-
-	private DataSourceRepository dataSourceRepository;
 
 	private Map<String, DMLCommon> sqlParseCache = Collections.synchronizedMap(new LRUCache<String, DMLCommon>(1000));
 
@@ -103,30 +98,34 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	}
 
 	private List<TargetedSql> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable, String sql,
-	      DMLCommon dmlSql, String table, int skip, int max) {
-
+	      DMLCommon dmlSql, String logicTable, int skip, int max) {
 		Map<String, TargetedSql> targetedSqlMap = new HashMap<String, TargetedSql>();
 		sql = reconstructSqlLimit(acrossTable, sql, dmlSql, skip, max);
 
 		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
-			NamedDataSource dataSource = getDataSource(entry.getKey(), dmlSql);
-			if (!targetedSqlMap.containsKey(dataSource.identity)) {
-				targetedSqlMap.put(dataSource.identity, new TargetedSql(dataSource));
+			String jdbcRef = entry.getKey();
+
+			if (!targetedSqlMap.containsKey(jdbcRef)) {
+				targetedSqlMap.put(jdbcRef, new TargetedSql(jdbcRef));
 			}
-			TargetedSql targetedSql = targetedSqlMap.get(dataSource.identity);
+
+			TargetedSql targetedSql = targetedSqlMap.get(jdbcRef);
 			for (String physicalTable : entry.getValue()) {
-				targetedSql.addSql(reconstructSql(sql, dmlSql, table, physicalTable));
+				targetedSql.addSql(replaceSqlTableName(sql, dmlSql, logicTable, physicalTable));
 			}
 		}
+
 		return new ArrayList<TargetedSql>(targetedSqlMap.values());
 	}
 
-	private String reconstructSql(String sql, DMLCommon dmlSql, String table, String physicalTable) {
-		List<Integer> tablePosList = dmlSql.getTablePos(table);
-		int tableLen = table.length();
+	private String replaceSqlTableName(String sql, DMLCommon dmlSql, String logicTable, String physicalTable) {
+		List<Integer> tablePosList = dmlSql.getTablePos(logicTable);
+		int tableLen = logicTable.length();
+
 		for (Integer tablePos : tablePosList) {
 			sql = sql.substring(0, tablePos) + physicalTable + sql.substring(tablePos + tableLen);
 		}
+
 		return sql;
 	}
 
@@ -191,10 +190,6 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 		return where != null ? where.limitInfo : null;
 	}
 
-	private NamedDataSource getDataSource(String dsName, DMLCommon dmlSql) {
-		return dataSourceRepository.getDataSource(dsName);
-	}
-
 	private TableShardRule getAppliedShardRule(Set<String> relatedTables) throws DataSourceRouteException {
 		Map<String, TableShardRule> shardRules = new HashMap<String, TableShardRule>(5);
 		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
@@ -211,13 +206,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	}
 
 	@Override
-	public void setDataSourcePool(Map<String, DataSource> dataSourcePool) {
-		this.dataSourcePool = dataSourcePool;
-	}
-
-	@Override
 	public void init() {
-		dataSourceRepository = new LocalDataSourceRepository(dataSourcePool);
 	}
 
 	public void setRouterRule(RouterRule routerRule) {
@@ -225,7 +214,7 @@ public class DataSourceRouterImpl implements DataSourceRouter {
 	}
 
 	@Override
-   public RouterRule getRouterRule() {
-	   return this.routerRule;
-   }
+	public RouterRule getRouterRule() {
+		return this.routerRule;
+	}
 }

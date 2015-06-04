@@ -19,63 +19,36 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 /**
- * @author danson.liu
- * @author hao.zhu modified
+ * @author hao.zhu 
  * 
  */
 public class TargetedSql {
 
-	private String dataSourceName;
-
-	private DataSource dataSource;
+	private String dbIndex;
 
 	private List<String> sqls;
 
-	public TargetedSql(String dataSourceName, DataSource dataSource, List<String> sqls) {
-		this.dataSourceName = dataSourceName;
-		this.dataSource = dataSource;
+	public TargetedSql(String dbIndex) {
+		this.dbIndex = dbIndex;
+	}
+	
+	public TargetedSql(String dbIndex, List<String> sqls) {
+		this.dbIndex = dbIndex;
 		this.sqls = sqls;
 	}
 
-	public TargetedSql(String dataSourceName, DataSource dataSource, String sql) {
-		this.dataSourceName = dataSourceName;
-		this.dataSource = dataSource;
-		this.sqls = Arrays.asList(sql);
-	}
-
-	public TargetedSql(NamedDataSource namedDataSource) {
-		this(namedDataSource, new ArrayList<String>(100));
-	}
-
-	public TargetedSql(NamedDataSource namedDataSource, List<String> sqls) {
-		this.dataSourceName = namedDataSource.identity;
-		this.dataSource = namedDataSource.dataSource;
-		this.sqls = sqls;
-	}
-
-	public TargetedSql(NamedDataSource namedDataSource, String sql) {
-		this.dataSourceName = namedDataSource.identity;
-		this.dataSource = namedDataSource.dataSource;
+	public TargetedSql(String dbIndex, String sql) {
+		this.dbIndex = dbIndex;
 		this.sqls = Arrays.asList(sql);
 	}
 
 	public String getDataSourceName() {
-		return dataSourceName;
+		return dbIndex;
 	}
 
-	public void setDataSourceName(String dataSourceName) {
-		this.dataSourceName = dataSourceName;
-	}
-
-	public DataSource getDataSource() {
-		return dataSource;
-	}
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
+	public void setDataSourceName(String dbIndex) {
+		this.dbIndex = dbIndex;
 	}
 
 	public List<String> getSqls() {

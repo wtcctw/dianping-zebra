@@ -69,6 +69,7 @@ import com.dianping.zebra.group.jdbc.param.TimeParamContext;
 import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
 import com.dianping.zebra.group.jdbc.param.UnicodeStreamParamContext;
+import com.dianping.zebra.shard.router.LocalDataSourceRepository;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.shard.router.TargetedSql;
 import com.dianping.zebra.util.JDBCUtils;
@@ -186,7 +187,8 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
-						conn = targetedSql.getDataSource().getConnection();
+						String dbIndex = targetedSql.getDataSourceName();
+						conn = LocalDataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
@@ -232,7 +234,8 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
-						conn = targetedSql.getDataSource().getConnection();
+						String dbIndex = targetedSql.getDataSourceName();
+						conn = LocalDataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);

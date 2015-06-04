@@ -13,17 +13,13 @@
 package com.dianping.zebra.shard.router;
 
 import java.util.List;
-import java.util.Map;
-
-import javax.sql.DataSource;
 
 import com.dianping.zebra.shard.router.rule.RouterRule;
 
 /**
  * 数据源路由
  *
- * @author Leo Liang
- * @author danson.liu
+ * @author damonzhu
  */
 public interface DataSourceRouter {
 
@@ -31,8 +27,5 @@ public interface DataSourceRouter {
     
     RouterRule getRouterRule();
 
-    void setDataSourcePool(Map<String, DataSource> dataSourcePool);
-
     void init();
-
 }

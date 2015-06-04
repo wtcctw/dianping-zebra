@@ -15,6 +15,8 @@
  */
 package com.dianping.zebra.shard.router;
 
+import javax.sql.DataSource;
+
 
 /**
  * @author danson.liu
@@ -24,5 +26,5 @@ public interface DataSourceRepository {
 	
 	String DEFAULT_DS_NAME = "default";
 
-	NamedDataSource getDataSource(String dsName);
+	DataSource getDataSource(String dsName);
 }
