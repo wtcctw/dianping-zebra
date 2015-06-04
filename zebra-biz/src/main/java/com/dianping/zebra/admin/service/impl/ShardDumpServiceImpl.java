@@ -1,9 +1,10 @@
-package com.dianping.zebra.admin.service;
+package com.dianping.zebra.admin.service.impl;
 
 import com.dianping.zebra.admin.dao.ShardDumpDbMapper;
 import com.dianping.zebra.admin.dao.ShardDumpTaskMapper;
 import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
+import com.dianping.zebra.admin.service.ShardDumpService;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

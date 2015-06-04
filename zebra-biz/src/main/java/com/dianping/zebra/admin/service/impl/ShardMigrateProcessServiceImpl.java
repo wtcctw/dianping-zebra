@@ -1,7 +1,8 @@
-package com.dianping.zebra.admin.service;
+package com.dianping.zebra.admin.service.impl;
 
 import com.dianping.zebra.admin.dao.ShardMigrateProcessMapper;
 import com.dianping.zebra.admin.entity.ShardMigrateProcessEntity;
+import com.dianping.zebra.admin.service.ShardMigrateProcessService;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

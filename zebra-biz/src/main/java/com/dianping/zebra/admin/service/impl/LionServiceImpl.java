@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.service;
+package com.dianping.zebra.admin.service.impl;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -8,6 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.dianping.zebra.admin.service.HttpService;
+import com.dianping.zebra.admin.service.LionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

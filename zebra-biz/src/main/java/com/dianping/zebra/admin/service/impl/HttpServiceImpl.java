@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.service;
+package com.dianping.zebra.admin.service.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
+import com.dianping.zebra.admin.service.HttpService;
 import org.springframework.stereotype.Service;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
