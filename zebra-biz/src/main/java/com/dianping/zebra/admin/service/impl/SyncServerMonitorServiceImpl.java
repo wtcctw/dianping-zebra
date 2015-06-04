@@ -7,6 +7,8 @@ import com.dianping.zebra.admin.service.SyncServerMonitorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -40,7 +42,8 @@ public class SyncServerMonitorServiceImpl implements SyncServerMonitorService {
         SyncServerMonitorEntity item = new SyncServerMonitorEntity();
         try {
             item.setName(InetAddress.getLocalHost().getHostAddress());
-            //todo: get load
+            OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+            item.setLoad(os.getSystemLoadAverage() / os.getAvailableProcessors());
         } catch (UnknownHostException e) {
             Cat.logError(e);
         }
