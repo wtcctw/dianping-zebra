@@ -150,8 +150,10 @@ public class DMLController {
 			}
 		} catch (SQLException e) {
 		}
-
+		
 		try {
+			stmt.close();
+			conn.close();
 	      ds.close();
       } catch (SQLException e) {
 	      e.printStackTrace();
