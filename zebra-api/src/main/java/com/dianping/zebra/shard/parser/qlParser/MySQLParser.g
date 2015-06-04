@@ -41,6 +41,7 @@ tokens{
 	BETWEEN;
 	ORDERBY;
 	INSERT;
+	IGNORE;
 	INSERT_VAL;
 	PRIORITY;
 	
@@ -129,7 +130,7 @@ updateColumnSpec
 	:columnNameInUpdate EQ^ expr
 	;
 insert_command
-	:	'INSERT' 'INTO' selected_table
+	:	'INSERT' ('IGNORE')? 'INTO' selected_table
 		( LPAREN column_specs  RPAREN )?
 		('VALUES' LPAREN values RPAREN
 		)->^(INSERT selected_table column_specs values)

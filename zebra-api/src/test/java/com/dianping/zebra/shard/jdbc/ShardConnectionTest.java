@@ -165,4 +165,18 @@ public class ShardConnectionTest extends ZebraMultiDBBaseTestCase {
 		
 		System.out.println(rs.getInt(1));
 	}
+	
+	//@Test
+	public void test_insert_ignore() throws SQLException {
+		ShardDataSource ds = new ShardDataSource();
+		ds.setRuleName("welife");
+		
+		ds.init();
+		
+		Connection conn = ds.getConnection();
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate("insert into welife_users(uid,bid) values (20,2127114697)");
+		stmt.close();
+		conn.close();
+	}
 }

@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 MySQLParser.g 2015-06-03 18:01:46
+// $ANTLR 3.5.2 MySQLParser.g 2015-06-04 10:14:38
  package  com.dianping.zebra.shard.parser.qlParser; 
 
 import org.antlr.runtime.*;
@@ -9,7 +9,6 @@ import java.util.ArrayList;
 @SuppressWarnings("all")
 public class MySQLParserLexer extends Lexer {
 	public static final int EOF=-1;
-	public static final int T__76=76;
 	public static final int T__77=77;
 	public static final int T__78=78;
 	public static final int T__79=79;
@@ -48,6 +47,7 @@ public class MySQLParserLexer extends Lexer {
 	public static final int T__112=112;
 	public static final int T__113=113;
 	public static final int T__114=114;
+	public static final int T__115=115;
 	public static final int ALIAS=4;
 	public static final int AND=5;
 	public static final int ARROW=6;
@@ -78,48 +78,49 @@ public class MySQLParserLexer extends Lexer {
 	public static final int GROUPBY=31;
 	public static final int GTH=32;
 	public static final int ID=33;
-	public static final int IN=34;
-	public static final int INFINITE=35;
-	public static final int INSERT=36;
-	public static final int INSERT_VAL=37;
-	public static final int IN_LISTS=38;
-	public static final int IS=39;
-	public static final int ISNOT=40;
-	public static final int JOINTYPE=41;
-	public static final int LEQ=42;
-	public static final int LIKE=43;
-	public static final int LPAREN=44;
-	public static final int LTH=45;
-	public static final int MINUS=46;
-	public static final int MOD=47;
-	public static final int N=48;
-	public static final int NAN=49;
-	public static final int NOT=50;
-	public static final int NOT_BETWEEN=51;
-	public static final int NOT_EQ=52;
-	public static final int NOT_LIKE=53;
-	public static final int NULL=54;
-	public static final int NUMBER=55;
-	public static final int OR=56;
-	public static final int ORDERBY=57;
-	public static final int PLUS=58;
-	public static final int POINT=59;
-	public static final int PRIORITY=60;
-	public static final int QUOTED_STRING=61;
-	public static final int QUTED_STR=62;
-	public static final int RANGE=63;
-	public static final int RPAREN=64;
-	public static final int SELECT=65;
-	public static final int SELECT_LIST=66;
-	public static final int SET=67;
-	public static final int SET_ELE=68;
-	public static final int SKIP=69;
-	public static final int SUBQUERY=70;
-	public static final int TABLENAME=71;
-	public static final int TABLENAMES=72;
-	public static final int UPDATE=73;
-	public static final int WHERE=74;
-	public static final int WS=75;
+	public static final int IGNORE=34;
+	public static final int IN=35;
+	public static final int INFINITE=36;
+	public static final int INSERT=37;
+	public static final int INSERT_VAL=38;
+	public static final int IN_LISTS=39;
+	public static final int IS=40;
+	public static final int ISNOT=41;
+	public static final int JOINTYPE=42;
+	public static final int LEQ=43;
+	public static final int LIKE=44;
+	public static final int LPAREN=45;
+	public static final int LTH=46;
+	public static final int MINUS=47;
+	public static final int MOD=48;
+	public static final int N=49;
+	public static final int NAN=50;
+	public static final int NOT=51;
+	public static final int NOT_BETWEEN=52;
+	public static final int NOT_EQ=53;
+	public static final int NOT_LIKE=54;
+	public static final int NULL=55;
+	public static final int NUMBER=56;
+	public static final int OR=57;
+	public static final int ORDERBY=58;
+	public static final int PLUS=59;
+	public static final int POINT=60;
+	public static final int PRIORITY=61;
+	public static final int QUOTED_STRING=62;
+	public static final int QUTED_STR=63;
+	public static final int RANGE=64;
+	public static final int RPAREN=65;
+	public static final int SELECT=66;
+	public static final int SELECT_LIST=67;
+	public static final int SET=68;
+	public static final int SET_ELE=69;
+	public static final int SKIP=70;
+	public static final int SUBQUERY=71;
+	public static final int TABLENAME=72;
+	public static final int TABLENAMES=73;
+	public static final int UPDATE=74;
+	public static final int WHERE=75;
+	public static final int WS=76;
 
 	// delegates
 	// delegators
@@ -136,36 +137,15 @@ public class MySQLParserLexer extends Lexer {
 	}
 	@Override public String getGrammarFileName() { return "MySQLParser.g"; }
 
-	// $ANTLR start "T__76"
-	public final void mT__76() throws RecognitionException {
-		try {
-			int _type = T__76;
-			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:9:7: ( '?' )
-			// MySQLParser.g:9:9: '?'
-			{
-			match('?'); 
-			}
-
-			state.type = _type;
-			state.channel = _channel;
-		}
-		finally {
-			// do for sure before leaving
-		}
-	}
-	// $ANTLR end "T__76"
-
 	// $ANTLR start "T__77"
 	public final void mT__77() throws RecognitionException {
 		try {
 			int _type = T__77;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:10:7: ( 'AND' )
-			// MySQLParser.g:10:9: 'AND'
+			// MySQLParser.g:9:7: ( '?' )
+			// MySQLParser.g:9:9: '?'
 			{
-			match("AND"); 
-
+			match('?'); 
 			}
 
 			state.type = _type;
@@ -182,10 +162,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__78;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:11:7: ( 'AS' )
-			// MySQLParser.g:11:9: 'AS'
+			// MySQLParser.g:10:7: ( 'AND' )
+			// MySQLParser.g:10:9: 'AND'
 			{
-			match("AS"); 
+			match("AND"); 
 
 			}
 
@@ -203,10 +183,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__79;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:12:7: ( 'BETWEEN' )
-			// MySQLParser.g:12:9: 'BETWEEN'
+			// MySQLParser.g:11:7: ( 'AS' )
+			// MySQLParser.g:11:9: 'AS'
 			{
-			match("BETWEEN"); 
+			match("AS"); 
 
 			}
 
@@ -224,10 +204,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__80;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:13:7: ( 'BY' )
-			// MySQLParser.g:13:9: 'BY'
+			// MySQLParser.g:12:7: ( 'BETWEEN' )
+			// MySQLParser.g:12:9: 'BETWEEN'
 			{
-			match("BY"); 
+			match("BETWEEN"); 
 
 			}
 
@@ -245,10 +225,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__81;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:14:7: ( 'CONCAT' )
-			// MySQLParser.g:14:9: 'CONCAT'
+			// MySQLParser.g:13:7: ( 'BY' )
+			// MySQLParser.g:13:9: 'BY'
 			{
-			match("CONCAT"); 
+			match("BY"); 
 
 			}
 
@@ -266,10 +246,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__82;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:15:7: ( 'COUNT' )
-			// MySQLParser.g:15:9: 'COUNT'
+			// MySQLParser.g:14:7: ( 'CONCAT' )
+			// MySQLParser.g:14:9: 'CONCAT'
 			{
-			match("COUNT"); 
+			match("CONCAT"); 
 
 			}
 
@@ -287,10 +267,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__83;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:16:7: ( 'DELETE' )
-			// MySQLParser.g:16:9: 'DELETE'
+			// MySQLParser.g:15:7: ( 'COUNT' )
+			// MySQLParser.g:15:9: 'COUNT'
 			{
-			match("DELETE"); 
+			match("COUNT"); 
 
 			}
 
@@ -308,10 +288,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__84;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:17:7: ( 'DISTINCT' )
-			// MySQLParser.g:17:9: 'DISTINCT'
+			// MySQLParser.g:16:7: ( 'DELETE' )
+			// MySQLParser.g:16:9: 'DELETE'
 			{
-			match("DISTINCT"); 
+			match("DELETE"); 
 
 			}
 
@@ -329,10 +309,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__85;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:18:7: ( 'FALSE' )
-			// MySQLParser.g:18:9: 'FALSE'
+			// MySQLParser.g:17:7: ( 'DISTINCT' )
+			// MySQLParser.g:17:9: 'DISTINCT'
 			{
-			match("FALSE"); 
+			match("DISTINCT"); 
 
 			}
 
@@ -350,10 +330,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__86;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:19:7: ( 'FORCE' )
-			// MySQLParser.g:19:9: 'FORCE'
+			// MySQLParser.g:18:7: ( 'FALSE' )
+			// MySQLParser.g:18:9: 'FALSE'
 			{
-			match("FORCE"); 
+			match("FALSE"); 
 
 			}
 
@@ -371,10 +351,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__87;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:20:7: ( 'FROM' )
-			// MySQLParser.g:20:9: 'FROM'
+			// MySQLParser.g:19:7: ( 'FORCE' )
+			// MySQLParser.g:19:9: 'FORCE'
 			{
-			match("FROM"); 
+			match("FORCE"); 
 
 			}
 
@@ -392,10 +372,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__88;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:21:7: ( 'GROUP BY' )
-			// MySQLParser.g:21:9: 'GROUP BY'
+			// MySQLParser.g:20:7: ( 'FROM' )
+			// MySQLParser.g:20:9: 'FROM'
 			{
-			match("GROUP BY"); 
+			match("FROM"); 
 
 			}
 
@@ -413,10 +393,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__89;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:22:7: ( 'IGNORE' )
-			// MySQLParser.g:22:9: 'IGNORE'
+			// MySQLParser.g:21:7: ( 'GROUP BY' )
+			// MySQLParser.g:21:9: 'GROUP BY'
 			{
-			match("IGNORE"); 
+			match("GROUP BY"); 
 
 			}
 
@@ -434,10 +414,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__90;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:23:7: ( 'IN' )
-			// MySQLParser.g:23:9: 'IN'
+			// MySQLParser.g:22:7: ( 'IGNORE' )
+			// MySQLParser.g:22:9: 'IGNORE'
 			{
-			match("IN"); 
+			match("IGNORE"); 
 
 			}
 
@@ -455,10 +435,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__91;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:24:7: ( 'INDEX' )
-			// MySQLParser.g:24:9: 'INDEX'
+			// MySQLParser.g:23:7: ( 'IN' )
+			// MySQLParser.g:23:9: 'IN'
 			{
-			match("INDEX"); 
+			match("IN"); 
 
 			}
 
@@ -476,10 +456,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__92;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:25:7: ( 'INFINITE' )
-			// MySQLParser.g:25:9: 'INFINITE'
+			// MySQLParser.g:24:7: ( 'INDEX' )
+			// MySQLParser.g:24:9: 'INDEX'
 			{
-			match("INFINITE"); 
+			match("INDEX"); 
 
 			}
 
@@ -497,10 +477,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__93;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:26:7: ( 'INNER JOIN' )
-			// MySQLParser.g:26:9: 'INNER JOIN'
+			// MySQLParser.g:25:7: ( 'INFINITE' )
+			// MySQLParser.g:25:9: 'INFINITE'
 			{
-			match("INNER JOIN"); 
+			match("INFINITE"); 
 
 			}
 
@@ -518,10 +498,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__94;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:27:7: ( 'INSERT' )
-			// MySQLParser.g:27:9: 'INSERT'
+			// MySQLParser.g:26:7: ( 'INNER JOIN' )
+			// MySQLParser.g:26:9: 'INNER JOIN'
 			{
-			match("INSERT"); 
+			match("INNER JOIN"); 
 
 			}
 
@@ -539,10 +519,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__95;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:28:7: ( 'INTO' )
-			// MySQLParser.g:28:9: 'INTO'
+			// MySQLParser.g:27:7: ( 'INSERT' )
+			// MySQLParser.g:27:9: 'INSERT'
 			{
-			match("INTO"); 
+			match("INSERT"); 
 
 			}
 
@@ -560,10 +540,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__96;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:29:7: ( 'IS' )
-			// MySQLParser.g:29:9: 'IS'
+			// MySQLParser.g:28:7: ( 'INTO' )
+			// MySQLParser.g:28:9: 'INTO'
 			{
-			match("IS"); 
+			match("INTO"); 
 
 			}
 
@@ -581,10 +561,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__97;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:30:7: ( 'JOIN' )
-			// MySQLParser.g:30:9: 'JOIN'
+			// MySQLParser.g:29:7: ( 'IS' )
+			// MySQLParser.g:29:9: 'IS'
 			{
-			match("JOIN"); 
+			match("IS"); 
 
 			}
 
@@ -602,10 +582,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__98;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:31:7: ( 'LEFT JOIN' )
-			// MySQLParser.g:31:9: 'LEFT JOIN'
+			// MySQLParser.g:30:7: ( 'JOIN' )
+			// MySQLParser.g:30:9: 'JOIN'
 			{
-			match("LEFT JOIN"); 
+			match("JOIN"); 
 
 			}
 
@@ -623,10 +603,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__99;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:32:7: ( 'LIKE' )
-			// MySQLParser.g:32:9: 'LIKE'
+			// MySQLParser.g:31:7: ( 'LEFT JOIN' )
+			// MySQLParser.g:31:9: 'LEFT JOIN'
 			{
-			match("LIKE"); 
+			match("LEFT JOIN"); 
 
 			}
 
@@ -644,10 +624,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__100;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:33:8: ( 'LIMIT' )
-			// MySQLParser.g:33:10: 'LIMIT'
+			// MySQLParser.g:32:8: ( 'LIKE' )
+			// MySQLParser.g:32:10: 'LIKE'
 			{
-			match("LIMIT"); 
+			match("LIKE"); 
 
 			}
 
@@ -665,10 +645,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__101;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:34:8: ( 'NAN' )
-			// MySQLParser.g:34:10: 'NAN'
+			// MySQLParser.g:33:8: ( 'LIMIT' )
+			// MySQLParser.g:33:10: 'LIMIT'
 			{
-			match("NAN"); 
+			match("LIMIT"); 
 
 			}
 
@@ -686,10 +666,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__102;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:35:8: ( 'NOT' )
-			// MySQLParser.g:35:10: 'NOT'
+			// MySQLParser.g:34:8: ( 'NAN' )
+			// MySQLParser.g:34:10: 'NAN'
 			{
-			match("NOT"); 
+			match("NAN"); 
 
 			}
 
@@ -707,10 +687,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__103;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:36:8: ( 'NULL' )
-			// MySQLParser.g:36:10: 'NULL'
+			// MySQLParser.g:35:8: ( 'NOT' )
+			// MySQLParser.g:35:10: 'NOT'
 			{
-			match("NULL"); 
+			match("NOT"); 
 
 			}
 
@@ -728,10 +708,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__104;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:37:8: ( 'ON' )
-			// MySQLParser.g:37:10: 'ON'
+			// MySQLParser.g:36:8: ( 'NULL' )
+			// MySQLParser.g:36:10: 'NULL'
 			{
-			match("ON"); 
+			match("NULL"); 
 
 			}
 
@@ -749,10 +729,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__105;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:38:8: ( 'OR' )
-			// MySQLParser.g:38:10: 'OR'
+			// MySQLParser.g:37:8: ( 'ON' )
+			// MySQLParser.g:37:10: 'ON'
 			{
-			match("OR"); 
+			match("ON"); 
 
 			}
 
@@ -770,10 +750,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__106;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:39:8: ( 'ORDER' )
-			// MySQLParser.g:39:10: 'ORDER'
+			// MySQLParser.g:38:8: ( 'OR' )
+			// MySQLParser.g:38:10: 'OR'
 			{
-			match("ORDER"); 
+			match("OR"); 
 
 			}
 
@@ -791,10 +771,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__107;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:40:8: ( 'RIGHT JOIN' )
-			// MySQLParser.g:40:10: 'RIGHT JOIN'
+			// MySQLParser.g:39:8: ( 'ORDER' )
+			// MySQLParser.g:39:10: 'ORDER'
 			{
-			match("RIGHT JOIN"); 
+			match("ORDER"); 
 
 			}
 
@@ -812,10 +792,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__108;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:41:8: ( 'ROWNUM' )
-			// MySQLParser.g:41:10: 'ROWNUM'
+			// MySQLParser.g:40:8: ( 'RIGHT JOIN' )
+			// MySQLParser.g:40:10: 'RIGHT JOIN'
 			{
-			match("ROWNUM"); 
+			match("RIGHT JOIN"); 
 
 			}
 
@@ -833,10 +813,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__109;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:42:8: ( 'SELECT' )
-			// MySQLParser.g:42:10: 'SELECT'
+			// MySQLParser.g:41:8: ( 'ROWNUM' )
+			// MySQLParser.g:41:10: 'ROWNUM'
 			{
-			match("SELECT"); 
+			match("ROWNUM"); 
 
 			}
 
@@ -854,10 +834,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__110;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:43:8: ( 'SET' )
-			// MySQLParser.g:43:10: 'SET'
+			// MySQLParser.g:42:8: ( 'SELECT' )
+			// MySQLParser.g:42:10: 'SELECT'
 			{
-			match("SET"); 
+			match("SELECT"); 
 
 			}
 
@@ -875,10 +855,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__111;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:44:8: ( 'TRUE' )
-			// MySQLParser.g:44:10: 'TRUE'
+			// MySQLParser.g:43:8: ( 'SET' )
+			// MySQLParser.g:43:10: 'SET'
 			{
-			match("TRUE"); 
+			match("SET"); 
 
 			}
 
@@ -896,10 +876,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__112;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:45:8: ( 'UPDATE' )
-			// MySQLParser.g:45:10: 'UPDATE'
+			// MySQLParser.g:44:8: ( 'TRUE' )
+			// MySQLParser.g:44:10: 'TRUE'
 			{
-			match("UPDATE"); 
+			match("TRUE"); 
 
 			}
 
@@ -917,10 +897,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__113;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:46:8: ( 'VALUES' )
-			// MySQLParser.g:46:10: 'VALUES'
+			// MySQLParser.g:45:8: ( 'UPDATE' )
+			// MySQLParser.g:45:10: 'UPDATE'
 			{
-			match("VALUES"); 
+			match("UPDATE"); 
 
 			}
 
@@ -938,6 +918,27 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = T__114;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
+			// MySQLParser.g:46:8: ( 'VALUES' )
+			// MySQLParser.g:46:10: 'VALUES'
+			{
+			match("VALUES"); 
+
+			}
+
+			state.type = _type;
+			state.channel = _channel;
+		}
+		finally {
+			// do for sure before leaving
+		}
+	}
+	// $ANTLR end "T__114"
+
+	// $ANTLR start "T__115"
+	public final void mT__115() throws RecognitionException {
+		try {
+			int _type = T__115;
+			int _channel = DEFAULT_TOKEN_CHANNEL;
 			// MySQLParser.g:47:8: ( 'WHERE' )
 			// MySQLParser.g:47:10: 'WHERE'
 			{
@@ -952,17 +953,17 @@ public class MySQLParserLexer extends Lexer {
 			// do for sure before leaving
 		}
 	}
-	// $ANTLR end "T__114"
+	// $ANTLR end "T__115"
 
 	// $ANTLR start "N"
 	public final void mN() throws RecognitionException {
 		try {
 			int _type = N;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:376:5: ( ( MINUS )? '0' .. '9' ( '0' .. '9' )* )
-			// MySQLParser.g:376:6: ( MINUS )? '0' .. '9' ( '0' .. '9' )*
+			// MySQLParser.g:377:5: ( ( MINUS )? '0' .. '9' ( '0' .. '9' )* )
+			// MySQLParser.g:377:6: ( MINUS )? '0' .. '9' ( '0' .. '9' )*
 			{
-			// MySQLParser.g:376:6: ( MINUS )?
+			// MySQLParser.g:377:6: ( MINUS )?
 			int alt1=2;
 			int LA1_0 = input.LA(1);
 			if ( (LA1_0=='-') ) {
@@ -986,7 +987,7 @@ public class MySQLParserLexer extends Lexer {
 			}
 
 			matchRange('0','9'); 
-			// MySQLParser.g:376:24: ( '0' .. '9' )*
+			// MySQLParser.g:377:24: ( '0' .. '9' )*
 			loop2:
 			while (true) {
 				int alt2=2;
@@ -1031,8 +1032,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = ASC;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:379:4: ( 'ASC' )
-			// MySQLParser.g:379:5: 'ASC'
+			// MySQLParser.g:380:4: ( 'ASC' )
+			// MySQLParser.g:380:5: 'ASC'
 			{
 			match("ASC"); 
 
@@ -1052,8 +1053,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = DESC;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:380:5: ( 'DESC' )
-			// MySQLParser.g:380:6: 'DESC'
+			// MySQLParser.g:381:5: ( 'DESC' )
+			// MySQLParser.g:381:6: 'DESC'
 			{
 			match("DESC"); 
 
@@ -1073,8 +1074,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = EXPONENT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:382:2: ( '**' )
-			// MySQLParser.g:382:4: '**'
+			// MySQLParser.g:383:2: ( '**' )
+			// MySQLParser.g:383:4: '**'
 			{
 			match("**"); 
 
@@ -1094,8 +1095,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = ID;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:385:5: ( ( 'A' .. 'Z' | 'a' .. 'z' ) ( 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '$' | '#' )* )
-			// MySQLParser.g:385:7: ( 'A' .. 'Z' | 'a' .. 'z' ) ( 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '$' | '#' )*
+			// MySQLParser.g:386:5: ( ( 'A' .. 'Z' | 'a' .. 'z' ) ( 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '$' | '#' )* )
+			// MySQLParser.g:386:7: ( 'A' .. 'Z' | 'a' .. 'z' ) ( 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '$' | '#' )*
 			{
 			if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
 				input.consume();
@@ -1105,7 +1106,7 @@ public class MySQLParserLexer extends Lexer {
 				recover(mse);
 				throw mse;
 			}
-			// MySQLParser.g:385:29: ( 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '$' | '#' )*
+			// MySQLParser.g:386:29: ( 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '$' | '#' )*
 			loop3:
 			while (true) {
 				int alt3=2;
@@ -1150,8 +1151,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = PLUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:389:2: ( '+' )
-			// MySQLParser.g:389:4: '+'
+			// MySQLParser.g:390:2: ( '+' )
+			// MySQLParser.g:390:4: '+'
 			{
 			match('+'); 
 			}
@@ -1170,10 +1171,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = NUMBER;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:393:2: ( ( ( N '.' N ) | ( '.' N ) ) )
-			// MySQLParser.g:394:2: ( ( N '.' N ) | ( '.' N ) )
+			// MySQLParser.g:394:2: ( ( ( N '.' N ) | ( '.' N ) ) )
+			// MySQLParser.g:395:2: ( ( N '.' N ) | ( '.' N ) )
 			{
-			// MySQLParser.g:394:2: ( ( N '.' N ) | ( '.' N ) )
+			// MySQLParser.g:395:2: ( ( N '.' N ) | ( '.' N ) )
 			int alt4=2;
 			int LA4_0 = input.LA(1);
 			if ( (LA4_0=='-'||(LA4_0 >= '0' && LA4_0 <= '9')) ) {
@@ -1191,10 +1192,10 @@ public class MySQLParserLexer extends Lexer {
 
 			switch (alt4) {
 				case 1 :
-					// MySQLParser.g:394:3: ( N '.' N )
+					// MySQLParser.g:395:3: ( N '.' N )
 					{
-					// MySQLParser.g:394:3: ( N '.' N )
-					// MySQLParser.g:394:5: N '.' N
+					// MySQLParser.g:395:3: ( N '.' N )
+					// MySQLParser.g:395:5: N '.' N
 					{
 					mN(); 
 
@@ -1206,10 +1207,10 @@ public class MySQLParserLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// MySQLParser.g:395:3: ( '.' N )
+					// MySQLParser.g:396:3: ( '.' N )
 					{
-					// MySQLParser.g:395:3: ( '.' N )
-					// MySQLParser.g:395:4: '.' N
+					// MySQLParser.g:396:3: ( '.' N )
+					// MySQLParser.g:396:4: '.' N
 					{
 					match('.'); 
 					mN(); 
@@ -1237,8 +1238,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = MINUS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:401:2: ( '-' )
-			// MySQLParser.g:401:4: '-'
+			// MySQLParser.g:402:2: ( '-' )
+			// MySQLParser.g:402:4: '-'
 			{
 			match('-'); 
 			}
@@ -1257,7 +1258,7 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = DOT;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:404:2: ( POINT )
+			// MySQLParser.g:405:2: ( POINT )
 			// MySQLParser.g:
 			{
 			if ( input.LA(1)=='.' ) {
@@ -1284,8 +1285,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = COMMA;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:407:2: ( ',' )
-			// MySQLParser.g:407:4: ','
+			// MySQLParser.g:408:2: ( ',' )
+			// MySQLParser.g:408:4: ','
 			{
 			match(','); 
 			}
@@ -1304,8 +1305,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = EQ;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:410:2: ( '=' )
-			// MySQLParser.g:410:4: '='
+			// MySQLParser.g:411:2: ( '=' )
+			// MySQLParser.g:411:4: '='
 			{
 			match('='); 
 			}
@@ -1324,8 +1325,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = DIVIDE;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:414:2: ( '/' )
-			// MySQLParser.g:414:4: '/'
+			// MySQLParser.g:415:2: ( '/' )
+			// MySQLParser.g:415:4: '/'
 			{
 			match('/'); 
 			}
@@ -1344,8 +1345,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = ASTERISK;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:417:2: ( '*' )
-			// MySQLParser.g:417:4: '*'
+			// MySQLParser.g:418:2: ( '*' )
+			// MySQLParser.g:418:4: '*'
 			{
 			match('*'); 
 			}
@@ -1364,8 +1365,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = MOD;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:420:2: ( '%' )
-			// MySQLParser.g:420:4: '%'
+			// MySQLParser.g:421:2: ( '%' )
+			// MySQLParser.g:421:4: '%'
 			{
 			match('%'); 
 			}
@@ -1384,8 +1385,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = ARROW;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:423:2: ( '=>' )
-			// MySQLParser.g:423:4: '=>'
+			// MySQLParser.g:424:2: ( '=>' )
+			// MySQLParser.g:424:4: '=>'
 			{
 			match("=>"); 
 
@@ -1405,8 +1406,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = DOUBLEVERTBAR;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:426:2: ( '||' )
-			// MySQLParser.g:426:4: '||'
+			// MySQLParser.g:427:2: ( '||' )
+			// MySQLParser.g:427:4: '||'
 			{
 			match("||"); 
 
@@ -1424,8 +1425,8 @@ public class MySQLParserLexer extends Lexer {
 	// $ANTLR start "POINT"
 	public final void mPOINT() throws RecognitionException {
 		try {
-			// MySQLParser.g:432:2: ( '.' )
-			// MySQLParser.g:432:4: '.'
+			// MySQLParser.g:433:2: ( '.' )
+			// MySQLParser.g:433:4: '.'
 			{
 			match('.'); 
 			}
@@ -1442,8 +1443,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = RPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:434:2: ( ')' )
-			// MySQLParser.g:434:4: ')'
+			// MySQLParser.g:435:2: ( ')' )
+			// MySQLParser.g:435:4: ')'
 			{
 			match(')'); 
 			}
@@ -1462,8 +1463,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = LPAREN;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:437:2: ( '(' )
-			// MySQLParser.g:437:4: '('
+			// MySQLParser.g:438:2: ( '(' )
+			// MySQLParser.g:438:4: '('
 			{
 			match('('); 
 			}
@@ -1482,8 +1483,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = LTH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:440:2: ( '<' )
-			// MySQLParser.g:440:4: '<'
+			// MySQLParser.g:441:2: ( '<' )
+			// MySQLParser.g:441:4: '<'
 			{
 			match('<'); 
 			}
@@ -1502,7 +1503,7 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = NOT_EQ;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:443:2: ( '<>' | '!=' | '^=' )
+			// MySQLParser.g:444:2: ( '<>' | '!=' | '^=' )
 			int alt5=3;
 			switch ( input.LA(1) ) {
 			case '<':
@@ -1527,21 +1528,21 @@ public class MySQLParserLexer extends Lexer {
 			}
 			switch (alt5) {
 				case 1 :
-					// MySQLParser.g:443:4: '<>'
+					// MySQLParser.g:444:4: '<>'
 					{
 					match("<>"); 
 
 					}
 					break;
 				case 2 :
-					// MySQLParser.g:443:11: '!='
+					// MySQLParser.g:444:11: '!='
 					{
 					match("!="); 
 
 					}
 					break;
 				case 3 :
-					// MySQLParser.g:443:18: '^='
+					// MySQLParser.g:444:18: '^='
 					{
 					match("^="); 
 
@@ -1563,8 +1564,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = LEQ;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:446:2: ( '<=' )
-			// MySQLParser.g:446:4: '<='
+			// MySQLParser.g:447:2: ( '<=' )
+			// MySQLParser.g:447:4: '<='
 			{
 			match("<="); 
 
@@ -1584,8 +1585,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = GEQ;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:449:2: ( '>=' )
-			// MySQLParser.g:449:4: '>='
+			// MySQLParser.g:450:2: ( '>=' )
+			// MySQLParser.g:450:4: '>='
 			{
 			match(">="); 
 
@@ -1605,8 +1606,8 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = GTH;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:452:2: ( '>' )
-			// MySQLParser.g:452:4: '>'
+			// MySQLParser.g:453:2: ( '>' )
+			// MySQLParser.g:453:4: '>'
 			{
 			match('>'); 
 			}
@@ -1625,11 +1626,11 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = QUOTED_STRING;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:460:2: ( '\\'' (~ '\\'' | '\\'\\'' )* '\\'' )
-			// MySQLParser.g:460:3: '\\'' (~ '\\'' | '\\'\\'' )* '\\''
+			// MySQLParser.g:461:2: ( '\\'' (~ '\\'' | '\\'\\'' )* '\\'' )
+			// MySQLParser.g:461:3: '\\'' (~ '\\'' | '\\'\\'' )* '\\''
 			{
 			match('\''); 
-			// MySQLParser.g:460:8: (~ '\\'' | '\\'\\'' )*
+			// MySQLParser.g:461:8: (~ '\\'' | '\\'\\'' )*
 			loop6:
 			while (true) {
 				int alt6=3;
@@ -1647,7 +1648,7 @@ public class MySQLParserLexer extends Lexer {
 
 				switch (alt6) {
 				case 1 :
-					// MySQLParser.g:460:9: ~ '\\''
+					// MySQLParser.g:461:9: ~ '\\''
 					{
 					if ( (input.LA(1) >= '\u0000' && input.LA(1) <= '&')||(input.LA(1) >= '(' && input.LA(1) <= '\uFFFF') ) {
 						input.consume();
@@ -1660,7 +1661,7 @@ public class MySQLParserLexer extends Lexer {
 					}
 					break;
 				case 2 :
-					// MySQLParser.g:460:15: '\\'\\''
+					// MySQLParser.g:461:15: '\\'\\''
 					{
 					match("''"); 
 
@@ -1689,11 +1690,11 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = DOUBLEQUOTED_STRING;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:465:2: ( '\"' (~ ( '\"' ) )* '\"' )
-			// MySQLParser.g:465:4: '\"' (~ ( '\"' ) )* '\"'
+			// MySQLParser.g:466:2: ( '\"' (~ ( '\"' ) )* '\"' )
+			// MySQLParser.g:466:4: '\"' (~ ( '\"' ) )* '\"'
 			{
 			match('\"'); 
-			// MySQLParser.g:465:8: (~ ( '\"' ) )*
+			// MySQLParser.g:466:8: (~ ( '\"' ) )*
 			loop7:
 			while (true) {
 				int alt7=2;
@@ -1739,10 +1740,10 @@ public class MySQLParserLexer extends Lexer {
 		try {
 			int _type = WS;
 			int _channel = DEFAULT_TOKEN_CHANNEL;
-			// MySQLParser.g:468:5: ( ( ' ' | '\\t' | '\\r' '\\n' | '\\n' | '\\r' ) )
-			// MySQLParser.g:468:9: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' | '\\r' )
+			// MySQLParser.g:469:5: ( ( ' ' | '\\t' | '\\r' '\\n' | '\\n' | '\\r' ) )
+			// MySQLParser.g:469:9: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' | '\\r' )
 			{
-			// MySQLParser.g:468:9: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' | '\\r' )
+			// MySQLParser.g:469:9: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' | '\\r' )
 			int alt8=5;
 			switch ( input.LA(1) ) {
 			case ' ':
@@ -1780,32 +1781,32 @@ public class MySQLParserLexer extends Lexer {
 			}
 			switch (alt8) {
 				case 1 :
-					// MySQLParser.g:468:13: ' '
+					// MySQLParser.g:469:13: ' '
 					{
 					match(' '); 
 					}
 					break;
 				case 2 :
-					// MySQLParser.g:469:7: '\\t'
+					// MySQLParser.g:470:7: '\\t'
 					{
 					match('\t'); 
 					}
 					break;
 				case 3 :
-					// MySQLParser.g:470:7: '\\r' '\\n'
+					// MySQLParser.g:471:7: '\\r' '\\n'
 					{
 					match('\r'); 
 					match('\n'); 
 					}
 					break;
 				case 4 :
-					// MySQLParser.g:471:7: '\\n'
+					// MySQLParser.g:472:7: '\\n'
 					{
 					match('\n'); 
 					}
 					break;
 				case 5 :
-					// MySQLParser.g:472:7: '\\r'
+					// MySQLParser.g:473:7: '\\r'
 					{
 					match('\r'); 
 					}
@@ -1827,460 +1828,460 @@ public class MySQLParserLexer extends Lexer {
 
 	@Override
 	public void mTokens() throws RecognitionException {
-		// MySQLParser.g:1:8: ( T__76 | T__77 | T__78 | T__79 | T__80 | T__81 | T__82 | T__83 | T__84 | T__85 | T__86 | T__87 | T__88 | T__89 | T__90 | T__91 | T__92 | T__93 | T__94 | T__95 | T__96 | T__97 | T__98 | T__99 | T__100 | T__101 | T__102 | T__103 | T__104 | T__105 | T__106 | T__107 | T__108 | T__109 | T__110 | T__111 | T__112 | T__113 | T__114 | N | ASC | DESC | EXPONENT | ID | PLUS | NUMBER | MINUS | DOT | COMMA | EQ | DIVIDE | ASTERISK | MOD | ARROW | DOUBLEVERTBAR | RPAREN | LPAREN | LTH | NOT_EQ | LEQ | GEQ | GTH | QUOTED_STRING | DOUBLEQUOTED_STRING | WS )
+		// MySQLParser.g:1:8: ( T__77 | T__78 | T__79 | T__80 | T__81 | T__82 | T__83 | T__84 | T__85 | T__86 | T__87 | T__88 | T__89 | T__90 | T__91 | T__92 | T__93 | T__94 | T__95 | T__96 | T__97 | T__98 | T__99 | T__100 | T__101 | T__102 | T__103 | T__104 | T__105 | T__106 | T__107 | T__108 | T__109 | T__110 | T__111 | T__112 | T__113 | T__114 | T__115 | N | ASC | DESC | EXPONENT | ID | PLUS | NUMBER | MINUS | DOT | COMMA | EQ | DIVIDE | ASTERISK | MOD | ARROW | DOUBLEVERTBAR | RPAREN | LPAREN | LTH | NOT_EQ | LEQ | GEQ | GTH | QUOTED_STRING | DOUBLEQUOTED_STRING | WS )
 		int alt9=65;
 		alt9 = dfa9.predict(input);
 		switch (alt9) {
 			case 1 :
-				// MySQLParser.g:1:10: T__76
-				{
-				mT__76(); 
-
-				}
-				break;
-			case 2 :
-				// MySQLParser.g:1:16: T__77
+				// MySQLParser.g:1:10: T__77
 				{
 				mT__77(); 
 
 				}
 				break;
-			case 3 :
-				// MySQLParser.g:1:22: T__78
+			case 2 :
+				// MySQLParser.g:1:16: T__78
 				{
 				mT__78(); 
 
 				}
 				break;
-			case 4 :
-				// MySQLParser.g:1:28: T__79
+			case 3 :
+				// MySQLParser.g:1:22: T__79
 				{
 				mT__79(); 
 
 				}
 				break;
-			case 5 :
-				// MySQLParser.g:1:34: T__80
+			case 4 :
+				// MySQLParser.g:1:28: T__80
 				{
 				mT__80(); 
 
 				}
 				break;
-			case 6 :
-				// MySQLParser.g:1:40: T__81
+			case 5 :
+				// MySQLParser.g:1:34: T__81
 				{
 				mT__81(); 
 
 				}
 				break;
-			case 7 :
-				// MySQLParser.g:1:46: T__82
+			case 6 :
+				// MySQLParser.g:1:40: T__82
 				{
 				mT__82(); 
 
 				}
 				break;
-			case 8 :
-				// MySQLParser.g:1:52: T__83
+			case 7 :
+				// MySQLParser.g:1:46: T__83
 				{
 				mT__83(); 
 
 				}
 				break;
-			case 9 :
-				// MySQLParser.g:1:58: T__84
+			case 8 :
+				// MySQLParser.g:1:52: T__84
 				{
 				mT__84(); 
 
 				}
 				break;
-			case 10 :
-				// MySQLParser.g:1:64: T__85
+			case 9 :
+				// MySQLParser.g:1:58: T__85
 				{
 				mT__85(); 
 
 				}
 				break;
-			case 11 :
-				// MySQLParser.g:1:70: T__86
+			case 10 :
+				// MySQLParser.g:1:64: T__86
 				{
 				mT__86(); 
 
 				}
 				break;
-			case 12 :
-				// MySQLParser.g:1:76: T__87
+			case 11 :
+				// MySQLParser.g:1:70: T__87
 				{
 				mT__87(); 
 
 				}
 				break;
-			case 13 :
-				// MySQLParser.g:1:82: T__88
+			case 12 :
+				// MySQLParser.g:1:76: T__88
 				{
 				mT__88(); 
 
 				}
 				break;
-			case 14 :
-				// MySQLParser.g:1:88: T__89
+			case 13 :
+				// MySQLParser.g:1:82: T__89
 				{
 				mT__89(); 
 
 				}
 				break;
-			case 15 :
-				// MySQLParser.g:1:94: T__90
+			case 14 :
+				// MySQLParser.g:1:88: T__90
 				{
 				mT__90(); 
 
 				}
 				break;
-			case 16 :
-				// MySQLParser.g:1:100: T__91
+			case 15 :
+				// MySQLParser.g:1:94: T__91
 				{
 				mT__91(); 
 
 				}
 				break;
-			case 17 :
-				// MySQLParser.g:1:106: T__92
+			case 16 :
+				// MySQLParser.g:1:100: T__92
 				{
 				mT__92(); 
 
 				}
 				break;
-			case 18 :
-				// MySQLParser.g:1:112: T__93
+			case 17 :
+				// MySQLParser.g:1:106: T__93
 				{
 				mT__93(); 
 
 				}
 				break;
-			case 19 :
-				// MySQLParser.g:1:118: T__94
+			case 18 :
+				// MySQLParser.g:1:112: T__94
 				{
 				mT__94(); 
 
 				}
 				break;
-			case 20 :
-				// MySQLParser.g:1:124: T__95
+			case 19 :
+				// MySQLParser.g:1:118: T__95
 				{
 				mT__95(); 
 
 				}
 				break;
-			case 21 :
-				// MySQLParser.g:1:130: T__96
+			case 20 :
+				// MySQLParser.g:1:124: T__96
 				{
 				mT__96(); 
 
 				}
 				break;
-			case 22 :
-				// MySQLParser.g:1:136: T__97
+			case 21 :
+				// MySQLParser.g:1:130: T__97
 				{
 				mT__97(); 
 
 				}
 				break;
-			case 23 :
-				// MySQLParser.g:1:142: T__98
+			case 22 :
+				// MySQLParser.g:1:136: T__98
 				{
 				mT__98(); 
 
 				}
 				break;
-			case 24 :
-				// MySQLParser.g:1:148: T__99
+			case 23 :
+				// MySQLParser.g:1:142: T__99
 				{
 				mT__99(); 
 
 				}
 				break;
-			case 25 :
-				// MySQLParser.g:1:154: T__100
+			case 24 :
+				// MySQLParser.g:1:148: T__100
 				{
 				mT__100(); 
 
 				}
 				break;
-			case 26 :
-				// MySQLParser.g:1:161: T__101
+			case 25 :
+				// MySQLParser.g:1:155: T__101
 				{
 				mT__101(); 
 
 				}
 				break;
-			case 27 :
-				// MySQLParser.g:1:168: T__102
+			case 26 :
+				// MySQLParser.g:1:162: T__102
 				{
 				mT__102(); 
 
 				}
 				break;
-			case 28 :
-				// MySQLParser.g:1:175: T__103
+			case 27 :
+				// MySQLParser.g:1:169: T__103
 				{
 				mT__103(); 
 
 				}
 				break;
-			case 29 :
-				// MySQLParser.g:1:182: T__104
+			case 28 :
+				// MySQLParser.g:1:176: T__104
 				{
 				mT__104(); 
 
 				}
 				break;
-			case 30 :
-				// MySQLParser.g:1:189: T__105
+			case 29 :
+				// MySQLParser.g:1:183: T__105
 				{
 				mT__105(); 
 
 				}
 				break;
-			case 31 :
-				// MySQLParser.g:1:196: T__106
+			case 30 :
+				// MySQLParser.g:1:190: T__106
 				{
 				mT__106(); 
 
 				}
 				break;
-			case 32 :
-				// MySQLParser.g:1:203: T__107
+			case 31 :
+				// MySQLParser.g:1:197: T__107
 				{
 				mT__107(); 
 
 				}
 				break;
-			case 33 :
-				// MySQLParser.g:1:210: T__108
+			case 32 :
+				// MySQLParser.g:1:204: T__108
 				{
 				mT__108(); 
 
 				}
 				break;
-			case 34 :
-				// MySQLParser.g:1:217: T__109
+			case 33 :
+				// MySQLParser.g:1:211: T__109
 				{
 				mT__109(); 
 
 				}
 				break;
-			case 35 :
-				// MySQLParser.g:1:224: T__110
+			case 34 :
+				// MySQLParser.g:1:218: T__110
 				{
 				mT__110(); 
 
 				}
 				break;
-			case 36 :
-				// MySQLParser.g:1:231: T__111
+			case 35 :
+				// MySQLParser.g:1:225: T__111
 				{
 				mT__111(); 
 
 				}
 				break;
-			case 37 :
-				// MySQLParser.g:1:238: T__112
+			case 36 :
+				// MySQLParser.g:1:232: T__112
 				{
 				mT__112(); 
 
 				}
 				break;
-			case 38 :
-				// MySQLParser.g:1:245: T__113
+			case 37 :
+				// MySQLParser.g:1:239: T__113
 				{
 				mT__113(); 
 
 				}
 				break;
-			case 39 :
-				// MySQLParser.g:1:252: T__114
+			case 38 :
+				// MySQLParser.g:1:246: T__114
 				{
 				mT__114(); 
 
 				}
 				break;
+			case 39 :
+				// MySQLParser.g:1:253: T__115
+				{
+				mT__115(); 
+
+				}
+				break;
 			case 40 :
-				// MySQLParser.g:1:259: N
+				// MySQLParser.g:1:260: N
 				{
 				mN(); 
 
 				}
 				break;
 			case 41 :
-				// MySQLParser.g:1:261: ASC
+				// MySQLParser.g:1:262: ASC
 				{
 				mASC(); 
 
 				}
 				break;
 			case 42 :
-				// MySQLParser.g:1:265: DESC
+				// MySQLParser.g:1:266: DESC
 				{
 				mDESC(); 
 
 				}
 				break;
 			case 43 :
-				// MySQLParser.g:1:270: EXPONENT
+				// MySQLParser.g:1:271: EXPONENT
 				{
 				mEXPONENT(); 
 
 				}
 				break;
 			case 44 :
-				// MySQLParser.g:1:279: ID
+				// MySQLParser.g:1:280: ID
 				{
 				mID(); 
 
 				}
 				break;
 			case 45 :
-				// MySQLParser.g:1:282: PLUS
+				// MySQLParser.g:1:283: PLUS
 				{
 				mPLUS(); 
 
 				}
 				break;
 			case 46 :
-				// MySQLParser.g:1:287: NUMBER
+				// MySQLParser.g:1:288: NUMBER
 				{
 				mNUMBER(); 
 
 				}
 				break;
 			case 47 :
-				// MySQLParser.g:1:294: MINUS
+				// MySQLParser.g:1:295: MINUS
 				{
 				mMINUS(); 
 
 				}
 				break;
 			case 48 :
-				// MySQLParser.g:1:300: DOT
+				// MySQLParser.g:1:301: DOT
 				{
 				mDOT(); 
 
 				}
 				break;
 			case 49 :
-				// MySQLParser.g:1:304: COMMA
+				// MySQLParser.g:1:305: COMMA
 				{
 				mCOMMA(); 
 
 				}
 				break;
 			case 50 :
-				// MySQLParser.g:1:310: EQ
+				// MySQLParser.g:1:311: EQ
 				{
 				mEQ(); 
 
 				}
 				break;
 			case 51 :
-				// MySQLParser.g:1:313: DIVIDE
+				// MySQLParser.g:1:314: DIVIDE
 				{
 				mDIVIDE(); 
 
 				}
 				break;
 			case 52 :
-				// MySQLParser.g:1:320: ASTERISK
+				// MySQLParser.g:1:321: ASTERISK
 				{
 				mASTERISK(); 
 
 				}
 				break;
 			case 53 :
-				// MySQLParser.g:1:329: MOD
+				// MySQLParser.g:1:330: MOD
 				{
 				mMOD(); 
 
 				}
 				break;
 			case 54 :
-				// MySQLParser.g:1:333: ARROW
+				// MySQLParser.g:1:334: ARROW
 				{
 				mARROW(); 
 
 				}
 				break;
 			case 55 :
-				// MySQLParser.g:1:339: DOUBLEVERTBAR
+				// MySQLParser.g:1:340: DOUBLEVERTBAR
 				{
 				mDOUBLEVERTBAR(); 
 
 				}
 				break;
 			case 56 :
-				// MySQLParser.g:1:353: RPAREN
+				// MySQLParser.g:1:354: RPAREN
 				{
 				mRPAREN(); 
 
 				}
 				break;
 			case 57 :
-				// MySQLParser.g:1:360: LPAREN
+				// MySQLParser.g:1:361: LPAREN
 				{
 				mLPAREN(); 
 
 				}
 				break;
 			case 58 :
-				// MySQLParser.g:1:367: LTH
+				// MySQLParser.g:1:368: LTH
 				{
 				mLTH(); 
 
 				}
 				break;
 			case 59 :
-				// MySQLParser.g:1:371: NOT_EQ
+				// MySQLParser.g:1:372: NOT_EQ
 				{
 				mNOT_EQ(); 
 
 				}
 				break;
 			case 60 :
-				// MySQLParser.g:1:378: LEQ
+				// MySQLParser.g:1:379: LEQ
 				{
 				mLEQ(); 
 
 				}
 				break;
 			case 61 :
-				// MySQLParser.g:1:382: GEQ
+				// MySQLParser.g:1:383: GEQ
 				{
 				mGEQ(); 
 
 				}
 				break;
 			case 62 :
-				// MySQLParser.g:1:386: GTH
+				// MySQLParser.g:1:387: GTH
 				{
 				mGTH(); 
 
 				}
 				break;
 			case 63 :
-				// MySQLParser.g:1:390: QUOTED_STRING
+				// MySQLParser.g:1:391: QUOTED_STRING
 				{
 				mQUOTED_STRING(); 
 
 				}
 				break;
 			case 64 :
-				// MySQLParser.g:1:404: DOUBLEQUOTED_STRING
+				// MySQLParser.g:1:405: DOUBLEQUOTED_STRING
 				{
 				mDOUBLEQUOTED_STRING(); 
 
 				}
 				break;
 			case 65 :
-				// MySQLParser.g:1:424: WS
+				// MySQLParser.g:1:425: WS
 				{
 				mWS(); 
 
@@ -2611,7 +2612,7 @@ public class MySQLParserLexer extends Lexer {
 		}
 		@Override
 		public String getDescription() {
-			return "1:1: Tokens : ( T__76 | T__77 | T__78 | T__79 | T__80 | T__81 | T__82 | T__83 | T__84 | T__85 | T__86 | T__87 | T__88 | T__89 | T__90 | T__91 | T__92 | T__93 | T__94 | T__95 | T__96 | T__97 | T__98 | T__99 | T__100 | T__101 | T__102 | T__103 | T__104 | T__105 | T__106 | T__107 | T__108 | T__109 | T__110 | T__111 | T__112 | T__113 | T__114 | N | ASC | DESC | EXPONENT | ID | PLUS | NUMBER | MINUS | DOT | COMMA | EQ | DIVIDE | ASTERISK | MOD | ARROW | DOUBLEVERTBAR | RPAREN | LPAREN | LTH | NOT_EQ | LEQ | GEQ | GTH | QUOTED_STRING | DOUBLEQUOTED_STRING | WS );";
+			return "1:1: Tokens : ( T__77 | T__78 | T__79 | T__80 | T__81 | T__82 | T__83 | T__84 | T__85 | T__86 | T__87 | T__88 | T__89 | T__90 | T__91 | T__92 | T__93 | T__94 | T__95 | T__96 | T__97 | T__98 | T__99 | T__100 | T__101 | T__102 | T__103 | T__104 | T__105 | T__106 | T__107 | T__108 | T__109 | T__110 | T__111 | T__112 | T__113 | T__114 | T__115 | N | ASC | DESC | EXPONENT | ID | PLUS | NUMBER | MINUS | DOT | COMMA | EQ | DIVIDE | ASTERISK | MOD | ARROW | DOUBLEVERTBAR | RPAREN | LPAREN | LTH | NOT_EQ | LEQ | GEQ | GTH | QUOTED_STRING | DOUBLEQUOTED_STRING | WS );";
 		}
 	}
 

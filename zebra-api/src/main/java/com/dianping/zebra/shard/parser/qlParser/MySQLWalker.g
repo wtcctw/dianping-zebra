@@ -14,32 +14,37 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Stack;
 
-import static com.dianping.zebra.shard.parser.util.DbFunctions.*;
+import static com.dianping.zebra.shard.parser.util.DbFunctions.add;
+import static com.dianping.zebra.shard.parser.util.DbFunctions.column;
+import static com.dianping.zebra.shard.parser.util.DbFunctions.divide;
+import static com.dianping.zebra.shard.parser.util.DbFunctions.mod;
+import static com.dianping.zebra.shard.parser.util.DbFunctions.multiply;
+import static com.dianping.zebra.shard.parser.util.DbFunctions.subtract;
 
-import com.dianping.zebra.shard.parser.condition.ExpressionGroup;
-import com.dianping.zebra.shard.parser.condition.WhereCondition;
-import com.dianping.zebra.shard.parser.condition.BindIndexHolder;
-import com.dianping.zebra.shard.parser.condition.OrExpressionGroup;
 import com.dianping.zebra.shard.parser.condition.BetweenPair;
-
-import com.dianping.zebra.shard.parser.sqlParser.*;
+import com.dianping.zebra.shard.parser.condition.BindIndexHolder;
+import com.dianping.zebra.shard.parser.condition.ExpressionGroup;
+import com.dianping.zebra.shard.parser.condition.OrExpressionGroup;
+import com.dianping.zebra.shard.parser.condition.WhereCondition;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.parser.sqlParser.mySql.MyWhereCondition;
-import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Count;
+import com.dianping.zebra.shard.parser.sqlParser.Delete;
+import com.dianping.zebra.shard.parser.sqlParser.Insert;
+import com.dianping.zebra.shard.parser.sqlParser.Select;
+import com.dianping.zebra.shard.parser.sqlParser.Update;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Concat;
+import com.dianping.zebra.shard.parser.sqlParser.groupFunction.Count;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunction;
 import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunctionRegister;
-
-import com.dianping.zebra.shard.parser.sqlParser.mySql.MySelect;
 import com.dianping.zebra.shard.parser.sqlParser.mySql.MyDelete;
+import com.dianping.zebra.shard.parser.sqlParser.mySql.MySelect;
 import com.dianping.zebra.shard.parser.sqlParser.mySql.MyUpdate;
-
-import com.dianping.zebra.shard.parser.valueObject.ColumnObject;
-import com.dianping.zebra.shard.parser.valueObject.ValueObject;
-import com.dianping.zebra.shard.parser.valueObject.FunctionConvertor;
-
+import com.dianping.zebra.shard.parser.sqlParser.mySql.MyWhereCondition;
 import com.dianping.zebra.shard.parser.util.DbFunctions;
+import com.dianping.zebra.shard.parser.valueObject.ColumnObject;
+import com.dianping.zebra.shard.parser.valueObject.FunctionConvertor;
 }
 @members{
 		protected  GroupFunctionRegister groupFunc;
@@ -97,7 +102,7 @@ updateColumnSpec[Update update]
 
 insert_command returns[Insert ins]
 @init{$ins=new Insert();}
-	:^(INSERT tables[$ins, true] column_specs[$ins]* values[$ins])
+	:^(INSERT (IGNORE)? tables[$ins, true] column_specs[$ins]* values[$ins])
 	;
 values[Insert ins]	:^(INSERT_VAL (expr[$ins]{ins.addValue($expr.valueObj);})*)
 	;
