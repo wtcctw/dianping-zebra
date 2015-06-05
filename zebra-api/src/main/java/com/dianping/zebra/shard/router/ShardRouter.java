@@ -25,6 +25,8 @@ public interface ShardRouter {
 
     RouterResult router(String sql, List<Object> params) throws ShardRouterException;
     
+    boolean validate(String sql) throws SyntaxException,ShardRouterException;
+    
     RouterRule getRouterRule();
 
     void init();

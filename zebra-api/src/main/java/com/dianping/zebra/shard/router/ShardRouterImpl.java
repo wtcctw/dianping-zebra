@@ -28,6 +28,7 @@ import com.dianping.zebra.shard.parser.valueObject.variable.BindVar;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardMatchResult;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
+
 import org.antlr.runtime.RecognitionException;
 
 import java.io.IOException;
@@ -44,6 +45,30 @@ public class ShardRouterImpl implements ShardRouter {
 	private Map<String, DMLCommon> sqlParseCache = Collections.synchronizedMap(new LRUCache<String, DMLCommon>(1000));
 
 	private static final String SKIP_MAX_STUB = "?";
+
+	@Override
+	public boolean validate(String sql) throws SyntaxException, ShardRouterException {
+		DMLCommon dmlSql = null;
+
+		try {
+			dmlSql = parseSqlClause(sql);
+		} catch (Exception e) {
+			throw new SyntaxException(e.getCause().getMessage());
+		}
+
+		if (dmlSql != null) {
+			Set<String> relatedTables = dmlSql.getRelatedTables();
+			TableShardRule tableShardRule = getAppliedShardRule(relatedTables);
+
+			if (tableShardRule == null) {
+				throw new ShardRouterException("Cannot find any Shard Rule for table " + relatedTables);
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
+	}
 
 	@Override
 	public RouterResult router(String sql, List<Object> params) throws ShardRouterException {
@@ -64,7 +89,6 @@ public class ShardRouterImpl implements ShardRouter {
 				target.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
 				      tableShardRule.getTableName(), skip, max));
 				target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
-				target.setShardResult(matchResult);
 			} else {
 				throw new ShardRouterException("Cannot find any Shard Rule for table " + relatedTables);
 			}
@@ -86,8 +110,7 @@ public class ShardRouterImpl implements ShardRouter {
 		return parsedResult;
 	}
 
-	private RouterResult enrichRouterTarget(RouterResult target, DMLCommon dmlSql, String generatedPK, int skip,
-	      int max) {
+	private RouterResult enrichRouterTarget(RouterResult target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
 		target.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
 		target.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
 		target.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);

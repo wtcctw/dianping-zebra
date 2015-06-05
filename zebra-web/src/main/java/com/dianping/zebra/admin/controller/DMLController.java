@@ -5,11 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -27,13 +23,9 @@ import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
 import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 import com.dianping.zebra.shard.router.LionDataSourceRouterFactory;
-import com.dianping.zebra.shard.router.ShardRouterException;
-import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.shard.router.RouterTarget;
-import com.dianping.zebra.shard.router.rule.DimensionRule;
-import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.util.SqlType;
 import com.dianping.zebra.util.SqlUtils;
 
@@ -49,6 +41,17 @@ public class DMLController extends BasicController {
 	public Object analyze(@RequestBody DmlResultDto dto) {
 		DataSourceRouterFactory routerFactory = new LionDataSourceRouterFactory(dto.getRuleName());
 		ShardRouter router = routerFactory.getRouter();
+		router.init();
+		
+		try {
+			router.validate(dto.getSql());
+		} catch (Exception e) {
+			dto.setSuccess(false);
+			dto.setErrorMsg(e.getMessage());
+
+			return dto;
+		}
+		
 		RouterResult target = null;
 
 		try {
@@ -72,30 +75,7 @@ public class DMLController extends BasicController {
 		if (target.getTargetedSqls().size() > 1) {
 			isCrossDb = true;
 		}
-
-		RouterRule routerRule = router.getRouterRule();
-		try {
-			DMLCommon dml = DPMySQLParser.parse(dto.getSql()).obj;
-			Set<String> relatedTables = dml.getRelatedTables();
-			TableShardRule tableShardRule = getAppliedShardRule(routerRule, relatedTables);
-
-			if (tableShardRule != null) {
-				DimensionRule dimensionRule = tableShardRule.getDimensionRules().get(0);
-				for (Entry<String, Set<String>> shard : dimensionRule.getAllDBAndTables().entrySet()) {
-					totalTableCount += shard.getValue().size();
-				}
-			} else {
-				dto.setSuccess(false);
-				dto.setErrorMsg("Cannot found any sharding rule for this sql");
-
-				return dto;
-			}
-		} catch (Exception e) {
-			dto.setSuccess(false);
-			dto.setErrorMsg(e.getCause().getMessage());
-
-			return dto;
-		}
+		
 
 		if (targetSqlCount == totalTableCount) {
 			isFullTableScan = true;
@@ -104,7 +84,7 @@ public class DMLController extends BasicController {
 		dto.setTargetSQLCount(targetSqlCount);
 		dto.setCrossDb(isCrossDb);
 		dto.setFullTableScan(isFullTableScan);
-		dto.setPk(target.getShardResult().getBasedColumn());
+		dto.setPk(target.getGeneratedPK());
 
 		List<RouterTarget> targetedSqls = target.getTargetedSqls();
 
@@ -175,21 +155,5 @@ public class DMLController extends BasicController {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-	}
-
-	private TableShardRule getAppliedShardRule(RouterRule routerRule, Set<String> relatedTables)
-	      throws ShardRouterException {
-		Map<String, TableShardRule> shardRules = new HashMap<String, TableShardRule>(5);
-		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
-		for (String relatedTable : relatedTables) {
-			TableShardRule tableShardRule = tableShardRules.get(relatedTable);
-			if (tableShardRule != null) {
-				shardRules.put(relatedTable, tableShardRule);
-			}
-		}
-		if (shardRules.size() > 1) {
-			throw new ShardRouterException("Sql contains more than one shard-related table is not supported now.");
-		}
-		return !shardRules.isEmpty() ? shardRules.values().iterator().next() : null;
 	}
 }
