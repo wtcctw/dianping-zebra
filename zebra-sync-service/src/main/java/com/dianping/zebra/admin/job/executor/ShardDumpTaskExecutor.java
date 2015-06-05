@@ -42,9 +42,9 @@ public class ShardDumpTaskExecutor {
 
     private volatile int indexIncrease = 100000;
 
-    private volatile int MAX_SQL_SIZE = 30;
+    private volatile int MAX_SQL_SIZE = 20;
 
-    private volatile int MIN_SQL_SIZE = 20;
+    private volatile int MIN_SQL_SIZE = 10;
 
     private ShardDumpService shardDumpService;
 
@@ -106,11 +106,7 @@ public class ShardDumpTaskExecutor {
         createOutPutDir();
     }
 
-    public void destroy() {
-
-    }
-
-    protected synchronized void saveTask() {
+    protected void saveTask() {
         this.task.setStatus(getTaskState());
         shardDumpService.updateTaskStatus(this.task);
     }
@@ -185,6 +181,7 @@ public class ShardDumpTaskExecutor {
                     waitForLoadQueue.put(lastIndex);
                     this.lastIndex = nextIndex;
 
+                    saveTask();
                 } catch (InterruptedException e) {
                     dumpStatus = Status.STOPPED;
                     saveTask();
@@ -332,7 +329,9 @@ public class ShardDumpTaskExecutor {
                         }
                     }
                     cleanUp(index);
+
                     loadPersent = (int) (index * 100 / task.getMaxKey());
+                    saveTask();
                 } catch (InterruptedException e) {
                     loadStatus = Status.STOPPED;
                     saveTask();
