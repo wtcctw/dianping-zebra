@@ -1,3 +1,22 @@
+zebraWeb.config(function ($httpProvider, loginServiceProvider) {
+    $httpProvider.interceptors.push(function ($q) {
+        return {
+            'response': function (response) {
+                return response;
+            },
+            'responseError': function (rejection) {
+                if (rejection.status === 401) {
+                    loginServiceProvider.$get().login();
+                }
+                if (rejection.status === 500) {
+                    alert(rejection.data.message);
+                }
+                return $q.reject(rejection);
+            }
+        };
+    });
+});
+
 zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     $scope.load = function () {
         $http.get('/a/shard/migrate/dump/' + $scope.name).success(function (data, status, headers, config) {
@@ -24,8 +43,18 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
         $scope.newTask.targets.splice(index, 1);
     }
 
+    $scope.removeTask = function (index) {
+        $http.delete('/a/shard/migrate/dump/' + $scope.name + '/' + index).success(function (data, status, headers, config) {
+            $scope.dump = data;
+        });
+    }
+
     $scope.commitTask = function () {
-        
+        $http.post('/a/shard/migrate/dump/' + $scope.name, $scope.newTask).success(function (data, status, headers, config) {
+            alert("创建成功！");
+            $scope.dump = data;
+            $scope.newTask = {};
+        });
     }
 });
 
@@ -137,14 +166,10 @@ zebraWeb.controller('doc', function ($scope, $location) {
     };
 });
 
-zebraWeb.controller('monitor', function ($scope, $http, loginService) {
+zebraWeb.controller('monitor', function ($scope, $http) {
     $scope.load = function () {
         $http.get('/a/monitor/list').success(function (data, status, headers, config) {
             $scope.statusList = data;
-        }).error(function (data, status, headers, config) {
-            if (status == 401) {
-                loginService.login();
-            }
         });
 
         $http.get('/a/mha/allMarkedDown').success(function (data, status, headers, config) {
@@ -183,14 +208,10 @@ zebraWeb.controller('monitor', function ($scope, $http, loginService) {
     }
 });
 
-zebraWeb.controller('update', function ($scope, $http, loginService) {
+zebraWeb.controller('update', function ($scope, $http) {
     $http.get('/a/update/index').success(function (data, status, headers, config) {
         $scope.predicate = 'name';
         $scope.report = data;
-    }).error(function (data, status, headers, config) {
-        if (status == 401) {
-            loginService.login();
-        }
     });
 });
 
@@ -466,11 +487,7 @@ zebraWeb.controller('update-app', function ($scope, $stateParams, $http, $window
             if (!!data) {
                 $scope.load();
             }
-        }).error(function (data, status, headers, config) {
-            if (status == 401) {
-                loginService.login();
-            }
-        });
+        })
     }
 });
 

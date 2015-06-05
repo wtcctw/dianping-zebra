@@ -24,7 +24,7 @@ import com.dianping.zebra.admin.service.LionService;
 
 @Controller
 @RequestMapping(value = "/mha")
-public class MHAController {
+public class MHAController extends BasicController {
 
 	private static final String lionKey = "zebra.server.monitor.mha.markdown";
 

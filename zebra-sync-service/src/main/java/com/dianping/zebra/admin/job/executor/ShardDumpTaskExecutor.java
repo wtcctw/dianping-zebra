@@ -40,6 +40,12 @@ public class ShardDumpTaskExecutor {
 
     private static final Charset DEFAULT_CJARSET = Charset.forName("utf8");
 
+    private volatile int indexIncrease = 100000;
+
+    private volatile int MAX_SQL_SIZE = 30;
+
+    private volatile int MIN_SQL_SIZE = 20;
+
     private ShardDumpService shardDumpService;
 
     private static final Pattern BINLOG_PATTERN = Pattern
@@ -119,40 +125,30 @@ public class ShardDumpTaskExecutor {
         return String.format("%s%d-%d.dump.sql", dumpOutputDir, task.getShardRule().hashCode(), index);
     }
 
+    protected void adjustIndexIncrease() {
+        int count = 0;
+        double size = 0;
+
+        for (File file : FileUtils.listFiles(new File(dumpOutputDir), new String[] { "sql" }, false)) {
+            count++;
+            size += file.length() / 1024.0f / 1024.0f;//MB
+        }
+
+        if (count == 0) {
+            return;
+        }
+
+        if (size / count < MIN_SQL_SIZE || size / count > MAX_SQL_SIZE) {
+            indexIncrease = (int) (indexIncrease * (MAX_SQL_SIZE + MIN_SQL_SIZE) / 2 / (size / count));
+        }
+    }
+
     class DumpWorker implements Runnable {
         protected long lastIndex;
 
         public DumpWorker() {
             this.lastIndex = task.getIndexKey();
         }
-
-        //        protected boolean checkHasData(long index) {
-        //            FileInputStream reader = null;
-        //            boolean hasData = false;
-        //            File file = null;
-        //            try {
-        //                file = new File(getDumpFile(index));
-        //                if (file.length() >= 1024 * 8) {
-        //                    hasData = true;
-        //                    return hasData;
-        //                }
-        //                hasData = FileUtils.readFileToString(file).contains("INSERT");
-        //                return hasData;
-        //            } catch (IOException e) {
-        //                hasData = false;
-        //                return hasData;
-        //            } finally {
-        //                if (reader != null) {
-        //                    try {
-        //                        reader.close();
-        //                    } catch (IOException ignore) {
-        //                    }
-        //                }
-        //                if (!hasData && file != null) {
-        //                    file.delete();
-        //                }
-        //            }
-        //        }
 
         @Override
         public void run() {
@@ -202,7 +198,8 @@ public class ShardDumpTaskExecutor {
         }
 
         protected long increaseIndex() {
-            return this.lastIndex + task.getIndexIncrease();
+            adjustIndexIncrease();
+            return this.lastIndex + indexIncrease;
         }
 
         protected String mysqldump(long lastIndex, long nextIndex) throws IOException, InterruptedException {
@@ -257,9 +254,11 @@ public class ShardDumpTaskExecutor {
 
         protected void checkAndUpdateBinlogInfo(String binlog, long position) throws IOException {
             boolean needToSet = false;
+            boolean needUpdateMaxIndex = false;
 
             if (Strings.isNullOrEmpty(task.getBinlogFile())) {
                 needToSet = true;
+                needUpdateMaxIndex = true;
             } else {
                 int oldBinlogIndex = getBinlogIndex(task.getBinlogFile());
                 int newBinlogIndex = getBinlogIndex(binlog);
@@ -267,6 +266,15 @@ public class ShardDumpTaskExecutor {
                 if (newBinlogIndex < oldBinlogIndex || (newBinlogIndex == oldBinlogIndex && position < task
                     .getBinlogPos())) {
                     needToSet = true;
+                }
+            }
+
+            if (needUpdateMaxIndex) {
+                long maxIndex = shardDumpService
+                    .getMaxIndex(task.getSrcDbName(), task.getDataBase(), task.getTableName(),
+                        task.getIndexColumnName());
+                if (task.getMaxKey() < maxIndex) {
+                    task.setMaxKey(maxIndex);
                 }
             }
 

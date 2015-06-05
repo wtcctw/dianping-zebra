@@ -23,7 +23,7 @@ import com.dianping.zebra.admin.service.ReportService;
 
 @Controller
 @RequestMapping(value = "/update")
-public class UpdateController {
+public class UpdateController extends BasicController {
 
     @Autowired
     private ReportService reportService;

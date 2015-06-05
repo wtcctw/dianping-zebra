@@ -1,11 +1,13 @@
 package com.dianping.zebra.admin.controller;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.admin.dto.ShardDumpTaskDto;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
 import com.dianping.zebra.admin.entity.ShardMigrateProcessEntity;
 import com.dianping.zebra.admin.service.LionService;
 import com.dianping.zebra.admin.service.ShardDumpService;
 import com.dianping.zebra.admin.service.ShardMigrateProcessService;
+import com.dianping.zebra.admin.service.SyncServerMonitorService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.google.gson.Gson;
@@ -21,7 +23,7 @@ import java.util.Set;
 
 @Controller
 @RequestMapping(value = "/shard")
-public class ShardController {
+public class ShardController extends BasicController {
 
     @Autowired
     private LionService lionHttpService;
@@ -31,6 +33,9 @@ public class ShardController {
 
     @Autowired
     private ShardDumpService shardDumpService;
+
+    @Autowired
+    private SyncServerMonitorService syncServerMonitorService;
 
     private final Gson gson = new Gson();
 
@@ -55,7 +60,8 @@ public class ShardController {
             }
         }
 
-        return shardKeys;
+        throw new RuntimeException("xxxxxx111");
+//        return shardKeys;
     }
 
     @RequestMapping(value = "/{env}/config/{name}", method = RequestMethod.GET)
@@ -84,6 +90,34 @@ public class ShardController {
     @RequestMapping(value = "/migrate/dump/{name}", method = RequestMethod.GET)
     @ResponseBody
     public List<ShardDumpTaskEntity> migrateDumpStatus(@PathVariable String name) {
+        return shardDumpService.getTaskByName(name);
+    }
+
+    @RequestMapping(value = "/migrate/dump/{name}/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public List<ShardDumpTaskEntity> migrateDumpRemove(@PathVariable String name, @PathVariable int id)
+        throws Exception {
+        shardDumpService.removeTask(id);
+        return shardDumpService.getTaskByName(name);
+    }
+
+    @RequestMapping(value = "/migrate/dump/{name}", method = RequestMethod.POST)
+    @ResponseBody
+    public List<ShardDumpTaskEntity> migrateDumpCommit(@RequestBody ShardDumpTaskDto dto, @PathVariable String name) {
+        String keyName = shardDumpService.getPrimaryKey(dto.getSrcDbName(), dto.getDataBase(), dto.getTableName());
+        long maxId = shardDumpService.getMaxIndex(dto.getSrcDbName(), dto.getDataBase(), dto.getTableName(), keyName);
+
+        for (ShardDumpTaskEntity task : dto.getTargets()) {
+            task.setName(name);
+            task.setDataBase(dto.getDataBase());
+            task.setSrcDbName(dto.getSrcDbName());
+            task.setTableName(dto.getTableName());
+            task.setExecutor(syncServerMonitorService.chooseOne().getName());
+            task.setIndexColumnName(keyName);
+            task.setIndexKey(1);
+            task.setMaxKey(maxId);
+            shardDumpService.createTask(task);
+        }
         return shardDumpService.getTaskByName(name);
     }
 }

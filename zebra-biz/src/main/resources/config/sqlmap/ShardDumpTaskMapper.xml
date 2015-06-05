@@ -11,6 +11,10 @@
         SELECT * FROM ShardDumpTask WHERE Name = #{name}
     </select>
 
+    <delete id="remove" parameterType="map">
+        DELETE FROM ShardDumpTask WHERE Id = #{id}
+    </delete>
+
     <update id="updateStatus" parameterType="ShardDumpTaskEntity">
         Update ShardDumpTask SET
         BinlogFile = #{binlogFile},
@@ -19,4 +23,37 @@
         Status = #{status}
         WHERE ID = #{id}
     </update>
+
+    <insert id="create" parameterType="ShardDumpTaskEntity">
+        INSERT INTO `zebra`.`ShardDumpTask`
+        (
+        `Name`,
+        `SrcDbName`,
+        `DstDbName`,
+        `DataBase`,
+        `TargetDataBase`,
+        `TableName`,
+        `TargetTableName`,
+        `ShardRule`,
+        `IndexColumnName`,
+        `IndexKey`,
+        `MaxKey`,
+        `Executor`
+        )
+        VALUES
+        (
+        #{name},
+        #{srcDbName},
+        #{dstDbName},
+        #{dataBase},
+        #{targetDataBase},
+        #{tableName},
+        #{targetTableName},
+        #{shardRule},
+        #{indexColumnName},
+        #{indexKey},
+        #{maxKey},
+        #{executor}
+        )
+    </insert>
 </mapper>

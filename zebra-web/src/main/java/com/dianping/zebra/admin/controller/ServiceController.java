@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/service")
-public class ServiceController {
+public class ServiceController extends BasicController {
 	@Autowired
 	private DalConfigService m_dalConfigService;
 

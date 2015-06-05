@@ -39,7 +39,7 @@ import com.dianping.zebra.util.SqlUtils;
 
 @Controller
 @RequestMapping(value = "/dml")
-public class DMLController {
+public class DMLController extends BasicController {
 
 	@Autowired
 	private LionService lionService;

@@ -18,7 +18,6 @@ public class ShardDumpTaskExecutorImplMain {
     public static void main(String... args) throws InterruptedException {
         ShardDumpTaskEntity task = new ShardDumpTaskEntity();
 
-        task.setIndexIncrease(1000000);
         task.setDataBase("test");
         task.setTableName("user");
         task.setIndexColumnName("id");

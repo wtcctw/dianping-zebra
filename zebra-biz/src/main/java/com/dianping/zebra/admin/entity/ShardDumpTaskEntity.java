@@ -1,56 +1,46 @@
 package com.dianping.zebra.admin.entity;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class ShardDumpTaskEntity {
-    private int id;
+    private volatile int id;
 
     //binlog文件
-    private String binlogFile;
+    private volatile String binlogFile;
 
     //binlog位置
-    private long binlogPos;
+    private volatile long binlogPos;
 
     //状态
-    private String status;
+    private volatile String status;
 
     //执行的机器
-    private String executor;
+    private volatile String executor;
 
     //rule name
-    private String name;
+    private volatile String name;
 
-    private String srcDbName;
+    private volatile String srcDbName;
 
-    private String dstDbName;
+    private volatile String dstDbName;
 
-    private String dataBase;
+    private volatile String dataBase;
 
-    private String targetDataBase;
+    private volatile String targetDataBase;
 
-    private String tableName;
+    private volatile String tableName;
 
-    private String targetTableName;
+    private volatile String targetTableName;
 
-    private String shardRule;
+    private volatile String shardRule;
 
+    private volatile String indexColumnName;
 
+    private volatile long indexKey;
 
-    private String indexColumnName;
+    private volatile long maxKey;
 
-    private long indexKey;
+    private volatile ShardDumpDbEntity srcDbEntity;
 
-    //需要自动调整
-    private long indexIncrease = 1000000;
-
-    private long maxKey;
-
-
-
-    private ShardDumpDbEntity srcDbEntity;
-
-    private ShardDumpDbEntity dstDbEntity;
+    private volatile ShardDumpDbEntity dstDbEntity;
 
     public String getShardRule() {
         return shardRule;
@@ -130,14 +120,6 @@ public class ShardDumpTaskEntity {
 
     public void setTargetDataBase(String targetDataBase) {
         this.targetDataBase = targetDataBase;
-    }
-
-    public long getIndexIncrease() {
-        return indexIncrease;
-    }
-
-    public void setIndexIncrease(long indexIncrease) {
-        this.indexIncrease = indexIncrease;
     }
 
     public String getName() {

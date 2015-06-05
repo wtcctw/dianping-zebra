@@ -24,6 +24,7 @@
         <param-value>
             classpath:config/spring/common/appcontext-*.xml,
             classpath:config/spring/db/appcontext-*.xml,
+            classpath:config/spring/mapper/appcontext-*.xml,
             classpath:config/spring/appcontext-*.xml
         </param-value>
     </context-param>

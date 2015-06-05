@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/logout")
-public class LogoutController {
+public class LogoutController extends BasicController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
