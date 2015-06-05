@@ -1,11 +1,13 @@
 package com.dianping.zebra.admin.controller;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.admin.dto.ShardDumpTaskDto;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
 import com.dianping.zebra.admin.entity.ShardMigrateProcessEntity;
 import com.dianping.zebra.admin.service.LionService;
 import com.dianping.zebra.admin.service.ShardDumpService;
 import com.dianping.zebra.admin.service.ShardMigrateProcessService;
+import com.dianping.zebra.admin.service.SyncServerMonitorService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.google.gson.Gson;
@@ -31,6 +33,9 @@ public class ShardController {
 
     @Autowired
     private ShardDumpService shardDumpService;
+
+    @Autowired
+    private SyncServerMonitorService syncServerMonitorService;
 
     private final Gson gson = new Gson();
 
@@ -84,6 +89,27 @@ public class ShardController {
     @RequestMapping(value = "/migrate/dump/{name}", method = RequestMethod.GET)
     @ResponseBody
     public List<ShardDumpTaskEntity> migrateDumpStatus(@PathVariable String name) {
+        return shardDumpService.getTaskByName(name);
+    }
+
+    @RequestMapping(value = "/migrate/dump/{name}", method = RequestMethod.POST)
+    @ResponseBody
+    public List<ShardDumpTaskEntity> migrateDumpCommit(@RequestBody ShardDumpTaskDto dto, @PathVariable String name) {
+        String keyName = shardDumpService.getPrimaryKey(dto.getSrcDbName(), dto.getDataBase(), dto.getTableName());
+        long maxId = shardDumpService.getMaxIndex(dto.getSrcDbName(), dto.getDataBase(), dto.getTableName(), keyName);
+
+        for (ShardDumpTaskEntity task : dto.getTargets()) {
+            task.setName(name);
+            task.setDataBase(dto.getDataBase());
+            task.setSrcDbName(dto.getSrcDbName());
+            task.setTableName(dto.getTableName());
+            task.setExecutor(syncServerMonitorService.chooseOne().getName());
+            task.setIndexColumnName(keyName);
+            task.setIndexKey(1);
+            task.setIndexIncrease(1000000);
+            task.setMaxKey(maxId);
+            shardDumpService.createTask(task);
+        }
         return shardDumpService.getTaskByName(name);
     }
 }

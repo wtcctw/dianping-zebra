@@ -16,4 +16,6 @@ public interface ShardDumpTaskMapper {
     List<ShardDumpTaskEntity> getByName(@Param("name") String name);
 
     void updateStatus(ShardDumpTaskEntity entity);
+
+    void create(ShardDumpTaskEntity entity);
 }

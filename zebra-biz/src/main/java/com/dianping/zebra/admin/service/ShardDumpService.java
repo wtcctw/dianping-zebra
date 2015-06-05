@@ -13,6 +13,12 @@ import java.util.List;
 public interface ShardDumpService {
     void updateTaskStatus(ShardDumpTaskEntity entity);
 
+    void createTask(ShardDumpTaskEntity entity);
+
+    String getPrimaryKey(String instance, String db, String table);
+
+    long getMaxIndex(String instance, String db, String table, String key);
+
     List<ShardDumpTaskEntity> getTaskByIp(String ip);
 
     List<ShardDumpTaskEntity> getTaskByName(String name);

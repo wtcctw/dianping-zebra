@@ -25,7 +25,11 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     }
 
     $scope.commitTask = function () {
-        
+        $http.post('/a/shard/migrate/dump/' + $scope.name, $scope.newTask).success(function (data, status, headers, config) {
+            alert("创建成功！");
+            $scope.dump = data;
+            $scope.newTask = {};
+        });
     }
 });
 

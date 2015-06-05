@@ -19,4 +19,39 @@
         Status = #{status}
         WHERE ID = #{id}
     </update>
+
+    <insert id="create" parameterType="ShardDumpTaskEntity">
+        INSERT INTO `zebra`.`ShardDumpTask`
+        (
+        `Name`,
+        `SrcDbName`,
+        `DstDbName`,
+        `DataBase`,
+        `TargetDataBase`,
+        `TableName`,
+        `TargetTableName`,
+        `ShardRule`,
+        `IndexColumnName`,
+        `IndexKey`,
+        `IndexIncrease`,
+        `MaxKey`,
+        `Executor`
+        )
+        VALUES
+        (
+        #{name},
+        #{srcDbName},
+        #{dstDbName},
+        #{dataBase},
+        #{targetDataBase},
+        #{tableName},
+        #{targetTableName},
+        #{shardRule},
+        #{indexColumnName},
+        #{indexKey},
+        #{indexIncrease},
+        #{maxKey},
+        #{executor}
+        )
+    </insert>
 </mapper>
