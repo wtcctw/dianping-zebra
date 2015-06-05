@@ -49,8 +49,8 @@
 	   		<tbody>
 	   			<tr ng-repeat="item in data | toArray">
 	   				<td>
-   						<div popover-trigger="mouseenter" popover="{{(item.sqlName && item.sqlName.length>20)?item.sqlName:''}}">
-   							{{(item.sqlName && item.sqlName.length>20)?item.sqlName.substring(0,20-3) + '...':item.sqlName }}
+   						<div popover-trigger="mouseenter" popover="{{(item.sqlName && item.sqlName.length>40)?item.sqlName:''}}">
+   							{{(item.sqlName && item.sqlName.length>40)?item.sqlName.substring(0,40-3) + '...':item.sqlName }}
    						</div>
                     </td>
                     <td>
