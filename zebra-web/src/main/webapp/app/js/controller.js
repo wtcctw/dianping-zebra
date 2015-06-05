@@ -54,9 +54,11 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     }
 
     $scope.removeTask = function (index) {
-        $http.delete('/a/shard/migrate/dump/' + $scope.name + '/' + index).success(function (data, status, headers, config) {
-            $scope.dump = data;
-        });
+        if (confirm('确认删除？')) {
+            $http.delete('/a/shard/migrate/dump/' + $scope.name + '/' + index).success(function (data, status, headers, config) {
+                $scope.dump = data;
+            });
+        }
     }
 
     $scope.commitTask = function () {
