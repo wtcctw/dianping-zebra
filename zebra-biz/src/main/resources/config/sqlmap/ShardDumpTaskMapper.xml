@@ -33,7 +33,6 @@
         `ShardRule`,
         `IndexColumnName`,
         `IndexKey`,
-        `IndexIncrease`,
         `MaxKey`,
         `Executor`
         )
@@ -49,7 +48,6 @@
         #{shardRule},
         #{indexColumnName},
         #{indexKey},
-        #{indexIncrease},
         #{maxKey},
         #{executor}
         )

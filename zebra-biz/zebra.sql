@@ -53,7 +53,6 @@ CREATE TABLE `ShardDumpTask` (
   `ShardRule` varchar(45) NOT NULL,
   `IndexColumnName` varchar(45) NOT NULL,
   `IndexKey` BIGINT(64) NOT NULL,
-  `IndexIncrease` BIGINT(64) NOT NULL,
   `MaxKey` BIGINT(64) NOT NULL,
   `BinlogFile` VARCHAR(45) NULL,
   `BinlogPos` BIGINT(64) NOT NULL DEFAULT 0,

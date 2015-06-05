@@ -106,7 +106,6 @@ public class ShardController {
             task.setExecutor(syncServerMonitorService.chooseOne().getName());
             task.setIndexColumnName(keyName);
             task.setIndexKey(1);
-            task.setIndexIncrease(1000000);
             task.setMaxKey(maxId);
             shardDumpService.createTask(task);
         }
