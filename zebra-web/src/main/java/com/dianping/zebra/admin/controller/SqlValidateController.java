@@ -18,11 +18,6 @@ import com.dianping.zebra.admin.service.CatSQLDataCrawler.DatabaseSql;
 import com.dianping.zebra.admin.service.CatSQLDataCrawler.SqlEntity;
 import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.router.DataSourceRouterFactory;
-import com.dianping.zebra.shard.router.LionDataSourceRouterFactory;
-import com.dianping.zebra.shard.router.ShardRouter;
-import com.dianping.zebra.shard.router.ShardRouterException;
-import com.dianping.zebra.shard.router.SyntaxException;
 
 @Controller
 @RequestMapping(value = "/validate")
@@ -33,14 +28,9 @@ public class SqlValidateController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public Object validate(String database, String table, String ruleName) {
+	public Object validate(String database, String table) {
 		// crawler data from cat
 		DatabaseSql databaseSql = catSqlDataCrawler.crawler(database);
-
-		// init router
-		DataSourceRouterFactory routerFactory = new LionDataSourceRouterFactory(ruleName);
-		ShardRouter router = routerFactory.getRouter();
-		router.init();
 
 		List<SQLValidateDto> results = new ArrayList<SQLValidateDto>();
 
@@ -50,35 +40,28 @@ public class SqlValidateController {
 			SQLValidateDto dto = new SQLValidateDto();
 
 			String sql = sqlEntity.getSql();
-			
-			if(sql != null && (sql.equalsIgnoreCase("null") || sql.equalsIgnoreCase("batched"))){
+
+			if (sql != null && (sql.equalsIgnoreCase("null") || sql.equalsIgnoreCase("batched"))) {
 				continue;
-			}
-
-			try {
-				DMLCommon parsedResult = DPMySQLParser.parse(sql).obj;
-
-				if (!parsedResult.getRelatedTables().contains(table)) {
-					continue;
-				}
-			} catch (Exception ignore) {
-			}
-
-			try {
-				router.validate(sql);
-			} catch (ShardRouterException e) {
-				dto.setShardSupported(false);
-				dto.setErrorMsg(e.getMessage());
-			} catch (SyntaxException e) {
-				dto.setSyntaxSupported(false);
-				dto.setErrorMsg(e.getMessage());
 			}
 
 			dto.setApp(sqlEntity.getDomain());
 			dto.setSqlName(sqlName);
 			dto.setSql(sql);
 
-			results.add(dto);
+			DMLCommon parsedResult = null;
+			try {
+				parsedResult = DPMySQLParser.parse(sql).obj;
+			} catch (Exception e) {
+				dto.setSyntaxSupported(false);
+				dto.setErrorMsg(e.getMessage());
+			}
+
+			if (parsedResult != null && parsedResult.getRelatedTables().contains(table)) {
+				results.add(dto);
+			}else if(parsedResult == null){
+				results.add(dto);
+			}
 		}
 
 		return results;

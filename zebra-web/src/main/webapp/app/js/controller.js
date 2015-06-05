@@ -106,17 +106,23 @@ zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
 
 zebraWeb.controller('validate', function ($scope, $http) {
     $scope.load = function () {
-        $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
-            $scope.shardRules = data;
-        });
-
         $http.get('/a/validate/dbs').success(function (data, status, headers, config) {
             $scope.databases = data;
         });
     }
 	
 	$scope.analyze = function () {
-		$http.get("/a/validate?database=" + $scope.db + "&table=" + $scope.table + "&ruleName=" + $scope.shardRule).success(function (data, status, headers, config) {
+		if (!$scope.db) {
+            alert("请选择数据库");
+            return;
+        }
+
+        if (!$scope.table) {
+            alert("请选择表");
+            return;
+        }
+		
+		$http.get("/a/validate?database=" + $scope.db + "&table=" + $scope.table).success(function (data, status, headers, config) {
 			$scope.data = data;
 		});
 	}
