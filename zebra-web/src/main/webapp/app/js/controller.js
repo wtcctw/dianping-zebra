@@ -92,6 +92,19 @@ zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
     }
 });
 
+zebraWeb.controller('validate', function ($scope, $http) {
+	$scope.load = function () {
+        $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
+            $scope.shardRules = data;
+        });
+        
+        $http.get('/a/validate/dbs').success(function (data, status, headers, config) {
+            $scope.databases = data;
+        });
+    }
+	
+	$scope.load();
+});
 
 zebraWeb.controller('dml', function ($scope, $http) {
     $scope.load = function () {

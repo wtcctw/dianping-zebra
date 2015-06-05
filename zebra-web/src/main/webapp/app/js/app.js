@@ -119,5 +119,9 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/shard-migrate',
         templateUrl: 'app/template/shard-migrate.html',
         controller: 'shard-migrate'
+    }).state('validate', {
+        url: '/validate',
+        templateUrl: 'app/template/validate.html',
+        controller: 'validate'
     });
 });

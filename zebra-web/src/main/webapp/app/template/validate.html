@@ -10,29 +10,24 @@
 <div class="row">
 	<div class="col-xs-12">
     	 <form class="form-horizontal" role="form">
+    	    <div class="form-group">
+		        <label class="col-sm-3 control-label">选择数据库</label>
+		        <div class="col-sm-9">
+			        <select class="col-xs-10 col-sm-5" ng-model="databases" ng-options="db for db in databases"></select>
+		        </div>
+			</div>
     	 	<div class="form-group">
 		        <label class="col-sm-3 control-label">选择规则</label>
 		        <div class="col-sm-9">
 			        <select class="col-xs-10 col-sm-5" ng-model="shardRule" ng-options="rule for rule in shardRules"></select>
 		        </div>
 			</div>
-			<div class="form-group">
-			   	<label class="col-sm-3 control-label">输入SQL语句</label>
-		        <div class="col-sm-9">
-				    <textarea class="col-xs-10 col-sm-10" placeholder="SQL"  ng-model="shardSql"></textarea>
-		        </div>
-			</div>
 			
 			<div class="clearfix form-actions">
 				<div class="col-md-offset-3 col-md-9">
 				    <button ng-disabled="isDisabled" class="btn btn-info" type="button" ng-click="analyze()">
-				    	<i class="ace-icon fa fa-check bigger-110"></i>执行
+				    	<i class="ace-icon fa fa-check bigger-110"></i>分析
 				    </button>
-				    &nbsp;&nbsp;&nbsp;
-				    <button ng-disabled="isDisabled" class="btn btn-info" type="button" ng-click="analyzeSample()">
-						<i class="ace-icon fa fa-check bigger-110"></i>
-						执行样例
-					</button>
 				</div>
 			</div>
 	    </form>

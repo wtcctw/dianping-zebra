@@ -22,7 +22,7 @@ import com.dianping.zebra.shard.router.SyntaxException;
 
 @Controller
 @RequestMapping(value = "/validate")
-public class SqlValidateController {
+public class SqlValidateController extends BasicController {
 
 	@Autowired
 	private CatSQLDataCrawler catSqlDataCrawler;
