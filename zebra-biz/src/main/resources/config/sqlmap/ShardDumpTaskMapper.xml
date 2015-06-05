@@ -11,6 +11,10 @@
         SELECT * FROM ShardDumpTask WHERE Name = #{name}
     </select>
 
+    <delete id="remove" parameterType="map">
+        DELETE FROM ShardDumpTask WHERE Id = #{id}
+    </delete>
+
     <update id="updateStatus" parameterType="ShardDumpTaskEntity">
         Update ShardDumpTask SET
         BinlogFile = #{binlogFile},

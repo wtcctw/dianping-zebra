@@ -41,6 +41,11 @@ public class ShardDumpServiceImpl implements ShardDumpService {
     }
 
     @Override
+    public void removeTask(int id) {
+        shardDumpTaskMapper.remove(id);
+    }
+
+    @Override
     public String getPrimaryKey(String instance, String db, String table) {
         JdbcTemplate template = getJdbcTemplate(instance, db);
         return template.query("SELECT * FROM " + table + " limit 1", new ResultSetExtractor<String>() {

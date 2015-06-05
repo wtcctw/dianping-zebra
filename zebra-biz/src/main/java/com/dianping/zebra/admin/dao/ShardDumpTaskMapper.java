@@ -18,4 +18,6 @@ public interface ShardDumpTaskMapper {
     void updateStatus(ShardDumpTaskEntity entity);
 
     void create(ShardDumpTaskEntity entity);
+
+    void remove(@Param("id") int id);
 }

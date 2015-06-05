@@ -92,6 +92,13 @@ public class ShardController {
         return shardDumpService.getTaskByName(name);
     }
 
+    @RequestMapping(value = "/migrate/dump/{name}/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public List<ShardDumpTaskEntity> migrateDumpRemove(@PathVariable String name, @PathVariable int id) {
+        shardDumpService.removeTask(id);
+        return shardDumpService.getTaskByName(name);
+    }
+
     @RequestMapping(value = "/migrate/dump/{name}", method = RequestMethod.POST)
     @ResponseBody
     public List<ShardDumpTaskEntity> migrateDumpCommit(@RequestBody ShardDumpTaskDto dto, @PathVariable String name) {

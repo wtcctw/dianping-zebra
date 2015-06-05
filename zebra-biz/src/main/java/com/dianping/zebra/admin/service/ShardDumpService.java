@@ -15,6 +15,8 @@ public interface ShardDumpService {
 
     void createTask(ShardDumpTaskEntity entity);
 
+    void removeTask(int id);
+
     String getPrimaryKey(String instance, String db, String table);
 
     long getMaxIndex(String instance, String db, String table, String key);

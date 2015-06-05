@@ -24,6 +24,12 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
         $scope.newTask.targets.splice(index, 1);
     }
 
+    $scope.removeTask = function (index) {
+        $http.delete('/a/shard/migrate/dump/' + $scope.name + '/' + index).success(function (data, status, headers, config) {
+            $scope.dump = data;
+        });
+    }
+
     $scope.commitTask = function () {
         $http.post('/a/shard/migrate/dump/' + $scope.name, $scope.newTask).success(function (data, status, headers, config) {
             alert("创建成功！");
