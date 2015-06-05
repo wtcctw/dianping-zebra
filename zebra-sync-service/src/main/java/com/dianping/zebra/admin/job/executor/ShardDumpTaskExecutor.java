@@ -187,12 +187,14 @@ public class ShardDumpTaskExecutor {
 
                 } catch (InterruptedException e) {
                     dumpStatus = Status.STOPPED;
+                    saveTask();
                     break;
                 } catch (Exception e) {
                     String msg = "Dump Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
                     dumpStatus = Status.FAILED;
+                    saveTask();
                     break;
                 }
             }
@@ -333,12 +335,14 @@ public class ShardDumpTaskExecutor {
                     loadPersent = (int) (index * 100 / task.getMaxKey());
                 } catch (InterruptedException e) {
                     loadStatus = Status.STOPPED;
+                    saveTask();
                     break;
                 } catch (Exception e) {
                     String msg = "Load Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
                     loadStatus = Status.FAILED;
+                    saveTask();
                     break;
                 }
             }
