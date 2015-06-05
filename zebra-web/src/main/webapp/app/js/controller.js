@@ -20,8 +20,10 @@ zebraWeb.config(function ($httpProvider, loginServiceProvider, alertServiceProvi
 
 zebraWeb.controller('alert', function ($rootScope, $scope) {
     setInterval(function () {
-        $rootScope.alertList.shift();
-        $rootScope.$apply();
+        if ($rootScope.alertList) {
+            $rootScope.alertList.shift();
+            $rootScope.$apply();
+        }
     }, 4000);
 });
 
@@ -52,16 +54,18 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     }
 
     $scope.removeTask = function (index) {
-        $http.delete('/a/shard/migrate/dump/' + $scope.name + '/' + index).success(function (data, status, headers, config) {
-            $scope.dump = data;
-        });
+        if (confirm('确认删除？')) {
+            $http.delete('/a/shard/migrate/dump/' + $scope.name + '/' + index).success(function (data, status, headers, config) {
+                $scope.dump = data;
+            });
+        }
     }
 
     $scope.commitTask = function () {
         $http.post('/a/shard/migrate/dump/' + $scope.name, $scope.newTask).success(function (data, status, headers, config) {
             alert("创建成功！");
             $scope.dump = data;
-            $scope.newTask = {};
+            $scope.newTask.targets = [];
         });
     }
 });
@@ -101,11 +105,11 @@ zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
 });
 
 zebraWeb.controller('validate', function ($scope, $http) {
-	$scope.load = function () {
+    $scope.load = function () {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.shardRules = data;
         });
-        
+
         $http.get('/a/validate/dbs').success(function (data, status, headers, config) {
             $scope.databases = data;
         });

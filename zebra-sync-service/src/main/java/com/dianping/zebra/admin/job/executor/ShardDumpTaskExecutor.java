@@ -42,9 +42,9 @@ public class ShardDumpTaskExecutor {
 
     private volatile int indexIncrease = 100000;
 
-    private volatile int MAX_SQL_SIZE = 30;
+    private volatile int MAX_SQL_SIZE = 20;
 
-    private volatile int MIN_SQL_SIZE = 20;
+    private volatile int MIN_SQL_SIZE = 10;
 
     private ShardDumpService shardDumpService;
 
@@ -84,6 +84,9 @@ public class ShardDumpTaskExecutor {
         this.dumpOutputDir = "/tmp/" + task.getId() + "/";
         this.srcDBInstance = task.getSrcDbEntity();
         this.dstDBInstance = task.getDstDbEntity();
+
+        this.dumpWorker = new Thread(new DumpWorker());
+        this.loadWorker = new Thread(new LoadWorker());
     }
 
     public boolean isFinish() {
@@ -100,16 +103,10 @@ public class ShardDumpTaskExecutor {
             return;
         }
 
-        this.dumpWorker = new Thread(new DumpWorker());
-        this.loadWorker = new Thread(new LoadWorker());
         createOutPutDir();
     }
 
-    public void destroy() {
-
-    }
-
-    protected synchronized void saveTask() {
+    protected void saveTask() {
         this.task.setStatus(getTaskState());
         shardDumpService.updateTaskStatus(this.task);
     }
@@ -184,14 +181,17 @@ public class ShardDumpTaskExecutor {
                     waitForLoadQueue.put(lastIndex);
                     this.lastIndex = nextIndex;
 
+                    saveTask();
                 } catch (InterruptedException e) {
                     dumpStatus = Status.STOPPED;
+                    saveTask();
                     break;
                 } catch (Exception e) {
                     String msg = "Dump Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
                     dumpStatus = Status.FAILED;
+                    saveTask();
                     break;
                 }
             }
@@ -329,15 +329,19 @@ public class ShardDumpTaskExecutor {
                         }
                     }
                     cleanUp(index);
+
                     loadPersent = (int) (index * 100 / task.getMaxKey());
+                    saveTask();
                 } catch (InterruptedException e) {
                     loadStatus = Status.STOPPED;
+                    saveTask();
                     break;
                 } catch (Exception e) {
                     String msg = "Load Failed!";
                     logger.error(msg, e);
                     Cat.logError(msg, e);
                     loadStatus = Status.FAILED;
+                    saveTask();
                     break;
                 }
             }
@@ -398,7 +402,7 @@ public class ShardDumpTaskExecutor {
         dumpWorker.interrupt();
         loadWorker.interrupt();
 
-        while (!dumpWorker.isInterrupted() || loadWorker.isInterrupted()) {
+        while (dumpWorker.isAlive() || loadWorker.isAlive()) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
