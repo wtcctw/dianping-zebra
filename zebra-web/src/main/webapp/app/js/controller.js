@@ -1,4 +1,4 @@
-zebraWeb.config(function ($httpProvider, loginServiceProvider) {
+zebraWeb.config(function ($httpProvider, loginServiceProvider, alertServiceProvider) {
     $httpProvider.interceptors.push(function ($q) {
         return {
             'response': function (response) {
@@ -9,12 +9,20 @@ zebraWeb.config(function ($httpProvider, loginServiceProvider) {
                     loginServiceProvider.$get().login();
                 }
                 if (rejection.status === 500) {
-                    alert(rejection.data.message);
+                    alertServiceProvider.$get().addException(rejection.data.message);
                 }
                 return $q.reject(rejection);
             }
         };
     });
+});
+
+
+zebraWeb.controller('alert', function ($rootScope, $scope) {
+    setInterval(function () {
+        $rootScope.alertList.shift();
+        $rootScope.$apply();
+    }, 4000);
 });
 
 zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
