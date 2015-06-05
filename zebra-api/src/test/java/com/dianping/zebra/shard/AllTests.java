@@ -2,6 +2,7 @@ package com.dianping.zebra.shard;
 
 import com.dianping.zebra.shard.config.XmlDataSourceRouterConfigLoaderTest;
 import com.dianping.zebra.shard.jdbc.*;
+import com.dianping.zebra.shard.parser.InsertTest;
 import com.dianping.zebra.shard.parser.SelectTest;
 import com.dianping.zebra.shard.router.DataSourceRouterImplTest;
 import com.dianping.zebra.shard.router.rule.GroovyRuleEngineTest;
@@ -32,6 +33,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
         //parser
         SelectTest.class,
+        InsertTest.class,
 
         //router
         DataSourceRouterImplTest.class,

@@ -53,7 +53,7 @@ public class ShardRouterImpl implements ShardRouter {
 		try {
 			dmlSql = parseSqlClause(sql);
 		} catch (Exception e) {
-			throw new SyntaxException(e.getCause().getMessage());
+			throw new SyntaxException(e);
 		}
 
 		if (dmlSql != null) {

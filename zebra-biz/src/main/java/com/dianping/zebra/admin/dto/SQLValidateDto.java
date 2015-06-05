@@ -7,7 +7,7 @@ public class SQLValidateDto {
 	private String sqlName;
 
 	private String sql;
-
+	
 	private boolean isSyntaxSupported = true;
 
 	private boolean isShardSupported = true;

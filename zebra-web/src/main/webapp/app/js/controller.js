@@ -111,6 +111,20 @@ zebraWeb.controller('validate', function ($scope, $http) {
         });
     }
 	
+	$scope.analyze = function () {
+		$http.get("/a/validate?database=" + $scope.db + "&table=" + $scope.table + "&ruleName=" + $scope.shardRule).success(function (data, status, headers, config) {
+			$scope.data = data;
+		});
+	}
+	
+	$scope.loadTable = function (){
+		$http.get("/a/validate/tables?database=" + $scope.db).success(function (data, status, headers, config) {
+			$scope.tables = data;
+		});
+	}
+	
+    $scope.$watch('db', $scope.loadTable);
+
 	$scope.load();
 });
 

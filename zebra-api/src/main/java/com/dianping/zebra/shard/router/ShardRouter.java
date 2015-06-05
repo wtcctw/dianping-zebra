@@ -23,11 +23,12 @@ import com.dianping.zebra.shard.router.rule.RouterRule;
  */
 public interface ShardRouter {
 
-    RouterResult router(String sql, List<Object> params) throws ShardRouterException;
-    
-    boolean validate(String sql) throws SyntaxException,ShardRouterException;
-    
-    RouterRule getRouterRule();
+	RouterResult router(String sql, List<Object> params) throws ShardRouterException;
 
-    void init();
+	// 如果语法错误，则抛出SyntaxException;如果不符合路由策略，则抛出ShardRouterException
+	boolean validate(String sql) throws SyntaxException, ShardRouterException;
+
+	RouterRule getRouterRule();
+
+	void init();
 }
