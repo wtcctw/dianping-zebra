@@ -20,8 +20,10 @@ zebraWeb.config(function ($httpProvider, loginServiceProvider, alertServiceProvi
 
 zebraWeb.controller('alert', function ($rootScope, $scope) {
     setInterval(function () {
-        $rootScope.alertList.shift();
-        $rootScope.$apply();
+        if ($rootScope.alertList) {
+            $rootScope.alertList.shift();
+            $rootScope.$apply();
+        }
     }, 4000);
 });
 
@@ -101,17 +103,17 @@ zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
 });
 
 zebraWeb.controller('validate', function ($scope, $http) {
-	$scope.load = function () {
+    $scope.load = function () {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.shardRules = data;
         });
-        
+
         $http.get('/a/validate/dbs').success(function (data, status, headers, config) {
             $scope.databases = data;
         });
     }
-	
-	$scope.load();
+
+    $scope.load();
 });
 
 zebraWeb.controller('dml', function ($scope, $http) {
