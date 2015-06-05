@@ -1,16 +1,16 @@
-zebraWeb.service('shardService', function($modal) {
-    this.openEditModal = function(name, onClose) {
+zebraWeb.service('shardService', function ($modal) {
+    this.openEditModal = function (name, onClose) {
         var modal = $modal.open({
             templateUrl: 'app/template/shard-edit.html',
             controller: 'shard-edit',
             size: 'lg',
             backdrop: false,
             resolve: {
-                name: function() {
+                name: function () {
                     return name;
                 },
-                close: function() {
-                    return function() {
+                close: function () {
+                    return function () {
                         if (modal) {
                             modal.close();
                         }
@@ -24,35 +24,35 @@ zebraWeb.service('shardService', function($modal) {
     };
 });
 
-zebraWeb.service('configService', function($modal) {
-    this.openTestModal = function(name, configs) {
+zebraWeb.service('configService', function ($modal) {
+    this.openTestModal = function (name, configs) {
         $modal.open({
             templateUrl: 'app/template/config-test.html',
             controller: 'config-test',
             size: 'lg',
             resolve: {
-                name: function() {
+                name: function () {
                     return name;
                 },
-                configs: function() {
+                configs: function () {
                     return configs;
                 }
             }
         });
     };
 
-    this.openEditModal = function(name, onClose) {
+    this.openEditModal = function (name, onClose) {
         var modal = $modal.open({
             templateUrl: 'app/template/config-edit.html',
             controller: 'config-edit',
             size: 'lg',
             backdrop: false,
             resolve: {
-                name: function() {
+                name: function () {
                     return name;
                 },
-                close: function() {
-                    return function() {
+                close: function () {
+                    return function () {
                         if (modal) {
                             modal.close();
                         }
@@ -65,18 +65,18 @@ zebraWeb.service('configService', function($modal) {
         });
     };
 
-    this.openMergeModal = function(name, onClose) {
+    this.openMergeModal = function (name, onClose) {
         var modal = $modal.open({
             templateUrl: 'app/template/merge-edit.html',
             controller: 'merge-edit',
             size: 'lg',
             backdrop: false,
             resolve: {
-                name: function() {
+                name: function () {
                     return name;
                 },
-                close: function() {
-                    return function() {
+                close: function () {
+                    return function () {
                         if (modal) {
                             modal.close();
                         }
@@ -90,9 +90,21 @@ zebraWeb.service('configService', function($modal) {
     };
 });
 
+zebraWeb.service('alertService', function ($rootScope) {
+    this.addException = function (msg) {
+        if (!$rootScope.alertList) {
+            $rootScope.alertList = [];
+        }
 
-zebraWeb.service('loginService', function($modal, $rootScope, $http) {
-    this.login = function() {
+        $rootScope.alertList.push({
+            "msg": msg,
+            "className": "alert-danger"
+        });
+    };
+});
+
+zebraWeb.service('loginService', function ($modal, $rootScope, $http) {
+    this.login = function () {
         if ($rootScope.isLogin) {
             return;
         }
@@ -102,20 +114,20 @@ zebraWeb.service('loginService', function($modal, $rootScope, $http) {
             controller: 'login'
         });
     };
-    
-    this.logout = function() {
+
+    this.logout = function () {
         if ($rootScope.isLogin == false) {
             return;
         }
 
         $http.get('/a/logout').success(function (data) {
-     		$rootScope.isLogin = false;
-     	});
+            $rootScope.isLogin = false;
+        });
     };
-    
-    this.isLogin = function() {
-    	$http.get('/a/login').success(function (data) {
-     		$rootScope.isLogin = data;
-     	});
+
+    this.isLogin = function () {
+        $http.get('/a/login').success(function (data) {
+            $rootScope.isLogin = data;
+        });
     }
 });

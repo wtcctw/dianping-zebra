@@ -60,8 +60,7 @@ public class ShardController extends BasicController {
             }
         }
 
-        throw new RuntimeException("xxxxxx111");
-//        return shardKeys;
+        return shardKeys;
     }
 
     @RequestMapping(value = "/{env}/config/{name}", method = RequestMethod.GET)
