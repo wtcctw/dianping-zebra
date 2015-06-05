@@ -84,6 +84,9 @@ public class ShardDumpTaskExecutor {
         this.dumpOutputDir = "/tmp/" + task.getId() + "/";
         this.srcDBInstance = task.getSrcDbEntity();
         this.dstDBInstance = task.getDstDbEntity();
+
+        this.dumpWorker = new Thread(new DumpWorker());
+        this.loadWorker = new Thread(new LoadWorker());
     }
 
     public boolean isFinish() {
@@ -100,8 +103,6 @@ public class ShardDumpTaskExecutor {
             return;
         }
 
-        this.dumpWorker = new Thread(new DumpWorker());
-        this.loadWorker = new Thread(new LoadWorker());
         createOutPutDir();
     }
 
@@ -398,7 +399,7 @@ public class ShardDumpTaskExecutor {
         dumpWorker.interrupt();
         loadWorker.interrupt();
 
-        while (!dumpWorker.isInterrupted() || loadWorker.isInterrupted()) {
+        while (dumpWorker.isAlive() || loadWorker.isAlive()) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
