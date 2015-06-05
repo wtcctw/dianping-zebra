@@ -115,7 +115,7 @@ public class ShardDataSource extends AbstractDataSource {
 			}
 
 			if (routerFactory == null) {
-				routerFactory = new LionDataSourceRouterFactory(configService, ruleName);
+				routerFactory = new LionDataSourceRouterFactory(ruleName);
 			}
 
 			final String switchOnValue = configService.getProperty(LionKey.getShardSiwtchOnKey(ruleName));

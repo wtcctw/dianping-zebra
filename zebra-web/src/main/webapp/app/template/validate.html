@@ -1,0 +1,102 @@
+<div class="page-header">
+	<h1>
+		分库分表
+		<small>
+			<i class="ace-icon fa fa-angle-double-right"></i>
+			SQL Validate			
+		</small>
+	</h1>
+</div>
+<div class="row">
+	<div class="col-xs-12">
+    	 <form class="form-horizontal" role="form">
+    	 	<div class="form-group">
+		        <label class="col-sm-3 control-label">选择规则</label>
+		        <div class="col-sm-9">
+			        <select class="col-xs-10 col-sm-5" ng-model="shardRule" ng-options="rule for rule in shardRules"></select>
+		        </div>
+			</div>
+			<div class="form-group">
+			   	<label class="col-sm-3 control-label">输入SQL语句</label>
+		        <div class="col-sm-9">
+				    <textarea class="col-xs-10 col-sm-10" placeholder="SQL"  ng-model="shardSql"></textarea>
+		        </div>
+			</div>
+			
+			<div class="clearfix form-actions">
+				<div class="col-md-offset-3 col-md-9">
+				    <button ng-disabled="isDisabled" class="btn btn-info" type="button" ng-click="analyze()">
+				    	<i class="ace-icon fa fa-check bigger-110"></i>执行
+				    </button>
+				    &nbsp;&nbsp;&nbsp;
+				    <button ng-disabled="isDisabled" class="btn btn-info" type="button" ng-click="analyzeSample()">
+						<i class="ace-icon fa fa-check bigger-110"></i>
+						执行样例
+					</button>
+				</div>
+			</div>
+	    </form>
+    </div>
+</div>
+<div class="row" ng-init="isInQuery = false">
+    <!-- 分析结果 -->
+    <div class="alert alert-danger" ng-show="isInQuery && !data.isSuccess">
+		错误信息：{{data.errorMsg}}
+	</div>
+	
+	<div ng-show="isInQuery && data.isSuccess">
+		<div class="table-header">基本信息</div>
+	   	<table class="table table-striped table-bordered table-hover">
+	   		<thead>
+	   			<tr>
+	   				<th>维度</th>
+	   				<th>需要执行的SQL数</th>
+	   				<th>是否跨表</th>
+	   				<th>是否全表操作</th>
+	   			</tr>
+	   		</thead>
+	   		<tbody>
+	   			<tr>
+	   				<td>{{data.pk}}</td>
+	   				<td>{{data.targetSQLCount}}</td>
+	   				<td>{{data.isCrossDb}}</td>
+	   				<td>{{data.isFullTableScan}}</td>
+	   			</tr>
+	   		</tbody>
+	   	</table>
+	   	<div class="table-header">路由信息</div>
+	   	<table class="table table-striped table-bordered table-hover">
+	   		<thead>
+	   			<tr>
+	   				<th>目标库</th>
+	   				<th>目标表</th>
+	   				<th>SQL</th>
+	   				<th>操作</th>
+	   			</tr>
+	   		</thead>
+	   		<tbody>
+	   			<tr ng-repeat="routerItem in data.routerItems | toArray">
+					<td>{{routerItem.targetJdbcRef}}</td>
+					<td>{{routerItem.targetTable}}</td>
+					<td>{{routerItem.targetSql}}</td>
+					<td>执行</td>
+	   			</tr>
+	   		</tbody>
+	   	</table>
+	   	<div class="table-header">结果数据</div>
+	   	<table class="table table-striped table-bordered table-hover">
+	   		<thead>
+	   			<th ng-repeat="dataHeader in data.dataHeaders">
+	   				{{dataHeader}}
+	   			</th>
+	   		</thead>
+	   		<tbody>
+	   			<tr ng-repeat="dataRow in data.dataRows">
+	   				<td ng-repeat="column in dataRow.datas track by $index">
+	   					{{column}}
+	   				</td>
+	   			</tr>
+	   		</tbody>
+	   	</table>
+	</div>
+</div>

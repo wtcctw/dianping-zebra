@@ -1,6 +1,6 @@
 package com.dianping.zebra.shard.router;
 
-import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
@@ -11,7 +11,9 @@ import com.google.gson.Gson;
 public class LionDataSourceRouterFactory extends AbstractDataSourceRouterFactory implements DataSourceRouterFactory {
 	private final RouterRuleConfig routerConfig;
 
-	public LionDataSourceRouterFactory(ConfigService configService, String ruleName) {
+	public LionDataSourceRouterFactory(String ruleName) {
+		LionConfigService configService = LionConfigService.getInstance();
+		
 		this.routerConfig = new Gson().fromJson(configService.getProperty(LionKey.getShardConfigKey(ruleName)),
 		      RouterRuleConfig.class);
 
