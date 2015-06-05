@@ -19,7 +19,7 @@ import com.dianping.zebra.admin.service.FlowControlService;
 
 @Controller
 @RequestMapping(value = "/flowcontrol")
-public class FlowControlController {
+public class FlowControlController extends BasicController {
 	@Autowired
 	private FlowControlService flowControlService;
 

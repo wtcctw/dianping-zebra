@@ -32,7 +32,7 @@ import com.google.common.base.Strings;
 
 @Controller
 @RequestMapping(value = "/config")
-public class ConfigController {
+public class ConfigController extends BasicController {
 	private final static String currentEnv = EnvZooKeeperConfig.getEnv();
 
 	@Autowired

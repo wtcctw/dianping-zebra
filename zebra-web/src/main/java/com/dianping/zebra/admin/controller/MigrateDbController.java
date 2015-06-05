@@ -16,7 +16,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(value = "/migratedb")
-public class MigrateDbController {
+public class MigrateDbController extends BasicController {
 
     @Autowired
     private ShardDumpService shardDumpService;

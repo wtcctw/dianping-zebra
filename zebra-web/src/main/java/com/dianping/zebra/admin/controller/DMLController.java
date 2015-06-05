@@ -35,7 +35,7 @@ import com.dianping.zebra.util.SqlUtils;
 
 @Controller
 @RequestMapping(value = "/dml")
-public class DMLController {
+public class DMLController extends BasicController {
 
 	@RequestMapping(value = "/analyze", method = RequestMethod.POST)
 	@ResponseBody

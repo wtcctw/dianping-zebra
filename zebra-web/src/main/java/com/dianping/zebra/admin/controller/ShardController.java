@@ -23,7 +23,7 @@ import java.util.Set;
 
 @Controller
 @RequestMapping(value = "/shard")
-public class ShardController {
+public class ShardController extends BasicController {
 
     @Autowired
     private LionService lionHttpService;
@@ -94,7 +94,8 @@ public class ShardController {
 
     @RequestMapping(value = "/migrate/dump/{name}/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public List<ShardDumpTaskEntity> migrateDumpRemove(@PathVariable String name, @PathVariable int id) {
+    public List<ShardDumpTaskEntity> migrateDumpRemove(@PathVariable String name, @PathVariable int id)
+        throws Exception {
         shardDumpService.removeTask(id);
         return shardDumpService.getTaskByName(name);
     }

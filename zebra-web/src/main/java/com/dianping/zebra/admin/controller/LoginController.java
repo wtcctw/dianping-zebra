@@ -16,7 +16,7 @@ import com.dianping.zebra.admin.service.LionService;
 
 @Controller
 @RequestMapping(value = "/login")
-public class LoginController {
+public class LoginController extends BasicController {
 	
 	@Autowired
 	private LionService lionService;

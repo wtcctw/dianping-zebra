@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = "/sync-server")
-public class SyncServerController {
+public class SyncServerController extends BasicController {
 
     @Autowired
     private SyncServerMonitorService syncServerMonitorService;

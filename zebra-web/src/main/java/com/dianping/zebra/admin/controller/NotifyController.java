@@ -23,7 +23,7 @@ import com.google.gson.reflect.TypeToken;
 
 @Controller
 @RequestMapping(value = "/notify")
-public class NotifyController {
+public class NotifyController extends BasicController {
 
 	@Autowired
 	private ReportService reportService;
