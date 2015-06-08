@@ -475,7 +475,7 @@ zebraWeb.controller('flow', function ($scope, $http, $filter) {
             $http.post('/a/flowcontrol/save?env=' + $scope.config.env, {
                 m_sqlId: $data.m_sqlId,
                 ip: $data.m_app,
-                m_allowPercent: selected[0].text,
+                m_allowPercent: selected[0].text == '0' ? -1:selected[0].text,
                 sql: $data.sql
             }).success(
                 function (data, status, headers, config) {
