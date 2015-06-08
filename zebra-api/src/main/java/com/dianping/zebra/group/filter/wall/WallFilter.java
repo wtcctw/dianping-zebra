@@ -35,7 +35,7 @@ public class WallFilter extends DefaultJdbcFilter {
 
 	protected void checkFlowControl(String id) throws SQLException {
 		if (StringUtils.isNotBlank(id) && flowControl.containsKey(id)) {
-			if (generateFlowPercent() > flowControl.get(id).getAllowPercent()) {
+			if (generateFlowPercent() >= flowControl.get(id).getAllowPercent()) {
 				throw new SQLException("The SQL is in the blacklist. Please contact with dba!","SQL.Blacklist");
 			}
 		}
