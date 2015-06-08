@@ -16,7 +16,7 @@
         dumpFinish=#{dumpFinish},
         syncCreateFinish = #{syncCreateFinish},
         catchUpFinish =#{catchUpFinish}
-        WHRER Id = #{id}
+        WHERE Id = #{id}
     </update>
 
     <insert id="create" parameterType="ShardMigrateProcessEntity"
