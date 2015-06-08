@@ -73,12 +73,6 @@ public class ShardSyncTaskExecutor {
 
     protected String originDsJdbcRef;
 
-    //    private PumaServerService pumaServerService;
-
-    //    private PumaTaskService pumaTaskService;
-
-    //    private SrcDBInstanceService srcDBInstanceService;
-
     protected RouterRule routerRuleOrigin;
 
     protected List<RouterRule> routerRuleList = new CopyOnWriteArrayList<RouterRule>();
@@ -500,18 +494,6 @@ public class ShardSyncTaskExecutor {
     public void setConfigCache(ConfigCache configCache) {
         this.configCache = configCache;
     }
-
-    //    public void setPumaServerService(PumaServerService pumaServerService) {
-    //        this.pumaServerService = pumaServerService;
-    //    }
-    //
-    //    public void setPumaTaskService(PumaTaskService pumaTaskService) {
-    //        this.pumaTaskService = pumaTaskService;
-    //    }
-    //
-    //    public void setSrcDBInstanceService(SrcDBInstanceService srcDBInstanceService) {
-    //        this.srcDBInstanceService = srcDBInstanceService;
-    //    }
 
     public class RouterRuleBuilder extends AbstractDataSourceRouterFactory {
         @Override

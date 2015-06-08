@@ -2,6 +2,7 @@ package com.dianping.zebra.admin.job.executor;
 
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
+import com.dianping.puma.api.Configuration;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
@@ -13,8 +14,10 @@ import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import junit.framework.Assert;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -53,55 +56,33 @@ public class ShardSyncTaskExecutorTest {
         this.target.setConfigCache(configCache);
     }
 
-    //    @Test
-    //    public void initPumaClientTest() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-    //        //prepare
-    //        GroupDataSourceConfig config = new GroupDataSourceConfig();
-    //        DataSourceConfig ds1 = new DataSourceConfig();
-    //        ds1.setCanWrite(true);
-    //        ds1.setJdbcUrl("jdbc:mysql://1.1.1.1:3306/db1?a=b");
-    //        config.getDataSourceConfigs().put("db1", ds1);
-    //
-    //        Set<String> tables = Sets.newHashSet("t1", "t2");
-    //
-    //        SrcDBInstanceService srcDBInstanceService = mock(SrcDBInstanceService.class);
-    //        SrcDBInstance instance = new SrcDBInstance();
-    //        when(srcDBInstanceService.findByIp("1.1.1.1")).thenReturn(Lists.newArrayList(instance));
-    //
-    //        PumaTaskService pumaTaskService = mock(PumaTaskService.class);
-    //        PumaTask pumaTask = new PumaTask();
-    //        PumaServer pumaServer = new PumaServer();
-    //        pumaServer.setHost("2.2.2.2");
-    //        pumaServer.setPort(12345);
-    //        String targetName = "test-puma-test";
-    //        pumaTask.setPumaServerName(pumaServer.getName());
-    //        pumaTask.setName(targetName);
-    //        when(pumaTaskService.findBySrcDBInstanceName(instance.getName())).thenReturn(Lists.newArrayList(pumaTask));
-    //
-    //        PumaServerService pumaServerService = mock(PumaServerService.class);
-    //        when(pumaServerService.find(pumaServer.getName())).thenReturn(pumaServer);
+    @Test
+    public void initPumaClientTest() throws IllegalAccessException, NoSuchMethodException {
+        //prepare
+        GroupDataSourceConfig config = new GroupDataSourceConfig();
+        DataSourceConfig ds1 = new DataSourceConfig();
+        ds1.setCanWrite(true);
+        ds1.setJdbcUrl("jdbc:mysql://1.1.1.1:3306/db1?a=b");
+        config.getDataSourceConfigs().put("db1", ds1);
 
-    //        target.setPumaServerService(pumaServerService);
-    //        target.setPumaTaskService(pumaTaskService);
-    //        target.setSrcDBInstanceService(srcDBInstanceService);
+        Set<String> tables = Sets.newHashSet("t1", "t2");
+        target.task.setPumaServerHost("10.0.0.1");
+        target.task.setPumaServerPort(8080);
+        target.task.setPumaTaskName("task");
+        //run
+        PumaClient actual = target.initPumaClient("debug", config, tables, "debug");
 
-    ////run
-    //        PumaClient actual = target.initPumaClient("debug", config, tables, "debug");
+        //verify
+        Configuration clientConfig = (Configuration) FieldUtils.readField(actual, "config", true);
+        Assert.assertEquals(true, clientConfig.isNeedDml());
+        Assert.assertEquals(false, clientConfig.isNeedDdl());
+        Assert.assertEquals(false, clientConfig.isNeedTransactionInfo());
+        Assert.assertTrue(clientConfig.getDatabaseTablesMapping().containsKey("db1"));
+        Assert.assertEquals(tables.toString(), clientConfig.getDatabaseTablesMapping().get("db1").toString());
 
-    ////verify
-    //        Configuration clientConfig = (Configuration) FieldUtils.readField(actual, "config", true);
-    //        Assert.assertEquals(pumaServer.getHost(), clientConfig.getHost());
-    //        Assert.assertEquals(pumaServer.getPort().intValue(), clientConfig.getPort());
-    //        Assert.assertEquals(pumaTask.getName(), clientConfig.getTarget());
-    //        Assert.assertEquals(true, clientConfig.isNeedDml());
-    //        Assert.assertEquals(false, clientConfig.isNeedDdl());
-    //        Assert.assertEquals(false, clientConfig.isNeedTransactionInfo());
-    //        Assert.assertTrue(clientConfig.getDatabaseTablesMapping().containsKey("db1"));
-    //        Assert.assertEquals(tables.toString(), clientConfig.getDatabaseTablesMapping().get("db1").toString());
-    //
-    //        Assert.assertEquals("task-db1-debug", clientConfig.getName());
-    //        System.out.println("PumaClient :" + clientConfig.getName());
-    //    }
+        Assert.assertEquals("task-db1-debug", clientConfig.getName());
+        System.out.println("PumaClient :" + clientConfig.getName());
+    }
 
     @Test
     public void findTheOnlyWriteDataSourceConfigTestSuccess() {
