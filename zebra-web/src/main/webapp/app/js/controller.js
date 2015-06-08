@@ -42,6 +42,14 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
 
     $scope.load();
 
+    $scope.finish = function () {
+        if (confirm('确认该步骤已经完成？')) {
+            $http.post('/a/shard/migrate/dump/' + $scope.name + '/finish').success(function (data, status, headers, config) {
+                $scope.$parent.process = data;
+            });
+        }
+    }
+
     $scope.addNewTarget = function () {
         if (!$scope.newTask.targets) {
             $scope.newTask.targets = [];
@@ -74,8 +82,7 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
 zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
     $scope.name = name;
 
-    $http.get('/a/shard/migrate/process/' + name).success(function (data, status, headers, config) {
-        $scope.process = data;
+    $scope.init = function () {
         if ($scope.process) {
             if (!$scope.process.initFinish) {
                 $scope.currentStop = 1;
@@ -87,6 +94,11 @@ zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
                 $scope.currentStop = 4;
             }
         }
+    }
+
+    $http.get('/a/shard/migrate/process/' + name).success(function (data, status, headers, config) {
+        $scope.process = data;
+        $scope.init();
     });
 
     $scope.close = close;
@@ -110,9 +122,9 @@ zebraWeb.controller('validate', function ($scope, $http) {
             $scope.databases = data;
         });
     }
-	
-	$scope.analyze = function () {
-		if (!$scope.db) {
+
+    $scope.analyze = function () {
+        if (!$scope.db) {
             alert("请选择数据库");
             return;
         }
@@ -121,21 +133,21 @@ zebraWeb.controller('validate', function ($scope, $http) {
             alert("请选择表");
             return;
         }
-		
-		$http.get("/a/validate?database=" + $scope.db + "&table=" + $scope.table).success(function (data, status, headers, config) {
-			$scope.data = data;
-		});
-	}
-	
-	$scope.loadTable = function (){
-		$http.get("/a/validate/tables?database=" + $scope.db).success(function (data, status, headers, config) {
-			$scope.tables = data;
-		});
-	}
-	
+
+        $http.get("/a/validate?database=" + $scope.db + "&table=" + $scope.table).success(function (data, status, headers, config) {
+            $scope.data = data;
+        });
+    }
+
+    $scope.loadTable = function () {
+        $http.get("/a/validate/tables?database=" + $scope.db).success(function (data, status, headers, config) {
+            $scope.tables = data;
+        });
+    }
+
     $scope.$watch('db', $scope.loadTable);
 
-	$scope.load();
+    $scope.load();
 });
 
 zebraWeb.controller('dml', function ($scope, $http) {

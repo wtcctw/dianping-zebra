@@ -100,6 +100,15 @@ public class ShardController extends BasicController {
         return shardDumpService.getTaskByName(name);
     }
 
+    @RequestMapping(value = "/migrate/dump/{name}/finish", method = RequestMethod.POST)
+    @ResponseBody
+    public ShardMigrateProcessEntity migrateDumpFinish( @PathVariable String name) {
+        ShardMigrateProcessEntity status = shardMigrateProcessService.getProcessByName(name);
+        status.setDumpFinish(true);
+        shardMigrateProcessService.updateProcess(status);
+        return status;
+    }
+
     @RequestMapping(value = "/migrate/dump/{name}", method = RequestMethod.POST)
     @ResponseBody
     public List<ShardDumpTaskEntity> migrateDumpCommit(@RequestBody ShardDumpTaskDto dto, @PathVariable String name) {
