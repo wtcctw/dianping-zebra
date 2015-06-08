@@ -112,7 +112,7 @@ public class ShardSyncTaskExecutorTest {
 
     @Test
     public void initSyncDataSourceTest() {
-        ShardSyncTaskExecutor spy = initDataSourceTest(false);
+        ShardSyncTaskExecutor spy = initDataSourceTest(1);
         verify(spy, times(2)).initGroupDataSource(anyString());
         verify(spy, times(1)).initGroupDataSource("ds4");
         verify(spy, times(1)).initGroupDataSource("ds5");
@@ -120,7 +120,7 @@ public class ShardSyncTaskExecutorTest {
 
     @Test
     public void initMigrateDataSourceTest() {
-        ShardSyncTaskExecutor spy = initDataSourceTest(true);
+        ShardSyncTaskExecutor spy = initDataSourceTest(2);
         verify(spy, times(6)).initGroupDataSource(anyString());
         verify(spy, times(1)).initGroupDataSource("origin");
         verify(spy, times(1)).initGroupDataSource("ds0");
@@ -130,8 +130,8 @@ public class ShardSyncTaskExecutorTest {
         verify(spy, times(1)).initGroupDataSource("ds8");
     }
 
-    private ShardSyncTaskExecutor initDataSourceTest(boolean isMigrate) {
-        task.setIsMigrate(isMigrate);
+    private ShardSyncTaskExecutor initDataSourceTest(int type) {
+        task.setType(type);
         ShardSyncTaskExecutor spy = spy(target);
 
         doAnswer(new Answer<GroupDataSource>() {
@@ -154,7 +154,7 @@ public class ShardSyncTaskExecutorTest {
 
     @Test
     public void initMigratePumaClientsTest() {
-        ShardSyncTaskExecutor spy = initPumaClientsTest(true);
+        ShardSyncTaskExecutor spy = initPumaClientsTest(2);
         verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString());
         verify(spy, times(1))
             .initPumaClient(anyString(), any(GroupDataSourceConfig.class), argThat(new SetMatchers("table1")),
@@ -163,7 +163,7 @@ public class ShardSyncTaskExecutorTest {
 
     @Test
     public void initSyncPumaClientsTest() {
-        ShardSyncTaskExecutor spy = initPumaClientsTest(false);
+        ShardSyncTaskExecutor spy = initPumaClientsTest(1);
 
         verify(spy, times(6)).initPumaClient(anyString(), any(GroupDataSourceConfig.class), anySet(), anyString());
         verify(spy, times(1)).initPumaClient(anyString(), any(GroupDataSourceConfig.class),
@@ -182,8 +182,8 @@ public class ShardSyncTaskExecutorTest {
                 anyString());
     }
 
-    private ShardSyncTaskExecutor initPumaClientsTest(boolean isMigrate) {
-        task.setIsMigrate(isMigrate);
+    private ShardSyncTaskExecutor initPumaClientsTest(int type) {
+        task.setType(type);
         ShardSyncTaskExecutor spy = spy(target);
 
         doReturn(null).when(spy).getGroupDataSourceConfig(anyString());

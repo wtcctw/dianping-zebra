@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.zebra.admin.dao.ShardSyncTaskMapper">
+    <select id="getByExecutor" parameterType="map" resultType="ShardSyncTaskEntity">
+        SELECT * FROM ShardSyncTask WHERE Executor = #{executor}
+    </select>
+
+    <select id="getByName" parameterType="map" resultType="ShardSyncTaskEntity">
+        SELECT * FROM ShardSyncTask WHERE Name = #{name}
+    </select>
+
+    <delete id="remove" parameterType="map">
+        DELETE FROM ShardSyncTask WHERE Id = #{id}
+    </delete>
+
+    <insert id="create" parameterType="ShardSyncTaskEntity">
+        INSERT INTO `zebra`.`ShardSyncTask`
+        (
+        `PumaServerHost`,
+        `PumaServerPort`,
+        `PumaTaskName`,
+        `Executor`,
+        `RuleName`,
+        `TableName`,
+        `Type`,
+        `BinlogName`,
+        `BinlogPos`,
+        `SeqTimestamp`
+        )
+        VALUES
+        (
+        #{pumaServerHost},
+        #{pumaServerPort},
+        #{pumaTaskName},
+        #{executor},
+        #{ruleName},
+        #{tableName},
+        #{type},
+        #{binlogName},
+        #{binlogPos},
+        #{seqTimestamp}
+        )
+    </insert>
+</mapper>

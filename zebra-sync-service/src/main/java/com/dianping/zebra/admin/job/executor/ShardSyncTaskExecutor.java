@@ -91,7 +91,6 @@ public class ShardSyncTaskExecutor {
             checkNotNull(task, "task");
             checkNotNull(task.getRuleName(), "task.ruleName");
             checkNotNull(task.getTableName(), "task.tableName");
-            checkArgument(!task.isMigrate() || !Strings.isNullOrEmpty(task.getBinlogName()), "task.binlogName");
             this.task = task;
 
             //            this.status.setTaskName(task.getName());
@@ -251,7 +250,7 @@ public class ShardSyncTaskExecutor {
         routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfigOrigin));
         this.routerRuleOrigin = RouterRuleBuilder.build(routerRuleConfig);
 
-        if (!task.isMigrate()) {
+        if (task.getType() == ShardSyncTaskEntity.SYNC_TASK) {
             for (TableShardRuleConfig config : tableShardRuleConfigList) {
                 RouterRuleConfig tempRouterRuleConfig = new RouterRuleConfig();
                 tempRouterRuleConfig.setTableShardConfigs(Lists.newArrayList(config));
@@ -261,12 +260,12 @@ public class ShardSyncTaskExecutor {
     }
 
     protected void initRouter() {
-        if (task.isMigrate()) {
+        if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK) {
             ShardRouterImpl routerForMigrate = new ShardRouterImpl();
             routerForMigrate.setRouterRule(routerRuleOrigin);
             this.routerForMigrate = routerForMigrate;
             this.routerForMigrate.init();
-        } else {
+        } else if (task.getType() == ShardSyncTaskEntity.SYNC_TASK) {
             for (RouterRule routerRule : routerRuleList) {
                 ShardRouterImpl tempRouter = new ShardRouterImpl();
                 tempRouter.setRouterRule(routerRule);
@@ -278,7 +277,7 @@ public class ShardSyncTaskExecutor {
     }
 
     protected void initDataSources() {
-        if (task.isMigrate()) {
+        if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK) {
             this.originDataSource = initGroupDataSource(originDsJdbcRef);
         }
 
@@ -286,8 +285,8 @@ public class ShardSyncTaskExecutor {
         for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
             DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
 
-            if ((task.isMigrate() && !dimensionRuleImpl.isMaster()) || (!task.isMigrate() && dimensionRuleImpl
-                .isMaster())) {
+            if ((task.getType() == ShardSyncTaskEntity.MIGRATE_TASK && !dimensionRuleImpl.isMaster()) || (
+                task.getType() == ShardSyncTaskEntity.SYNC_TASK && dimensionRuleImpl.isMaster())) {
                 continue;
             }
 
@@ -316,10 +315,10 @@ public class ShardSyncTaskExecutor {
     }
 
     protected void initPumaClient() {
-        if (task.isMigrate()) {
+        if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK) {
             initPumaClient(originDsJdbcRef, originDataSource.getConfig(), Sets.newHashSet(task.getTableName()),
                 "migrate");
-        } else {
+        } else if (task.getType() == ShardSyncTaskEntity.SYNC_TASK) {
             TableShardRule tableShardRule = routerRuleOrigin.getTableShardRules().get(task.getTableName());
             for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
                 DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
@@ -372,16 +371,16 @@ public class ShardSyncTaskExecutor {
             configBuilder.tables(ds, tb);
         }
 
-        if (task.isMigrate()) {
+        if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK) {
             configBuilder.binlog(task.getBinlogName());
             configBuilder.binlogPos(task.getBinlogPos());
-        } else if (task.getSeqTimestamp() != 0) {
-            configBuilder.timeStamp(task.getSeqTimestamp());
+        } else if (task.getSeqTimestamp() != null && task.getSeqTimestamp().longValue() > 0) {
+            configBuilder.timeStamp(task.getSeqTimestamp().longValue());
         }
 
         PumaClient client = new PumaClient(configBuilder.build());
 
-        if (task.isMigrate()) {
+        if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK) {
             client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
             client.register(new Processor(fullName, Lists.newArrayList(routerForMigrate)));
         } else {
@@ -420,7 +419,7 @@ public class ShardSyncTaskExecutor {
                     RouterRuleConfig.class);
             this.originDsJdbcRef = configCache.getProperty(LionKey.getShardOriginDatasourceKey(task.getRuleName()));
 
-            if (task.isMigrate() && Strings.isNullOrEmpty(this.originDsJdbcRef)) {
+            if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK && Strings.isNullOrEmpty(this.originDsJdbcRef)) {
                 throw new IllegalArgumentException("no origin ds name!");
             }
 
