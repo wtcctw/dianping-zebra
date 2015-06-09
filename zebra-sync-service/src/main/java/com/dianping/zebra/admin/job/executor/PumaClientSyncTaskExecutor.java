@@ -2,7 +2,9 @@ package com.dianping.zebra.admin.job.executor;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.ConfigurationBuilder;
+import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
@@ -10,7 +12,6 @@ import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.AbstractDataSourceRouterFactory;
-import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.shard.router.ShardRouterImpl;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
@@ -19,8 +20,10 @@ import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
 import com.google.common.collect.Lists;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Dozer @ 6/9/15
@@ -37,6 +40,8 @@ public class PumaClientSyncTaskExecutor {
 
     protected PumaClient client;
 
+    protected static Map<String, GroupDataSource> dataSources = new ConcurrentHashMap<String, GroupDataSource>();
+
     public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task) {
         this.task = task;
     }
@@ -46,9 +51,29 @@ public class PumaClientSyncTaskExecutor {
             initRule();
             initRouter();
             initDataSources();
+            initPumaClient();
         } catch (Exception exp) {
             Cat.logError(exp);
         }
+    }
+
+    public synchronized void start() {
+        client.start();
+    }
+
+    public synchronized void pause() {
+        client.stop();
+    }
+
+    public synchronized void close() {
+        client.stop();
+        for (GroupDataSource ds : dataSources.values()) {
+            try {
+                ds.close();
+            } catch (SQLException ignore) {
+            }
+        }
+        dataSources.clear();
     }
 
     protected void initRouter() {
@@ -90,9 +115,9 @@ public class PumaClientSyncTaskExecutor {
     protected void initDataSources(Map<String, Set<String>> all) {
         for (Map.Entry<String, Set<String>> entity : all.entrySet()) {
             String jdbcRef = entity.getKey();
-            if (!DataSourceRepository.contains(jdbcRef)) {
+            if (!dataSources.containsKey(jdbcRef)) {
                 GroupDataSource ds = initGroupDataSource(jdbcRef);
-                DataSourceRepository.put(jdbcRef, ds);
+                dataSources.put(jdbcRef, ds);
             }
         }
     }
@@ -106,39 +131,41 @@ public class PumaClientSyncTaskExecutor {
 
     protected void initPumaClient() {
         ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-
         configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName());
-
         String fullName = String.format("%s-%d", "PumaClientSyncTask", task.getId());
         configBuilder.name(fullName);
-
         configBuilder.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
-        //        //todo:seq ??
-        //        if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK) {
-        //            configBuilder.binlog(task.getBinlogName());
-        //            configBuilder.binlogPos(task.getBinlogPos());
-        //        } else if (task.getSeqTimestamp() != null && task.getSeqTimestamp().longValue() > 0) {
-        //            configBuilder.timeStamp(task.getSeqTimestamp().longValue());
-        //        }
-        //
-        //        PumaClient client = new PumaClient(configBuilder.build());
-        //
-        //        if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK) {
-        //            client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_BINLOGINFO);
-        //            client.register(new Processor(fullName, Lists.newArrayList(routerForMigrate)));
-        //        } else {
-        //            if (client.getSeqFileHolder().getSeq() == SubscribeConstant.SEQ_FROM_OLDEST) {
-        //                if (task.getSeqTimestamp() != 0) {
-        //                    client.getSeqFileHolder().saveSeq(task.getSeqTimestamp());
-        //                } else {
-        //                    client.getSeqFileHolder().saveSeq(SubscribeConstant.SEQ_FROM_LATEST);
-        //                }
-        //            }
-        //            client.register(new Processor(fullName, routerList));
-        //        }
-        //
-        //        pumaClientList.put(jdbcRef, client);
-        //        return client;
+        this.client = new PumaClient(configBuilder.build());
+        this.client.register(new PumaEventListener());
+        client.getSeqFileHolder().saveSeq(task.getSequence());
+    }
+
+    class PumaEventListener implements EventListener {
+
+        @Override
+        public void onEvent(ChangedEvent event) throws Exception {
+            System.out.println(event.getSeq());
+        }
+
+        @Override
+        public boolean onException(ChangedEvent event, Exception e) {
+            return false;
+        }
+
+        @Override
+        public void onConnectException(Exception e) {
+
+        }
+
+        @Override
+        public void onConnected() {
+
+        }
+
+        @Override
+        public void onSkipEvent(ChangedEvent event) {
+
+        }
     }
 }

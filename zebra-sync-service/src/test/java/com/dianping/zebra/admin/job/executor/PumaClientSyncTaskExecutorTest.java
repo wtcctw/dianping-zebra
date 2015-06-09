@@ -6,9 +6,12 @@ import com.dianping.zebra.shard.router.RouterResult;
 import com.google.gson.Gson;
 import junit.framework.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import java.io.IOException;
 
 import static org.mockito.Mockito.*;
 
@@ -62,5 +65,17 @@ public class PumaClientSyncTaskExecutorTest {
         verify(target, times(1)).initGroupDataSource(eq("db0"));
         verify(target, times(1)).initGroupDataSource(eq("db1"));
         verify(target, times(2)).initGroupDataSource(anyString());
+    }
+
+    @Test
+    @Ignore
+    public void testPuma() throws IOException {
+        config.setPumaTaskName("dpshop@server_beta");
+        config.setPumaDatabase("DPShop");
+        config.setPumaTables("DP_Shop");
+        target.initPumaClient();
+        target.start();
+
+        System.in.read();
     }
 }
