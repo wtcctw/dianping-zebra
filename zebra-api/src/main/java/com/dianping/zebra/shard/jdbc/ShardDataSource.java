@@ -58,6 +58,8 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private ConfigService configService;
 
+	private volatile boolean closed = false;
+
 	public void close() throws SQLException {
 		DataSourceRepository.close();
 
@@ -67,6 +69,8 @@ public class ShardDataSource extends AbstractDataSource {
 			} catch (SQLException ignore) {
 			}
 		}
+
+		closed = true;
 
 		logger.info(String.format("ShardDataSource(%s) successfully closed.", ruleName));
 	}
@@ -86,6 +90,10 @@ public class ShardDataSource extends AbstractDataSource {
 	}
 
 	public Connection getConnection(String username, String password, boolean switchOn) throws SQLException {
+		if (closed) {
+			throw new SQLException("Datasource has been closed!");
+		}
+
 		if (switchOn) {
 			ShardConnection connection = new ShardConnection(username, password);
 			connection.setRouter(router);
