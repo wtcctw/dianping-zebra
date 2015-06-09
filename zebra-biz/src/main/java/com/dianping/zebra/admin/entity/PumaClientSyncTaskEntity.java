@@ -5,7 +5,7 @@ public class PumaClientSyncTaskEntity {
     /**
      * id
      */
-    private String id;
+    private int id;
 
     /**
      * 分库分表规则
@@ -57,11 +57,11 @@ public class PumaClientSyncTaskEntity {
      */
     private String executor;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
