@@ -1,8 +1,42 @@
 <div class="page-header">
 	<h1>
-		分库分表
-		<small>
-			<i class="ace-icon fa fa-angle-double-right">多维度同步任务</i>
+		分库分表 <small> <i class="ace-icon fa fa-angle-double-right">多维度同步任务</i>
 		</small>
 	</h1>
+</div>
+<div class="row">
+	<div class="col-xs-12">
+		<form class="form-horizontal" role="form">
+			<div class="form-group">
+				<label class="col-sm-3 control-label">选择规则</label>
+				<div class="col-sm-9">
+					<select class="col-xs-10 col-sm-5" ng-model="shardRule"
+						ng-options="rule for rule in shardRules"></select>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div>
+	<div class="table-header">执行计划</div>
+	<table class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>目标库</th>
+				<th>目标表</th>
+				<th>SQL</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="syncTaskPlan in syncTaskPlans | toArray">
+				<td>{{syncTaskPlan.ruleName}}</td>
+				<td>{{syncTaskPlan.pumaTaskName}}</td>
+				<td>{{syncTaskPlan.pumaTables}}</td>
+				<td>{{syncTaskPlan.executor}}</td>
+				<td>执行</td>
+			</tr>
+		</tbody>
+	</table>
 </div>

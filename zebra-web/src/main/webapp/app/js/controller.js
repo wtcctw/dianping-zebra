@@ -78,8 +78,26 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     }
 });
 
-zebraWeb.controller('shard-migrate', function ($scope, $http){
-	
+zebraWeb.controller('syncTask', function ($scope, $http){
+	$scope.load = function () {
+        $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
+            $scope.shardRules = data;
+        });
+        
+        $http.get('/a/syncTask?ruleName=unifiedorder').success(function (data, status, headers, config) {
+    		$scope.syncTaskPlans = data;
+    	});
+    }
+    
+//    $scope.loadSyncTaskPlan = function (){
+//    	$http.get('/a/syncTask?ruleName=' + shardRule).success(function (data, status, headers, config) {
+//    		$scope.syncTaskPlans = data;
+//    	});
+//    }
+//    
+//    $scope.$watch('shardRule', $scope.loadSyncTaskPlan);
+
+    $scope.load();
 });
 
 zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {

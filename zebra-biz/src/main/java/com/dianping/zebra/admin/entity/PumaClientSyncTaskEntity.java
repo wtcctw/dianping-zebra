@@ -62,7 +62,7 @@ public class PumaClientSyncTaskEntity {
 	/**
 	 * 状态： 1.创建 2.生效 3.暂停
 	 */
-	private String status;
+	private int status;
 
 	/**
 	 * 创建时间
@@ -167,11 +167,11 @@ public class PumaClientSyncTaskEntity {
 		this.pumaTables = pumaTables;
 	}
 
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 
