@@ -57,6 +57,11 @@ public class PumaClientSyncTaskEntity {
      */
     private String executor;
 
+    /**
+     * 当前执行的位置
+     */
+    private long sequence;
+
     public String getId() {
         return id;
     }
@@ -143,5 +148,13 @@ public class PumaClientSyncTaskEntity {
 
     public void setPumaTables(String pumaTables) {
         this.pumaTables = pumaTables;
+    }
+
+    public long getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(long sequence) {
+        this.sequence = sequence;
     }
 }

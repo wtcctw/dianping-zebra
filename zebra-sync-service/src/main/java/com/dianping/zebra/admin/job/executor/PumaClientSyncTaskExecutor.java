@@ -1,6 +1,7 @@
 package com.dianping.zebra.admin.job.executor;
 
 import com.dianping.cat.Cat;
+import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
@@ -33,6 +34,8 @@ public class PumaClientSyncTaskExecutor {
     protected ShardRouter shardRouter;
 
     protected RouterRule routerRule;
+
+    protected PumaClient client;
 
     public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task) {
         this.task = task;
@@ -101,17 +104,16 @@ public class PumaClientSyncTaskExecutor {
         return ds;
     }
 
-    protected PumaClient initPumaClient() {
-        //        ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-        //
-        //        configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName());
-        //
-        //        String fullName = String.format("%s-%d", task.getId());
-        //        configBuilder.name(fullName);
-        //
-        //            configBuilder.tables(task.getPumaDatabase(), task.getTable());
-        //
-        //
+    protected void initPumaClient() {
+        ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+
+        configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName());
+
+        String fullName = String.format("%s-%d", "PumaClientSyncTask", task.getId());
+        configBuilder.name(fullName);
+
+        configBuilder.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+
         //        //todo:seq ??
         //        if (task.getType() == ShardSyncTaskEntity.MIGRATE_TASK) {
         //            configBuilder.binlog(task.getBinlogName());
@@ -138,6 +140,5 @@ public class PumaClientSyncTaskExecutor {
         //
         //        pumaClientList.put(jdbcRef, client);
         //        return client;
-        return null;
     }
 }
