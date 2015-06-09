@@ -8,7 +8,11 @@
     </select>
 
     <select id="getByName" parameterType="map" resultType="ShardSyncTaskEntity">
-        SELECT * FROM ShardSyncTask WHERE Name = #{name}
+        SELECT * FROM ShardSyncTask WHERE RuleName = #{ruleName}
+    </select>
+
+    <select id="getCountByName" parameterType="map" resultType="int">
+        SELECT COUNT(Id) FROM ShardSyncTask WHERE RuleName = #{ruleName}
     </select>
 
     <delete id="remove" parameterType="map">

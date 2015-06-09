@@ -1,9 +1,15 @@
 package com.dianping.zebra.admin.service.impl;
 
+import com.dianping.lion.client.ConfigCache;
 import com.dianping.zebra.admin.dao.ShardMigrateProcessMapper;
+import com.dianping.zebra.admin.dao.ShardSyncTaskMapper;
 import com.dianping.zebra.admin.entity.ShardMigrateProcessEntity;
 import com.dianping.zebra.admin.service.ShardMigrateProcessService;
+import com.dianping.zebra.config.LionKey;
+import com.dianping.zebra.shard.config.RouterRuleConfig;
+import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +25,15 @@ public class ShardMigrateProcessServiceImpl implements ShardMigrateProcessServic
     @Autowired
     private ShardMigrateProcessMapper shardMigrateProcessMapper;
 
+    @Autowired
+    private ShardSyncTaskMapper shardSyncTaskMapper;
+
+    private ConfigCache configCache;
+
+    public ShardMigrateProcessServiceImpl() {
+        this.configCache = ConfigCache.getInstance();
+    }
+
     @Override
     public ShardMigrateProcessEntity getProcessByName(String name) {
         ShardMigrateProcessEntity entity;
@@ -33,7 +48,21 @@ public class ShardMigrateProcessServiceImpl implements ShardMigrateProcessServic
             entity = result.get(0);
         }
 
-        //todo: check other properties
+        int needSyncTaskCount = 0;
+        RouterRuleConfig config = new Gson()
+            .fromJson(configCache.getProperty(LionKey.getShardConfigKey(name)), RouterRuleConfig.class);
+        if (config != null) {
+            for (TableShardRuleConfig tableConfig : config.getTableShardConfigs()) {
+                if (tableConfig.getDimensionConfigs().size() >= 2) {
+                    entity.setNeedSync(true);
+                }
+                needSyncTaskCount += tableConfig.getDimensionConfigs().size();
+            }
+        }
+        int syncTaskCount = shardSyncTaskMapper.getCountByName(name);
+        entity.setSyncCreateFinish(needSyncTaskCount == syncTaskCount);
+
+        shardMigrateProcessMapper.update(entity);
         return entity;
     }
 

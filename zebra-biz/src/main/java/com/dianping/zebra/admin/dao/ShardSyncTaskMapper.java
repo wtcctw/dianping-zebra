@@ -14,7 +14,9 @@ public interface ShardSyncTaskMapper {
 
     List<ShardSyncTaskEntity> getByExecutor(@Param("executor") String executor);
 
-    List<ShardSyncTaskEntity> getByName(@Param("name") String name);
+    List<ShardSyncTaskEntity> getByName(@Param("ruleName") String ruleName);
+
+    int getCountByName(@Param("ruleName") String ruleName);
 
     void create(ShardSyncTaskEntity entity);
 
