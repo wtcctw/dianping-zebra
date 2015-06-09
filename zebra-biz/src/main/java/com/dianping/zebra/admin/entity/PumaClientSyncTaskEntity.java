@@ -74,10 +74,10 @@ public class PumaClientSyncTaskEntity {
 	 */
 	private Date updateTime;
 
-    /**
-     * 消费位置
-     */
-    private long sequence;
+	/**
+	 * 消费位置
+	 */
+	private long sequence;
 
 	public int getId() {
 		return id;
@@ -191,11 +191,11 @@ public class PumaClientSyncTaskEntity {
 		this.updateTime = updateTime;
 	}
 
-    public long getSequence() {
-        return sequence;
-    }
+	public long getSequence() {
+		return sequence;
+	}
 
-    public void setSequence(long sequence) {
-        this.sequence = sequence;
-    }
+	public void setSequence(long sequence) {
+		this.sequence = sequence;
+	}
 }
