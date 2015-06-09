@@ -123,5 +123,9 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/validate',
         templateUrl: 'app/template/validate.html',
         controller: 'validate'
+    }).state('syncTask', {
+        url: '/syncTask',
+        templateUrl: 'app/template/syncTask.html',
+        controller: 'syncTask'
     });
 });

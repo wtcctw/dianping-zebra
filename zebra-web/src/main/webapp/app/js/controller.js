@@ -78,6 +78,9 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     }
 });
 
+zebraWeb.controller('shard-migrate', function ($scope, $http){
+	
+});
 
 zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {
     $scope.name = name;
