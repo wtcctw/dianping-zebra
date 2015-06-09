@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper">
+
+	<select id="findAllByRuleName" parameterType="map"
+		resultType="PumaClientSyncTaskEntity">
+		SELECT * FROM puma_task WHERE ruleName = #{ruleName}
+	</select>
+
+	<select id="findEffectiveTaskByRuleName" parameterType="map"
+		resultType="PumaClientSyncTaskEntity">
+		SELECT * FROM puma_task WHERE ruleName = #{ruleName} and
+		status = 2;
+	</select>
+
+	<insert id="insertSyncTask" parameterType="PumaClientSyncTaskEntity">
+		INSERT INTO
+		`zebra`.`puma_task`
+		(
+		`ruleName`,
+		`table`,
+		`dbRule`,
+		`dbIndexes`,
+		`tbRule`,
+		`tbSuffix`,
+		`pumaTaskName`,
+		`pumaDatabase`,
+		`pumaTables`,
+		`executor`,
+		`status`,
+		`createTime`,
+		`updateTime`
+		)
+		VALUES
+		(
+		#{ruleName},
+		#{table},
+		#{dbRule},
+		#{dbIndexes},
+		#{tbRule},
+		#{tbSuffix},
+		#{pumaTaskName},
+		#{pumaDatabase},
+		#{pumaTables},
+		#{executor},
+		#{status},
+		NOW(),
+		NOW()
+		)
+	</insert>
+
+	<update id="updateSyncTask" parameterType="PumaClientSyncTaskEntity">
+		UPDATE `zebra`.`puma_task`
+		SET
+		ruleName=#{ruleName},
+		table=#{table},
+		dbRule=#{dbRule},
+		dbIndexes=#{dbIndexes},
+		tbSuffix=#{tbSuffix},
+		pumaTaskName=#{pumaTaskName},
+		pumaDatabase=#{pumaDatabase},
+		pumaTables=#{pumaTables},
+		executor=#{executor},
+		status=#{status},
+		updateTime=NOW(),
+		WHERE id = #{id}
+	</update>
+</mapper>
