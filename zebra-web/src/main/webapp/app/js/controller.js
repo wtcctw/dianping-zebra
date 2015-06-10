@@ -83,19 +83,30 @@ zebraWeb.controller('syncTask', function ($scope, $http){
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.shardRules = data;
         });
-        
-        $http.get('/a/syncTask?ruleName=unifiedorder').success(function (data, status, headers, config) {
-    		$scope.syncTaskPlans = data;
-    	});
     }
     
-//    $scope.loadSyncTaskPlan = function (){
-//    	$http.get('/a/syncTask?ruleName=' + shardRule).success(function (data, status, headers, config) {
-//    		$scope.syncTaskPlans = data;
-//    	});
-//    }
-//    
-//    $scope.$watch('shardRule', $scope.loadSyncTaskPlan);
+    $scope.loadSyncTaskPlan = function (){
+    	if($scope.shardRule){
+    		$http.get('/a/syncTask?ruleName=' + $scope.shardRule).success(function (data, status, headers, config) {
+    			$scope.syncTaskPlans = data;
+    		});
+    	}
+    }
+    
+    $scope.schedule = function (pumaTaskName){
+    	if(pumaTaskName){
+    		$http.get('/a/syncTask/schedule?pumaTaskName=' + pumaTaskName).success(function (data, status, headers, config) {
+    			$scope.syncTaskPlans.forEach(function (item){
+    				if(item.pumaTaskName == pumaTaskName){
+    					item.status = 2;
+    				}
+    			});
+    		});
+    	}
+    }
+
+    
+    $scope.$watch('shardRule', $scope.loadSyncTaskPlan);
 
     $scope.load();
 });

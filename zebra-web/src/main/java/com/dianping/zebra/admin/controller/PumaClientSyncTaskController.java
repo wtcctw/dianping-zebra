@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.dto.PumaClientSyncTaskDto;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
+import com.dianping.zebra.admin.entity.SyncServerMonitorEntity;
 import com.dianping.zebra.admin.service.SyncServerMonitorService;
 import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LionKey;
@@ -51,6 +52,10 @@ public class PumaClientSyncTaskController extends BasicController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Object getExecutePlan(String ruleName) {
+		if(ruleName == null || ruleName.length() == 0){
+			return null;
+		}
+		
 		List<PumaClientSyncTaskEntity> allEntities = dao.findAllByRuleName(ruleName);
 
 		List<PumaClientSyncTaskDto> result = generatePlan(ruleName);
@@ -78,8 +83,16 @@ public class PumaClientSyncTaskController extends BasicController {
 		}
 
 		if (tmp == null) {
+			SyncServerMonitorEntity chooseOne = syncServers.chooseOne();
+			if(chooseOne != null){
+				dto.setExecutor(chooseOne.getName());
+			}
+			dto.setStatus(1);
+			
 			dao.insertSyncTask(dto);
 		} else {
+			dto.setExecutor(tmp.getExecutor());
+			dto.setStatus(tmp.getStatus());
 			dao.updateSyncTask(dto);
 		}
 	}
@@ -142,8 +155,6 @@ public class PumaClientSyncTaskController extends BasicController {
 						}
 
 						syncTask.setPumaTables(sb.toString());
-						syncTask.setExecutor(syncServers.chooseOne().getName());
-						syncTask.setStatus(1);
 
 						result.add(syncTask);
 					}

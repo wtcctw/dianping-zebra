@@ -58,8 +58,8 @@
         #{pumaDatabase},
         #{pumaTables},
         #{executor},
-        #{sequence},
         #{status},
+        #{sequence},
         NOW(),
         NOW()
         )

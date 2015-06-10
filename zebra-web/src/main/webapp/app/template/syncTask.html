@@ -33,8 +33,9 @@
 			<tr ng-repeat="syncTaskPlan in syncTaskPlans | toArray">
 				<td>{{syncTaskPlan.pumaTaskName}}</td>
 				<td>{{syncTaskPlan.executor}}</td>
-				<td>{{syncTaskPlan.status}}</td>
-				<td>生效</td>
+				<td ng-if="syncTaskPlan.status == 1">初始化</td>
+				<td ng-if="syncTaskPlan.status == 2">运行中</td>
+				<td ><button ng-if="syncTaskPlan.status == 1" class="btn btn-xs btn-primary" ng-click="schedule(syncTaskPlan.pumaTaskName)">生效</button></td>
 			</tr>
 		</tbody>
 	</table>
