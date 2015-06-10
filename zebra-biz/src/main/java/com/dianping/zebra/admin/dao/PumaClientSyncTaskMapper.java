@@ -12,7 +12,7 @@ public interface PumaClientSyncTaskMapper {
 
 	List<PumaClientSyncTaskEntity> findEffectiveTaskByRuleName(@Param("ruleName") String ruleName);
 
-	List<PumaClientSyncTaskEntity> findByExecutor(@Param("executor") String executor);
+	List<PumaClientSyncTaskEntity> findEffectiveTaskByExecutor(@Param("executor") String executor);
 
 	void insertSyncTask(PumaClientSyncTaskEntity entity);
 

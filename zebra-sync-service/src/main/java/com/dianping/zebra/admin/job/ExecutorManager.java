@@ -43,7 +43,7 @@ public class ExecutorManager {
 	public synchronized void startPumaSyncTask() {
 		try {
 			List<PumaClientSyncTaskEntity> tasks = pumaClientSyncTaskMapper
-				.findByExecutor(InetAddress.getLocalHost().getHostAddress());
+				.findEffectiveTaskByExecutor(InetAddress.getLocalHost().getHostAddress());
 
 			for (PumaClientSyncTaskEntity task : tasks) {
 				if (pumaClientSyncTaskExecutorMap.containsKey(task.getId())) {

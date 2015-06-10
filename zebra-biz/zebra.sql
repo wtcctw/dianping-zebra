@@ -91,21 +91,6 @@ CREATE TABLE `SyncServerMonitor` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-CREATE TABLE `ShardSyncTask` (
-  `Id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `PumaServerHost` varchar(45) NOT NULL,
-  `PumaServerPort` int(11) NOT NULL,
-  `PumaTaskName` varchar(45) NOT NULL,
-  `Executor` varchar(45) NOT NULL,
-  `RuleName` varchar(45) NOT NULL,
-  `TableName` varchar(45) NOT NULL,
-  `Type` int(11) NOT NULL,
-  `BinlogName` varchar(45) DEFAULT NULL,
-  `BinlogPos` bigint(64) DEFAULT NULL,
-  `SeqTimestamp` bigint(64) DEFAULT NULL,
-  PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE `puma_task` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `ruleName` varchar(128) DEFAULT NULL,

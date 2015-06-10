@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class PumaClientSyncTaskExecutor implements TaskExecutor{
+public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	private PumaClientSyncTaskMapper pumaClientSyncTaskMapper;
 
 	private final PumaClientSyncTaskEntity task;
@@ -45,6 +45,8 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor{
 	protected RouterRule routerRule;
 
 	protected PumaClient client;
+
+	protected Thread taskSequenceUploader;
 
 	protected static Map<String, GroupDataSource> dataSources = new ConcurrentHashMap<String, GroupDataSource>();
 
@@ -58,6 +60,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor{
 			initRouter();
 			initDataSources();
 			initPumaClient();
+
 		} catch (Exception exp) {
 			Cat.logError(exp);
 		}
@@ -65,14 +68,17 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor{
 
 	public synchronized void start() {
 		client.start();
+		taskSequenceUploader.start();
 	}
 
 	public synchronized void pause() {
 		client.stop();
+		taskSequenceUploader.interrupt();
 	}
 
 	public synchronized void stop() {
 		client.stop();
+		taskSequenceUploader.interrupt();
 		for (GroupDataSource ds : dataSources.values()) {
 			try {
 				ds.close();
@@ -80,6 +86,12 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor{
 			}
 		}
 		dataSources.clear();
+	}
+
+	protected void initSequenceUploader() {
+		taskSequenceUploader = new Thread(new TaskSequenceUploader());
+		taskSequenceUploader.setName("TaskSequenceUploader");
+		taskSequenceUploader.setDaemon(true);
 	}
 
 	protected void initRouter() {
@@ -147,6 +159,28 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor{
 		client.getSeqFileHolder().saveSeq(task.getSequence());
 	}
 
+	class TaskSequenceUploader implements Runnable {
+		@Override
+		public void run() {
+			long lastSeq = 0;
+
+			while (true) {
+				try {
+					Thread.sleep(5 * 1000);
+				} catch (InterruptedException e) {
+					break;
+				}
+
+				if (lastSeq == task.getSequence()) {
+					continue;
+				}
+
+				lastSeq = task.getSequence();
+				pumaClientSyncTaskMapper.updateSequence(task);
+			}
+		}
+	}
+
 	class PumaEventListener implements EventListener {
 		protected volatile long tryTimes = 0;
 
@@ -154,6 +188,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor{
 		public void onEvent(ChangedEvent event) throws Exception {
 			tryTimes++;
 			onEventInternal(event);
+			task.setSequence(event.getSeq());
 			tryTimes = 0;
 		}
 
