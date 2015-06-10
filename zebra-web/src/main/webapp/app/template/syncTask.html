@@ -23,19 +23,18 @@
 	<table class="table table-striped table-bordered table-hover">
 		<thead>
 			<tr>
-				<th>目标库</th>
-				<th>目标表</th>
-				<th>SQL</th>
+				<th>任务名</th>
+				<th>同步服务器地址</th>
+				<th>状态</th>
 				<th>操作</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr ng-repeat="syncTaskPlan in syncTaskPlans | toArray">
-				<td>{{syncTaskPlan.ruleName}}</td>
 				<td>{{syncTaskPlan.pumaTaskName}}</td>
-				<td>{{syncTaskPlan.pumaTables}}</td>
 				<td>{{syncTaskPlan.executor}}</td>
-				<td>执行</td>
+				<td>{{syncTaskPlan.status}}</td>
+				<td>生效</td>
 			</tr>
 		</tbody>
 	</table>

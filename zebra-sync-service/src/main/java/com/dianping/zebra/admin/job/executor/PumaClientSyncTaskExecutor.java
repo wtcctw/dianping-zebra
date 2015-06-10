@@ -85,7 +85,7 @@ public class PumaClientSyncTaskExecutor {
 
     protected void initRule() {
         TableShardDimensionConfig dimensionConfig = new TableShardDimensionConfig();
-        dimensionConfig.setTableName(task.getTable());
+        dimensionConfig.setTableName(task.getTableName());
         dimensionConfig.setDbRule(task.getDbRule());
         dimensionConfig.setDbIndexes(task.getDbIndexes());
         dimensionConfig.setTbRule(task.getTbRule());
@@ -93,7 +93,7 @@ public class PumaClientSyncTaskExecutor {
         dimensionConfig.setMaster(true);
 
         TableShardRuleConfig tableShardRuleConfig = new TableShardRuleConfig();
-        tableShardRuleConfig.setTableName(task.getTable());
+        tableShardRuleConfig.setTableName(task.getTableName());
         tableShardRuleConfig.setDimensionConfigs(Lists.newArrayList(dimensionConfig));
 
         RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
@@ -102,7 +102,7 @@ public class PumaClientSyncTaskExecutor {
     }
 
     protected void initDataSources() {
-        TableShardRule tableShardRule = routerRule.getTableShardRules().get(task.getTable());
+        TableShardRule tableShardRule = routerRule.getTableShardRules().get(task.getTableName());
         for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
             DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
             initDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());

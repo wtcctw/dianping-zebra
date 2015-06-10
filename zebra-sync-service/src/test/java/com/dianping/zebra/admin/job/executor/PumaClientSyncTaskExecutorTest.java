@@ -29,7 +29,7 @@ public class PumaClientSyncTaskExecutorTest {
     public void setUp() throws Exception {
         config = new PumaClientSyncTaskEntity();
 
-        config.setTable("ut");
+        config.setTableName("ut");
         config.setDbRule("((#id#).toLong() % 2)");
         config.setDbIndexes("db0,db1");
         config.setTbRule("((#id# / 2).toLong() % 2)");

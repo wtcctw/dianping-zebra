@@ -15,4 +15,6 @@ public interface PumaClientSyncTaskMapper {
 	void insertSyncTask(PumaClientSyncTaskEntity entity);
 
 	void updateSyncTask(PumaClientSyncTaskEntity entity);
+	
+	void updateSyncTaskStatus(@Param("pumaTaskName") String pumaTaskName, @Param("status")  int status);
 }
