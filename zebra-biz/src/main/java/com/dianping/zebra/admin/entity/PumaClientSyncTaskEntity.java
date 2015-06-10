@@ -77,7 +77,7 @@ public class PumaClientSyncTaskEntity {
 	/**
 	 * 消费位置
 	 */
-	private long sequence;
+	private volatile long sequence;
 
 	public int getId() {
 		return id;
