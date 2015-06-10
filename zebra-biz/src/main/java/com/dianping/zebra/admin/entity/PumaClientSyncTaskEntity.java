@@ -17,7 +17,7 @@ public class PumaClientSyncTaskEntity {
 	/**
 	 * 逻辑表名
 	 */
-	private String table;
+	private String tableName;
 
 	/**
 	 * 数据库规则分配策略
@@ -95,12 +95,12 @@ public class PumaClientSyncTaskEntity {
 		this.ruleName = ruleName;
 	}
 
-	public String getTable() {
-		return table;
+	public String getTableName() {
+		return tableName;
 	}
 
-	public void setTable(String table) {
-		this.table = table;
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
 	}
 
 	public String getDbRule() {

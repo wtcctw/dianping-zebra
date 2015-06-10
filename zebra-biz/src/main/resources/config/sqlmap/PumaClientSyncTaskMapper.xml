@@ -20,12 +20,19 @@
         status = 2;
     </select>
 
+    <update id="updateSequence" parameterType="PumaClientSyncTaskEntity">
+        UPDATE `zebra`.`puma_task`
+        SET
+        sequence=#{sequence},
+        WHERE id = #{id}
+    </update>
+
     <insert id="insertSyncTask" parameterType="PumaClientSyncTaskEntity">
         INSERT INTO
         `zebra`.`puma_task`
         (
         `ruleName`,
-        `table`,
+        `tableName`,
         `dbRule`,
         `dbIndexes`,
         `tbRule`,
@@ -35,13 +42,14 @@
         `pumaTables`,
         `executor`,
         `status`,
+        `sequence`,
         `createTime`,
         `updateTime`
         )
         VALUES
         (
         #{ruleName},
-        #{table},
+        #{tableName},
         #{dbRule},
         #{dbIndexes},
         #{tbRule},
@@ -50,6 +58,7 @@
         #{pumaDatabase},
         #{pumaTables},
         #{executor},
+        #{sequence},
         #{status},
         NOW(),
         NOW()
@@ -57,10 +66,11 @@
     </insert>
 
     <update id="updateSyncTask" parameterType="PumaClientSyncTaskEntity">
-        UPDATE `zebra`.`puma_task`
+        UPDATE
+        `zebra`.`puma_task`
         SET
         ruleName=#{ruleName},
-        table=#{table},
+        tableName=#{tableName},
         dbRule=#{dbRule},
         dbIndexes=#{dbIndexes},
         tbSuffix=#{tbSuffix},
@@ -70,14 +80,15 @@
         executor=#{executor},
         status=#{status},
         sequence=#{sequence},
-        updateTime=NOW(),
-        WHERE id = #{id}
+        updateTime=NOW()
+        WHERE pumaTaskName = #{pumaTaskName}
     </update>
 
-    <update id="updateSequence" parameterType="PumaClientSyncTaskEntity">
-        UPDATE `zebra`.`puma_task`
-        SET
-        sequence=#{sequence},
-        WHERE id = #{id}
+    <update id="updateSyncTaskStatus" parameterType="map">
+        UPDATE
+        `zebra`.`puma_task` SET
+        status=#{status},
+        updateTime=NOW()
+        WHERE pumaTaskName=#{pumaTaskName}
     </update>
 </mapper>
