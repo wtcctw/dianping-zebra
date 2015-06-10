@@ -1,0 +1,22 @@
+UPDATE
+#if (${event.database} == "")
+`${event.table}`
+#else
+`${event.database}`.`${event.table}`
+#end
+SET
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+    `${name2ColumnInfo.key}` = ?
+  #if($velocityCount < ${event.columns.size()})
+     ,
+  #end
+#end
+WHERE
+#foreach($name2ColumnInfo in $event.columns.entrySet())
+  #if(${name2ColumnInfo.value.key})
+      #if($velocityCount > 1)
+          AND
+      #end
+      `${name2ColumnInfo.key}` = ?
+  #end
+#end

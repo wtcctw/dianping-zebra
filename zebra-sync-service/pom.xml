@@ -167,6 +167,17 @@
             <artifactId>puma-client</artifactId>
             <version>1.0.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>velocity-tools</groupId>
+            <artifactId>velocity-tools-view</artifactId>
+            <version>1.4</version>
+        </dependency>
     </dependencies>
     <build>
         <pluginManagement>
