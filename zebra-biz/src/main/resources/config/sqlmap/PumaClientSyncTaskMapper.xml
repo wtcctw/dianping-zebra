@@ -9,9 +9,10 @@
         SELECT * FROM puma_task WHERE ruleName = #{ruleName}
     </select>
 
-    <select id="findByExecutor" parameterType="map"
+    <select id="findEffectiveTaskByExecutor" parameterType="map"
             resultType="PumaClientSyncTaskEntity">
-        SELECT * FROM puma_task WHERE executor = #{executor}
+        SELECT * FROM puma_task WHERE executor = #{executor} and
+        status = 2;
     </select>
 
     <select id="findEffectiveTaskByRuleName" parameterType="map"
