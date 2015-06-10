@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.dto.PumaClientSyncTaskDto;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
+import com.dianping.zebra.admin.service.SyncServerMonitorService;
 import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
@@ -39,6 +40,9 @@ public class PumaClientSyncTaskController extends BasicController {
 
 	@Autowired
 	private PumaClientSyncTaskMapper dao;
+	
+	@Autowired
+	private SyncServerMonitorService syncServers;
 
 	private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
 
@@ -138,6 +142,7 @@ public class PumaClientSyncTaskController extends BasicController {
 						}
 
 						syncTask.setPumaTables(sb.toString());
+						syncTask.setExecutor(syncServers.chooseOne().getName());
 						syncTask.setStatus(1);
 
 						result.add(syncTask);
