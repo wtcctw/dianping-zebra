@@ -6,6 +6,7 @@ import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.exception.NoRowsAffectedException;
 import com.dianping.zebra.admin.util.SqlGenerator;
@@ -34,7 +35,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class PumaClientSyncTaskExecutor {
+public class PumaClientSyncTaskExecutor implements TaskExecutor{
+	private PumaClientSyncTaskMapper pumaClientSyncTaskMapper;
 
 	private final PumaClientSyncTaskEntity task;
 
@@ -69,7 +71,7 @@ public class PumaClientSyncTaskExecutor {
 		client.stop();
 	}
 
-	public synchronized void close() {
+	public synchronized void stop() {
 		client.stop();
 		for (GroupDataSource ds : dataSources.values()) {
 			try {
@@ -226,5 +228,9 @@ public class PumaClientSyncTaskExecutor {
 		public void onSkipEvent(ChangedEvent event) {
 
 		}
+	}
+
+	public void setPumaClientSyncTaskMapper(PumaClientSyncTaskMapper pumaClientSyncTaskMapper) {
+		this.pumaClientSyncTaskMapper = pumaClientSyncTaskMapper;
 	}
 }
