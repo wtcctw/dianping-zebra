@@ -105,3 +105,22 @@ CREATE TABLE `ShardSyncTask` (
   `SeqTimestamp` bigint(64) DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `puma_task` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `ruleName` varchar(128) DEFAULT NULL,
+  `table` varchar(128) DEFAULT NULL,
+  `dbRule` varchar(512) DEFAULT NULL,
+  `dbIndexes` varchar(512) DEFAULT NULL,
+  `tbRule` varchar(512) DEFAULT NULL,
+  `tbSuffix` varchar(512) DEFAULT NULL,
+  `pumaTaskName` varchar(256) DEFAULT NULL,
+  `pumaDatabase` varchar(256) DEFAULT NULL,
+  `pumaTables` varchar(1024) DEFAULT NULL,
+  `executor` varchar(128) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
+  `createTime` timestamp NULL DEFAULT NULL,
+  `updateTime` timestamp NULL DEFAULT NULL,
+  `sequence` bigint(64) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;

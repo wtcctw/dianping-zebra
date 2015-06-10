@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class ShardDumpTaskExecutor {
+public class ShardDumpTaskExecutor implements TaskExecutor{
     private List<String> options = Lists
         .newArrayList("--master-data=2", "--disable-keys", "--skip-comments", "--quick", "--add-drop-database=false",
             "--no-create-info", "--add-drop-table=false", "--skip-add-locks", "--default-character-set=utf8",

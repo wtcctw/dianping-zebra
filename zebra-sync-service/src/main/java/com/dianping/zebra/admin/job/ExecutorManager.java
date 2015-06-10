@@ -1,7 +1,10 @@
 package com.dianping.zebra.admin.job;
 
 import com.dianping.cat.Cat;
+import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
+import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
+import com.dianping.zebra.admin.job.executor.PumaClientSyncTaskExecutor;
 import com.dianping.zebra.admin.job.executor.ShardDumpTaskExecutor;
 import com.dianping.zebra.admin.service.ShardDumpService;
 import com.google.common.base.Predicate;
@@ -26,51 +29,100 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ExecutorManager {
-    @Autowired
-    private ShardDumpService shardDumpService;
+	@Autowired
+	private ShardDumpService shardDumpService;
 
-    private Map<Integer, ShardDumpTaskExecutor> shardDumpTaskExecutorMap = new ConcurrentHashMap<Integer, ShardDumpTaskExecutor>();
+	@Autowired
+	private PumaClientSyncTaskMapper pumaClientSyncTaskMapper;
 
-    @Scheduled(cron = "0/15 * * * * ?")
-    public synchronized void startShardDumpTask() {
-        try {
-            List<ShardDumpTaskEntity> tasks = shardDumpService.getTaskByIp(InetAddress.getLocalHost().getHostAddress());
+	private Map<Integer, PumaClientSyncTaskExecutor> pumaClientSyncTaskExecutorMap = new ConcurrentHashMap<Integer, PumaClientSyncTaskExecutor>();
 
-            for (ShardDumpTaskEntity task : tasks) {
-                if (shardDumpTaskExecutorMap.containsKey(task.getId())) {
-                    continue;
-                }
+	private Map<Integer, ShardDumpTaskExecutor> shardDumpTaskExecutorMap = new ConcurrentHashMap<Integer, ShardDumpTaskExecutor>();
 
-                ShardDumpTaskExecutor executor = new ShardDumpTaskExecutor(task);
-                executor.setShardDumpService(shardDumpService);
-                executor.init();
-                executor.start();
+	@Scheduled(cron = "0/15 * * * * ?")
+	public synchronized void startPumaSyncTask() {
+		try {
+			List<PumaClientSyncTaskEntity> tasks = pumaClientSyncTaskMapper
+				.findByExecutor(InetAddress.getLocalHost().getHostAddress());
 
-                shardDumpTaskExecutorMap.put(task.getId(), executor);
-            }
+			for (PumaClientSyncTaskEntity task : tasks) {
+				if (pumaClientSyncTaskExecutorMap.containsKey(task.getId())) {
+					continue;
+				}
 
-            Set<Integer> idToRemove = new HashSet<Integer>();
-            for (int id : shardDumpTaskExecutorMap.keySet()) {
-                final int finalId = id;
-                if (Iterables.all(tasks, new Predicate<ShardDumpTaskEntity>() {
-                    @Override
-                    public boolean apply(ShardDumpTaskEntity entity) {
-                        return entity.getId() != finalId;
-                    }
-                })) {
-                    idToRemove.add(finalId);
-                }
-            }
+				PumaClientSyncTaskExecutor executor = new PumaClientSyncTaskExecutor(task);
+				executor.setPumaClientSyncTaskMapper(pumaClientSyncTaskMapper);
+				executor.init();
+				executor.start();
 
-            for (int id : idToRemove) {
-                ShardDumpTaskExecutor task = shardDumpTaskExecutorMap.remove(id);
-                if (task != null) {
-                    task.stop();
-                }
-            }
+				pumaClientSyncTaskExecutorMap.put(task.getId(), executor);
+			}
 
-        } catch (UnknownHostException e) {
-            Cat.logError(e);
-        }
-    }
+			Set<Integer> idToRemove = new HashSet<Integer>();
+			for (int id : pumaClientSyncTaskExecutorMap.keySet()) {
+				final int finalId = id;
+				if (Iterables.all(tasks, new Predicate<PumaClientSyncTaskEntity>() {
+					@Override
+					public boolean apply(PumaClientSyncTaskEntity entity) {
+						return entity.getId() != finalId;
+					}
+				})) {
+					idToRemove.add(finalId);
+				}
+			}
+
+			for (int id : idToRemove) {
+				ShardDumpTaskExecutor task = shardDumpTaskExecutorMap.remove(id);
+				if (task != null) {
+					task.stop();
+				}
+			}
+
+		} catch (UnknownHostException e) {
+			Cat.logError(e);
+		}
+	}
+
+	@Scheduled(cron = "0/15 * * * * ?")
+	public synchronized void startShardDumpTask() {
+		try {
+			List<ShardDumpTaskEntity> tasks = shardDumpService.getTaskByIp(InetAddress.getLocalHost().getHostAddress());
+
+			for (ShardDumpTaskEntity task : tasks) {
+				if (shardDumpTaskExecutorMap.containsKey(task.getId())) {
+					continue;
+				}
+
+				ShardDumpTaskExecutor executor = new ShardDumpTaskExecutor(task);
+				executor.setShardDumpService(shardDumpService);
+				executor.init();
+				executor.start();
+
+				shardDumpTaskExecutorMap.put(task.getId(), executor);
+			}
+
+			Set<Integer> idToRemove = new HashSet<Integer>();
+			for (int id : shardDumpTaskExecutorMap.keySet()) {
+				final int finalId = id;
+				if (Iterables.all(tasks, new Predicate<ShardDumpTaskEntity>() {
+					@Override
+					public boolean apply(ShardDumpTaskEntity entity) {
+						return entity.getId() != finalId;
+					}
+				})) {
+					idToRemove.add(finalId);
+				}
+			}
+
+			for (int id : idToRemove) {
+				ShardDumpTaskExecutor task = shardDumpTaskExecutorMap.remove(id);
+				if (task != null) {
+					task.stop();
+				}
+			}
+
+		} catch (UnknownHostException e) {
+			Cat.logError(e);
+		}
+	}
 }
