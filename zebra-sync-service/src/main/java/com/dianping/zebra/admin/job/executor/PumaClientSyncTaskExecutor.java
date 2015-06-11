@@ -60,7 +60,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 			initRouter();
 			initDataSources();
 			initPumaClient();
-
+			initSequenceUploader();
 		} catch (Exception exp) {
 			Cat.logError(exp);
 		}
