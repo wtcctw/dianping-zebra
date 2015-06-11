@@ -8,7 +8,7 @@ public class PumaClientSyncTaskEntity {
 	 * id
 	 */
 	private int id;
-
+	
 	/**
 	 * 分库分表规则
 	 */
@@ -18,6 +18,11 @@ public class PumaClientSyncTaskEntity {
 	 * 逻辑表名
 	 */
 	private String tableName;
+
+	/**
+	 * 主键字段
+	 */
+	private String pk;
 
 	/**
 	 * 数据库规则分配策略
@@ -55,9 +60,19 @@ public class PumaClientSyncTaskEntity {
 	private String pumaTables;
 
 	/**
-	 * 执行任务的服务器
+	 * 当前执行任务的服务器
 	 */
 	private String executor;
+
+	/**
+	 * 备选执行任务的服务器
+	 */
+	private String executor1;
+
+	/**
+	 * 备选执行任务的服务器
+	 */
+	private String executor2;
 
 	/**
 	 * 状态： 1.创建 2.生效 3.暂停
@@ -101,6 +116,14 @@ public class PumaClientSyncTaskEntity {
 
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
+	}
+
+	public String getPk() {
+		return pk;
+	}
+
+	public void setPk(String pk) {
+		this.pk = pk;
 	}
 
 	public String getDbRule() {
@@ -197,5 +220,21 @@ public class PumaClientSyncTaskEntity {
 
 	public void setSequence(long sequence) {
 		this.sequence = sequence;
+	}
+
+	public String getExecutor1() {
+		return executor1;
+	}
+
+	public void setExecutor1(String executor1) {
+		this.executor1 = executor1;
+	}
+
+	public String getExecutor2() {
+		return executor2;
+	}
+
+	public void setExecutor2(String executor2) {
+		this.executor2 = executor2;
 	}
 }

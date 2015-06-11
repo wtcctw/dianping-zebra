@@ -13,6 +13,8 @@ public interface SyncServerMonitorMapper {
 
     List<SyncServerMonitorEntity> getAllAlive();
 
+    List<SyncServerMonitorEntity> getAllSyncServer();
+
     int update(SyncServerMonitorEntity entity);
 
     void create(SyncServerMonitorEntity entity);

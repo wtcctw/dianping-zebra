@@ -15,7 +15,7 @@ public class ServerStatusMonitor {
     @Autowired
     private SyncServerMonitorService syncServerMonitorService;
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void uploadStatus() {
         syncServerMonitorService.uploadStatus();
     }
