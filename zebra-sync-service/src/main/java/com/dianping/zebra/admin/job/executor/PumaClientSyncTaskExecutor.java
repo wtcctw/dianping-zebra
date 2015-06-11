@@ -175,8 +175,12 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 					continue;
 				}
 
-				lastSeq = task.getSequence();
-				pumaClientSyncTaskMapper.updateSequence(task);
+				try {
+					lastSeq = task.getSequence();
+					pumaClientSyncTaskMapper.updateSequence(task);
+				} catch (Exception e) {
+					Cat.logError(e);
+				}
 			}
 		}
 	}
