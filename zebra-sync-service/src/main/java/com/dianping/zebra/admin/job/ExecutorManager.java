@@ -50,12 +50,19 @@ public class ExecutorManager {
 					continue;
 				}
 
-				PumaClientSyncTaskExecutor executor = new PumaClientSyncTaskExecutor(task);
-				executor.setPumaClientSyncTaskMapper(pumaClientSyncTaskMapper);
-				executor.init();
-				executor.start();
+				PumaClientSyncTaskExecutor executor = null;
+				try {
+					executor = new PumaClientSyncTaskExecutor(task);
+					executor.setPumaClientSyncTaskMapper(pumaClientSyncTaskMapper);
+					executor.init();
+					executor.start();
+					pumaClientSyncTaskExecutorMap.put(task.getId(), executor);
+				} catch (Exception e) {
+					if (executor != null) {
+						executor.stop();
+					}
+				}
 
-				pumaClientSyncTaskExecutorMap.put(task.getId(), executor);
 			}
 
 			Set<Integer> idToRemove = new HashSet<Integer>();

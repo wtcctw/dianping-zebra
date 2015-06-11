@@ -6,6 +6,7 @@ import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.exception.NoRowsAffectedException;
@@ -77,8 +78,12 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	}
 
 	public synchronized void stop() {
-		client.stop();
-		taskSequenceUploader.interrupt();
+		if (client != null) {
+			client.stop();
+		}
+		if (taskSequenceUploader != null) {
+			taskSequenceUploader.interrupt();
+		}
 		for (GroupDataSource ds : dataSources.values()) {
 			try {
 				ds.close();
@@ -237,10 +242,10 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 			RowChangedEvent rowEvent = (RowChangedEvent) event;
 
 			if (e instanceof DuplicateKeyException) {
-				rowEvent.setActionType(RowChangedEvent.UPDATE);
+				rowEvent.setDmlType(DMLType.UPDATE);
 				return false;
 			} else if (e instanceof NoRowsAffectedException) {
-				rowEvent.setActionType(RowChangedEvent.INSERT);
+				rowEvent.setDmlType(DMLType.INSERT);
 				return false;
 			} else {
 				//不断重试，随着重试次数增多，sleep 时间增加
