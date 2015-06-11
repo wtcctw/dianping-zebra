@@ -34,6 +34,7 @@
         (
         `ruleName`,
         `tableName`,
+        `pk`,
         `dbRule`,
         `dbIndexes`,
         `tbRule`,
@@ -53,6 +54,7 @@
         (
         #{ruleName},
         #{tableName},
+        #{pk},
         #{dbRule},
         #{dbIndexes},
         #{tbRule},
@@ -76,6 +78,7 @@
         SET
         ruleName=#{ruleName},
         tableName=#{tableName},
+        pk=#{pk},
         dbRule=#{dbRule},
         dbIndexes=#{dbIndexes},
         tbSuffix=#{tbSuffix},

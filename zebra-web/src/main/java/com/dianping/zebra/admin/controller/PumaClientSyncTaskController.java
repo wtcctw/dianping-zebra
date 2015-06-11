@@ -140,6 +140,7 @@ public class PumaClientSyncTaskController extends BasicController {
 
 						syncTask.setRuleName(ruleName);
 						syncTask.setTableName(table);
+						syncTask.setPk(tableShardRule.getGeneratedPK());
 						syncTask.setDbRule(dimensionConfig.getDbRule());
 						syncTask.setDbIndexes(dimensionConfig.getDbIndexes());
 						syncTask.setTbRule(dimensionConfig.getTbRule());

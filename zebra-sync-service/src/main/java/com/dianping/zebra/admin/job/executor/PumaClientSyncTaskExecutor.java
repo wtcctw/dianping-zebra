@@ -10,23 +10,19 @@ import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.exception.NoRowsAffectedException;
+import com.dianping.zebra.admin.util.ColumnInfoWrap;
 import com.dianping.zebra.admin.util.SqlGenerator;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
-import com.dianping.zebra.shard.config.RouterRuleConfig;
-import com.dianping.zebra.shard.config.TableShardDimensionConfig;
-import com.dianping.zebra.shard.config.TableShardRuleConfig;
-import com.dianping.zebra.shard.router.*;
-import com.dianping.zebra.shard.router.rule.DimensionRule;
-import com.dianping.zebra.shard.router.rule.DimensionRuleImpl;
-import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.TableShardRule;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import com.dianping.zebra.shard.router.rule.DataSourceBO;
+import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
+import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
+import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,9 +37,9 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	private final PumaClientSyncTaskEntity task;
 
-	protected ShardRouter shardRouter;
+	protected GroovyRuleEngine engine;
 
-	protected RouterRule routerRule;
+	protected SimpleDataSourceProvider dataSourceProvider;
 
 	protected PumaClient client;
 
@@ -57,7 +53,6 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	public synchronized void init() {
 		try {
-			initRule();
 			initRouter();
 			initDataSources();
 			initPumaClient();
@@ -100,43 +95,13 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initRouter() {
-		ShardRouterImpl router = new ShardRouterImpl();
-		router.setRouterRule(this.routerRule);
-		router.init();
-		this.shardRouter = router;
-	}
-
-	protected void initRule() {
-		TableShardDimensionConfig dimensionConfig = new TableShardDimensionConfig();
-		dimensionConfig.setTableName(task.getTableName());
-		dimensionConfig.setDbRule(task.getDbRule());
-		dimensionConfig.setDbIndexes(task.getDbIndexes());
-		dimensionConfig.setTbRule(task.getTbRule());
-		dimensionConfig.setTbSuffix(task.getTbSuffix());
-		dimensionConfig.setMaster(true);
-
-		TableShardRuleConfig tableShardRuleConfig = new TableShardRuleConfig();
-		tableShardRuleConfig.setTableName(task.getTableName());
-		tableShardRuleConfig.setDimensionConfigs(Lists.newArrayList(dimensionConfig));
-
-		RouterRuleConfig routerRuleConfig = new RouterRuleConfig();
-		routerRuleConfig.setTableShardConfigs(Lists.newArrayList(tableShardRuleConfig));
-		this.routerRule = AbstractDataSourceRouterFactory.build(routerRuleConfig);
+		this.engine = new GroovyRuleEngine(task.getDbRule());
+		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
+			task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
-		TableShardRule tableShardRule = routerRule.getTableShardRules().get(task.getTableName());
-		for (DimensionRule dimensionRule : tableShardRule.getDimensionRules()) {
-			DimensionRuleImpl dimensionRuleImpl = (DimensionRuleImpl) dimensionRule;
-			initDataSources(dimensionRuleImpl.getDataSourceProvider().getAllDBAndTables());
-			for (DimensionRule rule : dimensionRuleImpl.getWhiteListRules()) {
-				initDataSources(rule.getAllDBAndTables());
-			}
-		}
-	}
-
-	protected void initDataSources(Map<String, Set<String>> all) {
-		for (Map.Entry<String, Set<String>> entity : all.entrySet()) {
+		for (Map.Entry<String, Set<String>> entity : dataSourceProvider.getAllDBAndTables().entrySet()) {
 			String jdbcRef = entity.getKey();
 			if (!dataSources.containsKey(jdbcRef)) {
 				GroupDataSource ds = initGroupDataSource(jdbcRef);
@@ -211,29 +176,36 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 				return;
 			}
 
-			String tempSql;
-			Object[] args;
-			rowEvent.setTable(task.getTableName());
+			convertKey(rowEvent);
+
+			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
+			Number index = (Number) engine.eval(new RuleEngineEvalContext(column));
+			DataSourceBO bo = dataSourceProvider.getDataSource(index.intValue());
+			String table = bo.evalTable(column);
+
+			rowEvent.setTable(table);
 			rowEvent.setDatabase("");
+			String sql = SqlGenerator.parseSql(rowEvent);
+			Object[] args = SqlGenerator.parseArgs(rowEvent);
 
-			tempSql = SqlGenerator.parseSql(rowEvent);
-			args = SqlGenerator.parseArgs(rowEvent);
-
-			if (Strings.isNullOrEmpty(tempSql)) {
-				return;
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSources.get(bo.getDbIndex()));
+			int rows = jdbcTemplate.update(sql, args);
+			if (rows == 0 && RowChangedEvent.UPDATE == rowEvent.getActionType()) {
+				throw new NoRowsAffectedException();
 			}
-			
-			RouterResult routerTarget = shardRouter.router(tempSql, Lists.newArrayList(args));
+		}
 
-			for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
-				JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSources.get(targetedSql.getDataSourceName()));
-				for (String sql : targetedSql.getSqls()) {
-					int rows = jdbcTemplate.update(sql, args);
-					if (rows == 0 && RowChangedEvent.UPDATE == rowEvent.getActionType()) {
-						throw new NoRowsAffectedException();
-					}
+		protected void convertKey(RowChangedEvent rowEvent) {
+			Set<String> needToRemoveKey = new HashSet<String>();
+			for (Map.Entry<String, RowChangedEvent.ColumnInfo> info : rowEvent.getColumns().entrySet()) {
+				if (info.getValue().isKey() && !task.getPk().equals(info.getKey())) {
+					needToRemoveKey.add(info.getKey());
 				}
 			}
+			for (String key : needToRemoveKey) {
+				rowEvent.getColumns().remove(key);
+			}
+			rowEvent.getColumns().get(task.getPk()).setKey(true);
 		}
 
 		@Override
