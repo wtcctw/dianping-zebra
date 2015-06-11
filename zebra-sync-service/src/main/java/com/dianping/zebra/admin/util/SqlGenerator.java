@@ -30,7 +30,7 @@ public class SqlGenerator {
 		VE.setProperty("class.resource.loader.class", ClasspathResourceLoader.class.getName());
 		VE.setProperty("class.resource.loader.cache", true);
 		VE.setProperty("class.resource.loader.modificationCheckInterval", "-1");
-		VE.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.Log4JLogChute");
+		VE.setProperty("runtime.log", "/tmp/velocity.log");
 		VE.setProperty("input.encoding", "UTF-8");
 		VE.init();
 
