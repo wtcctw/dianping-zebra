@@ -78,7 +78,7 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     }
 });
 
-zebraWeb.controller('syncTask', function ($scope, $http){
+zebraWeb.controller('syncTask', function ($scope, $http, $modal,syncService){
 	$scope.load = function () {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
             $scope.shardRules = data;
@@ -104,11 +104,45 @@ zebraWeb.controller('syncTask', function ($scope, $http){
     		});
     	}
     }
-
     
+    $scope.edit = function (pumaTask) {
+    	syncService.openEditModal(pumaTask);
+    }
+
     $scope.$watch('shardRule', $scope.loadSyncTaskPlan);
 
     $scope.load();
+});
+
+zebraWeb.controller('syncTask-edit', function ($scope, $http, pumaTask, close){
+	$scope.name = pumaTask.pumaTaskName;
+	
+	$scope.load = function() {
+		$http.get('/a/sync-server').success(function (data, status, headers, config) {
+			$scope.syncServers = data;
+			
+			$scope.executor = pumaTask.executor;
+			$scope.executor1 = pumaTask.executor1;
+			$scope.executor2 = pumaTask.executor2;
+		});
+	}
+	
+	$scope.load();
+	
+	$scope.save = function(){
+		pumaTask.executor = $scope.executor;
+		pumaTask.executor1 = $scope.executor1;
+		pumaTask.executor2 = $scope.executor2;
+		
+		$http.get('/a/syncTask/updateSyncServer?pumaTaskName=' + pumaTask.pumaTaskName
+				+ '&executor=' + $scope.executor + '&executor1=' + $scope.executor1 + "&executor2=" + $scope.executor2).success(function (data, status, headers, config) {
+			close();
+		});
+	}
+	
+	$scope.close = function(){
+		close();
+	}
 });
 
 zebraWeb.controller('shard-migrate', function ($scope, $http, name, close) {

@@ -24,6 +24,32 @@ zebraWeb.service('shardService', function ($modal) {
     };
 });
 
+zebraWeb.service('syncService', function ($modal) {
+    this.openEditModal = function (pumaTask, onClose) {
+        var modal = $modal.open({
+            templateUrl: 'app/template/syncTask-edit.html',
+            controller: 'syncTask-edit',
+            size: 'lg',
+            backdrop: false,
+            resolve: {
+                pumaTask: function () {
+                    return pumaTask;
+                },
+                close: function () {
+                    return function () {
+                        if (modal) {
+                            modal.close();
+                        }
+                        if (onClose) {
+                            onClose();
+                        }
+                    };
+                }
+            }
+        });
+    };
+});
+
 zebraWeb.service('configService', function ($modal) {
     this.openTestModal = function (name, configs) {
         $modal.open({
