@@ -101,4 +101,14 @@
         updateTime=NOW()
         WHERE pumaTaskName=#{pumaTaskName}
     </update>
+    
+    <update id="updateSyncTaskSyncServers" parameterType="map">
+        UPDATE
+        `zebra`.`PumaTask` SET
+        executor=#{executor},
+        executor1=#{executor1},
+        executor2=#{executor2},
+        updateTime=NOW()
+        WHERE pumaTaskName=#{pumaTaskName}
+    </update>
 </mapper>

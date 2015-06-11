@@ -22,7 +22,7 @@ public class SyncServerController extends BasicController {
     @Autowired
     private SyncServerMonitorService syncServerMonitorService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public List<SyncServerMonitorEntity> index() {
         return syncServerMonitorService.getAllAlive();

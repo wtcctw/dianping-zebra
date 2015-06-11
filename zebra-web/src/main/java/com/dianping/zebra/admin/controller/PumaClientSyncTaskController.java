@@ -66,6 +66,14 @@ public class PumaClientSyncTaskController extends BasicController {
 
 		return null;
 	}
+	
+	@RequestMapping(value = "/updateSyncServer", method = RequestMethod.GET)
+	@ResponseBody
+	public void updateSyncServer(String pumaTaskName,String executor, String executor1,String executor2){
+		if(pumaTaskName != null && executor != null && executor1 != null && executor2 != null){
+			dao.updateSyncTaskSyncServers(pumaTaskName, executor, executor1, executor2);
+		}
+	}
 
 	@RequestMapping(value = "/schedule", method = RequestMethod.GET)
 	@ResponseBody
