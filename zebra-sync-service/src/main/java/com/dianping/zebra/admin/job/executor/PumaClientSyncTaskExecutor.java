@@ -135,7 +135,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	class TaskSequenceUploader implements Runnable {
 		@Override
 		public void run() {
-			long lastSeq = 0;
+			Long lastSeq = null;
 
 			while (true) {
 				try {
@@ -144,7 +144,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 					break;
 				}
 
-				if (lastSeq == task.getSequence()) {
+				if (lastSeq != null && lastSeq.longValue() == task.getSequence()) {
 					continue;
 				}
 
