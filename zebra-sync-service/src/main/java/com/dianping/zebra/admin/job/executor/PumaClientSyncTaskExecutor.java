@@ -4,6 +4,7 @@ import com.dianping.cat.Cat;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
+import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
@@ -127,7 +128,8 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 		this.client = new PumaClient(configBuilder.build());
 		this.client.register(new PumaEventListener());
-		client.getSeqFileHolder().saveSeq(task.getSequence());
+		client.getSeqFileHolder()
+			.saveSeq(task.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : task.getSequence());
 	}
 
 	class TaskSequenceUploader implements Runnable {
