@@ -31,6 +31,7 @@ import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
+import com.dianping.zebra.util.StringUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.gson.Gson;
@@ -41,7 +42,7 @@ public class PumaClientSyncTaskController extends BasicController {
 
 	@Autowired
 	private PumaClientSyncTaskMapper dao;
-	
+
 	@Autowired
 	private SyncServerMonitorService syncServers;
 
@@ -52,25 +53,26 @@ public class PumaClientSyncTaskController extends BasicController {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Object getExecutePlan(String ruleName) {
-		if(ruleName == null || ruleName.length() == 0){
-			return null;
+		if (StringUtils.isNotBlank(ruleName)) {
+			List<PumaClientSyncTaskEntity> allEntities = dao.findAllByRuleName(ruleName);
+
+			List<PumaClientSyncTaskDto> result = generatePlan(ruleName);
+
+			for (PumaClientSyncTaskDto dto : result) {
+				insertOrUpdate(allEntities, dto);
+			}
+			return result;
 		}
-		
-		List<PumaClientSyncTaskEntity> allEntities = dao.findAllByRuleName(ruleName);
 
-		List<PumaClientSyncTaskDto> result = generatePlan(ruleName);
-
-		for (PumaClientSyncTaskDto dto : result) {
-			insertOrUpdate(allEntities, dto);
-		}
-
-		return result;
+		return null;
 	}
-	
+
 	@RequestMapping(value = "/schedule", method = RequestMethod.GET)
 	@ResponseBody
-	public void updateExecutePlan(String pumaTaskName){
-		dao.updateSyncTaskStatus(pumaTaskName,2);
+	public void updateExecutePlan(String pumaTaskName) {
+		if (StringUtils.isNotBlank(pumaTaskName)) {
+			dao.updateSyncTaskStatus(pumaTaskName, 2);
+		}
 	}
 
 	private void insertOrUpdate(List<PumaClientSyncTaskEntity> allEntities, PumaClientSyncTaskDto dto) {
@@ -84,14 +86,19 @@ public class PumaClientSyncTaskController extends BasicController {
 
 		if (tmp == null) {
 			SyncServerMonitorEntity chooseOne = syncServers.chooseOne();
-			if(chooseOne != null){
-				dto.setExecutor(chooseOne.getName());
+			if (chooseOne != null) {
+				String executor = chooseOne.getName();
+				dto.setExecutor(executor);
+				dto.setExecutor1(executor);
+				dto.setExecutor2("");
 			}
 			dto.setStatus(1);
-			
+
 			dao.insertSyncTask(dto);
 		} else {
 			dto.setExecutor(tmp.getExecutor());
+			dto.setExecutor1(tmp.getExecutor1());
+			dto.setExecutor2(tmp.getExecutor2());
 			dto.setStatus(tmp.getStatus());
 			dao.updateSyncTask(dto);
 		}
@@ -110,23 +117,23 @@ public class PumaClientSyncTaskController extends BasicController {
 
 			for (TableShardDimensionConfig dimensionConfig : tableShardRule.getDimensionConfigs()) {
 				SimpleDataSourceProvider provider = new SimpleDataSourceProvider(table, dimensionConfig.getDbIndexes(),
-						dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
-				
-				if(dimensionConfig.isMaster()){
+				      dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
+
+				if (dimensionConfig.isMaster()) {
 					allDBAndTables = provider.getAllDBAndTables();
 					break;
 				}
 			}
-			
+
 			for (TableShardDimensionConfig dimensionConfig : tableShardRule.getDimensionConfigs()) {
 				SimpleDataSourceProvider provider = new SimpleDataSourceProvider(table, dimensionConfig.getDbIndexes(),
-						dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
-				
-				if(dimensionConfig.isMaster()){
+				      dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
+
+				if (dimensionConfig.isMaster()) {
 					allDBAndTables = provider.getAllDBAndTables();
 					continue;
 				}
-				
+
 				if (dimensionConfig.isMaster() == false) {
 					for (Entry<String, Set<String>> dbAndTables : allDBAndTables.entrySet()) {
 						PumaClientSyncTaskDto syncTask = new PumaClientSyncTaskDto();

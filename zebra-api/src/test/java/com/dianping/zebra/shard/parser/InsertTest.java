@@ -29,6 +29,4 @@ public class InsertTest {
 		
 		Assert.assertEquals("tg_dealcurrentjoin", insert.getTableName());
 	}
-	
-
 }

@@ -1,13 +1,5 @@
 package com.dianping.zebra.admin.service.impl;
 
-import com.dianping.cat.Cat;
-import com.dianping.zebra.admin.dao.SyncServerMonitorMapper;
-import com.dianping.zebra.admin.entity.SyncServerMonitorEntity;
-import com.dianping.zebra.admin.service.SyncServerMonitorService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.InetAddress;
@@ -15,6 +7,13 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.dianping.zebra.admin.dao.SyncServerMonitorMapper;
+import com.dianping.zebra.admin.entity.SyncServerMonitorEntity;
+import com.dianping.zebra.admin.service.SyncServerMonitorService;
 
 /**
  * Dozer @ 6/4/15 mail@dozer.cc http://www.dozer.cc

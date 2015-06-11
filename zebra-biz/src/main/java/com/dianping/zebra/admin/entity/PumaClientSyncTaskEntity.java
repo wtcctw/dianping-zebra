@@ -8,7 +8,7 @@ public class PumaClientSyncTaskEntity {
 	 * id
 	 */
 	private int id;
-
+	
 	/**
 	 * 分库分表规则
 	 */
@@ -18,6 +18,11 @@ public class PumaClientSyncTaskEntity {
 	 * 逻辑表名
 	 */
 	private String tableName;
+
+	/**
+	 * 主键字段
+	 */
+	private String pk;
 
 	/**
 	 * 数据库规则分配策略
@@ -111,6 +116,14 @@ public class PumaClientSyncTaskEntity {
 
 	public void setTableName(String tableName) {
 		this.tableName = tableName;
+	}
+
+	public String getPk() {
+		return pk;
+	}
+
+	public void setPk(String pk) {
+		this.pk = pk;
 	}
 
 	public String getDbRule() {

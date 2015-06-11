@@ -213,7 +213,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 			if (Strings.isNullOrEmpty(tempSql)) {
 				return;
 			}
-
+			
 			RouterResult routerTarget = shardRouter.router(tempSql, Lists.newArrayList(args));
 
 			for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
