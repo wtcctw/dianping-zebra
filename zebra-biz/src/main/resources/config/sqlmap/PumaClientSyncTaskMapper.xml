@@ -20,7 +20,7 @@
         SELECT * FROM PumaTask WHERE ruleName = #{ruleName} and
         status = 2;
     </select>
-
+    
     <update id="updateSequence" parameterType="PumaClientSyncTaskEntity">
         UPDATE `zebra`.`PumaTask`
         SET
@@ -42,6 +42,8 @@
         `pumaDatabase`,
         `pumaTables`,
         `executor`,
+        `executor1`,
+        `executor2`,
         `status`,
         `sequence`,
         `createTime`,
@@ -59,6 +61,8 @@
         #{pumaDatabase},
         #{pumaTables},
         #{executor},
+        #{executor1},
+        #{executor2},
         #{status},
         #{sequence},
         NOW(),
@@ -79,6 +83,8 @@
         pumaDatabase=#{pumaDatabase},
         pumaTables=#{pumaTables},
         executor=#{executor},
+        executor1=#{executor1},
+        executor2=#{executor2},
         status=#{status},
         sequence=#{sequence},
         updateTime=NOW()

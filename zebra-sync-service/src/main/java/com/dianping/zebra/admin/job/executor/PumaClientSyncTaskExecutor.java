@@ -143,6 +143,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	protected GroupDataSource initGroupDataSource(String jdbcRef) {
 		GroupDataSource ds = new GroupDataSource(jdbcRef);
 		ds.setRouterType(RouterType.FAIL_OVER.getRouterType());
+		ds.setFilter("!cat");
 		ds.init();
 		return ds;
 	}

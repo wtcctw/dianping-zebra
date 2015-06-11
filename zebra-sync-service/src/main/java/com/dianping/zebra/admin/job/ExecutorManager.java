@@ -39,7 +39,7 @@ public class ExecutorManager {
 
 	private Map<Integer, ShardDumpTaskExecutor> shardDumpTaskExecutorMap = new ConcurrentHashMap<Integer, ShardDumpTaskExecutor>();
 
-	@Scheduled(cron = "0/15 * * * * ?")
+	@Scheduled(cron = "0/10 * * * * ?")
 	public synchronized void startPumaSyncTask() {
 		try {
 			List<PumaClientSyncTaskEntity> tasks = pumaClientSyncTaskMapper
@@ -83,7 +83,7 @@ public class ExecutorManager {
 		}
 	}
 
-	@Scheduled(cron = "0/15 * * * * ?")
+	@Scheduled(cron = "0/10 * * * * ?")
 	public synchronized void startShardDumpTask() {
 		try {
 			List<ShardDumpTaskEntity> tasks = shardDumpService.getTaskByIp(InetAddress.getLocalHost().getHostAddress());

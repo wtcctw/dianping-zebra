@@ -7,6 +7,10 @@
     <select id="getAllAlive" parameterType="map" resultType="SyncServerMonitorEntity">
         SELECT * FROM SyncServerMonitor where UpdateTime > DATE_SUB(NOW(),INTERVAL 15 MINUTE)
     </select>
+    
+    <select id="getAllSyncServer" parameterType="map" resultType="SyncServerMonitorEntity">
+        SELECT * FROM SyncServerMonitor
+    </select>
 
     <insert id="create" parameterType="ShardDumpTaskEntity">
         INSERT INTO SyncServerMonitor

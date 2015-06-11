@@ -55,9 +55,19 @@ public class PumaClientSyncTaskEntity {
 	private String pumaTables;
 
 	/**
-	 * 执行任务的服务器
+	 * 当前执行任务的服务器
 	 */
 	private String executor;
+
+	/**
+	 * 备选执行任务的服务器
+	 */
+	private String executor1;
+
+	/**
+	 * 备选执行任务的服务器
+	 */
+	private String executor2;
 
 	/**
 	 * 状态： 1.创建 2.生效 3.暂停
@@ -197,5 +207,21 @@ public class PumaClientSyncTaskEntity {
 
 	public void setSequence(long sequence) {
 		this.sequence = sequence;
+	}
+
+	public String getExecutor1() {
+		return executor1;
+	}
+
+	public void setExecutor1(String executor1) {
+		this.executor1 = executor1;
+	}
+
+	public String getExecutor2() {
+		return executor2;
+	}
+
+	public void setExecutor2(String executor2) {
+		this.executor2 = executor2;
 	}
 }
