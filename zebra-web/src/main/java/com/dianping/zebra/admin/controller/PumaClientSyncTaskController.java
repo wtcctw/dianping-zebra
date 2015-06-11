@@ -106,14 +106,28 @@ public class PumaClientSyncTaskController extends BasicController {
 
 		for (TableShardRuleConfig tableShardRule : routerConfig.getTableShardConfigs()) {
 			String table = tableShardRule.getTableName();
+			Map<String, Set<String>> allDBAndTables = null;
 
 			for (TableShardDimensionConfig dimensionConfig : tableShardRule.getDimensionConfigs()) {
+				SimpleDataSourceProvider provider = new SimpleDataSourceProvider(table, dimensionConfig.getDbIndexes(),
+						dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
+				
+				if(dimensionConfig.isMaster()){
+					allDBAndTables = provider.getAllDBAndTables();
+					break;
+				}
+			}
+			
+			for (TableShardDimensionConfig dimensionConfig : tableShardRule.getDimensionConfigs()) {
+				SimpleDataSourceProvider provider = new SimpleDataSourceProvider(table, dimensionConfig.getDbIndexes(),
+						dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
+				
+				if(dimensionConfig.isMaster()){
+					allDBAndTables = provider.getAllDBAndTables();
+					continue;
+				}
+				
 				if (dimensionConfig.isMaster() == false) {
-					SimpleDataSourceProvider provider = new SimpleDataSourceProvider(table, dimensionConfig.getDbIndexes(),
-					      dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
-
-					Map<String, Set<String>> allDBAndTables = provider.getAllDBAndTables();
-
 					for (Entry<String, Set<String>> dbAndTables : allDBAndTables.entrySet()) {
 						PumaClientSyncTaskDto syncTask = new PumaClientSyncTaskDto();
 
