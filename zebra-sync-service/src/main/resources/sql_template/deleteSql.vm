@@ -5,11 +5,13 @@ DELETE FROM
 `${event.database}`.`${event.table}`
 #end
 WHERE
+#set ($keyCount = 0)
 #foreach($name2ColumnInfo in $event.columns.entrySet())
   #if(${name2ColumnInfo.value.key})
-       #if($velocityCount > 1)
-           AND
-       #end
-       `${name2ColumnInfo.key}` = ?
-   #end
+      #set ($keyCount = $keyCount + 1)
+      #if($keyCount > 1)
+          AND
+      #end
+      `${name2ColumnInfo.key}` = ?
+  #end
 #end

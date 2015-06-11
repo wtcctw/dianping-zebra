@@ -24,7 +24,7 @@
     <update id="updateSequence" parameterType="PumaClientSyncTaskEntity">
         UPDATE `zebra`.`PumaTask`
         SET
-        sequence=#{sequence},
+        sequence = #{sequence}
         WHERE id = #{id}
     </update>
 
