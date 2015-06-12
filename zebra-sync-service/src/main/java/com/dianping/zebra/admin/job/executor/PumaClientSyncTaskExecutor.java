@@ -41,7 +41,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	private final PumaClientStatusEntity status;
 
-	public final AtomicLong hitTImes = new AtomicLong();
+	public final AtomicLong hitTimes = new AtomicLong();
 
 	protected GroovyRuleEngine engine;
 
@@ -184,7 +184,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 		@Override
 		public void onEvent(ChangedEvent event) throws Exception {
-			hitTImes.incrementAndGet();
+			hitTimes.incrementAndGet();
 			tryTimes++;
 			onEventInternal(event);
 			status.setSequence(event.getSeq());
@@ -276,7 +276,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	public Map<String, String> getStatus() {
 		Map<String, String> result = new HashMap<String, String>();
-		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTImes.getAndSet(0)));
+		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTimes.getAndSet(0)));
 		return result;
 	}
 
