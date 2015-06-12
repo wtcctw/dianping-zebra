@@ -20,6 +20,7 @@ import com.dianping.zebra.shard.router.rule.DataSourceBO;
 import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
+import com.google.common.collect.ImmutableMap;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -41,7 +41,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	private final PumaClientStatusEntity status;
 
-	public final AtomicLong hitTImes = new AtomicLong();
+	public final AtomicLong hitTimes = new AtomicLong();
 
 	protected GroovyRuleEngine engine;
 
@@ -51,7 +51,9 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	protected Thread taskSequenceUploader;
 
-	protected Map<String, GroupDataSource> dataSources = new ConcurrentHashMap<String, GroupDataSource>();
+	protected Map<String, GroupDataSource> dataSources;
+
+	protected Map<String, JdbcTemplate> templateMap;
 
 	public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task, PumaClientStatusEntity status) {
 		this.task = task;
@@ -61,6 +63,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	public synchronized void init() {
 		initRouter();
 		initDataSources();
+		initJdbcTemplate();
 		initPumaClient();
 		initSequenceUploader();
 	}
@@ -107,13 +110,25 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initDataSources() {
+		Map<String, GroupDataSource> temp = new HashMap<String, GroupDataSource>();
 		for (Map.Entry<String, Set<String>> entity : dataSourceProvider.getAllDBAndTables().entrySet()) {
 			String jdbcRef = entity.getKey();
-			if (!dataSources.containsKey(jdbcRef)) {
+			if (!temp.containsKey(jdbcRef)) {
 				GroupDataSource ds = initGroupDataSource(jdbcRef);
-				dataSources.put(jdbcRef, ds);
+				temp.put(jdbcRef, ds);
 			}
 		}
+		this.dataSources = ImmutableMap.copyOf(temp);
+	}
+
+	protected void initJdbcTemplate() {
+		ImmutableMap.Builder<String, JdbcTemplate> builder = ImmutableMap.builder();
+
+		for (Map.Entry<String, GroupDataSource> entry : dataSources.entrySet()) {
+			builder.put(entry.getKey(), new JdbcTemplate(entry.getValue()));
+		}
+
+		this.templateMap = builder.build();
 	}
 
 	protected GroupDataSource initGroupDataSource(String jdbcRef) {
@@ -169,7 +184,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 		@Override
 		public void onEvent(ChangedEvent event) throws Exception {
-			hitTImes.incrementAndGet();
+			hitTimes.incrementAndGet();
 			tryTimes++;
 			onEventInternal(event);
 			status.setSequence(event.getSeq());
@@ -198,8 +213,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 			String sql = SqlBuilder.buildSql(rowEvent);
 			Object[] args = SqlBuilder.buildArgs(rowEvent);
 
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSources.get(bo.getDbIndex()));
-			int rows = jdbcTemplate.update(sql, args);
+			int rows = templateMap.get(bo.getDbIndex()).update(sql, args);
 			if (rows == 0 && RowChangedEvent.UPDATE == rowEvent.getActionType()) {
 				throw new NoRowsAffectedException();
 			}
@@ -263,7 +277,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	public Map<String, String> getStatus() {
 		Map<String, String> result = new HashMap<String, String>();
-		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTImes.getAndSet(0)));
+		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTimes.getAndSet(0)));
 		return result;
 	}
 
