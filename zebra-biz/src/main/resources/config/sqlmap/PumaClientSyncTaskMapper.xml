@@ -89,7 +89,6 @@
         executor1=#{executor1},
         executor2=#{executor2},
         status=#{status},
-        sequence=#{sequence},
         updateTime=NOW()
         WHERE pumaTaskName = #{pumaTaskName}
     </update>

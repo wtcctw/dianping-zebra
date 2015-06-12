@@ -23,7 +23,7 @@ public class SyncServerMonitorController {
 
 	private static final long INTERVAL = 30 * 1000; // 30 seconds
 
-	@Scheduled(cron = "0 * * * * ?")
+	@Scheduled(cron = "0/5 * * * * ?")
 	public void monitor() {
 		List<SyncServerMonitorEntity> aliveSyncServices = monitorDao.getAllSyncServer();
 

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SqlGenerator {
+public class SqlBuilder {
 
 	private static final VelocityEngine VE;
 
@@ -39,7 +39,7 @@ public class SqlGenerator {
 		ut = VE.getTemplate("/sql_template/updateSql.vm");
 	}
 
-	public static String parseSql(RowChangedEvent event) {
+	public static String buildSql(RowChangedEvent event) {
 		String sql;
 
 		switch (event.getDmlType()) {
@@ -55,10 +55,11 @@ public class SqlGenerator {
 		default:
 			sql = null;
 		}
+		
 		return StringUtils.normalizeSpace(sql);
 	}
 
-	public static Object[] parseArgs(RowChangedEvent event) {
+	public static Object[] buildArgs(RowChangedEvent event) {
 		List<Object> args = new ArrayList<Object>();
 		Map<String, ColumnInfo> columnInfoMap = event.getColumns();
 
@@ -84,6 +85,8 @@ public class SqlGenerator {
 					args.add(columnName2ColumnInfo.getValue().getOldValue());
 				}
 			}
+			break;
+		default:
 			break;
 		}
 
