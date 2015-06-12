@@ -59,7 +59,7 @@ public class TableShardRule {
 		return tableName;
 	}
 
-	public ShardMatchResult match(DMLCommon dmlSql, List<Object> params) {
+	public ShardMatchResult eval(DMLCommon dmlSql, List<Object> params) {
 		ShardMatchContext matchContext = new ShardMatchContext(dmlSql, params);
 		for (DimensionRule rule : rules) {
 			boolean isContinue = rule.match(matchContext);

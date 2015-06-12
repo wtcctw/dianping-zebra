@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * @author danson.liu
+ * @author damon.zhu
  */
 public class ShardRouterImpl implements ShardRouter {
 
@@ -45,81 +45,6 @@ public class ShardRouterImpl implements ShardRouter {
 	private Map<String, DMLCommon> sqlParseCache = Collections.synchronizedMap(new LRUCache<String, DMLCommon>(1000));
 
 	private static final String SKIP_MAX_STUB = "?";
-
-	@Override
-	public boolean validate(String sql) throws SyntaxException, ShardRouterException {
-		DMLCommon dmlSql = null;
-
-		try {
-			dmlSql = parseSqlClause(sql);
-		} catch (Exception e) {
-			throw new SyntaxException(e);
-		}
-
-		if (dmlSql != null) {
-			Set<String> relatedTables = dmlSql.getRelatedTables();
-			TableShardRule tableShardRule = getAppliedShardRule(relatedTables);
-
-			if (tableShardRule == null) {
-				throw new ShardRouterException("Cannot find any Shard Rule for table " + relatedTables);
-			} else {
-				return true;
-			}
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public RouterResult router(String sql, List<Object> params) throws ShardRouterException {
-		try {
-			RouterResult target = new RouterResult();
-			DMLCommon dmlSql = parseSqlClause(sql);
-			int skip = dmlSql.getSkip(params);
-			int max = dmlSql.getMax(params);
-			Set<String> relatedTables = dmlSql.getRelatedTables();
-			TableShardRule tableShardRule = getAppliedShardRule(relatedTables);
-
-			if (tableShardRule != null) {
-				ShardMatchResult matchResult = tableShardRule.match(dmlSql, params);
-				Map<String, Set<String>> dbAndTables = matchResult.getDbAndTables();
-				boolean acrossTable = dbAndTables.size() > 1
-				      || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
-
-				target.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
-				      tableShardRule.getTableName(), skip, max));
-				target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
-			} else {
-				throw new ShardRouterException("Cannot find any Shard Rule for table " + relatedTables);
-			}
-
-			return enrichRouterTarget(target, dmlSql, tableShardRule == null ? null : tableShardRule.getGeneratedPK(),
-			      skip, max);
-		} catch (Exception e) {
-			throw new ShardRouterException("DataSource route failed, cause: ", e);
-		}
-	}
-
-	private DMLCommon parseSqlClause(String sql) throws RecognitionException, IOException {
-		DMLCommon cachedResult = sqlParseCache.get(sql);
-		if (cachedResult != null) {
-			return cachedResult;
-		}
-		DMLCommon parsedResult = DPMySQLParser.parse(sql).obj;
-		sqlParseCache.put(sql, parsedResult);
-		return parsedResult;
-	}
-
-	private RouterResult enrichRouterTarget(RouterResult target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
-		target.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
-		target.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
-		target.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);
-		target.setOrderBys(dmlSql.getOrderByList());
-		target.setGeneratedPK(generatedPK);
-		target.setSkip(skip);
-		target.setMax(max);
-		return target;
-	}
 
 	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable, String sql,
 	      DMLCommon dmlSql, String logicTable, int skip, int max) {
@@ -142,15 +67,95 @@ public class ShardRouterImpl implements ShardRouter {
 		return new ArrayList<RouterTarget>(targetedSqlMap.values());
 	}
 
-	private String replaceSqlTableName(String sql, DMLCommon dmlSql, String logicTable, String physicalTable) {
-		List<Integer> tablePosList = dmlSql.getTablePos(logicTable);
-		int tableLen = logicTable.length();
+	private RouterResult enrichRouterTarget(RouterResult target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
+		target.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
+		target.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
+		target.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);
+		target.setOrderBys(dmlSql.getOrderByList());
+		target.setGeneratedPK(generatedPK);
+		target.setSkip(skip);
+		target.setMax(max);
+		
+		return target;
+	}
 
-		for (Integer tablePos : tablePosList) {
-			sql = sql.substring(0, tablePos) + physicalTable + sql.substring(tablePos + tableLen);
+	private MyWhereCondition.LimitInfo getLimitInfo(DMLCommon dmlSql) {
+		MyWhereCondition where = null;
+		if (dmlSql instanceof MySelect) {
+			where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
+		} else if (dmlSql instanceof MyUpdate) {
+			where = (MyWhereCondition) ((MyUpdate) dmlSql).getWhere();
+		} else if (dmlSql instanceof MyDelete) {
+			where = (MyWhereCondition) ((MyDelete) dmlSql).getWhere();
+		}
+		return where != null ? where.limitInfo : null;
+	}
+
+	private TableShardRule findTableShardRule(Set<String> relatedTables) throws ShardRouterException {
+		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
+		int matchedTimes = 0;
+		TableShardRule matchedTableShardRule = null;
+
+		for (String relatedTable : relatedTables) {
+			TableShardRule tmp = tableShardRules.get(relatedTable);
+			if (tmp != null) {
+				matchedTableShardRule = tmp;
+				matchedTimes++;
+			}
 		}
 
-		return sql;
+		if (matchedTimes > 1) {
+			throw new ShardRouterException("Matched more than one table shard rules is not supported now.");
+		}
+
+		if (matchedTableShardRule == null) {
+			throw new ShardRouterException("Cannot find any table shard rule for table " + relatedTables);
+		} else {
+			return matchedTableShardRule;
+		}
+	}
+
+	@Override
+	public RouterRule getRouterRule() {
+		return this.routerRule;
+	}
+
+	@Override
+	public void init() {
+	}
+
+	private DMLCommon parseSql(String sql) throws RecognitionException, IOException {
+		DMLCommon cachedResult = sqlParseCache.get(sql);
+
+		if (cachedResult != null) {
+			return cachedResult;
+		} else {
+			DMLCommon parsedResult = DPMySQLParser.parse(sql).obj;
+			sqlParseCache.put(sql, parsedResult);
+
+			return parsedResult;
+		}
+	}
+
+	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, DMLCommon dmlSql, int skip, int max) {
+		List<Object> newParams = null;
+		if (params != null) {
+			newParams = new ArrayList<Object>(params);
+			if (acrossTable && !(dmlSql instanceof Insert) && max != RouterResult.NO_MAX && skip > 0) {
+				MyWhereCondition where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
+				Object start = where.getStart();
+				if (start instanceof BindVar) {
+					int index = ((BindVar) start).getIndex();
+					newParams.set(index, 0);
+				}
+				Object range = where.getRange();
+				if (range instanceof BindVar) {
+					int index = ((BindVar) range).getIndex();
+					newParams.set(index, max != -1 ? skip + max : -1);
+				}
+			}
+		}
+		return newParams;
 	}
 
 	private String reconstructSqlLimit(boolean acrossTable, String sql, DMLCommon dmlSql, int skip, int max) {
@@ -181,56 +186,39 @@ public class ShardRouterImpl implements ShardRouter {
 		return sql;
 	}
 
-	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, DMLCommon dmlSql, int skip, int max) {
-		List<Object> newParams = null;
-		if (params != null) {
-			newParams = new ArrayList<Object>(params);
-			if (acrossTable && !(dmlSql instanceof Insert) && max != RouterResult.NO_MAX && skip > 0) {
-				MyWhereCondition where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
-				Object start = where.getStart();
-				if (start instanceof BindVar) {
-					int index = ((BindVar) start).getIndex();
-					newParams.set(index, 0);
-				}
-				Object range = where.getRange();
-				if (range instanceof BindVar) {
-					int index = ((BindVar) range).getIndex();
-					newParams.set(index, max != -1 ? skip + max : -1);
-				}
-			}
-		}
-		return newParams;
-	}
+	private String replaceSqlTableName(String sql, DMLCommon dmlSql, String logicTable, String physicalTable) {
+		List<Integer> tablePosList = dmlSql.getTablePos(logicTable);
+		int tableLen = logicTable.length();
 
-	private MyWhereCondition.LimitInfo getLimitInfo(DMLCommon dmlSql) {
-		MyWhereCondition where = null;
-		if (dmlSql instanceof MySelect) {
-			where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
-		} else if (dmlSql instanceof MyUpdate) {
-			where = (MyWhereCondition) ((MyUpdate) dmlSql).getWhere();
-		} else if (dmlSql instanceof MyDelete) {
-			where = (MyWhereCondition) ((MyDelete) dmlSql).getWhere();
+		for (Integer tablePos : tablePosList) {
+			sql = sql.substring(0, tablePos) + physicalTable + sql.substring(tablePos + tableLen);
 		}
-		return where != null ? where.limitInfo : null;
-	}
 
-	private TableShardRule getAppliedShardRule(Set<String> relatedTables) throws ShardRouterException {
-		Map<String, TableShardRule> shardRules = new HashMap<String, TableShardRule>(5);
-		Map<String, TableShardRule> tableShardRules = routerRule.getTableShardRules();
-		for (String relatedTable : relatedTables) {
-			TableShardRule tableShardRule = tableShardRules.get(relatedTable);
-			if (tableShardRule != null) {
-				shardRules.put(relatedTable, tableShardRule);
-			}
-		}
-		if (shardRules.size() > 1) {
-			throw new ShardRouterException("Sql contains more than one shard-related table is not supported now.");
-		}
-		return !shardRules.isEmpty() ? shardRules.values().iterator().next() : null;
+		return sql;
 	}
 
 	@Override
-	public void init() {
+	public RouterResult router(String sql, List<Object> params) throws ShardRouterException {
+		try {
+			RouterResult target = new RouterResult();
+			DMLCommon dmlSql = parseSql(sql);
+			int skip = dmlSql.getSkip(params);
+			int max = dmlSql.getMax(params);
+			Set<String> relatedTables = dmlSql.getRelatedTables();
+			TableShardRule tableShardRule = findTableShardRule(relatedTables);
+			
+			ShardMatchResult result = tableShardRule.eval(dmlSql, params);
+			Map<String, Set<String>> dbAndTables = result.getDbAndTables();
+			boolean acrossTable = dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
+			target.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
+			      tableShardRule.getTableName(), skip, max));
+			target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
+
+			return enrichRouterTarget(target, dmlSql, tableShardRule == null ? null : tableShardRule.getGeneratedPK(),
+			      skip, max);
+		} catch (Exception e) {
+			throw new ShardRouterException("DataSource route failed, cause: ", e);
+		}
 	}
 
 	public void setRouterRule(RouterRule routerRule) {
@@ -238,7 +226,26 @@ public class ShardRouterImpl implements ShardRouter {
 	}
 
 	@Override
-	public RouterRule getRouterRule() {
-		return this.routerRule;
+	public boolean validate(String sql) throws SyntaxException, ShardRouterException {
+		DMLCommon dmlSql = null;
+
+		try {
+			dmlSql = parseSql(sql);
+		} catch (Exception e) {
+			throw new SyntaxException(e);
+		}
+
+		if (dmlSql != null) {
+			Set<String> relatedTables = dmlSql.getRelatedTables();
+			TableShardRule tableShardRule = findTableShardRule(relatedTables);
+
+			if (tableShardRule == null) {
+				throw new ShardRouterException("Cannot find any Shard Rule for table " + relatedTables);
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
 	}
 }

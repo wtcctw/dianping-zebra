@@ -46,10 +46,6 @@ public abstract class AbstractDimensionRule implements DimensionRule {
 		shardColumn = shardColumns.iterator().next();
 	}
 
-	public boolean isMaster() {
-		return isMaster;
-	}
-
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
 	}

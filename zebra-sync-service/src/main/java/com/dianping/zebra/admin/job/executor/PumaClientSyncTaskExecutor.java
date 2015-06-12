@@ -106,7 +106,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-			task.getTbSuffix(), task.getTbRule());
+		      task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -146,13 +146,13 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
-			.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
 		this.client = new PumaClient(configBuilder.build());
 
 		this.client.register(new PumaEventListener());
-		client.getSeqFileHolder()
-			.saveSeq(status.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : status.getSequence());
+		client.getSeqFileHolder().saveSeq(
+		      status.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : status.getSequence());
 	}
 
 	class TaskSequenceUploader implements Runnable {
@@ -203,9 +203,10 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 			processPK(rowEvent);
 
 			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
-			Number index = (Number) engine.eval(new RuleEngineEvalContext(column));
+			RuleEngineEvalContext context = new RuleEngineEvalContext(column);
+			Number index = (Number) engine.eval(context);
 			DataSourceBO bo = dataSourceProvider.getDataSource(index.intValue());
-			String table = bo.evalTable(column);
+			String table = bo.evalTable(context);
 
 			rowEvent.setTable(table);
 			rowEvent.setDatabase("");
