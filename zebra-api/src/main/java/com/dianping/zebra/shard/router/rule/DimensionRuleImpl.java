@@ -28,105 +28,103 @@ import java.util.Map.Entry;
  */
 public class DimensionRuleImpl extends AbstractDimensionRule {
 
-    private Map<String, Set<String>> allDBAndTables = new HashMap<String, Set<String>>();
+	private String tableName;
 
-    private RuleEngine ruleEngine;
+	private RuleEngine ruleEngine;
 
-    private DataSourceProvider dataSourceProvider;
+	private List<DimensionRule> whiteListRules;
 
-    private List<DimensionRule> whiteListRules;
+	private DataSourceProvider dataSourceProvider;
 
-    private String tableName;
+	private Map<String, Set<String>> allDBAndTables = new HashMap<String, Set<String>>();
 
-    public RuleEngine getRuleEngine() {
-        return ruleEngine;
-    }
+	public Map<String, Set<String>> getAllDBAndTables() {
+		return allDBAndTables;
+	}
 
-    public void setRuleEngine(RuleEngine ruleEngine) {
-        this.ruleEngine = ruleEngine;
-    }
+	public DataSourceProvider getDataSourceProvider() {
+		return this.dataSourceProvider;
+	}
 
-    public Map<String, Set<String>> getAllDBAndTables() {
-        return allDBAndTables;
-    }
+	public RuleEngine getRuleEngine() {
+		return ruleEngine;
+	}
 
-    public List<DimensionRule> getWhiteListRules() {
-        return whiteListRules;
-    }
+	public List<DimensionRule> getWhiteListRules() {
+		return whiteListRules;
+	}
 
-    public void setWhiteListRules(List<DimensionRule> whiteListRules) {
-        this.whiteListRules = whiteListRules;
-    }
+	public void init(TableShardDimensionConfig dimensionConfig) {
+		this.isMaster = dimensionConfig.isMaster();
+		this.tableName = dimensionConfig.getTableName();
+		this.dataSourceProvider = new SimpleDataSourceProvider(dimensionConfig.getTableName(),
+		      dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
+		allDBAndTables.putAll(this.dataSourceProvider.getAllDBAndTables());
+		for (DimensionRule whiteListRule : this.whiteListRules) {
+			Map<String, Set<String>> whiteListDBAndTables = whiteListRule.getAllDBAndTables();
+			for (Entry<String, Set<String>> allDBAndTable : whiteListDBAndTables.entrySet()) {
+				String db = allDBAndTable.getKey();
+				if (!allDBAndTables.containsKey(db)) {
+					allDBAndTables.put(db, new HashSet<String>());
+				}
+				allDBAndTables.get(db).addAll(allDBAndTable.getValue());
+			}
+		}
+		this.ruleEngine = new GroovyRuleEngine(dimensionConfig.getDbRule());
+		this.initShardColumn(dimensionConfig.getDbRule());
+	}
 
-    public void init(TableShardDimensionConfig dimensionConfig) {
-        this.isMaster = dimensionConfig.isMaster();
-        this.tableName = dimensionConfig.getTableName();
-        this.dataSourceProvider = new SimpleDataSourceProvider(dimensionConfig.getTableName(),
-                dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
-        allDBAndTables.putAll(this.dataSourceProvider.getAllDBAndTables());
-        for (DimensionRule whiteListRule : this.whiteListRules) {
-            Map<String, Set<String>> whiteListDBAndTables = whiteListRule.getAllDBAndTables();
-            for (Entry<String, Set<String>> allDBAndTable : whiteListDBAndTables.entrySet()) {
-                String db = allDBAndTable.getKey();
-                if (!allDBAndTables.containsKey(db)) {
-                    allDBAndTables.put(db, new HashSet<String>());
-                }
-                allDBAndTables.get(db).addAll(allDBAndTable.getValue());
-            }
-        }
-        this.ruleEngine = new GroovyRuleEngine(dimensionConfig.getDbRule());
-        this.initBasedColumns(dimensionConfig.getDbRule());
-    }
+	@Override
+	public boolean match(ShardMatchContext matchContext) {
+		ShardMatchResult matchResult = matchContext.getMatchResult();
+		boolean onlyMatchMaster = matchContext.onlyMatchMaster();
+		boolean onlyMatchOnce = matchContext.onlyMatchOnce();
+		Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
+		      matchContext.getParams());
+		if (shardColValues == null || shardColValues.isEmpty()) {
+			if (onlyMatchMaster && isMaster) {
+				// 强制匹配了Master Rule，将该主规则所有表设置为主路由结果
+				matchResult.setDbAndTables(allDBAndTables);
+				matchResult.setDbAndTablesSetted(true);
+				return !onlyMatchOnce;
+			} else {
+				if (matchResult.isPotentialDBAndTbsSetted()) {
+					matchResult.addSubDBAndTables(allDBAndTables);
+				} else {
+					matchResult.setPotentialDBAndTbs(allDBAndTables);
+					matchResult.setPotentialDBAndTbsSetted(true);
+				}
+				return true;
+			}
+		}
+		boolean dbAndTablesSetted = matchResult.isDbAndTablesSetted();
+		matchContext.setColValues(shardColValues);
+		for (DimensionRule whiteListRule : whiteListRules) {
+			whiteListRule.match(matchContext);
+		}
+		for (Object colVal : matchContext.getColValues()) {
+			Map<String, Object> valMap = new HashMap<String, Object>();
+			valMap.put(shardColumn, colVal);
+			Number dbPos = (Number) ruleEngine.eval(new RuleEngineEvalContext(valMap));
+			DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
+			String table = dataSource.evalTable(valMap);
+			if (dbAndTablesSetted) {
+				matchResult.addSubDBAndTable(dataSource.getDbIndex(), table);
+			} else {
+				matchResult.addDBAndTable(dataSource.getDbIndex(), table);
+			}
+		}
+		if (!dbAndTablesSetted) {
+			matchResult.setDbAndTablesSetted(true);
+		}
+		return !onlyMatchOnce;
+	}
 
-    @Override
-    public boolean match(ShardMatchContext matchContext) {
-        ShardMatchResult matchResult = matchContext.getMatchResult();
-        boolean onlyMatchMaster = matchContext.onlyMatchMaster();
-        boolean onlyMatchOnce = matchContext.onlyMatchOnce();
-        String basedColumn = basedColumns.iterator().next();
-        matchContext.getMatchResult().setBasedColumn(basedColumn);
-        Set<Object> shardColValues = ShardColumnValueUtil
-                .eval(matchContext.getDmlSql(), tableName, basedColumn, matchContext.getParams());
-        if (shardColValues == null || shardColValues.isEmpty()) {
-            if (onlyMatchMaster && isMaster) {
-                // 强制匹配了Master Rule，将该主规则所有表设置为主路由结果
-                matchResult.setDbAndTables(allDBAndTables);
-                matchResult.setDbAndTablesSetted(true);
-                return !onlyMatchOnce;
-            } else {
-                if (matchResult.isPotentialDBAndTbsSetted()) {
-                    matchResult.addSubDBAndTables(allDBAndTables);
-                } else {
-                    matchResult.setPotentialDBAndTbs(allDBAndTables);
-                    matchResult.setPotentialDBAndTbsSetted(true);
-                }
-                return true;
-            }
-        }
-        boolean dbAndTablesSetted = matchResult.isDbAndTablesSetted();
-        matchContext.setColValues(shardColValues);
-        for (DimensionRule whiteListRule : whiteListRules) {
-            whiteListRule.match(matchContext);
-        }
-        for (Object colVal : matchContext.getColValues()) {
-            Map<String, Object> valMap = new HashMap<String, Object>();
-            valMap.put(basedColumn, colVal);
-            Number dbPos = (Number) ruleEngine.eval(new RuleEngineEvalContext(valMap));
-            DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
-            String table = dataSource.evalTable(valMap);
-            if (dbAndTablesSetted) {
-                matchResult.addSubDBAndTable(dataSource.getDbIndex(), table);
-            } else {
-                matchResult.addDBAndTable(dataSource.getDbIndex(), table);
-            }
-        }
-        if (!dbAndTablesSetted) {
-            matchResult.setDbAndTablesSetted(true);
-        }
-        return !onlyMatchOnce;
-    }
+	public void setRuleEngine(RuleEngine ruleEngine) {
+		this.ruleEngine = ruleEngine;
+	}
 
-    public DataSourceProvider getDataSourceProvider() {
-        return this.dataSourceProvider;
-    }
+	public void setWhiteListRules(List<DimensionRule> whiteListRules) {
+		this.whiteListRules = whiteListRules;
+	}
 }

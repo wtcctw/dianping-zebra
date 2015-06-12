@@ -39,19 +39,18 @@ public class WhitelistDimensionRule extends AbstractDimensionRule {
 		this.table = exceptionConfig.getTable();
 		String condition = exceptionConfig.getCondition();
 		this.ruleEngine = new GroovyRuleEngine(condition);
-		this.initBasedColumns(condition);
+		this.initShardColumn(condition);
 	}
 
 	@Override
 	public boolean match(ShardMatchContext matchContext) {
 		ShardMatchResult matchResult = matchContext.getMatchResult();
 		Set<Object> colValues = matchContext.getColValues();
-		String basedColumn = basedColumns.iterator().next();
 		for (Iterator<Object> iter = colValues.iterator(); iter.hasNext();) {
 			//new map every time, for concurrent execute later
 			Object colVal = iter.next();
 			Map<String, Object> valMap = new HashMap<String, Object>();
-			valMap.put(basedColumn, colVal);
+			valMap.put(shardColumn, colVal);
 			if ((Boolean) ruleEngine.eval(new RuleEngineEvalContext(valMap))) {
 				colValues.remove(colVal);
 				if (matchResult.isDbAndTablesSetted()) {

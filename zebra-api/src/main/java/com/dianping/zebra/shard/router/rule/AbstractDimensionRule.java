@@ -27,26 +27,23 @@ import java.util.regex.Matcher;
  */
 public abstract class AbstractDimensionRule implements DimensionRule {
 
-	protected Set<String> basedColumns = new HashSet<String>(2);
+	protected String shardColumn;
 
 	protected boolean isMaster;
 
-	public Set<String> getBasedColumns() {
-		return basedColumns;
-	}
-
-	public void setBasedColumns(Set<String> basedColumns) {
-		this.basedColumns = basedColumns;
-	}
-
-	public void initBasedColumns(String rule) {
+	public void initShardColumn(String rule) {
+		Set<String> shardColumns = new HashSet<String>();
 		Matcher matcher = RULE_COLUMN_PATTERN.matcher(rule);
+		
 		while (matcher.find()) {
-			basedColumns.add(matcher.group(1));
+			shardColumns.add(matcher.group(1));
 		}
-		if (basedColumns.size() != 1) {
+		
+		if (shardColumns.size() != 1) {
 			throw new RouterConfigException("Sharding rule only support one column now.");
 		}
+		
+		shardColumn = shardColumns.iterator().next();
 	}
 
 	public boolean isMaster() {
