@@ -56,6 +56,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 
 	public void init(TableShardDimensionConfig dimensionConfig) {
 		this.isMaster = dimensionConfig.isMaster();
+		this.needSync = dimensionConfig.isNeedSync();
 		this.tableName = dimensionConfig.getTableName();
 		this.dataSourceProvider = new SimpleDataSourceProvider(dimensionConfig.getTableName(),
 		      dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());

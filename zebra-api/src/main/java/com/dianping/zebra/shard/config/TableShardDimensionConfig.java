@@ -31,6 +31,8 @@ public class TableShardDimensionConfig implements Serializable {
 	
 	private boolean isMaster;
 	
+	private boolean needSync;
+	
 	private List<ExceptionConfig> exceptions;
 
 	private String tableName;
@@ -73,6 +75,14 @@ public class TableShardDimensionConfig implements Serializable {
 
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
+	}
+
+	public boolean isNeedSync() {
+		return needSync;
+	}
+
+	public void setNeedSync(boolean needSync) {
+		this.needSync = needSync;
 	}
 
 	public List<ExceptionConfig> getExceptions() {

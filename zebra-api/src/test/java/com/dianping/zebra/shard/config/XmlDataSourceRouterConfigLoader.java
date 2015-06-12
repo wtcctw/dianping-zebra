@@ -22,6 +22,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.*;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,6 +99,10 @@ public class XmlDataSourceRouterConfigLoader {
 			String isMaster = dimensionItem.getAttribute("isMaster");
 			if (isMaster != null) {
 				dimensionConfig.setMaster(Boolean.parseBoolean(isMaster));
+			}
+			String needSync = dimensionItem.getAttribute("needSync");
+			if(needSync != null) {
+				dimensionConfig.setNeedSync(Boolean.parseBoolean(needSync));
 			}
 			dimensionConfig.setExceptions(parseExceptionConfigs(dimensionItem));
 			dimensionConfigs.add(dimensionConfig);

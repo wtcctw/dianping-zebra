@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 /**
- * @author danson.liu
+ * @author damon.zhu
  *
  */
 public abstract class AbstractDimensionRule implements DimensionRule {
@@ -30,6 +30,8 @@ public abstract class AbstractDimensionRule implements DimensionRule {
 	protected String shardColumn;
 
 	protected boolean isMaster;
+	
+	protected boolean needSync;
 
 	public void initShardColumn(String rule) {
 		Set<String> shardColumns = new HashSet<String>();
@@ -48,5 +50,9 @@ public abstract class AbstractDimensionRule implements DimensionRule {
 
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
+	}
+	
+	public void setNeedSync(boolean needSync){
+		this.needSync = needSync;
 	}
 }
