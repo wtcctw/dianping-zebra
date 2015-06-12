@@ -1,12 +1,15 @@
 package com.dianping.zebra.admin.controller;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.dianping.cat.Cat;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.dao.SyncServerMonitorMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
@@ -25,9 +28,16 @@ public class SyncServerMonitorController {
 
 	@Scheduled(cron = "0/5 * * * * ?")
 	public void monitor() {
-		List<SyncServerMonitorEntity> aliveSyncServices = monitorDao.getAllSyncServer();
+		List<SyncServerMonitorEntity> aliveSyncServers = monitorDao.getAllAlive();
+		Set<String> aliveSyncServersSet = new HashSet<String>();
 
-		for (SyncServerMonitorEntity aliveSyncService : aliveSyncServices) {
+		for (SyncServerMonitorEntity entity : aliveSyncServers) {
+			aliveSyncServersSet.add(entity.getName());
+		}
+
+		List<SyncServerMonitorEntity> allSyncServers = monitorDao.getAllSyncServer();
+
+		for (SyncServerMonitorEntity aliveSyncService : allSyncServers) {
 			Date lastUpdateTime = aliveSyncService.getUpdateTime();
 
 			long now = System.currentTimeMillis();
@@ -41,20 +51,28 @@ public class SyncServerMonitorController {
 					String executor1 = task.getExecutor1();
 					String executor2 = task.getExecutor2();
 
-					if (executor.equals(executor1)) {
-						task.setExecutor(executor2);
-						syncTaskDao.updateSyncTask(task);
-						continue;
-					}
-
-					if (executor.equalsIgnoreCase(executor2)) {
+					if (!executor.equals(executor1) && aliveSyncServersSet.contains(executor1)) {
 						task.setExecutor(executor1);
 						syncTaskDao.updateSyncTask(task);
-						continue;
+					} else if (!executor.equalsIgnoreCase(executor2) && aliveSyncServersSet.contains(executor2)) {
+						task.setExecutor(executor2);
+						syncTaskDao.updateSyncTask(task);
+					} else {
+						Cat.logError(new NoAliveSyncServerException(task.getPumaTaskName()
+						      + " has no available alive syncservers."));
 					}
 
 				}
 			}
+		}
+	}
+
+	public static class NoAliveSyncServerException extends Exception {
+
+		private static final long serialVersionUID = -1437599668873911951L;
+
+		public NoAliveSyncServerException(String message) {
+			super(message);
 		}
 	}
 }
