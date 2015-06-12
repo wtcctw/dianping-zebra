@@ -11,11 +11,11 @@ import com.dianping.zebra.admin.job.executor.ShardDumpTaskExecutor;
 import com.dianping.zebra.admin.service.ShardDumpService;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Dozer @ 6/2/15 mail@dozer.cc http://www.dozer.cc
@@ -59,43 +57,30 @@ public class ExecutorManager {
 		for (PumaClientSyncTaskEntity task : tasks) {
 			if (pumaClientSyncTaskExecutorMap.containsKey(task.getId())) {
 				continue;
+			}
 
-				PumaClientStatusEntity status = pumaClientStatusMapper.selectByTaskId(task.getId());
-				if (status == null) {
-					status = new PumaClientStatusEntity();
-					status.setTaskId(task.getId());
-					pumaClientStatusMapper.create(status);
-				}
-
-				PumaClientSyncTaskExecutor executor = null;
-				try {
-					executor = new PumaClientSyncTaskExecutor(task, status);
-					executor.setStatusMapper(pumaClientStatusMapper);
-					executor.init();
-					executor.start();
-					pumaClientSyncTaskExecutorMap.put(task.getId(), executor);
-				} catch (Exception e) {
-					if (executor != null) {
-						executor.stop();
-					}
-				}
-
+			PumaClientStatusEntity status = pumaClientStatusMapper.selectByTaskId(task.getId());
+			if (status == null) {
+				status = new PumaClientStatusEntity();
+				status.setTaskId(task.getId());
+				pumaClientStatusMapper.create(status);
 			}
 
 			PumaClientSyncTaskExecutor executor = null;
 			try {
-				executor = new PumaClientSyncTaskExecutor(task);
-				executor.setPumaClientSyncTaskMapper(pumaClientSyncTaskMapper);
+				executor = new PumaClientSyncTaskExecutor(task, status);
+				executor.setStatusMapper(pumaClientStatusMapper);
 				executor.init();
 				executor.start();
 				pumaClientSyncTaskExecutorMap.put(task.getId(), executor);
 			} catch (Exception e) {
 				if (executor != null) {
 					executor.stop();
-				
-				//TODO 上报状态
-			}
 
+					//TODO 上报状态
+				}
+
+			}
 		}
 
 		Set<Integer> idToRemove = new HashSet<Integer>();
