@@ -99,7 +99,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-		      task.getTbSuffix(), task.getTbRule());
+			task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -127,7 +127,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
-		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+			.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
 		this.client = new PumaClient(configBuilder.build());
 
@@ -148,15 +148,13 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 					break;
 				}
 
-				if (lastSeq != null || lastSeq.longValue() == status.getSequence()) {
-					continue;
-				}
-
-				try {
-					lastSeq = status.getSequence();
-					statusMapper.updateSequence(status);
-				} catch (Exception e) {
-					Cat.logError(e);
+				if (lastSeq == null || lastSeq.longValue() != status.getSequence()) {
+					try {
+						lastSeq = status.getSequence();
+						statusMapper.updateSequence(status);
+					} catch (Exception e) {
+						Cat.logError(e);
+					}
 				}
 			}
 		}
@@ -224,11 +222,11 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 			if (e instanceof DuplicateKeyException) {
 				rowEvent.setDmlType(DMLType.UPDATE);
-				
+
 				return false;
 			} else if (e instanceof NoRowsAffectedException) {
 				rowEvent.setDmlType(DMLType.INSERT);
-				
+
 				return false;
 			} else {
 				// 不断重试，随着重试次数增多，sleep 时间增加
