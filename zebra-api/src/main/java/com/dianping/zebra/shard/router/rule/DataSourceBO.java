@@ -15,12 +15,11 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
-import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
-import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
+import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 
 /**
  * @author danson.liu
@@ -54,8 +53,8 @@ public class DataSourceBO {
 		return dbIndex;
 	}
 
-	public String evalTable(Map<String, Object> valMap) {
-		Number tablePos = (Number) tableRuleEngine.eval(new RuleEngineEvalContext(valMap));
+	public String evalTable(RuleEngineEvalContext context) {
+		Number tablePos = (Number) tableRuleEngine.eval(context);
 		return physicalTables.get(tablePos.intValue());
 	}
 }

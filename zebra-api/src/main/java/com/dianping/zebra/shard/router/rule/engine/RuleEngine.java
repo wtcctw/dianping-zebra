@@ -23,5 +23,4 @@ public interface RuleEngine {
 
 	Object eval(RuleEngineEvalContext evalContext);
 
-
 }

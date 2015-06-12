@@ -92,11 +92,11 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 					matchResult.setPotentialDBAndTbs(allDBAndTables);
 					matchResult.setPotentialDBAndTbsSetted(true);
 				}
-				
+
 				return true;
 			}
 		}
-		
+
 		boolean dbAndTablesSetted = matchResult.isDbAndTablesSetted();
 		matchContext.setColValues(shardColValues);
 		for (DimensionRule whiteListRule : whiteListRules) {
@@ -105,9 +105,11 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		for (Object colVal : matchContext.getColValues()) {
 			Map<String, Object> valMap = new HashMap<String, Object>();
 			valMap.put(shardColumn, colVal);
-			Number dbPos = (Number) ruleEngine.eval(new RuleEngineEvalContext(valMap));
+
+			RuleEngineEvalContext context = new RuleEngineEvalContext(valMap);
+			Number dbPos = (Number) ruleEngine.eval(context);
 			DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
-			String table = dataSource.evalTable(valMap);
+			String table = dataSource.evalTable(context);
 			if (!dbAndTablesSetted) {
 				matchResult.addDBAndTable(dataSource.getDbIndex(), table);
 			}
