@@ -1,5 +1,6 @@
 package com.dianping.zebra.admin.job.executor;
 
+import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -63,6 +64,7 @@ public class PumaClientSyncTaskExecutorTest {
 	@Ignore
 	public void testPuma() throws IOException {
 		PumaClientSyncTaskEntity config = new PumaClientSyncTaskEntity();
+		PumaClientStatusEntity status = new PumaClientStatusEntity();
 
 		config.setRuleName("unifiedorder");
 		config.setTableName("UOD_Order");
@@ -71,12 +73,10 @@ public class PumaClientSyncTaskExecutorTest {
 		config.setTbRule("(#ShopID#.toInteger()).intdiv(2) %2");
 		config.setTbSuffix("alldb:[_Shop0,_Shop3]");
 		config.setPumaTaskName("OrderShop0@UOD_Order@ShopID");
-		config.setPumaDatabase("UnifiedOrder0");
 		config.setPumaTables("UOD_Order0,UOD_Order1");
 		config.setPk("OrderID");
-		config.setSequence(-2);
 
-		PumaClientSyncTaskExecutor target = new PumaClientSyncTaskExecutor(config);
+		PumaClientSyncTaskExecutor target = new PumaClientSyncTaskExecutor(config, status);
 		target.init();
 		target.start();
 		System.in.read();

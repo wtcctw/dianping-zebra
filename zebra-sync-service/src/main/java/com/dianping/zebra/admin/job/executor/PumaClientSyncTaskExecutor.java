@@ -8,7 +8,8 @@ import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
+import com.dianping.zebra.admin.dao.PumaClientStatusMapper;
+import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.exception.NoRowsAffectedException;
 import com.dianping.zebra.admin.util.ColumnInfoWrap;
@@ -32,9 +33,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
  */
 public class PumaClientSyncTaskExecutor implements TaskExecutor {
-	private PumaClientSyncTaskMapper pumaClientSyncTaskMapper;
+	private PumaClientStatusMapper statusMapper;
 
 	private final PumaClientSyncTaskEntity task;
+
+	private final PumaClientStatusEntity status;
 
 	protected GroovyRuleEngine engine;
 
@@ -46,8 +49,9 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	protected Map<String, GroupDataSource> dataSources = new ConcurrentHashMap<String, GroupDataSource>();
 
-	public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task) {
+	public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task, PumaClientStatusEntity status) {
 		this.task = task;
+		this.status = status;
 	}
 
 	public synchronized void init() {
@@ -128,8 +132,8 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		this.client = new PumaClient(configBuilder.build());
 
 		this.client.register(new PumaEventListener());
-		client.getSeqFileHolder().saveSeq(
-		      task.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : task.getSequence());
+		client.getSeqFileHolder()
+			.saveSeq(status.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : status.getSequence());
 	}
 
 	class TaskSequenceUploader implements Runnable {
@@ -144,13 +148,15 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 					break;
 				}
 
-				if (lastSeq != null && lastSeq.longValue() != task.getSequence()) {
-					try {
-						lastSeq = task.getSequence();
-						pumaClientSyncTaskMapper.updateSequence(task);
-					} catch (Exception e) {
-						Cat.logError(e);
-					}
+				if (lastSeq != null || lastSeq.longValue() == status.getSequence()) {
+					continue;
+				}
+
+				try {
+					lastSeq = status.getSequence();
+					statusMapper.updateSequence(status);
+				} catch (Exception e) {
+					Cat.logError(e);
 				}
 			}
 		}
@@ -163,7 +169,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		public void onEvent(ChangedEvent event) throws Exception {
 			tryTimes++;
 			onEventInternal(event);
-			task.setSequence(event.getSeq());
+			status.setSequence(event.getSeq());
 			tryTimes = 0;
 		}
 
@@ -251,7 +257,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		}
 	}
 
-	public void setPumaClientSyncTaskMapper(PumaClientSyncTaskMapper pumaClientSyncTaskMapper) {
-		this.pumaClientSyncTaskMapper = pumaClientSyncTaskMapper;
+	public void setStatusMapper(PumaClientStatusMapper statusMapper) {
+		this.statusMapper = statusMapper;
 	}
 }
