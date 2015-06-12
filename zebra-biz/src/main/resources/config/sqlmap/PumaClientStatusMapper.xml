@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.dianping.zebra.admin.dao.PumaClientStatusMapper">
-    <select id="selectByTaskId" parameterType="map">
+    <select id="selectByTaskId" parameterType="map" resultType="PumaClientStatusEntity">
         SELECT * FROM `PumaTaskStatus`
         WHERE taskId = #{taskId}
         LIMIT 1
