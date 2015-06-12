@@ -21,13 +21,6 @@
         status = 2;
     </select>
     
-    <update id="updateSequence" parameterType="PumaClientSyncTaskEntity">
-        UPDATE `zebra`.`PumaTask`
-        SET
-        sequence = #{sequence}
-        WHERE id = #{id}
-    </update>
-
     <insert id="insertSyncTask" parameterType="PumaClientSyncTaskEntity">
         INSERT INTO
         `zebra`.`PumaTask`
@@ -46,7 +39,6 @@
         `executor1`,
         `executor2`,
         `status`,
-        `sequence`,
         `createTime`,
         `updateTime`
         )
@@ -66,7 +58,6 @@
         #{executor1},
         #{executor2},
         #{status},
-        #{sequence},
         NOW(),
         NOW()
         )
