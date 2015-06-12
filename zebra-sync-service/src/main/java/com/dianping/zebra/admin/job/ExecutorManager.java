@@ -18,10 +18,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -44,6 +41,14 @@ public class ExecutorManager {
 	private Map<Integer, ShardDumpTaskExecutor> shardDumpTaskExecutorMap = new ConcurrentHashMap<Integer, ShardDumpTaskExecutor>();
 
 	private String localAddress;
+
+	public Map<String, String> getStatus() {
+		Map<String, String> result = new HashMap<String, String>();
+		for (PumaClientSyncTaskExecutor task : pumaClientSyncTaskExecutorMap.values()) {
+			result.putAll(task.getStatus());
+		}
+		return result;
+	}
 
 	@PostConstruct
 	public void init() throws UnknownHostException {

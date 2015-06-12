@@ -24,10 +24,12 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
@@ -38,6 +40,8 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	private final PumaClientSyncTaskEntity task;
 
 	private final PumaClientStatusEntity status;
+
+	public final AtomicLong hitTImes = new AtomicLong();
 
 	protected GroovyRuleEngine engine;
 
@@ -165,6 +169,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 		@Override
 		public void onEvent(ChangedEvent event) throws Exception {
+			hitTImes.incrementAndGet();
 			tryTimes++;
 			onEventInternal(event);
 			status.setSequence(event.getSeq());
@@ -253,6 +258,12 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		public void onSkipEvent(ChangedEvent event) {
 
 		}
+	}
+
+	public Map<String, String> getStatus() {
+		Map<String, String> result = new HashMap<String, String>();
+		result.put(String.format("PumaTask-%d-QPS", task.getId()), String.valueOf(hitTImes.getAndSet(0)));
+		return result;
 	}
 
 	public void setStatusMapper(PumaClientStatusMapper statusMapper) {
