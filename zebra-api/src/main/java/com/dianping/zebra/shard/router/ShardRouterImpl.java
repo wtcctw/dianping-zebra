@@ -15,6 +15,16 @@
  */
 package com.dianping.zebra.shard.router;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.antlr.runtime.RecognitionException;
+
 import com.dianping.zebra.shard.jdbc.util.LRUCache;
 import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
@@ -29,12 +39,6 @@ import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardMatchResult;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
 
-import org.antlr.runtime.RecognitionException;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-
 /**
  * @author damon.zhu
  */
@@ -48,23 +52,20 @@ public class ShardRouterImpl implements ShardRouter {
 
 	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable, String sql,
 	      DMLCommon dmlSql, String logicTable, int skip, int max) {
-		Map<String, RouterTarget> targetedSqlMap = new HashMap<String, RouterTarget>();
 		sql = reconstructSqlLimit(acrossTable, sql, dmlSql, skip, max);
 
+		List<RouterTarget> result = new ArrayList<RouterTarget>();
 		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
-			String jdbcRef = entry.getKey();
+			RouterTarget targetedSql = new RouterTarget(entry.getKey());
 
-			if (!targetedSqlMap.containsKey(jdbcRef)) {
-				targetedSqlMap.put(jdbcRef, new RouterTarget(jdbcRef));
-			}
-
-			RouterTarget targetedSql = targetedSqlMap.get(jdbcRef);
 			for (String physicalTable : entry.getValue()) {
 				targetedSql.addSql(replaceSqlTableName(sql, dmlSql, logicTable, physicalTable));
 			}
+
+			result.add(targetedSql);
 		}
 
-		return new ArrayList<RouterTarget>(targetedSqlMap.values());
+		return result;
 	}
 
 	private RouterResult enrichRouterTarget(RouterResult target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
@@ -75,7 +76,7 @@ public class ShardRouterImpl implements ShardRouter {
 		target.setGeneratedPK(generatedPK);
 		target.setSkip(skip);
 		target.setMax(max);
-		
+
 		return target;
 	}
 
@@ -141,6 +142,7 @@ public class ShardRouterImpl implements ShardRouter {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
+			//处理limit的参数
 			if (acrossTable && !(dmlSql instanceof Insert) && max != RouterResult.NO_MAX && skip > 0) {
 				MyWhereCondition where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
 				Object start = where.getStart();
@@ -155,19 +157,28 @@ public class ShardRouterImpl implements ShardRouter {
 				}
 			}
 		}
+		
 		return newParams;
 	}
 
 	private String reconstructSqlLimit(boolean acrossTable, String sql, DMLCommon dmlSql, int skip, int max) {
-		// 如果既有limit又有groupby，那么需要去掉limit。by Leo Liang
+		// 有limit又有groupby的情况，那么需要去掉limit。by Leo Liang
 		// Note: 其实应该加上一个过滤条件，groupby里面没有分区键
 		if ((dmlSql instanceof Select) && acrossTable && (max != RouterResult.NO_MAX || skip != RouterResult.NO_SKIP)) {
-			if (((Select) dmlSql).getWhere().getGroupByColumns() != null
-			      && !((Select) dmlSql).getWhere().getGroupByColumns().isEmpty()) {
-				return sql.substring(0, sql.toLowerCase().lastIndexOf(" limit "));
+			List<String> groupByColumns = ((Select) dmlSql).getWhere().getGroupByColumns();
+
+			if (groupByColumns != null && groupByColumns.size() > 0) {
+				int pos = sql.toLowerCase().lastIndexOf(" limit ");
+
+				if (pos > 0) {
+					return sql.substring(0, pos);
+				} else {
+					return sql;
+				}
 			}
 		}
 
+		// 没有groupby的情况
 		if (acrossTable && !(dmlSql instanceof Insert) && max != RouterResult.NO_MAX && skip > 0) {
 			MyWhereCondition.LimitInfo limitInfo = getLimitInfo(dmlSql);
 
@@ -183,6 +194,7 @@ public class ShardRouterImpl implements ShardRouter {
 				sql = sql.substring(0, rangeIdx) + (skip + max) + sql.substring(rangeIdx + maxLen);
 			}
 		}
+
 		return sql;
 	}
 
@@ -206,7 +218,7 @@ public class ShardRouterImpl implements ShardRouter {
 			int max = dmlSql.getMax(params);
 			Set<String> relatedTables = dmlSql.getRelatedTables();
 			TableShardRule tableShardRule = findTableShardRule(relatedTables);
-			
+
 			ShardMatchResult result = tableShardRule.eval(dmlSql, params);
 			Map<String, Set<String>> dbAndTables = result.getDbAndTables();
 			boolean acrossTable = dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
