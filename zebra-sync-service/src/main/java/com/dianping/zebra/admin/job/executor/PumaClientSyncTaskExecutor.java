@@ -12,7 +12,7 @@ import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.exception.NoRowsAffectedException;
 import com.dianping.zebra.admin.util.ColumnInfoWrap;
-import com.dianping.zebra.admin.util.SqlGenerator;
+import com.dianping.zebra.admin.util.SqlBuilder;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.shard.router.rule.DataSourceBO;
@@ -29,9 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Dozer @ 6/9/15
- * mail@dozer.cc
- * http://www.dozer.cc
+ * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
  */
 public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	private PumaClientSyncTaskMapper pumaClientSyncTaskMapper;
@@ -46,21 +44,17 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	protected Thread taskSequenceUploader;
 
-	protected static Map<String, GroupDataSource> dataSources = new ConcurrentHashMap<String, GroupDataSource>();
+	protected Map<String, GroupDataSource> dataSources = new ConcurrentHashMap<String, GroupDataSource>();
 
 	public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task) {
 		this.task = task;
 	}
 
 	public synchronized void init() {
-		try {
-			initRouter();
-			initDataSources();
-			initPumaClient();
-			initSequenceUploader();
-		} catch (Exception exp) {
-			Cat.logError(exp);
-		}
+		initRouter();
+		initDataSources();
+		initPumaClient();
+		initSequenceUploader();
 	}
 
 	public synchronized void start() {
@@ -77,15 +71,18 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		if (client != null) {
 			client.stop();
 		}
+
 		if (taskSequenceUploader != null) {
 			taskSequenceUploader.interrupt();
 		}
+
 		for (GroupDataSource ds : dataSources.values()) {
 			try {
 				ds.close();
 			} catch (SQLException ignore) {
 			}
 		}
+
 		dataSources.clear();
 	}
 
@@ -98,7 +95,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-			task.getTbSuffix(), task.getTbRule());
+		      task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -113,23 +110,26 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	protected GroupDataSource initGroupDataSource(String jdbcRef) {
 		GroupDataSource ds = new GroupDataSource(jdbcRef);
+
 		ds.setRouterType(RouterType.FAIL_OVER.getRouterType());
 		ds.setFilter("!cat");
 		ds.init();
+
 		return ds;
 	}
 
 	protected void initPumaClient() {
-		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName());
 		String fullName = String.format("%s-%d", "PumaClientSyncTask", task.getId());
-		configBuilder.name(fullName);
-		configBuilder.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+
+		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
+		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
+		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
 		this.client = new PumaClient(configBuilder.build());
+
 		this.client.register(new PumaEventListener());
-		client.getSeqFileHolder()
-			.saveSeq(task.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : task.getSequence());
+		client.getSeqFileHolder().saveSeq(
+		      task.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : task.getSequence());
 	}
 
 	class TaskSequenceUploader implements Runnable {
@@ -137,22 +137,20 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		public void run() {
 			Long lastSeq = null;
 
-			while (true) {
+			while (!Thread.currentThread().isInterrupted()) {
 				try {
 					Thread.sleep(5 * 1000);
 				} catch (InterruptedException e) {
 					break;
 				}
 
-				if (lastSeq != null && lastSeq.longValue() == task.getSequence()) {
-					continue;
-				}
-
-				try {
-					lastSeq = task.getSequence();
-					pumaClientSyncTaskMapper.updateSequence(task);
-				} catch (Exception e) {
-					Cat.logError(e);
+				if (lastSeq != null && lastSeq.longValue() != task.getSequence()) {
+					try {
+						lastSeq = task.getSequence();
+						pumaClientSyncTaskMapper.updateSequence(task);
+					} catch (Exception e) {
+						Cat.logError(e);
+					}
 				}
 			}
 		}
@@ -178,7 +176,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 				return;
 			}
 
-			convertKey(rowEvent);
+			processPK(rowEvent);
 
 			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
 			Number index = (Number) engine.eval(new RuleEngineEvalContext(column));
@@ -187,8 +185,8 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 			rowEvent.setTable(table);
 			rowEvent.setDatabase("");
-			String sql = SqlGenerator.parseSql(rowEvent);
-			Object[] args = SqlGenerator.parseArgs(rowEvent);
+			String sql = SqlBuilder.buildSql(rowEvent);
+			Object[] args = SqlBuilder.buildArgs(rowEvent);
 
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSources.get(bo.getDbIndex()));
 			int rows = jdbcTemplate.update(sql, args);
@@ -197,16 +195,18 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 			}
 		}
 
-		protected void convertKey(RowChangedEvent rowEvent) {
-			Set<String> needToRemoveKey = new HashSet<String>();
+		protected void processPK(RowChangedEvent rowEvent) {
+			Set<String> needToRemoveKeys = new HashSet<String>();
 			for (Map.Entry<String, RowChangedEvent.ColumnInfo> info : rowEvent.getColumns().entrySet()) {
 				if (info.getValue().isKey() && !task.getPk().equals(info.getKey())) {
-					needToRemoveKey.add(info.getKey());
+					needToRemoveKeys.add(info.getKey());
 				}
 			}
-			for (String key : needToRemoveKey) {
+
+			for (String key : needToRemoveKeys) {
 				rowEvent.getColumns().remove(key);
 			}
+
 			rowEvent.getColumns().get(task.getPk()).setKey(true);
 		}
 
@@ -218,12 +218,14 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 			if (e instanceof DuplicateKeyException) {
 				rowEvent.setDmlType(DMLType.UPDATE);
+				
 				return false;
 			} else if (e instanceof NoRowsAffectedException) {
 				rowEvent.setDmlType(DMLType.INSERT);
+				
 				return false;
 			} else {
-				//不断重试，随着重试次数增多，sleep 时间增加
+				// 不断重试，随着重试次数增多，sleep 时间增加
 				try {
 					Thread.sleep(tryTimes);
 				} catch (InterruptedException ignore) {

@@ -67,6 +67,8 @@ public class ExecutorManager {
 				if (executor != null) {
 					executor.stop();
 				}
+				
+				//TODO 上报状态
 			}
 
 		}
