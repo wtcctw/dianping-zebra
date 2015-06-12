@@ -40,8 +40,10 @@
                 <span style="color:#d9534f" title="Remove Dimension" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
             </a>
             <div class="form-group clearfix">
-                <label popover-trigger="mouseenter" popover="是否为主维度">Is Master</label>&nbsp;
+                <label popover-trigger="mouseenter" popover="是否为主维度">主维度</label>&nbsp;
                 <input type="checkbox" ng-model="dimension.isMaster" />
+                <label popover-trigger="mouseenter" popover="是否需要同步">需要同步</label>&nbsp;
+                <input type="checkbox" ng-model="dimension.needSync" />
                 <br/>
                 <label popover-trigger="mouseenter" popover="分库分组">Db Rule</label>&nbsp;
                 <input style="width:300px;" type="text" ng-model="dimension.dbRule" />&nbsp;&nbsp;

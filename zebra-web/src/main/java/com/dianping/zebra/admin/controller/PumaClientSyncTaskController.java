@@ -142,7 +142,7 @@ public class PumaClientSyncTaskController extends BasicController {
 					continue;
 				}
 
-				if (dimensionConfig.isMaster() == false) {
+				if (dimensionConfig.isMaster() == false && dimensionConfig.isNeedSync()) {
 					for (Entry<String, Set<String>> dbAndTables : allDBAndTables.entrySet()) {
 						PumaClientSyncTaskDto syncTask = new PumaClientSyncTaskDto();
 
