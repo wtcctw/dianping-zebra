@@ -102,7 +102,7 @@ public class ExecutorManager {
 		}
 
 		for (int id : idToRemove) {
-			ShardDumpTaskExecutor task = shardDumpTaskExecutorMap.remove(id);
+			PumaClientSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(id);
 			if (task != null) {
 				task.stop();
 			}
