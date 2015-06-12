@@ -2,7 +2,6 @@ package com.dianping.zebra.admin.util;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -55,8 +54,8 @@ public class SqlBuilder {
 		default:
 			sql = null;
 		}
-		
-		return StringUtils.normalizeSpace(sql);
+
+		return sql;
 	}
 
 	public static Object[] buildArgs(RowChangedEvent event) {
