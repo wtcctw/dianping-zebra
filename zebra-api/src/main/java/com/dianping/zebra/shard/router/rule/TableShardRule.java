@@ -81,9 +81,7 @@ public class TableShardRule {
 		}
 		Map<String, Set<String>> potentialDBAndTbs = matchResult.getPotentialDBAndTbs();
 		if (potentialDBAndTbs != null && !potentialDBAndTbs.isEmpty()) {
-			if (matchResult.isDbAndTablesSetted()) {
-				matchResult.addSubDBAndTables(potentialDBAndTbs);
-			} else {
+			if (!matchResult.isDbAndTablesSetted()) {
 				matchResult.addDBAndTables(potentialDBAndTbs);
 			}
 		}

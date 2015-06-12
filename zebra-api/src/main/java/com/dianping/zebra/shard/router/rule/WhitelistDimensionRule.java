@@ -53,9 +53,7 @@ public class WhitelistDimensionRule extends AbstractDimensionRule {
 			valMap.put(shardColumn, colVal);
 			if ((Boolean) ruleEngine.eval(new RuleEngineEvalContext(valMap))) {
 				colValues.remove(colVal);
-				if (matchResult.isDbAndTablesSetted()) {
-					matchResult.addSubDBAndTable(dataSource, table);
-				} else {
+				if (!matchResult.isDbAndTablesSetted()) {
 					matchResult.addDBAndTable(dataSource, table);
 				}
 			}

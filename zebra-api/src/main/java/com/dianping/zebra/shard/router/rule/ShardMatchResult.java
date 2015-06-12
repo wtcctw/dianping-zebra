@@ -32,11 +32,6 @@ public class ShardMatchResult {
 	private Map<String, Set<String>> dbAndTables = new HashMap<String, Set<String>>(4);
 	private boolean dbAndTablesSetted;
 	
-	/**
-	 * 附属维度涉及的库和表(目前采取异步消息的方式发出，由专门的server去执行数据同步任务)
-	 */
-	private Map<String, Set<String>> subDBAndTables = new HashMap<String, Set<String>>(4);
-	
 	private Map<String, Set<String>> potentialDBAndTbs = new HashMap<String, Set<String>>(4);
 	private boolean potentialDBAndTbsSetted;
 
@@ -69,27 +64,6 @@ public class ShardMatchResult {
 		return dbAndTables.isEmpty();
 	}
 
-	public void addSubDBAndTables(Map<String, Set<String>> dbAndTables) {
-		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
-			String db = entry.getKey();
-			if (!subDBAndTables.containsKey(db)) {
-				subDBAndTables.put(db, new HashSet<String>());
-			}
-			subDBAndTables.get(db).addAll(entry.getValue());
-		}
-	}
-	
-	public void addSubDBAndTable(String dataSource, String table) {
-		if (!subDBAndTables.containsKey(dataSource)) {
-			subDBAndTables.put(dataSource, new HashSet<String>());
-		}
-		subDBAndTables.get(dataSource).add(table);
-	}
-
-	public Map<String, Set<String>> getSubDBAndTables() {
-		return subDBAndTables;
-	}
-
 	boolean isDbAndTablesSetted() {
 		return dbAndTablesSetted;
 	}
@@ -113,12 +87,4 @@ public class ShardMatchResult {
 	void setPotentialDBAndTbsSetted(boolean potentialDBAndTbsSetted) {
 		this.potentialDBAndTbsSetted = potentialDBAndTbsSetted;
 	}
-
-//	public String getBasedColumn() {
-//		return basedColumn;
-//	}
-//
-//	public void setBasedColumn(String basedColumn) {
-//		this.basedColumn = basedColumn;
-//	}
 }

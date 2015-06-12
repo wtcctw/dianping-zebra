@@ -88,15 +88,15 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 				matchResult.setDbAndTablesSetted(true);
 				return !onlyMatchOnce;
 			} else {
-				if (matchResult.isPotentialDBAndTbsSetted()) {
-					matchResult.addSubDBAndTables(allDBAndTables);
-				} else {
+				if (!matchResult.isPotentialDBAndTbsSetted()) {
 					matchResult.setPotentialDBAndTbs(allDBAndTables);
 					matchResult.setPotentialDBAndTbsSetted(true);
 				}
+				
 				return true;
 			}
 		}
+		
 		boolean dbAndTablesSetted = matchResult.isDbAndTablesSetted();
 		matchContext.setColValues(shardColValues);
 		for (DimensionRule whiteListRule : whiteListRules) {
@@ -108,9 +108,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 			Number dbPos = (Number) ruleEngine.eval(new RuleEngineEvalContext(valMap));
 			DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
 			String table = dataSource.evalTable(valMap);
-			if (dbAndTablesSetted) {
-				matchResult.addSubDBAndTable(dataSource.getDbIndex(), table);
-			} else {
+			if (!dbAndTablesSetted) {
 				matchResult.addDBAndTable(dataSource.getDbIndex(), table);
 			}
 		}
