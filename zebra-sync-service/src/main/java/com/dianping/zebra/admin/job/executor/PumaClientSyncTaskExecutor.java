@@ -262,7 +262,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	public Map<String, String> getStatus() {
 		Map<String, String> result = new HashMap<String, String>();
-		result.put(String.format("PumaTask-%d-QPS", task.getId()), String.valueOf(hitTImes.getAndSet(0)));
+		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTImes.getAndSet(0)));
 		return result;
 	}
 
