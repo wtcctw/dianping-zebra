@@ -90,22 +90,33 @@ CREATE TABLE `SyncServerMonitor` (
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
-CREATE TABLE `puma_task` (
+CREATE TABLE `PumaTask` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `ruleName` varchar(128) DEFAULT NULL,
-  `table` varchar(128) DEFAULT NULL,
-  `dbRule` varchar(512) DEFAULT NULL,
-  `dbIndexes` varchar(512) DEFAULT NULL,
-  `tbRule` varchar(512) DEFAULT NULL,
-  `tbSuffix` varchar(512) DEFAULT NULL,
-  `pumaTaskName` varchar(256) DEFAULT NULL,
-  `pumaDatabase` varchar(256) DEFAULT NULL,
-  `pumaTables` varchar(1024) DEFAULT NULL,
-  `executor` varchar(128) DEFAULT NULL,
-  `status` tinyint(1) DEFAULT NULL,
-  `createTime` timestamp NULL DEFAULT NULL,
-  `updateTime` timestamp NULL DEFAULT NULL,
-  `sequence` bigint(64) NOT NULL,
+  `ruleName` varchar(128) NOT NULL DEFAULT '',
+  `tableName` varchar(128) NOT NULL DEFAULT '',
+  `pk` varchar(64) DEFAULT NULL,
+  `dbRule` varchar(512) NOT NULL DEFAULT '',
+  `dbIndexes` varchar(512) NOT NULL DEFAULT '',
+  `tbRule` varchar(512) NOT NULL DEFAULT '',
+  `tbSuffix` varchar(512) NOT NULL DEFAULT '',
+  `pumaTaskName` varchar(256) NOT NULL DEFAULT '',
+  `pumaDatabase` varchar(256) NOT NULL DEFAULT '',
+  `pumaTables` varchar(1024) NOT NULL DEFAULT '',
+  `executor` varchar(128) NOT NULL DEFAULT '',
+  `executor1` varchar(128) NOT NULL DEFAULT '',
+  `executor2` varchar(128) NOT NULL DEFAULT '',
+  `status` int(1) NOT NULL,
+  `createTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updateTime` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=135 DEFAULT CHARSET=utf8;
+
+
+
+CREATE TABLE `PumaTaskStatus` (
+  `Id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `TaskId` int(11) NOT NULL,
+  `Sequence` bigint(64) NOT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
