@@ -15,18 +15,29 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.dianping.zebra.shard.jdbc.util.CollectionUtils;
-import com.dianping.zebra.shard.parser.condition.*;
-import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
-import com.dianping.zebra.shard.parser.sqlParser.*;
+import com.dianping.zebra.shard.parser.condition.ComparableAndInExpression;
+import com.dianping.zebra.shard.parser.condition.Comparative;
+import com.dianping.zebra.shard.parser.condition.Expression;
+import com.dianping.zebra.shard.parser.condition.ExpressionGroup;
+import com.dianping.zebra.shard.parser.condition.OrExpressionGroup;
+import com.dianping.zebra.shard.parser.condition.WhereCondition;
+import com.dianping.zebra.shard.parser.sqlParser.Column;
+import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
+import com.dianping.zebra.shard.parser.sqlParser.Delete;
+import com.dianping.zebra.shard.parser.sqlParser.Insert;
+import com.dianping.zebra.shard.parser.sqlParser.Select;
+import com.dianping.zebra.shard.parser.sqlParser.Update;
 import com.dianping.zebra.shard.parser.tableObject.TableName;
 import com.dianping.zebra.shard.parser.tableObject.imp.TableNameSubQueryImp;
 import com.dianping.zebra.shard.parser.valueObject.ValueObject;
 import com.dianping.zebra.shard.router.ShardRouterException;
-import org.antlr.runtime.RecognitionException;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * 计算相关DML语句对于指定的column可能的值
@@ -188,24 +199,4 @@ public class ShardColumnValueUtil {
 			this.params = params;
 		}
 	}
-
-	public static void main(String[] args) throws RecognitionException, IOException {
-		//		String sql = "UPDATE DP_GroupFollowNote SET NoteClass = ? WHERE UserID = 3";
-		//		String sql = "SELECT N.GroupID, F.FollowNoteID, F.UserID, F.NoteId " +
-		//				"FROM DP_GroupFollowNote F INNER JOIN DP_GroupNote N ON N.NoteID = F.NoteID " +
-		//				"WHERE F.UserID = 3 OR F.NoteClass <> 3 AND F.UserID = 4";
-		//		String sql = "SELECT * FROM DP_GroupFollowNote " +
-		//				"WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = 5)) AND NoteID = 3 " +
-		//				"LIMIT 2, 6";
-		String sql = "SELECT DISTINCT (GN.NoteID) FROM DP_GroupNote GN " +
-			"INNER JOIN DP_Group G ON GN.GroupID = G.GroupID AND G.Status = 0 " +
-			"INNER JOIN DP_GroupFollowNote GFN ON GN.NoteID = GFN.NoteID";
-		DMLCommon dmlSql = DPMySQLParser.parse(sql).obj;
-		String table = "DP_GroupFollowNote";
-		String column = "NoteID";
-		List<Object> params = Arrays.asList((Object) 1);
-		Set<Object> evalSet = eval(dmlSql, table, column, params);
-		System.out.println(evalSet);
-	}
-
 }
