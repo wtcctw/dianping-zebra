@@ -78,8 +78,8 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 	@Override
 	public boolean match(ShardMatchContext matchContext) {
 		ShardMatchResult matchResult = matchContext.getMatchResult();
-		boolean onlyMatchMaster = matchContext.onlyMatchMaster();
-		boolean onlyMatchOnce = matchContext.onlyMatchOnce();
+		boolean onlyMatchMaster = matchContext.onlyMatchMaster(); // 非Select
+		boolean onlyMatchOnce = matchContext.onlyMatchOnce(); // Select
 		Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
 		      matchContext.getParams());
 		if (shardColValues == null || shardColValues.isEmpty()) {
