@@ -146,9 +146,12 @@ public class ConfigController extends BasicController {
 			host = "http://10.2.8.65:8080";
 		} else if ("product".equals(env)) {
 			host = "http://zebra.dp";
+		} else if("performance".equals(env)){
+			host = "http://192.168.104.88:8080";
 		} else {
 			throw new Exception("Error: unrecognized lion env!");
 		}
+		
 		return host;
 	}
 
