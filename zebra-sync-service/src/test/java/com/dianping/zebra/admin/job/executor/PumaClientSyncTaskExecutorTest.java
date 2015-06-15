@@ -106,10 +106,10 @@ public class PumaClientSyncTaskExecutorTest {
 
 		config.setRuleName("unifiedorder");
 		config.setTableName("UOD_Order");
-		config.setDbRule("(#AddTime#.year - 114 < 0 ? 0 : #AddTime#.year - 114).intValue()");
+		config.setDbRule("(date(#AddTime#).year - 114 < 0 ? 0 :date(#AddTime#).year - 114).intValue()");
 		config.setDbIndexes("unifiedorder0,unifiedorder1");
-		config.setTbRule("((#AddTime#.month - 1)/3).intValue()");
-		config.setTbSuffix("alldb:[_Time0,_Time3]");
+		config.setTbRule("((date(#AddTime#).month - 1)/3).intValue()");
+		config.setTbSuffix("everydb:[_Time0,_Time3]");
 		config.setPumaTaskName("UnifiedOrder0@UOD_Order@ShopID");
 		config.setPumaTables("UOD_Order0,UOD_Order1");
 		config.setPumaDatabase("UnifiedOrder0");
