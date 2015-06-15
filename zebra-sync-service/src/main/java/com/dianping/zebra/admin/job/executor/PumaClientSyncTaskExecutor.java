@@ -4,7 +4,6 @@ import com.dianping.cat.Cat;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
@@ -49,8 +48,6 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	protected PumaClient client;
 
-	protected Thread taskSequenceUploader;
-
 	protected Map<String, GroupDataSource> dataSources;
 
 	protected Map<String, JdbcTemplate> templateMap;
@@ -65,26 +62,19 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		initDataSources();
 		initJdbcTemplate();
 		initPumaClient();
-		initSequenceUploader();
 	}
 
 	public synchronized void start() {
 		client.start();
-		taskSequenceUploader.start();
 	}
 
 	public synchronized void pause() {
 		client.stop();
-		taskSequenceUploader.interrupt();
 	}
 
 	public synchronized void stop() {
 		if (client != null) {
 			client.stop();
-		}
-
-		if (taskSequenceUploader != null) {
-			taskSequenceUploader.interrupt();
 		}
 
 		for (GroupDataSource ds : dataSources.values()) {
@@ -97,16 +87,10 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		dataSources.clear();
 	}
 
-	protected void initSequenceUploader() {
-		taskSequenceUploader = new Thread(new TaskSequenceUploader());
-		taskSequenceUploader.setName("TaskSequenceUploader");
-		taskSequenceUploader.setDaemon(true);
-	}
-
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-		      task.getTbSuffix(), task.getTbRule());
+			task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -146,37 +130,11 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
-		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+			.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
 		this.client = new PumaClient(configBuilder.build());
 
 		this.client.register(new PumaEventListener());
-		client.getSeqFileHolder().saveSeq(
-		      status.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : status.getSequence());
-	}
-
-	class TaskSequenceUploader implements Runnable {
-		@Override
-		public void run() {
-			Long lastSeq = null;
-
-			while (!Thread.currentThread().isInterrupted()) {
-				try {
-					Thread.sleep(5 * 1000);
-				} catch (InterruptedException e) {
-					break;
-				}
-
-				if (lastSeq == null || lastSeq.longValue() != status.getSequence()) {
-					try {
-						lastSeq = status.getSequence();
-						statusMapper.updateSequence(status);
-					} catch (Exception e) {
-						Cat.logError(e);
-					}
-				}
-			}
-		}
 	}
 
 	class PumaEventListener implements EventListener {
