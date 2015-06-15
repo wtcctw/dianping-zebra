@@ -64,17 +64,9 @@ public class ExecutorManager {
 				continue;
 			}
 
-			PumaClientStatusEntity status = pumaClientStatusMapper.selectByTaskId(task.getId());
-			if (status == null) {
-				status = new PumaClientStatusEntity();
-				status.setTaskId(task.getId());
-				pumaClientStatusMapper.create(status);
-			}
-
 			PumaClientSyncTaskExecutor executor = null;
 			try {
-				executor = new PumaClientSyncTaskExecutor(task, status);
-				executor.setStatusMapper(pumaClientStatusMapper);
+				executor = new PumaClientSyncTaskExecutor(task);
 				executor.init();
 				executor.start();
 				pumaClientSyncTaskExecutorMap.put(task.getPumaTaskName(), executor);

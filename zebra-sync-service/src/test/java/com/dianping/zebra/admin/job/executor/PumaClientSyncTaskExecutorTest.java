@@ -40,7 +40,7 @@ public class PumaClientSyncTaskExecutorTest {
 		config.setTbRule("((#id# / 2).toLong() % 2)");
 		config.setTbSuffix("everydb:[_0,_1]");
 
-		target = new PumaClientSyncTaskExecutor(config, status);
+		target = new PumaClientSyncTaskExecutor(config);
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class PumaClientSyncTaskExecutorTest {
 		config.setPumaDatabase("UnifiedOrder0");
 		config.setPk("OrderID");
 
-		PumaClientSyncTaskExecutor target = new PumaClientSyncTaskExecutor(config, status);
+		PumaClientSyncTaskExecutor target = new PumaClientSyncTaskExecutor(config);
 		target.init();
 
 		target.start();

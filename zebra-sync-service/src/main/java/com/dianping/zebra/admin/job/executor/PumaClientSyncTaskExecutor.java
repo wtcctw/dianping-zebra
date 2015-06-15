@@ -8,7 +8,6 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.zebra.admin.dao.PumaClientStatusMapper;
-import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.exception.NoRowsAffectedException;
 import com.dianping.zebra.admin.util.ColumnInfoWrap;
@@ -38,8 +37,6 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	private final PumaClientSyncTaskEntity task;
 
-	private final PumaClientStatusEntity status;
-
 	public final AtomicLong hitTimes = new AtomicLong();
 
 	public final static int MAX_TRY_TIMES = 10;
@@ -54,9 +51,8 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	protected Map<String, JdbcTemplate> templateMap;
 
-	public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task, PumaClientStatusEntity status) {
+	public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task) {
 		this.task = task;
-		this.status = status;
 	}
 
 	public synchronized void init() {
@@ -147,7 +143,6 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 			hitTimes.incrementAndGet();
 			tryTimes++;
 			onEventInternal(event);
-			status.setSequence(event.getSeq());
 			tryTimes = 0;
 		}
 
