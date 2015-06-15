@@ -4,7 +4,6 @@ import com.dianping.cat.Cat;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.core.constant.SubscribeConstant;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
@@ -106,7 +105,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-		      task.getTbSuffix(), task.getTbRule());
+			task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -146,13 +145,11 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
-		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+			.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
 		this.client = new PumaClient(configBuilder.build());
 
 		this.client.register(new PumaEventListener());
-		client.getSeqFileHolder().saveSeq(
-		      status.getSequence() == 0 ? SubscribeConstant.SEQ_FROM_LATEST : status.getSequence());
 	}
 
 	class TaskSequenceUploader implements Runnable {
