@@ -37,7 +37,7 @@ public class GroovyRuleEngine implements RuleEngine {
     public GroovyRuleEngine(String rule) {
         try {
             Matcher matcher = DimensionRule.RULE_COLUMN_PATTERN.matcher(rule);
-            StringBuilder engineClazzImpl = new StringBuilder(200).append("class RuleEngine extends " + RuleEngineBase.class.getName() + "{")
+            StringBuilder engineClazzImpl = new StringBuilder(200).append("class RuleEngineBaseImpl extends " + RuleEngineBase.class.getName() + "{")
                     .append("Object execute(Map context) {").append(matcher.replaceAll("context.get(\"$1\")")).append("}")
                     .append("}");
             GroovyClassLoader loader = new GroovyClassLoader(AbstractDimensionRule.class.getClassLoader());
