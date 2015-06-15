@@ -3,7 +3,6 @@ package com.dianping.zebra.admin.job;
 import com.dianping.cat.Cat;
 import com.dianping.zebra.admin.dao.PumaClientStatusMapper;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
-import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
 import com.dianping.zebra.admin.job.executor.PumaClientSyncTaskExecutor;
@@ -83,7 +82,7 @@ public class ExecutorManager {
 			if (Iterables.all(tasks, new Predicate<PumaClientSyncTaskEntity>() {
 				@Override
 				public boolean apply(PumaClientSyncTaskEntity entity) {
-					return entity.getPumaTaskName() != finalPumaTaskName;
+					return !finalPumaTaskName.equals(entity.getPumaTaskName());
 				}
 			})) {
 				idToRemove.add(finalPumaTaskName);
