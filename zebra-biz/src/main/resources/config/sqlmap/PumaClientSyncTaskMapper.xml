@@ -72,6 +72,7 @@
         pk=#{pk},
         dbRule=#{dbRule},
         dbIndexes=#{dbIndexes},
+        tbRule=#{tbRule},
         tbSuffix=#{tbSuffix},
         pumaTaskName=#{pumaTaskName},
         pumaDatabase=#{pumaDatabase},
