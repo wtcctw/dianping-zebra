@@ -15,8 +15,6 @@ import java.util.zip.CRC32;
  */
 public class RuleEngineBase {
 
-	private final static DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.SIMPLIFIED_CHINESE);
-
 	public long crc32(Object str) throws UnsupportedEncodingException {
 		return crc32(str, "utf-8");
 	}
@@ -26,6 +24,7 @@ public class RuleEngineBase {
 			return (Date) value;
 		}
 		if (value instanceof String) {
+			DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.SIMPLIFIED_CHINESE);
 			return format.parse((String) value);
 		}
 
