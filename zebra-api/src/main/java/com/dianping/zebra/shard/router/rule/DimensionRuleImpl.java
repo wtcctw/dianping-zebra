@@ -80,46 +80,48 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		ShardMatchResult matchResult = matchContext.getMatchResult();
 		boolean onlyMatchMaster = matchContext.onlyMatchMaster(); // 非Select
 		boolean onlyMatchOnce = matchContext.onlyMatchOnce(); // Select
+		// Insert必须要有主维度，否则这里抛错
 		Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
 		      matchContext.getParams());
-//		if (shardColValues == null || shardColValues.isEmpty()) {
-//			if (onlyMatchMaster && isMaster) {
-//				// 强制匹配了Master Rule，将该主规则所有表设置为主路由结果
-//				matchResult.setDbAndTables(allDBAndTables);
-//				matchResult.setDbAndTablesSetted(true);
-//				return !onlyMatchOnce;
-//			} else {
-//				if (!matchResult.isPotentialDBAndTbsSetted()) {
-//					matchResult.setPotentialDBAndTbs(allDBAndTables);
-//					matchResult.setPotentialDBAndTbsSetted(true);
-//				}
-//
-//				return true;
-//			}
-//		}
+		if (shardColValues == null || shardColValues.isEmpty()) {
+			if (onlyMatchMaster && isMaster) {
+				// 如果Update和Insert没有设置master维度，则设置主路由的所有表
+				matchResult.setDbAndTables(allDBAndTables);
+				matchResult.setDbAndTablesSetted(true);
 
-		boolean dbAndTablesSetted = matchResult.isDbAndTablesSetted();
-		if(!dbAndTablesSetted){
-			matchContext.setColValues(shardColValues);
-			for (DimensionRule whiteListRule : whiteListRules) {
-				whiteListRule.match(matchContext);
+				return !onlyMatchOnce;
+			} else {
+				// Select没有带任何维度
+				if (!matchResult.isPotentialDBAndTbsSetted()) {
+					matchResult.setPotentialDBAndTbs(allDBAndTables);
+					matchResult.setPotentialDBAndTbsSetted(true);
+				}
+
+				return true;
 			}
+		}
+
+		matchContext.setColValues(shardColValues);
+		for (DimensionRule whiteListRule : whiteListRules) {
+			whiteListRule.match(matchContext);
+		}
+
+		if (!matchResult.isDbAndTablesSetted()) {
 			for (Object colVal : matchContext.getColValues()) {
 				Map<String, Object> valMap = new HashMap<String, Object>();
 				valMap.put(shardColumn, colVal);
-				
 				RuleEngineEvalContext context = new RuleEngineEvalContext(valMap);
+
 				Number dbPos = (Number) ruleEngine.eval(context);
 				DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
 				String table = dataSource.evalTable(context);
-				if (!dbAndTablesSetted) {
-					matchResult.addDBAndTable(dataSource.getDbIndex(), table);
-				}
+
+				matchResult.addDBAndTable(dataSource.getDbIndex(), table);
 			}
-			
+
 			matchResult.setDbAndTablesSetted(true);
 		}
-		
+
 		return !onlyMatchOnce;
 	}
 
