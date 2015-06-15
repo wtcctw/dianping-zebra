@@ -82,42 +82,44 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		boolean onlyMatchOnce = matchContext.onlyMatchOnce(); // Select
 		Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
 		      matchContext.getParams());
-		if (shardColValues == null || shardColValues.isEmpty()) {
-			if (onlyMatchMaster && isMaster) {
-				// 强制匹配了Master Rule，将该主规则所有表设置为主路由结果
-				matchResult.setDbAndTables(allDBAndTables);
-				matchResult.setDbAndTablesSetted(true);
-				return !onlyMatchOnce;
-			} else {
-				if (!matchResult.isPotentialDBAndTbsSetted()) {
-					matchResult.setPotentialDBAndTbs(allDBAndTables);
-					matchResult.setPotentialDBAndTbsSetted(true);
-				}
-
-				return true;
-			}
-		}
+//		if (shardColValues == null || shardColValues.isEmpty()) {
+//			if (onlyMatchMaster && isMaster) {
+//				// 强制匹配了Master Rule，将该主规则所有表设置为主路由结果
+//				matchResult.setDbAndTables(allDBAndTables);
+//				matchResult.setDbAndTablesSetted(true);
+//				return !onlyMatchOnce;
+//			} else {
+//				if (!matchResult.isPotentialDBAndTbsSetted()) {
+//					matchResult.setPotentialDBAndTbs(allDBAndTables);
+//					matchResult.setPotentialDBAndTbsSetted(true);
+//				}
+//
+//				return true;
+//			}
+//		}
 
 		boolean dbAndTablesSetted = matchResult.isDbAndTablesSetted();
-		matchContext.setColValues(shardColValues);
-		for (DimensionRule whiteListRule : whiteListRules) {
-			whiteListRule.match(matchContext);
-		}
-		for (Object colVal : matchContext.getColValues()) {
-			Map<String, Object> valMap = new HashMap<String, Object>();
-			valMap.put(shardColumn, colVal);
-
-			RuleEngineEvalContext context = new RuleEngineEvalContext(valMap);
-			Number dbPos = (Number) ruleEngine.eval(context);
-			DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
-			String table = dataSource.evalTable(context);
-			if (!dbAndTablesSetted) {
-				matchResult.addDBAndTable(dataSource.getDbIndex(), table);
+		if(!dbAndTablesSetted){
+			matchContext.setColValues(shardColValues);
+			for (DimensionRule whiteListRule : whiteListRules) {
+				whiteListRule.match(matchContext);
 			}
-		}
-		if (!dbAndTablesSetted) {
+			for (Object colVal : matchContext.getColValues()) {
+				Map<String, Object> valMap = new HashMap<String, Object>();
+				valMap.put(shardColumn, colVal);
+				
+				RuleEngineEvalContext context = new RuleEngineEvalContext(valMap);
+				Number dbPos = (Number) ruleEngine.eval(context);
+				DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
+				String table = dataSource.evalTable(context);
+				if (!dbAndTablesSetted) {
+					matchResult.addDBAndTable(dataSource.getDbIndex(), table);
+				}
+			}
+			
 			matchResult.setDbAndTablesSetted(true);
 		}
+		
 		return !onlyMatchOnce;
 	}
 
