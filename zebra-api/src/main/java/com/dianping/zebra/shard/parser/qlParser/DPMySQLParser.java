@@ -13,6 +13,7 @@
 package com.dianping.zebra.shard.parser.qlParser;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenRewriteStream;
@@ -25,16 +26,17 @@ import com.dianping.zebra.shard.parser.sqlParser.groupFunction.GroupFunctionRegi
 import com.dianping.zebra.shard.parser.valueObject.function.FunctionRegister;
 
 public class DPMySQLParser {
-	
+
 	private static Logger logger = Logger.getLogger(DPMySQLParser.class);
-	
+
+	private static Pattern pattern = Pattern.compile("\\n|`");
+
 	public static MySQLWalker.beg_return parse(String sql) throws RecognitionException, IOException {
-		
-		sql = sql.replaceAll("\\n", " ");
-		if(sql.endsWith(";")) {
-			sql = sql.substring(0, sql.length()-1);
+		sql = pattern.matcher(sql).replaceAll("");
+		if (sql.endsWith(";")) {
+			sql = sql.substring(0, sql.length() - 1);
 		}
-		
+
 		AntlrStringStream st = new AntlrStringStream(sql);
 
 		MySQLParserLexer pl = new MySQLParserLexer(st);
@@ -45,7 +47,10 @@ public class DPMySQLParser {
 		MySQLParserParser.beg_return beg = null;
 		beg = pa.beg();
 		CommonTree tree = (CommonTree) beg.getTree();
-		logger.debug(tree.toStringTree());
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(tree.toStringTree());
+		}
 
 		CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
 		nodes.setTokenStream(tokens);
@@ -55,7 +60,7 @@ public class DPMySQLParser {
 		MySQLWalker.beg_return ret = walker.beg();
 
 		ret.obj.setPos2TableName(walker.pos2TableName);
-		
+
 		return ret;
 
 	}
