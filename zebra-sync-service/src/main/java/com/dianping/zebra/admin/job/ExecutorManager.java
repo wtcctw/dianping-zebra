@@ -36,7 +36,7 @@ public class ExecutorManager {
 	@Autowired
 	private PumaClientStatusMapper pumaClientStatusMapper;
 
-	private Map<Integer, PumaClientSyncTaskExecutor> pumaClientSyncTaskExecutorMap = new ConcurrentHashMap<Integer, PumaClientSyncTaskExecutor>();
+	private Map<String, PumaClientSyncTaskExecutor> pumaClientSyncTaskExecutorMap = new ConcurrentHashMap<String, PumaClientSyncTaskExecutor>();
 
 	private Map<Integer, ShardDumpTaskExecutor> shardDumpTaskExecutorMap = new ConcurrentHashMap<Integer, ShardDumpTaskExecutor>();
 
@@ -60,7 +60,7 @@ public class ExecutorManager {
 		List<PumaClientSyncTaskEntity> tasks = pumaClientSyncTaskMapper.findEffectiveTaskByExecutor(this.localAddress);
 
 		for (PumaClientSyncTaskEntity task : tasks) {
-			if (pumaClientSyncTaskExecutorMap.containsKey(task.getId())) {
+			if (pumaClientSyncTaskExecutorMap.containsKey(task.getPumaTaskName())) {
 				continue;
 			}
 
@@ -77,32 +77,29 @@ public class ExecutorManager {
 				executor.setStatusMapper(pumaClientStatusMapper);
 				executor.init();
 				executor.start();
-				pumaClientSyncTaskExecutorMap.put(task.getId(), executor);
+				pumaClientSyncTaskExecutorMap.put(task.getPumaTaskName(), executor);
 			} catch (Exception e) {
 				if (executor != null) {
 					executor.stop();
-
-					//TODO 上报状态
 				}
-
 			}
 		}
 
-		Set<Integer> idToRemove = new HashSet<Integer>();
-		for (int id : pumaClientSyncTaskExecutorMap.keySet()) {
-			final int finalId = id;
+		Set<String> idToRemove = new HashSet<String>();
+		for (String pumaTaskName : pumaClientSyncTaskExecutorMap.keySet()) {
+			final String finalPumaTaskName = pumaTaskName;
 			if (Iterables.all(tasks, new Predicate<PumaClientSyncTaskEntity>() {
 				@Override
 				public boolean apply(PumaClientSyncTaskEntity entity) {
-					return entity.getId() != finalId;
+					return entity.getPumaTaskName() != finalPumaTaskName;
 				}
 			})) {
-				idToRemove.add(finalId);
+				idToRemove.add(finalPumaTaskName);
 			}
 		}
 
-		for (int id : idToRemove) {
-			PumaClientSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(id);
+		for (String taskName : idToRemove) {
+			PumaClientSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(taskName);
 			if (task != null) {
 				task.stop();
 			}

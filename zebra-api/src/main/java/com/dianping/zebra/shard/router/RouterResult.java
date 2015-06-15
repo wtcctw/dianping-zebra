@@ -49,6 +49,8 @@ public class RouterResult {
 	 */
 	private String generatedPK;
 	
+	private boolean acrossTable;
+	
 	private List<String> groupBys;
 	
 	private boolean hasDistinct;
@@ -109,6 +111,14 @@ public class RouterResult {
 
 	public void setGroupBys(List<String> groupBys) {
 		this.groupBys = groupBys;
+	}
+	
+	public boolean isAcrossTable() {
+		return acrossTable;
+	}
+
+	public void setAcrossTable(boolean acrossTable) {
+		this.acrossTable = acrossTable;
 	}
 
 	public boolean isHasDistinct() {

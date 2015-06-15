@@ -68,16 +68,16 @@ public class ShardRouterImpl implements ShardRouter {
 		return result;
 	}
 
-	private RouterResult enrichRouterTarget(RouterResult target, DMLCommon dmlSql, String generatedPK, int skip, int max) {
-		target.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
-		target.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
-		target.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);
-		target.setOrderBys(dmlSql.getOrderByList());
-		target.setGeneratedPK(generatedPK);
-		target.setSkip(skip);
-		target.setMax(max);
+	private RouterResult enrichRouterResult(RouterResult result, DMLCommon dmlSql, String generatedPK, int skip, int max) {
+		result.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
+		result.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
+		result.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);
+		result.setOrderBys(dmlSql.getOrderByList());
+		result.setGeneratedPK(generatedPK);
+		result.setSkip(skip);
+		result.setMax(max);
 
-		return target;
+		return result;
 	}
 
 	private MyWhereCondition.LimitInfo getLimitInfo(DMLCommon dmlSql) {
@@ -142,7 +142,7 @@ public class ShardRouterImpl implements ShardRouter {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
-			//处理limit的参数
+			// 处理limit的参数
 			if (acrossTable && !(dmlSql instanceof Insert) && max != RouterResult.NO_MAX && skip > 0) {
 				MyWhereCondition where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
 				Object start = where.getStart();
@@ -157,7 +157,7 @@ public class ShardRouterImpl implements ShardRouter {
 				}
 			}
 		}
-		
+
 		return newParams;
 	}
 
@@ -212,22 +212,24 @@ public class ShardRouterImpl implements ShardRouter {
 	@Override
 	public RouterResult router(String sql, List<Object> params) throws ShardRouterException {
 		try {
-			RouterResult target = new RouterResult();
+			RouterResult routerResult = new RouterResult();
 			DMLCommon dmlSql = parseSql(sql);
 			int skip = dmlSql.getSkip(params);
 			int max = dmlSql.getMax(params);
 			Set<String> relatedTables = dmlSql.getRelatedTables();
 			TableShardRule tableShardRule = findTableShardRule(relatedTables);
 
-			ShardMatchResult result = tableShardRule.eval(dmlSql, params);
-			Map<String, Set<String>> dbAndTables = result.getDbAndTables();
+			ShardMatchResult shardResult = tableShardRule.eval(dmlSql, params);
+			Map<String, Set<String>> dbAndTables = shardResult.getDbAndTables();
 			boolean acrossTable = dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
-			target.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
-			      tableShardRule.getTableName(), skip, max));
-			target.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
 
-			return enrichRouterTarget(target, dmlSql, tableShardRule == null ? null : tableShardRule.getGeneratedPK(),
-			      skip, max);
+			routerResult.setAcrossTable(acrossTable);
+			routerResult.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
+			      tableShardRule.getTableName(), skip, max));
+			routerResult.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
+
+			return enrichRouterResult(routerResult, dmlSql,
+			      tableShardRule == null ? null : tableShardRule.getGeneratedPK(), skip, max);
 		} catch (Exception e) {
 			throw new ShardRouterException("DataSource route failed, cause: ", e);
 		}
