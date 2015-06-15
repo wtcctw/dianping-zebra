@@ -42,6 +42,8 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	public final AtomicLong hitTimes = new AtomicLong();
 
+	public final static int MAX_TRY_TIMES = 10;
+
 	protected GroovyRuleEngine engine;
 
 	protected SimpleDataSourceProvider dataSourceProvider;
@@ -195,6 +197,10 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		@Override
 		public boolean onException(ChangedEvent event, Exception e) {
 			Cat.logError(e);
+
+			if (hitTimes.get() > MAX_TRY_TIMES) {
+				return true;
+			}
 
 			RowChangedEvent rowEvent = (RowChangedEvent) event;
 
