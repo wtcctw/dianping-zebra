@@ -67,6 +67,7 @@ public class DataSourceRepository {
                 for (String jdbcRef : dimensionRule.getAllDBAndTables().keySet()) {
                     if (!dataSources.containsKey(jdbcRef)) {
                         GroupDataSource groupDataSource = new GroupDataSource(jdbcRef);
+                        groupDataSource.setPoolType("tomcat-jdbc");
                         groupDataSource.setForceWriteOnLogin(false); // HACK turn off
                         groupDataSource.init();
 
