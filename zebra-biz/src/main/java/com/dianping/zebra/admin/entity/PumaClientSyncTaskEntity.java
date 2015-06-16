@@ -50,6 +50,11 @@ public class PumaClientSyncTaskEntity {
 	private String pumaTaskName;
 	
 	/**
+	 * puma client名
+	 */
+	private String pumaClientName;
+	
+	/**
 	 * 监听的数据库
 	 */
 	private String pumaDatabase;
@@ -223,5 +228,13 @@ public class PumaClientSyncTaskEntity {
 
 	public void setExecutor2(String executor2) {
 		this.executor2 = executor2;
+	}
+
+	public String getPumaClientName() {
+		return pumaClientName;
+	}
+
+	public void setPumaClientName(String pumaClientName) {
+		this.pumaClientName = pumaClientName;
 	}
 }

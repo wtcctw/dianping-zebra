@@ -25,17 +25,25 @@ public class HttpServiceImpl implements HttpService {
 	public String sendGet(String url) {
 		Transaction transaction = Cat.newTransaction("Http", "Get");
 
-		InputStream inputStream;
+		InputStream inputStream = null;
 		try {
 			Cat.logEvent("Url", url);
 			inputStream = Urls.forIO().connectTimeout(1000).readTimeout(5000).openStream(url);
 			transaction.setStatus(Message.SUCCESS);
+
 			return Files.forIO().readFrom(inputStream, "utf-8");
 		} catch (IOException e) {
 			Cat.logError(e);
 			transaction.setStatus(e);
 			return "";
 		} finally {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException e) {
+				}
+			}
+
 			transaction.complete();
 		}
 	}
@@ -65,8 +73,8 @@ public class HttpServiceImpl implements HttpService {
 			// 获取URLConnection对象对应的输出流
 			out = new PrintWriter(conn.getOutputStream());
 			// 发送请求参数
-			
-//			String encodedParams = URLEncoder.encode(params,"utf-8");
+
+			// String encodedParams = URLEncoder.encode(params,"utf-8");
 			out.print(params);
 			// flush输出流的缓冲
 			out.flush();

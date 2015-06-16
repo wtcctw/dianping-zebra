@@ -61,16 +61,16 @@ public class SyncServerMonitorController {
 						task.setExecutor(executor1);
 						syncTaskDao.updateSyncTask(task);
 						
-						content = new AlarmContent(task.getPk(), executor, executor1);
+						content = new AlarmContent(task.getPumaClientName(), executor, executor1);
 					} else if (!executor.equalsIgnoreCase(executor2) && aliveSyncServersSet.contains(executor2)) {
 						task.setExecutor(executor2);
 						syncTaskDao.updateSyncTask(task);
 
-						content = new AlarmContent(task.getPk(), executor, executor2);
+						content = new AlarmContent(task.getPumaClientName(), executor, executor2);
 					} else {
-						content = new AlarmContent(task.getPk(), executor, null);
+						content = new AlarmContent(task.getPumaClientName(), executor, null);
 						
-						Cat.logError(new NoAliveSyncServerException(task.getPk()
+						Cat.logError(new NoAliveSyncServerException(task.getPumaClientName()
 						      + " has no available alive syncservers."));
 					}
 
