@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
  * http://www.dozer.cc
  */
 public class ShardSyncTaskExecutorTest {
+
 	PumaClientSyncTaskEntity config;
 
 	PumaClientStatusEntity status;
@@ -53,8 +54,8 @@ public class ShardSyncTaskExecutorTest {
 		test_init_event_queue();
 		target.initProcessors();
 
-		Assert.assertEquals(target.dataSources.size() * target.THREADS_PER_DS, target.rowEventProcessers.size());
-		Assert.assertEquals(target.dataSources.size() * target.THREADS_PER_DS, target.rowEventProcesserThreads.size());
+		Assert.assertEquals(target.NUMBER_OF_PROCESSORS, target.rowEventProcessors.size());
+		Assert.assertEquals(target.NUMBER_OF_PROCESSORS, target.rowEventProcesserThreads.size());
 	}
 
 	@Test
@@ -63,8 +64,7 @@ public class ShardSyncTaskExecutorTest {
 		target.dataSources.put("a", new GroupDataSource());
 		target.dataSources.put("b", new GroupDataSource());
 		target.initEventQueues();
-		Assert.assertTrue(target.eventQueues.get("a").length == target.THREADS_PER_DS);
-		Assert.assertTrue(target.eventQueues.get("b").length == target.THREADS_PER_DS);
+		Assert.assertTrue(target.eventQueues.length == target.NUMBER_OF_PROCESSORS);
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class ShardSyncTaskExecutorTest {
 
 	@Test
 	public void test_process_pk_removepk_add_shard_key() throws Exception {
-		ShardSyncTaskExecutor.PumaEventListener listener = target.new PumaEventListener();
+		ShardSyncTaskExecutor.RowEventProcessor listener = target.new RowEventProcessor(null);
 
 		RowChangedEvent event = new RowChangedEvent();
 		config.setPk("UserId");
@@ -103,7 +103,7 @@ public class ShardSyncTaskExecutorTest {
 
 	@Test
 	public void test_process_pk_pk_is_shard_key() throws Exception {
-		ShardSyncTaskExecutor.PumaEventListener listener = target.new PumaEventListener();
+		ShardSyncTaskExecutor.RowEventProcessor listener = target.new RowEventProcessor(null);
 
 		RowChangedEvent event = new RowChangedEvent();
 		config.setPk("UserId");
