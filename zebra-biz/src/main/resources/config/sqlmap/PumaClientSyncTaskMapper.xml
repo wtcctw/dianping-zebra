@@ -33,6 +33,7 @@
         `tbRule`,
         `tbSuffix`,
         `pumaTaskName`,
+        `pumaClientName`,
         `pumaDatabase`,
         `pumaTables`,
         `executor`,
@@ -52,6 +53,7 @@
         #{tbRule},
         #{tbSuffix},
         #{pumaTaskName},
+        #{pumaClientName},
         #{pumaDatabase},
         #{pumaTables},
         #{executor},
@@ -69,6 +71,7 @@
         SET
         ruleName=#{ruleName},
         tableName=#{tableName},
+        pk=#{pk},
         dbRule=#{dbRule},
         dbIndexes=#{dbIndexes},
         tbRule=#{tbRule},
@@ -81,7 +84,7 @@
         executor2=#{executor2},
         status=#{status},
         updateTime=NOW()
-        WHERE pk = #{pk}
+        WHERE pumaClientName = #{pumaClientName}
     </update>
 
     <update id="updateSyncTaskStatus" parameterType="map">
@@ -89,7 +92,7 @@
         `zebra`.`PumaTask` SET
         status=#{status},
         updateTime=NOW()
-        WHERE pk=#{pk}
+        WHERE pumaClientName=#{pumaClientName}
     </update>
     
     <update id="updateSyncTaskSyncServers" parameterType="map">
@@ -100,6 +103,6 @@
         executor1=#{executor1},
         executor2=#{executor2},
         updateTime=NOW()
-        WHERE pk=#{pk}
+        WHERE pumaClientName=#{pumaClientName}
     </update>
 </mapper>

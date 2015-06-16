@@ -69,24 +69,24 @@ public class PumaClientSyncTaskController extends BasicController {
 	
 	@RequestMapping(value = "/updateSyncServer", method = RequestMethod.GET)
 	@ResponseBody
-	public void updateSyncServer(String pk, String pumaTaskName, String executor, String executor1,String executor2){
-		if(pk != null && pumaTaskName != null && executor != null && executor1 != null && executor2 != null){
-			dao.updateSyncTaskSyncServers(pk, pumaTaskName, executor, executor1, executor2);
+	public void updateSyncServer(String pumaClientName, String pumaTaskName, String executor, String executor1,String executor2){
+		if(pumaClientName != null && pumaTaskName != null && executor != null && executor1 != null && executor2 != null){
+			dao.updateSyncTaskSyncServers(pumaClientName, pumaTaskName, executor, executor1, executor2);
 		}
 	}
 
 	@RequestMapping(value = "/schedule", method = RequestMethod.GET)
 	@ResponseBody
-	public void updateExecutePlan(String pk) {
-		if (StringUtils.isNotBlank(pk)) {
-			dao.updateSyncTaskStatus(pk, 2);
+	public void updateExecutePlan(String pumaClientName) {
+		if (StringUtils.isNotBlank(pumaClientName)) {
+			dao.updateSyncTaskStatus(pumaClientName, 2);
 		}
 	}
 
 	private void insertOrUpdate(List<PumaClientSyncTaskEntity> allEntities, PumaClientSyncTaskDto dto) {
 		PumaClientSyncTaskEntity tmp = null;
 		for (PumaClientSyncTaskEntity entity : allEntities) {
-			if (entity.getPk().equals(dto.getPk())) {
+			if (entity.getPumaClientName().equals(dto.getPumaClientName())) {
 				tmp = entity;
 				break;
 			}
@@ -169,7 +169,7 @@ public class PumaClientSyncTaskController extends BasicController {
 
 						syncTask.setPumaDatabase(dbName);
 
-						syncTask.setPk(String.format("%s@%s@%s", dbName, table, shardColumn));
+						syncTask.setPumaClientName(String.format("%s@%s@%s", dbName, table, shardColumn));
 						configManager.close();
 
 						StringBuilder sb = new StringBuilder(128);

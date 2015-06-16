@@ -269,6 +269,27 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 	}
 
+//	class SequenceReporter implements Runnable {
+//		private long lastSequence = 0;
+//
+//		@Override
+//		public void run() {
+//			while (true) {
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e) {
+//					break;
+//				}
+//
+//
+//			}
+//		}
+//
+//		protected long chooseSequence(){
+//			for()
+//		}
+//	}
+
 	class PumaEventListener implements EventListener {
 		@Override
 		public void onEvent(ChangedEvent event) throws Exception {
