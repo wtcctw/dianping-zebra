@@ -29,7 +29,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
+ * Dozer @ 6/9/15
+ * mail@dozer.cc
+ * http://www.dozer.cc
  */
 public class ShardSyncTaskExecutor implements TaskExecutor {
 	private final PumaClientSyncTaskEntity task;
@@ -126,14 +128,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	protected void initEventQueues() {
 		this.eventQueues = new BlockingQueue[NUMBER_OF_PROCESSORS];
 		for (int k = 0; k < this.eventQueues.length; k++) {
-			this.eventQueues[k] = new LinkedBlockingQueue<RowChangedEvent>();
+			this.eventQueues[k] = new LinkedBlockingQueue<RowChangedEvent>(MAX_QUEUE_SIZE);
 		}
 	}
 
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-		      task.getTbSuffix(), task.getTbRule());
+			task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -173,7 +175,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
-		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+			.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
 		this.client = new PumaClient(configBuilder.build());
 
@@ -206,7 +208,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 				processPK(event);
 
+				int tryTimes = 0;
 				while (true) {
+					tryTimes++;
+
 					try {
 						process(event);
 						lastSuccessSequence = event.getSeq();
@@ -219,7 +224,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 						event.setDmlType(DMLType.INSERT);
 					} catch (RuntimeException e) {
 						Cat.logError(e);
-						break;//todo:log error
+						if (tryTimes > MAX_TRY_TIMES) {
+							break;
+						}
 					}
 				}
 
@@ -260,6 +267,27 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			rowEvent.getColumns().get(task.getPk()).setKey(true);
 		}
 	}
+
+//	class SequenceReporter implements Runnable {
+//		private long lastSequence = 0;
+//
+//		@Override
+//		public void run() {
+//			while (true) {
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e) {
+//					break;
+//				}
+//
+//
+//			}
+//		}
+//
+//		protected long chooseSequence(){
+//			for()
+//		}
+//	}
 
 	class PumaEventListener implements EventListener {
 		@Override
