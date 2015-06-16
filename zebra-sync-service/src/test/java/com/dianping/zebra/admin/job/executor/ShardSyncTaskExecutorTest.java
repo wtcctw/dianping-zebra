@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class PumaClientSyncTaskExecutorTest {
+public class ShardSyncTaskExecutorTest {
 	PumaClientSyncTaskEntity config;
 
 	PumaClientStatusEntity status;
@@ -46,6 +46,25 @@ public class PumaClientSyncTaskExecutorTest {
 	@Test
 	public void test_router() {
 
+	}
+
+	@Test
+	public void test_init_processor_and_thread() throws Exception {
+		test_init_event_queue();
+		target.initProcessors();
+
+		Assert.assertEquals(target.dataSources.size() * target.THREADS_PER_DS, target.rowEventProcessers.size());
+		Assert.assertEquals(target.dataSources.size() * target.THREADS_PER_DS, target.rowEventProcesserThreads.size());
+	}
+
+	@Test
+	public void test_init_event_queue() throws Exception {
+		target.dataSources = new HashMap<String, GroupDataSource>();
+		target.dataSources.put("a", new GroupDataSource());
+		target.dataSources.put("b", new GroupDataSource());
+		target.initEventQueues();
+		Assert.assertTrue(target.eventQueues.get("a").length == target.THREADS_PER_DS);
+		Assert.assertTrue(target.eventQueues.get("b").length == target.THREADS_PER_DS);
 	}
 
 	@Test

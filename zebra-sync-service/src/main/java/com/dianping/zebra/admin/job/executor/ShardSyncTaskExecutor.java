@@ -1,15 +1,5 @@
 package com.dianping.zebra.admin.job.executor;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
@@ -27,7 +17,16 @@ import com.dianping.zebra.shard.router.rule.DataSourceBO;
 import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
@@ -39,6 +38,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	public final static int MAX_TRY_TIMES = 10;
 
+	public final static int THREADS_PER_DS = 5;
+
+	public final static int MAX_QUEUE_SIZE = 10000;
+
 	protected GroovyRuleEngine engine;
 
 	protected SimpleDataSourceProvider dataSourceProvider;
@@ -49,6 +52,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	protected Map<String, JdbcTemplate> templateMap;
 
+	protected Map<String, BlockingQueue<RowChangedEvent>[]> eventQueues;
+
+	protected List<RowEventProcessor> rowEventProcessers;
+
+	protected List<Thread> rowEventProcesserThreads;
+
 	public ShardSyncTaskExecutor(PumaClientSyncTaskEntity task) {
 		this.task = task;
 	}
@@ -58,6 +67,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		initDataSources();
 		initJdbcTemplate();
 		initPumaClient();
+		initEventQueues();
+		initProcessors();
 	}
 
 	public synchronized void start() {
@@ -81,6 +92,42 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 
 		dataSources.clear();
+	}
+
+	protected void initProcessors() {
+		ImmutableList.Builder<RowEventProcessor> processorBuilder = ImmutableList.builder();
+		ImmutableList.Builder<Thread> threadBuilder = ImmutableList.builder();
+
+		for (Map.Entry<String, BlockingQueue<RowChangedEvent>[]> entry : eventQueues.entrySet()) {
+
+			for (int k = 0; k < entry.getValue().length; k++) {
+				BlockingQueue<RowChangedEvent> queue = entry.getValue()[k];
+				RowEventProcessor processor = new RowEventProcessor(queue);
+				Thread thread = new Thread(processor);
+				thread.setDaemon(true);
+				thread.setName(String.format("RowEventProcessor-%s-%d", entry.getKey(), k));
+
+				processorBuilder.add(processor);
+				threadBuilder.add(thread);
+			}
+		}
+
+		this.rowEventProcessers = processorBuilder.build();
+		this.rowEventProcesserThreads = threadBuilder.build();
+	}
+
+	protected void initEventQueues() {
+		ImmutableMap.Builder<String, BlockingQueue<RowChangedEvent>[]> queueBuilder = ImmutableMap.builder();
+
+		for (String name : dataSources.keySet()) {
+			BlockingQueue<RowChangedEvent>[] arrays = new BlockingQueue[THREADS_PER_DS];
+			for (int k = 0; k < arrays.length; k++) {
+				arrays[k] = new LinkedBlockingQueue<RowChangedEvent>();
+			}
+			queueBuilder.put(name, arrays);
+		}
+
+		this.eventQueues = queueBuilder.build();
 	}
 
 	protected void initRouter() {
@@ -131,6 +178,24 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		this.client = new PumaClient(configBuilder.build());
 
 		this.client.register(new PumaEventListener());
+	}
+
+	class RowEventProcessor implements Runnable {
+
+		private final BlockingQueue<RowChangedEvent> queue;
+
+		public RowEventProcessor(BlockingQueue<RowChangedEvent> queue) {
+			this.queue = queue;
+		}
+
+		public long getLastSuccessSequence() {
+			return 0;
+		}
+
+		@Override
+		public void run() {
+
+		}
 	}
 
 	class PumaEventListener implements EventListener {
