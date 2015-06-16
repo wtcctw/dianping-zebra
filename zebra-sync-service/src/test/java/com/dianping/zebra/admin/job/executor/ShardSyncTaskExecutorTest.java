@@ -123,14 +123,14 @@ public class ShardSyncTaskExecutorTest {
 	public void testPuma() throws IOException {
 		PumaClientSyncTaskEntity config = new PumaClientSyncTaskEntity();
 
-		config.setId(1000000001);
+		config.setId(3);
 		config.setRuleName("unifiedorder");
 		config.setTableName("UOD_Order");
 		config.setDbRule("(date(#AddTime#).year - 114 < 0 ? 0 :date(#AddTime#).year - 114).intValue()");
 		config.setDbIndexes("ordershop0,ordershop1");
 		config.setTbRule("((date(#AddTime#).month - 1)/3).intValue()");
 		config.setTbSuffix("everydb:[_Time0,_Time3]");
-		config.setPumaTaskName("UnifiedOrder0@UOD_Order@AddTime");
+		config.setPumaTaskName("UnifiedOrder@UOD_Order");
 		config.setPumaTables("UOD_Order0,UOD_Order1");
 		config.setPumaDatabase("UnifiedOrder0");
 		config.setPk("OrderID");
