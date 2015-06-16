@@ -1,15 +1,5 @@
 package com.dianping.zebra.admin.job.executor;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
@@ -27,7 +17,16 @@ import com.dianping.zebra.shard.router.rule.DataSourceBO;
 import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
@@ -39,6 +38,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	public final static int MAX_TRY_TIMES = 10;
 
+	public final static int NUMBER_OF_PROCESSORS = 5;
+
+	public final static int MAX_QUEUE_SIZE = 10000;
+
 	protected GroovyRuleEngine engine;
 
 	protected SimpleDataSourceProvider dataSourceProvider;
@@ -49,6 +52,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	protected Map<String, JdbcTemplate> templateMap;
 
+	protected BlockingQueue<RowChangedEvent>[] eventQueues;
+
+	protected List<RowEventProcessor> rowEventProcessors;
+
+	protected List<Thread> rowEventProcesserThreads;
+
 	public ShardSyncTaskExecutor(PumaClientSyncTaskEntity task) {
 		this.task = task;
 	}
@@ -58,14 +67,19 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		initDataSources();
 		initJdbcTemplate();
 		initPumaClient();
+		initEventQueues();
+		initProcessors();
 	}
 
 	public synchronized void start() {
-		client.start();
-	}
+		if (client == null || rowEventProcesserThreads == null) {
+			throw new IllegalStateException("You should init before start!");
+		}
 
-	public synchronized void pause() {
-		client.stop();
+		client.start();
+		for (Thread thread : rowEventProcesserThreads) {
+			thread.start();
+		}
 	}
 
 	public synchronized void stop() {
@@ -73,14 +87,47 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			client.stop();
 		}
 
-		for (GroupDataSource ds : dataSources.values()) {
-			try {
-				ds.close();
-			} catch (SQLException ignore) {
+		if (dataSources != null) {
+			for (GroupDataSource ds : dataSources.values()) {
+				try {
+					ds.close();
+				} catch (SQLException ignore) {
+				}
 			}
+			dataSources.clear();
 		}
 
-		dataSources.clear();
+		if (rowEventProcesserThreads != null) {
+			for (Thread thread : rowEventProcesserThreads) {
+				thread.interrupt();
+			}
+		}
+	}
+
+	protected void initProcessors() {
+		ImmutableList.Builder<RowEventProcessor> processorBuilder = ImmutableList.builder();
+		ImmutableList.Builder<Thread> threadBuilder = ImmutableList.builder();
+
+		for (int k = 0; k < this.eventQueues.length; k++) {
+			BlockingQueue<RowChangedEvent> queue = this.eventQueues[k];
+			RowEventProcessor processor = new RowEventProcessor(queue);
+			Thread thread = new Thread(processor);
+			thread.setDaemon(true);
+			thread.setName(String.format("RowEventProcessor-%d", k));
+
+			processorBuilder.add(processor);
+			threadBuilder.add(thread);
+		}
+
+		this.rowEventProcessors = processorBuilder.build();
+		this.rowEventProcesserThreads = threadBuilder.build();
+	}
+
+	protected void initEventQueues() {
+		this.eventQueues = new BlockingQueue[NUMBER_OF_PROCESSORS];
+		for (int k = 0; k < this.eventQueues.length; k++) {
+			this.eventQueues[k] = new LinkedBlockingQueue<RowChangedEvent>();
+		}
 	}
 
 	protected void initRouter() {
@@ -133,28 +180,54 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		this.client.register(new PumaEventListener());
 	}
 
-	class PumaEventListener implements EventListener {
-		protected volatile long tryTimes = 0;
+	class RowEventProcessor implements Runnable {
 
-		@Override
-		public void onEvent(ChangedEvent event) throws Exception {
-			hitTimes.incrementAndGet();
-			tryTimes++;
-			onEventInternal(event);
-			tryTimes = 0;
+		private final BlockingQueue<RowChangedEvent> queue;
+
+		private volatile long lastSuccessSequence;
+
+		public RowEventProcessor(BlockingQueue<RowChangedEvent> queue) {
+			this.queue = queue;
 		}
 
-		protected void onEventInternal(ChangedEvent event) {
-			if (!(event instanceof RowChangedEvent)) {
-				return;
-			}
-			RowChangedEvent rowEvent = (RowChangedEvent) event;
-			if (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit()) {
-				return;
-			}
+		public long getLastSuccessSequence() {
+			return lastSuccessSequence;
+		}
 
-			processPK(rowEvent);
+		@Override
+		public void run() {
+			while (true) {
+				RowChangedEvent event;
+				try {
+					event = queue.take();
+				} catch (InterruptedException e) {
+					break;
+				}
 
+				processPK(event);
+
+				while (true) {
+					try {
+						process(event);
+						lastSuccessSequence = event.getSeq();
+						break;
+					} catch (DuplicateKeyException e) {
+						Cat.logError(e);
+						event.setDmlType(DMLType.UPDATE);
+					} catch (NoRowsAffectedException e) {
+						Cat.logError(e);
+						event.setDmlType(DMLType.INSERT);
+					} catch (RuntimeException e) {
+						Cat.logError(e);
+						break;//todo:log error
+					}
+				}
+
+				hitTimes.incrementAndGet();
+			}
+		}
+
+		protected void process(RowChangedEvent rowEvent) {
 			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
 			RuleEngineEvalContext context = new RuleEngineEvalContext(column);
 			Number index = (Number) engine.eval(context);
@@ -186,34 +259,32 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 			rowEvent.getColumns().get(task.getPk()).setKey(true);
 		}
+	}
+
+	class PumaEventListener implements EventListener {
+		@Override
+		public void onEvent(ChangedEvent event) throws Exception {
+			if (!(event instanceof RowChangedEvent)) {
+				return;
+			}
+			RowChangedEvent rowEvent = (RowChangedEvent) event;
+			if (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit()) {
+				return;
+			}
+
+			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(task.getPk());
+			eventQueues[getIndex(columnInfo)].put(rowEvent);
+		}
+
+		private int getIndex(RowChangedEvent.ColumnInfo columnInfo) {
+			return Math.abs(
+				(columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue()).hashCode())
+				% NUMBER_OF_PROCESSORS;
+		}
 
 		@Override
 		public boolean onException(ChangedEvent event, Exception e) {
-			Cat.logError(e);
-
-			if (hitTimes.get() > MAX_TRY_TIMES) {
-				return true;
-			}
-
-			RowChangedEvent rowEvent = (RowChangedEvent) event;
-
-			if (e instanceof DuplicateKeyException) {
-				rowEvent.setDmlType(DMLType.UPDATE);
-
-				return false;
-			} else if (e instanceof NoRowsAffectedException) {
-				rowEvent.setDmlType(DMLType.INSERT);
-
-				return false;
-			} else {
-				// 不断重试，随着重试次数增多，sleep 时间增加
-				try {
-					Thread.sleep(tryTimes);
-				} catch (InterruptedException ignore) {
-					return true;
-				}
-				return false;
-			}
+			return false;
 		}
 
 		@Override
@@ -230,6 +301,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		public void onSkipEvent(ChangedEvent event) {
 
 		}
+
 	}
 
 	public Map<String, String> getStatus() {

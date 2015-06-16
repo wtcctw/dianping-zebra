@@ -8,7 +8,7 @@ public class PumaClientSyncTaskEntity {
 	 * id
 	 */
 	private int id;
-	
+
 	/**
 	 * 分库分表规则
 	 */
@@ -22,7 +22,7 @@ public class PumaClientSyncTaskEntity {
 	/**
 	 * 主键字段
 	 */
-	private String pk;
+	private volatile String pk;
 
 	/**
 	 * 数据库规则分配策略

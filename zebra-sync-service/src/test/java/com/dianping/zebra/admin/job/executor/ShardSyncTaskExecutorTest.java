@@ -22,7 +22,8 @@ import static org.mockito.Mockito.*;
  * mail@dozer.cc
  * http://www.dozer.cc
  */
-public class PumaClientSyncTaskExecutorTest {
+public class ShardSyncTaskExecutorTest {
+
 	PumaClientSyncTaskEntity config;
 
 	PumaClientStatusEntity status;
@@ -49,6 +50,24 @@ public class PumaClientSyncTaskExecutorTest {
 	}
 
 	@Test
+	public void test_init_processor_and_thread() throws Exception {
+		test_init_event_queue();
+		target.initProcessors();
+
+		Assert.assertEquals(target.NUMBER_OF_PROCESSORS, target.rowEventProcessors.size());
+		Assert.assertEquals(target.NUMBER_OF_PROCESSORS, target.rowEventProcesserThreads.size());
+	}
+
+	@Test
+	public void test_init_event_queue() throws Exception {
+		target.dataSources = new HashMap<String, GroupDataSource>();
+		target.dataSources.put("a", new GroupDataSource());
+		target.dataSources.put("b", new GroupDataSource());
+		target.initEventQueues();
+		Assert.assertTrue(target.eventQueues.length == target.NUMBER_OF_PROCESSORS);
+	}
+
+	@Test
 	public void test_init_datasource() {
 		target = spy(target);
 		doAnswer(new Answer<GroupDataSource>() {
@@ -68,7 +87,7 @@ public class PumaClientSyncTaskExecutorTest {
 
 	@Test
 	public void test_process_pk_removepk_add_shard_key() throws Exception {
-		ShardSyncTaskExecutor.PumaEventListener listener = target.new PumaEventListener();
+		ShardSyncTaskExecutor.RowEventProcessor listener = target.new RowEventProcessor(null);
 
 		RowChangedEvent event = new RowChangedEvent();
 		config.setPk("UserId");
@@ -84,7 +103,7 @@ public class PumaClientSyncTaskExecutorTest {
 
 	@Test
 	public void test_process_pk_pk_is_shard_key() throws Exception {
-		ShardSyncTaskExecutor.PumaEventListener listener = target.new PumaEventListener();
+		ShardSyncTaskExecutor.RowEventProcessor listener = target.new RowEventProcessor(null);
 
 		RowChangedEvent event = new RowChangedEvent();
 		config.setPk("UserId");
@@ -104,13 +123,14 @@ public class PumaClientSyncTaskExecutorTest {
 	public void testPuma() throws IOException {
 		PumaClientSyncTaskEntity config = new PumaClientSyncTaskEntity();
 
+		config.setId(1000000001);
 		config.setRuleName("unifiedorder");
 		config.setTableName("UOD_Order");
 		config.setDbRule("(date(#AddTime#).year - 114 < 0 ? 0 :date(#AddTime#).year - 114).intValue()");
-		config.setDbIndexes("unifiedorder0,unifiedorder1");
+		config.setDbIndexes("ordershop0,ordershop1");
 		config.setTbRule("((date(#AddTime#).month - 1)/3).intValue()");
 		config.setTbSuffix("everydb:[_Time0,_Time3]");
-		config.setPumaTaskName("UnifiedOrder0@UOD_Order@ShopID");
+		config.setPumaTaskName("UnifiedOrder0@UOD_Order@AddTime");
 		config.setPumaTables("UOD_Order0,UOD_Order1");
 		config.setPumaDatabase("UnifiedOrder0");
 		config.setPk("OrderID");
