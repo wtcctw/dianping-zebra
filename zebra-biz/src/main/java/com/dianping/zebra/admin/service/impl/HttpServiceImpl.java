@@ -7,8 +7,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 
 import com.dianping.zebra.admin.service.HttpService;
+
 import org.springframework.stereotype.Service;
 import org.unidal.helper.Files;
 import org.unidal.helper.Urls;
@@ -64,6 +66,8 @@ public class HttpServiceImpl implements HttpService {
 			// 获取URLConnection对象对应的输出流
 			out = new PrintWriter(conn.getOutputStream());
 			// 发送请求参数
+			
+//			String encodedParams = URLEncoder.encode(params,"utf-8");
 			out.print(params);
 			// flush输出流的缓冲
 			out.flush();

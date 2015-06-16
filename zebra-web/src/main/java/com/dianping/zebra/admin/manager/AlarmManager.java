@@ -76,10 +76,10 @@ public class AlarmManager {
 
 		public String getSmsContent() {
 			if (StringUtils.isNotBlank(toSyncIp)) {
-				return String.format("[%s][同步任务:%s 从同步服务器1:%s 灾备到 同步服务器2:%s]", getTitle(), syncTaskName, fromSyncIp,
+				return String.format("[%s] 同步任务:%s 在同步服务器1:%s已挂,灾备到同步服务器2:%s", getTitle(), syncTaskName, fromSyncIp,
 				      toSyncIp);
 			} else {
-				return String.format("[%s][同步任务:%s 同步服务器1:%s 挂掉,无法找到其灾备服务器!]", getTitle(), syncTaskName, fromSyncIp);
+				return String.format("[%s] 同步任务:%s 在同步服务器1:%s已挂,无法找到其灾备服务器!", getTitle(), syncTaskName, fromSyncIp);
 			}
 		}
 
@@ -88,7 +88,11 @@ public class AlarmManager {
 		}
 
 		public String getWeiXinContent() {
-			return getSmsContent();
+			if (StringUtils.isNotBlank(toSyncIp)) {
+				return String.format("[同步任务:%s 在同步服务器1:%s已挂,灾备到同步服务器2:%s]", syncTaskName, fromSyncIp, toSyncIp);
+			} else {
+				return String.format("[同步任务:%s 在同步服务器1:%s已挂,无法找到其灾备服务器!!]", syncTaskName, fromSyncIp);
+			}
 		}
 	}
 }

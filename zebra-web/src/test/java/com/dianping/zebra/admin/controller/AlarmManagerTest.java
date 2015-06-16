@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.service;
+package com.dianping.zebra.admin.controller;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -7,26 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.dianping.zebra.admin.manager.AlarmManager;
+import com.dianping.zebra.admin.manager.AlarmManager.AlarmContent;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath*:config/spring/appcontext-*.xml")
 @Ignore
-public class AlarmServiceTest {
+public class AlarmManagerTest {
 	
 	@Autowired
-	private AlarmService alarmService;
-
-	@Test
-	public void testSms(){
-		boolean success = alarmService.sendSms("15216716460", "[xsdf] zebra test");
-		
-		System.out.println(success);
-	}
+	private AlarmManager manager;
 	
 	@Test
-	public void testWexin(){
-		boolean success = alarmService.sendWeixin("hao.zhu@dianping.com", "test", "test");
+	public void testAlarm(){
+		AlarmContent content = new AlarmContent("mock-puma-task", "192.168.1.1", null);
 		
-		System.out.println(success);
+		manager.alarm(content);
 	}
 
 }
