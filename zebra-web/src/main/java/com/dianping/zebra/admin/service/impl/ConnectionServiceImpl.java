@@ -2,10 +2,11 @@ package com.dianping.zebra.admin.service.impl;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.admin.dto.ConnectionStatusDto;
-import com.dianping.zebra.admin.mock.GroupDataSourceExtend;
 import com.dianping.zebra.admin.service.ConnectionService;
 import com.dianping.zebra.admin.service.DalConfigService;
 import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
+import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
@@ -108,6 +109,20 @@ public class ConnectionServiceImpl implements ConnectionService {
 			config.getValue().setPassword(
 			      config.getValue().getPassword() != null ? StringUtils.repeat("*", config.getValue().getPassword()
 			            .length()) : null);
+		}
+	}
+	
+	public static class GroupDataSourceExtend extends GroupDataSource {
+
+		@Override
+		protected void initConfig() {
+			this.groupConfig = buildGroupConfig();
+			this.systemConfigManager = SystemConfigManagerFactory.getConfigManger(configManagerType);
+		}
+
+		public void setDataSourceConfigManager(ConfigService configService) {
+			this.dataSourceConfigManager = new DefaultDataSourceConfigManager(jdbcRef, configService);
+			this.dataSourceConfigManager.init();
 		}
 	}
 }
