@@ -72,11 +72,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	public synchronized void start() {
-		client.start();
-	}
+		if (client != null || rowEventProcesserThreads != null) {
+			throw new IllegalStateException("You should init before start!");
+		}
 
-	public synchronized void pause() {
-		client.stop();
+		client.start();
+		for (Thread thread : rowEventProcesserThreads) {
+			thread.start();
+		}
 	}
 
 	public synchronized void stop() {
@@ -84,14 +87,21 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			client.stop();
 		}
 
-		for (GroupDataSource ds : dataSources.values()) {
-			try {
-				ds.close();
-			} catch (SQLException ignore) {
+		if (dataSources != null) {
+			for (GroupDataSource ds : dataSources.values()) {
+				try {
+					ds.close();
+				} catch (SQLException ignore) {
+				}
 			}
+			dataSources.clear();
 		}
 
-		dataSources.clear();
+		if (rowEventProcesserThreads != null) {
+			for (Thread thread : rowEventProcesserThreads) {
+				thread.interrupt();
+			}
+		}
 	}
 
 	protected void initProcessors() {
@@ -102,7 +112,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 			for (int k = 0; k < entry.getValue().length; k++) {
 				BlockingQueue<RowChangedEvent> queue = entry.getValue()[k];
-				RowEventProcessor processor = new RowEventProcessor(queue);
+				RowEventProcessor processor = new RowEventProcessor(queue, templateMap.get(entry.getKey()));
 				Thread thread = new Thread(processor);
 				thread.setDaemon(true);
 				thread.setName(String.format("RowEventProcessor-%s-%d", entry.getKey(), k));
@@ -184,8 +194,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		private final BlockingQueue<RowChangedEvent> queue;
 
-		public RowEventProcessor(BlockingQueue<RowChangedEvent> queue) {
+		private final JdbcTemplate template;
+
+		public RowEventProcessor(BlockingQueue<RowChangedEvent> queue, JdbcTemplate template) {
 			this.queue = queue;
+			this.template = template;
 		}
 
 		public long getLastSuccessSequence() {
