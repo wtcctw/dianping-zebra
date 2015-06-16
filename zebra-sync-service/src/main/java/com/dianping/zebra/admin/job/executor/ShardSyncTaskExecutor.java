@@ -86,7 +86,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-			task.getTbSuffix(), task.getTbRule());
+		      task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -126,7 +126,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
-			.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
 		this.client = new PumaClient(configBuilder.build());
 

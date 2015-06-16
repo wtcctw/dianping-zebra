@@ -10,6 +10,12 @@
         <div class="form-group">
 	        <label class="col-sm-3 control-label">当前服务器</label>
 	        <div class="col-sm-9">
+	        	<input type="text" class="col-xs-10 col-sm-5" placeholder="Puma任务名"  ng-model="pumaTaskName"/>
+	        </div>
+		</div>
+        <div class="form-group">
+	        <label class="col-sm-3 control-label">当前服务器</label>
+	        <div class="col-sm-9">
 		        <select class="col-xs-10 col-sm-5" ng-model="executor" ng-options="syncServer.name as syncServer.name for syncServer in syncServers"></select>
 	        </div>
 		</div>

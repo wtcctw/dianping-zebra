@@ -69,24 +69,24 @@ public class PumaClientSyncTaskController extends BasicController {
 	
 	@RequestMapping(value = "/updateSyncServer", method = RequestMethod.GET)
 	@ResponseBody
-	public void updateSyncServer(String pumaTaskName,String executor, String executor1,String executor2){
-		if(pumaTaskName != null && executor != null && executor1 != null && executor2 != null){
-			dao.updateSyncTaskSyncServers(pumaTaskName, executor, executor1, executor2);
+	public void updateSyncServer(String pk, String pumaTaskName, String executor, String executor1,String executor2){
+		if(pk != null && pumaTaskName != null && executor != null && executor1 != null && executor2 != null){
+			dao.updateSyncTaskSyncServers(pk, pumaTaskName, executor, executor1, executor2);
 		}
 	}
 
 	@RequestMapping(value = "/schedule", method = RequestMethod.GET)
 	@ResponseBody
-	public void updateExecutePlan(String pumaTaskName) {
-		if (StringUtils.isNotBlank(pumaTaskName)) {
-			dao.updateSyncTaskStatus(pumaTaskName, 2);
+	public void updateExecutePlan(String pk) {
+		if (StringUtils.isNotBlank(pk)) {
+			dao.updateSyncTaskStatus(pk, 2);
 		}
 	}
 
 	private void insertOrUpdate(List<PumaClientSyncTaskEntity> allEntities, PumaClientSyncTaskDto dto) {
 		PumaClientSyncTaskEntity tmp = null;
 		for (PumaClientSyncTaskEntity entity : allEntities) {
-			if (entity.getPumaTaskName().equals(dto.getPumaTaskName())) {
+			if (entity.getPk().equals(dto.getPk())) {
 				tmp = entity;
 				break;
 			}
@@ -108,6 +108,7 @@ public class PumaClientSyncTaskController extends BasicController {
 			dto.setExecutor1(tmp.getExecutor1());
 			dto.setExecutor2(tmp.getExecutor2());
 			dto.setStatus(tmp.getStatus());
+			dto.setPumaTaskName(tmp.getPumaTaskName());
 			dao.updateSyncTask(dto);
 		}
 	}
@@ -168,7 +169,7 @@ public class PumaClientSyncTaskController extends BasicController {
 
 						syncTask.setPumaDatabase(dbName);
 
-						syncTask.setPumaTaskName(String.format("%s@%s@%s", dbName, table, shardColumn));
+						syncTask.setPk(String.format("%s@%s@%s", dbName, table, shardColumn));
 						configManager.close();
 
 						StringBuilder sb = new StringBuilder(128);

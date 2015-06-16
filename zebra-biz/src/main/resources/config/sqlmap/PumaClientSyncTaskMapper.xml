@@ -69,7 +69,6 @@
         SET
         ruleName=#{ruleName},
         tableName=#{tableName},
-        pk=#{pk},
         dbRule=#{dbRule},
         dbIndexes=#{dbIndexes},
         tbRule=#{tbRule},
@@ -82,7 +81,7 @@
         executor2=#{executor2},
         status=#{status},
         updateTime=NOW()
-        WHERE pumaTaskName = #{pumaTaskName}
+        WHERE pk = #{pk}
     </update>
 
     <update id="updateSyncTaskStatus" parameterType="map">
@@ -90,16 +89,17 @@
         `zebra`.`PumaTask` SET
         status=#{status},
         updateTime=NOW()
-        WHERE pumaTaskName=#{pumaTaskName}
+        WHERE pk=#{pk}
     </update>
     
     <update id="updateSyncTaskSyncServers" parameterType="map">
         UPDATE
         `zebra`.`PumaTask` SET
+        pumaTaskName=#{pumaTaskName},
         executor=#{executor},
         executor1=#{executor1},
         executor2=#{executor2},
         updateTime=NOW()
-        WHERE pumaTaskName=#{pumaTaskName}
+        WHERE pk=#{pk}
     </update>
 </mapper>

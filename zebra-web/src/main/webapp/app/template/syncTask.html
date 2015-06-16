@@ -24,6 +24,7 @@
 		<thead>
 			<tr>
 				<th>任务名</th>
+				<th>Puma任务名</th>
 				<th>同步服务器地址</th>
 				<th>备选服务器地址1</th>
 				<th>备选服务器地址2</th>
@@ -34,6 +35,7 @@
 		</thead>
 		<tbody>
 			<tr ng-repeat="syncTaskPlan in syncTaskPlans | toArray">
+				<td>{{syncTaskPlan.pk}}</td>
 				<td>{{syncTaskPlan.pumaTaskName}}</td>
 				<td>{{syncTaskPlan.executor}}</td>
 				<td>{{syncTaskPlan.executor1}}</td>
@@ -41,7 +43,7 @@
 				<td ng-if="syncTaskPlan.status == 1">初始化</td>
 				<td ng-if="syncTaskPlan.status == 2">运行中</td>
 				<td >
-					<button ng-if="syncTaskPlan.status == 1" class="btn btn-xs btn-primary" ng-click="schedule(syncTaskPlan.pumaTaskName)">生效</button>
+					<button ng-if="syncTaskPlan.status == 1" class="btn btn-xs btn-primary" ng-click="schedule(syncTaskPlan.pk)">生效</button>
 				</td>
 				<td>
 					<button class="btn btn-xs btn-primary" ng-click="edit(syncTaskPlan)">编辑</button>	

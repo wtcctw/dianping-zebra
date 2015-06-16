@@ -48,7 +48,7 @@ public class PumaClientSyncTaskEntity {
 	 * puma任务名
 	 */
 	private String pumaTaskName;
-
+	
 	/**
 	 * 监听的数据库
 	 */

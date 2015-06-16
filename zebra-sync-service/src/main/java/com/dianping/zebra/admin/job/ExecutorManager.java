@@ -59,7 +59,7 @@ public class ExecutorManager {
 		List<PumaClientSyncTaskEntity> tasks = pumaClientSyncTaskMapper.findEffectiveTaskByExecutor(this.localAddress);
 
 		for (PumaClientSyncTaskEntity task : tasks) {
-			if (pumaClientSyncTaskExecutorMap.containsKey(task.getPumaTaskName())) {
+			if (pumaClientSyncTaskExecutorMap.containsKey(task.getPk())) {
 				continue;
 			}
 
@@ -68,7 +68,7 @@ public class ExecutorManager {
 				executor = new ShardSyncTaskExecutor(task);
 				executor.init();
 				executor.start();
-				pumaClientSyncTaskExecutorMap.put(task.getPumaTaskName(), executor);
+				pumaClientSyncTaskExecutorMap.put(task.getPk(), executor);
 			} catch (Exception e) {
 				if (executor != null) {
 					executor.stop();
@@ -76,21 +76,21 @@ public class ExecutorManager {
 			}
 		}
 
-		Set<String> idToRemove = new HashSet<String>();
-		for (String pumaTaskName : pumaClientSyncTaskExecutorMap.keySet()) {
-			final String finalPumaTaskName = pumaTaskName;
+		Set<String> pksToRemove = new HashSet<String>();
+		for (String pk : pumaClientSyncTaskExecutorMap.keySet()) {
+			final String finalPK = pk;
 			if (Iterables.all(tasks, new Predicate<PumaClientSyncTaskEntity>() {
 				@Override
 				public boolean apply(PumaClientSyncTaskEntity entity) {
-					return !finalPumaTaskName.equals(entity.getPumaTaskName());
+					return !finalPK.equals(entity.getPk());
 				}
 			})) {
-				idToRemove.add(finalPumaTaskName);
+				pksToRemove.add(finalPK);
 			}
 		}
 
-		for (String taskName : idToRemove) {
-			ShardSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(taskName);
+		for (String pk : pksToRemove) {
+			ShardSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(pk);
 			if (task != null) {
 				task.stop();
 			}

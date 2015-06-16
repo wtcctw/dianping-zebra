@@ -93,11 +93,11 @@ zebraWeb.controller('syncTask', function ($scope, $http, $modal,syncService){
     	}
     }
     
-    $scope.schedule = function (pumaTaskName){
-    	if(pumaTaskName){
-    		$http.get('/a/syncTask/schedule?pumaTaskName=' + pumaTaskName).success(function (data, status, headers, config) {
+    $scope.schedule = function (pk){
+    	if(pk){
+    		$http.get('/a/syncTask/schedule?pk=' + pk).success(function (data, status, headers, config) {
     			$scope.syncTaskPlans.forEach(function (item){
-    				if(item.pumaTaskName == pumaTaskName){
+    				if(item.pk == pk){
     					item.status = 2;
     				}
     			});
@@ -115,12 +115,13 @@ zebraWeb.controller('syncTask', function ($scope, $http, $modal,syncService){
 });
 
 zebraWeb.controller('syncTask-edit', function ($scope, $http, pumaTask, close){
-	$scope.name = pumaTask.pumaTaskName;
+	$scope.name = pumaTask.pk;
 	
 	$scope.load = function() {
 		$http.get('/a/sync-server').success(function (data, status, headers, config) {
 			$scope.syncServers = data;
 			
+			$scope.pumaTaskName = pumaTask.pumaTaskName;
 			$scope.executor = pumaTask.executor;
 			$scope.executor1 = pumaTask.executor1;
 			$scope.executor2 = pumaTask.executor2;
@@ -130,11 +131,13 @@ zebraWeb.controller('syncTask-edit', function ($scope, $http, pumaTask, close){
 	$scope.load();
 	
 	$scope.save = function(){
+		pumaTask.pumaTaskName = $scope.pumaTaskName;
 		pumaTask.executor = $scope.executor;
 		pumaTask.executor1 = $scope.executor1;
 		pumaTask.executor2 = $scope.executor2;
 		
-		$http.get('/a/syncTask/updateSyncServer?pumaTaskName=' + pumaTask.pumaTaskName
+		$http.get('/a/syncTask/updateSyncServer?pk=' + pumaTask.pk
+				+ '&pumaTaskName=' + pumaTask.pumaTaskName
 				+ '&executor=' + $scope.executor + '&executor1=' + $scope.executor1 + "&executor2=" + $scope.executor2).success(function (data, status, headers, config) {
 			close();
 		});
