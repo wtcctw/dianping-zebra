@@ -210,13 +210,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 					try {
 						process(event);
 						lastSuccessSequence = event.getSeq();
+						break;
 					} catch (DuplicateKeyException e) {
 						Cat.logError(e);
 						event.setDmlType(DMLType.UPDATE);
 					} catch (NoRowsAffectedException e) {
 						Cat.logError(e);
 						event.setDmlType(DMLType.INSERT);
-					} catch (Exception e) {
+					} catch (RuntimeException e) {
 						Cat.logError(e);
 						break;//todo:log error
 					}
@@ -226,7 +227,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			}
 		}
 
-		protected void process(RowChangedEvent rowEvent) throws Exception {
+		protected void process(RowChangedEvent rowEvent) {
 			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
 			RuleEngineEvalContext context = new RuleEngineEvalContext(column);
 			Number index = (Number) engine.eval(context);
@@ -272,7 +273,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			}
 
 			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(task.getPk());
-			eventQueues[Math.abs(columnInfo.getOldValue().hashCode()) % NUMBER_OF_PROCESSORS].put(rowEvent);
+			eventQueues[getIndex(columnInfo)].put(rowEvent);
+		}
+
+		private int getIndex(RowChangedEvent.ColumnInfo columnInfo) {
+			return Math.abs(
+				(columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue()).hashCode())
+				% NUMBER_OF_PROCESSORS;
 		}
 
 		@Override

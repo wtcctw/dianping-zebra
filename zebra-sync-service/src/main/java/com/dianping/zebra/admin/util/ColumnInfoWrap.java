@@ -48,6 +48,7 @@ public class ColumnInfoWrap implements Map<String, Object> {
 
 		switch (event.getDmlType()) {
 		case INSERT:
+		case UPDATE:
 			return info.getNewValue();
 		default:
 			return info.getOldValue();
