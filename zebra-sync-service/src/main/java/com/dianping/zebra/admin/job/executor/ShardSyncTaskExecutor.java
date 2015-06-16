@@ -225,7 +225,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 					} catch (RuntimeException e) {
 						Cat.logError(e);
 						if (tryTimes > MAX_TRY_TIMES) {
-							stop();
 							break;
 						}
 					}
