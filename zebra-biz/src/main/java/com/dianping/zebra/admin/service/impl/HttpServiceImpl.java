@@ -57,6 +57,8 @@ public class HttpServiceImpl implements HttpService {
 			conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
 
 			// 发送POST请求必须设置如下两行
+			conn.setConnectTimeout(2000);
+			conn.setReadTimeout(3000);
 			conn.setDoOutput(true);
 			conn.setDoInput(true);
 			// 获取URLConnection对象对应的输出流
