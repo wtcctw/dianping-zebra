@@ -27,7 +27,7 @@ public class PumaClientSyncTaskExecutorTest {
 
 	PumaClientStatusEntity status;
 
-	PumaClientSyncTaskExecutor target;
+	ShardSyncTaskExecutor target;
 
 	@Before
 	public void setUp() throws Exception {
@@ -40,7 +40,7 @@ public class PumaClientSyncTaskExecutorTest {
 		config.setTbRule("((#id# / 2).toLong() % 2)");
 		config.setTbSuffix("everydb:[_0,_1]");
 
-		target = new PumaClientSyncTaskExecutor(config);
+		target = new ShardSyncTaskExecutor(config);
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class PumaClientSyncTaskExecutorTest {
 
 	@Test
 	public void test_process_pk_removepk_add_shard_key() throws Exception {
-		PumaClientSyncTaskExecutor.PumaEventListener listener = target.new PumaEventListener();
+		ShardSyncTaskExecutor.PumaEventListener listener = target.new PumaEventListener();
 
 		RowChangedEvent event = new RowChangedEvent();
 		config.setPk("UserId");
@@ -84,7 +84,7 @@ public class PumaClientSyncTaskExecutorTest {
 
 	@Test
 	public void test_process_pk_pk_is_shard_key() throws Exception {
-		PumaClientSyncTaskExecutor.PumaEventListener listener = target.new PumaEventListener();
+		ShardSyncTaskExecutor.PumaEventListener listener = target.new PumaEventListener();
 
 		RowChangedEvent event = new RowChangedEvent();
 		config.setPk("UserId");
@@ -115,7 +115,7 @@ public class PumaClientSyncTaskExecutorTest {
 		config.setPumaDatabase("UnifiedOrder0");
 		config.setPk("OrderID");
 
-		PumaClientSyncTaskExecutor target = new PumaClientSyncTaskExecutor(config);
+		ShardSyncTaskExecutor target = new ShardSyncTaskExecutor(config);
 		target.init();
 
 		target.start();

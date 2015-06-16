@@ -5,7 +5,7 @@ import com.dianping.zebra.admin.dao.PumaClientStatusMapper;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
-import com.dianping.zebra.admin.job.executor.PumaClientSyncTaskExecutor;
+import com.dianping.zebra.admin.job.executor.ShardSyncTaskExecutor;
 import com.dianping.zebra.admin.job.executor.ShardDumpTaskExecutor;
 import com.dianping.zebra.admin.service.ShardDumpService;
 import com.google.common.base.Predicate;
@@ -35,7 +35,7 @@ public class ExecutorManager {
 	@Autowired
 	private PumaClientStatusMapper pumaClientStatusMapper;
 
-	private Map<String, PumaClientSyncTaskExecutor> pumaClientSyncTaskExecutorMap = new ConcurrentHashMap<String, PumaClientSyncTaskExecutor>();
+	private Map<String, ShardSyncTaskExecutor> pumaClientSyncTaskExecutorMap = new ConcurrentHashMap<String, ShardSyncTaskExecutor>();
 
 	private Map<Integer, ShardDumpTaskExecutor> shardDumpTaskExecutorMap = new ConcurrentHashMap<Integer, ShardDumpTaskExecutor>();
 
@@ -43,7 +43,7 @@ public class ExecutorManager {
 
 	public Map<String, String> getStatus() {
 		Map<String, String> result = new HashMap<String, String>();
-		for (PumaClientSyncTaskExecutor task : pumaClientSyncTaskExecutorMap.values()) {
+		for (ShardSyncTaskExecutor task : pumaClientSyncTaskExecutorMap.values()) {
 			result.putAll(task.getStatus());
 		}
 		return result;
@@ -63,9 +63,9 @@ public class ExecutorManager {
 				continue;
 			}
 
-			PumaClientSyncTaskExecutor executor = null;
+			ShardSyncTaskExecutor executor = null;
 			try {
-				executor = new PumaClientSyncTaskExecutor(task);
+				executor = new ShardSyncTaskExecutor(task);
 				executor.init();
 				executor.start();
 				pumaClientSyncTaskExecutorMap.put(task.getPumaTaskName(), executor);
@@ -90,7 +90,7 @@ public class ExecutorManager {
 		}
 
 		for (String taskName : idToRemove) {
-			PumaClientSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(taskName);
+			ShardSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(taskName);
 			if (task != null) {
 				task.stop();
 			}

@@ -1,5 +1,15 @@
 package com.dianping.zebra.admin.job.executor;
 
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
+
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
@@ -7,7 +17,6 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.zebra.admin.dao.PumaClientStatusMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.exception.NoRowsAffectedException;
 import com.dianping.zebra.admin.util.ColumnInfoWrap;
@@ -19,22 +28,11 @@ import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 import com.google.common.collect.ImmutableMap;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
  */
-public class PumaClientSyncTaskExecutor implements TaskExecutor {
-	private PumaClientStatusMapper statusMapper;
-
+public class ShardSyncTaskExecutor implements TaskExecutor {
 	private final PumaClientSyncTaskEntity task;
 
 	public final AtomicLong hitTimes = new AtomicLong();
@@ -51,7 +49,7 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 
 	protected Map<String, JdbcTemplate> templateMap;
 
-	public PumaClientSyncTaskExecutor(PumaClientSyncTaskEntity task) {
+	public ShardSyncTaskExecutor(PumaClientSyncTaskEntity task) {
 		this.task = task;
 	}
 
@@ -238,9 +236,5 @@ public class PumaClientSyncTaskExecutor implements TaskExecutor {
 		Map<String, String> result = new HashMap<String, String>();
 		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTimes.getAndSet(0)));
 		return result;
-	}
-
-	public void setStatusMapper(PumaClientStatusMapper statusMapper) {
-		this.statusMapper = statusMapper;
 	}
 }
