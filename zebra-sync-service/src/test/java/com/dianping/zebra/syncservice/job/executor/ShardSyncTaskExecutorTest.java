@@ -1,29 +1,25 @@
 package com.dianping.zebra.syncservice.job.executor;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.model.BinlogInfo;
+import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
+import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.google.common.collect.Lists;
 import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
-import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.syncservice.job.executor.ShardSyncTaskExecutor;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * Dozer @ 6/9/15
@@ -124,6 +120,20 @@ public class ShardSyncTaskExecutorTest {
 		Assert.assertEquals(2, event.getColumns().size());
 		Assert.assertTrue(event.getColumns().get("UserId").isKey());
 		Assert.assertFalse(event.getColumns().get("OrderId").isKey());
+	}
+
+	@Test
+	public void test_get_oldest_binlog() throws Exception {
+		ShardSyncTaskExecutor.BinlogReporter reporter = target.new BinlogReporter();
+
+		BinlogInfo info1 = new BinlogInfo("mysql.002", 80l);
+		BinlogInfo info2 = new BinlogInfo("mysql.002", 100l);
+		BinlogInfo info3 = new BinlogInfo("mysql.003", 1l);
+
+		BinlogInfo result = reporter.getOldestBinlog(Lists.newArrayList(info1, info2, info3));
+
+		Assert.assertEquals(info1.getBinlogFile(), result.getBinlogFile());
+		Assert.assertEquals(info1.getBinlogPosition(), result.getBinlogPosition());
 	}
 
 	@Test

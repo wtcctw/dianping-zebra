@@ -17,8 +17,11 @@ import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 import com.dianping.zebra.syncservice.exception.NoRowsAffectedException;
 import com.dianping.zebra.syncservice.util.ColumnInfoWrap;
 import com.dianping.zebra.syncservice.util.SqlBuilder;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,21 +46,23 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	public final static int MAX_QUEUE_SIZE = 10000;
 
-	protected GroovyRuleEngine engine;
+	protected volatile GroovyRuleEngine engine;
 
-	protected SimpleDataSourceProvider dataSourceProvider;
+	protected volatile SimpleDataSourceProvider dataSourceProvider;
 
-	protected PumaClient client;
+	protected volatile PumaClient client;
 
-	protected Map<String, GroupDataSource> dataSources;
+	protected volatile Map<String, GroupDataSource> dataSources;
 
-	protected Map<String, JdbcTemplate> templateMap;
+	protected volatile Map<String, JdbcTemplate> templateMap;
 
-	protected BlockingQueue<RowChangedEvent>[] eventQueues;
+	protected volatile BlockingQueue<RowChangedEvent>[] eventQueues;
 
-	protected List<RowEventProcessor> rowEventProcessors;
+	protected volatile List<RowEventProcessor> rowEventProcessors;
 
-	protected List<Thread> rowEventProcesserThreads;
+	protected volatile List<Thread> rowEventProcesserThreads;
+
+	protected volatile Thread binlogReporter;
 
 	public ShardSyncTaskExecutor(PumaClientSyncTaskEntity task) {
 		this.task = task;
@@ -70,10 +75,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		initPumaClient();
 		initEventQueues();
 		initProcessors();
+		initBinlogReporter();
 	}
 
 	public synchronized void start() {
-		if (client == null || rowEventProcesserThreads == null) {
+		if (client == null || rowEventProcesserThreads == null || binlogReporter == null) {
 			throw new IllegalStateException("You should init before start!");
 		}
 
@@ -81,6 +87,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		for (Thread thread : rowEventProcesserThreads) {
 			thread.start();
 		}
+
+		binlogReporter.start();
 	}
 
 	public synchronized void stop() {
@@ -103,6 +111,16 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				thread.interrupt();
 			}
 		}
+
+		if (binlogReporter != null) {
+			binlogReporter.interrupt();
+		}
+	}
+
+	protected void initBinlogReporter() {
+		this.binlogReporter = new Thread(new BinlogReporter());
+		this.binlogReporter.setName("BinlogReporter");
+		this.binlogReporter.setDaemon(true);
 	}
 
 	protected void initProcessors() {
@@ -178,6 +196,54 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		this.client.register(new PumaEventListener());
 	}
 
+	class BinlogReporter implements Runnable {
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					break;
+				}
+
+				if (rowEventProcessors == null) {
+					continue;
+				}
+
+				Iterable<BinlogInfo> binlogInfos = getBinlogInfos();
+				BinlogInfo oldestBinlog = getOldestBinlog(binlogInfos);
+				if (oldestBinlog != null) {
+					client.asyncSavePosition(oldestBinlog);
+				}
+			}
+		}
+
+		protected BinlogInfo getOldestBinlog(Iterable<BinlogInfo> binlogInfos) {
+			BinlogInfo oldestBinlog = null;
+			for (BinlogInfo binlog : binlogInfos) {
+				if (oldestBinlog == null || binlog.compareTo(oldestBinlog) < 0) {
+					oldestBinlog = binlog;
+				}
+			}
+			return oldestBinlog;
+		}
+
+		protected Iterable<BinlogInfo> getBinlogInfos() {
+			return Iterables.transform(Iterables.filter(rowEventProcessors, new Predicate<RowEventProcessor>() {
+				@Override
+				public boolean apply(RowEventProcessor input) {
+					return input.getBinlogInfo() != null;
+				}
+			}), new Function<RowEventProcessor, BinlogInfo>() {
+				@Override
+				public BinlogInfo apply(RowEventProcessor input) {
+					return input.getBinlogInfo();
+				}
+			});
+		}
+	}
+
 	class RowEventProcessor implements Runnable {
 
 		private final BlockingQueue<RowChangedEvent> queue;
@@ -186,6 +252,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		public RowEventProcessor(BlockingQueue<RowChangedEvent> queue) {
 			this.queue = queue;
+		}
+
+		public BinlogInfo getBinlogInfo() {
+			return binlogInfo;
 		}
 
 		@Override
