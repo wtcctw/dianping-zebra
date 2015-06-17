@@ -1,11 +1,11 @@
 package com.dianping.zebra.syncservice.job.executor;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.api.ConfigurationBuilder;
 import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
@@ -19,7 +19,7 @@ import com.dianping.zebra.syncservice.util.ColumnInfoWrap;
 import com.dianping.zebra.syncservice.util.SqlBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
+import com.google.common.collect.Lists;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -134,7 +134,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-		      task.getTbSuffix(), task.getTbRule());
+			task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -170,14 +170,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initPumaClient() {
-		String fullName = String.format("%s-%d", "PumaClientSyncTask", task.getId());
-
-		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
-		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
-		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
-
-		this.client = new PumaClient(configBuilder.build());
-
+		this.client = new PumaClient();
+		this.client.setName(task.getPumaClientName());
+		this.client.setAsync(true);
+		this.client.setDatabase(task.getPumaDatabase());
+		this.client.setTables(Lists.newArrayList(task.getPumaTables().split(",")));
 		this.client.register(new PumaEventListener());
 	}
 
@@ -185,14 +182,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		private final BlockingQueue<RowChangedEvent> queue;
 
-		private volatile long lastSuccessSequence;
+		private volatile BinlogInfo binlogInfo;
 
 		public RowEventProcessor(BlockingQueue<RowChangedEvent> queue) {
 			this.queue = queue;
-		}
-
-		public long getLastSuccessSequence() {
-			return lastSuccessSequence;
 		}
 
 		@Override
@@ -213,7 +206,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 					try {
 						process(event);
-						lastSuccessSequence = event.getSeq();
+						this.binlogInfo = event.getBinlogInfo();
 						break;
 					} catch (DuplicateKeyException e) {
 						Cat.logError(e);
@@ -267,30 +260,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 	}
 
-	// class SequenceReporter implements Runnable {
-	// private long lastSequence = 0;
-	//
-	// @Override
-	// public void run() {
-	// while (true) {
-	// try {
-	// Thread.sleep(1000);
-	// } catch (InterruptedException e) {
-	// break;
-	// }
-	//
-	//
-	// }
-	// }
-	//
-	// protected long chooseSequence(){
-	// for()
-	// }
-	// }
-
 	class PumaEventListener implements EventListener {
 		@Override
-		public void onEvent(ChangedEvent event) throws Exception {
+		public void onEvent(ChangedEvent event) {
 			if (!(event instanceof RowChangedEvent)) {
 				return;
 			}
@@ -300,34 +272,19 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			}
 
 			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(task.getPk());
-			eventQueues[getIndex(columnInfo)].put(rowEvent);
+
+			try {
+				eventQueues[getIndex(columnInfo)].put(rowEvent);
+			} catch (InterruptedException e) {
+				//todo:
+			}
 		}
 
 		private int getIndex(RowChangedEvent.ColumnInfo columnInfo) {
-			return Math.abs((columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue())
-			      .hashCode()) % NUMBER_OF_PROCESSORS;
+			return Math.abs(
+				(columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue()).hashCode())
+				% NUMBER_OF_PROCESSORS;
 		}
-
-		@Override
-		public boolean onException(ChangedEvent event, Exception e) {
-			return false;
-		}
-
-		@Override
-		public void onConnectException(Exception e) {
-
-		}
-
-		@Override
-		public void onConnected() {
-
-		}
-
-		@Override
-		public void onSkipEvent(ChangedEvent event) {
-
-		}
-
 	}
 
 	public Map<String, String> getStatus() {
