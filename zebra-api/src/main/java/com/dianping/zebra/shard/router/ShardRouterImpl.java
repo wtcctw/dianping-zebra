@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.antlr.runtime.RecognitionException;
 
@@ -38,6 +39,8 @@ import com.dianping.zebra.shard.parser.valueObject.variable.BindVar;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardMatchResult;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.util.SqlUtils;
+import com.dianping.zebra.util.StringUtils;
 
 /**
  * @author damon.zhu
@@ -46,20 +49,31 @@ public class ShardRouterImpl implements ShardRouter {
 
 	private RouterRule routerRule;
 
-	private Map<String, DMLCommon> sqlParseCache = Collections.synchronizedMap(new LRUCache<String, DMLCommon>(1000));
+	private final Map<String, DMLCommon> parsedSqlCache = Collections.synchronizedMap(new LRUCache<String, DMLCommon>(1000));
+
+	private final Map<String, PreParsedSql> preParsedSqlCache = Collections
+	      .synchronizedMap(new LRUCache<String, PreParsedSql>(1000));
 
 	private static final String SKIP_MAX_STUB = "?";
 
-	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable, String sql,
-	      DMLCommon dmlSql, String logicTable, int skip, int max) {
-		sql = reconstructSqlLimit(acrossTable, sql, dmlSql, skip, max);
+	private static Pattern pattern = Pattern.compile("\\n|`");
+
+	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable,
+	      PreParsedSql sql, DMLCommon dmlSql, String logicTable, int skip, int max) {
+		String tmpSql = reconstructSqlLimit(acrossTable, sql.getPreParsedSql(), dmlSql, skip, max);
 
 		List<RouterTarget> result = new ArrayList<RouterTarget>();
 		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
 			RouterTarget targetedSql = new RouterTarget(entry.getKey());
 
 			for (String physicalTable : entry.getValue()) {
-				targetedSql.addSql(replaceSqlTableName(sql, dmlSql, logicTable, physicalTable));
+				String _sql = replaceSqlTableName(tmpSql, dmlSql, logicTable, physicalTable);
+
+				if (sql.getComment() != null) {
+					targetedSql.addSql(sql.getComment() + _sql);
+				} else {
+					targetedSql.addSql(_sql);
+				}
 			}
 
 			result.add(targetedSql);
@@ -78,18 +92,6 @@ public class ShardRouterImpl implements ShardRouter {
 		result.setMax(max);
 
 		return result;
-	}
-
-	private MyWhereCondition.LimitInfo getLimitInfo(DMLCommon dmlSql) {
-		MyWhereCondition where = null;
-		if (dmlSql instanceof MySelect) {
-			where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
-		} else if (dmlSql instanceof MyUpdate) {
-			where = (MyWhereCondition) ((MyUpdate) dmlSql).getWhere();
-		} else if (dmlSql instanceof MyDelete) {
-			where = (MyWhereCondition) ((MyDelete) dmlSql).getWhere();
-		}
-		return where != null ? where.limitInfo : null;
 	}
 
 	private TableShardRule findTableShardRule(Set<String> relatedTables) throws ShardRouterException {
@@ -116,6 +118,18 @@ public class ShardRouterImpl implements ShardRouter {
 		}
 	}
 
+	private MyWhereCondition.LimitInfo getLimitInfo(DMLCommon dmlSql) {
+		MyWhereCondition where = null;
+		if (dmlSql instanceof MySelect) {
+			where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
+		} else if (dmlSql instanceof MyUpdate) {
+			where = (MyWhereCondition) ((MyUpdate) dmlSql).getWhere();
+		} else if (dmlSql instanceof MyDelete) {
+			where = (MyWhereCondition) ((MyDelete) dmlSql).getWhere();
+		}
+		return where != null ? where.limitInfo : null;
+	}
+
 	@Override
 	public RouterRule getRouterRule() {
 		return this.routerRule;
@@ -124,15 +138,36 @@ public class ShardRouterImpl implements ShardRouter {
 	@Override
 	public void init() {
 	}
+	
+	private PreParsedSql preParseSql(final String sql){
+		PreParsedSql preParsedSql = preParsedSqlCache.get(sql);
+		
+		if(preParsedSql == null){
+			String realSql = pattern.matcher(sql).replaceAll("");
+			if (realSql.endsWith(";")) {
+				realSql = realSql.substring(0, realSql.length() - 1);
+			}
+			
+			String comment = SqlUtils.parseSqlComment(realSql);
+			realSql = StringUtils.stripComments(realSql, "'\"", "'\"", true, false, true, true).trim();
+			preParsedSql = new PreParsedSql();
+			preParsedSql.setComment(comment);
+			preParsedSql.setFormattedSql(realSql);
+			
+			preParsedSqlCache.put(sql, preParsedSql);
+		}
+		
+		return preParsedSql;
+	}
 
-	private DMLCommon parseSql(String sql) throws RecognitionException, IOException {
-		DMLCommon cachedResult = sqlParseCache.get(sql);
+	private DMLCommon parseSql(final String sql) throws RecognitionException, IOException {
+		DMLCommon cachedResult = parsedSqlCache.get(sql);
 
 		if (cachedResult != null) {
 			return cachedResult;
 		} else {
 			DMLCommon parsedResult = DPMySQLParser.parse(sql).obj;
-			sqlParseCache.put(sql, parsedResult);
+			parsedSqlCache.put(sql, parsedResult);
 
 			return parsedResult;
 		}
@@ -210,10 +245,12 @@ public class ShardRouterImpl implements ShardRouter {
 	}
 
 	@Override
-	public RouterResult router(String sql, List<Object> params) throws ShardRouterException {
+	public RouterResult router(final String sql, List<Object> params) throws ShardRouterException {
 		try {
 			RouterResult routerResult = new RouterResult();
-			DMLCommon dmlSql = parseSql(sql);
+			PreParsedSql preParsedSql = preParseSql(sql);
+
+			DMLCommon dmlSql = parseSql(preParsedSql.getPreParsedSql());
 			int skip = dmlSql.getSkip(params);
 			int max = dmlSql.getMax(params);
 			Set<String> relatedTables = dmlSql.getRelatedTables();
@@ -224,7 +261,7 @@ public class ShardRouterImpl implements ShardRouter {
 			boolean acrossTable = dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
 
 			routerResult.setAcrossTable(acrossTable);
-			routerResult.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, sql, dmlSql,
+			routerResult.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, preParsedSql, dmlSql,
 			      tableShardRule.getTableName(), skip, max));
 			routerResult.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
 
@@ -260,6 +297,28 @@ public class ShardRouterImpl implements ShardRouter {
 			}
 		} else {
 			return false;
+		}
+	}
+
+	public static class PreParsedSql {
+		private String preParsedSql;
+
+		private String comment;
+
+		public String getComment() {
+			return comment;
+		}
+
+		public String getPreParsedSql() {
+			return preParsedSql;
+		}
+
+		public void setComment(String comment) {
+			this.comment = comment;
+		}
+
+		public void setFormattedSql(String preParsedSql) {
+			this.preParsedSql = preParsedSql;
 		}
 	}
 }

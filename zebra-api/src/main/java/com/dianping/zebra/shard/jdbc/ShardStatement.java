@@ -58,9 +58,6 @@ public class ShardStatement implements Statement {
 
 	private static final String SELECT_LAST_INSERT_ID = "last_insert_id()";
 
-//	private static final Map<String, JudgeSQLRetVal> judgeSqlRetValCache = Collections
-//	      .synchronizedMap(new LRUCache<String, JudgeSQLRetVal>(1000));
-
 	protected Set<ResultSet> attachedResultSets = new HashSet<ResultSet>();
 
 	protected List<String> batchedArgs;

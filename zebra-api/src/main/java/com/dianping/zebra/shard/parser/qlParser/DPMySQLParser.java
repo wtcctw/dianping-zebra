@@ -13,7 +13,6 @@
 package com.dianping.zebra.shard.parser.qlParser;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenRewriteStream;
@@ -29,14 +28,7 @@ public class DPMySQLParser {
 
 	private static Logger logger = Logger.getLogger(DPMySQLParser.class);
 
-	private static Pattern pattern = Pattern.compile("\\n|`");
-
 	public static MySQLWalker.beg_return parse(String sql) throws RecognitionException, IOException {
-		sql = pattern.matcher(sql).replaceAll("");
-		if (sql.endsWith(";")) {
-			sql = sql.substring(0, sql.length() - 1);
-		}
-
 		AntlrStringStream st = new AntlrStringStream(sql);
 
 		MySQLParserLexer pl = new MySQLParserLexer(st);
