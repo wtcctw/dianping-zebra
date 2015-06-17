@@ -23,6 +23,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -37,6 +39,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ShardSyncTaskExecutor implements TaskExecutor {
 	private final PumaClientSyncTaskEntity task;
+
+	private final static Logger eventSkipLogger = LoggerFactory.getLogger("EventSkip");
 
 	public final AtomicLong hitTimes = new AtomicLong();
 
@@ -287,6 +291,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 					} catch (RuntimeException e) {
 						Cat.logError(e);
 						if (tryTimes > MAX_TRY_TIMES) {
+							eventSkipLogger.warn(event.toString());
 							break;
 						}
 					}
@@ -346,7 +351,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			try {
 				eventQueues[getIndex(columnInfo)].put(rowEvent);
 			} catch (InterruptedException e) {
-				//todo:
 			}
 		}
 

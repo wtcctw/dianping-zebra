@@ -39,6 +39,11 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- spring -->
         <dependency>
@@ -140,6 +145,11 @@
         </dependency>
 
         <!-- arch -->
+        <dependency>
+            <groupId>com.dianping.dpsf</groupId>
+            <artifactId>dpsf-net</artifactId>
+            <version>2.4.7</version>
+        </dependency>
         <dependency>
             <groupId>com.dianping.cat</groupId>
             <artifactId>cat-client</artifactId>
