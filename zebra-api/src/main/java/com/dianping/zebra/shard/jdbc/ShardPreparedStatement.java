@@ -73,6 +73,7 @@ import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.shard.router.RouterTarget;
 import com.dianping.zebra.util.JDBCUtils;
+import com.dianping.zebra.util.SqlType;
 
 /**
  * @author Leo Liang
@@ -136,14 +137,13 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 	 */
 	@Override
 	public boolean execute() throws SQLException {
-		JudgeSQLRetVal judgeSQLRetVal = judgeSQLType(sql);
+		SqlType sqlType = judgeSqlType(sql);
 
-		if (judgeSQLRetVal.getSqlType() == SQLType.SELECT) {
+		if (sqlType == SqlType.SELECT) {
 			executeQuery();
 
 			return true;
-		} else if (judgeSQLRetVal.getSqlType() == SQLType.INSERT || judgeSQLRetVal.getSqlType() == SQLType.UPDATE
-		      || judgeSQLRetVal.getSqlType() == SQLType.DELETE) {
+		} else if (sqlType == SqlType.INSERT || sqlType == SqlType.UPDATE || sqlType == SqlType.DELETE) {
 			executeUpdate();
 
 			return false;
@@ -166,7 +166,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 			this.results = specRS;
 			this.updateCount = -1;
 			attachedResultSets.add(specRS);
-			
+
 			return this.results;
 		}
 
@@ -205,7 +205,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 
 		this.results = rs;
 		this.updateCount = -1;
-		
+
 		rs.init();
 
 		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);

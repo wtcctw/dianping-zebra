@@ -198,9 +198,9 @@ public class SpecialSQLTest extends ZebraSingleDBBaseTestCase {
 		try {
 			conn = ds.getConnection();
 			PreparedStatement stmt = conn
-					.prepareStatement("select score/amount as b from test where name in ('leoxx', 'leo8') order by b desc limit 10");
+					.prepareStatement("select score from test where name in ('leoxx', 'leo8') order by score desc limit 10");
 			stmt.execute();
-			List<Integer> expected = Arrays.asList(new Integer[] { 4});
+			List<Integer> expected = Arrays.asList(new Integer[] { 8});
 			ResultSet rs = stmt.getResultSet();
 			int count = 0;
 			while (rs.next()) {

@@ -109,5 +109,32 @@ public class SqlUtilsTest {
 		
 		System.out.println(type);
 	}
+	
+	@Test
+	public void testSqlCommnent() throws SQLException{
+		String sql = "/*+zebra:w*/ SELECT CategoryID, ParentCategoryID, CategoryOrderID, CityID, IsMain, AddDate FROM DP_CategoryTree";
+		
+		String type = SqlUtils.parseSqlComment(sql);
+		
+		Assert.assertEquals("/*+zebra:w*/", type);
+	}
+	
+	@Test
+	public void testSqlCommnent2() throws SQLException{
+		String sql = "    /*+zebra:w*/ SELECT CategoryID, ParentCategoryID, CategoryOrderID, CityID, IsMain, AddDate FROM DP_CategoryTree";
+		
+		String type = SqlUtils.parseSqlComment(sql);
+		
+		Assert.assertEquals("/*+zebra:w*/", type);
+	}
+	
+	@Test
+	public void testSqlCommnent3() throws SQLException{
+		String sql = "  SELECT CategoryID, ParentCategoryID, CategoryOrderID, CityID, IsMain, AddDate FROM DP_CategoryTree";
+		
+		String type = SqlUtils.parseSqlComment(sql);
+		
+		Assert.assertNull("isnull", type);;
+	}
 
 }
