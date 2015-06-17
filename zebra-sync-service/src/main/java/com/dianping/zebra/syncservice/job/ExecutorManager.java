@@ -1,20 +1,22 @@
-package com.dianping.zebra.admin.job;
+package com.dianping.zebra.syncservice.job;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.admin.dao.PumaClientStatusMapper;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
-import com.dianping.zebra.admin.job.executor.ShardSyncTaskExecutor;
-import com.dianping.zebra.admin.job.executor.ShardDumpTaskExecutor;
 import com.dianping.zebra.admin.service.ShardDumpService;
+import com.dianping.zebra.syncservice.job.executor.ShardDumpTaskExecutor;
+import com.dianping.zebra.syncservice.job.executor.ShardSyncTaskExecutor;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;

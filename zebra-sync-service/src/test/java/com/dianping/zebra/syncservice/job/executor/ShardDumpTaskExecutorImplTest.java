@@ -1,8 +1,10 @@
-package com.dianping.zebra.admin.job.executor;
+package com.dianping.zebra.syncservice.job.executor;
 
 import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
 import com.dianping.zebra.admin.service.ShardDumpService;
+import com.dianping.zebra.syncservice.job.executor.ShardDumpTaskExecutor;
+
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -14,7 +16,7 @@ import static org.mockito.Mockito.*;
  * http://www.dozer.cc
  */
 
-public class ShardDumpTaskExecutorImplMain {
+public class ShardDumpTaskExecutorImplTest {
     public static void main(String... args) throws InterruptedException {
         ShardDumpTaskEntity task = new ShardDumpTaskEntity();
 

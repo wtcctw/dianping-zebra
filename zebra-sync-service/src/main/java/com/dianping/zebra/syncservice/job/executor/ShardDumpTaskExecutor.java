@@ -1,14 +1,15 @@
-package com.dianping.zebra.admin.job.executor;
+package com.dianping.zebra.syncservice.job.executor;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
 import com.dianping.zebra.admin.service.ShardDumpService;
-import com.dianping.zebra.admin.util.ProcessBuilderWrapper;
+import com.dianping.zebra.syncservice.util.ProcessBuilderWrapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

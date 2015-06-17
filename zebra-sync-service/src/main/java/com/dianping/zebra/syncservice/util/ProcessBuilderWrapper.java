@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.util;
+package com.dianping.zebra.syncservice.util;
 
 import java.io.*;
 import java.util.ArrayList;

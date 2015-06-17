@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.exception;
+package com.dianping.zebra.syncservice.exception;
 
 /**
  * Dozer @ 6/10/15

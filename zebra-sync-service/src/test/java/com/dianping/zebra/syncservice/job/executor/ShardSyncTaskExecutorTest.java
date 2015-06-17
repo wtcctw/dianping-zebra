@@ -1,21 +1,29 @@
-package com.dianping.zebra.admin.job.executor;
+package com.dianping.zebra.syncservice.job.executor;
 
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
-import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.Mockito.*;
+import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
+import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
+import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.syncservice.job.executor.ShardSyncTaskExecutor;
 
 /**
  * Dozer @ 6/9/15

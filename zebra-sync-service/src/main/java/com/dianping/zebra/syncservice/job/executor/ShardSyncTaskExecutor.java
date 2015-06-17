@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.job.executor;
+package com.dianping.zebra.syncservice.job.executor;
 
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.ConfigurationBuilder;
@@ -8,17 +8,18 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
-import com.dianping.zebra.admin.exception.NoRowsAffectedException;
-import com.dianping.zebra.admin.util.ColumnInfoWrap;
-import com.dianping.zebra.admin.util.SqlBuilder;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.shard.router.rule.DataSourceBO;
 import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
+import com.dianping.zebra.syncservice.exception.NoRowsAffectedException;
+import com.dianping.zebra.syncservice.util.ColumnInfoWrap;
+import com.dianping.zebra.syncservice.util.SqlBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -29,9 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Dozer @ 6/9/15
- * mail@dozer.cc
- * http://www.dozer.cc
+ * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
  */
 public class ShardSyncTaskExecutor implements TaskExecutor {
 	private final PumaClientSyncTaskEntity task;
@@ -135,7 +134,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-			task.getTbSuffix(), task.getTbRule());
+		      task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -175,7 +174,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		ConfigurationBuilder configBuilder = new ConfigurationBuilder();
 		configBuilder.dml(true).ddl(false).transaction(false).target(task.getPumaTaskName()).name(fullName)
-			.tables(task.getPumaDatabase(), task.getPumaTables().split(","));
+		      .tables(task.getPumaDatabase(), task.getPumaTables().split(","));
 
 		this.client = new PumaClient(configBuilder.build());
 
@@ -268,26 +267,26 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 	}
 
-//	class SequenceReporter implements Runnable {
-//		private long lastSequence = 0;
-//
-//		@Override
-//		public void run() {
-//			while (true) {
-//				try {
-//					Thread.sleep(1000);
-//				} catch (InterruptedException e) {
-//					break;
-//				}
-//
-//
-//			}
-//		}
-//
-//		protected long chooseSequence(){
-//			for()
-//		}
-//	}
+	// class SequenceReporter implements Runnable {
+	// private long lastSequence = 0;
+	//
+	// @Override
+	// public void run() {
+	// while (true) {
+	// try {
+	// Thread.sleep(1000);
+	// } catch (InterruptedException e) {
+	// break;
+	// }
+	//
+	//
+	// }
+	// }
+	//
+	// protected long chooseSequence(){
+	// for()
+	// }
+	// }
 
 	class PumaEventListener implements EventListener {
 		@Override
@@ -305,9 +304,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 
 		private int getIndex(RowChangedEvent.ColumnInfo columnInfo) {
-			return Math.abs(
-				(columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue()).hashCode())
-				% NUMBER_OF_PROCESSORS;
+			return Math.abs((columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue())
+			      .hashCode()) % NUMBER_OF_PROCESSORS;
 		}
 
 		@Override

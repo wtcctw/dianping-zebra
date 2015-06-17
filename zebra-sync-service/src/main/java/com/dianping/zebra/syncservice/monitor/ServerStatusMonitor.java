@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.monitor;
+package com.dianping.zebra.syncservice.monitor;
 
 import com.dianping.zebra.admin.service.SyncServerMonitorService;
 import org.springframework.beans.factory.annotation.Autowired;

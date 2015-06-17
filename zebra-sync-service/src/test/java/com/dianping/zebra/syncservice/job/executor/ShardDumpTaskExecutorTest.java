@@ -1,13 +1,20 @@
-package com.dianping.zebra.admin.job.executor;
+package com.dianping.zebra.syncservice.job.executor;
 
-import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.io.File;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-
-import static org.mockito.Mockito.*;
+import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
+import com.dianping.zebra.syncservice.job.executor.ShardDumpTaskExecutor;
 
 /**
  * Dozer @ 6/1/15

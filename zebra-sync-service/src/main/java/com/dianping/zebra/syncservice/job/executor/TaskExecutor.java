@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.job.executor;
+package com.dianping.zebra.syncservice.job.executor;
 
 /**
  * Dozer @ 6/10/15

@@ -1,4 +1,4 @@
-package com.dianping.zebra.admin.util;
+package com.dianping.zebra.syncservice.util;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent.ColumnInfo;

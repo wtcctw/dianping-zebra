@@ -1,13 +1,13 @@
-package com.dianping.zebra.admin.util;
+package com.dianping.zebra.syncservice.util;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.util.sql.DMLType;
+import com.dianping.zebra.syncservice.util.SqlBuilder;
+
 import org.junit.Test;
-import org.openjdk.jmh.annotations.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Dozer @ 6/12/15
