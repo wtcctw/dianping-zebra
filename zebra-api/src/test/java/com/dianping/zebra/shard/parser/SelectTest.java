@@ -44,4 +44,14 @@ public class SelectTest {
 
 		DPMySQLParser.parse(sql);
 	}
+	
+	@Test
+	public void testSelect5() throws Exception {
+		String sql = "/*+zebra:w*/SELECT SUM(A) FROM B JOIN C ON a=a WHERE a=1 GROUP BY A,B ORDER BY a;";
+
+		MySQLWalker.beg_return ret = DPMySQLParser.parse(sql);
+		MySelect select = (MySelect) ret.obj;
+
+		Assert.assertEquals(2, select.getWhere().getGroupByColumns().size());
+	}
 }

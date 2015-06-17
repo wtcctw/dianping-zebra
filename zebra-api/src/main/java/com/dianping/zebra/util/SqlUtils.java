@@ -22,7 +22,7 @@ public final class SqlUtils {
 
 		if (StringUtils.startsWithIgnoreCaseAndWs(noCommentsSql, "select")) {
 			String lowerCaseSql = noCommentsSql.toLowerCase();
-			
+
 			if (lowerCaseSql.contains(" for ") && SELECT_FOR_UPDATE_PATTERN.matcher(noCommentsSql).matches()) {
 				sqlType = SqlType.SELECT_FOR_UPDATE;
 			} else if (lowerCaseSql.contains("@@identity") || lowerCaseSql.contains("last_insert_id()")) {
@@ -82,5 +82,23 @@ public final class SqlUtils {
 		} catch (Exception e) {
 		}
 		return "Execute";
+	}
+
+	public static String parseSqlComment(String sql) {
+		String trimSql = sql.trim();
+
+		int start = trimSql.indexOf("/*");
+
+		if (start >= 0) {
+			int end = trimSql.indexOf("*/");
+
+			if (end > 0 && end > start) {
+				return trimSql.substring(start, end + 2);
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
 	}
 }
