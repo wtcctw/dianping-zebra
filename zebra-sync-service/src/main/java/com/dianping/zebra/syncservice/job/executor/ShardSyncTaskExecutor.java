@@ -107,7 +107,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				} catch (SQLException ignore) {
 				}
 			}
-			dataSources.clear();
+			dataSources = null;
 		}
 
 		if (rowEventProcesserThreads != null) {
