@@ -26,10 +26,15 @@
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="eventAppender"/>
     </logger>
+    <logger name="com.dianping.zebra.syncservice" additivity="false">
+        <level value="INFO"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="appAppender"/>
+        <appender-ref ref="catAppender"/>
+    </logger>
     <root>
         <level value="ERROR"/>
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="appAppender"/>
-        <appender-ref ref="catAppender"/>
     </root>
 </log4j:configuration>
