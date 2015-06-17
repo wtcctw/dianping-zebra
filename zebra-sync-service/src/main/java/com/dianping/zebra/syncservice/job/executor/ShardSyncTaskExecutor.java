@@ -305,6 +305,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
 			RuleEngineEvalContext context = new RuleEngineEvalContext(column);
 			Number index = (Number) engine.eval(context);
+			if (index.intValue() < 0) {
+				return;
+			}
 			DataSourceBO bo = dataSourceProvider.getDataSource(index.intValue());
 			String table = bo.evalTable(context);
 

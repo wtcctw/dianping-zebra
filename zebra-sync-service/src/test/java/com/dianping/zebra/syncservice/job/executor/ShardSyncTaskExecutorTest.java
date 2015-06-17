@@ -5,6 +5,7 @@ import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.junit.Before;
@@ -40,7 +41,7 @@ public class ShardSyncTaskExecutorTest {
 		status = new PumaClientStatusEntity();
 
 		config.setTableName("ut");
-		config.setDbRule("((#id#).toLong() % 2)");
+		config.setDbRule("#id# == null ? SKIP : ((#id#).toLong() % 2)");
 		config.setDbIndexes("db0,db1");
 		config.setTbRule("((#id# / 2).toLong() % 2)");
 		config.setTbSuffix("everydb:[_0,_1]");
@@ -50,7 +51,10 @@ public class ShardSyncTaskExecutorTest {
 
 	@Test
 	public void test_router() {
-
+		Map<String, Object> args = new HashMap<String, Object>();
+		target.initRouter();
+		Number result = (Number) target.engine.eval(new RuleEngineEvalContext(args));
+		Assert.assertEquals(-1, result.intValue());
 	}
 
 	@Test

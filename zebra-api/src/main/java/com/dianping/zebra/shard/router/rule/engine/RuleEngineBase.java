@@ -14,6 +14,7 @@ import java.util.zip.CRC32;
  * http://www.dozer.cc
  */
 public class RuleEngineBase {
+	public static final int SKIP = -1;
 
 	public long crc32(Object str) throws UnsupportedEncodingException {
 		return crc32(str, "utf-8");
