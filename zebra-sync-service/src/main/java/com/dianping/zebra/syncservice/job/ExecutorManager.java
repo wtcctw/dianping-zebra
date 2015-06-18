@@ -9,13 +9,11 @@ import com.dianping.zebra.syncservice.job.executor.ShardDumpTaskExecutor;
 import com.dianping.zebra.syncservice.job.executor.ShardSyncTaskExecutor;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -52,8 +50,8 @@ public class ExecutorManager {
 		this.localAddress = InetAddress.getLocalHost().getHostName();
 	}
 
-	@Scheduled(cron = "0/10 * * * * ?")
-	public synchronized void startPumaSyncTask() {
+	@Scheduled(fixedDelay = 10 * 1000)
+	public void startPumaSyncTask() {
 		List<PumaClientSyncTaskEntity> tasks = pumaClientSyncTaskMapper.findEffectiveTaskByExecutor(this.localAddress);
 
 		for (PumaClientSyncTaskEntity task : tasks) {
@@ -95,7 +93,7 @@ public class ExecutorManager {
 		}
 	}
 
-//	@Scheduled(cron = "0/10 * * * * ?")
+	//	@Scheduled(cron = "0/10 * * * * ?")
 	public synchronized void startShardDumpTask() {
 		try {
 			List<ShardDumpTaskEntity> tasks = shardDumpService.getTaskByIp(InetAddress.getLocalHost().getHostAddress());
