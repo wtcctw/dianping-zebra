@@ -1,19 +1,17 @@
 package com.dianping.zebra.admin.service.impl;
 
+import com.dianping.zebra.admin.dao.SyncServerMonitorMapper;
+import com.dianping.zebra.admin.entity.SyncServerMonitorEntity;
+import com.dianping.zebra.admin.service.SyncServerMonitorService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.dianping.zebra.admin.dao.SyncServerMonitorMapper;
-import com.dianping.zebra.admin.entity.SyncServerMonitorEntity;
-import com.dianping.zebra.admin.service.SyncServerMonitorService;
 
 /**
  * Dozer @ 6/4/15 mail@dozer.cc http://www.dozer.cc
@@ -24,11 +22,11 @@ public class SyncServerMonitorServiceImpl implements SyncServerMonitorService {
 	@Autowired
 	private SyncServerMonitorMapper syncServerMonitorMapper;
 
-	private String localIpAddress;
+	private String localAddress;
 
 	@PostConstruct
 	public void init() throws UnknownHostException {
-		this.localIpAddress = InetAddress.getLocalHost().getHostAddress();
+		this.localAddress = InetAddress.getLocalHost().getHostName();
 	}
 
 	@Override
@@ -52,7 +50,7 @@ public class SyncServerMonitorServiceImpl implements SyncServerMonitorService {
 	@Override
 	public void uploadStatus() {
 		SyncServerMonitorEntity item = new SyncServerMonitorEntity();
-		item.setName(this.localIpAddress);
+		item.setName(this.localAddress);
 		OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
 		item.setLoad(os.getSystemLoadAverage() / os.getAvailableProcessors());
 
