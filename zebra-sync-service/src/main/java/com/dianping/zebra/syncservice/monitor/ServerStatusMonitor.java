@@ -2,8 +2,9 @@ package com.dianping.zebra.syncservice.monitor;
 
 import com.dianping.zebra.admin.service.SyncServerMonitorService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Dozer @ 6/4/15
@@ -11,12 +12,32 @@ import org.springframework.stereotype.Component;
  * http://www.dozer.cc
  */
 @Component
-public class ServerStatusMonitor {
-    @Autowired
-    private SyncServerMonitorService syncServerMonitorService;
+public class ServerStatusMonitor implements Runnable {
+	@Autowired
+	private SyncServerMonitorService syncServerMonitorService;
 
-    @Scheduled(fixedDelay = 10 * 1000)
-    public void uploadStatus() {
-        syncServerMonitorService.uploadStatus();
-    }
+	protected void uploadStatus() {
+		syncServerMonitorService.uploadStatus();
+	}
+
+	@PostConstruct
+	public void init() {
+		Thread t = new Thread(this);
+		t.setName(this.getClass().getName());
+		t.setDaemon(true);
+		t.start();
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				Thread.sleep(10 * 1000);
+			} catch (InterruptedException e) {
+				break;
+			}
+
+			this.uploadStatus();
+		}
+	}
 }

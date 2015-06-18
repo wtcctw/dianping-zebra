@@ -10,7 +10,6 @@ import com.dianping.zebra.syncservice.job.executor.ShardSyncTaskExecutor;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -24,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 
 @Component
-public class ExecutorManager {
+public class ExecutorManager implements Runnable {
 	@Autowired
 	private ShardDumpService shardDumpService;
 
@@ -48,10 +47,14 @@ public class ExecutorManager {
 	@PostConstruct
 	public void init() throws UnknownHostException {
 		this.localAddress = InetAddress.getLocalHost().getHostName();
+
+		Thread t = new Thread(this);
+		t.setName(this.getClass().getName());
+		t.setDaemon(true);
+		t.start();
 	}
 
-	@Scheduled(fixedDelay = 10 * 1000)
-	public void startPumaSyncTask() {
+	protected synchronized void startPumaSyncTask() {
 		List<PumaClientSyncTaskEntity> tasks = pumaClientSyncTaskMapper.findEffectiveTaskByExecutor(this.localAddress);
 
 		for (PumaClientSyncTaskEntity task : tasks) {
@@ -93,8 +96,7 @@ public class ExecutorManager {
 		}
 	}
 
-	//	@Scheduled(cron = "0/10 * * * * ?")
-	public synchronized void startShardDumpTask() {
+	protected synchronized void startShardDumpTask() {
 		try {
 			List<ShardDumpTaskEntity> tasks = shardDumpService.getTaskByIp(InetAddress.getLocalHost().getHostAddress());
 
@@ -133,6 +135,19 @@ public class ExecutorManager {
 
 		} catch (UnknownHostException e) {
 			Cat.logError(e);
+		}
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				Thread.sleep(10 * 1000);
+			} catch (InterruptedException e) {
+				break;
+			}
+
+			this.startPumaSyncTask();
 		}
 	}
 }
