@@ -1,7 +1,6 @@
 package com.dianping.zebra.syncservice.job;
 
 import com.dianping.cat.Cat;
-import com.dianping.zebra.admin.dao.PumaClientStatusMapper;
 import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
@@ -33,9 +32,6 @@ public class ExecutorManager {
 
 	@Autowired
 	private PumaClientSyncTaskMapper pumaClientSyncTaskMapper;
-
-	@Autowired
-	private PumaClientStatusMapper pumaClientStatusMapper;
 
 	private Map<String, ShardSyncTaskExecutor> pumaClientSyncTaskExecutorMap = new ConcurrentHashMap<String, ShardSyncTaskExecutor>();
 

@@ -2,7 +2,6 @@ package com.dianping.zebra.syncservice.job.executor;
 
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.zebra.admin.entity.PumaClientStatusEntity;
 import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
@@ -31,14 +30,11 @@ public class ShardSyncTaskExecutorTest {
 
 	PumaClientSyncTaskEntity config;
 
-	PumaClientStatusEntity status;
-
 	ShardSyncTaskExecutor target;
 
 	@Before
 	public void setUp() throws Exception {
 		config = new PumaClientSyncTaskEntity();
-		status = new PumaClientStatusEntity();
 
 		config.setTableName("ut");
 		config.setDbRule("#id# == null ? SKIP : ((#id#).toLong() % 2)");
