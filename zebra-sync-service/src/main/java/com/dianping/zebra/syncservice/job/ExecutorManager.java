@@ -95,7 +95,7 @@ public class ExecutorManager {
 		}
 	}
 
-	@Scheduled(cron = "0/10 * * * * ?")
+//	@Scheduled(cron = "0/10 * * * * ?")
 	public synchronized void startShardDumpTask() {
 		try {
 			List<ShardDumpTaskEntity> tasks = shardDumpService.getTaskByIp(InetAddress.getLocalHost().getHostAddress());
