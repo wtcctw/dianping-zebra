@@ -49,7 +49,7 @@ public class ExecutorManager {
 
 	@PostConstruct
 	public void init() throws UnknownHostException {
-		this.localAddress = InetAddress.getLocalHost().getHostAddress();
+		this.localAddress = InetAddress.getLocalHost().getHostName();
 	}
 
 	@Scheduled(cron = "0/10 * * * * ?")
