@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
@@ -39,6 +40,10 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	private CountPunisher punisher;
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;
+	
+	private AtomicInteger closeAttmpet = new AtomicInteger(1);
+	
+	private static final int MAX_CLOSE_ATTEMPT = 10;
 
 	public SingleDataSource(DataSourceConfig config, List<JdbcFilter> filters) {
 		this.dsId = config.getId();
@@ -78,12 +83,12 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			if (dataSource instanceof PoolBackedDataSource) {
 				PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
 
-				if (poolBackedDataSource.getNumBusyConnections() == 0) {
-					logger.info("closing old datasource [" + dsId + "]");
+				logger.info(this.closeAttmpet.getAndIncrement() + " attempt to close datasource [" + dsId + "]");
 
+				if (poolBackedDataSource.getNumBusyConnections() == 0 || this.closeAttmpet.get() >= MAX_CLOSE_ATTEMPT) {
 					DataSources.destroy(poolBackedDataSource);
 
-					logger.info("old datasource [" + dsId + "] closed");
+					logger.info("datasource [" + dsId + "] closed");
 					state = DataSourceState.CLOSED;
 				} else {
 					throw new DalException(String.format("Cannot close dataSource[%s] since there are busy connections.",
