@@ -28,15 +28,19 @@ import java.util.*;
  */
 public class SimpleDataSourceProvider implements DataSourceProvider {
 
-	public static final String	TB_SUFFIX_STYLE_ALL		= "alldb";
-	public static final String	TB_SUFFIX_STYLE_EVERY	= "everydb";
+	public static final String TB_SUFFIX_STYLE_ALL = "alldb";
 
-	private final String		tableName;
-	private final String		dbIndexes;
-	private final String		tbSuffix;
-	private final String		tbRule;
+	public static final String TB_SUFFIX_STYLE_EVERY = "everydb";
 
-	private List<DataSourceBO>	dataSourceBOs			= new ArrayList<DataSourceBO>(6);
+	private final String tableName;
+
+	private final String dbIndexes;
+
+	private final String tbSuffix;
+
+	private final String tbRule;
+
+	private List<DataSourceBO> dataSourceBOs = new ArrayList<DataSourceBO>(6);
 
 	public SimpleDataSourceProvider(String tableName, String dbIndexes, String tbSuffix, String tbRule) {
 		this.tableName = tableName;
@@ -50,10 +54,13 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 		String[] dbs = dbIndexes.split(",");
 		RuleEngine tableRuleEngine = new GroovyRuleEngine(tbRule);
 		for (String db : dbs) {
-			DataSourceBO dataSourceBO = new DataSourceBO(db);
+			String jdbcRef = db.trim();
+
+			DataSourceBO dataSourceBO = new DataSourceBO(jdbcRef);
 			dataSourceBO.setTableRuleEngine(tableRuleEngine);
 			dataSourceBOs.add(dataSourceBO);
 		}
+
 		setTables2DataSource(dataSourceBOs);
 	}
 
