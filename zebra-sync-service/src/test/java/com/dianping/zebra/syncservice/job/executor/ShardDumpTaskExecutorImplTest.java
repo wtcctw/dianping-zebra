@@ -1,8 +1,8 @@
 package com.dianping.zebra.syncservice.job.executor;
 
-import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
-import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
-import com.dianping.zebra.admin.service.ShardDumpService;
+import com.dianping.zebra.biz.entity.ShardDumpDbEntity;
+import com.dianping.zebra.biz.entity.ShardDumpTaskEntity;
+import com.dianping.zebra.biz.service.ShardDumpService;
 import com.dianping.zebra.syncservice.job.executor.ShardDumpTaskExecutor;
 
 import org.mockito.invocation.InvocationOnMock;

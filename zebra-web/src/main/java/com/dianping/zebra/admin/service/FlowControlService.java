@@ -2,7 +2,7 @@ package com.dianping.zebra.admin.service;
 
 import java.util.Map;
 
-import com.dianping.zebra.admin.dto.FlowControlDto;
+import com.dianping.zebra.biz.dto.FlowControlDto;
 
 /**
  * @author hao.zhu

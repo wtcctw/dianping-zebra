@@ -1,6 +1,7 @@
 package com.dianping.zebra.syncservice.monitor;
 
-import com.dianping.zebra.admin.service.SyncServerMonitorService;
+import com.dianping.zebra.biz.service.SyncServerMonitorService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

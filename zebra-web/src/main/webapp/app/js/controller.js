@@ -292,27 +292,35 @@ zebraWeb.controller('doc', function ($scope, $location) {
     };
 });
 
-zebraWeb.controller('monitor', function ($scope, $http) {
-    $scope.load = function () {
-        $http.get('/a/monitor/list').success(function (data, status, headers, config) {
-            $scope.statusList = data;
-        });
-
-        $http.get('/a/mha/allMarkedDown').success(function (data, status, headers, config) {
-            $scope.mhaList = data;
-        });
-
+zebraWeb.controller('monitor-history', function($scope, $http){
+	$scope.load = function () {
         $http.get('/a/monitor/history').success(function (data, status, headers, config) {
             $scope.histories = data;
         });
     }
+	
+	$scope.load();
+});
 
-    $scope.load();
+zebraWeb.controller('monitor-manager', function($scope, $http){
+	$scope.load = function () {
+        $http.get('/a/monitor/servers').success(function (data, status, headers, config) {
+            $scope.servers = data;
+        });
+    }
+	
+	$scope.loadMonitorDs = function() {
+		if($scope.monitorServer){
+			$http.get('/a/monitor/getStatus?ip=' + $scope.monitorServer).success(function (data, status, headers, config) {
+				$scope.statusList = data;
+			});
+		}
+	}
 
-    $scope.addJdbcRef = function () {
+	 $scope.addJdbcRef = function () {
         if ($scope.jdbcRef) {
             $http.get('/a/monitor/add?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
-                $scope.load();
+                $scope.loadMonitorDs();
             });
         }
     }
@@ -320,11 +328,11 @@ zebraWeb.controller('monitor', function ($scope, $http) {
     $scope.removeJdbcRef = function () {
         if ($scope.jdbcRef) {
             $http.get('/a/monitor/remove?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
-                $scope.load();
+                $scope.loadMonitorDs();
             });
         }
     }
-
+    
     $scope.markup = function (dsId) {
         if (dsId) {
             $http.get('/a/mha/markup?dsId=' + dsId).success(function (data, status, headers, config) {
@@ -332,6 +340,10 @@ zebraWeb.controller('monitor', function ($scope, $http) {
             });
         }
     }
+    
+	$scope.$watch('monitorServer', $scope.loadMonitorDs);
+	
+	$scope.load();
 });
 
 zebraWeb.controller('update', function ($scope, $http) {

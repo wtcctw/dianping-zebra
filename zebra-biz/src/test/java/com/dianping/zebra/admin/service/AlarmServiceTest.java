@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.dianping.zebra.biz.service.AlarmService;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath*:config/spring/appcontext-*.xml")
 @Ignore

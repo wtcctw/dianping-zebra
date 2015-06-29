@@ -7,7 +7,7 @@ import com.dianping.puma.core.event.ChangedEvent;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
-import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
+import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.shard.router.rule.DataSourceBO;
@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;

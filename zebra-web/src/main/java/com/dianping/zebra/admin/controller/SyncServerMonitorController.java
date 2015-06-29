@@ -10,12 +10,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
-import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
-import com.dianping.zebra.admin.dao.SyncServerMonitorMapper;
-import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
-import com.dianping.zebra.admin.entity.SyncServerMonitorEntity;
 import com.dianping.zebra.admin.manager.AlarmManager;
 import com.dianping.zebra.admin.manager.AlarmManager.AlarmContent;
+import com.dianping.zebra.biz.dao.PumaClientSyncTaskMapper;
+import com.dianping.zebra.biz.dao.SyncServerMonitorMapper;
+import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
+import com.dianping.zebra.biz.entity.SyncServerMonitorEntity;
 
 @Component
 public class SyncServerMonitorController {
@@ -25,7 +25,7 @@ public class SyncServerMonitorController {
 
 	@Autowired
 	private PumaClientSyncTaskMapper syncTaskDao;
-	
+
 	@Autowired
 	private AlarmManager alarmManager;
 
@@ -60,7 +60,7 @@ public class SyncServerMonitorController {
 					if (!executor.equals(executor1) && aliveSyncServersSet.contains(executor1)) {
 						task.setExecutor(executor1);
 						syncTaskDao.updateSyncTask(task);
-						
+
 						content = new AlarmContent(task.getPumaClientName(), executor, executor1);
 					} else if (!executor.equalsIgnoreCase(executor2) && aliveSyncServersSet.contains(executor2)) {
 						task.setExecutor(executor2);
@@ -69,7 +69,7 @@ public class SyncServerMonitorController {
 						content = new AlarmContent(task.getPumaClientName(), executor, executor2);
 					} else {
 						content = new AlarmContent(task.getPumaClientName(), executor, null);
-						
+
 						Cat.logError(new NoAliveSyncServerException(task.getPumaClientName()
 						      + " has no available alive syncservers."));
 					}

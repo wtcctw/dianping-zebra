@@ -43,9 +43,7 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>
             classpath:config/spring/common/appcontext-*.xml,
-            classpath:config/spring/db/appcontext-*.xml,
-            classpath:config/spring/mapper/appcontext-*.xml,
-            classpath:config/spring/appcontext-*.xml
+            classpath:config/spring/local/appcontext-*.xml,
         </param-value>
     </context-param>
     <listener>
@@ -57,7 +55,7 @@
         <init-param>
             <param-name>contextConfigLocation</param-name>
             <param-value>
-                classpath:config/spring/appcontext-mvc.xml
+                classpath:config/spring/local/appcontext-mvc.xml
             </param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>

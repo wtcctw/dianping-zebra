@@ -1,9 +1,9 @@
 package com.dianping.zebra.admin.service;
 
-import com.dianping.zebra.admin.dto.AppDto;
-import com.dianping.zebra.admin.dto.DatabaseDto;
-import com.dianping.zebra.admin.dto.ReportDto;
-import com.dianping.zebra.admin.entity.HeartbeatEntity;
+import com.dianping.zebra.biz.dto.AppDto;
+import com.dianping.zebra.biz.dto.DatabaseDto;
+import com.dianping.zebra.biz.dto.ReportDto;
+import com.dianping.zebra.biz.entity.HeartbeatEntity;
 
 public interface ReportService {
 

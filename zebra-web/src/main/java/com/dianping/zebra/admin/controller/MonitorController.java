@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
@@ -18,15 +16,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import com.dianping.cat.Cat;
-import com.dianping.cat.configuration.NetworkInterfaceManager;
-import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.lion.client.ConfigCache;
-import com.dianping.lion.client.ConfigChange;
-import com.dianping.lion.client.LionException;
-import com.dianping.zebra.admin.dao.MonitorHistoryMapper;
-import com.dianping.zebra.admin.monitor.InstanceStatus;
-import com.dianping.zebra.admin.monitor.MySQLMonitorManager;
-import com.dianping.zebra.admin.service.LionService;
+import com.dianping.zebra.biz.dao.MonitorHistoryMapper;
+import com.dianping.zebra.biz.dto.InstanceStatusDto;
+import com.dianping.zebra.biz.service.LionService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -37,14 +29,14 @@ public class MonitorController extends BasicController {
 	private static final String LION_KEY = "zebra.server.monitor.config";
 
 	@Autowired
-	private MySQLMonitorManager monitorServer;
-
-	@Autowired
 	private LionService lionService;
 
 	@Autowired
 	private MonitorHistoryMapper monitorHistoryDao;
 	
+	@Autowired
+	private RestTemplate restClient;
+
 	private String localIpAddress;
 
 	private Gson gson = new Gson();
@@ -52,10 +44,8 @@ public class MonitorController extends BasicController {
 	private Type type = new TypeToken<Map<String, Set<String>>>() {
 	}.getType();
 
-	private Type type1 = new TypeToken<Map<String, InstanceStatus>>() {
+	private Type type1 = new TypeToken<Map<String, InstanceStatusDto>>() {
 	}.getType();
-
-	private Set<String> currentJdbcRefs = new HashSet<String>();
 
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
 	@ResponseBody
@@ -105,11 +95,11 @@ public class MonitorController extends BasicController {
 				for (String jdbcRef2 : entry.getValue()) {
 					if (jdbcRef2.equalsIgnoreCase(jdbcRef)) {
 						entry.getValue().remove(jdbcRef);
-						
-						if(entry.getValue().isEmpty()){
+
+						if (entry.getValue().isEmpty()) {
 							ipWithJdbcRef.remove(entry.getKey());
 						}
-						
+
 						String json = gson.toJson(ipWithJdbcRef);
 						lionService.setConfig(lionService.getEnv(), LION_KEY, json);
 						return;
@@ -128,69 +118,31 @@ public class MonitorController extends BasicController {
 		}
 	}
 
-	@PostConstruct
-	public void init() {
-		localIpAddress = NetworkInterfaceManager.INSTANCE.getLocalHostAddress();
-
-		Map<String, Set<String>> ipToJdbcRefs = getIpWithJdbcRef();
-
-		if (ipToJdbcRefs != null) {
-			Set<String> jdbcRefs = ipToJdbcRefs.get(localIpAddress);
-
-			if (jdbcRefs != null) {
-				for (String jdbcRef : jdbcRefs) {
-					monitorServer.addJdbcRef(jdbcRef);
-				}
-
-				synchronized (currentJdbcRefs) {
-					currentJdbcRefs = jdbcRefs;
-				}
-			}
-		}
+	@RequestMapping(value = "/getStatus", method = RequestMethod.GET)
+	@ResponseBody
+	public Object getStatus(String ip) throws Exception {
+		Map<String, InstanceStatusDto> result = new HashMap<String, InstanceStatusDto>();
 
 		try {
-			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(new MyConfigChange());
-		} catch (LionException e) {
-		}
-	}
-	
-	@RequestMapping(value = "/list", method = RequestMethod.GET)
-	@ResponseBody
-	public Object listJdbcRef() throws Exception {
-		Map<String, InstanceStatus> result = new HashMap<String, InstanceStatus>();
+			String url = String.format("http://%s:8080/a/status", ip);
+			String jsonBody = restClient.exchange(url, HttpMethod.GET, null, String.class).getBody();
 
-		result.putAll(monitorServer.listStatus());
+			if (jsonBody != null) {
+				Map<String, InstanceStatusDto> fromJson = gson.fromJson(jsonBody, type1);
 
-		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-
-		if (ipWithJdbcRef != null) {
-			for (String ip : ipWithJdbcRef.keySet()) {
-				if (!ip.equalsIgnoreCase(localIpAddress)) {
-					try {
-						String url = String.format("http://%s:8080/a/monitor/listown", ip);
-
-						RestTemplate client = new RestTemplate();
-						String jsonBody = client.exchange(url, HttpMethod.GET, null, String.class).getBody();
-
-						if (jsonBody != null) {
-							Map<String, InstanceStatus> fromJson = gson.fromJson(jsonBody, type1);
-
-							result.putAll(fromJson);
-						}
-					} catch (Exception e) {
-						Cat.logError(e);
-					}
-				}
+				result.putAll(fromJson);
 			}
+		} catch (Exception e) {
+			Cat.logError(e);
 		}
-		
+
 		return result;
 	}
 
-	@RequestMapping(value = "/listown", method = RequestMethod.GET)
+	@RequestMapping(value = "/servers", method = RequestMethod.GET)
 	@ResponseBody
-	public Object listOwnJdbcRef() throws Exception {
-		return monitorServer.listStatus();
+	public Object getServers() throws Exception {
+		return getIpWithJdbcRef().keySet();
 	}
 
 	@RequestMapping(value = "/remove", method = RequestMethod.GET)
@@ -205,55 +157,5 @@ public class MonitorController extends BasicController {
 	@ResponseBody
 	public Object showHistory() throws Exception {
 		return monitorHistoryDao.findAllHistory();
-	}
-
-	private class MyConfigChange implements ConfigChange {
-
-		@Override
-		public void onChange(String key, String value) {
-			if (key.equalsIgnoreCase(LION_KEY)) {
-				Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-
-				if (ipWithJdbcRef != null) {
-					Set<String> newJdbcRefs = ipWithJdbcRef.get(localIpAddress);
-
-					synchronized (currentJdbcRefs) {
-						if (newJdbcRefs != null) {
-							for (String jdbcRef : newJdbcRefs) {
-								if (!currentJdbcRefs.contains(jdbcRef)) {
-									monitorServer.addJdbcRef(jdbcRef);
-								}
-							}
-
-							for (String jdbcRef : currentJdbcRefs) {
-								if (!newJdbcRefs.contains(jdbcRef)) {
-									monitorServer.removeJdbcRef(jdbcRef);
-								}
-							}
-
-							currentJdbcRefs = newJdbcRefs;
-						} else {
-							if (currentJdbcRefs != null) {
-								for (String jdbcRef : currentJdbcRefs) {
-									monitorServer.removeJdbcRef(jdbcRef);
-								}
-
-								currentJdbcRefs.clear();
-							}
-						}
-
-					}
-				}else{
-					synchronized (currentJdbcRefs) {
-						for (String jdbcRef : currentJdbcRefs) {
-							monitorServer.removeJdbcRef(jdbcRef);
-						}
-
-						currentJdbcRefs.clear();
-					}
-				}
-			}
-		}
-
 	}
 }

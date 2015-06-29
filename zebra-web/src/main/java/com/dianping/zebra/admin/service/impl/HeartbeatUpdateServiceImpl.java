@@ -11,14 +11,15 @@ import javax.annotation.PostConstruct;
 
 import com.dianping.zebra.admin.service.CmdbService;
 import com.dianping.zebra.admin.service.HeartbeatUpdateService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
-import com.dianping.zebra.admin.dao.HeartbeatMapper;
-import com.dianping.zebra.admin.entity.HeartbeatEntity;
+import com.dianping.zebra.biz.dao.HeartbeatMapper;
+import com.dianping.zebra.biz.entity.HeartbeatEntity;
 
 @Service
 public class HeartbeatUpdateServiceImpl implements HeartbeatUpdateService, Runnable {

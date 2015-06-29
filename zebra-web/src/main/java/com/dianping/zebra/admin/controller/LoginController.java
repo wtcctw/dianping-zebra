@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.zebra.admin.dto.LoginDto;
-import com.dianping.zebra.admin.service.LionService;
+import com.dianping.zebra.biz.dto.LoginDto;
+import com.dianping.zebra.biz.service.LionService;
 
 @Controller
 @RequestMapping(value = "/login")

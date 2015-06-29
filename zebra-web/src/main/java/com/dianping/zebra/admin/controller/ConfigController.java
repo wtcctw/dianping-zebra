@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import com.dianping.lion.EnvZooKeeperConfig;
-import com.dianping.zebra.admin.dto.ConfigDto;
-import com.dianping.zebra.admin.dto.ConnectionStatusDto;
 import com.dianping.zebra.admin.service.ConnectionService;
 import com.dianping.zebra.admin.service.DalConfigService;
-import com.dianping.zebra.admin.service.LionService;
+import com.dianping.zebra.biz.dto.ConfigDto;
+import com.dianping.zebra.biz.dto.ConnectionStatusDto;
+import com.dianping.zebra.biz.service.LionService;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager.ReadOrWriteRole;

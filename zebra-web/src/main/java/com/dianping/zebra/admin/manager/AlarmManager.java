@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.dianping.lion.client.ConfigCache;
-import com.dianping.zebra.admin.service.AlarmService;
+import com.dianping.zebra.biz.service.AlarmService;
 import com.dianping.zebra.util.StringUtils;
 
 @Component

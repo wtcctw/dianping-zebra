@@ -1,7 +1,7 @@
 package com.dianping.zebra.admin.mapper;
 
-import com.dianping.zebra.admin.dto.HeartbeatDto;
-import com.dianping.zebra.admin.entity.HeartbeatEntity;
+import com.dianping.zebra.biz.dto.HeartbeatDto;
+import com.dianping.zebra.biz.entity.HeartbeatEntity;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.google.common.base.Strings;
 

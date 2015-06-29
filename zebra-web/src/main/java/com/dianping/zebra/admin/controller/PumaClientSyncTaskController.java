@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.zebra.admin.dao.PumaClientSyncTaskMapper;
-import com.dianping.zebra.admin.dto.PumaClientSyncTaskDto;
-import com.dianping.zebra.admin.entity.PumaClientSyncTaskEntity;
-import com.dianping.zebra.admin.entity.SyncServerMonitorEntity;
-import com.dianping.zebra.admin.service.SyncServerMonitorService;
+import com.dianping.zebra.biz.dao.PumaClientSyncTaskMapper;
+import com.dianping.zebra.biz.dto.PumaClientSyncTaskDto;
+import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
+import com.dianping.zebra.biz.entity.SyncServerMonitorEntity;
+import com.dianping.zebra.biz.service.SyncServerMonitorService;
 import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;

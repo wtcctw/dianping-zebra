@@ -7,7 +7,7 @@ import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
 import com.dianping.zebra.admin.service.DalConfigService;
-import com.dianping.zebra.admin.service.LionService;
+import com.dianping.zebra.biz.service.LionService;
 import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
 import com.dianping.zebra.util.StringUtils;
 import com.google.common.base.Predicate;

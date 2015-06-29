@@ -84,9 +84,9 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         controller: 'shard',
         templateUrl: 'app/template/shard.html'
     }).state('flow-control', {
-              url: '/flow',
-              controller: 'flow',
-              templateUrl: 'app/template/flow-control.html'
+        url: '/flow',
+        controller: 'flow',
+        templateUrl: 'app/template/flow-control.html'
     }).state('update', {
         url: '/update',
         templateUrl: 'app/template/update.html',
@@ -99,10 +99,6 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/update/database/{name}',
         templateUrl: 'app/template/update-database.html',
         controller: 'update-database'
-    }).state('monitor', {
-        url: '/monitor',
-        templateUrl: 'app/template/monitor.html',
-        controller: 'monitor'
     }).state('doc', {
         url: '/doc',
         templateUrl: 'app/template/doc.html',
@@ -127,5 +123,13 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/syncTask',
         templateUrl: 'app/template/syncTask.html',
         controller: 'syncTask'
+    }).state('monitor-manager', {
+        url: '/monitor-manager',
+        templateUrl: 'app/template/monitor-manager.html',
+        controller: 'monitor-manager'
+    }).state('monitor-history', {
+        url: '/monitor-history',
+        templateUrl: 'app/template/monitor-history.html',
+        controller: 'monitor-history'
     });
 });

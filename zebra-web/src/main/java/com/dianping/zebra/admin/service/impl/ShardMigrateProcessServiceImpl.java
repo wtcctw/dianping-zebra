@@ -1,14 +1,15 @@
 package com.dianping.zebra.admin.service.impl;
 
 import com.dianping.lion.client.ConfigCache;
-import com.dianping.zebra.admin.dao.ShardMigrateProcessMapper;
-import com.dianping.zebra.admin.entity.ShardMigrateProcessEntity;
 import com.dianping.zebra.admin.service.ShardMigrateProcessService;
+import com.dianping.zebra.biz.dao.ShardMigrateProcessMapper;
+import com.dianping.zebra.biz.entity.ShardMigrateProcessEntity;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

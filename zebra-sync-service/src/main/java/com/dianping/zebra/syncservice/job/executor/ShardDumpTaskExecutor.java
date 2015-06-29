@@ -1,9 +1,9 @@
 package com.dianping.zebra.syncservice.job.executor;
 
 import com.dianping.cat.Cat;
-import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
-import com.dianping.zebra.admin.entity.ShardDumpTaskEntity;
-import com.dianping.zebra.admin.service.ShardDumpService;
+import com.dianping.zebra.biz.entity.ShardDumpDbEntity;
+import com.dianping.zebra.biz.entity.ShardDumpTaskEntity;
+import com.dianping.zebra.biz.service.ShardDumpService;
 import com.dianping.zebra.syncservice.util.ProcessBuilderWrapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;

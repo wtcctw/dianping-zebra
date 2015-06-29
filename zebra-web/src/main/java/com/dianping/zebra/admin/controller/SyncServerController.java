@@ -1,7 +1,8 @@
 package com.dianping.zebra.admin.controller;
 
-import com.dianping.zebra.admin.entity.SyncServerMonitorEntity;
-import com.dianping.zebra.admin.service.SyncServerMonitorService;
+import com.dianping.zebra.biz.entity.SyncServerMonitorEntity;
+import com.dianping.zebra.biz.service.SyncServerMonitorService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

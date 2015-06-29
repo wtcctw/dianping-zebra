@@ -9,13 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.zebra.admin.dto.FlowControlDto;
 import com.dianping.zebra.admin.service.BlackListService;
 import com.dianping.zebra.admin.service.FlowControlService;
-
-/**
- * Dozer @ 2015-02 mail@dozer.cc http://www.dozer.cc
- */
+import com.dianping.zebra.biz.dto.FlowControlDto;
 
 @Controller
 @RequestMapping(value = "/flowcontrol")

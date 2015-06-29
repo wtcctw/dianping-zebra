@@ -1,7 +1,8 @@
 package com.dianping.zebra.admin.controller;
 
-import com.dianping.zebra.admin.entity.ShardDumpDbEntity;
-import com.dianping.zebra.admin.service.ShardDumpService;
+import com.dianping.zebra.biz.entity.ShardDumpDbEntity;
+import com.dianping.zebra.biz.service.ShardDumpService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;

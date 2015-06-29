@@ -7,7 +7,8 @@ import java.util.Map;
 
 import com.dianping.zebra.admin.service.BlackListService;
 import com.dianping.zebra.admin.service.CmdbService;
-import com.dianping.zebra.admin.service.LionService;
+import com.dianping.zebra.biz.service.LionService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

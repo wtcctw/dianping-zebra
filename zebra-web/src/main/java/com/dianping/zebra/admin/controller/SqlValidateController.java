@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.zebra.admin.dto.SQLValidateDto;
 import com.dianping.zebra.admin.service.CatSQLDataCrawler;
 import com.dianping.zebra.admin.service.CatSQLDataCrawler.DatabaseSql;
 import com.dianping.zebra.admin.service.CatSQLDataCrawler.SqlEntity;
+import com.dianping.zebra.biz.dto.SQLValidateDto;
 import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
 

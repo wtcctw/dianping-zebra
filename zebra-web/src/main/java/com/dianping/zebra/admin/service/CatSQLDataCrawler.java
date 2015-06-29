@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.dianping.cat.Cat;
+import com.dianping.zebra.biz.service.HttpService;
 
 @Service
 public class CatSQLDataCrawler {

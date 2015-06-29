@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.dianping.zebra.admin.service.CmdbService;
-import com.dianping.zebra.admin.service.HttpService;
+import com.dianping.zebra.biz.service.HttpService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

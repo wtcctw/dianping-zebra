@@ -1,6 +1,6 @@
 package com.dianping.zebra.admin.service;
 
-import com.dianping.zebra.admin.entity.ShardMigrateProcessEntity;
+import com.dianping.zebra.biz.entity.ShardMigrateProcessEntity;
 
 /**
  * Dozer @ 6/3/15

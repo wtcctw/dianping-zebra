@@ -81,7 +81,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public GroupDataSource(String jdbcRef) {
-		this.jdbcRef = jdbcRef;
+		this.jdbcRef = jdbcRef.trim();
 	}
 
 	protected void buildC3P0Properties(GroupDataSourceConfig newGroupConfig) {

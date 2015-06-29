@@ -146,9 +146,24 @@
                     </a>
                     <b class="arrow"></b>
                 </li>
-                <li ng-show="isLogin" active-link="active"><a href="#/monitor"><i class="menu-icon fa fa-tag"></i>
-				<span class="menu-text"> 监控 </span></a>
+                <li ng-show="isLogin" class="open">
+                	<a href="#/monitor-manager"><i class="menu-icon fa fa-tag"></i>
+					<span class="menu-text"> 监控 </span></a>
                     <b class="arrow"></b>
+                     <ul class="submenu  nav-show">
+                        <li active-link="active">
+                            <a href="#/monitor-manager">
+                                <i class="menu-icon fa fa-caret-right"></i> 监控管理
+                            </a>
+                            <b class="arrow"></b>
+                        </li>
+                        <li active-link="active">
+                            <a href="#/monitor-history">
+                                <i class="menu-icon fa fa-caret-right"></i> 切换历史
+                            </a>
+                            <b class="arrow"></b>
+                        </li>
+                    </ul>
                 </li>
                 <li active-link="active">
                     <a href="#/doc" class="dropdown-toggle">

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.dianping.zebra.admin.dao.MonitorHistoryMapper">
+<mapper namespace="com.dianping.zebra.biz.dao.MonitorHistoryMapper">
 
 	<select id="findAllHistory" parameterType="map"
 		resultType="MonitorHistoryEntity">
