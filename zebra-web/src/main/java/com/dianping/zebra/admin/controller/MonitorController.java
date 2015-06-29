@@ -26,7 +26,7 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping(value = "/monitor")
 public class MonitorController extends BasicController {
 
-	private static final String LION_KEY = "zebra.server.monitor.config";
+	private static final String LION_KEY = "zebra.monitorservice.jdbcreflist";
 
 	@Autowired
 	private LionService lionService;
