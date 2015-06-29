@@ -19,6 +19,7 @@ import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.dao.MonitorHistoryMapper;
 import com.dianping.zebra.biz.dto.InstanceStatusDto;
 import com.dianping.zebra.biz.service.LionService;
+import com.dianping.zebra.util.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -33,11 +34,9 @@ public class MonitorController extends BasicController {
 
 	@Autowired
 	private MonitorHistoryMapper monitorHistoryDao;
-	
+
 	@Autowired
 	private RestTemplate restClient;
-
-	private String localIpAddress;
 
 	private Gson gson = new Gson();
 
@@ -49,13 +48,19 @@ public class MonitorController extends BasicController {
 
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
 	@ResponseBody
-	public Object addJdbcRef(String jdbcRef) throws Exception {
-		addJdbcRefToLion(jdbcRef);
+	public Object addJdbcRef(String ip, String jdbcRefs) throws Exception {
+		if(StringUtils.isNotBlank(jdbcRefs)){
+			String[] jdbcRefSplits = jdbcRefs.split(",");
+			
+			for(String jdbcRef : jdbcRefSplits){
+				addJdbcRefToLion(ip, jdbcRef.trim());
+			}
+		}
 
 		return null;
 	}
 
-	private void addJdbcRefToLion(String jdbcRef) {
+	private void addJdbcRefToLion(String ip, String jdbcRef) {
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
 
 		if (ipWithJdbcRef == null) {
@@ -71,11 +76,11 @@ public class MonitorController extends BasicController {
 			}
 		}
 
-		Set<String> jdbcRefs = ipWithJdbcRef.get(localIpAddress);
+		Set<String> jdbcRefs = ipWithJdbcRef.get(ip);
 
 		if (jdbcRefs == null) {
 			jdbcRefs = new HashSet<String>();
-			ipWithJdbcRef.put(localIpAddress, jdbcRefs);
+			ipWithJdbcRef.put(ip, jdbcRefs);
 		}
 
 		if (!jdbcRefs.contains(jdbcRef)) {
@@ -95,10 +100,6 @@ public class MonitorController extends BasicController {
 				for (String jdbcRef2 : entry.getValue()) {
 					if (jdbcRef2.equalsIgnoreCase(jdbcRef)) {
 						entry.getValue().remove(jdbcRef);
-
-						if (entry.getValue().isEmpty()) {
-							ipWithJdbcRef.remove(entry.getKey());
-						}
 
 						String json = gson.toJson(ipWithJdbcRef);
 						lionService.setConfig(lionService.getEnv(), LION_KEY, json);

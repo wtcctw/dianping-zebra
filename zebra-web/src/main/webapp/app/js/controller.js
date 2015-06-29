@@ -318,19 +318,35 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
 	}
 
 	 $scope.addJdbcRef = function () {
-        if ($scope.jdbcRef) {
-            $http.get('/a/monitor/add?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
-                $scope.loadMonitorDs();
-            });
-        }
+		if(!$scope.monitorServer){
+			alert("请选择监控服务器");
+			return;
+		}
+		
+		if(!$scope.jdbcRef){
+			alert("请填写jdbcRef");
+			return;
+		}
+		
+        $http.get('/a/monitor/add?jdbcRef=' + $scope.jdbcRef + "&ip=" + $scope.monitorServer).success(function (data, status, headers, config) {
+            $scope.loadMonitorDs();
+        });
     }
 
     $scope.removeJdbcRef = function () {
-        if ($scope.jdbcRef) {
-            $http.get('/a/monitor/remove?jdbcRef=' + $scope.jdbcRef + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
-                $scope.loadMonitorDs();
-            });
-        }
+    	if(!$scope.monitorServer){
+			alert("请选择监控服务器");
+			return;
+		}
+		
+		if(!$scope.jdbcRef){
+			alert("请填写jdbcRef");
+			return;
+		}
+		
+        $http.get('/a/monitor/remove?jdbcRef=' + $scope.jdbcRef).success(function (data, status, headers, config) {
+            $scope.loadMonitorDs();
+        });
     }
     
     $scope.markup = function (dsId) {
