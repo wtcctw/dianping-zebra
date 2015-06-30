@@ -148,8 +148,14 @@ public class MonitorController extends BasicController {
 
 	@RequestMapping(value = "/remove", method = RequestMethod.GET)
 	@ResponseBody
-	public Object removeJdbcRef(String jdbcRef) throws Exception {
-		deleteJdbcRefToLion(jdbcRef);
+	public Object removeJdbcRef(String jdbcRefs) throws Exception {
+		if(StringUtils.isNotBlank(jdbcRefs)){
+			String[] jdbcRefSplits = jdbcRefs.split(",");
+			
+			for(String jdbcRef : jdbcRefSplits){
+				deleteJdbcRefToLion(jdbcRef.trim());
+			}
+		}
 
 		return null;
 	}

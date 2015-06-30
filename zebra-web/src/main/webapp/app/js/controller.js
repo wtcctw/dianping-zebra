@@ -323,12 +323,12 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
 			return;
 		}
 		
-		if(!$scope.jdbcRef){
+		if(!$scope.jdbcRefs){
 			alert("请填写jdbcRef");
 			return;
 		}
 		
-        $http.get('/a/monitor/add?jdbcRef=' + $scope.jdbcRef + "&ip=" + $scope.monitorServer).success(function (data, status, headers, config) {
+        $http.get('/a/monitor/add?jdbcRefs=' + $scope.jdbcRefs + "&ip=" + $scope.monitorServer).success(function (data, status, headers, config) {
             $scope.loadMonitorDs();
         });
     }
@@ -339,12 +339,12 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
 			return;
 		}
 		
-		if(!$scope.jdbcRef){
+		if(!$scope.jdbcRefs){
 			alert("请填写jdbcRef");
 			return;
 		}
 		
-        $http.get('/a/monitor/remove?jdbcRef=' + $scope.jdbcRef).success(function (data, status, headers, config) {
+        $http.get('/a/monitor/remove?jdbcRefs=' + $scope.jdbcRefs).success(function (data, status, headers, config) {
             $scope.loadMonitorDs();
         });
     }
@@ -906,10 +906,6 @@ zebraWeb.controller('header', function ($rootScope, $scope, $cookies, $http, log
 });
 
 zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
-    var convertKey = function (key) {
-        return key;
-    }
-
     $scope.edit = function (key) {
         configService.openEditModal(convertKey(key), $scope.load);
     };
@@ -919,7 +915,7 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
     };
 
     $scope.test = function (key) {
-        configService.openTestModal(convertKey(key));
+        configService.openTestModal(key);
     };
 
     $scope.autoreplace = function (jdbcRef, isNew) {

@@ -43,6 +43,9 @@ public class ConfigController extends BasicController {
 
 	@Autowired
 	private ConnectionService connectionService;
+	
+	@Autowired
+	private RestTemplate restClient;
 
 	@RequestMapping(value = "/autoreplace", method = RequestMethod.POST)
 	@ResponseBody
@@ -247,9 +250,7 @@ public class ConfigController extends BasicController {
 				throw new NullPointerException("host");
 			}
 			String url = getUrl(env, key, host);
-
-			RestTemplate client = new RestTemplate();
-			return client.exchange(url, HttpMethod.POST, new HttpEntity<DalConfigService.GroupConfigModel>(dsConfig),
+			return restClient.exchange(url, HttpMethod.POST, new HttpEntity<DalConfigService.GroupConfigModel>(dsConfig),
 			      ConnectionStatusDto.class).getBody();
 		}
 	}

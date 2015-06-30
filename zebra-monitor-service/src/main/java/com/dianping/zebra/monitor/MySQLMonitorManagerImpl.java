@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.dianping.zebra.biz.dto.InstanceStatusDto;
-import com.dianping.zebra.biz.service.MHAService;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
@@ -22,9 +21,6 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 	@Autowired
 	private MySQLMonitorThreadGroup monitorThreadGroup;
-
-	@Autowired
-	private MHAService mhaService;
 
 	private Map<String, DataSourceConfig> dataSourceConfigs = new ConcurrentHashMap<String, DataSourceConfig>();
 
@@ -53,10 +49,6 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
-			if (!groupDataSourceConfigs.containsKey(jdbcRef)) {
-				return;
-			}
-
 			int pos = evt.getPropertyName().indexOf(jdbcRef);
 
 			if (pos > 0) {
@@ -64,49 +56,39 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 				GroupDataSourceConfig newGroupDataSourceConfig = configManager.getGroupDataSourceConfig();
 				Map<String, DataSourceConfig> newDataSourceConfigs = newGroupDataSourceConfig.getDataSourceConfigs();
 
+				// 添加或者更新
 				for (Map.Entry<String, DataSourceConfig> entryConfig : newDataSourceConfigs.entrySet()) {
 					String dsId = entryConfig.getKey();
 					DataSourceConfig dsConfig = entryConfig.getValue();
 
 					if (dsConfig.isCanRead()) {
 						if (dataSourceConfigs.containsKey(dsId)) {
-							if (mhaService.isMarkdownByMHA(dsId)) {
-								dataSourceConfigs.remove(dsId);
-								monitorThreadGroup.removeMonitor(dsId);
-							} else {
-								DataSourceConfig oldConfig = dataSourceConfigs.get(dsId);
-								if (!dsConfig.toString().equals(oldConfig.toString())) {
-									dataSourceConfigs.put(dsId, dsConfig);
-									monitorThreadGroup.startOrRefreshMonitor(dsConfig);
-								}
-							}
-						} else {
-							if (!mhaService.isMarkdownByMHA(dsId)) {
+							DataSourceConfig oldConfig = dataSourceConfigs.get(dsId);
+							if (!dsConfig.toString().equals(oldConfig.toString())) {
 								dataSourceConfigs.put(dsId, dsConfig);
 								monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 							}
+						} else {
+							dataSourceConfigs.put(dsId, dsConfig);
+							monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 						}
 					}
 				}
 
+				// 删除
 				for (Entry<String, DataSourceConfig> entry : groupDataSourceConfigs.get(jdbcRef).getDataSourceConfigs()
 				      .entrySet()) {
 					String dsId = entry.getKey();
 					if (entry.getValue().isCanRead()) {
 						DataSourceConfig newDataSourceConfig = newDataSourceConfigs.get(dsId);
 
-						if(newDataSourceConfig == null){
+						if (newDataSourceConfig == null || !newDataSourceConfig.isCanRead()) {
 							dataSourceConfigs.remove(dsId);
 							monitorThreadGroup.removeMonitor(dsId);
-						}else{
-							if(!newDataSourceConfig.isCanRead()){
-								dataSourceConfigs.remove(dsId);
-								monitorThreadGroup.removeMonitor(dsId);
-							}
 						}
 					}
 				}
-				
+
 				groupDataSourceConfigs.put(jdbcRef, newGroupDataSourceConfig);
 			}
 		}
@@ -121,7 +103,7 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 			String dsId = entryConfig.getKey();
 			DataSourceConfig dsConfig = entryConfig.getValue();
 
-			if (dsConfig.isCanRead() && !mhaService.isMarkdownByMHA(dsId)) {
+			if (dsConfig.isCanRead()) {
 				dataSourceConfigs.put(dsId, dsConfig);
 
 				monitorThreadGroup.startOrRefreshMonitor(dsConfig);
@@ -149,6 +131,7 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 
 		this.groupDataSourceConfigs.remove(jdbcRef);
 		configManager.close();
+		configManagers.remove(jdbcRef);
 	}
 
 	@Override
