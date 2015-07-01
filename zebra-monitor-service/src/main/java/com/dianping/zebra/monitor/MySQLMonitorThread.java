@@ -39,11 +39,19 @@ public class MySQLMonitorThread extends Thread {
 	private long lastAlarmTime = 0L;
 
 	private long ALARM_INTERVAL = 5 * 60 * 1000L;
+	
+	private String jdbcUrl;
 
 	public MySQLMonitorThread(DataSourceMonitorConfig monitorConfig, DataSourceConfig config, HaHandler haHandler,
 	      AlarmManager alarmManager) {
 		this.monitorConfig = monitorConfig;
 		this.config = config;
+		
+		String url = config.getJdbcUrl();
+		String cleanURI = url.substring(5);
+		URI uri = URI.create(cleanURI);
+		this.jdbcUrl = "jdbc:" + uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
+		
 		this.hahandler = haHandler;
 		this.alarmManager = alarmManager;
 	}
@@ -110,12 +118,7 @@ public class MySQLMonitorThread extends Thread {
 			Statement stmt = null;
 
 			try {
-				String url = config.getJdbcUrl();
-				String cleanURI = url.substring(5);
-				URI uri = URI.create(cleanURI);
-				String newUrl = "jdbc:" + uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
-
-				con = DriverManager.getConnection(newUrl, monitorConfig.getUsername(), monitorConfig.getPassword());
+				con = DriverManager.getConnection(this.jdbcUrl, monitorConfig.getUsername(), monitorConfig.getPassword());
 				stmt = con.createStatement();
 				stmt.setQueryTimeout(1);
 				stmt.executeQuery("SELECT 1");
