@@ -39,19 +39,19 @@ public class MySQLMonitorThread extends Thread {
 	private long lastAlarmTime = 0L;
 
 	private long ALARM_INTERVAL = 5 * 60 * 1000L;
-	
+
 	private String jdbcUrl;
 
 	public MySQLMonitorThread(DataSourceMonitorConfig monitorConfig, DataSourceConfig config, HaHandler haHandler,
 	      AlarmManager alarmManager) {
 		this.monitorConfig = monitorConfig;
 		this.config = config;
-		
+
 		String url = config.getJdbcUrl();
 		String cleanURI = url.substring(5);
 		URI uri = URI.create(cleanURI);
 		this.jdbcUrl = "jdbc:" + uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
-		
+
 		this.hahandler = haHandler;
 		this.alarmManager = alarmManager;
 	}
