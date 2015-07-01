@@ -27,11 +27,14 @@ public class MySQLMonitorThread extends Thread {
 	private HaHandler hahandler;
 
 	private AlarmManager alarmManager;
-
+	
+	//实时状态
 	private volatile long lastUpdatedTime = System.currentTimeMillis();
+	
+	private int delay = 0;
 
 	private Status currentState = Status.INIT;
-
+	
 	private long lastAlarmTime = 0L;
 
 	private long ALARM_INTERVAL = 5 * 60 * 1000L;
@@ -104,7 +107,6 @@ public class MySQLMonitorThread extends Thread {
 		FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig);
 		currentState = Status.ALIVE;
 		boolean isDelay = false;
-		int delay = 0;
 		while (!Thread.currentThread().isInterrupted()) {
 			Connection con = null;
 			Statement stmt = null;
@@ -205,6 +207,10 @@ public class MySQLMonitorThread extends Thread {
 				break;
 			}
 		}
+	}
+	
+	public int getDelay(){
+		return this.delay;
 	}
 
 	public void terminate() {

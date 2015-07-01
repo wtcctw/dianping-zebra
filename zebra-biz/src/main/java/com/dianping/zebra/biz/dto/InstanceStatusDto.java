@@ -6,6 +6,8 @@ public class InstanceStatusDto {
 	
 	private long lastUpdateTime;
 	
+	private int delay;
+	
 	private String status;
 	
 	public String getDsId(){
@@ -22,6 +24,14 @@ public class InstanceStatusDto {
 
 	public void setLastUpdateTime(long lastUpdateTime) {
 		this.lastUpdateTime = lastUpdateTime;
+	}
+
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int delay) {
+		this.delay = delay;
 	}
 
 	public String getStatus() {

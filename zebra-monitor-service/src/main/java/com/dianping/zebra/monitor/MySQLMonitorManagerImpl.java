@@ -147,6 +147,7 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 			status.setDsId(dsId);
 			status.setLastUpdateTime(thread.getLastUpdatedTime());
 			status.setStatus(thread.getCurrentState().name());
+			status.setDelay(thread.getDelay());
 
 			result.put(dsId, status);
 		}

@@ -46,6 +46,7 @@
             <tr>
                 <th>dsId</th>
                 <th>上一次检测时间</th>
+                <th>当前延迟</th>
                 <th>当前状态</th>
             </tr>
             </thead>
@@ -53,6 +54,7 @@
             <tr ng-repeat="statusItem in statusList | toArray | filter:{$key:searchText}">
                 <td>{{statusItem.$key}}</td>
                 <td>{{statusItem.lastUpdateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td>{{statusItem.delay}}</td>
                 <td ng-show="statusItem.status == 'INIT'"><span class="label label-info">{{statusItem.status}}</span></td>
                 <td ng-show="statusItem.status == 'DEAD' || statusItem.status == 'MHA_MARK_DOWN'"><span class="label label-danger">{{statusItem.status}}</span></td>
                 <td ng-show="statusItem.status == 'ALIVE'"><span class="label label-success">{{statusItem.status}}</span></td>
