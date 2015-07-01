@@ -64,15 +64,22 @@ public class AlarmManager {
 	public static class AlarmContent {
 		private String ds;
 
+		private int delay;
+
 		private String op;
 
-		public AlarmContent(String ds, String op) {
+		public AlarmContent(String ds, int delay, String op) {
 			this.ds = ds;
+			this.delay = delay;
 			this.op = op;
 		}
 
 		public String getSmsContent() {
-			return String.format("[%s] 读库:%s 已自动被%s", getTitle(), ds, op);
+			if (op != null) {
+				return String.format("[%s] 读库:%s 已延迟了%d秒,自动被%s", getTitle(), ds, delay, op);
+			} else {
+				return String.format("[%s] 读库:%s 已延迟了%d秒,请尽快进行排查", getTitle(), ds, delay);
+			}
 		}
 
 		public String getTitle() {
@@ -80,7 +87,11 @@ public class AlarmManager {
 		}
 
 		public String getWeiXinContent() {
-			return String.format("[读库:%s 已自动被%s]", ds, op);
+			if (op != null) {
+				return String.format("[读库:%s 已延迟了%d秒,自动被%s]", ds, delay, op);
+			} else {
+				return String.format("[读库:%s 已延迟了%d秒,请尽快进行排查]", ds, delay);
+			}
 		}
 	}
 }

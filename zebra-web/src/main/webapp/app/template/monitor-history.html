@@ -15,6 +15,7 @@
 					<th>操作</th>
 					<th>操作人</th>
 					<th>操作时间</th>
+					<th>恢复操作</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -26,6 +27,9 @@
 						class="label label-success">markup</span></td>
 					<td>{{history.who}}</td>
 					<td>{{history.createTime}}</td>
+					<td>
+						<button ng-show="history.operator == -1" class="btn btn-xs btn-danger" ng-click="markup(history.dsId)">手动恢复</button>
+					</td>
 					</td>
 				</tr>
 			</tbody>

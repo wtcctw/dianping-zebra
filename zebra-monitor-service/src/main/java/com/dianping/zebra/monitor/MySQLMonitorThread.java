@@ -2,6 +2,7 @@ package com.dianping.zebra.monitor;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
@@ -30,6 +31,10 @@ public class MySQLMonitorThread extends Thread {
 	private volatile long lastUpdatedTime = System.currentTimeMillis();
 
 	private Status currentState = Status.INIT;
+
+	private long lastAlarmTime = 0L;
+
+	private long ALARM_INTERVAL = 5 * 60 * 1000L;
 
 	public MySQLMonitorThread(DataSourceMonitorConfig monitorConfig, DataSourceConfig config, HaHandler haHandler,
 	      AlarmManager alarmManager) {
@@ -98,15 +103,48 @@ public class MySQLMonitorThread extends Thread {
 	private void doMarkDown() {
 		FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig);
 		currentState = Status.ALIVE;
+		boolean isDelay = false;
+		int delay = 0;
 		while (!Thread.currentThread().isInterrupted()) {
 			Connection con = null;
 			Statement stmt = null;
 
 			try {
-				con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
+				con = DriverManager.getConnection(config.getJdbcUrl(), monitorConfig.getUsername(),
+				      monitorConfig.getPassword());
 				stmt = con.createStatement();
-				stmt.executeQuery(monitorConfig.getTestSql());
+				ResultSet rs = stmt.executeQuery(monitorConfig.getTestSql());
 
+				while (rs.next()) {
+					delay = rs.getInt("Seconds_Behind_Master");
+
+					if (delay >= monitorConfig.getDelayTime() / 3 && delay < monitorConfig.getDelayTime() / 2) {
+						if(lastAlarmTime == 0L){
+							alarmManager.alarm(new AlarmContent(config.getId(), delay, null));
+						}else{
+							long interval = System.currentTimeMillis() - lastAlarmTime;
+							
+							if (interval >= ALARM_INTERVAL) {
+								alarmManager.alarm(new AlarmContent(config.getId(), delay, null));
+							}
+						}
+					}
+
+					if (delay >= monitorConfig.getDelayTime()) {
+						hahandler.markdown(config.getId(), Operator.ZEBRA);
+						logger.info("markDown " + config.getId());
+
+						isDelay = true;
+						alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
+						break;
+					}
+					
+					break;
+				}
+
+				if (isDelay) {
+					break;
+				}
 				// 如果能连上，则清空队列中的异常；因为要求连续的异常
 				timestamp.clear();
 			} catch (SQLException e) {
@@ -116,7 +154,7 @@ public class MySQLMonitorThread extends Thread {
 					hahandler.markdown(config.getId(), Operator.ZEBRA);
 					logger.info("markDown " + config.getId());
 
-					alarmManager.alarm(new AlarmContent(config.getId(), "markDown"));
+					alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
 					break;
 				}
 			} finally {
@@ -140,7 +178,8 @@ public class MySQLMonitorThread extends Thread {
 			Connection con = null;
 			Statement stmt = null;
 			try {
-				con = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
+				con = DriverManager.getConnection(config.getJdbcUrl(), monitorConfig.getUsername(),
+				      monitorConfig.getPassword());
 				stmt = con.createStatement();
 				stmt.executeQuery(monitorConfig.getTestSql());
 
@@ -150,7 +189,6 @@ public class MySQLMonitorThread extends Thread {
 					hahandler.markup(config.getId(), Operator.ZEBRA);
 					logger.info("markUp " + config.getId());
 
-					alarmManager.alarm(new AlarmContent(config.getId(), "markUp"));
 					break;
 				}
 			} catch (SQLException ignore) {

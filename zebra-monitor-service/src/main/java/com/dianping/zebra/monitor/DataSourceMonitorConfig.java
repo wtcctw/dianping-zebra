@@ -11,6 +11,10 @@ public class DataSourceMonitorConfig {
 	private volatile long validPeriod;
 
 	private int delayTime;
+	
+	private String username;
+	
+	private String password;
 
 	private boolean isAutoMarkUp;
 	
@@ -70,5 +74,21 @@ public class DataSourceMonitorConfig {
 
 	public void setValidPeriod(long validPeriod) {
 		this.validPeriod = validPeriod;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }

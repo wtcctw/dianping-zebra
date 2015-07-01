@@ -1,7 +1,10 @@
 package com.dianping.zebra.admin.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,41 +13,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.dto.MHAResultDto;
+import com.dianping.zebra.biz.service.HaHandler;
+import com.dianping.zebra.biz.service.HaHandler.Operator;
 import com.dianping.zebra.biz.service.LionService;
-import com.dianping.zebra.biz.service.MHAService;
 
+/**
+ * 给外部系统——MHA集群调用的接口，请勿轻易改变
+ * 
+ * @author damonzhu
+ *
+ */
 @Controller
 @RequestMapping(value = "/mha")
 public class MHAController extends BasicController {
 
-	private static final String lionKey = "zebra.server.monitor.mha.markdown";
+	private final String PORJECT = "ds";
 
 	@Autowired
-	private MHAService mhaService;
+	private HaHandler haHandler;
 
 	@Autowired
 	private LionService lionService;
 
-	@RequestMapping(value = "/allMarkedDown", method = RequestMethod.GET)
-	@ResponseBody
-	public Object listMarkDownByMHA() throws Exception {
-		String configFromZk = lionService.getConfigFromZk(lionKey);
-		
-		Map<String,String> results = new HashMap<String,String>();
-		
-		if(configFromZk != null && configFromZk.length() > 0){
-			
-			String[] dsIds = configFromZk.split(",");
-			
-			for(String dsId : dsIds){
-				results.put(dsId, dsId);
-			}
-		}
-		
-		return results;
-	}
-	
 	// 给mha集群调用
 	@RequestMapping(value = "/markdown", method = RequestMethod.GET)
 	@ResponseBody
@@ -52,10 +44,12 @@ public class MHAController extends BasicController {
 		MHAResultDto result = new MHAResultDto();
 
 		if (ip != null && port != null) {
-			Set<String> dsIds = mhaService.findDsIds(ip, port);
+			Set<String> dsIds = findDsIds(ip, port);
 
 			if (dsIds != null) {
-				mhaService.markDownDsIds(dsIds);
+				for (String dsId : dsIds) {
+					haHandler.markdown(dsId, Operator.MHA);
+				}
 			}
 
 			result.setDsIds(dsIds);
@@ -73,9 +67,18 @@ public class MHAController extends BasicController {
 		MHAResultDto result = new MHAResultDto();
 
 		if (dsId != null) {
-			mhaService.markUpDsId(dsId);
+			String active;
+			try {
+				active = lionService.getConfigByHttp(lionService.getEnv(), "ds." + dsId + ".active");
 
-			result.addDsId(dsId);
+				if (active == null || active.equalsIgnoreCase("false")) {
+					haHandler.markup(dsId, Operator.PEOPLE);
+				}
+
+				result.addDsId(dsId);
+			} catch (IOException e) {
+				Cat.logError(e);
+			}
 		}
 
 		result.setStatus("success");
@@ -86,6 +89,64 @@ public class MHAController extends BasicController {
 	@RequestMapping(value = "/find", method = RequestMethod.GET)
 	@ResponseBody
 	public Object find(String ip, String port) {
-		return mhaService.findDsIds(ip, port);
+		return findDsIds(ip, port);
+	}
+
+	private Set<String> findDsIds1(String ip, String port, HashMap<String, String> keyValues) {
+		String content = ip + ":" + port;
+
+		Set<String> dsIds = new HashSet<String>();
+
+		for (Entry<String, String> entry : keyValues.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+
+			if (key != null && key.contains(".jdbc.url") && value != null && value.contains(content.trim())) {
+				int begin = "ds.".length();
+				int end = key.indexOf(".jdbc.url");
+
+				dsIds.add(key.substring(begin, end));
+			}
+		}
+
+		return dsIds;
+	}
+
+	private Set<String> findDsIds(String ip, String port) {
+		try {
+			HashMap<String, String> dsKV = lionService.getConfigByProject(lionService.getEnv(), PORJECT);
+			Set<String> dsIds = findDsIds1(ip, port, dsKV);
+
+			HashMap<String, String> groupdsKV = lionService.getConfigByProject(lionService.getEnv(), "groupds");
+
+			Iterator<String> iterator = dsIds.iterator();
+			while (iterator.hasNext()) {
+				String dsId = iterator.next();
+
+				// 第一步过滤写账号
+				if (dsId.contains("write")) {
+					iterator.remove();
+
+					continue;
+				}
+
+				// 第二步过滤没有被groupds使用的dsId
+				boolean hasRef = false;
+				for (String value : groupdsKV.values()) {
+					if (value.contains(dsId)) {
+						hasRef = true;
+						break;
+					}
+				}
+
+				if (!hasRef) {
+					iterator.remove();
+				}
+			}
+
+			return dsIds;
+		} catch (IOException e) {
+			return null;
+		}
 	}
 }

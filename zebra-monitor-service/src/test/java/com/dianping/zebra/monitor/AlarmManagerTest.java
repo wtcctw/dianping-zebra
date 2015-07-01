@@ -19,7 +19,7 @@ public class AlarmManagerTest {
 	
 	@Test
 	public void testAlarm(){
-		AlarmContent content = new AlarmContent("zebra-n1-write", "markDown");
+		AlarmContent content = new AlarmContent("zebra-n1-write", 100, "markDown");
 		
 		manager.alarm(content);
 	}

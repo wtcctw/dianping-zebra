@@ -299,6 +299,14 @@ zebraWeb.controller('monitor-history', function($scope, $http){
         });
     }
 	
+	$scope.markup = function (dsId) {
+        if (dsId) {
+            $http.get('/a/mha/markup?dsId=' + dsId).success(function (data, status, headers, config) {
+                $scope.load();
+            });
+        }
+    }
+	
 	$scope.load();
 });
 
@@ -347,14 +355,6 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
         $http.get('/a/monitor/remove?jdbcRefs=' + $scope.jdbcRefs).success(function (data, status, headers, config) {
             $scope.loadMonitorDs();
         });
-    }
-    
-    $scope.markup = function (dsId) {
-        if (dsId) {
-            $http.get('/a/mha/markup?dsId=' + dsId).success(function (data, status, headers, config) {
-                $scope.load();
-            });
-        }
     }
     
 	$scope.$watch('monitorServer', $scope.loadMonitorDs);
@@ -906,6 +906,10 @@ zebraWeb.controller('header', function ($rootScope, $scope, $cookies, $http, log
 });
 
 zebraWeb.controller('config', function ($scope, $stateParams, $http, configService) {
+	var convertKey = function (key) {
+		return key;
+	}
+	
     $scope.edit = function (key) {
         configService.openEditModal(convertKey(key), $scope.load);
     };
