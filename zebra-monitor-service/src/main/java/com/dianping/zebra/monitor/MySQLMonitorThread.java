@@ -113,7 +113,7 @@ public class MySQLMonitorThread extends Thread {
 				String url = config.getJdbcUrl();
 				String cleanURI = url.substring(5);
 				URI uri = URI.create(cleanURI);
-				String newUrl = "jdbc:" + uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPath();
+				String newUrl = "jdbc:" + uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
 
 				con = DriverManager.getConnection(newUrl, monitorConfig.getUsername(), monitorConfig.getPassword());
 				stmt = con.createStatement();
