@@ -196,8 +196,7 @@ public class MySQLMonitorThread extends Thread {
 			Connection con = null;
 			Statement stmt = null;
 			try {
-				con = DriverManager.getConnection(config.getJdbcUrl(), monitorConfig.getUsername(),
-				      monitorConfig.getPassword());
+				con = DriverManager.getConnection(this.jdbcUrl, monitorConfig.getUsername(), monitorConfig.getPassword());
 				stmt = con.createStatement();
 				stmt.executeQuery("SELECT 1");
 
