@@ -81,7 +81,7 @@ public class SqlBuilder {
 			}
 			for (Map.Entry<String, ColumnInfo> columnName2ColumnInfo : columnInfoMap.entrySet()) {
 				if (columnName2ColumnInfo.getValue().isKey()) {
-					args.add(columnName2ColumnInfo.getValue().getOldValue());
+					args.add(columnName2ColumnInfo.getValue().getNewValue());
 				}
 			}
 			break;
