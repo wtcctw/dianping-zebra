@@ -837,7 +837,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
     }
 
     $scope.test = function () {
-        $http.post('/a/config/test?env=' + $scope.config.env, angular.toJson($scope.data))
+        $http.post('/a/config/test?env=' + $scope.config.env + "&key=" + $scope.name, angular.toJson($scope.data))
             .success(function (data, status, headers, config) {
                 configService.openTestModal("", data);
             });
