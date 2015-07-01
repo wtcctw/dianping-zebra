@@ -1,5 +1,6 @@
 package com.dianping.zebra.monitor;
 
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -109,8 +110,12 @@ public class MySQLMonitorThread extends Thread {
 			Statement stmt = null;
 
 			try {
-				con = DriverManager.getConnection(config.getJdbcUrl(), monitorConfig.getUsername(),
-				      monitorConfig.getPassword());
+				String url = config.getJdbcUrl();
+				String cleanURI = url.substring(5);
+				URI uri = URI.create(cleanURI);
+				String newUrl = "jdbc:" + uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPath();
+
+				con = DriverManager.getConnection(newUrl, monitorConfig.getUsername(), monitorConfig.getPassword());
 				stmt = con.createStatement();
 				stmt.setQueryTimeout(1);
 				stmt.executeQuery("SELECT 1");
@@ -171,7 +176,7 @@ public class MySQLMonitorThread extends Thread {
 					alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
 					break;
 				}
-				
+
 				break;
 			}
 		} catch (SQLException ignore) {
