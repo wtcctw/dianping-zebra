@@ -2,8 +2,6 @@ package com.dianping.zebra.monitor;
 
 public class DataSourceMonitorConfig {
 
-	private volatile String testSql;
-
 	private volatile int pingFailLimit;
 
 	private volatile int pingIntervalSeconds;
@@ -30,10 +28,6 @@ public class DataSourceMonitorConfig {
 
 	public int getPingIntervalSeconds() {
 		return pingIntervalSeconds;
-	}
-
-	public String getTestSql() {
-		return testSql;
 	}
 
 	public long getValidPeriod() {
@@ -66,10 +60,6 @@ public class DataSourceMonitorConfig {
 
 	public void setPingIntervalSeconds(int pingIntervalSeconds) {
 		this.pingIntervalSeconds = pingIntervalSeconds;
-	}
-
-	public void setTestSql(String testSql) {
-		this.testSql = testSql;
 	}
 
 	public void setValidPeriod(long validPeriod) {

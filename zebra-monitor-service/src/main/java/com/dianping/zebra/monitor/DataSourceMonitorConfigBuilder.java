@@ -8,8 +8,6 @@ import com.dianping.zebra.biz.service.LionService;
 @Service
 public class DataSourceMonitorConfigBuilder {
 
-	private static final String TEST_SQL = "zebra.monitorservice.testSql";
-
 	private static final String MAX_FAIL = "zebra.monitorservice.failLimit";
 
 	private static final String SLEEP_INTERVAL = "zebra.monitorservice.sleepInterval";
@@ -28,7 +26,6 @@ public class DataSourceMonitorConfigBuilder {
 	public DataSourceMonitorConfig buildMonitorConfig(String dsId) {
 		DataSourceMonitorConfig config = new DataSourceMonitorConfig();
 
-		config.setTestSql(lionService.getConfigFromZk(TEST_SQL));
 		config.setPingFailLimit(Integer.parseInt(lionService.getConfigFromZk(MAX_FAIL)));
 		config.setPingIntervalSeconds(Integer.parseInt(lionService.getConfigFromZk(SLEEP_INTERVAL)));
 		config.setValidPeriod(Integer.parseInt(lionService.getConfigFromZk(VALID_PERIOD)));
