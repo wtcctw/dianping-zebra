@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.service.HaHandler;
 import com.dianping.zebra.biz.service.HaHandler.Operator;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
@@ -131,6 +132,7 @@ public class MySQLMonitorThread extends Thread {
 			} catch (SQLException e) {
 				timestamp.addLast(System.currentTimeMillis());
 
+				Cat.logError(e);
 				if (timestamp.shouldAction()) {
 					hahandler.markdown(config.getId(), Operator.ZEBRA);
 					logger.info("markDown " + config.getId());
@@ -209,6 +211,7 @@ public class MySQLMonitorThread extends Thread {
 					break;
 				}
 			} catch (SQLException ignore) {
+				Cat.logError(ignore);
 				// 如果不能连上，则清空队列中正常的次数；
 				timestamp.clear();
 			} finally {
