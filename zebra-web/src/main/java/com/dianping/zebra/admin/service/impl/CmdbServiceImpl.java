@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import com.dianping.zebra.admin.service.CmdbService;
 import com.dianping.zebra.biz.service.HttpService;
+import com.dianping.zebra.util.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -80,14 +81,17 @@ public class CmdbServiceImpl implements CmdbService {
 
 			String content = httpService.sendPost(CMDB_BATCH_QUERY_URL, "ip=" + sb.toString());
 
-			JsonParser parser = new JsonParser();
-			for (Entry<String, JsonElement> entry : parser.parse(content).getAsJsonObject().entrySet()) {
-				JsonElement value = entry.getValue();
-				if (!value.toString().equals(QUOTE)) {
-					String ip = entry.getKey();
-					String name = value.getAsJsonObject().get("project_name").getAsString();
+			if (StringUtils.isNotBlank(content)) {
+				JsonParser parser = new JsonParser();
+				
+				for (Entry<String, JsonElement> entry : parser.parse(content).getAsJsonObject().entrySet()) {
+					JsonElement value = entry.getValue();
+					if (!value.toString().equals(QUOTE)) {
+						String ip = entry.getKey();
+						String name = value.getAsJsonObject().get("project_name").getAsString();
 
-					ipNames.put(ip, name);
+						ipNames.put(ip, name);
+					}
 				}
 			}
 

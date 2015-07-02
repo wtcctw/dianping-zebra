@@ -40,7 +40,6 @@ public class CatSQLDataCrawler {
 
 			saxParser.parse(ins, new ElementHandler(databaseSql));
 		} catch (Exception e) {
-			System.out.println(e);
 			Cat.logError(e);
 		}
 
