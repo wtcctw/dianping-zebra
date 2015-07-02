@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -278,6 +277,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				int tryTimes = 0;
 				while (true) {
 					tryTimes++;
+					if (Thread.interrupted()) {
+						break;
+					}
 
 					try {
 						process(event);
