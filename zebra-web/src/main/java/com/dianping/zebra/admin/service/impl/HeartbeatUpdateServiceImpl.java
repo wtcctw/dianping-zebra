@@ -58,24 +58,26 @@ public class HeartbeatUpdateServiceImpl implements HeartbeatUpdateService, Runna
 
 			Map<String, String> multiAppName = cmdbService.getMultiAppName(ips_);
 
-			for (HeartbeatEntity heartbeat : heartbeats) {
-				String ip = heartbeat.getIp();
-				String name = heartbeat.getApp_name();
-				String cmdbName = multiAppName.get(ip);
+			if (!multiAppName.isEmpty()) {
+				for (HeartbeatEntity heartbeat : heartbeats) {
+					String ip = heartbeat.getIp();
+					String name = heartbeat.getApp_name();
+					String cmdbName = multiAppName.get(ip);
 
-				// if ip is no longer belongs to this app, then delete this heartbeat
-				if (cmdbName != null && !name.equalsIgnoreCase(cmdbName)) {
-					heartbeatMapper.deleteHeartbeatById((heartbeat.getId()));
-				}
+					// if ip is no longer belongs to this app, then delete this heartbeat
+					if (cmdbName != null && !name.equalsIgnoreCase(cmdbName)) {
+						heartbeatMapper.deleteHeartbeatById((heartbeat.getId()));
+					}
 
-				// if ip is no longer belongs to any app, then delete this heartbeat
-				if (cmdbName == null) {
-					heartbeatMapper.deleteHeartbeatById((heartbeat.getId()));
-				}
+					// if ip is no longer belongs to any app, then delete this heartbeat
+					if (cmdbName == null) {
+						heartbeatMapper.deleteHeartbeatById((heartbeat.getId()));
+					}
 
-				// if name is equals noname
-				if (name.equalsIgnoreCase("noname") || name.contains("job")) {
-					heartbeatMapper.deleteHeartbeatById((heartbeat.getId()));
+					// if name is equals noname
+					if (name.equalsIgnoreCase("noname") || name.contains("job")) {
+						heartbeatMapper.deleteHeartbeatById((heartbeat.getId()));
+					}
 				}
 			}
 
