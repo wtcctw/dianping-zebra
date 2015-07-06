@@ -1,12 +1,12 @@
 /**
  * Project: com.dianping.zebra.zebra-client-0.1.0
- * 
+ * <p/>
  * File Created at 2011-6-15
  * $Id$
- * 
+ * <p/>
  * Copyright 2010 dianping.com.
  * All rights reserved.
- *
+ * <p/>
  * This software is the confidential and proprietary information of
  * Dianping Company. ("Confidential Information").  You shall not
  * disclose such Confidential Information and shall use it only in
@@ -15,16 +15,15 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
-import com.dianping.zebra.util.StringUtils;
 import com.dianping.zebra.shard.config.RouterConfigException;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
+import com.dianping.zebra.util.StringUtils;
 
 import java.util.*;
 
 /**
  * @author danson.liu
- * 
  */
 public class SimpleDataSourceProvider implements DataSourceProvider {
 
@@ -42,6 +41,13 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 
 	private List<DataSourceBO> dataSourceBOs = new ArrayList<DataSourceBO>(6);
 
+	protected SimpleDataSourceProvider() {
+		this.tableName = null;
+		this.dbIndexes = null;
+		this.tbSuffix = null;
+		this.tbRule = null;
+	}
+
 	public SimpleDataSourceProvider(String tableName, String dbIndexes, String tbSuffix, String tbRule) {
 		this.tableName = tableName;
 		this.dbIndexes = dbIndexes;
@@ -51,7 +57,7 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 	}
 
 	private void init() {
-		String[] dbs = dbIndexes.split(",");
+		List<String> dbs = splitDb(dbIndexes);
 		RuleEngine tableRuleEngine = new GroovyRuleEngine(tbRule);
 		for (String db : dbs) {
 			String jdbcRef = db.trim();
@@ -62,6 +68,26 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 		}
 
 		setTables2DataSource(dataSourceBOs);
+	}
+
+	protected List<String> splitDb(String dbIndexes) {
+		List<String> result = new ArrayList<String>();
+		String[] dbConfig = dbIndexes.split(",");
+		for (String config : dbConfig) {
+			if (config.contains("[") && config.contains("]") && config.contains("-")) {
+				String suffix = config.substring(0, config.indexOf("["));
+				String tbSuffixRange = StringUtils.substringBetween(config, "[", "]");
+				String[] ranges = tbSuffixRange.split("-");
+				int startNum = Integer.parseInt(ranges[0]);
+				int endNum = Integer.parseInt(ranges[1]);
+				for (int k = startNum; k <= endNum; k++) {
+					result.add(suffix + k);
+				}
+			} else {
+				result.add(config);
+			}
+		}
+		return result;
 	}
 
 	private void setTables2DataSource(List<DataSourceBO> dataSourceBOs) {
