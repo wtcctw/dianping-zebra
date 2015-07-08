@@ -743,7 +743,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             newValue: ""
         });
         propertiesTmp.push({
-            key: 'ds.' + $scope.newDsName1 + '.jdbc.uername',
+            key: 'ds.' + $scope.newDsName1 + '.jdbc.username',
             value: '',
             isCreate: true,
             newValue: ""
