@@ -37,7 +37,6 @@
         <url-pattern>/a/update/*</url-pattern>
         <url-pattern>/a/monitor/*</url-pattern>
         <url-pattern>/a/monitor/database/*</url-pattern>
-        <url-pattern>/a/mha/*</url-pattern>
     </filter-mapping>
     <context-param>
         <param-name>contextConfigLocation</param-name>
