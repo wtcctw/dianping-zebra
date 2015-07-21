@@ -17,11 +17,6 @@
 		<spring.version>4.1.4.RELEASE</spring.version>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>com.dianping.zebra</groupId>
-			<artifactId>zebra-biz</artifactId>
-		</dependency>
-		
 		<!-- test -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -207,9 +202,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
+				<version>2.6</version>
 				<configuration>
-					<warName>${artifactId}-${env}-${version}</warName>
+					<warName>${project.artifactId}-${env}-${project.version}</warName>
 					<webResources>
 						<resource>
 							<directory>src/main/resources</directory>
