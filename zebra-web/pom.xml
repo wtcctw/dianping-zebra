@@ -32,7 +32,6 @@
 			<artifactId>httpclient</artifactId>
 			<version>4.4</version>
 		</dependency>
-
         <!-- spring -->
         <dependency>
             <groupId>org.springframework</groupId>

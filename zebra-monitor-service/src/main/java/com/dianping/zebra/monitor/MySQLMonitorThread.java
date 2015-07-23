@@ -43,6 +43,8 @@ public class MySQLMonitorThread extends Thread {
 	private long ALARM_INTERVAL = 5 * 60 * 1000L;
 
 	private String jdbcUrl;
+	
+	private String host;
 
 	public MySQLMonitorThread(DataSourceMonitorConfig monitorConfig, DataSourceConfig config, HaHandler haHandler,
 	      AlarmManager alarmManager) {
@@ -53,7 +55,8 @@ public class MySQLMonitorThread extends Thread {
 		String cleanURI = url.substring(5);
 		URI uri = URI.create(cleanURI);
 		this.jdbcUrl = "jdbc:" + uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
-
+		this.host = uri.getHost();
+		
 		this.hahandler = haHandler;
 		this.alarmManager = alarmManager;
 	}
@@ -141,6 +144,9 @@ public class MySQLMonitorThread extends Thread {
 				logger.info("markDown " + config.getId());
 
 				alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
+
+				CatAlarmManager.sendAlarm(config.getId(),"ZEBRA","ZEBRA",host);
+				
 				break;
 			}
 			} finally {
@@ -170,7 +176,9 @@ public class MySQLMonitorThread extends Thread {
 						logger.info("markDown" + config.getId());
 
 						alarmManager.alarm(new AlarmContent(config.getId(), -1, "markDown"));
-
+						
+						CatAlarmManager.sendAlarm(config.getId(),"ZEBRA","ZEBRA",host);
+						
 						isDelay = true;
 						break;
 					}
@@ -197,6 +205,9 @@ public class MySQLMonitorThread extends Thread {
 
 					isDelay = true;
 					alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
+					
+					CatAlarmManager.sendAlarm(config.getId(),"ZEBRA","ZEBRA",host);
+
 					break;
 				}
 

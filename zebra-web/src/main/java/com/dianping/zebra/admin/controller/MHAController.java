@@ -1,6 +1,8 @@
 package com.dianping.zebra.admin.controller;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,12 +16,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.cat.Cat;
+import com.dianping.zebra.admin.manager.CatAlarmManager;
 import com.dianping.zebra.admin.manager.MHAAlarmManager;
 import com.dianping.zebra.admin.manager.MHAAlarmManager.AlarmContent;
 import com.dianping.zebra.biz.dto.MHAResultDto;
 import com.dianping.zebra.biz.service.HaHandler;
 import com.dianping.zebra.biz.service.HaHandler.Operator;
 import com.dianping.zebra.biz.service.LionService;
+import com.dianping.zebra.admin.util.CatAlarmContent;
 
 /**
  * 给外部系统——MHA集群调用的接口，请勿轻易改变
@@ -34,7 +38,7 @@ public class MHAController extends BasicController {
 	private final String PORJECT = "ds";
 	
 	private MHAAlarmManager mhaAlarmManager;
-
+	
 	@Autowired
 	private HaHandler haHandler;
 
@@ -54,6 +58,14 @@ public class MHAController extends BasicController {
 				for (String dsId : dsIds) {
 					haHandler.markdown(dsId, Operator.MHA);
 					mhaAlarmManager.alarm(new AlarmContent(dsId, "markDown by MHA"));
+					CatAlarmContent alarmcontent = new CatAlarmContent();
+					alarmcontent.setHostname(dsId);
+					alarmcontent.setTitle("MHA");
+					alarmcontent.setUser("MHA");
+					alarmcontent.setIp(ip);
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					alarmcontent.setAlterationDate(df.format(new Date()));
+					CatAlarmManager.sendAlarm(alarmcontent);
 				}
 			}
 
