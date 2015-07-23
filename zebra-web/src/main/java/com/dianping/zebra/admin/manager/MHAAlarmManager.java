@@ -1,4 +1,4 @@
-package com.dianping.zebra.monitor;
+package com.dianping.zebra.admin.manager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +13,7 @@ import com.dianping.zebra.biz.service.AlarmService;
 import com.dianping.zebra.util.StringUtils;
 
 @Component
-public class AlarmManager {
+public class MHAAlarmManager {
 
 	private static final String LION_KEY_SMS = "zebra.monitorservice.alarm.sms";
 
@@ -62,48 +62,26 @@ public class AlarmManager {
 	}
 
 	public static class AlarmContent {
-		private String ds;
-
-		private int delay;
+		private String dsId;
 
 		private String op;
 
-		public AlarmContent(String ds, int delay, String op) {
-			this.ds = ds;
-			this.delay = delay;
+		public AlarmContent(String dsId,String op) {
+			this.dsId = dsId;
 			this.op = op;
 		}
-
+		
 		public String getTitle() {
-			return "Zebra-MonitorService告警";
+			return "Zebra-MHA markDown告警:";
 		}
 		
 		public String getSmsContent() {
-			if (op != null) {
-				if(delay == -1) {
-					return String.format("[%s] 读库:%s  复制线程没有运行,自动被s%",getTitle(),ds,delay);
-				} else if(delay == 0) {
-					return String.format("[%s] 读库:%s 数据库连接超时,自动被%s", getTitle(), ds,op);
-				} else {
-					return String.format("[%s] 读库:%s 已延迟了%d秒,自动被%s", getTitle(), ds, delay, op);
-				}
-			} else {
-				return String.format("[%s] 读库:%s 已延迟了%d秒,请尽快进行排查", getTitle(), ds, delay);
-			}
+			return String.format("[%s] 主库:%s , %s ,请尽快处理!", getTitle(), dsId, op);
 		}
 
+
 		public String getWeiXinContent() {
-			if (op != null) {
-				if(delay == -1) {
-					return String.format("[读库:%s  复制线程没有运行,自动被s%]",ds,delay);
-				} else if(delay == 0) {
-					return String.format("[读库:%s 数据库连接超时,自动被%s]",ds,op);
-				} else {
-					return String.format("[读库:%s 已延迟了%d秒,自动被%s]",ds, delay, op);
-				}
-			} else {
-				return String.format("[读库:%s 已延迟了%d秒,请尽快进行排查]",ds, delay);
-			}
+				return String.format("[主库:s% , %s ,请尽快处理!]", dsId, op);
 		}
 	}
 }
