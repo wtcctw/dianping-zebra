@@ -76,6 +76,9 @@ public class AlarmManager {
 
 		public String getSmsContent() {
 			if (op != null) {
+				if(delay == -1) {
+					return String.format("[%s] 读库s% 复制线程没有运行或延迟无法计算,自动被s%",getTitle(),ds,delay);
+				}
 				return String.format("[%s] 读库:%s 已延迟了%d秒,自动被%s", getTitle(), ds, delay, op);
 			} else {
 				return String.format("[%s] 读库:%s 已延迟了%d秒,请尽快进行排查", getTitle(), ds, delay);
@@ -88,6 +91,9 @@ public class AlarmManager {
 
 		public String getWeiXinContent() {
 			if (op != null) {
+				if(delay == -1) {
+					return String.format("[%s] 读库s% 复制线程没有运行或延迟无法计算,自动被s%",getTitle(),ds,delay);
+				}
 				return String.format("[读库:%s 已延迟了%d秒,自动被%s]", ds, delay, op);
 			} else {
 				return String.format("[读库:%s 已延迟了%d秒,请尽快进行排查]", ds, delay);
