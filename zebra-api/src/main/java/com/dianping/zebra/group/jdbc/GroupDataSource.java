@@ -570,6 +570,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.springProperties.put(Constants.SPRING_PROPERTY_EXTRA_JDBC_URL_PARAMS, extraJdbcUrlParams);
 	}
 
+	public void setSocketTimeout(long socketTimeout) {
+		this.springProperties.put(Constants.SPRING_PROPERTY_EXTRA_JDBC_URL_PARAMS, "socketTimeout=" + socketTimeout);
+	}
+
 	public synchronized void setFactoryClassLocation(String factoryClassLocation) {
 		setProperty("factoryClassLocation", factoryClassLocation);
 	}

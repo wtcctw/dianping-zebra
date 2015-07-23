@@ -1,6 +1,10 @@
 ##  更新说明
 
-### 2.7.6 NEW!
+### 2.7.7 NEW!
+* [/] 重构了分库分表的部分代码，修正了分库分表的若干bug
+* [+] 增加了GroupDataSource的socketTimeout的设置功能
+
+### 2.7.6
 * [+] 增加底层对tomcat-jdbc的支持
 * [+] 增加配置支持GroupDataSource可以选择底层用c3p0还是tomcat-jdbc
 
