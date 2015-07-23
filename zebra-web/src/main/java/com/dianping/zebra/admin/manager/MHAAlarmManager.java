@@ -81,7 +81,7 @@ public class MHAAlarmManager {
 
 
 		public String getWeiXinContent() {
-				return String.format("[主库:s% , %s ,请尽快处理!]", dsId, op);
+				return String.format("[主库:%s , %s ,请尽快处理!]", dsId, op);
 		}
 	}
 }
