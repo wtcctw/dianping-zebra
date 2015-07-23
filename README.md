@@ -24,7 +24,7 @@
     	<version>${version}</version>
 	</dependency>
 
-目前的最新版本为`2.7.6`
+目前的最新版本为`2.7.7`
 
 ### 数据库监控功能
 如果想要在CAT上对数据库进行监控，请务必添加该组件
@@ -110,6 +110,10 @@ SQL调用依赖需要加载一个配置文件 /config/spring/common/appcontext-d
     	<property name="jdbcRef" value="tuangou2010" /> 
         <property name="forceWriteOnLogin" value="false" /> <!-- 关闭登录用户走写库，默认值是true，表明开启该功能 -->
     </bean>
+
+3.SocketTimeout支持。为了更及时的从数据库故障中恢复，线上将会对所有的jdbcurl的参数加入这个参数，默认值是60000(60秒)。这个的影响是，如果有慢SQL超过了60秒，SQL执行将会失败。所以业务可以在GroupDataSource中设置这个值来覆盖默认值。
+
+    <property name="socketTimeout" value="600000"/>
 
 ### 常见问题
 #### Q：为什么要加`init-method`，不加会怎么样？
