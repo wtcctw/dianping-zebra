@@ -1,8 +1,6 @@
 package com.dianping.zebra.admin.controller;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,14 +56,8 @@ public class MHAController extends BasicController {
 				for (String dsId : dsIds) {
 					haHandler.markdown(dsId, Operator.MHA);
 					mhaAlarmManager.alarm(new AlarmContent(dsId, "markDown by MHA"));
-					CatAlarmContent alarmcontent = new CatAlarmContent();
-					alarmcontent.setHostname(dsId);
-					alarmcontent.setTitle("MHA");
-					alarmcontent.setUser("MHA");
-					alarmcontent.setIp(ip);
-					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					alarmcontent.setAlterationDate(df.format(new Date()));
-					CatAlarmManager.sendAlarm(alarmcontent);
+					
+					CatAlarmManager.sendAlarm(new CatAlarmContent(dsId,"MHA","MAH",ip,"MarkDown by MHA"));
 				}
 			}
 

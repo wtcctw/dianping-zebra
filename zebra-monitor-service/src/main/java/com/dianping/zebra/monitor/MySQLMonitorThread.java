@@ -145,7 +145,7 @@ public class MySQLMonitorThread extends Thread {
 
 				alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
 
-				CatAlarmManager.sendAlarm(config.getId(),"ZEBRA","ZEBRA",host);
+				CatAlarmManager.sendAlarm(new CatAlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA"));
 				
 				break;
 			}
@@ -177,7 +177,7 @@ public class MySQLMonitorThread extends Thread {
 
 						alarmManager.alarm(new AlarmContent(config.getId(), -1, "markDown"));
 						
-						CatAlarmManager.sendAlarm(config.getId(),"ZEBRA","ZEBRA",host);
+						CatAlarmManager.sendAlarm(new CatAlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA"));
 						
 						isDelay = true;
 						break;
@@ -206,7 +206,7 @@ public class MySQLMonitorThread extends Thread {
 					isDelay = true;
 					alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
 					
-					CatAlarmManager.sendAlarm(config.getId(),"ZEBRA","ZEBRA",host);
+					CatAlarmManager.sendAlarm(new CatAlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA"));
 
 					break;
 				}

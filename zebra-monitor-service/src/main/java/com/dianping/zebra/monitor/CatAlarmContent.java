@@ -21,7 +21,15 @@ public class CatAlarmContent {
 	private String status;             //状态
 	
 	private String content;            //内容
-
+	
+	public CatAlarmContent(String hostname,String title,String user,String ip,String content) {
+		this.hostname = hostname;
+		this.title    = title;
+		this.user     = user;
+		this.ip       = ip;
+		this.content  = content;
+	}
+	
 	public String getOp() {
 		return op;
 	}

@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.dianping.zebra.admin.util.CatAlarmContent;
 
@@ -13,7 +15,8 @@ public class CatAlarmManager {
 		catalarmcontent.setOp("insert");
 		catalarmcontent.setType("SQL");
 		catalarmcontent.setStatus("0");
-		
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		catalarmcontent.setAlterationDate(df.format(new Date()));
 		String domin  = (catalarmcontent.getDomin().split("-"))[0]; 
 		if("".equals(domin)) {
 			domin = catalarmcontent.getHostname();
@@ -26,7 +29,7 @@ public class CatAlarmManager {
 		      + "&status=" + catalarmcontent.getStatus() + "&alterationDate=" + catalarmcontent.getAlterationDate()
 		      + "&content=" + catalarmcontent.getContent();
 	}
-
+	
 	public static void sendAlarm(CatAlarmContent catalarmcontent) {
 		BufferedReader in = null;
 		String param = makeAlarmParam(catalarmcontent);

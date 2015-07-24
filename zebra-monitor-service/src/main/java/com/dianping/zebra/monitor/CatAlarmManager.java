@@ -9,15 +9,10 @@ import java.util.Date;
 
 public class CatAlarmManager {
 
-	public static String makeAlarmParam(String hostname,String title,String user,String ip) {
-		CatAlarmContent alarmcontent = new CatAlarmContent();
+	public static String makeAlarmParam(CatAlarmContent alarmcontent) {
 		alarmcontent.setOp("insert");
 		alarmcontent.setType("SQL");
 		alarmcontent.setStatus("0");
-		alarmcontent.setHostname(hostname);
-		alarmcontent.setTitle(title);
-		alarmcontent.setUser(user);
-		alarmcontent.setIp(ip);
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		alarmcontent.setAlterationDate(df.format(new Date()));
 		String domin  = (alarmcontent.getDomin().split("-"))[0]; 
@@ -33,9 +28,9 @@ public class CatAlarmManager {
 		      + "&content=" + alarmcontent.getContent();
 	}
 
-	public static void sendAlarm(String hostname,String title,String user,String ip) {
+	public static void sendAlarm(CatAlarmContent alarmcontent) {
 		BufferedReader in = null;
-		String param = makeAlarmParam(hostname,title,user,ip);
+		String param = makeAlarmParam(alarmcontent);
 		try {
 			URL url = new URL("http://cat.qa.dianpingoa.com/cat/r/alteration?" + param);
 			URLConnection connection = url.openConnection();
