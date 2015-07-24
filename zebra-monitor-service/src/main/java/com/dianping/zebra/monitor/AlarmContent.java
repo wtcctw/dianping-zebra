@@ -1,6 +1,6 @@
 package com.dianping.zebra.monitor;
 
-public class CatAlarmContent {
+public class AlarmContent {
 	
 	private String op;                 //insert
 	
@@ -8,7 +8,7 @@ public class CatAlarmContent {
 	
 	private String title;              //标题
 	
-	private String domin;             //数据库
+	private String domain;             //数据库
 	
 	private String hostname;           //datasource
 	
@@ -22,12 +22,15 @@ public class CatAlarmContent {
 	
 	private String content;            //内容
 	
-	public CatAlarmContent(String hostname,String title,String user,String ip,String content) {
+	private int    delay;              //延迟
+	
+	public AlarmContent(String hostname,String title,String user,String ip,String content,int delay) {
 		this.hostname = hostname;
 		this.title    = title;
 		this.user     = user;
 		this.ip       = ip;
 		this.content  = content;
+		this.delay    = delay;
 	}
 	
 	public String getOp() {
@@ -54,12 +57,12 @@ public class CatAlarmContent {
 		this.title = title;
 	}
 
-	public String getDomin() {
-		return domin;
+	public String getDomain() {
+		return domain;
 	}
 
-	public void setDomin(String domain) {
-		this.domin = domain;
+	public void setDomain(String domain) {
+		this.domain = domain;
 	}
 
 	public String getHostname() {
@@ -108,6 +111,14 @@ public class CatAlarmContent {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int delay) {
+		this.delay = delay;
 	}
 	
 }

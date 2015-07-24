@@ -17,7 +17,6 @@ import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.service.HaHandler;
 import com.dianping.zebra.biz.service.HaHandler.Operator;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.monitor.AlarmManager.AlarmContent;
 
 public class MySQLMonitorThread extends Thread {
 
@@ -45,7 +44,7 @@ public class MySQLMonitorThread extends Thread {
 	private String jdbcUrl;
 	
 	private String host;
-
+	
 	public MySQLMonitorThread(DataSourceMonitorConfig monitorConfig, DataSourceConfig config, HaHandler haHandler,
 	      AlarmManager alarmManager) {
 		this.monitorConfig = monitorConfig;
@@ -143,10 +142,8 @@ public class MySQLMonitorThread extends Thread {
 				hahandler.markdown(config.getId(), Operator.ZEBRA);
 				logger.info("markDown " + config.getId());
 
-				alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
+				alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA", delay));
 
-				CatAlarmManager.sendAlarm(new CatAlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA"));
-				
 				break;
 			}
 			} finally {
@@ -175,9 +172,8 @@ public class MySQLMonitorThread extends Thread {
 						hahandler.markdown(config.getId(), Operator.ZEBRA);
 						logger.info("markDown" + config.getId());
 
-						alarmManager.alarm(new AlarmContent(config.getId(), -1, "markDown"));
+						alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA", delay));
 						
-						CatAlarmManager.sendAlarm(new CatAlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA"));
 						
 						isDelay = true;
 						break;
@@ -187,14 +183,14 @@ public class MySQLMonitorThread extends Thread {
 
 				if (delay >= monitorConfig.getDelayTime() / 3 && delay < monitorConfig.getDelayTime() / 2) {
 					if (lastAlarmTime == 0L) {
-						alarmManager.alarm(new AlarmContent(config.getId(), delay, null));
+						alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,null, delay));
 
 						lastAlarmTime = System.currentTimeMillis();
 					} else {
 						long interval = System.currentTimeMillis() - lastAlarmTime;
 
 						if (interval >= ALARM_INTERVAL) {
-						alarmManager.alarm(new AlarmContent(config.getId(), delay, null));
+						alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,null, delay));
 						}
 					}
 				}
@@ -204,10 +200,8 @@ public class MySQLMonitorThread extends Thread {
 					logger.info("markDown " + config.getId());
 
 					isDelay = true;
-					alarmManager.alarm(new AlarmContent(config.getId(), delay, "markDown"));
+					alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA", delay));
 					
-					CatAlarmManager.sendAlarm(new CatAlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA"));
-
 					break;
 				}
 

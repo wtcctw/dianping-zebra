@@ -1,6 +1,6 @@
 package com.dianping.zebra.admin.util;
 
-public class CatAlarmContent {
+public class MHAAlarmContent {
 	
 	private String op;                 //insert
 	
@@ -8,7 +8,7 @@ public class CatAlarmContent {
 	
 	private String title;              //标题
 	
-	private String domin;             //数据库
+	private String domain;             //数据库
 	
 	private String hostname;           //datasource
 	
@@ -21,8 +21,8 @@ public class CatAlarmContent {
 	private String status;             //状态
 	
 	private String content;            //内容
-
-	public CatAlarmContent(String hostname,String title,String user,String ip,String content) {
+	
+	public MHAAlarmContent(String hostname,String title,String user,String ip,String content) {
 		this.hostname = hostname;
 		this.title    = title;
 		this.user     = user;
@@ -54,12 +54,12 @@ public class CatAlarmContent {
 		this.title = title;
 	}
 
-	public String getDomin() {
-		return domin;
+	public String getDomain() {
+		return domain;
 	}
 
-	public void setDomin(String domain) {
-		this.domin = domain;
+	public void setDomain(String domain) {
+		this.domain = domain;
 	}
 
 	public String getHostname() {

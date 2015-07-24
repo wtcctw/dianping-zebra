@@ -14,14 +14,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.cat.Cat;
-import com.dianping.zebra.admin.manager.CatAlarmManager;
-import com.dianping.zebra.admin.manager.MHAAlarmManager;
-import com.dianping.zebra.admin.manager.MHAAlarmManager.AlarmContent;
 import com.dianping.zebra.biz.dto.MHAResultDto;
 import com.dianping.zebra.biz.service.HaHandler;
 import com.dianping.zebra.biz.service.HaHandler.Operator;
 import com.dianping.zebra.biz.service.LionService;
-import com.dianping.zebra.admin.util.CatAlarmContent;
+import com.dianping.zebra.admin.util.MHAAlarmContent;
+import com.dianping.zebra.admin.manager.MHAAlarmManager;
 
 /**
  * 给外部系统——MHA集群调用的接口，请勿轻易改变
@@ -55,9 +53,7 @@ public class MHAController extends BasicController {
 			if (dsIds != null) {
 				for (String dsId : dsIds) {
 					haHandler.markdown(dsId, Operator.MHA);
-					mhaAlarmManager.alarm(new AlarmContent(dsId, "markDown by MHA"));
-					
-					CatAlarmManager.sendAlarm(new CatAlarmContent(dsId,"MHA","MAH",ip,"MarkDown by MHA"));
+					mhaAlarmManager.alarm(new MHAAlarmContent(dsId,"MHA","MAH",ip,"MarkDown by MHA"));
 				}
 			}
 
