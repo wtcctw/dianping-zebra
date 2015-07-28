@@ -18,6 +18,8 @@ import com.dianping.zebra.biz.dto.MHAResultDto;
 import com.dianping.zebra.biz.service.HaHandler;
 import com.dianping.zebra.biz.service.HaHandler.Operator;
 import com.dianping.zebra.biz.service.LionService;
+import com.dianping.zebra.admin.util.MHAAlarmContent;
+import com.dianping.zebra.admin.manager.MHAAlarmManager;
 
 /**
  * 给外部系统——MHA集群调用的接口，请勿轻易改变
@@ -30,7 +32,9 @@ import com.dianping.zebra.biz.service.LionService;
 public class MHAController extends BasicController {
 
 	private final String PORJECT = "ds";
-
+	
+	private MHAAlarmManager mhaAlarmManager;
+	
 	@Autowired
 	private HaHandler haHandler;
 
@@ -49,6 +53,7 @@ public class MHAController extends BasicController {
 			if (dsIds != null) {
 				for (String dsId : dsIds) {
 					haHandler.markdown(dsId, Operator.MHA);
+					mhaAlarmManager.alarm(new MHAAlarmContent(dsId,"MHA","MAH",ip,"MarkDown by MHA"));
 				}
 			}
 
