@@ -172,7 +172,7 @@ public class MySQLMonitorThread extends Thread {
 						hahandler.markdown(config.getId(), Operator.ZEBRA);
 						logger.info("markDown" + config.getId());
 
-						alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA", delay));
+						alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA", -1));
 						
 						
 						isDelay = true;

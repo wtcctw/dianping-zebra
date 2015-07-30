@@ -52,44 +52,44 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 			int pos = evt.getPropertyName().indexOf(jdbcRef);
 
 			if (pos > 0) {
-				DataSourceConfigManager configManager = findOrCreate(jdbcRef);
-				GroupDataSourceConfig newGroupDataSourceConfig = configManager.getGroupDataSourceConfig();
-				Map<String, DataSourceConfig> newDataSourceConfigs = newGroupDataSourceConfig.getDataSourceConfigs();
+			DataSourceConfigManager configManager = findOrCreate(jdbcRef);
+			GroupDataSourceConfig newGroupDataSourceConfig = configManager.getGroupDataSourceConfig();
+			Map<String, DataSourceConfig> newDataSourceConfigs = newGroupDataSourceConfig.getDataSourceConfigs();
 
-				// 添加或者更新
-				for (Map.Entry<String, DataSourceConfig> entryConfig : newDataSourceConfigs.entrySet()) {
-					String dsId = entryConfig.getKey();
-					DataSourceConfig dsConfig = entryConfig.getValue();
+			// 添加或者更新
+			for (Map.Entry<String, DataSourceConfig> entryConfig : newDataSourceConfigs.entrySet()) {
+				String dsId = entryConfig.getKey();
+				DataSourceConfig dsConfig = entryConfig.getValue();
 
-					if (dsConfig.isCanRead()) {
-						if (dataSourceConfigs.containsKey(dsId)) {
-							DataSourceConfig oldConfig = dataSourceConfigs.get(dsId);
-							if (!dsConfig.toString().equals(oldConfig.toString())) {
-								dataSourceConfigs.put(dsId, dsConfig);
-								monitorThreadGroup.startOrRefreshMonitor(dsConfig);
-							}
-						} else {
-							dataSourceConfigs.put(dsId, dsConfig);
-							monitorThreadGroup.startOrRefreshMonitor(dsConfig);
+				if (dsConfig.isCanRead()) {
+					if (dataSourceConfigs.containsKey(dsId)) {
+						DataSourceConfig oldConfig = dataSourceConfigs.get(dsId);
+						if (!dsConfig.toString().equals(oldConfig.toString())) {
+						dataSourceConfigs.put(dsId, dsConfig);
+						monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 						}
+					} else {
+						dataSourceConfigs.put(dsId, dsConfig);
+						monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 					}
 				}
+			}
 
-				// 删除
-				for (Entry<String, DataSourceConfig> entry : groupDataSourceConfigs.get(jdbcRef).getDataSourceConfigs()
-				      .entrySet()) {
-					String dsId = entry.getKey();
-					if (entry.getValue().isCanRead()) {
-						DataSourceConfig newDataSourceConfig = newDataSourceConfigs.get(dsId);
+			// 删除
+			for (Entry<String, DataSourceConfig> entry : groupDataSourceConfigs.get(jdbcRef).getDataSourceConfigs()
+			      .entrySet()) {
+				String dsId = entry.getKey();
+				if (entry.getValue().isCanRead()) {
+					DataSourceConfig newDataSourceConfig = newDataSourceConfigs.get(dsId);
 
-						if (newDataSourceConfig == null || !newDataSourceConfig.isCanRead()) {
-							dataSourceConfigs.remove(dsId);
-							monitorThreadGroup.removeMonitor(dsId);
-						}
+					if (newDataSourceConfig == null || !newDataSourceConfig.isCanRead()) {
+						dataSourceConfigs.remove(dsId);
+						monitorThreadGroup.removeMonitor(dsId);
 					}
 				}
+			}
 
-				groupDataSourceConfigs.put(jdbcRef, newGroupDataSourceConfig);
+			groupDataSourceConfigs.put(jdbcRef, newGroupDataSourceConfig);
 			}
 		}
 	}
@@ -99,14 +99,15 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 		DataSourceConfigManager configManager = findOrCreate(jdbcRef);
 		GroupDataSourceConfig groupDataSourceConfig = configManager.getGroupDataSourceConfig();
 
-		for (Map.Entry<String, DataSourceConfig> entryConfig : groupDataSourceConfig.getDataSourceConfigs().entrySet()) {
+		for (Map.Entry<String, DataSourceConfig> entryConfig : groupDataSourceConfig.getDataSourceConfigs()
+		      .entrySet()) {
 			String dsId = entryConfig.getKey();
 			DataSourceConfig dsConfig = entryConfig.getValue();
 
 			if (dsConfig.isCanRead()) {
-				dataSourceConfigs.put(dsId, dsConfig);
+			dataSourceConfigs.put(dsId, dsConfig);
 
-				monitorThreadGroup.startOrRefreshMonitor(dsConfig);
+			monitorThreadGroup.startOrRefreshMonitor(dsConfig);
 			}
 		}
 
@@ -119,13 +120,14 @@ public class MySQLMonitorManagerImpl implements MySQLMonitorManager {
 		DataSourceConfigManager configManager = findOrCreate(jdbcRef);
 		GroupDataSourceConfig groupDataSourceConfig = configManager.getGroupDataSourceConfig();
 
-		for (Map.Entry<String, DataSourceConfig> entryConfig : groupDataSourceConfig.getDataSourceConfigs().entrySet()) {
+		for (Map.Entry<String, DataSourceConfig> entryConfig : groupDataSourceConfig.getDataSourceConfigs()
+		      .entrySet()) {
 			String dsId = entryConfig.getKey();
 			DataSourceConfig dsConfig = entryConfig.getValue();
 
 			if (dsConfig.isCanRead()) {
-				dataSourceConfigs.remove(dsId);
-				monitorThreadGroup.removeMonitor(dsId);
+			dataSourceConfigs.remove(dsId);
+			monitorThreadGroup.removeMonitor(dsId);
 			}
 		}
 

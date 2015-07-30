@@ -1,5 +1,6 @@
 package com.dianping.zebra.admin.controller;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +61,35 @@ public class MonitorController extends BasicController {
 		return null;
 	}
 
+	public boolean isRightJdbcRef(String jdbcRef) {
+		if (StringUtils.isBlank(jdbcRef)) {
+			return false;
+		}
+		if("DPReview".equals(jdbcRef)) {
+			return true;
+		}
+		
+		boolean ret = false;
+		
+		try {
+
+			HashMap<String, String> dsKV = lionService.getConfigByProject(lionService.getEnv(), "groupds");
+
+			String searchKey = "groupds." + jdbcRef.toLowerCase() + ".mapping";
+
+			ret = dsKV.containsKey(searchKey);
+			
+		} catch (IOException e) {
+		}
+		
+		return ret;
+	}
+	
 	private void addJdbcRefToLion(String ip, String jdbcRef) {
+		if (!isRightJdbcRef(jdbcRef)) {
+			return;
+		}
+		
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
 
 		if (ipWithJdbcRef == null) {

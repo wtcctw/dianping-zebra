@@ -22,12 +22,16 @@ public class MHAAlarmManager {
 	private static final String LION_KEY_SMS = "zebra.monitorservice.alarm.sms";
 
 	private static final String LION_KEY_WEIXIN = "zebra.monitorservice.alarm.weixin";
+	
+	private static final String LION_ALARM_HOSTNAME = "zebra.monitorservice.alarm.catalarmhost";
 
 	private static final String DELIM = ",";
 
 	private Set<String> smsTargets = new HashSet<String>();
 
 	private Set<String> weixinTargets = new HashSet<String>();
+	
+	private String catHost = null;
 
 	@Autowired
 	private AlarmService alarmService;
@@ -56,6 +60,8 @@ public class MHAAlarmManager {
 			weixinTargets.add(split);
 			}
 		}
+		
+		catHost = ConfigCache.getInstance().getProperty(LION_ALARM_HOSTNAME);
 	}
 	
 	public String getTitle() {
@@ -92,7 +98,7 @@ public class MHAAlarmManager {
 
 	public void sendCat(MHAAlarmContent alarmContent) {
 		String param = makeAlarmParam(alarmContent);
-		String url = "http://cat.qa.dianpingoa.com/cat/r/alteration?" + param;
+		String url = catHost + param;
 
 		httpService.sendGet(url);
 	}

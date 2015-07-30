@@ -24,11 +24,15 @@ public class AlarmManager {
 
 	private static final String LION_KEY_WEIXIN = "zebra.monitorservice.alarm.weixin";
 
+	private static final String LION_ALARM_HOSTNAME = "zebra.monitorservice.alarm.catalarmhost";
+
 	private static final String DELIM = ",";
 
 	private Set<String> smsTargets = new HashSet<String>();
 
 	private Set<String> weixinTargets = new HashSet<String>();
+
+	private String catHost = null;
 
 	@Autowired
 	private AlarmService alarmService;
@@ -57,6 +61,8 @@ public class AlarmManager {
 			weixinTargets.add(split);
 			}
 		}
+
+		catHost = ConfigCache.getInstance().getProperty(LION_ALARM_HOSTNAME);
 	}
 
 	public String getTitle() {
@@ -66,7 +72,7 @@ public class AlarmManager {
 	public String makeSmsContent(AlarmContent alarmContent) {
 		if (alarmContent.getContent() != null) {
 			if (alarmContent.getDelay() == -1) {
-			return String.format("[%s] 读库:%s  复制线程没有运行,自动被s%", getTitle(), alarmContent.getHostname(),
+			return String.format("[%s] 读库:%s  复制线程没有运行,自动被%s", getTitle(), alarmContent.getHostname(),
 			      alarmContent.getContent());
 			} else if (alarmContent.getDelay() == 0) {
 			return String.format("[%s] 读库:%s 数据库连接超时,自动被%s", getTitle(), alarmContent.getHostname(),
@@ -84,7 +90,7 @@ public class AlarmManager {
 	public String makeWeiXinContent(AlarmContent alarmContent) {
 		if (alarmContent.getContent() != null) {
 			if (alarmContent.getDelay() == -1) {
-			return String.format("[读库:%s  复制线程没有运行,自动被s%]", alarmContent.getHostname(), alarmContent.getContent());
+			return String.format("[读库:%s  复制线程没有运行,自动被%s]", alarmContent.getHostname(), alarmContent.getContent());
 			} else if (alarmContent.getDelay() == 0) {
 			return String.format("[读库:%s 数据库连接超时,自动被%s]", alarmContent.getHostname(), alarmContent.getContent());
 			} else {
@@ -122,7 +128,7 @@ public class AlarmManager {
 		} catch (UnsupportedEncodingException e) {
 		}
 
-		String url = "http://cat.qa.dianpingoa.com/cat/r/alteration?" + param;
+		String url = catHost + param;
 
 		httpService.sendGet(url);
 	}
@@ -136,7 +142,9 @@ public class AlarmManager {
 			alarmService.sendWeixin(email, alarmContent.getTitle(), makeWeiXinContent(alarmContent));
 		}
 
-		sendCat(alarmContent);
+		if (alarmContent.getContent() != null) {
+			sendCat(alarmContent);
+		}
 	}
 
 }

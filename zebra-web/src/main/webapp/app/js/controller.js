@@ -694,10 +694,11 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             }
             if (config.role.isWrite) {
                 writeList += writeList ? ',' + config.id : config.id;
+                config.role.isRead = false;
             }
             if (config.role.isRead) {
-                if (!config.role.weight) {
-                    config.role.weight = 1;
+            	if(config.role.weight < 0) {
+               		config.role.weight = 0;
                 }
                 var temp = config.id + ':' + config.role.weight;
                 readList += readList ? ',' + temp : temp;
@@ -705,7 +706,6 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
                 if (config.id.indexOf("write") >= 0) {
                     readListHasWrite = true;
                 }
-
                 readListLength++;
             }
         });
@@ -720,6 +720,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         if (readListLength <= 1) {
             $scope.data.alert = $scope.data.alert + "配置的读role少于2个，将不具有读HA。"
         }
+
     }
 
     $scope.close = function () {
@@ -778,7 +779,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             role: {
                 isWrite: false,
                 isRead: false,
-                weight: 0
+                weight: 1
             },
             properties: propertiesTmp
         });
