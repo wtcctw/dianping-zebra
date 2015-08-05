@@ -1,7 +1,6 @@
 package com.dianping.zebra.syncservice.util;
 
 import com.dianping.puma.core.event.RowChangedEvent;
-import scala.NotImplementedError;
 
 import java.util.Collection;
 import java.util.Map;
@@ -21,12 +20,12 @@ public class ColumnInfoWrap implements Map<String, Object> {
 
 	@Override
 	public int size() {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
 	public boolean isEmpty() {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
@@ -36,7 +35,7 @@ public class ColumnInfoWrap implements Map<String, Object> {
 
 	@Override
 	public boolean containsValue(Object value) {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
@@ -57,36 +56,36 @@ public class ColumnInfoWrap implements Map<String, Object> {
 
 	@Override
 	public Object put(String key, Object value) {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
 	public Object remove(Object key) {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
 	public void putAll(Map<? extends String, ?> m) {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
 	public void clear() {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
 	public Set<String> keySet() {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
 	public Collection<Object> values() {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 
 	@Override
 	public Set<Entry<String, Object>> entrySet() {
-		throw new NotImplementedError();
+		throw new IllegalAccessError();
 	}
 }
