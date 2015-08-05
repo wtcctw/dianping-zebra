@@ -325,9 +325,11 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
 		$http.get('/a/monitor/getTickedList?ip=' + $scope.monitorServer).success(function (data, status, headers, config) {
 			if(data != null) {
 				var ticked = [];
+				
 				angular.forEach(data, function(value) {
 					ticked.push(value);
 				});
+				
 				$scope.tickedList = ticked;
 			}
 		});
@@ -335,6 +337,7 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
 	
 	$scope.myFilter = function(value) {
 		$scope.flag = false;
+		
 		angular.forEach($scope.tickedList, function(data){
 			if(value == data) {
 				$scope.flag = true;

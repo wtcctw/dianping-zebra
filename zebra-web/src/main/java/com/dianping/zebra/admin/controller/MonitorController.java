@@ -65,24 +65,29 @@ public class MonitorController extends BasicController {
 	@ResponseBody
 	public Object submitJdbcRef(String ip, String jdbcRefs) throws Exception {
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
+		
+		if (ipWithJdbcRef == null) {
+			ipWithJdbcRef = new HashMap<String, Set<String>>();
+		}
+		
 		if (StringUtils.isNotBlank(jdbcRefs)) {
-			String[] jdbcRefSplits = jdbcRefs.split(",");
+			Set<String> newJdbcRefs = new HashSet<String>();
 
-			if (ipWithJdbcRef == null) {
-				ipWithJdbcRef = new HashMap<String, Set<String>>();
-			} else {
-				ipWithJdbcRef.get(ip).clear();
-			}
+			if(!jdbcRefs.equalsIgnoreCase("null")){
+				String[] jdbcRefSplits = jdbcRefs.trim().split(",");
 
-			if(jdbcRefs.equals("null")) {
-				submitJdbcRefToLion(ip, "clean.all", ipWithJdbcRef);
-			} else {
-				for (String jdbcRef : jdbcRefSplits) {
-					submitJdbcRefToLion(ip, jdbcRef.trim(), ipWithJdbcRef);
+				for(String jdbcRef : jdbcRefSplits){
+					newJdbcRefs.add(jdbcRef);
 				}
 			}
-		}
+			
+			ipWithJdbcRef.put(ip, newJdbcRefs);
 
+			String json = gson.toJson(ipWithJdbcRef);
+
+			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
+		}
+		
 		return null;
 	}
 
@@ -94,23 +99,6 @@ public class MonitorController extends BasicController {
 		Set<String> jdbcRefSet = getJdbcRefSet();
 
 		return jdbcRefSet.contains(jdbcRef);
-	}
-
-	private void submitJdbcRefToLion(String ip, String jdbcRef, Map<String, Set<String>> ipWithJdbcRef) {
-		if (!jdbcRef.equals("clean.all")) {
-			if (!isRightJdbcRef(jdbcRef)) {
-			return;
-			}
-
-			Set<String> jdbcRefs = ipWithJdbcRef.get(ip);
-
-			if (!jdbcRefs.contains(jdbcRef)) {
-			jdbcRefs.add(jdbcRef);
-			}
-		}
-		String json = gson.toJson(ipWithJdbcRef);
-
-		lionService.setConfig(lionService.getEnv(), LION_KEY, json);
 	}
 
 	private Map<String, Set<String>> getIpWithJdbcRef() {
