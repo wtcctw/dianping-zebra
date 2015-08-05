@@ -232,6 +232,8 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 			}
 
 			dsConfig.setDriverClass(driverClass);
+			dsConfig.setTag(
+				getProperty(getSingleDataSourceKey(Constants.ELEMENT_TAG, dsId), dsConfig.getTag()));
 			dsConfig.setPassword(getProperty(getSingleDataSourceKey(Constants.ELEMENT_PASSWORD, dsId),
 			      dsConfig.getPassword()));
 			dsConfig.setWarmupTime(getProperty(getSingleDataSourceKey(Constants.ELEMENT_WARMUP_TIME, dsId),

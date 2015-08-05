@@ -15,6 +15,7 @@
         <attribute name="canWrite" value-type="boolean" primitive="true" default-value="false"/>
         <attribute name="active" value-type="boolean" primitive="true"/>
         <attribute name="type" value-type="String" default-value="c3p0"/>
+        <attribute name="tag" value-type="String" default-value=""/>
         <element name="test-read-only-sql" value-type="String" primitive="true" default-value="select @@read_only"/>
         <element name="time-window" value-type="long" primitive="true" default-value="0"/>
         <element name="punish-limit" value-type="long" primitive="true" default-value="0"/>

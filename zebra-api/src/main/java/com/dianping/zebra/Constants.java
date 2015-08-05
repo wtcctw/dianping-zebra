@@ -62,6 +62,8 @@ public final class Constants {
 	public static final String ELEMENT_USER = "username";
 
 	public static final String ELEMENT_PROPERTIES = "properties";
+
+	public static final String ELEMENT_TAG = "tag";
 	
 	public static final String ELEMENT_POOL_TYPE = AppPropertiesUtils.getAppName() + ".zebra.pool.type";
 
