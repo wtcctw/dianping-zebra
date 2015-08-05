@@ -47,14 +47,39 @@ public class MonitorController extends BasicController {
 	private Type type1 = new TypeToken<Map<String, InstanceStatusDto>>() {
 	}.getType();
 
-	@RequestMapping(value = "/add", method = RequestMethod.GET)
+	@RequestMapping(value = "/getTickedList", method = RequestMethod.GET)
 	@ResponseBody
-	public Object addJdbcRef(String ip, String jdbcRefs) throws Exception {
-		if(StringUtils.isNotBlank(jdbcRefs)){
+	public Set<String> getTickedList(String ip) throws Exception {
+		if(StringUtils.isBlank(ip)) {
+			return null;
+		}
+		
+		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
+
+		Set<String> jdbcRefSet = ipWithJdbcRef.get(ip);
+		
+		return jdbcRefSet;
+	}
+	
+	@RequestMapping(value = "/submit", method = RequestMethod.GET)
+	@ResponseBody
+	public Object submitJdbcRef(String ip, String jdbcRefs) throws Exception {
+		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
+		if (StringUtils.isNotBlank(jdbcRefs)) {
 			String[] jdbcRefSplits = jdbcRefs.split(",");
-			
-			for(String jdbcRef : jdbcRefSplits){
-				addJdbcRefToLion(ip, jdbcRef.trim());
+
+			if (ipWithJdbcRef == null) {
+				ipWithJdbcRef = new HashMap<String, Set<String>>();
+			} else {
+				ipWithJdbcRef.get(ip).clear();
+			}
+
+			if(jdbcRefs.equals("null")) {
+				submitJdbcRefToLion(ip, "clean.all", ipWithJdbcRef);
+			} else {
+				for (String jdbcRef : jdbcRefSplits) {
+					submitJdbcRefToLion(ip, jdbcRef.trim(), ipWithJdbcRef);
+				}
 			}
 		}
 
@@ -65,78 +90,27 @@ public class MonitorController extends BasicController {
 		if (StringUtils.isBlank(jdbcRef)) {
 			return false;
 		}
-		if("DPReview".equals(jdbcRef)) {
-			return true;
-		}
-		
-		boolean ret = false;
-		
-		try {
 
-			HashMap<String, String> dsKV = lionService.getConfigByProject(lionService.getEnv(), "groupds");
+		Set<String> jdbcRefSet = getJdbcRefSet();
 
-			String searchKey = "groupds." + jdbcRef.toLowerCase() + ".mapping";
-
-			ret = dsKV.containsKey(searchKey);
-			
-		} catch (IOException e) {
-		}
-		
-		return ret;
+		return jdbcRefSet.contains(jdbcRef);
 	}
-	
-	private void addJdbcRefToLion(String ip, String jdbcRef) {
-		if (!isRightJdbcRef(jdbcRef)) {
+
+	private void submitJdbcRefToLion(String ip, String jdbcRef, Map<String, Set<String>> ipWithJdbcRef) {
+		if (!jdbcRef.equals("clean.all")) {
+			if (!isRightJdbcRef(jdbcRef)) {
 			return;
-		}
-		
-		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-
-		if (ipWithJdbcRef == null) {
-			ipWithJdbcRef = new HashMap<String, Set<String>>();
-		}
-
-		// 如果已经存在，表明已经被监控，不做任何处理
-		for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
-			for (String jdbcRef2 : entry.getValue()) {
-				if (jdbcRef2.equalsIgnoreCase(jdbcRef)) {
-					return;
-				}
 			}
-		}
 
-		Set<String> jdbcRefs = ipWithJdbcRef.get(ip);
+			Set<String> jdbcRefs = ipWithJdbcRef.get(ip);
 
-		if (jdbcRefs == null) {
-			jdbcRefs = new HashSet<String>();
-			ipWithJdbcRef.put(ip, jdbcRefs);
-		}
-
-		if (!jdbcRefs.contains(jdbcRef)) {
+			if (!jdbcRefs.contains(jdbcRef)) {
 			jdbcRefs.add(jdbcRef);
-
-			String json = gson.toJson(ipWithJdbcRef);
-
-			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
-		}
-	}
-
-	private void deleteJdbcRefToLion(String jdbcRef) {
-		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-
-		if (ipWithJdbcRef != null) {
-			for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
-				for (String jdbcRef2 : entry.getValue()) {
-					if (jdbcRef2.equalsIgnoreCase(jdbcRef)) {
-						entry.getValue().remove(jdbcRef);
-
-						String json = gson.toJson(ipWithJdbcRef);
-						lionService.setConfig(lionService.getEnv(), LION_KEY, json);
-						return;
-					}
-				}
 			}
 		}
+		String json = gson.toJson(ipWithJdbcRef);
+
+		lionService.setConfig(lionService.getEnv(), LION_KEY, json);
 	}
 
 	private Map<String, Set<String>> getIpWithJdbcRef() {
@@ -158,9 +132,9 @@ public class MonitorController extends BasicController {
 			String jsonBody = restClient.exchange(url, HttpMethod.GET, null, String.class).getBody();
 
 			if (jsonBody != null) {
-				Map<String, InstanceStatusDto> fromJson = gson.fromJson(jsonBody, type1);
+			Map<String, InstanceStatusDto> fromJson = gson.fromJson(jsonBody, type1);
 
-				result.putAll(fromJson);
+			result.putAll(fromJson);
 			}
 		} catch (Exception e) {
 			Cat.logError(e);
@@ -169,26 +143,54 @@ public class MonitorController extends BasicController {
 		return result;
 	}
 
+	private Set<String> getJdbcRefSet() {
+		Set<String> jdbcRefSet = new HashSet<String>();
+		try {
+			HashMap<String, String> dsKV = lionService.getConfigByProject(lionService.getEnv(), "groupds");
+
+			synchronized (jdbcRefSet) {
+			for (Entry<String, String> entry : dsKV.entrySet()) {
+				String key = entry.getKey();
+				String value = entry.getValue();
+
+				if (key != null && value != null) {
+					int begin = "groupds.".length();
+					int end = key.indexOf(".mapping");
+					if (end == -1 || begin == -1) {
+						continue;
+					}
+
+					jdbcRefSet.add(key.substring(begin, end).toLowerCase());
+				}
+			}
+			}
+		} catch (IOException e) {
+		}
+		return jdbcRefSet;
+	}
+
+	@RequestMapping(value = "/getJdbcRefList", method = RequestMethod.GET)
+	@ResponseBody
+	public Set<String> getJdbcRefList() {
+		return getJdbcRefSet();
+	}
+
 	@RequestMapping(value = "/servers", method = RequestMethod.GET)
 	@ResponseBody
 	public Object getServers() throws Exception {
 		return getIpWithJdbcRef().keySet();
 	}
 
-	@RequestMapping(value = "/remove", method = RequestMethod.GET)
-	@ResponseBody
-	public Object removeJdbcRef(String jdbcRefs) throws Exception {
-		if(StringUtils.isNotBlank(jdbcRefs)){
-			String[] jdbcRefSplits = jdbcRefs.split(",");
-			
-			for(String jdbcRef : jdbcRefSplits){
-				deleteJdbcRefToLion(jdbcRef.trim());
-			}
-		}
-
-		return null;
-	}
-
+	/*
+	 * @RequestMapping(value = "/remove", method = RequestMethod.GET)
+	 * 
+	 * @ResponseBody public Object removeJdbcRef(String jdbcRefs) throws Exception { if (StringUtils.isNotBlank(jdbcRefs)) {
+	 * String[] jdbcRefSplits = jdbcRefs.split(",");
+	 * 
+	 * for (String jdbcRef : jdbcRefSplits) { deleteJdbcRefToLion(jdbcRef.trim()); } }
+	 * 
+	 * return null; }
+	 */
 	@RequestMapping(value = "/history", method = RequestMethod.GET)
 	@ResponseBody
 	public Object showHistory() throws Exception {

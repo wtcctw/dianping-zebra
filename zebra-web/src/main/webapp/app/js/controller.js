@@ -317,46 +317,86 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
         });
     }
 	
+	$scope.jdbcRefsList = [];
+
+	$scope.tickedList = [];
+	
+	$scope.getTickedList = function() {
+		$http.get('/a/monitor/getTickedList?ip=' + $scope.monitorServer).success(function (data, status, headers, config) {
+			if(data != null) {
+				var ticked = [];
+				angular.forEach(data, function(value) {
+					ticked.push(value);
+				});
+				$scope.tickedList = ticked;
+			}
+		});
+	}
+	
+	$scope.myFilter = function(value) {
+		$scope.flag = false;
+		angular.forEach($scope.tickedList, function(data){
+			if(value == data) {
+				$scope.flag = true;
+			}
+		});
+	}
+	
+	$scope.switchSource = function() {
+		$scope.getTickedList();
+		$http.get('/a/monitor/getJdbcRefList').success(function (data, status, headers, config) {
+			var list = [];
+			if(data != null) {
+				angular.forEach(data, function(value){
+					$scope.myFilter(value);
+					var jsonValue = {
+							"jdbcRef": value,
+							"ticked" : $scope.flag
+					};
+					
+					list.push(jsonValue);
+				});
+			}
+			
+			$scope.jdbcRefsList = list;
+		});
+	}
+	
+	$scope.loadMultiSelects = function(){
+        $scope.jdbcRefs = null;
+		angular.forEach($scope.jdbcRefChosed, function(data) {
+			if(data.ticked) {
+				if(!$scope.jdbcRefs) {
+					$scope.jdbcRefs = data.jdbcRef;
+				} else {
+					$scope.jdbcRefs += (',' + data.jdbcRef);
+				}
+			}
+		});
+	}
+	
 	$scope.loadMonitorDs = function() {
 		if($scope.monitorServer){
 			$http.get('/a/monitor/getStatus?ip=' + $scope.monitorServer).success(function (data, status, headers, config) {
 				$scope.statusList = data;
 			});
+			 $scope.switchSource();
 		}
 	}
 
-	 $scope.addJdbcRef = function () {
+	$scope.submitJdbcRef = function() {
 		if(!$scope.monitorServer){
 			alert("请选择监控服务器");
 			return;
 		}
 		
-		if(!$scope.jdbcRefs){
-			alert("请填写jdbcRef");
-			return;
-		}
+		$scope.loadMultiSelects();
 		
-        $http.get('/a/monitor/add?jdbcRefs=' + $scope.jdbcRefs + "&ip=" + $scope.monitorServer).success(function (data, status, headers, config) {
+        $http.get('/a/monitor/submit?jdbcRefs=' + $scope.jdbcRefs + "&ip=" + $scope.monitorServer).success(function (data, status, headers, config) {
             $scope.loadMonitorDs();
         });
-    }
-
-    $scope.removeJdbcRef = function () {
-    	if(!$scope.monitorServer){
-			alert("请选择监控服务器");
-			return;
-		}
-		
-		if(!$scope.jdbcRefs){
-			alert("请填写jdbcRef");
-			return;
-		}
-		
-        $http.get('/a/monitor/remove?jdbcRefs=' + $scope.jdbcRefs).success(function (data, status, headers, config) {
-            $scope.loadMonitorDs();
-        });
-    }
-    
+	}
+   
 	$scope.$watch('monitorServer', $scope.loadMonitorDs);
 	
 	$scope.load();

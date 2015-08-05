@@ -18,20 +18,18 @@
 			<div class="form-group">
 				<label class="col-sm-3 control-label">JdbcRef</label>
 				<div class="col-sm-9">
-					<input required class="form-control input-sm" ng-model="jdbcRefs"
-						type="text" placeholder="支持添加单个或多个jdbcRef,多个以逗号分隔">
+					<div isteven-multi-select input-model="jdbcRefsList"
+						output-model="jdbcRefChosed" item-label="jdbcRef"
+						button-label="jdbcRef" tick-property="ticked" max-height="200px">
+					</div>
 				</div>
 			</div>
+
 			<div class="clearfix form-actions">
-				<div class="col-md-offset-3 col-md-9">
+				<div class="col-md-offset-4 col-md-9">
 					<button ng-disabled="isDisabled" class="btn btn-info" type="button"
-						ng-click="addJdbcRef()">
-						<i class="ace-icon fa fa-check bigger-110"></i>添加
-					</button>
-					&nbsp;&nbsp;&nbsp;
-					<button ng-disabled="isDisabled" class="btn btn-info" type="button"
-						ng-click="removeJdbcRef()">
-						<i class="ace-icon fa fa-check bigger-110"></i> 删除
+						ng-click="submitJdbcRef()">
+						<i class="ace-icon fa fa-check bigger-110"></i>提交
 					</button>
 				</div>
 			</div>

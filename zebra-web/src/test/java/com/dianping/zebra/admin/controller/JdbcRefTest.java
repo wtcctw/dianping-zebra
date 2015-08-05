@@ -16,6 +16,6 @@ public class JdbcRefTest {
 
 	@Test
 	public void TestMC() {
-		testMC.isRightJdbcRef("DPReview");
+		System.out.println(testMC.getJdbcRefList());
 	}
 }
