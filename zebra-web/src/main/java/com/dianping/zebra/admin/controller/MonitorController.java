@@ -79,8 +79,9 @@ public class MonitorController extends BasicController {
 			String[] jdbcRefSplits = jdbcRefs.trim().split(",");
 
 			//在其他IP中已经监控的jdbcRef不会再一次被监控
-			boolean isMonitored = false;
 			for (String jdbcRef : jdbcRefSplits) {
+				boolean isMonitored = false;
+
 				for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
 					Set<String> monitoredJdbcRef = entry.getValue();
 
