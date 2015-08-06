@@ -24,6 +24,8 @@ import com.dianping.zebra.util.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import groovy.util.MapEntry;
+
 @Controller
 @RequestMapping(value = "/monitor")
 public class MonitorController extends BasicController {
@@ -50,44 +52,51 @@ public class MonitorController extends BasicController {
 	@RequestMapping(value = "/getTickedList", method = RequestMethod.GET)
 	@ResponseBody
 	public Set<String> getTickedList(String ip) throws Exception {
-		if(StringUtils.isBlank(ip)) {
+		if (StringUtils.isBlank(ip)) {
 			return null;
 		}
-		
+
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
 
 		Set<String> jdbcRefSet = ipWithJdbcRef.get(ip);
-		
+
 		return jdbcRefSet;
 	}
-	
+
 	@RequestMapping(value = "/submit", method = RequestMethod.GET)
 	@ResponseBody
 	public Object submitJdbcRef(String ip, String jdbcRefs) throws Exception {
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-		
+
 		if (ipWithJdbcRef == null) {
 			ipWithJdbcRef = new HashMap<String, Set<String>>();
 		}
-		
+
 		if (StringUtils.isNotBlank(jdbcRefs)) {
 			Set<String> newJdbcRefs = new HashSet<String>();
 
-			if(!jdbcRefs.equalsIgnoreCase("null")){
-				String[] jdbcRefSplits = jdbcRefs.trim().split(",");
+			if (!jdbcRefs.equalsIgnoreCase("null")) {
+			String[] jdbcRefSplits = jdbcRefs.trim().split(",");
 
-				for(String jdbcRef : jdbcRefSplits){
-					newJdbcRefs.add(jdbcRef);
+			//在其他IP中已经监控的jdbcRef不会再一次被监控
+			for (String jdbcRef : jdbcRefSplits) {
+				for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+					Set<String> monitoredJdbcRef = entry.getValue();
+
+					if (!monitoredJdbcRef.contains(jdbcRef) && !newJdbcRefs.contains(jdbcRef)) {
+						newJdbcRefs.add(jdbcRef);
+					}
 				}
 			}
-			
+			}
+
 			ipWithJdbcRef.put(ip, newJdbcRefs);
 
 			String json = gson.toJson(ipWithJdbcRef);
 
 			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
 		}
-		
+
 		return null;
 	}
 
