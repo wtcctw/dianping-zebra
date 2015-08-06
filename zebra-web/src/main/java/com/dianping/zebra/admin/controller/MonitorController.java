@@ -85,7 +85,7 @@ public class MonitorController extends BasicController {
 				for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
 					Set<String> monitoredJdbcRef = entry.getValue();
 
-					if (monitoredJdbcRef.contains(jdbcRef)) {
+					if (!entry.getKey().equals(ip) && monitoredJdbcRef.contains(jdbcRef)) {
 						isMonitored = true;
 						break;
 					}
