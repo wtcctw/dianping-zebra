@@ -16,6 +16,11 @@ public class JdbcRefTest {
 
 	@Test
 	public void TestMC() {
-		System.out.println(testMC.getJdbcRefList());
-	}
+		try {
+			testMC.submitJdbcRef("192.168.217.112","saleplatform");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		}
 }
