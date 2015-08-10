@@ -1,9 +1,10 @@
 package com.dianping.zebra.syncservice.job.executor;
 
 import com.dianping.cat.Cat;
-import com.dianping.puma.api.EventListener;
 import com.dianping.puma.api.PumaClient;
-import com.dianping.puma.core.event.ChangedEvent;
+import com.dianping.puma.api.PumaClientConfig;
+import com.dianping.puma.api.PumaClientException;
+import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
@@ -32,6 +33,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -60,13 +62,13 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	protected volatile Map<String, JdbcTemplate> templateMap;
 
-	protected volatile BlockingQueue<RowChangedEvent>[] eventQueues;
+	protected volatile BlockingQueue[] eventQueues;
 
 	protected volatile List<RowEventProcessor> rowEventProcessors;
 
 	protected volatile List<Thread> rowEventProcesserThreads;
 
-	protected volatile Thread binlogReporter;
+	protected volatile Thread clientThread;
 
 	public ShardSyncTaskExecutor(PumaClientSyncTaskEntity task) {
 		this.task = task;
@@ -79,25 +81,23 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		initPumaClient();
 		initEventQueues();
 		initProcessors();
-		initBinlogReporter();
 	}
 
 	public synchronized void start() {
-		if (client == null || rowEventProcesserThreads == null || binlogReporter == null) {
+		if (clientThread == null || rowEventProcesserThreads == null) {
 			throw new IllegalStateException("You should init before start!");
 		}
 
-		client.start();
+		clientThread.start();
+
 		for (Thread thread : rowEventProcesserThreads) {
 			thread.start();
 		}
-
-		binlogReporter.start();
 	}
 
 	public synchronized void stop() {
-		if (client != null) {
-			client.stop();
+		if (clientThread != null) {
+			clientThread.interrupt();
 		}
 
 		if (dataSources != null) {
@@ -115,16 +115,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				thread.interrupt();
 			}
 		}
-
-		if (binlogReporter != null) {
-			binlogReporter.interrupt();
-		}
-	}
-
-	protected void initBinlogReporter() {
-		this.binlogReporter = new Thread(new BinlogReporter());
-		this.binlogReporter.setName("BinlogReporter");
-		this.binlogReporter.setDaemon(true);
 	}
 
 	protected void initProcessors() {
@@ -192,60 +182,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initPumaClient() {
-		this.client = new PumaClient();
-		this.client.setName(task.getPumaClientName());
-		this.client.setAsync(true);
-		this.client.setDatabase(task.getPumaDatabase());
-		this.client.setTables(Lists.newArrayList(task.getPumaTables().split(",")));
-		this.client.register(new PumaEventListener());
-	}
-
-	class BinlogReporter implements Runnable {
-
-		@Override
-		public void run() {
-			while (true) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					break;
-				}
-
-				if (rowEventProcessors == null) {
-					continue;
-				}
-
-				Iterable<BinlogInfo> binlogInfos = getBinlogInfos();
-				BinlogInfo oldestBinlog = getOldestBinlog(binlogInfos);
-				if (oldestBinlog != null) {
-					client.asyncSavePosition(oldestBinlog);
-				}
-			}
-		}
-
-		protected BinlogInfo getOldestBinlog(Iterable<BinlogInfo> binlogInfos) {
-			BinlogInfo oldestBinlog = null;
-			for (BinlogInfo binlog : binlogInfos) {
-				if (oldestBinlog == null || binlog.compareTo(oldestBinlog) < 0) {
-					oldestBinlog = binlog;
-				}
-			}
-			return oldestBinlog;
-		}
-
-		protected Iterable<BinlogInfo> getBinlogInfos() {
-			return Iterables.transform(Iterables.filter(rowEventProcessors, new Predicate<RowEventProcessor>() {
-				@Override
-				public boolean apply(RowEventProcessor input) {
-					return input.getBinlogInfo() != null;
-				}
-			}), new Function<RowEventProcessor, BinlogInfo>() {
-				@Override
-				public BinlogInfo apply(RowEventProcessor input) {
-					return input.getBinlogInfo();
-				}
-			});
-		}
+		this.client = new PumaClientConfig().setClientName(task.getPumaClientName()).setDatabase(task.getPumaDatabase())
+			.setTables(Lists.newArrayList(task.getPumaTables().split(","))).buildClusterPumaClient();
+		this.clientThread = new Thread(new PumaClientRunner());
 	}
 
 	class RowEventProcessor implements Runnable {
@@ -341,9 +280,62 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 	}
 
-	class PumaEventListener implements EventListener {
+	protected BinlogInfo getOldestBinlog(Iterable<BinlogInfo> binlogInfos) {
+		BinlogInfo oldestBinlog = null;
+		for (BinlogInfo binlog : binlogInfos) {
+			if (oldestBinlog == null || binlog.getTimestamp() < oldestBinlog.getTimestamp()) {
+				oldestBinlog = binlog;
+			}
+		}
+		return oldestBinlog;
+	}
+
+	protected Iterable<BinlogInfo> getBinlogInfos() {
+		return Iterables.transform(Iterables.filter(rowEventProcessors, new Predicate<RowEventProcessor>() {
+			@Override
+			public boolean apply(RowEventProcessor input) {
+				return input.getBinlogInfo() != null;
+			}
+		}), new Function<RowEventProcessor, BinlogInfo>() {
+			@Override
+			public BinlogInfo apply(RowEventProcessor input) {
+				return input.getBinlogInfo();
+			}
+		});
+	}
+
+	class PumaClientRunner implements Runnable {
+
 		@Override
-		public void onEvent(ChangedEvent event) {
+		public void run() {
+			while (true) {
+				try {
+					BinlogMessage data = client.get(1000, 1, TimeUnit.SECONDS);
+					for (com.dianping.puma.core.event.Event event : data.getBinlogEvents()) {
+						onEvent(event);
+					}
+
+					if (rowEventProcessors == null) {
+						continue;
+					}
+
+					Iterable<BinlogInfo> binlogInfos = getBinlogInfos();
+					BinlogInfo oldestBinlog = getOldestBinlog(binlogInfos);
+					if (oldestBinlog != null) {
+						client.ack(oldestBinlog);
+					}
+				} catch (PumaClientException e) {
+					Cat.logError(e.getMessage(), e);
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e1) {
+						break;
+					}
+				}
+			}
+		}
+
+		public void onEvent(com.dianping.puma.core.event.Event event) {
 			if (!(event instanceof RowChangedEvent)) {
 				return;
 			}
