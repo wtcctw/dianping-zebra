@@ -6,6 +6,11 @@ public class MonitorDto {
 
 	private String errorMessage;
 
+	public MonitorDto(int errorCode, String errorMessage) {
+		this.errorCode = errorCode;
+		this.errorMessage = errorMessage;
+	}
+	
 	public int getErrorCode() {
 		return errorCode;
 	}

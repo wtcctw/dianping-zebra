@@ -396,6 +396,9 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
 		$scope.loadMultiSelects();
 		
         $http.get('/a/monitor/submit?jdbcRefs=' + $scope.jdbcRefs + "&ip=" + $scope.monitorServer).success(function (data, status, headers, config) {
+        	if(data.errorCode == 1) {
+        		alert(data.errorMessage);
+        	}
         	$scope.loadMonitorDs();
         });
 	}

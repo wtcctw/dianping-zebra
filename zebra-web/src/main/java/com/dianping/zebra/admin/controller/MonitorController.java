@@ -85,11 +85,11 @@ public class MonitorController extends BasicController {
 			Set<String> set = entry.getValue();
 
 			if (set == null) {
-			size = 0;
-			bestIp = entry.getKey();
+				size = 0;
+				bestIp = entry.getKey();
 			} else if (set.size() < size) {
-			size = set.size();
-			bestIp = entry.getKey();
+				size = set.size();
+				bestIp = entry.getKey();
 			}
 		}
 
@@ -100,45 +100,45 @@ public class MonitorController extends BasicController {
 	@ResponseBody
 	public Object addJdbcRef(String jdbcRefs) {
 		if (StringUtils.isBlank(jdbcRefs)) {
-			return new MonitorDto();
+			return new MonitorDto(-1, "null pointer");
 		}
 
 		String[] jdbcRefSplits = jdbcRefs.trim().split(",");
 
 		for (String jdbcRef : jdbcRefSplits) {
 			if (isRightJdbcRef(jdbcRef)) {
-			Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
+				Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
 
-			boolean isMonitored = false;
+				boolean isMonitored = false;
 
-			// 检查是否有重复
-			for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
-				Set<String> monitoredJdbcRef = entry.getValue();
+				// 检查是否有重复
+				for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+					Set<String> monitoredJdbcRef = entry.getValue();
 
-				if (monitoredJdbcRef.contains(jdbcRef)) {
-					isMonitored = true;
+					if (monitoredJdbcRef.contains(jdbcRef)) {
+						isMonitored = true;
+					}
 				}
-			}
 
-			if (isMonitored) {
-				continue;
-			}
+				if (isMonitored) {
+					continue;
+				}
 
-			if (!testConnection(jdbcRef)) {
-				return false;
-			}
+				if (!testConnection(jdbcRef)) {
+					return new MonitorDto(1,"jdbcRef:"+jdbcRef+" 无法连接到数据库");
+				}
 
-			String ip = findLowLoadMachine(ipWithJdbcRef);
-			Set<String> jdbcRefSet = ipWithJdbcRef.get(ip);
+				String ip = findLowLoadMachine(ipWithJdbcRef);
+				Set<String> jdbcRefSet = ipWithJdbcRef.get(ip);
 
-			jdbcRefSet.add(jdbcRef);
+				jdbcRefSet.add(jdbcRef);
 
-			String json = gson.toJson(ipWithJdbcRef);
-			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
+				String json = gson.toJson(ipWithJdbcRef);
+				lionService.setConfig(lionService.getEnv(), LION_KEY, json);
 			}
 		}
 
-		return null;
+		return new MonitorDto(0,"OK");
 	}
 
 	public boolean testConnection(String jdbcRef) {
@@ -154,13 +154,13 @@ public class MonitorController extends BasicController {
 		for (Map.Entry<String, DataSourceConfig> entry : dsConfMap.entrySet()) {
 			DataSourceConfig dsConf = entry.getValue();
 			if (dsConf.getActive()) {
-			continue;
+				continue;
 			}
 
 			String driverClass = dsConf.getDriverClass();
 
 			try {
-			Class.forName(driverClass);
+				Class.forName(driverClass);
 			} catch (ClassNotFoundException e) {
 				Cat.logError(e);
 			}
@@ -169,7 +169,7 @@ public class MonitorController extends BasicController {
 			int pos = url.indexOf("&socketTimeout");
 
 			if (pos > 0) {
-			url = url.substring(0, pos - 1);
+				url = url.substring(0, pos - 1);
 			}
 			url += "&connectTimeout=1000&socketTimeout=1000";
 
@@ -177,33 +177,33 @@ public class MonitorController extends BasicController {
 			Statement stmt = null;
 
 			try {
-			con = DriverManager.getConnection(url, uNmae, uPasswd);
-			stmt = con.createStatement();
-			stmt.executeQuery("SELECT 1");
+				con = DriverManager.getConnection(url, uNmae, uPasswd);
+				stmt = con.createStatement();
+				stmt.executeQuery("SELECT 1");
 
 			} catch (SQLTimeoutException e) {
-			return false;
+				return false;
 			} catch (SQLException se) {
-			return false;
+				return false;
 			} finally {
-			close(con, stmt);
+				close(con, stmt);
 			}
 
 		}
-		
+
 		return true;
 	}
 
 	private void close(Connection con, Statement stmt) {
 		if (stmt != null) {
 			try {
-			stmt.close();
+				stmt.close();
 			} catch (SQLException ignore) {
 			}
 		}
 		if (con != null) {
 			try {
-			con.close();
+				con.close();
 			} catch (SQLException ingore) {
 			}
 		}
@@ -222,29 +222,29 @@ public class MonitorController extends BasicController {
 			Set<String> newJdbcRefs = new HashSet<String>();
 
 			if (!jdbcRefs.equalsIgnoreCase("null")) {
-			String[] jdbcRefSplits = jdbcRefs.trim().split(",");
+				String[] jdbcRefSplits = jdbcRefs.trim().split(",");
 
-			for (String jdbcRef : jdbcRefSplits) {
-				boolean isMonitored = false;
+				for (String jdbcRef : jdbcRefSplits) {
+					boolean isMonitored = false;
 
-				// 在其他IP中已经监控的jdbcRef不会再一次被监控
-				for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
-					Set<String> monitoredJdbcRef = entry.getValue();
+					// 在其他IP中已经监控的jdbcRef不会再一次被监控
+					for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+						Set<String> monitoredJdbcRef = entry.getValue();
 
-					if (!entry.getKey().equals(ip) && monitoredJdbcRef.contains(jdbcRef)) {
-						isMonitored = true;
-						break;
+						if (!entry.getKey().equals(ip) && monitoredJdbcRef.contains(jdbcRef)) {
+							isMonitored = true;
+							break;
+						}
+					}
+
+					if (!testConnection(jdbcRef)) {
+						return new MonitorDto(1,"jdbcRef:"+jdbcRef+" 无法连接到数据库");
+					}
+
+					if (!isMonitored) {
+						newJdbcRefs.add(jdbcRef);
 					}
 				}
-
-				if (!testConnection(jdbcRef)) {
-					return null;
-				}
-
-				if (!isMonitored) {
-					newJdbcRefs.add(jdbcRef);
-				}
-			}
 			}
 
 			ipWithJdbcRef.put(ip, newJdbcRefs);
@@ -254,7 +254,7 @@ public class MonitorController extends BasicController {
 			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
 		}
 
-		return null;
+		return new MonitorDto(0,"OK");
 	}
 
 	public boolean isRightJdbcRef(String jdbcRef) {
@@ -286,9 +286,9 @@ public class MonitorController extends BasicController {
 			String jsonBody = restClient.exchange(url, HttpMethod.GET, null, String.class).getBody();
 
 			if (jsonBody != null) {
-			Map<String, InstanceStatusDto> fromJson = gson.fromJson(jsonBody, type1);
+				Map<String, InstanceStatusDto> fromJson = gson.fromJson(jsonBody, type1);
 
-			result.putAll(fromJson);
+				result.putAll(fromJson);
 			}
 		} catch (Exception e) {
 			Cat.logError(e);
@@ -303,20 +303,20 @@ public class MonitorController extends BasicController {
 			HashMap<String, String> dsKV = lionService.getConfigByProject(lionService.getEnv(), "groupds");
 
 			synchronized (jdbcRefSet) {
-			for (Entry<String, String> entry : dsKV.entrySet()) {
-				String key = entry.getKey();
-				String value = entry.getValue();
+				for (Entry<String, String> entry : dsKV.entrySet()) {
+					String key = entry.getKey();
+					String value = entry.getValue();
 
-				if (key != null && value != null) {
-					int begin = "groupds.".length();
-					int end = key.indexOf(".mapping");
-					if (end == -1 || begin == -1) {
-						continue;
+					if (key != null && value != null) {
+						int begin = "groupds.".length();
+						int end = key.indexOf(".mapping");
+						if (end == -1 || begin == -1) {
+							continue;
+						}
+
+						jdbcRefSet.add(key.substring(begin, end).toLowerCase());
 					}
-
-					jdbcRefSet.add(key.substring(begin, end).toLowerCase());
 				}
-			}
 			}
 		} catch (IOException e) {
 		}
