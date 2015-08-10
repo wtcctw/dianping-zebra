@@ -6,9 +6,7 @@ import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 import com.google.common.collect.Lists;
-
 import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -126,13 +124,11 @@ public class ShardSyncTaskExecutorTest {
 
 	@Test
 	public void test_get_oldest_binlog() throws Exception {
-		ShardSyncTaskExecutor.BinlogReporter reporter = target.new BinlogReporter();
+		BinlogInfo info1 = new BinlogInfo(1, "mysql.002", 80l, 0, 1);
+		BinlogInfo info2 = new BinlogInfo(1, "mysql.002", 100l, 0, 2);
+		BinlogInfo info3 = new BinlogInfo(1, "mysql.003", 1l, 0, 3);
 
-		BinlogInfo info1 = new BinlogInfo("mysql.002", 80l);
-		BinlogInfo info2 = new BinlogInfo("mysql.002", 100l);
-		BinlogInfo info3 = new BinlogInfo("mysql.003", 1l);
-
-		BinlogInfo result = reporter.getOldestBinlog(Lists.newArrayList(info1, info2, info3));
+		BinlogInfo result = target.getOldestBinlog(Lists.newArrayList(info1, info2, info3));
 
 		Assert.assertEquals(info1.getBinlogFile(), result.getBinlogFile());
 		Assert.assertEquals(info1.getBinlogPosition(), result.getBinlogPosition());
