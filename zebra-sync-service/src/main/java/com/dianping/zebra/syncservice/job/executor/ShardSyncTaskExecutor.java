@@ -3,9 +3,9 @@ package com.dianping.zebra.syncservice.job.executor;
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
-import com.dianping.puma.api.PumaClientException;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.RowChangedEvent;
+import com.dianping.puma.core.exception.PumaException;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
@@ -185,6 +185,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		this.client = new PumaClientConfig().setClientName(task.getPumaClientName()).setDatabase(task.getPumaDatabase())
 			.setTables(Lists.newArrayList(task.getPumaTables().split(","))).buildClusterPumaClient();
 		this.clientThread = new Thread(new PumaClientRunner());
+		this.clientThread.setDaemon(true);
+		this.clientThread.setName("PumaClientRunner");
 	}
 
 	class RowEventProcessor implements Runnable {
@@ -305,7 +307,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	class PumaClientRunner implements Runnable {
-
 		@Override
 		public void run() {
 			while (true) {
@@ -324,7 +325,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 					if (oldestBinlog != null) {
 						client.ack(oldestBinlog);
 					}
-				} catch (PumaClientException e) {
+				} catch (Exception e) {
 					Cat.logError(e.getMessage(), e);
 					try {
 						Thread.sleep(1000);
