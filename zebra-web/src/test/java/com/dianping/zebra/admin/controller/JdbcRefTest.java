@@ -17,7 +17,7 @@ public class JdbcRefTest {
 	@Test
 	public void TestMC() {
 		try {
-			testMC.submitJdbcRef("192.168.217.112","saleplatform,dpemployeemd");
+			testMC.addJdbcRef("mha_test");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

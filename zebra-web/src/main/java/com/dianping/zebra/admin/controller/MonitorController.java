@@ -2,6 +2,11 @@ package com.dianping.zebra.admin.controller;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,18 +24,25 @@ import org.springframework.web.client.RestTemplate;
 import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.dao.MonitorHistoryMapper;
 import com.dianping.zebra.biz.dto.InstanceStatusDto;
+import com.dianping.zebra.biz.dto.MonitorDto;
 import com.dianping.zebra.biz.service.LionService;
+import com.dianping.zebra.group.config.DataSourceConfigManager;
+import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
+import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
+import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.util.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import groovy.util.MapEntry;
 
 @Controller
 @RequestMapping(value = "/monitor")
 public class MonitorController extends BasicController {
 
 	private static final String LION_KEY = "zebra.monitorservice.jdbcreflist";
+
+	private final String USER_NAME = "zebra.monitorservice.jdbc.username";
+
+	private final String USER_PASSWD = "zebra.monitorservice.jdbc.password";
 
 	@Autowired
 	private LionService lionService;
@@ -58,9 +70,143 @@ public class MonitorController extends BasicController {
 
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
 
-		Set<String> jdbcRefSet = ipWithJdbcRef.get(ip);
+		Set<String> jdbcRefSet = new HashSet<String>();
+
+		jdbcRefSet = ipWithJdbcRef.get(ip);
 
 		return jdbcRefSet;
+	}
+
+	private String findLowLoadMachine(Map<String, Set<String>> ipWithJdbcRef) {
+		String bestIp = null;
+		int size = Integer.MAX_VALUE;
+
+		for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+			Set<String> set = entry.getValue();
+
+			if (set == null) {
+			size = 0;
+			bestIp = entry.getKey();
+			} else if (set.size() < size) {
+			size = set.size();
+			bestIp = entry.getKey();
+			}
+		}
+
+		return bestIp;
+	}
+
+	@RequestMapping(value = "/addJdbcRef", method = RequestMethod.GET)
+	@ResponseBody
+	public Object addJdbcRef(String jdbcRefs) {
+		if (StringUtils.isBlank(jdbcRefs)) {
+			return new MonitorDto();
+		}
+
+		String[] jdbcRefSplits = jdbcRefs.trim().split(",");
+
+		for (String jdbcRef : jdbcRefSplits) {
+			if (isRightJdbcRef(jdbcRef)) {
+			Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
+
+			boolean isMonitored = false;
+
+			// 检查是否有重复
+			for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+				Set<String> monitoredJdbcRef = entry.getValue();
+
+				if (monitoredJdbcRef.contains(jdbcRef)) {
+					isMonitored = true;
+				}
+			}
+
+			if (isMonitored) {
+				continue;
+			}
+
+			if (!testConnection(jdbcRef)) {
+				return false;
+			}
+
+			String ip = findLowLoadMachine(ipWithJdbcRef);
+			Set<String> jdbcRefSet = ipWithJdbcRef.get(ip);
+
+			jdbcRefSet.add(jdbcRef);
+
+			String json = gson.toJson(ipWithJdbcRef);
+			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
+			}
+		}
+
+		return null;
+	}
+
+	public boolean testConnection(String jdbcRef) {
+		String uNmae = lionService.getConfigFromZk(USER_NAME);
+		String uPasswd = lionService.getConfigFromZk(USER_PASSWD);
+
+		DataSourceConfigManager dsManager = DataSourceConfigManagerFactory.getConfigManager("remote", jdbcRef);
+		GroupDataSourceConfig groupDSConf = dsManager.getGroupDataSourceConfig();
+		dsManager.close();
+
+		Map<String, DataSourceConfig> dsConfMap = groupDSConf.getDataSourceConfigs();
+
+		for (Map.Entry<String, DataSourceConfig> entry : dsConfMap.entrySet()) {
+			DataSourceConfig dsConf = entry.getValue();
+			if (dsConf.getActive()) {
+			continue;
+			}
+
+			String driverClass = dsConf.getDriverClass();
+
+			try {
+			Class.forName(driverClass);
+			} catch (ClassNotFoundException e) {
+				Cat.logError(e);
+			}
+
+			String url = dsConf.getJdbcUrl();
+			int pos = url.indexOf("&socketTimeout");
+
+			if (pos > 0) {
+			url = url.substring(0, pos - 1);
+			}
+			url += "&connectTimeout=1000&socketTimeout=1000";
+
+			Connection con = null;
+			Statement stmt = null;
+
+			try {
+			con = DriverManager.getConnection(url, uNmae, uPasswd);
+			stmt = con.createStatement();
+			stmt.executeQuery("SELECT 1");
+
+			} catch (SQLTimeoutException e) {
+			return false;
+			} catch (SQLException se) {
+			return false;
+			} finally {
+			close(con, stmt);
+			}
+
+		}
+		
+		return true;
+	}
+
+	private void close(Connection con, Statement stmt) {
+		if (stmt != null) {
+			try {
+			stmt.close();
+			} catch (SQLException ignore) {
+			}
+		}
+		if (con != null) {
+			try {
+			con.close();
+			} catch (SQLException ingore) {
+			}
+		}
 	}
 
 	@RequestMapping(value = "/submit", method = RequestMethod.GET)
@@ -78,10 +224,10 @@ public class MonitorController extends BasicController {
 			if (!jdbcRefs.equalsIgnoreCase("null")) {
 			String[] jdbcRefSplits = jdbcRefs.trim().split(",");
 
-			//在其他IP中已经监控的jdbcRef不会再一次被监控
 			for (String jdbcRef : jdbcRefSplits) {
 				boolean isMonitored = false;
 
+				// 在其他IP中已经监控的jdbcRef不会再一次被监控
 				for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
 					Set<String> monitoredJdbcRef = entry.getValue();
 
@@ -90,7 +236,12 @@ public class MonitorController extends BasicController {
 						break;
 					}
 				}
-				if(!isMonitored) {
+
+				if (!testConnection(jdbcRef)) {
+					return null;
+				}
+
+				if (!isMonitored) {
 					newJdbcRefs.add(jdbcRef);
 				}
 			}
@@ -184,16 +335,6 @@ public class MonitorController extends BasicController {
 		return getIpWithJdbcRef().keySet();
 	}
 
-	/*
-	 * @RequestMapping(value = "/remove", method = RequestMethod.GET)
-	 * 
-	 * @ResponseBody public Object removeJdbcRef(String jdbcRefs) throws Exception { if (StringUtils.isNotBlank(jdbcRefs)) {
-	 * String[] jdbcRefSplits = jdbcRefs.split(",");
-	 * 
-	 * for (String jdbcRef : jdbcRefSplits) { deleteJdbcRefToLion(jdbcRef.trim()); } }
-	 * 
-	 * return null; }
-	 */
 	@RequestMapping(value = "/history", method = RequestMethod.GET)
 	@ResponseBody
 	public Object showHistory() throws Exception {

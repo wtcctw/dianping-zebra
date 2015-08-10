@@ -383,7 +383,7 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
 			$http.get('/a/monitor/getStatus?ip=' + $scope.monitorServer).success(function (data, status, headers, config) {
 				$scope.statusList = data;
 			});
-			 $scope.switchSource();
+			$scope.switchSource();
 		}
 	}
 
@@ -396,7 +396,7 @@ zebraWeb.controller('monitor-manager', function($scope, $http){
 		$scope.loadMultiSelects();
 		
         $http.get('/a/monitor/submit?jdbcRefs=' + $scope.jdbcRefs + "&ip=" + $scope.monitorServer).success(function (data, status, headers, config) {
-            $scope.loadMonitorDs();
+        	$scope.loadMonitorDs();
         });
 	}
    
@@ -740,7 +740,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
                 config.role.isRead = false;
             }
             if (config.role.isRead) {
-            	if(config.role.weight < 0) {
+            	if(!config.role.weight || config.role.weight < 0) {
                		config.role.weight = 0;
                 }
                 var temp = config.id + ':' + config.role.weight;
