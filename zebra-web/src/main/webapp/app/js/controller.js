@@ -743,7 +743,10 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
                 config.role.isRead = false;
             }
             if (config.role.isRead) {
-            	if(!config.role.weight || config.role.weight < 0) {
+            	if(config.role.weight == null) {
+            		config.role.weight = 1;
+            	}
+            	if(config.role.weight < 0) {
                		config.role.weight = 0;
                 }
                 var temp = config.id + ':' + config.role.weight;
