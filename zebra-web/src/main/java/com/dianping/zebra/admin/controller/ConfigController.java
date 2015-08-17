@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -165,7 +166,7 @@ public class ConfigController extends BasicController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	@ResponseBody
 	public Object index(String env) throws Exception {
-		HashMap<String, ConfigDto> configs = new HashMap<String, ConfigDto>();
+		Map<String, ConfigDto> configs = new TreeMap<String, ConfigDto>();
 
 		HashMap<String, String> jdbcRefs = lionService.getConfigByProject(env, "groupds");
 		Set<String> whiteList = dalConfigService.getWhiteList(env);

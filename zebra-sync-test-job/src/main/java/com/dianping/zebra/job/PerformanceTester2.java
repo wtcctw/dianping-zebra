@@ -57,12 +57,12 @@ public class PerformanceTester2 {
 	}
 
 	public void init() {
-		ds1 = new GroupDataSource("unifiedorder0");
+		ds1 = new GroupDataSource("pumaperftest0");
 		ds1.setFilter("!cat");
 		ds1.setPoolType("tomcat-jdbc");
 		ds1.init();
 
-		ds2 = new GroupDataSource("unifiedorder1");
+		ds2 = new GroupDataSource("pumaperftest1");
 		ds2.setFilter("!cat");
 		ds2.setPoolType("tomcat-jdbc");
 		ds2.init();

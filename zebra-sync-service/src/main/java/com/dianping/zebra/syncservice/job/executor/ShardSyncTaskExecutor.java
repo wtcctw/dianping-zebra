@@ -5,7 +5,6 @@ import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
 import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.exception.PumaException;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
 import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
