@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -36,9 +37,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
- */
 public class ShardSyncTaskExecutor implements TaskExecutor {
 	private final PumaClientSyncTaskEntity task;
 
@@ -62,7 +60,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	protected volatile Map<String, JdbcTemplate> templateMap;
 
-	protected volatile BlockingQueue[] eventQueues;
+	protected volatile BlockingQueue<RowChangedEvent>[] eventQueues;
 
 	protected volatile List<RowEventProcessor> rowEventProcessors;
 
@@ -136,6 +134,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		this.rowEventProcesserThreads = threadBuilder.build();
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void initEventQueues() {
 		this.eventQueues = new BlockingQueue[NUMBER_OF_PROCESSORS];
 		for (int k = 0; k < this.eventQueues.length; k++) {
@@ -146,7 +145,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-			task.getTbSuffix(), task.getTbRule());
+		      task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -183,10 +182,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	protected void initPumaClient() {
 		this.client = new PumaClientConfig().setClientName(task.getPumaClientName()).setDatabase(task.getPumaDatabase())
-			.setTables(Lists.newArrayList(task.getPumaTables().split(","))).buildClusterPumaClient();
+		      .setTables(Lists.newArrayList(task.getPumaTables().split(","))).buildClusterPumaClient();
 		this.clientThread = new Thread(new PumaClientRunner());
 		this.clientThread.setDaemon(true);
-		this.clientThread.setName("PumaClientRunner");
+		this.clientThread.setName("PumaSyncTask-" + task.getPumaClientName());
 	}
 
 	class RowEventProcessor implements Runnable {
@@ -268,6 +267,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		protected void processPK(RowChangedEvent rowEvent) {
 			Set<String> needToRemoveKeys = new HashSet<String>();
+			
 			for (Map.Entry<String, RowChangedEvent.ColumnInfo> info : rowEvent.getColumns().entrySet()) {
 				if (info.getValue().isKey() && !task.getPk().equals(info.getKey())) {
 					needToRemoveKeys.add(info.getKey());
@@ -354,15 +354,15 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 
 		private int getIndex(RowChangedEvent.ColumnInfo columnInfo) {
-			return Math.abs(
-				(columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue()).hashCode())
-				% NUMBER_OF_PROCESSORS;
+			return Math.abs((columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue())
+			      .hashCode()) % NUMBER_OF_PROCESSORS;
 		}
 	}
 
 	public Map<String, String> getStatus() {
 		Map<String, String> result = new HashMap<String, String>();
 		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTimes.getAndSet(0)));
+		
 		return result;
 	}
 }
