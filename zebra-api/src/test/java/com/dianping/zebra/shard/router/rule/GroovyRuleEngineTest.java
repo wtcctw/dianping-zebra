@@ -48,4 +48,15 @@ public class GroovyRuleEngineTest {
 		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
 		System.out.println(retVal);
 	}
+	
+	@Test
+	public void testData1() {
+		RuleEngine ruleEngine = new GroovyRuleEngine("#AddTime# == null ? SKIP : 0");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		Calendar cal = Calendar.getInstance();
+		cal.set(2015, 4, 1);
+		valMap.put("AddTime", cal.getTime());
+		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
+		System.out.println(retVal);
+	}
 }
