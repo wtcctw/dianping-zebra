@@ -21,15 +21,6 @@ public class GroovyRuleEngineTest {
 	}
 
 	@Test
-	public void testRule2() {
-		RuleEngine ruleEngine = new GroovyRuleEngine("Long.valueOf(#bnid#.split('_')[0])");
-		Map<String, Object> valMap = new HashMap<String, Object>();
-		valMap.put("bnid", "3824730897_9305833");
-		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
-		System.out.println(retVal);
-	}
-
-	@Test
 	public void testRule1() {
 		RuleEngine ruleEngine = new GroovyRuleEngine("#NoteID#.longValue() % 8");
 		Map<String, Object> valMap = new HashMap<String, Object>();
@@ -50,6 +41,17 @@ public class GroovyRuleEngineTest {
 	@Test
 	public void testData() {
 		RuleEngine ruleEngine = new GroovyRuleEngine("#AddTime#");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		Calendar cal = Calendar.getInstance();
+		cal.set(2015, 4, 1);
+		valMap.put("AddTime", cal.getTime());
+		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
+		System.out.println(retVal);
+	}
+
+	@Test
+	public void testData1() {
+		RuleEngine ruleEngine = new GroovyRuleEngine("#AddTime# == null ? SKIP : 0");
 		Map<String, Object> valMap = new HashMap<String, Object>();
 		Calendar cal = Calendar.getInstance();
 		cal.set(2015, 4, 1);

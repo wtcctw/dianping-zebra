@@ -40,6 +40,8 @@ public class LionServiceImpl implements LionService {
 
 	private String getProjectConfigUrl = "http://lionapi.dp:8080/config2/get?env=%s&project=%s&id=%s";
 
+	private String setConfigUrl = "http://lionapi.dp:8080/config2/set";
+
 	@Autowired
 	private HttpService httpService;
 
@@ -56,8 +58,6 @@ public class LionServiceImpl implements LionService {
 		ALL_ENV.addAll(DEV_ENV);
 		ALL_ENV.addAll(PRODUCT_ENV);
 	}
-
-	private String setConfigUrl = "http://lionapi.dp:8080/config2/set?env=%s&id=%s&key=%s&value=%s";
 
 	@Override
 	public boolean createKey(String project, String key) throws IOException {
@@ -177,7 +177,9 @@ public class LionServiceImpl implements LionService {
 
 		String result = null;
 		try {
-			result = httpService.sendGet(String.format(setConfigUrl, env, ID, key, URLEncoder.encode(value, "utf-8")));
+			String params = String.format("env=%s&id=%s&key=%s&value=%s", env, ID, key, URLEncoder.encode(value, "utf-8"));
+			result = httpService.sendPost(setConfigUrl, params);
+			// result = httpService.sendGet(String.format(setConfigUrl, env, ID, key, URLEncoder.encode(value, "utf-8")));
 		} catch (UnsupportedEncodingException e) {
 			return false;
 		}
@@ -206,7 +208,7 @@ public class LionServiceImpl implements LionService {
 	}
 
 	@Override
-   public String getEnv() {
-	   return EnvZooKeeperConfig.getEnv();
-   }
+	public String getEnv() {
+		return EnvZooKeeperConfig.getEnv();
+	}
 }
