@@ -34,6 +34,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Dozer @ 6/9/15 mail@dozer.cc http://www.dozer.cc
@@ -192,14 +193,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		private final BlockingQueue<RowChangedEvent> queue;
 
-		private volatile BinlogInfo binlogInfo;
+		private final AtomicReference<BinlogInfo> binlogInfo = new AtomicReference<BinlogInfo>();
 
 		public RowEventProcessor(BlockingQueue<RowChangedEvent> queue) {
 			this.queue = queue;
 		}
 
 		public BinlogInfo getBinlogInfo() {
-			return binlogInfo;
+			return binlogInfo.getAndSet(null);
 		}
 
 		@Override
@@ -223,7 +224,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 					try {
 						process(event);
-						this.binlogInfo = event.getBinlogInfo();
+						this.binlogInfo.set(event.getBinlogInfo());
 						break;
 					} catch (DuplicateKeyException e) {
 						Cat.logError(e);
