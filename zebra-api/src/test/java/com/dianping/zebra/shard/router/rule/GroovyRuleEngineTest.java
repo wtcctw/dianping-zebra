@@ -48,7 +48,7 @@ public class GroovyRuleEngineTest {
 		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
 		System.out.println(retVal);
 	}
-	
+
 	@Test
 	public void testData1() {
 		RuleEngine ruleEngine = new GroovyRuleEngine("#AddTime# == null ? SKIP : 0");

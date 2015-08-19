@@ -45,10 +45,10 @@
                         <td>
                             <form class="form-inline" role="form">
                                 <div class="btn-group">
-                                    <label ng-class="{'btn-primary':config.role.isWrite,'btn-default':!config.role.isWrite}" class="btn" ng-model="config.role.isWrite" btn-checkbox>可写</label>
-                                    <label ng-class="{'btn-primary':config.role.isRead,'btn-default':!config.role.isRead}" class="btn" ng-model="config.role.isRead" btn-checkbox>可读</label>
+                                    <buttern ng-class="{'btn-primary':config.role.isWrite,'btn-default':!config.role.isWrite}" class="btn" ng-model="config.role.isWrite" ng-click=isWriteChange(config)>可写</buttern>
+                                    <buttern ng-class="{'btn-primary':config.role.isRead,'btn-default':!config.role.isRead}" class="btn" ng-model="config.role.isRead" ng-click=isReadChange(config)>可读</buttern>
                                 </div>
-                                <input ng- placeholder="读库权重" class="form-control" ng-model="config.role.weight" type="number" min="-1" max="10" step="1" style="width: 100px" />
+                                <input placeholder="读库权重" class="form-control" ng-model="config.role.weight" type="number" min="0" max="10" step="1" style="width: 100px" />
                                 <input required class="form-control" placeholder="DataSource Id" ng-model="newDsName" />
         						<button type="submit" class="btn btn-primary" ng-click="addDs(config.properties,config.id,newDsName)">复制</button>
                             </form>

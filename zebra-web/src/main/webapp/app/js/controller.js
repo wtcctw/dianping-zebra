@@ -711,6 +711,8 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         if ($scope.config && $scope.config.env) {
             $http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env).success(function (data, status, headers, config) {
                 $scope.data = data;
+                
+                $scope.initRWList();
             });
         }
     }
@@ -719,59 +721,237 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         if ($scope.config && $scope.config.env) {
             $http.get('/a/config/ds?key=' + name + '&env=' + $scope.config.env + '&otherkey=' + $scope.changedName).success(function (data, status, headers, config) {
                 $scope.data = data;
-            });
+                
+                $scope.initRWList();
+           });
         }
     }
 
     $scope.$watch('config.env', $scope.load);
 
-    var calGroupPrevoew = function () {
-        if (!$scope.data) {
-            return;
-        }
-        var writeList = '';
-        var readList = '';
-        var readListHasWrite = false;
-        var readListLength = 0;
+    $scope.writeList = [];
+    
+    $scope.readList  = [];
+    
+    $scope.initRWList = function() {
+    	var start = 0;
+    	var end   = 0;
+    	
+    	start = $scope.data.config.indexOf('(') +1;
+    	end   = $scope.data.config.indexOf(')');
+    	
+    	if(start <= end) {
+        	var readStrings = $scope.data.config.substring(start,end);
+        	var readStrs    = readStrings.split(',');
+        	
+        	angular.forEach(readStrs,function(key) {
+        		$scope.readList.push(key);
+        	});
+        	
+    	}
 
-        $scope.data.configs.forEach(function (config) {
-            if (!config.role) {
-                return;
-            }
-            if (config.role.isWrite) {
-                writeList += writeList ? ',' + config.id : config.id;
-                config.role.isRead = false;
-            }
-            if (config.role.isRead) {
-            	if(config.role.weight == null) {
-            		config.role.weight = 1;
-            	}
-            	if(config.role.weight < 0) {
-               		config.role.weight = 0;
-                }
-                var temp = config.id + ':' + config.role.weight;
-                readList += readList ? ',' + temp : temp;
+    	start = $scope.data.config.lastIndexOf('(') +1;
+    	end   = $scope.data.config.lastIndexOf(')');
+    	
+    	if(start <= end) {
+        	var writeString = $scope.data.config.substring(start,end);
 
-                if (config.id.indexOf("write") >= 0) {
-                    readListHasWrite = true;
-                }
-                readListLength++;
-            }
-        });
-        $scope.data.config = '(' + readList + '),(' + writeList + ')';
-
-        $scope.data.alert = "";
-
-        if (readListHasWrite == true) {
-            $scope.data.alert = "含有不合法的读role，只允许读账号作为读role。"
-        }
-
-        if (readListLength <= 1) {
-            $scope.data.alert = $scope.data.alert + "配置的读role少于2个，将不具有读HA。"
-        }
-
+        	$scope.writeList.push(writeString);
+    	}
     }
+    
+    $scope.makeDataConfig = function() {
+    	$scope.data.config = '(' + $scope.readList.join() + '),(' + $scope.writeList.join() + ')';
+    }
+    
+    $scope.removeWriteId = function(key) {
+		$scope.writeList.splice(0,1);
+		
+		$scope.makeDataConfig();
+    }
+    
+    $scope.removeReadId = function(key) {
+    	var pos = 0;
+    	angular.forEach($scope.readList,function(id,index) {
+    		if(key ==id) {
+    			pos = index;
+    		}
+    	});
+    	
+    	$scope.readList.splice(pos,1);
+    	
+		$scope.makeDataConfig();
+    }
+    
+    $scope.isWriteChange = function(config) {
+    	if(config.role != null) {
+    		if(config.role.isWrite) {
+        		config.role.isWrite = false;
+        		
+        		$scope.removeWriteId(config.id);
+        		
+        		return;
+        	}
+    	} else {
+    		config.role = {
+					isWrite : true,
+					isRead  : false,
+					weight  : 1
+			};
+    	}
 
+		if(config.id.indexOf('-write') <= 0) {
+			config.role.isWrite = false;
+			alert("只有以-write结尾的库能够成为写库!");
+			
+			return;
+		}
+		
+		if($scope.writeList.length > 0) {
+			config.role.isWrite = false;
+			alert("一个jdbcRef只能有1个写库!");
+			
+			return;
+		}
+		
+		if(config.role.isRead) {
+			config.role.isRead = false;
+			
+			$scope.removeWriteId(config.id);
+		}
+	
+		config.role.isWrite = true;
+		config.role.weight  = 1;
+		
+		$scope.writeList.push(config.id);
+		
+		$scope.makeDataConfig();
+	}
+    
+    $scope.isReadChange = function(config) {
+    	if(config.role != null) {
+    		if(config.role.isRead) {
+        		config.role.isRead = false;
+        		
+        		var readConf = config.id + ':' + config.role.weight;
+        		$scope.removeReadId(readConf);
+        		
+        		return;
+        	}
+    	} else {
+    		config.role = {
+					isWrite : false,
+					isRead  : true,
+					weight  : 1
+			};
+    	}
+    	
+		if(config.id.indexOf('-read') <= 0) {
+			config.role.isRead = false;
+			alert("只有以-read结尾的库能够成为读库!");
+			
+			return;
+		}
+		
+		config.role.isRead = true;
+		config.role.weight = 1;
+		
+		var readConf = config.id + ':' + config.role.weight;
+		$scope.readList.push(readConf);
+    	
+		$scope.makeDataConfig();
+    }
+    
+    $scope.dbNumTest = function() {
+    	var readNum  = $scope.readList.length;
+    	var writeNum = $scope.writeList.length;
+    	
+    	var writeIp  = "";
+    	var isVIPRight = false;
+    	
+    	if(readNum < 1 || writeNum < 1) {
+    		alert("请设置至少1个读库和1个写库!");
+    		
+    		return false;
+    	}
+    	
+    	angular.forEach($scope.data.configs,function(config) {
+    		if(config.id == $scope.writeList[0]) {
+        		angular.forEach(config.properties,function(property) {
+    				if(property.key.indexOf('active') > 0) {
+    					if(property.newValue != 'true') {
+    						writeNum -= 1;
+    					}
+    				}
+    				
+    				if(property.key.indexOf('url') > 0 || property.key.indexOf('Url') > 0) {
+    					writeIp = property.newValue.match("[\\d+\\.]+");
+    					if(!writeIp) {
+    						alert("写RUL格式错误!");
+    						
+    						return false;
+    					}
+    				}
+        		});
+    		}
+    	});
+    	
+    	if(writeNum <1) {
+    		alert('至少要有1个写库可用,并且active为true!');
+    		
+    		return false;
+    	}
+    	
+    	angular.forEach($scope.data.configs,function(config) {
+    		angular.forEach($scope.readList,function(readId) {
+        		var readIdWithoutWeight = readId.substring(0,readId.indexOf(':'));
+        		var readIdWeight = readId.substring(readId.indexOf(':')+1,readId.length);
+        		
+    			if(config.id == readIdWithoutWeight) {
+    				if(readIdWeight == '0') {
+						readNum -= 1;
+					} else {
+        				angular.forEach(config.properties,function(property) {
+            				if(property.key.indexOf('active') > 0) {
+            					if(property.newValue != 'true') {
+            						readNum -= 1;
+            					}
+            				}
+            				
+            				if(property.key.indexOf('url') > 0 || property.key.indexOf('Url') > 0) {
+            					var readIp = property.newValue.match("[\\d+\\.]+");
+            					
+            					if(!readIp) {
+            						alert("读库RUL格式错误!");
+            						
+            						return false;
+            					}
+            					
+            					if(readIp[0] == writeIp[0]) {
+            						isVIPRight = true;
+            					}
+            				}
+            			});
+        			}
+    			} 
+    		});
+    	});
+    	
+    	if(readNum < 1) {
+    		alert('至少要有1个读库可用,并且active为true!');
+    		
+    		return false;
+    	}
+    	
+    	if(!isVIPRight) {
+    		alert("需要配置写库 的读vip!");
+    		
+    		return false;
+    	}
+    	
+    	return true;
+    }
+    
     $scope.close = function () {
         close();
     }
@@ -828,7 +1008,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
             role: {
                 isWrite: false,
                 isRead: false,
-                weight: 1
+                weight: 0
             },
             properties: propertiesTmp
         });
@@ -878,12 +1058,14 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
 
     $scope.save = function (force) {
         force = !!force;
-        $http.post('/a/config/updateds?force=' + force, angular.toJson($scope.data))
+        if($scope.dbNumTest()) {
+            $http.post('/a/config/updateds?force=' + force, angular.toJson($scope.data))
             .success(function (data, status, headers, config) {
                 alert('保存成功！');
                 close();
                 configService.openTestModal($scope.name);
             });
+        }
     }
 
     $scope.test = function () {
@@ -892,10 +1074,6 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
                 configService.openTestModal("", data);
             });
     }
-
-    $scope.$watch(function () {
-        calGroupPrevoew();
-    })
 
     $scope.newKeys = ['url', 'username', 'password', 'active', 'properties', 'warmupTime', 'driverClass', 'other'];
 
