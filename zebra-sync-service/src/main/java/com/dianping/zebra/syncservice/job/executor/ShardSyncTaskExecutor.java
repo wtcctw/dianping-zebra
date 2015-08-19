@@ -17,13 +17,9 @@ import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 import com.dianping.zebra.syncservice.exception.NoRowsAffectedException;
 import com.dianping.zebra.syncservice.util.ColumnInfoWrap;
 import com.dianping.zebra.syncservice.util.SqlBuilder;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -145,7 +141,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	protected void initRouter() {
 		this.engine = new GroovyRuleEngine(task.getDbRule());
 		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-		      task.getTbSuffix(), task.getTbRule());
+			task.getTbSuffix(), task.getTbRule());
 	}
 
 	protected void initDataSources() {
@@ -182,7 +178,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	protected void initPumaClient() {
 		this.client = new PumaClientConfig().setClientName(task.getPumaClientName()).setDatabase(task.getPumaDatabase())
-		      .setTables(Lists.newArrayList(task.getPumaTables().split(","))).buildClusterPumaClient();
+			.setTables(Lists.newArrayList(task.getPumaTables().split(","))).buildClusterPumaClient();
 		this.clientThread = new Thread(new PumaClientRunner());
 		this.clientThread.setDaemon(true);
 		this.clientThread.setName("PumaSyncTask-" + task.getPumaClientName());
@@ -267,7 +263,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		protected void processPK(RowChangedEvent rowEvent) {
 			Set<String> needToRemoveKeys = new HashSet<String>();
-			
+
 			for (Map.Entry<String, RowChangedEvent.ColumnInfo> info : rowEvent.getColumns().entrySet()) {
 				if (info.getValue().isKey() && !task.getPk().equals(info.getKey())) {
 					needToRemoveKeys.add(info.getKey());
@@ -292,18 +288,21 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		return oldestBinlog;
 	}
 
-	protected Iterable<BinlogInfo> getBinlogInfos() {
-		return Iterables.transform(Iterables.filter(rowEventProcessors, new Predicate<RowEventProcessor>() {
-			@Override
-			public boolean apply(RowEventProcessor input) {
-				return input.getBinlogInfo() != null;
+	protected List<BinlogInfo> getBinlogInfos() {
+		List<BinlogInfo> result = null;
+		for (RowEventProcessor processor : rowEventProcessors) {
+			BinlogInfo lastBinlogInfo = processor.getBinlogInfo();
+			if (lastBinlogInfo == null) {
+				continue;
 			}
-		}), new Function<RowEventProcessor, BinlogInfo>() {
-			@Override
-			public BinlogInfo apply(RowEventProcessor input) {
-				return input.getBinlogInfo();
+
+			if (result == null) {
+				result = new ArrayList<BinlogInfo>();
 			}
-		});
+
+			result.add(lastBinlogInfo);
+		}
+		return result;
 	}
 
 	class PumaClientRunner implements Runnable {
@@ -320,10 +319,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 						continue;
 					}
 
-					Iterable<BinlogInfo> binlogInfos = getBinlogInfos();
-					BinlogInfo oldestBinlog = getOldestBinlog(binlogInfos);
-					if (oldestBinlog != null) {
-						client.ack(oldestBinlog);
+					List<BinlogInfo> binlogInfos = getBinlogInfos();
+					if (binlogInfos != null) {
+						BinlogInfo oldestBinlog = getOldestBinlog(binlogInfos);
+						if (oldestBinlog != null) {
+							client.ack(oldestBinlog);
+						}
 					}
 				} catch (Exception e) {
 					Cat.logError(e.getMessage(), e);
@@ -354,15 +355,16 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 
 		private int getIndex(RowChangedEvent.ColumnInfo columnInfo) {
-			return Math.abs((columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue())
-			      .hashCode()) % NUMBER_OF_PROCESSORS;
+			return Math.abs(
+				(columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue()).hashCode())
+				% NUMBER_OF_PROCESSORS;
 		}
 	}
 
 	public Map<String, String> getStatus() {
 		Map<String, String> result = new HashMap<String, String>();
 		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTimes.getAndSet(0)));
-		
+
 		return result;
 	}
 }
