@@ -1203,7 +1203,7 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
     }
     
     $scope.addMonitor = function(group) {
-         $http.get('/a/monitor/addJdbcRef?jdbcRefs=' + group.jdbcRef).success(function (data, status, headers, config) {
+         $http.get('/a/monitor/addJdbcRef?env=' + $scope.config.env +'&jdbcRef=' + group.jdbcRef).success(function (data, status, headers, config) {
             if(!data.errorCode) {
             	group.isMonitored = true; 
             } else {
@@ -1213,7 +1213,7 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
     }
     
     $scope.removeMonitor = function(group) {
-    	$http.get('/a/monitor/removeJdbcRef?jdbcRef=' + group.jdbcRef).success(function (data, status, headers, config) {
+    	$http.get('/a/monitor/removeJdbcRef?env=' + $scope.config.env +'&jdbcRef=' + group.jdbcRef).success(function (data, status, headers, config) {
     		if(!data.errorCode) {
             	group.isMonitored = false; 
             } else {
@@ -1222,19 +1222,6 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
     	});
     }
     
-    $scope.alarmList = function(key) {
-    	configService.openAlarmModal(key);
-    };
-    
-});
-
-zebraWeb.controller('alarm-edit', function ($scope, $http, name, close) {
-    $scope.name = name;
-
-    $scope.close = function() {
-    	close();
-    }
-
 });
 
 zebraWeb.controller('login', function ($rootScope, $scope, $http) {
