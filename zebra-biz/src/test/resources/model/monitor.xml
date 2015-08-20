@@ -1,0 +1,25 @@
+<monitor-configs>
+	<monitor-config database="dianping" autoMarkUp="false"
+		autoMarkDown="true" minDelayTime="60" maxDelayTime="180"
+		autoDelayMarkDown="false">
+		<owners>
+			<owner weixin="hao.zhu@dianping.com" tel="15216716460"></owner>
+			<owner tel="15216716460"></owner>
+			<owner weixin="hao.zhu@dianping.com"></owner>
+		</owners>
+	</monitor-config>
+	<monitor-config database="dianping" autoMarkUp="false"
+		autoMarkDown="true" minDelayTime="60" maxDelayTime="180"
+		autoDelayMarkDown="false">
+		<owners>
+			<owner weixin="tong.xin@dianping.com" tel="15216716460"></owner>
+		</owners>
+	</monitor-config>
+	<monitor-config database="_default_" autoMarkUp="false"
+		autoMarkDown="true" minDelayTime="60" maxDelayTime="180"
+		autoDelayMarkDown="false">
+		<owners>
+			<owner weixin="hao.zhu@dianping.com" tel="15216716460"></owner>
+		</owners>
+	</monitor-config>
+</monitor-configs>
