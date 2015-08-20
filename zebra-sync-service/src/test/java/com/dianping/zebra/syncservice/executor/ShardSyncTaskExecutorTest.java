@@ -1,8 +1,11 @@
-package com.dianping.zebra.syncservice.job.executor;
+package com.dianping.zebra.syncservice.executor;
 
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
+import com.dianping.zebra.syncservice.executor.ShardSyncTaskExecutor;
+
 import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.Test;
 
