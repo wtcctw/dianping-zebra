@@ -119,6 +119,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initProcessors() {
+		rowEventProcessors = new RowEventProcessor[NUMBER_OF_PROCESSORS];
+		rowEventProcesserThreads = new Thread[NUMBER_OF_PROCESSORS];
+		
 		for (int k = 0; k < this.eventQueues.length; k++) {
 			BlockingQueue<RowChangedEvent> queue = this.eventQueues[k];
 			RowEventProcessor processor = new RowEventProcessor(queue);
