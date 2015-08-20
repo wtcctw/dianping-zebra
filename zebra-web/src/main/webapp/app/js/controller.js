@@ -949,6 +949,33 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
     	return true;
     }
     
+    var watchWeightChange = function() {
+    	angular.forEach($scope.data.configs,function(config) {
+    		angular.forEach($scope.readList,function(readId,index) {
+        		var readIdWithoutWeight = readId.substring(0,readId.indexOf(':'));
+        		var readIdWeight = readId.substring(readId.indexOf(':')+1,readId.length);
+        		
+    			if(config.id == readIdWithoutWeight && !!config.role) {
+    				if(!config.role.weight) {
+    					config.role.weight = 0;
+    				}
+    				
+    				if(readIdWeight != config.role.weight.toString()) {
+    					readId = readIdWithoutWeight + ':' + config.role.weight;
+    					$scope.readList.splice(index,1,readId);
+    			    	$scope.makeDataConfig();
+    				}   
+    			}
+    		});
+    	});
+    }
+    
+    $scope.$watch(function () {
+    	if($scope.data) {
+        	watchWeightChange();
+    	}
+    })
+    
     $scope.close = function () {
         close();
     }
@@ -1162,6 +1189,7 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
             });
         }
     }
+    
     $scope.$watch('config.env', $scope.load);
 
     $scope.createGroupDs = function () {
@@ -1173,6 +1201,40 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
             });
         }
     }
+    
+    $scope.addMonitor = function(group) {
+         $http.get('/a/monitor/addJdbcRef?jdbcRefs=' + group.jdbcRef).success(function (data, status, headers, config) {
+            if(!data.errorCode) {
+            	group.isMonitored = true; 
+            } else {
+               	alert(data.errorMessage);
+           	}
+         });
+    }
+    
+    $scope.removeMonitor = function(group) {
+    	$http.get('/a/monitor/removeJdbcRef?jdbcRef=' + group.jdbcRef).success(function (data, status, headers, config) {
+    		if(!data.errorCode) {
+            	group.isMonitored = false; 
+            } else {
+               	alert(data.errorMessage);
+           	}
+    	});
+    }
+    
+    $scope.alarmList = function(key) {
+    	configService.openAlarmModal(key);
+    };
+    
+});
+
+zebraWeb.controller('alarm-edit', function ($scope, $http, name, close) {
+    $scope.name = name;
+
+    $scope.close = function() {
+    	close();
+    }
+
 });
 
 zebraWeb.controller('login', function ($rootScope, $scope, $http) {

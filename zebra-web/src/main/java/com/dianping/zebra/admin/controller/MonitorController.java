@@ -208,6 +208,32 @@ public class MonitorController extends BasicController {
 			}
 		}
 	}
+	
+	@RequestMapping(value = "/removeJdbcRef", method = RequestMethod.GET)
+	@ResponseBody
+	public Object removeJdbcRef(String jdbcRef) {
+		if(StringUtils.isNotBlank(jdbcRef)) {
+			Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
+
+			if (ipWithJdbcRef == null) {
+				return new MonitorDto(0,"OK");
+			}
+			
+			for(Map.Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+				Set<String> jdbcRefSet = entry.getValue();
+				if(jdbcRefSet.contains(jdbcRef)) {
+					jdbcRefSet.remove(jdbcRef);
+				}
+			}
+			
+			String json = gson.toJson(ipWithJdbcRef);
+
+			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
+			
+			return new MonitorDto(0,"OK");
+		}
+		return new MonitorDto(-1,"null jdbcRef");
+	}
 
 	@RequestMapping(value = "/submit", method = RequestMethod.GET)
 	@ResponseBody

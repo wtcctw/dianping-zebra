@@ -1,6 +1,7 @@
 package com.dianping.zebra.syncservice.job.executor;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,10 +38,7 @@ import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 import com.dianping.zebra.syncservice.exception.NoRowsAffectedException;
 import com.dianping.zebra.syncservice.util.ColumnInfoWrap;
 import com.dianping.zebra.syncservice.util.SqlBuilder;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class ShardSyncTaskExecutor implements TaskExecutor {
@@ -302,18 +300,21 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		return oldestBinlog;
 	}
 
-	protected Iterable<BinlogInfo> getBinlogInfos() {
-		return Iterables.transform(Iterables.filter(rowEventProcessors, new Predicate<RowEventProcessor>() {
-			@Override
-			public boolean apply(RowEventProcessor input) {
-				return input.getBinlogInfo() != null;
+	protected List<BinlogInfo> getBinlogInfos() {
+		List<BinlogInfo> result = null;
+		for (RowEventProcessor processor : rowEventProcessors) {
+			BinlogInfo lastBinlogInfo = processor.getBinlogInfo();
+			if (lastBinlogInfo == null) {
+				continue;
 			}
-		}), new Function<RowEventProcessor, BinlogInfo>() {
-			@Override
-			public BinlogInfo apply(RowEventProcessor input) {
-				return input.getBinlogInfo();
+
+			if (result == null) {
+				result = new ArrayList<BinlogInfo>();
 			}
-		});
+
+			result.add(lastBinlogInfo);
+		}
+		return result;
 	}
 
 	class PumaClientRunner implements Runnable {
@@ -330,10 +331,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 						continue;
 					}
 
-					Iterable<BinlogInfo> binlogInfos = getBinlogInfos();
-					BinlogInfo oldestBinlog = getOldestBinlog(binlogInfos);
-					if (oldestBinlog != null) {
-						client.ack(oldestBinlog);
+					List<BinlogInfo> binlogInfos = getBinlogInfos();
+					if (binlogInfos != null) {
+						BinlogInfo oldestBinlog = getOldestBinlog(binlogInfos);
+						if (oldestBinlog != null) {
+							client.ack(oldestBinlog);
+						}
 					}
 				} catch (Exception e) {
 					Cat.logError(e.getMessage(), e);
@@ -366,8 +369,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 
 		private int getIndex(RowChangedEvent.ColumnInfo columnInfo) {
-			return Math.abs((columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue())
-			      .hashCode()) % NUMBER_OF_PROCESSORS;
+			return Math.abs(
+				(columnInfo.getNewValue() != null ? columnInfo.getNewValue() : columnInfo.getOldValue()).hashCode())
+				% NUMBER_OF_PROCESSORS;
 		}
 	}
 
