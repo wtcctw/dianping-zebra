@@ -21,10 +21,6 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Dozer @ 6/2/15 mail@dozer.cc http://www.dozer.cc
- */
-
 @Component
 public class ExecutorManager {
 	@Autowired
@@ -95,7 +91,7 @@ public class ExecutorManager {
 		}
 	}
 
-	//	@Scheduled(cron = "0/10 * * * * ?")
+	// @Scheduled(cron = "0/10 * * * * ?")
 	public synchronized void startShardDumpTask() {
 		try {
 			List<ShardDumpTaskEntity> tasks = shardDumpService.getTaskByIp(InetAddress.getLocalHost().getHostAddress());
