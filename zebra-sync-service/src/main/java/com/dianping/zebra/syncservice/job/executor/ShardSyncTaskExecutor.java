@@ -361,8 +361,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 			try {
 				int index = getIndex(columnInfo);
-				eventQueues[index].put(rowEvent);
 				lastSendBinlogInfo[index] = rowEvent.getBinlogInfo();
+				eventQueues[index].put(rowEvent);
 			} catch (InterruptedException e) {
 			}
 		}
