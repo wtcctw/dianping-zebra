@@ -248,18 +248,17 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		protected void process(RowChangedEvent rowEvent) {
 			String tableName = rowEvent.getTable();
+			String orginTableName = task.getTableNamesMapping().get(tableName);
 			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
 			RuleEngineEvalContext context = new RuleEngineEvalContext(column);
-			Number index = (Number) engines.get(tableName).eval(context);
+			Number index = (Number) engines.get(orginTableName).eval(context);
 			if (index.intValue() < 0) {
 				return;
 			}
-			DataSourceBO bo = dataSourceProviders.get(tableName).getDataSource(index.intValue());
+			DataSourceBO bo = dataSourceProviders.get(orginTableName).getDataSource(index.intValue());
 			String table = bo.evalTable(context);
 
-			rowEvent.setTable(table);
-			rowEvent.setDatabase("");
-			String sql = SqlBuilder.buildSql(rowEvent);
+			String sql = SqlBuilder.buildSql(rowEvent,"",table);
 			Object[] args = SqlBuilder.buildArgs(rowEvent);
 
 			int rows = templateMap.get(bo.getDbIndex()).update(sql, args);
@@ -271,7 +270,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		protected void processPK(RowChangedEvent rowEvent) {
 			Set<String> needToRemoveKeys = new HashSet<String>();
 			String tableName = rowEvent.getTable();
-			PumaClientSyncTaskBaseEntity baseEntity = task.getPumaBaseEntities().get(tableName);
+			String originTableName = task.getTableNamesMapping().get(tableName);
+			PumaClientSyncTaskBaseEntity baseEntity = task.getPumaBaseEntities().get(originTableName);
 
 			for (Map.Entry<String, RowChangedEvent.ColumnInfo> info : rowEvent.getColumns().entrySet()) {
 				if (info.getValue().isKey() && !baseEntity.getPk().equals(info.getKey())) {

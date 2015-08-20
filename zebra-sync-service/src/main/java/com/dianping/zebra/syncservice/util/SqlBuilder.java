@@ -38,18 +38,18 @@ public class SqlBuilder {
 		ut = VE.getTemplate("/sql_template/updateSql.vm");
 	}
 
-	public static String buildSql(RowChangedEvent event) {
+	public static String buildSql(RowChangedEvent event,String database,String table) {
 		String sql;
 
 		switch (event.getDmlType()) {
 		case INSERT:
-			sql = parseSql(event, it);
+			sql = parseSql(event, database,table, it);
 			break;
 		case DELETE:
-			sql = parseSql(event, dt);
+			sql = parseSql(event, database,table, dt);
 			break;
 		case UPDATE:
-			sql = parseSql(event, ut);
+			sql = parseSql(event, database,table, ut);
 			break;
 		default:
 			sql = null;
@@ -92,9 +92,11 @@ public class SqlBuilder {
 		return args.toArray();
 	}
 
-	private static String parseSql(RowChangedEvent event, Template t) {
+	private static String parseSql(RowChangedEvent event,String database, String table, Template t) {
 		VelocityContext context = new VelocityContext();
 		context.put("event", event);
+		context.put("database", database);
+		context.put("table", table);
 		StringWriter writer = new StringWriter();
 		t.merge(context, writer);
 		return writer.toString();

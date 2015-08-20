@@ -1,8 +1,8 @@
 INSERT INTO
-#if (${event.database} == "")
-`${event.table}`
+#if (${database} == "")
+`${table}`
 #else
-`${event.database}`.`${event.table}`
+`${database}`.`${table}`
 #end
 (
 #set($ask = "" )
