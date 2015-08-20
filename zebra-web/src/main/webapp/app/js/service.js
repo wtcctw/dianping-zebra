@@ -114,6 +114,30 @@ zebraWeb.service('configService', function ($modal) {
             }
         });
     };
+    
+    this.openAlarmModal = function (name, onClose) {
+        var modal = $modal.open({
+            templateUrl: 'app/template/alarm-edit.html',
+            controller: 'alarm-edit',
+            size: 'lg',
+            backdrop: false,
+            resolve: {
+                name: function () {
+                    return name;
+                },
+                close: function () {
+                    return function () {
+                        if (modal) {
+                            modal.close();
+                        }
+                        if (onClose) {
+                            onClose();
+                        }
+                    };
+                }
+            }
+        });
+    };
 });
 
 zebraWeb.service('alertService', function ($rootScope) {
