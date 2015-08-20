@@ -121,7 +121,6 @@ zebraWeb.controller('syncTask-edit', function ($scope, $http, pumaTask, close){
 		$http.get('/a/sync-server').success(function (data, status, headers, config) {
 			$scope.syncServers = data;
 			
-			$scope.pumaTaskName = pumaTask.pumaTaskName;
 			$scope.executor = pumaTask.executor;
 			$scope.executor1 = pumaTask.executor1;
 			$scope.executor2 = pumaTask.executor2;
@@ -131,13 +130,11 @@ zebraWeb.controller('syncTask-edit', function ($scope, $http, pumaTask, close){
 	$scope.load();
 	
 	$scope.save = function(){
-		pumaTask.pumaTaskName = $scope.pumaTaskName;
 		pumaTask.executor = $scope.executor;
 		pumaTask.executor1 = $scope.executor1;
 		pumaTask.executor2 = $scope.executor2;
 		
 		$http.get('/a/syncTask/updateSyncServer?pumaClientName=' + pumaTask.pumaClientName
-				+ '&pumaTaskName=' + pumaTask.pumaTaskName
 				+ '&executor=' + $scope.executor + '&executor1=' + $scope.executor1 + "&executor2=" + $scope.executor2).success(function (data, status, headers, config) {
 			close();
 		});

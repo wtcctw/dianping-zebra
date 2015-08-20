@@ -1,8 +1,17 @@
 package com.dianping.zebra.biz.entity;
 
+import java.lang.reflect.Type;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class PumaClientSyncTaskEntity {
+	
+	private static Type type = new TypeToken<Map<String, PumaClientSyncTaskBaseEntity>>() {  
+   }.getType();
 
 	/**
 	 * id
@@ -15,45 +24,10 @@ public class PumaClientSyncTaskEntity {
 	private String ruleName;
 
 	/**
-	 * 逻辑表名
-	 */
-	private String tableName;
-
-	/**
-	 * 主键字段
-	 */
-	private volatile String pk;
-
-	/**
-	 * 数据库规则分配策略
-	 */
-	private String dbRule;
-
-	/**
-	 * 数据库列表
-	 */
-	private String dbIndexes;
-
-	/**
-	 * 表分配策略
-	 */
-	private String tbRule;
-
-	/**
-	 * 表后缀名
-	 */
-	private String tbSuffix;
-
-	/**
-	 * puma任务名
-	 */
-	private String pumaTaskName;
-	
-	/**
 	 * puma client名
 	 */
 	private String pumaClientName;
-	
+
 	/**
 	 * 监听的数据库
 	 */
@@ -63,6 +37,11 @@ public class PumaClientSyncTaskEntity {
 	 * 监听的表，多个表用逗号分隔
 	 */
 	private String pumaTables;
+
+	/**
+	 * 需要分库分表配置
+	 */
+	private Map<String, PumaClientSyncTaskBaseEntity> pumaBaseEntities = new HashMap<String, PumaClientSyncTaskBaseEntity>();
 
 	/**
 	 * 当前执行任务的服务器
@@ -108,62 +87,6 @@ public class PumaClientSyncTaskEntity {
 
 	public void setRuleName(String ruleName) {
 		this.ruleName = ruleName;
-	}
-
-	public String getTableName() {
-		return tableName;
-	}
-
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-
-	public String getPk() {
-		return pk;
-	}
-
-	public void setPk(String pk) {
-		this.pk = pk;
-	}
-
-	public String getDbRule() {
-		return dbRule;
-	}
-
-	public void setDbRule(String dbRule) {
-		this.dbRule = dbRule;
-	}
-
-	public String getDbIndexes() {
-		return dbIndexes;
-	}
-
-	public void setDbIndexes(String dbIndexes) {
-		this.dbIndexes = dbIndexes;
-	}
-
-	public String getTbRule() {
-		return tbRule;
-	}
-
-	public void setTbRule(String tbRule) {
-		this.tbRule = tbRule;
-	}
-
-	public String getTbSuffix() {
-		return tbSuffix;
-	}
-
-	public void setTbSuffix(String tbSuffix) {
-		this.tbSuffix = tbSuffix;
-	}
-
-	public String getPumaTaskName() {
-		return pumaTaskName;
-	}
-
-	public void setPumaTaskName(String pumaTaskName) {
-		this.pumaTaskName = pumaTaskName;
 	}
 
 	public String getExecutor() {
@@ -237,4 +160,38 @@ public class PumaClientSyncTaskEntity {
 	public void setPumaClientName(String pumaClientName) {
 		this.pumaClientName = pumaClientName;
 	}
+
+	public Map<String, PumaClientSyncTaskBaseEntity> getPumaBaseEntities() {
+		return pumaBaseEntities;
+	}
+
+	public void setPumaBaseEntities(Map<String, PumaClientSyncTaskBaseEntity> pumaBaseEntities) {
+		this.pumaBaseEntities = pumaBaseEntities;
+	}
+
+	public void addPumaTable(String table) {
+		if (this.pumaTables == null || this.pumaTables.length() == 0) {
+			this.pumaTables = table;
+		} else {
+			this.pumaTables += "," + table;
+		}
+	}
+	
+	public String getPumaBaseEntitiesJson() {
+		Gson gson = new Gson();
+		return gson.toJson(this.pumaBaseEntities);
+	}
+
+	public void setPumaBaseEntitiesJson(String pumaBaseEntitiesJson) {
+		Gson gson = new Gson();
+		this.pumaBaseEntities = gson.fromJson(pumaBaseEntitiesJson, type);
+	}
+
+	@Override
+   public String toString() {
+	   return "PumaClientSyncTaskEntity [id=" + id + ", ruleName=" + ruleName + ", pumaClientName=" + pumaClientName
+	         + ", pumaDatabase=" + pumaDatabase + ", pumaTables=" + pumaTables + ", pumaBaseEntities="
+	         + pumaBaseEntities + ", executor=" + executor + ", executor1=" + executor1 + ", executor2=" + executor2
+	         + ", status=" + status + ", createTime=" + createTime + ", updateTime=" + updateTime + "]";
+   }
 }

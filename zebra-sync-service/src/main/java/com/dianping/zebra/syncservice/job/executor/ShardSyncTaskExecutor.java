@@ -1,5 +1,24 @@
 package com.dianping.zebra.syncservice.job.executor;
 
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.jboss.netty.util.internal.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.dianping.cat.Cat;
 import com.dianping.puma.api.PumaClient;
 import com.dianping.puma.api.PumaClientConfig;
@@ -7,6 +26,7 @@ import com.dianping.puma.core.dto.BinlogMessage;
 import com.dianping.puma.core.event.RowChangedEvent;
 import com.dianping.puma.core.model.BinlogInfo;
 import com.dianping.puma.core.util.sql.DMLType;
+import com.dianping.zebra.biz.entity.PumaClientSyncTaskBaseEntity;
 import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
@@ -20,27 +40,13 @@ import com.dianping.zebra.syncservice.util.SqlBuilder;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class ShardSyncTaskExecutor implements TaskExecutor {
-	private final PumaClientSyncTaskEntity task;
-
 	private final static Logger eventSkipLogger = LoggerFactory.getLogger("EventSkip");
+
+	private final PumaClientSyncTaskEntity task;
 
 	public final AtomicLong hitTimes = new AtomicLong();
 
@@ -50,15 +56,15 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	public final static int MAX_QUEUE_SIZE = 10000;
 
-	protected volatile GroovyRuleEngine engine;
-
-	protected volatile SimpleDataSourceProvider dataSourceProvider;
-
 	protected volatile PumaClient client;
 
-	protected volatile Map<String, GroupDataSource> dataSources;
+	protected Map<String, GroovyRuleEngine> engines = new ConcurrentHashMap<String, GroovyRuleEngine>();
 
-	protected volatile Map<String, JdbcTemplate> templateMap;
+	protected Map<String, SimpleDataSourceProvider> dataSourceProviders = new ConcurrentHashMap<String, SimpleDataSourceProvider>();
+
+	protected Map<String, GroupDataSource> dataSources = new ConcurrentHashMap<String, GroupDataSource>();
+
+	protected Map<String, JdbcTemplate> templateMap = new ConcurrentHashMap<String, JdbcTemplate>();
 
 	protected volatile BlockingQueue<RowChangedEvent>[] eventQueues;
 
@@ -143,31 +149,32 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initRouter() {
-		this.engine = new GroovyRuleEngine(task.getDbRule());
-		this.dataSourceProvider = new SimpleDataSourceProvider(task.getTableName(), task.getDbIndexes(),
-		      task.getTbSuffix(), task.getTbRule());
+		for (Entry<String, PumaClientSyncTaskBaseEntity> entry : task.getPumaBaseEntities().entrySet()) {
+			String tableName = entry.getKey();
+			PumaClientSyncTaskBaseEntity entity = entry.getValue();
+
+			this.engines.put(tableName, new GroovyRuleEngine(entity.getDbRule()));
+			this.dataSourceProviders.put(tableName,
+			      new SimpleDataSourceProvider(tableName, entity.getDbIndex(), entity.getTbSuffix(), entity.getTbRule()));
+		}
 	}
 
 	protected void initDataSources() {
-		Map<String, GroupDataSource> temp = new HashMap<String, GroupDataSource>();
-		for (Map.Entry<String, Set<String>> entity : dataSourceProvider.getAllDBAndTables().entrySet()) {
-			String jdbcRef = entity.getKey();
-			if (!temp.containsKey(jdbcRef)) {
-				GroupDataSource ds = initGroupDataSource(jdbcRef);
-				temp.put(jdbcRef, ds);
+		for (SimpleDataSourceProvider dataSourceProvider : this.dataSourceProviders.values()) {
+			for (Map.Entry<String, Set<String>> entity : dataSourceProvider.getAllDBAndTables().entrySet()) {
+				String jdbcRef = entity.getKey();
+				if (!this.dataSources.containsKey(jdbcRef)) {
+					GroupDataSource ds = initGroupDataSource(jdbcRef);
+					this.dataSources.put(jdbcRef, ds);
+				}
 			}
 		}
-		this.dataSources = ImmutableMap.copyOf(temp);
 	}
 
 	protected void initJdbcTemplate() {
-		ImmutableMap.Builder<String, JdbcTemplate> builder = ImmutableMap.builder();
-
 		for (Map.Entry<String, GroupDataSource> entry : dataSources.entrySet()) {
-			builder.put(entry.getKey(), new JdbcTemplate(entry.getValue()));
+			this.templateMap.put(entry.getKey(), new JdbcTemplate(entry.getValue()));
 		}
-
-		this.templateMap = builder.build();
 	}
 
 	protected GroupDataSource initGroupDataSource(String jdbcRef) {
@@ -182,14 +189,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	protected void initPumaClient() {
 		this.client = new PumaClientConfig().setClientName(task.getPumaClientName()).setDatabase(task.getPumaDatabase())
-		      .setTables(Lists.newArrayList(task.getPumaTables().split(","))).buildClusterPumaClient();
+		      .setTables(Lists.newArrayList(task.getPumaTables().split(","))).setTransaction(false)
+		      .buildClusterPumaClient();
 		this.clientThread = new Thread(new PumaClientRunner());
 		this.clientThread.setDaemon(true);
 		this.clientThread.setName("PumaSyncTask-" + task.getPumaClientName());
 	}
 
 	class RowEventProcessor implements Runnable {
-
 		private final BlockingQueue<RowChangedEvent> queue;
 
 		private final AtomicReference<BinlogInfo> binlogInfo = new AtomicReference<BinlogInfo>();
@@ -245,13 +252,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 
 		protected void process(RowChangedEvent rowEvent) {
+			String tableName = rowEvent.getTable();
 			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
 			RuleEngineEvalContext context = new RuleEngineEvalContext(column);
-			Number index = (Number) engine.eval(context);
+			Number index = (Number) engines.get(tableName).eval(context);
 			if (index.intValue() < 0) {
 				return;
 			}
-			DataSourceBO bo = dataSourceProvider.getDataSource(index.intValue());
+			DataSourceBO bo = dataSourceProviders.get(tableName).getDataSource(index.intValue());
 			String table = bo.evalTable(context);
 
 			rowEvent.setTable(table);
@@ -267,9 +275,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		protected void processPK(RowChangedEvent rowEvent) {
 			Set<String> needToRemoveKeys = new HashSet<String>();
-			
+			String tableName = rowEvent.getTable();
+			PumaClientSyncTaskBaseEntity baseEntity = task.getPumaBaseEntities().get(tableName);
+
 			for (Map.Entry<String, RowChangedEvent.ColumnInfo> info : rowEvent.getColumns().entrySet()) {
-				if (info.getValue().isKey() && !task.getPk().equals(info.getKey())) {
+				if (info.getValue().isKey() && !baseEntity.getPk().equals(info.getKey())) {
 					needToRemoveKeys.add(info.getKey());
 				}
 			}
@@ -278,7 +288,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				rowEvent.getColumns().remove(key);
 			}
 
-			rowEvent.getColumns().get(task.getPk()).setKey(true);
+			rowEvent.getColumns().get(baseEntity.getPk()).setKey(true);
 		}
 	}
 
@@ -345,7 +355,9 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				return;
 			}
 
-			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(task.getPk());
+			String tableName = rowEvent.getTable();
+			PumaClientSyncTaskBaseEntity pumaClientSyncTaskBaseEntity = task.getPumaBaseEntities().get(tableName);
+			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(pumaClientSyncTaskBaseEntity.getPk());
 
 			try {
 				eventQueues[getIndex(columnInfo)].put(rowEvent);
@@ -362,7 +374,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	public Map<String, String> getStatus() {
 		Map<String, String> result = new HashMap<String, String>();
 		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTimes.getAndSet(0)));
-		
+
 		return result;
 	}
 }

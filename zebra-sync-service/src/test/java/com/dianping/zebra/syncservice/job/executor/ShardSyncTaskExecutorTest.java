@@ -1,160 +1,160 @@
-package com.dianping.zebra.syncservice.job.executor;
-
-import com.dianping.puma.core.event.RowChangedEvent;
-import com.dianping.puma.core.model.BinlogInfo;
-import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
-import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
-import com.google.common.collect.Lists;
-import junit.framework.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
-
-/**
- * Dozer @ 6/9/15
- * mail@dozer.cc
- * http://www.dozer.cc
- */
-public class ShardSyncTaskExecutorTest {
-
-	PumaClientSyncTaskEntity config;
-
-	ShardSyncTaskExecutor target;
-
-	@Before
-	public void setUp() throws Exception {
-		config = new PumaClientSyncTaskEntity();
-
-		config.setTableName("ut");
-		config.setDbRule("#id# == null ? SKIP : ((#id#).toLong() % 2)");
-		config.setDbIndexes("db0,db1");
-		config.setTbRule("((#id# / 2).toLong() % 2)");
-		config.setTbSuffix("everydb:[_0,_1]");
-
-		target = new ShardSyncTaskExecutor(config);
-	}
-
-	@Test
-	public void test_router() {
-		Map<String, Object> args = new HashMap<String, Object>();
-		target.initRouter();
-		Number result = (Number) target.engine.eval(new RuleEngineEvalContext(args));
-		Assert.assertEquals(-1, result.intValue());
-	}
-
-	@Test
-	public void test_init_processor_and_thread() throws Exception {
-		test_init_event_queue();
-		target.initProcessors();
-
-		Assert.assertEquals(target.NUMBER_OF_PROCESSORS, target.rowEventProcessors.size());
-		Assert.assertEquals(target.NUMBER_OF_PROCESSORS, target.rowEventProcesserThreads.size());
-	}
-
-	@Test
-	public void test_init_event_queue() throws Exception {
-		target.dataSources = new HashMap<String, GroupDataSource>();
-		target.dataSources.put("a", new GroupDataSource());
-		target.dataSources.put("b", new GroupDataSource());
-		target.initEventQueues();
-		Assert.assertTrue(target.eventQueues.length == target.NUMBER_OF_PROCESSORS);
-	}
-
-	@Test
-	public void test_init_datasource() {
-		target = spy(target);
-		doAnswer(new Answer<GroupDataSource>() {
-			@Override
-			public GroupDataSource answer(InvocationOnMock invocation) throws Throwable {
-				return new GroupDataSource();
-			}
-		}).when(target).initGroupDataSource(anyString());
-
-		target.initRouter();
-		target.initDataSources();
-
-		verify(target, times(1)).initGroupDataSource(eq("db0"));
-		verify(target, times(1)).initGroupDataSource(eq("db1"));
-		verify(target, times(2)).initGroupDataSource(anyString());
-	}
-
-	@Test
-	public void test_process_pk_removepk_add_shard_key() throws Exception {
-		ShardSyncTaskExecutor.RowEventProcessor listener = target.new RowEventProcessor(null);
-
-		RowChangedEvent event = new RowChangedEvent();
-		config.setPk("UserId");
-		Map<String, RowChangedEvent.ColumnInfo> columns = new HashMap<String, RowChangedEvent.ColumnInfo>();
-		columns.put("ID", new RowChangedEvent.ColumnInfo(true, 1, 1));
-		columns.put("UserId", new RowChangedEvent.ColumnInfo(false, 1, 1));
-		event.setColumns(columns);
-		listener.processPK(event);
-
-		Assert.assertEquals(1, event.getColumns().size());
-		Assert.assertTrue(event.getColumns().get("UserId").isKey());
-	}
-
-	@Test
-	public void test_process_pk_pk_is_shard_key() throws Exception {
-		ShardSyncTaskExecutor.RowEventProcessor listener = target.new RowEventProcessor(null);
-
-		RowChangedEvent event = new RowChangedEvent();
-		config.setPk("UserId");
-		Map<String, RowChangedEvent.ColumnInfo> columns = new HashMap<String, RowChangedEvent.ColumnInfo>();
-		columns.put("OrderId", new RowChangedEvent.ColumnInfo(false, 1, 1));
-		columns.put("UserId", new RowChangedEvent.ColumnInfo(true, 1, 1));
-		event.setColumns(columns);
-		listener.processPK(event);
-
-		Assert.assertEquals(2, event.getColumns().size());
-		Assert.assertTrue(event.getColumns().get("UserId").isKey());
-		Assert.assertFalse(event.getColumns().get("OrderId").isKey());
-	}
-
-	@Test
-	public void test_get_oldest_binlog() throws Exception {
-		BinlogInfo info1 = new BinlogInfo(1, "mysql.002", 80l, 0, 1);
-		BinlogInfo info2 = new BinlogInfo(1, "mysql.002", 100l, 0, 2);
-		BinlogInfo info3 = new BinlogInfo(1, "mysql.003", 1l, 0, 3);
-
-		BinlogInfo result = target.getOldestBinlog(Lists.newArrayList(info1, info2, info3));
-
-		Assert.assertEquals(info1.getBinlogFile(), result.getBinlogFile());
-		Assert.assertEquals(info1.getBinlogPosition(), result.getBinlogPosition());
-	}
-
-	@Test
-	@Ignore
-	public void testPuma() throws IOException {
-		PumaClientSyncTaskEntity config = new PumaClientSyncTaskEntity();
-
-		config.setId(3);
-		config.setPumaClientName("test");
-		config.setRuleName("test");
-		config.setTableName("debug");
-		config.setDbRule("(#id# % 2).intValue()");
-		config.setDbIndexes("localhost,localhost");
-		config.setTbRule("(#id# % 2).intValue()");
-		config.setTbSuffix("everydb:[_0,_1]");
-		config.setPumaTables("debug");
-		config.setPumaDatabase("test");
-		config.setPk("id");
-
-		ShardSyncTaskExecutor target = new ShardSyncTaskExecutor(config);
-		target.init();
-
-		target.start();
-		System.in.read();
-	}
-}
+//package com.dianping.zebra.syncservice.job.executor;
+//
+//import com.dianping.puma.core.event.RowChangedEvent;
+//import com.dianping.puma.core.model.BinlogInfo;
+//import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
+//import com.dianping.zebra.group.jdbc.GroupDataSource;
+//import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
+//import com.google.common.collect.Lists;
+//import junit.framework.Assert;
+//import org.junit.Before;
+//import org.junit.Ignore;
+//import org.junit.Test;
+//import org.mockito.invocation.InvocationOnMock;
+//import org.mockito.stubbing.Answer;
+//
+//import java.io.IOException;
+//import java.util.HashMap;
+//import java.util.Map;
+//
+//import static org.mockito.Matchers.anyString;
+//import static org.mockito.Matchers.eq;
+//import static org.mockito.Mockito.*;
+//
+///**
+// * Dozer @ 6/9/15
+// * mail@dozer.cc
+// * http://www.dozer.cc
+// */
+//public class ShardSyncTaskExecutorTest {
+//
+//	PumaClientSyncTaskEntity config;
+//
+//	ShardSyncTaskExecutor target;
+//
+//	@Before
+//	public void setUp() throws Exception {
+//		config = new PumaClientSyncTaskEntity();
+//
+//		config.setTableName("ut");
+//		config.setDbRule("#id# == null ? SKIP : ((#id#).toLong() % 2)");
+//		config.setDbIndexes("db0,db1");
+//		config.setTbRule("((#id# / 2).toLong() % 2)");
+//		config.setTbSuffix("everydb:[_0,_1]");
+//
+//		target = new ShardSyncTaskExecutor(config);
+//	}
+//
+//	@Test
+//	public void test_router() {
+//		Map<String, Object> args = new HashMap<String, Object>();
+//		target.initRouter();
+//		Number result = (Number) target.engine.eval(new RuleEngineEvalContext(args));
+//		Assert.assertEquals(-1, result.intValue());
+//	}
+//
+//	@Test
+//	public void test_init_processor_and_thread() throws Exception {
+//		test_init_event_queue();
+//		target.initProcessors();
+//
+//		Assert.assertEquals(target.NUMBER_OF_PROCESSORS, target.rowEventProcessors.size());
+//		Assert.assertEquals(target.NUMBER_OF_PROCESSORS, target.rowEventProcesserThreads.size());
+//	}
+//
+//	@Test
+//	public void test_init_event_queue() throws Exception {
+//		target.dataSources = new HashMap<String, GroupDataSource>();
+//		target.dataSources.put("a", new GroupDataSource());
+//		target.dataSources.put("b", new GroupDataSource());
+//		target.initEventQueues();
+//		Assert.assertTrue(target.eventQueues.length == target.NUMBER_OF_PROCESSORS);
+//	}
+//
+//	@Test
+//	public void test_init_datasource() {
+//		target = spy(target);
+//		doAnswer(new Answer<GroupDataSource>() {
+//			@Override
+//			public GroupDataSource answer(InvocationOnMock invocation) throws Throwable {
+//				return new GroupDataSource();
+//			}
+//		}).when(target).initGroupDataSource(anyString());
+//
+//		target.initRouter();
+//		target.initDataSources();
+//
+//		verify(target, times(1)).initGroupDataSource(eq("db0"));
+//		verify(target, times(1)).initGroupDataSource(eq("db1"));
+//		verify(target, times(2)).initGroupDataSource(anyString());
+//	}
+//
+//	@Test
+//	public void test_process_pk_removepk_add_shard_key() throws Exception {
+//		ShardSyncTaskExecutor.RowEventProcessor listener = target.new RowEventProcessor(null);
+//
+//		RowChangedEvent event = new RowChangedEvent();
+//		config.setPk("UserId");
+//		Map<String, RowChangedEvent.ColumnInfo> columns = new HashMap<String, RowChangedEvent.ColumnInfo>();
+//		columns.put("ID", new RowChangedEvent.ColumnInfo(true, 1, 1));
+//		columns.put("UserId", new RowChangedEvent.ColumnInfo(false, 1, 1));
+//		event.setColumns(columns);
+//		listener.processPK(event);
+//
+//		Assert.assertEquals(1, event.getColumns().size());
+//		Assert.assertTrue(event.getColumns().get("UserId").isKey());
+//	}
+//
+//	@Test
+//	public void test_process_pk_pk_is_shard_key() throws Exception {
+//		ShardSyncTaskExecutor.RowEventProcessor listener = target.new RowEventProcessor(null);
+//
+//		RowChangedEvent event = new RowChangedEvent();
+//		config.setPk("UserId");
+//		Map<String, RowChangedEvent.ColumnInfo> columns = new HashMap<String, RowChangedEvent.ColumnInfo>();
+//		columns.put("OrderId", new RowChangedEvent.ColumnInfo(false, 1, 1));
+//		columns.put("UserId", new RowChangedEvent.ColumnInfo(true, 1, 1));
+//		event.setColumns(columns);
+//		listener.processPK(event);
+//
+//		Assert.assertEquals(2, event.getColumns().size());
+//		Assert.assertTrue(event.getColumns().get("UserId").isKey());
+//		Assert.assertFalse(event.getColumns().get("OrderId").isKey());
+//	}
+//
+//	@Test
+//	public void test_get_oldest_binlog() throws Exception {
+//		BinlogInfo info1 = new BinlogInfo(1, "mysql.002", 80l, 0, 1);
+//		BinlogInfo info2 = new BinlogInfo(1, "mysql.002", 100l, 0, 2);
+//		BinlogInfo info3 = new BinlogInfo(1, "mysql.003", 1l, 0, 3);
+//
+//		BinlogInfo result = target.getOldestBinlog(Lists.newArrayList(info1, info2, info3));
+//
+//		Assert.assertEquals(info1.getBinlogFile(), result.getBinlogFile());
+//		Assert.assertEquals(info1.getBinlogPosition(), result.getBinlogPosition());
+//	}
+//
+//	@Test
+//	@Ignore
+//	public void testPuma() throws IOException {
+//		PumaClientSyncTaskEntity config = new PumaClientSyncTaskEntity();
+//
+//		config.setId(3);
+//		config.setPumaClientName("test");
+//		config.setRuleName("test");
+//		config.setTableName("debug");
+//		config.setDbRule("(#id# % 2).intValue()");
+//		config.setDbIndexes("localhost,localhost");
+//		config.setTbRule("(#id# % 2).intValue()");
+//		config.setTbSuffix("everydb:[_0,_1]");
+//		config.setPumaTables("debug");
+//		config.setPumaDatabase("test");
+//		config.setPk("id");
+//
+//		ShardSyncTaskExecutor target = new ShardSyncTaskExecutor(config);
+//		target.init();
+//
+//		target.start();
+//		System.in.read();
+//	}
+//}

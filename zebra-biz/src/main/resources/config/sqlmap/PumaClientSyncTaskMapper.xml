@@ -26,16 +26,10 @@
         `zebra`.`PumaTask`
         (
         `ruleName`,
-        `tableName`,
-        `pk`,
-        `dbRule`,
-        `dbIndexes`,
-        `tbRule`,
-        `tbSuffix`,
-        `pumaTaskName`,
         `pumaClientName`,
         `pumaDatabase`,
         `pumaTables`,
+        `pumaBaseEntitiesJson`,
         `executor`,
         `executor1`,
         `executor2`,
@@ -46,16 +40,10 @@
         VALUES
         (
         #{ruleName},
-        #{tableName},
-        #{pk},
-        #{dbRule},
-        #{dbIndexes},
-        #{tbRule},
-        #{tbSuffix},
-        #{pumaTaskName},
         #{pumaClientName},
         #{pumaDatabase},
         #{pumaTables},
+        #{pumaBaseEntitiesJson},
         #{executor},
         #{executor1},
         #{executor2},
@@ -70,15 +58,9 @@
         `zebra`.`PumaTask`
         SET
         ruleName=#{ruleName},
-        tableName=#{tableName},
-        pk=#{pk},
-        dbRule=#{dbRule},
-        dbIndexes=#{dbIndexes},
-        tbRule=#{tbRule},
-        tbSuffix=#{tbSuffix},
-        pumaTaskName=#{pumaTaskName},
         pumaDatabase=#{pumaDatabase},
         pumaTables=#{pumaTables},
+        pumaBaseEntitiesJson=#{pumaBaseEntitiesJson},
         executor=#{executor},
         executor1=#{executor1},
         executor2=#{executor2},
@@ -98,7 +80,6 @@
     <update id="updateSyncTaskSyncServers" parameterType="map">
         UPDATE
         `zebra`.`PumaTask` SET
-        pumaTaskName=#{pumaTaskName},
         executor=#{executor},
         executor1=#{executor1},
         executor2=#{executor2},

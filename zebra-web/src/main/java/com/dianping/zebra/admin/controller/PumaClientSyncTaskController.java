@@ -1,9 +1,6 @@
 package com.dianping.zebra.admin.controller;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,20 +16,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.zebra.biz.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.biz.dto.PumaClientSyncTaskDto;
+import com.dianping.zebra.biz.entity.PumaClientSyncTaskBaseEntity;
 import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.biz.entity.SyncServerMonitorEntity;
 import com.dianping.zebra.biz.service.SyncServerMonitorService;
 import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LionKey;
-import com.dianping.zebra.group.config.DefaultDataSourceConfigManager;
-import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
 import com.dianping.zebra.util.StringUtils;
-import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.gson.Gson;
 
@@ -46,7 +40,7 @@ public class PumaClientSyncTaskController extends BasicController {
 	@Autowired
 	private SyncServerMonitorService syncServers;
 
-	private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
+	// private static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://([^:]+):\\d+/([^\\?]+).*");
 
 	private static final Pattern SHARD_PATTERN = Pattern.compile("#([^#]+)#");
 
@@ -66,12 +60,13 @@ public class PumaClientSyncTaskController extends BasicController {
 
 		return null;
 	}
-	
+
 	@RequestMapping(value = "/updateSyncServer", method = RequestMethod.GET)
 	@ResponseBody
-	public void updateSyncServer(String pumaClientName, String pumaTaskName, String executor, String executor1,String executor2){
-		if(pumaClientName != null && pumaTaskName != null && executor != null && executor1 != null && executor2 != null){
-			dao.updateSyncTaskSyncServers(pumaClientName, pumaTaskName, executor, executor1, executor2);
+	public void updateSyncServer(String pumaClientName, String executor, String executor1,
+	      String executor2) {
+		if (pumaClientName != null && executor != null && executor1 != null && executor2 != null) {
+			dao.updateSyncTaskSyncServers(pumaClientName, executor, executor1, executor2);
 		}
 	}
 
@@ -108,13 +103,12 @@ public class PumaClientSyncTaskController extends BasicController {
 			dto.setExecutor1(tmp.getExecutor1());
 			dto.setExecutor2(tmp.getExecutor2());
 			dto.setStatus(tmp.getStatus());
-			dto.setPumaTaskName(tmp.getPumaTaskName());
 			dao.updateSyncTask(dto);
 		}
 	}
 
-	private List<PumaClientSyncTaskDto> generatePlan(String ruleName) {
-		List<PumaClientSyncTaskDto> result = new ArrayList<PumaClientSyncTaskDto>();
+	protected List<PumaClientSyncTaskDto> generatePlan(String ruleName) {
+		Map<String, PumaClientSyncTaskDto> tasks = new HashMap<String, PumaClientSyncTaskDto>();
 
 		LionConfigService configService = LionConfigService.getInstance();
 		RouterRuleConfig routerConfig = new Gson().fromJson(
@@ -125,90 +119,82 @@ public class PumaClientSyncTaskController extends BasicController {
 			Map<String, Set<String>> allDBAndTables = null;
 
 			for (TableShardDimensionConfig dimensionConfig : tableShardRule.getDimensionConfigs()) {
-				SimpleDataSourceProvider provider = new SimpleDataSourceProvider(table, dimensionConfig.getDbIndexes(),
-				      dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
-
 				if (dimensionConfig.isMaster()) {
+					SimpleDataSourceProvider provider = new SimpleDataSourceProvider(table, dimensionConfig.getDbIndexes(),
+					      dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
 					allDBAndTables = provider.getAllDBAndTables();
 					break;
 				}
 			}
 
 			for (TableShardDimensionConfig dimensionConfig : tableShardRule.getDimensionConfigs()) {
-				SimpleDataSourceProvider provider = new SimpleDataSourceProvider(table, dimensionConfig.getDbIndexes(),
-				      dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
-
-				if (dimensionConfig.isMaster()) {
-					allDBAndTables = provider.getAllDBAndTables();
-					continue;
-				}
-
 				if (dimensionConfig.isMaster() == false && dimensionConfig.isNeedSync()) {
 					for (Entry<String, Set<String>> dbAndTables : allDBAndTables.entrySet()) {
-						PumaClientSyncTaskDto syncTask = new PumaClientSyncTaskDto();
-
-						syncTask.setRuleName(ruleName);
-						syncTask.setTableName(table);
-						syncTask.setPk(tableShardRule.getGeneratedPK());
-						syncTask.setDbRule(dimensionConfig.getDbRule());
-						syncTask.setDbIndexes(dimensionConfig.getDbIndexes());
-						syncTask.setTbRule(dimensionConfig.getTbRule());
+						String database = dbAndTables.getKey();
 						String shardColumn = getShardColumn(dimensionConfig.getTbRule());
-						syncTask.setShardColumn(shardColumn);
-						syncTask.setTbSuffix(dimensionConfig.getTbSuffix());
 
-						String jdbcRef = dbAndTables.getKey();
-						DefaultDataSourceConfigManager configManager = new DefaultDataSourceConfigManager(jdbcRef,
-						      LionConfigService.getInstance());
-						configManager.init();
+						String pumaClientName = database + "-" + shardColumn;
 
-						DataSourceConfig dsConfig = findTheOnlyWriteDataSourceConfig(configManager.getGroupDataSourceConfig());
-						Matcher matcher = JDBC_URL_PATTERN.matcher(dsConfig.getJdbcUrl());
-						checkArgument(matcher.matches(), dsConfig.getJdbcUrl());
-						String dbName = matcher.group(2);
+						PumaClientSyncTaskDto syncTask = tasks.get(pumaClientName);
 
-						syncTask.setPumaDatabase(dbName);
+						if (syncTask == null) {
+							syncTask = new PumaClientSyncTaskDto();
+							syncTask.setRuleName(ruleName);
+							syncTask.setPumaClientName(pumaClientName);
+							syncTask.setShardColumn(shardColumn);
+							syncTask.setPumaDatabase(database);
 
-						syncTask.setPumaClientName(String.format("%s@%s@%s", dbName, table, shardColumn));
-						configManager.close();
-
-						StringBuilder sb = new StringBuilder(128);
-						boolean isFirst = true;
-
-						for (String tb : dbAndTables.getValue()) {
-							if (isFirst) {
-								sb.append(tb);
-								isFirst = false;
-							} else {
-								sb.append(",");
-								sb.append(tb);
-							}
+							tasks.put(pumaClientName, syncTask);
 						}
 
-						syncTask.setPumaTables(sb.toString());
+						for (String tb : dbAndTables.getValue()) {
+							syncTask.addPumaTable(tb);
+						}
 
-						result.add(syncTask);
+						PumaClientSyncTaskBaseEntity baseEntity = new PumaClientSyncTaskBaseEntity();
+
+						baseEntity.setTableName(table);
+						baseEntity.setPk(tableShardRule.getGeneratedPK());
+						baseEntity.setDbRule(dimensionConfig.getDbRule());
+						baseEntity.setDbIndex(dimensionConfig.getDbIndexes());
+						baseEntity.setTbRule(dimensionConfig.getTbRule());
+						baseEntity.setTbSuffix(dimensionConfig.getTbSuffix());
+
+						syncTask.getPumaBaseEntities().put(table, baseEntity);
+
+						// String jdbcRef = database;
+						// DefaultDataSourceConfigManager configManager = new DefaultDataSourceConfigManager(jdbcRef,
+						// LionConfigService.getInstance());
+						// configManager.init();
+						//
+						// DataSourceConfig dsConfig = findTheOnlyWriteDataSourceConfig(configManager.getGroupDataSourceConfig());
+						// Matcher matcher = JDBC_URL_PATTERN.matcher(dsConfig.getJdbcUrl());
+						// checkArgument(matcher.matches(), dsConfig.getJdbcUrl());
+						// String dbName = matcher.group(2);
+						//
+						// syncTask.setPumaDatabase(dbName);
+
 					}
 				}
 			}
 		}
 
-		return result;
+		return FluentIterable.from(tasks.values()).toList();
 	}
 
-	private DataSourceConfig findTheOnlyWriteDataSourceConfig(GroupDataSourceConfig config) {
-		checkNotNull(config, "ds");
-		List<DataSourceConfig> dataSourceConfigs = FluentIterable.from(config.getDataSourceConfigs().values())
-		      .filter(new Predicate<DataSourceConfig>() {
-			      @Override
-			      public boolean apply(DataSourceConfig dataSourceConfig) {
-				      return dataSourceConfig.isCanWrite();
-			      }
-		      }).toList();
-
-		checkArgument(dataSourceConfigs.size() == 1, config.toString());
-		return dataSourceConfigs.get(0);
-	}
+	// private DataSourceConfig findTheOnlyWriteDataSourceConfig(GroupDataSourceConfig config) {
+	// checkNotNull(config, "ds");
+	// List<DataSourceConfig> dataSourceConfigs = FluentIterable.from(config.getDataSourceConfigs().values())
+	// .filter(new Predicate<DataSourceConfig>() {
+	// @Override
+	// public boolean apply(DataSourceConfig dataSourceConfig) {
+	// return dataSourceConfig.isCanWrite();
+	// }
+	// }).toList();
+	//
+	// checkArgument(dataSourceConfigs.size() == 1, config.toString());
+	// return dataSourceConfigs.get(0);
+	// }
 
 	private String getShardColumn(String tableRule) {
 		StringBuilder sb = new StringBuilder();

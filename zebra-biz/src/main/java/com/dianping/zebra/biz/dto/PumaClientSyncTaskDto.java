@@ -13,4 +13,9 @@ public class PumaClientSyncTaskDto extends PumaClientSyncTaskEntity{
 	public void setShardColumn(String shardColumn) {
 		this.shardColumn = shardColumn;
 	}
+
+	@Override
+   public String toString() {
+	   return "PumaClientSyncTaskDto [shardColumn=" + shardColumn + "]" + super.toString();
+   }
 }

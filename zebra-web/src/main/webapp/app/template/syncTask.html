@@ -24,7 +24,7 @@
 		<thead>
 			<tr>
 				<th>任务名</th>
-				<th>Puma任务名</th>
+				<th>表名</th>
 				<th>同步服务器地址</th>
 				<th>备选服务器地址1</th>
 				<th>备选服务器地址2</th>
@@ -36,7 +36,10 @@
 		<tbody>
 			<tr ng-repeat="syncTaskPlan in syncTaskPlans | toArray">
 				<td>{{syncTaskPlan.pumaClientName}}</td>
-				<td>{{syncTaskPlan.pumaTaskName}}</td>
+				<td><span popover-trigger="mouseenter" popover="{{(syncTaskPlan.pumaTables && syncTaskPlan.pumaTables.length>60)?syncTaskPlan.pumaTables:''}}">
+					{{(syncTaskPlan.pumaTables && syncTaskPlan.pumaTables.length>60)?syncTaskPlan.pumaTables.substring(0,60-3) + '...':syncTaskPlan.pumaTables}}
+				</span>
+				</td>
 				<td>{{syncTaskPlan.executor}}</td>
 				<td>{{syncTaskPlan.executor1}}</td>
 				<td>{{syncTaskPlan.executor2}}</td>
