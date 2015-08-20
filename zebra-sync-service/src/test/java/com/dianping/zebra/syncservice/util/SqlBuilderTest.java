@@ -33,6 +33,6 @@ public class SqlBuilderTest {
 		RowChangedEvent event = new RowChangedEvent();
 		event.setDmlType(DMLType.UPDATE);
 		event.setColumns(columns);
-		SqlBuilder.buildSql(event);
+		SqlBuilder.buildSql(event,"","");
 	}
 }

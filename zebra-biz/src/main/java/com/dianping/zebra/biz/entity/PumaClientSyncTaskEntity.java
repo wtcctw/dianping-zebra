@@ -2,16 +2,20 @@ package com.dianping.zebra.biz.entity;
 
 import java.lang.reflect.Type;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+
+import org.jboss.netty.util.internal.ConcurrentHashMap;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class PumaClientSyncTaskEntity {
-	
-	private static Type type = new TypeToken<Map<String, PumaClientSyncTaskBaseEntity>>() {  
-   }.getType();
+
+	private static Type type1 = new TypeToken<Map<String, PumaClientSyncTaskBaseEntity>>() {
+	}.getType();
+
+	private static Type type2 = new TypeToken<Map<String, String>>() {
+	}.getType();
 
 	/**
 	 * id
@@ -39,9 +43,14 @@ public class PumaClientSyncTaskEntity {
 	private String pumaTables;
 
 	/**
+	 * 分表名和原来的表名的对应关系
+	 */
+	private Map<String, String> tableNamesMapping = new ConcurrentHashMap<String, String>();
+
+	/**
 	 * 需要分库分表配置
 	 */
-	private Map<String, PumaClientSyncTaskBaseEntity> pumaBaseEntities = new HashMap<String, PumaClientSyncTaskBaseEntity>();
+	private Map<String, PumaClientSyncTaskBaseEntity> pumaBaseEntities = new ConcurrentHashMap<String, PumaClientSyncTaskBaseEntity>();
 
 	/**
 	 * 当前执行任务的服务器
@@ -176,7 +185,23 @@ public class PumaClientSyncTaskEntity {
 			this.pumaTables += "," + table;
 		}
 	}
+
+	public String getTableNamesMappingJson() {
+		Gson gson = new Gson();
+
+		return gson.toJson(this.tableNamesMapping);
+	}
+
+	public void setTableNamesMappingJson(String tableNamesMappingJson) {
+		Gson gson = new Gson();
+
+		this.tableNamesMapping = gson.fromJson(tableNamesMappingJson, type2);
+	}
 	
+	public Map<String, String> getTableNamesMapping() {
+		return tableNamesMapping;
+	}
+
 	public String getPumaBaseEntitiesJson() {
 		Gson gson = new Gson();
 		return gson.toJson(this.pumaBaseEntities);
@@ -184,14 +209,14 @@ public class PumaClientSyncTaskEntity {
 
 	public void setPumaBaseEntitiesJson(String pumaBaseEntitiesJson) {
 		Gson gson = new Gson();
-		this.pumaBaseEntities = gson.fromJson(pumaBaseEntitiesJson, type);
+		this.pumaBaseEntities = gson.fromJson(pumaBaseEntitiesJson, type1);
 	}
 
 	@Override
-   public String toString() {
-	   return "PumaClientSyncTaskEntity [id=" + id + ", ruleName=" + ruleName + ", pumaClientName=" + pumaClientName
-	         + ", pumaDatabase=" + pumaDatabase + ", pumaTables=" + pumaTables + ", pumaBaseEntities="
-	         + pumaBaseEntities + ", executor=" + executor + ", executor1=" + executor1 + ", executor2=" + executor2
-	         + ", status=" + status + ", createTime=" + createTime + ", updateTime=" + updateTime + "]";
-   }
+	public String toString() {
+		return "PumaClientSyncTaskEntity [id=" + id + ", ruleName=" + ruleName + ", pumaClientName=" + pumaClientName
+		      + ", pumaDatabase=" + pumaDatabase + ", pumaTables=" + pumaTables + ", pumaBaseEntities="
+		      + pumaBaseEntities + ", executor=" + executor + ", executor1=" + executor1 + ", executor2=" + executor2
+		      + ", status=" + status + ", createTime=" + createTime + ", updateTime=" + updateTime + "]";
+	}
 }
