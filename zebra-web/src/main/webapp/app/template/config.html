@@ -33,7 +33,6 @@
                     <button ng-show="isLogin" class="btn btn-xs btn-warning" ng-click="merge(group.$key)">配置合并</button>
                     <!--button class="btn btn-xs btn-info" ng-show="group.isAutoReplaced && isLogin" ng-click="autoreplace(group.$key,false)">取消替换</button>
                     <button class="btn btn-xs btn-danger" ng-show="!group.isAutoReplaced && group.jdbcRef.indexOf('.') < 0 && isLogin" ng-click="autoreplace(group.$key,true)">自动替换</button-->
-                    <button ng-show="isLogin" class="btn btn-xs btn-danger" ng-click=alarmList(group.$key)>告警名单</button>
                     <button ng-show="isLogin && !group.isMonitored" class="btn btn-xs btn-info" ng-model="group.isMonitored" ng-click=addMonitor(group)>加入监控</button>
                     <button ng-show="isLogin && group.isMonitored" class="btn btn-xs btn-pink" ng-model="group.isMonitored" ng-click=removeMonitor(group)>取消监控</button>
                 </td>
