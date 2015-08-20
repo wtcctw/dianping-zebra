@@ -166,6 +166,26 @@ public class MonitorController extends BasicController {
 
 	@RequestMapping(value = "/addJdbcRef", method = RequestMethod.GET)
 	@ResponseBody
+	public Object addJdbcRef(String jdbcRefs) {
+		if(StringUtils.isBlank(jdbcRefs)) {
+			return new MonitorDto(-1, "null pointer");
+		}
+		
+		String[] jdbcRefList = jdbcRefs.split(",");
+		
+		for(String jdbcRef : jdbcRefList) {
+			MonitorDto ret = (MonitorDto)addJdbcRef(lionService.getEnv(),jdbcRef);
+			
+			if(ret.getErrorCode() != 0) {
+				return ret;
+			}
+		}
+		
+		return new MonitorDto(0,"OK");
+	}
+	
+	@RequestMapping(value = "/addJdbcRef", method = RequestMethod.GET)
+	@ResponseBody
 	public Object addJdbcRef(String env, String jdbcRef) {
 		if (!lionService.getAllEnv().contains(env)) {
 			return new MonitorDto(3, "环境不能识别");
