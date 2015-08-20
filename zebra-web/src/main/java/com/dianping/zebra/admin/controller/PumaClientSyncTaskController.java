@@ -165,6 +165,7 @@ public class PumaClientSyncTaskController extends BasicController {
 
 						for (String tb : dbAndTables.getValue()) {
 							syncTask.addPumaTable(tb);
+							syncTask.getTableNamesMapping().put(tb, table);
 						}
 
 						PumaClientSyncTaskBaseEntity baseEntity = new PumaClientSyncTaskBaseEntity();

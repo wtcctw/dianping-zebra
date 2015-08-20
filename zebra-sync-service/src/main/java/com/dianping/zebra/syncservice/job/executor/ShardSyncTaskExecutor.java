@@ -359,7 +359,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			}
 
 			String tableName = rowEvent.getTable();
-			PumaClientSyncTaskBaseEntity pumaClientSyncTaskBaseEntity = task.getPumaBaseEntities().get(tableName);
+			String originTableName = task.getTableNamesMapping().get(tableName);
+			PumaClientSyncTaskBaseEntity pumaClientSyncTaskBaseEntity = task.getPumaBaseEntities().get(originTableName);
 			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(pumaClientSyncTaskBaseEntity.getPk());
 
 			try {
