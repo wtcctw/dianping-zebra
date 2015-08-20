@@ -40,9 +40,9 @@ public class MonitorController extends BasicController {
 
 	private static final String LION_KEY = "zebra.monitorservice.jdbcreflist";
 
-	private final String USER_NAME = "zebra.monitorservice.jdbc.username";
+	private static final String USER_NAME = "zebra.monitorservice.jdbc.username";
 
-	private final String USER_PASSWD = "zebra.monitorservice.jdbc.password";
+	private static final String USER_PASSWD = "zebra.monitorservice.jdbc.password";
 
 	@Autowired
 	private LionService lionService;
@@ -68,13 +68,7 @@ public class MonitorController extends BasicController {
 			return null;
 		}
 
-		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-
-		Set<String> jdbcRefSet = new HashSet<String>();
-
-		jdbcRefSet = ipWithJdbcRef.get(ip);
-
-		return jdbcRefSet;
+		return getIpWithJdbcRef().get(ip);
 	}
 
 	private String findLowLoadMachine(Map<String, Set<String>> ipWithJdbcRef) {
@@ -167,23 +161,23 @@ public class MonitorController extends BasicController {
 	@RequestMapping(value = "/addJdbcRef", method = RequestMethod.GET)
 	@ResponseBody
 	public Object addJdbcRef(String jdbcRefs) {
-		if(StringUtils.isBlank(jdbcRefs)) {
+		if (StringUtils.isBlank(jdbcRefs)) {
 			return new MonitorDto(-1, "null pointer");
 		}
-		
+
 		String[] jdbcRefList = jdbcRefs.split(",");
-		
-		for(String jdbcRef : jdbcRefList) {
-			MonitorDto ret = (MonitorDto)addJdbcRef(lionService.getEnv(),jdbcRef);
-			
-			if(ret.getErrorCode() != 0) {
+
+		for (String jdbcRef : jdbcRefList) {
+			MonitorDto ret = (MonitorDto) addJdbcRef(lionService.getEnv(), jdbcRef);
+
+			if (ret.getErrorCode() != 0) {
 				return ret;
 			}
 		}
-		
-		return new MonitorDto(0,"OK");
+
+		return new MonitorDto(0, "OK");
 	}
-	
+
 	@RequestMapping(value = "/addJdbcRef", method = RequestMethod.GET)
 	@ResponseBody
 	public Object addJdbcRef(String env, String jdbcRef) {
@@ -330,8 +324,7 @@ public class MonitorController extends BasicController {
 				return null;
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
-
+			Cat.logError(e);
 			return null;
 		}
 	}
@@ -341,7 +334,7 @@ public class MonitorController extends BasicController {
 		if (config != null) {
 			return gson.fromJson(config, type);
 		} else {
-			return null;
+			return new HashMap<String, Set<String>>();
 		}
 	}
 
@@ -366,10 +359,9 @@ public class MonitorController extends BasicController {
 		return result;
 	}
 
-
 	private Set<String> getJdbcRefSet() {
 		Set<String> jdbcRefSet = getJdbcRefSet(lionService.getEnv());
-		
+
 		return jdbcRefSet;
 	}
 
