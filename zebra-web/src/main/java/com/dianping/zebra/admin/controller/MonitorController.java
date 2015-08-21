@@ -159,6 +159,10 @@ public class MonitorController extends BasicController {
 			return new MonitorDto(MonitorDto.ErrorStyle.JdbcError);
 		}
 
+		if(!jdbcRef.equalsIgnoreCase("DPReview")) {
+			jdbcRef = jdbcRef.toLowerCase();
+		}
+		
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
 
 		// 检查是否有重复
@@ -177,6 +181,9 @@ public class MonitorController extends BasicController {
 		String ip = findLowLoadMachine(ipWithJdbcRef);
 		Set<String> jdbcRefSet = ipWithJdbcRef.get(ip);
 
+		if(jdbcRefSet == null) {
+			jdbcRefSet = new HashSet<String> ();
+		}
 		jdbcRefSet.add(jdbcRef);
 
 		String json = gson.toJson(ipWithJdbcRef);
@@ -193,6 +200,10 @@ public class MonitorController extends BasicController {
 		}
 
 		if (StringUtils.isNotBlank(jdbcRef)) {
+			if(!jdbcRef.equalsIgnoreCase("DPReview")) {
+				jdbcRef = jdbcRef.toLowerCase();
+			}
+			
 			Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
 
 			if (ipWithJdbcRef == null) {
@@ -227,6 +238,9 @@ public class MonitorController extends BasicController {
 				String[] jdbcRefSplits = jdbcRefs.trim().split(",");
 
 				for (String jdbcRef : jdbcRefSplits) {
+					if(!jdbcRef.equalsIgnoreCase("DPReview")) {
+						jdbcRef = jdbcRef.toLowerCase();
+					}
 					boolean isMonitored = false;
 
 					// 在其他IP中已经监控的jdbcRef不会再一次被监控
@@ -266,7 +280,7 @@ public class MonitorController extends BasicController {
 
 		Set<String> jdbcRefSet = getJdbcRefSet(env);
 
-		return jdbcRefSet.contains(jdbcRef.toLowerCase());
+		return jdbcRefSet.contains(jdbcRef);
 	}
 
 	private Map<String, Set<String>> getIpWithJdbcRefByEnv(String env) {
@@ -338,7 +352,7 @@ public class MonitorController extends BasicController {
 							continue;
 						}
 
-						jdbcRefSet.add(key.substring(begin, end).toLowerCase());
+						jdbcRefSet.add(key.substring(begin, end));
 					}
 				}
 			}
