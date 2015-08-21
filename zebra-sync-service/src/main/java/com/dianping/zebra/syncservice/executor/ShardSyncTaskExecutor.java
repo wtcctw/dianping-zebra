@@ -45,7 +45,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	private final static Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
 
 	private final PumaClientSyncTaskEntity task;
-	
+
 	private final AtomicLong hitTimes = new AtomicLong();
 
 	private final static int MAX_TRY_TIMES = 10;
@@ -257,14 +257,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 						metric.getTotalSyncBinlogNumber().incrementAndGet();
 						AtomicLong atomicLong = metric.getEveryTableSyncBinlogNumber().get(event.getTable());
-						
-						if(atomicLong == null){
+
+						if (atomicLong == null) {
 							atomicLong = new AtomicLong(1);
 							metric.getEveryTableSyncBinlogNumber().put(event.getTable(), atomicLong);
-						}else{
+						} else {
 							atomicLong.incrementAndGet();
 						}
-						
+
 						this.binlogInfo = event.getBinlogInfo();
 						break;
 					} catch (DuplicateKeyException e) {
@@ -323,7 +323,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				rowEvent.getColumns().remove(key);
 			}
 
-			rowEvent.getColumns().get(baseEntity.getPk()).setKey(true);
+			String[] splits = baseEntity.getPk().split("+");
+
+			for (String pk : splits) {
+				rowEvent.getColumns().get(pk).setKey(true);
+			}
 		}
 	}
 
@@ -426,8 +430,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	public TaskExecutorMetric getMetric() {
 		return metric;
 	}
-	
-	public String getName(){
+
+	public String getName() {
 		return task.getPumaClientName();
 	}
 }
