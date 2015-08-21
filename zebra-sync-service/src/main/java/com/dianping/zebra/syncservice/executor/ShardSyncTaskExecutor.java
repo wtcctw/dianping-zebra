@@ -376,9 +376,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 						onEvent(event);
 					}
 
-					metric.getTotalBinlogNumber().getAndAdd(binlogEvents.size());
-					logger.info("puma-client fetch {} binlog", binlogEvents.size());
-
 					if (rowEventProcessors == null) {
 						continue;
 					}
@@ -403,20 +400,27 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			if (!(event instanceof RowChangedEvent)) {
 				return;
 			}
+			
 			RowChangedEvent rowEvent = (RowChangedEvent) event;
 			if (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit()) {
 				return;
 			}
 
+
 			String tableName = rowEvent.getTable();
 			String originTableName = task.getTableNamesMapping().get(tableName);
 			PumaClientSyncTaskBaseEntity pumaClientSyncTaskBaseEntity = task.getPumaBaseEntities().get(originTableName);
-			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(pumaClientSyncTaskBaseEntity.getPk());
+			
+			String pk = pumaClientSyncTaskBaseEntity.getPk();
+			String[] pks = pk.split("\\+");
+			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(pks[0]);
 
 			try {
 				int index = getIndex(columnInfo);
 				lastSendBinlogInfo[index] = rowEvent.getBinlogInfo();
 				eventQueues[index].put(rowEvent);
+				
+				metric.getTotalBinlogNumber().incrementAndGet();
 			} catch (InterruptedException e) {
 			}
 		}
