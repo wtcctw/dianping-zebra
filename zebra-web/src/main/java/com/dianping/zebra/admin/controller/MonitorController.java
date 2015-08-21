@@ -40,9 +40,9 @@ public class MonitorController extends BasicController {
 
 	private static final String LION_KEY = "zebra.monitorservice.jdbcreflist";
 
-	private final String USER_NAME = "zebra.monitorservice.jdbc.username";
+	private static final String USER_NAME = "zebra.monitorservice.jdbc.username";
 
-	private final String USER_PASSWD = "zebra.monitorservice.jdbc.password";
+	private static final String USER_PASSWD = "zebra.monitorservice.jdbc.password";
 
 	@Autowired
 	private LionService lionService;
@@ -60,22 +60,6 @@ public class MonitorController extends BasicController {
 
 	private Type type1 = new TypeToken<Map<String, InstanceStatusDto>>() {
 	}.getType();
-
-	@RequestMapping(value = "/getTickedList", method = RequestMethod.GET)
-	@ResponseBody
-	public Set<String> getTickedList(String ip) throws Exception {
-		if (StringUtils.isBlank(ip)) {
-			return null;
-		}
-
-		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-
-		Set<String> jdbcRefSet = new HashSet<String>();
-
-		jdbcRefSet = ipWithJdbcRef.get(ip);
-
-		return jdbcRefSet;
-	}
 
 	private String findLowLoadMachine(Map<String, Set<String>> ipWithJdbcRef) {
 		String bestIp = null;
@@ -168,11 +152,11 @@ public class MonitorController extends BasicController {
 	@ResponseBody
 	public Object addJdbcRef(String env, String jdbcRef) {
 		if (!lionService.getAllEnv().contains(env)) {
-			return new MonitorDto(3, "环境不能识别");
+			return new MonitorDto(MonitorDto.ErrorStyle.EnvError);
 		}
 
 		if (!isRightJdbcRef(env, jdbcRef)) {
-			return new MonitorDto(-1, "jdbcRef wrong!");
+			return new MonitorDto(MonitorDto.ErrorStyle.JdbcError);
 		}
 
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
@@ -182,12 +166,12 @@ public class MonitorController extends BasicController {
 			Set<String> monitoredJdbcRef = entry.getValue();
 
 			if (monitoredJdbcRef.contains(jdbcRef)) {
-				return new MonitorDto(0, "OK");
+				return new MonitorDto(MonitorDto.ErrorStyle.Success);
 			}
 		}
 
 		if (!testConnection(jdbcRef)) {
-			return new MonitorDto(1, "jdbcRef:" + jdbcRef + " 无法连接到数据库");
+			return new MonitorDto(MonitorDto.ErrorStyle.ConnectError);
 		}
 
 		String ip = findLowLoadMachine(ipWithJdbcRef);
@@ -198,21 +182,21 @@ public class MonitorController extends BasicController {
 		String json = gson.toJson(ipWithJdbcRef);
 		lionService.setConfig(env, LION_KEY, json);
 
-		return new MonitorDto(0, "OK");
+		return new MonitorDto(MonitorDto.ErrorStyle.Success);
 	}
 
 	@RequestMapping(value = "/removeJdbcRef", method = RequestMethod.GET)
 	@ResponseBody
 	public Object removeJdbcRef(String env, String jdbcRef) {
 		if (!lionService.getAllEnv().contains(env)) {
-			return new MonitorDto(3, "环境不能识别");
+			return new MonitorDto(MonitorDto.ErrorStyle.EnvError);
 		}
 
 		if (StringUtils.isNotBlank(jdbcRef)) {
 			Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
 
 			if (ipWithJdbcRef == null) {
-				return new MonitorDto(0, "OK");
+				return new MonitorDto(MonitorDto.ErrorStyle.Success);
 			}
 
 			for (Map.Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
@@ -226,20 +210,16 @@ public class MonitorController extends BasicController {
 
 			lionService.setConfig(env, LION_KEY, json);
 
-			return new MonitorDto(0, "OK");
+			return new MonitorDto(MonitorDto.ErrorStyle.Success);
 		}
-		return new MonitorDto(-1, "null jdbcRef");
+		return new MonitorDto(MonitorDto.ErrorStyle.JdbcError);
 	}
 
 	@RequestMapping(value = "/submit", method = RequestMethod.GET)
 	@ResponseBody
 	public Object submitJdbcRef(String ip, String jdbcRefs) throws Exception {
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-
-		if (ipWithJdbcRef == null) {
-			ipWithJdbcRef = new HashMap<String, Set<String>>();
-		}
-
+		
 		if (StringUtils.isNotBlank(jdbcRefs)) {
 			Set<String> newJdbcRefs = new HashSet<String>();
 
@@ -260,7 +240,7 @@ public class MonitorController extends BasicController {
 					}
 
 					if (!testConnection(jdbcRef)) {
-						return new MonitorDto(1, "jdbcRef:" + jdbcRef + " 无法连接到数据库");
+						return new MonitorDto(MonitorDto.ErrorStyle.ConnectError);
 					}
 
 					if (!isMonitored) {
@@ -276,17 +256,7 @@ public class MonitorController extends BasicController {
 			lionService.setConfig(lionService.getEnv(), LION_KEY, json);
 		}
 
-		return new MonitorDto(0, "OK");
-	}
-
-	public boolean isRightJdbcRef(String jdbcRef) {
-		if (StringUtils.isBlank(jdbcRef)) {
-			return false;
-		}
-
-		Set<String> jdbcRefSet = getJdbcRefSet();
-
-		return jdbcRefSet.contains(jdbcRef.toLowerCase());
+		return new MonitorDto(MonitorDto.ErrorStyle.Success);
 	}
 
 	public boolean isRightJdbcRef(String env, String jdbcRef) {
@@ -307,12 +277,11 @@ public class MonitorController extends BasicController {
 			if (config != null) {
 				return gson.fromJson(config, type);
 			} else {
-				return null;
+				return new HashMap<String, Set<String>>();
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
-
-			return null;
+			Cat.logError(e);
+			return new HashMap<String, Set<String>>();
 		}
 	}
 
@@ -321,7 +290,7 @@ public class MonitorController extends BasicController {
 		if (config != null) {
 			return gson.fromJson(config, type);
 		} else {
-			return null;
+			return new HashMap<String, Set<String>>();
 		}
 	}
 
@@ -346,10 +315,9 @@ public class MonitorController extends BasicController {
 		return result;
 	}
 
-
 	private Set<String> getJdbcRefSet() {
 		Set<String> jdbcRefSet = getJdbcRefSet(lionService.getEnv());
-		
+
 		return jdbcRefSet;
 	}
 
@@ -377,6 +345,16 @@ public class MonitorController extends BasicController {
 		} catch (IOException e) {
 		}
 		return jdbcRefSet;
+	}
+	
+	@RequestMapping(value = "/getTickedList", method = RequestMethod.GET)
+	@ResponseBody
+	public Set<String> getTickedList(String ip) throws Exception {
+		if (StringUtils.isBlank(ip)) {
+			return null;
+		}
+
+		return getIpWithJdbcRef().get(ip);
 	}
 
 	@RequestMapping(value = "/getJdbcRefList", method = RequestMethod.GET)

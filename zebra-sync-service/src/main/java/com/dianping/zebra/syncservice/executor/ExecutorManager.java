@@ -1,28 +1,36 @@
-package com.dianping.zebra.syncservice.job;
+package com.dianping.zebra.syncservice.executor;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.biz.entity.ShardDumpTaskEntity;
 import com.dianping.zebra.biz.service.ShardDumpService;
-import com.dianping.zebra.syncservice.job.executor.ShardDumpTaskExecutor;
-import com.dianping.zebra.syncservice.job.executor.ShardSyncTaskExecutor;
+import com.dianping.zebra.syncservice.monitor.TaskExecutorMetric;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 @Component
 public class ExecutorManager {
+
+	private final static Logger logger = LoggerFactory.getLogger(ExecutorManager.class);
+
 	@Autowired
 	private ShardDumpService shardDumpService;
 
@@ -35,11 +43,12 @@ public class ExecutorManager {
 
 	private String localAddress;
 
-	public Map<String, String> getStatus() {
-		Map<String, String> result = new HashMap<String, String>();
+	public Map<String, TaskExecutorMetric> getStatus() {
+		Map<String, TaskExecutorMetric> result = new HashMap<String, TaskExecutorMetric>();
 		for (ShardSyncTaskExecutor task : pumaClientSyncTaskExecutorMap.values()) {
-			result.putAll(task.getStatus());
+			result.put(task.getName(), task.getMetric());
 		}
+
 		return result;
 	}
 
@@ -63,6 +72,8 @@ public class ExecutorManager {
 				executor.init();
 				executor.start();
 				pumaClientSyncTaskExecutorMap.put(task.getPumaClientName(), executor);
+
+				logger.info("starting a new task {} ..." + task.getPumaClientName());
 			} catch (Exception e) {
 				if (executor != null) {
 					executor.stop();
@@ -87,6 +98,8 @@ public class ExecutorManager {
 			ShardSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(pk);
 			if (task != null) {
 				task.stop();
+
+				logger.info("stop an old task {} ..." + task.getName());
 			}
 		}
 	}

@@ -11,6 +11,11 @@ public class MonitorDto {
 		this.errorMessage = errorMessage;
 	}
 	
+	public MonitorDto(ErrorStyle es) {
+		this.errorCode = es.errorCode;
+		this.errorMessage = es.errorMsg;
+	}
+	
 	public int getErrorCode() {
 		return errorCode;
 	}
@@ -25,5 +30,23 @@ public class MonitorDto {
 
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
+	}
+	
+	public enum ErrorStyle {
+		
+		Success(0,"OK"),JdbcError(-1,"jdbcRef wrong"),ConnectError(2,"无法连接到数据库"),EnvError(3,"环境错误");
+		
+		
+		public final int errorCode;
+		
+		public final String errorMsg;
+		
+		ErrorStyle(int errorCode,String errorMsg) {
+			this.errorCode = errorCode;
+			
+			this.errorMsg = errorMsg;
+		}
+		
+
 	}
 }

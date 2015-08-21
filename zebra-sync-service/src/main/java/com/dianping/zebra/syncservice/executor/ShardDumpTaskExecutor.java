@@ -1,4 +1,4 @@
-package com.dianping.zebra.syncservice.job.executor;
+package com.dianping.zebra.syncservice.executor;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.entity.ShardDumpDbEntity;

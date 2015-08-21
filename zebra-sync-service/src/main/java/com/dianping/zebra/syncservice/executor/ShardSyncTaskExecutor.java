@@ -1,7 +1,6 @@
-package com.dianping.zebra.syncservice.job.executor;
+package com.dianping.zebra.syncservice.executor;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,7 @@ import com.dianping.zebra.shard.router.rule.SimpleDataSourceProvider;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 import com.dianping.zebra.syncservice.exception.NoRowsAffectedException;
-import com.dianping.zebra.syncservice.metrics.TaskExecutorMetric;
+import com.dianping.zebra.syncservice.monitor.TaskExecutorMetric;
 import com.dianping.zebra.syncservice.util.ColumnInfoWrap;
 import com.dianping.zebra.syncservice.util.SqlBuilder;
 import com.google.common.collect.Lists;
@@ -43,7 +42,7 @@ import com.google.common.collect.Lists;
 public class ShardSyncTaskExecutor implements TaskExecutor {
 	private final static Logger eventLogger = LoggerFactory.getLogger("EventSkip");
 
-	private final static Logger appLogger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
+	private final static Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
 
 	private final PumaClientSyncTaskEntity task;
 
@@ -76,7 +75,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	protected volatile Thread[] rowEventProcesserThreads;
 
 	protected volatile Thread clientThread;
-	
+
 	private TaskExecutorMetric metric = new TaskExecutorMetric();
 
 	public ShardSyncTaskExecutor(PumaClientSyncTaskEntity task) {
@@ -84,7 +83,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	public synchronized void init() {
-		appLogger.info("initializing task executor...");
+		logger.info("initializing task executor...");
 
 		initRouter();
 		initDataSources();
@@ -93,7 +92,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		initEventQueues();
 		initProcessors();
 
-		appLogger.info("task executor initialized.");
+		logger.info("task executor initialized.");
 	}
 
 	public synchronized void start() {
@@ -101,7 +100,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			throw new IllegalStateException("You should init before start!");
 		}
 
-		appLogger.info("start task executor...");
+		logger.info("start task executor...");
 
 		clientThread.start();
 
@@ -111,7 +110,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	public synchronized void stop() {
-		appLogger.info("stop task executor...");
+		logger.info("stop task executor...");
 
 		if (clientThread != null) {
 			clientThread.interrupt();
@@ -133,11 +132,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			}
 		}
 
-		appLogger.info("task executor stopped.");
+		logger.info("task executor stopped.");
 	}
 
 	protected void initProcessors() {
-		appLogger.info("initializing processors...");
+		logger.info("initializing processors...");
 
 		rowEventProcessors = new RowEventProcessor[NUMBER_OF_PROCESSORS];
 		rowEventProcesserThreads = new Thread[NUMBER_OF_PROCESSORS];
@@ -156,7 +155,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	@SuppressWarnings("unchecked")
 	protected void initEventQueues() {
-		appLogger.info("initializing event queues...");
+		logger.info("initializing event queues...");
 
 		this.eventQueues = new BlockingQueue[NUMBER_OF_PROCESSORS];
 		this.lastSendBinlogInfo = new BinlogInfo[NUMBER_OF_PROCESSORS];
@@ -166,7 +165,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initRouter() {
-		appLogger.info("initializing router...");
+		logger.info("initializing router...");
 
 		for (Entry<String, PumaClientSyncTaskBaseEntity> entry : task.getPumaBaseEntities().entrySet()) {
 			String tableName = entry.getKey();
@@ -179,7 +178,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initDataSources() {
-		appLogger.info("initializing dataSources...");
+		logger.info("initializing dataSources...");
 
 		for (SimpleDataSourceProvider dataSourceProvider : this.dataSourceProviders.values()) {
 			for (Map.Entry<String, Set<String>> entity : dataSourceProvider.getAllDBAndTables().entrySet()) {
@@ -193,7 +192,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initJdbcTemplate() {
-		appLogger.info("initializing jdbcTemplate...");
+		logger.info("initializing jdbcTemplate...");
 
 		for (Map.Entry<String, GroupDataSource> entry : dataSources.entrySet()) {
 			this.templateMap.put(entry.getKey(), new JdbcTemplate(entry.getValue()));
@@ -211,7 +210,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	}
 
 	protected void initPumaClient() {
-		appLogger.info("initializing puma client...");
+		logger.info("initializing puma client...");
 
 		this.client = new PumaClientConfig().setClientName(task.getPumaClientName()).setDatabase(task.getPumaDatabase())
 		      .setTables(Lists.newArrayList(task.getPumaTables().split(","))).setTransaction(false)
@@ -255,18 +254,30 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 					try {
 						process(event);
+
+						metric.getTotalSyncBinlogNumber().incrementAndGet();
+						AtomicLong atomicLong = metric.getEveryTableSyncBinlogNumber().get(event.getTable());
+
+						if (atomicLong == null) {
+							atomicLong = new AtomicLong(1);
+							metric.getEveryTableSyncBinlogNumber().put(event.getTable(), atomicLong);
+						} else {
+							atomicLong.incrementAndGet();
+						}
+
 						this.binlogInfo = event.getBinlogInfo();
 						break;
 					} catch (DuplicateKeyException e) {
-						Cat.logError(e);
+						metric.getTotalDuplicateKey().incrementAndGet();
 						event.setDmlType(DMLType.UPDATE);
 					} catch (NoRowsAffectedException e) {
-						Cat.logError(e);
+						metric.getTotalNoRowsAffected().incrementAndGet();
 						event.setDmlType(DMLType.INSERT);
 					} catch (RuntimeException e) {
-						Cat.logError(e);
 						if (tryTimes > MAX_TRY_TIMES) {
+							Cat.logError(e);
 							eventLogger.warn(event.toString());
+							metric.getTotalSkipBinlogNumber().incrementAndGet();
 							break;
 						}
 					}
@@ -277,15 +288,14 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 
 		protected void process(RowChangedEvent rowEvent) {
-			String tableName = rowEvent.getTable();
-			String orginTableName = task.getTableNamesMapping().get(tableName);
+			String tableName = task.getTableNamesMapping().get(rowEvent.getTable());
 			ColumnInfoWrap column = new ColumnInfoWrap(rowEvent);
 			RuleEngineEvalContext context = new RuleEngineEvalContext(column);
-			Number index = (Number) engines.get(orginTableName).eval(context);
+			Number index = (Number) engines.get(tableName).eval(context);
 			if (index.intValue() < 0) {
 				return;
 			}
-			DataSourceBO bo = dataSourceProviders.get(orginTableName).getDataSource(index.intValue());
+			DataSourceBO bo = dataSourceProviders.get(tableName).getDataSource(index.intValue());
 			String table = bo.evalTable(context);
 
 			String sql = SqlBuilder.buildSql(rowEvent, "", table);
@@ -313,7 +323,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				rowEvent.getColumns().remove(key);
 			}
 
-			rowEvent.getColumns().get(baseEntity.getPk()).setKey(true);
+			String[] splits = baseEntity.getPk().split("+");
+
+			for (String pk : splits) {
+				rowEvent.getColumns().get(pk).setKey(true);
+			}
 		}
 	}
 
@@ -354,7 +368,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 	class PumaClientRunner implements Runnable {
 		@Override
 		public void run() {
-			while (true) {
+			while (!Thread.currentThread().isInterrupted()) {
 				try {
 					BinlogMessage data = client.get(1000, 1, TimeUnit.SECONDS);
 					List<Event> binlogEvents = data.getBinlogEvents();
@@ -362,7 +376,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 						onEvent(event);
 					}
 
-					appLogger.info("puma-client fetch {} binlog", binlogEvents.size());
+					metric.getTotalBinlogNumber().getAndAdd(binlogEvents.size());
+					logger.info("puma-client fetch {} binlog", binlogEvents.size());
 
 					if (rowEventProcessors == null) {
 						continue;
@@ -374,7 +389,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 						lastAckBinlogInfo = binlogInfo;
 					}
 				} catch (Exception e) {
-					Cat.logError(e.getMessage(), e);
+					Cat.logError(e);
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e1) {
@@ -412,10 +427,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		}
 	}
 
-	public Map<String, String> getStatus() {
-		Map<String, String> result = new HashMap<String, String>();
-		result.put(String.format("PumaTask-%d", task.getId()), String.valueOf(hitTimes.getAndSet(0)));
+	public TaskExecutorMetric getMetric() {
+		return metric;
+	}
 
-		return result;
+	public String getName() {
+		return task.getPumaClientName();
 	}
 }
