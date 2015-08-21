@@ -35,11 +35,12 @@
         <url-pattern>/a/flowcontrol/save</url-pattern>
         <url-pattern>/a/flowcontrol/delete</url-pattern>
         <url-pattern>/a/update/*</url-pattern>
-        <url-pattern>/a/monitor/getTickedList</url-pattern>
-        <url-pattern>/a/monitor//removeJdbcRef</url-pattern>
+        <url-pattern>/a/monitor/removeJdbcRef</url-pattern>
         <url-pattern>/a/monitor/submit</url-pattern>
         <url-pattern>/a/monitor/getStatus</url-pattern>
         <url-pattern>/a/monitor/getJdbcRefList</url-pattern>
+        <url-pattern>/a/monitor/getTickedList</url-pattern>
+        <url-pattern>/a/monitor/getAllMonitored</url-pattern>
         <url-pattern>/a/monitor/history</url-pattern>
         <url-pattern>/a/monitor/servers</url-pattern>
         <url-pattern>/a/monitor/database/*</url-pattern>

@@ -1185,11 +1185,34 @@ zebraWeb.controller('config', function ($scope, $stateParams, $http, configServi
             });
         }
     }
+    
+    $scope.getMonitored = function() {
+    	if(!$scope.lionConfigs) {
+    		return ;
+    	}
+    	
+        $http.get('/a/monitor/getAllMonitored?env=' + $scope.config.env).success(function (data, status, headers, config) {
+        	angular.forEach($scope.lionConfigs,function(jdbcRefConfigs) {
+        		angular.forEach(data,function(monitoredJdbcRef,index,allMonitored) {
+        			if(jdbcRefConfigs.jdbcRef == monitoredJdbcRef) {
+        				jdbcRefConfigs.isMonitored = true;
+        				allMonitored.splice(index,1);
+        				
+        				if(monitoredJdbcRef.length < 1) {
+        					return ;
+        				}
+        			}
+        		});
+        	});
+        });
+    }
 
     $scope.load = function () {
         if ($scope.config && $scope.config.env) {
             $http.get('/a/config/?env=' + $scope.config.env).success(function (data, status, headers, config) {
                 $scope.lionConfigs = data;
+                
+                $scope.getMonitored();
             });
         }
     }
