@@ -19,21 +19,15 @@ public class TaskExecutorMetric {
 
 	private AtomicLong totalDuplicateKey = new AtomicLong(0);
 
-	private QpsCounter counter = new QpsCounter(15);
-	
-	private long syncQps = counter.get();
+	private QpsCounter syncQps = new QpsCounter(15);
 
 	public AtomicLong getTotalBinlogNumber() {
 		return totalBinlogNumber;
 	}
-	
-	public long getSyncQps() {
-		return syncQps;
-	}
 
 	public void addTotalBinlog(long number) {
 		this.totalBinlogNumber.addAndGet(number);
-		this.counter.add(number);
+		this.syncQps.add(number);
 	}
 
 	public AtomicLong getTotalSyncBinlogNumber() {
