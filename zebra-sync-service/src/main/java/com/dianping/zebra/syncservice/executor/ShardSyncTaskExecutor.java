@@ -323,7 +323,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				rowEvent.getColumns().remove(key);
 			}
 
-			String[] splits = baseEntity.getPk().split("+");
+			String[] splits = baseEntity.getPk().split("\\+");
 
 			for (String pk : splits) {
 				rowEvent.getColumns().get(pk).setKey(true);
