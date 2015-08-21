@@ -21,7 +21,7 @@ public class TaskExecutorMetric {
 
 	private transient QpsCounter syncQpsCounter = new QpsCounter(15);
 
-	private long syncQps = syncQpsCounter.get();
+	private long syncQps = syncQpsCounter.get(5);
 
 	public AtomicLong getTotalBinlogNumber() {
 		return totalBinlogNumber;
