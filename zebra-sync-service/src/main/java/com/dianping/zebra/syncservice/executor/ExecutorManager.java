@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,9 @@ import com.google.common.collect.Iterables;
 
 @Component
 public class ExecutorManager {
+
+	private final static Logger logger = LoggerFactory.getLogger(ExecutorManager.class);
+
 	@Autowired
 	private ShardDumpService shardDumpService;
 
@@ -43,7 +48,7 @@ public class ExecutorManager {
 		for (ShardSyncTaskExecutor task : pumaClientSyncTaskExecutorMap.values()) {
 			result.put(task.getName(), task.getMetric());
 		}
-		
+
 		return result;
 	}
 
@@ -67,6 +72,8 @@ public class ExecutorManager {
 				executor.init();
 				executor.start();
 				pumaClientSyncTaskExecutorMap.put(task.getPumaClientName(), executor);
+
+				logger.info("starting a new task {} ..." + task.getPumaClientName());
 			} catch (Exception e) {
 				if (executor != null) {
 					executor.stop();
@@ -91,6 +98,8 @@ public class ExecutorManager {
 			ShardSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(pk);
 			if (task != null) {
 				task.stop();
+
+				logger.info("stop an old task {} ..." + task.getName());
 			}
 		}
 	}
