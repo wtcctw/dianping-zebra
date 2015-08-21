@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.dianping.cat.Cat;
@@ -43,7 +43,7 @@ public class ExecutorManager {
 
 	private String localAddress;
 
-	public Map<String, TaskExecutorMetric> getStatus() {
+	public synchronized Map<String, TaskExecutorMetric> getStatus() {
 		Map<String, TaskExecutorMetric> result = new HashMap<String, TaskExecutorMetric>();
 		for (ShardSyncTaskExecutor task : pumaClientSyncTaskExecutorMap.values()) {
 			result.put(task.getName(), task.getMetric());
@@ -55,9 +55,30 @@ public class ExecutorManager {
 	@PostConstruct
 	public void init() throws UnknownHostException {
 		this.localAddress = InetAddress.getLocalHost().getHostName();
+
+		Thread syncWithDbTask = new Thread(new SyncWithDatabaseTask());
+		syncWithDbTask.setName("Sync-Database-Task");
+		syncWithDbTask.setDaemon(true);
+
+		syncWithDbTask.start();
 	}
 
-	@Scheduled(fixedDelay = 10 * 1000)
+	class SyncWithDatabaseTask implements Runnable {
+
+		@Override
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				startPumaSyncTask();
+
+				try {
+					TimeUnit.SECONDS.sleep(10);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+		}
+	}
+
 	public void startPumaSyncTask() {
 		List<PumaClientSyncTaskEntity> tasks = pumaClientSyncTaskMapper.findEffectiveTaskByExecutor(this.localAddress);
 
@@ -68,13 +89,15 @@ public class ExecutorManager {
 
 			ShardSyncTaskExecutor executor = null;
 			try {
+				logger.info("starting a new task {" + task.getPumaClientName() + "} ...");
+
 				executor = new ShardSyncTaskExecutor(task);
 				executor.init();
 				executor.start();
 				pumaClientSyncTaskExecutorMap.put(task.getPumaClientName(), executor);
-
-				logger.info("starting a new task {} ..." + task.getPumaClientName());
 			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				Cat.logError(e);
 				if (executor != null) {
 					executor.stop();
 				}
@@ -97,9 +120,9 @@ public class ExecutorManager {
 		for (String pk : pksToRemove) {
 			ShardSyncTaskExecutor task = pumaClientSyncTaskExecutorMap.remove(pk);
 			if (task != null) {
-				task.stop();
+				logger.info("stop an old task {" + task.getName() + "} ...");
 
-				logger.info("stop an old task {} ..." + task.getName());
+				task.stop();
 			}
 		}
 	}

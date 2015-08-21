@@ -43,6 +43,11 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>mvc-dispatcher</servlet-name>
-		<url-pattern>/status</url-pattern>
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
+	
+	<!-- 默认跳转到根目录下的页面，在这里为index.jsp -->  
+    <welcome-file-list>  
+        <welcome-file>index.html</welcome-file>  
+    </welcome-file-list>
 </web-app>
