@@ -370,7 +370,25 @@ public class MonitorController extends BasicController {
 
 		return getIpWithJdbcRef().get(ip);
 	}
-
+	
+	@RequestMapping(value = "/getAllMonitored", method = RequestMethod.GET)
+	@ResponseBody
+	public Set<String> getAllMonitored(String env) {
+		if (!lionService.getAllEnv().contains(env)) {
+			return null;
+		}
+		
+		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
+		
+		Set<String> monitoredList = new HashSet<String>();
+		
+		for(Map.Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+			monitoredList.addAll(entry.getValue());
+		}
+		
+		return monitoredList;
+	}
+	
 	@RequestMapping(value = "/getJdbcRefList", method = RequestMethod.GET)
 	@ResponseBody
 	public Set<String> getJdbcRefList() {
