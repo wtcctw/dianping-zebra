@@ -376,9 +376,6 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 						onEvent(event);
 					}
 
-					metric.getTotalBinlogNumber().getAndAdd(binlogEvents.size());
-					logger.info("puma-client fetch {} binlog", binlogEvents.size());
-
 					if (rowEventProcessors == null) {
 						continue;
 					}
@@ -403,10 +400,12 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			if (!(event instanceof RowChangedEvent)) {
 				return;
 			}
+			
 			RowChangedEvent rowEvent = (RowChangedEvent) event;
 			if (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit()) {
 				return;
 			}
+
 
 			String tableName = rowEvent.getTable();
 			String originTableName = task.getTableNamesMapping().get(tableName);
@@ -417,6 +416,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				int index = getIndex(columnInfo);
 				lastSendBinlogInfo[index] = rowEvent.getBinlogInfo();
 				eventQueues[index].put(rowEvent);
+				
+				metric.getTotalBinlogNumber().incrementAndGet();
 			} catch (InterruptedException e) {
 			}
 		}
