@@ -5,8 +5,6 @@ import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,17 +61,15 @@ public class MonitorController extends BasicController {
 
 	private String findLowLoadMachine(Map<String, Set<String>> ipWithJdbcRef) {
 		String bestIp = null;
-		int size = Integer.MAX_VALUE;
+		int load = Integer.MAX_VALUE;
 
 		for (Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
-			Set<String> set = entry.getValue();
+			String ip = entry.getKey();
+			Set<String> jdbcRefs = entry.getValue();
 
-			if (set == null) {
-				size = 0;
-				bestIp = entry.getKey();
-			} else if (set.size() < size) {
-				size = set.size();
-				bestIp = entry.getKey();
+			if (load > jdbcRefs.size()) {
+				load = jdbcRefs.size();
+				bestIp = ip;
 			}
 		}
 
@@ -81,65 +77,67 @@ public class MonitorController extends BasicController {
 	}
 
 	public boolean testConnection(String jdbcRef) {
-		String uNmae = lionService.getConfigFromZk(USER_NAME);
-		String uPasswd = lionService.getConfigFromZk(USER_PASSWD);
+		String username = lionService.getConfigFromZk(USER_NAME);
+		String password = lionService.getConfigFromZk(USER_PASSWD);
 
-		DataSourceConfigManager dsManager = DataSourceConfigManagerFactory.getConfigManager("remote", jdbcRef);
-		GroupDataSourceConfig groupDSConf = dsManager.getGroupDataSourceConfig();
-		dsManager.close();
+		if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
+			return false;
+		}
 
-		Map<String, DataSourceConfig> dsConfMap = groupDSConf.getDataSourceConfigs();
+		DataSourceConfigManager dsCongfigManager = DataSourceConfigManagerFactory.getConfigManager("remote", jdbcRef);
+		GroupDataSourceConfig groupDsConfig = dsCongfigManager.getGroupDataSourceConfig();
+		dsCongfigManager.close();
+
+		Map<String, DataSourceConfig> dsConfMap = groupDsConfig.getDataSourceConfigs();
 
 		for (Map.Entry<String, DataSourceConfig> entry : dsConfMap.entrySet()) {
-			DataSourceConfig dsConf = entry.getValue();
-			if (dsConf.getActive()) {
-				continue;
-			}
+			DataSourceConfig dsConfig = entry.getValue();
+			if (dsConfig.isActive()) {
+				String driverClass = dsConfig.getDriverClass();
 
-			String driverClass = dsConf.getDriverClass();
+				try {
+					Class.forName(driverClass);
+				} catch (ClassNotFoundException e) {
+					Cat.logError(e);
+				}
 
-			try {
-				Class.forName(driverClass);
-			} catch (ClassNotFoundException e) {
-				Cat.logError(e);
-			}
+				String jdbcUrl = buildJdbcUrl(dsConfig);
 
-			String url = dsConf.getJdbcUrl();
-			int pos = url.indexOf("&socketTimeout");
+				Connection con = null;
 
-			if (pos > 0) {
-				url = url.substring(0, pos - 1);
-			}
-			url += "&connectTimeout=1000&socketTimeout=1000";
-
-			Connection con = null;
-			Statement stmt = null;
-
-			try {
-				con = DriverManager.getConnection(url, uNmae, uPasswd);
-				stmt = con.createStatement();
-				stmt.executeQuery("SELECT 1");
-
-			} catch (SQLTimeoutException e) {
+				try {
+					con = DriverManager.getConnection(jdbcUrl, username, password);
+					
+				} catch (SQLException se) {
+					return false;
+				} finally {
+					close(con);
+					
+					if(con == null) {
+						return false;
+					}
+				}
+			} else {
 				return false;
-			} catch (SQLException se) {
-				return false;
-			} finally {
-				close(con, stmt);
 			}
-
 		}
 
 		return true;
 	}
 
-	private void close(Connection con, Statement stmt) {
-		if (stmt != null) {
-			try {
-				stmt.close();
-			} catch (SQLException ignore) {
-			}
+	private String buildJdbcUrl(DataSourceConfig dsConfig) {
+		String url = dsConfig.getJdbcUrl();
+
+		int pos = url.indexOf("&connectTimeout");
+		if (pos > 0) {
+			url = url.substring(0, pos);
 		}
+		url += "&connectTimeout=1000";
+		
+		return url;
+	}
+
+	private void close(Connection con) {
 		if (con != null) {
 			try {
 				con.close();
@@ -150,7 +148,7 @@ public class MonitorController extends BasicController {
 
 	@RequestMapping(value = "/addJdbcRef", method = RequestMethod.GET)
 	@ResponseBody
-	public Object addJdbcRef(String env, String jdbcRef) {
+	public Object addJdbcRef(String env, String jdbcRef) throws IOException {
 		if (!lionService.getAllEnv().contains(env)) {
 			return new MonitorDto(MonitorDto.ErrorStyle.EnvError);
 		}
@@ -159,10 +157,11 @@ public class MonitorController extends BasicController {
 			return new MonitorDto(MonitorDto.ErrorStyle.JdbcError);
 		}
 
-		if(!jdbcRef.equalsIgnoreCase("DPReview")) {
+		// hack for DPReview
+		if (!jdbcRef.equalsIgnoreCase("DPReview")) {
 			jdbcRef = jdbcRef.toLowerCase();
 		}
-		
+
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
 
 		// 检查是否有重复
@@ -181,8 +180,8 @@ public class MonitorController extends BasicController {
 		String ip = findLowLoadMachine(ipWithJdbcRef);
 		Set<String> jdbcRefSet = ipWithJdbcRef.get(ip);
 
-		if(jdbcRefSet == null) {
-			jdbcRefSet = new HashSet<String> ();
+		if (jdbcRefSet == null) {
+			jdbcRefSet = new HashSet<String>();
 		}
 		jdbcRefSet.add(jdbcRef);
 
@@ -194,16 +193,16 @@ public class MonitorController extends BasicController {
 
 	@RequestMapping(value = "/removeJdbcRef", method = RequestMethod.GET)
 	@ResponseBody
-	public Object removeJdbcRef(String env, String jdbcRef) {
+	public Object removeJdbcRef(String env, String jdbcRef) throws IOException {
 		if (!lionService.getAllEnv().contains(env)) {
 			return new MonitorDto(MonitorDto.ErrorStyle.EnvError);
 		}
 
 		if (StringUtils.isNotBlank(jdbcRef)) {
-			if(!jdbcRef.equalsIgnoreCase("DPReview")) {
+			if (!jdbcRef.equalsIgnoreCase("DPReview")) {
 				jdbcRef = jdbcRef.toLowerCase();
 			}
-			
+
 			Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
 
 			if (ipWithJdbcRef == null) {
@@ -230,7 +229,7 @@ public class MonitorController extends BasicController {
 	@ResponseBody
 	public Object submitJdbcRef(String ip, String jdbcRefs) throws Exception {
 		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRef();
-		
+
 		if (StringUtils.isNotBlank(jdbcRefs)) {
 			Set<String> newJdbcRefs = new HashSet<String>();
 
@@ -238,7 +237,7 @@ public class MonitorController extends BasicController {
 				String[] jdbcRefSplits = jdbcRefs.trim().split(",");
 
 				for (String jdbcRef : jdbcRefSplits) {
-					if(!jdbcRef.equalsIgnoreCase("DPReview")) {
+					if (!jdbcRef.equalsIgnoreCase("DPReview")) {
 						jdbcRef = jdbcRef.toLowerCase();
 					}
 					boolean isMonitored = false;
@@ -273,28 +272,22 @@ public class MonitorController extends BasicController {
 		return new MonitorDto(MonitorDto.ErrorStyle.Success);
 	}
 
-	public boolean isRightJdbcRef(String env, String jdbcRef) {
+	public boolean isRightJdbcRef(String env, String jdbcRef) throws IOException {
 		if (StringUtils.isBlank(jdbcRef)) {
 			return false;
 		}
 
-		Set<String> jdbcRefSet = getJdbcRefSet(env);
+		Set<String> jdbcRefSet = getJdbcRefSet(lionService.getEnv());
 
 		return jdbcRefSet.contains(jdbcRef);
 	}
 
-	private Map<String, Set<String>> getIpWithJdbcRefByEnv(String env) {
-		String config;
-		try {
-			config = lionService.getConfigByHttp(env, LION_KEY);
+	private Map<String, Set<String>> getIpWithJdbcRefByEnv(String env) throws IOException {
+		String config = lionService.getConfigByHttp(env, LION_KEY);
 
-			if (config != null) {
-				return gson.fromJson(config, type);
-			} else {
-				return new HashMap<String, Set<String>>();
-			}
-		} catch (IOException e) {
-			Cat.logError(e);
+		if (config != null) {
+			return gson.fromJson(config, type);
+		} else {
 			return new HashMap<String, Set<String>>();
 		}
 	}
@@ -313,54 +306,38 @@ public class MonitorController extends BasicController {
 	public Object getStatus(String ip) throws Exception {
 		Map<String, InstanceStatusDto> result = new HashMap<String, InstanceStatusDto>();
 
-		try {
-			String url = String.format("http://%s:8080/a/status", ip);
-			String jsonBody = restClient.exchange(url, HttpMethod.GET, null, String.class).getBody();
+		String url = String.format("http://%s:8080/a/status", ip);
+		String jsonBody = restClient.exchange(url, HttpMethod.GET, null, String.class).getBody();
 
-			if (jsonBody != null) {
-				Map<String, InstanceStatusDto> fromJson = gson.fromJson(jsonBody, type1);
+		if (jsonBody != null) {
+			Map<String, InstanceStatusDto> fromJson = gson.fromJson(jsonBody, type1);
 
-				result.putAll(fromJson);
-			}
-		} catch (Exception e) {
-			Cat.logError(e);
+			result.putAll(fromJson);
 		}
 
 		return result;
 	}
 
-	private Set<String> getJdbcRefSet() {
-		Set<String> jdbcRefSet = getJdbcRefSet(lionService.getEnv());
-
-		return jdbcRefSet;
-	}
-
-	private Set<String> getJdbcRefSet(String env) {
+	public Set<String> getJdbcRefSet(String env) throws IOException {
 		Set<String> jdbcRefSet = new HashSet<String>();
-		try {
-			HashMap<String, String> dsKV = lionService.getConfigByProject(env, "groupds");
+		HashMap<String, String> dsKV = lionService.getConfigByProject(env, "groupds");
 
-			synchronized (jdbcRefSet) {
-				for (Entry<String, String> entry : dsKV.entrySet()) {
-					String key = entry.getKey();
-					String value = entry.getValue();
+		for (Entry<String, String> entry : dsKV.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
 
-					if (key != null && value != null) {
-						int begin = "groupds.".length();
-						int end = key.indexOf(".mapping");
-						if (end == -1 || begin == -1) {
-							continue;
-						}
-
-						jdbcRefSet.add(key.substring(begin, end));
-					}
+			if (key != null && value != null) {
+				int begin = "groupds.".length();
+				int end = key.indexOf(".mapping");
+				if (end > begin) {
+					jdbcRefSet.add(key.substring(begin, end));
 				}
 			}
-		} catch (IOException e) {
 		}
+
 		return jdbcRefSet;
 	}
-	
+
 	@RequestMapping(value = "/getTickedList", method = RequestMethod.GET)
 	@ResponseBody
 	public Set<String> getTickedList(String ip) throws Exception {
@@ -370,29 +347,28 @@ public class MonitorController extends BasicController {
 
 		return getIpWithJdbcRef().get(ip);
 	}
-	
+
 	@RequestMapping(value = "/getAllMonitored", method = RequestMethod.GET)
 	@ResponseBody
-	public Set<String> getAllMonitored(String env) {
+	public Set<String> getAllMonitored(String env) throws IOException {
 		if (!lionService.getAllEnv().contains(env)) {
 			return null;
 		}
-		
-		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
-		
+
 		Set<String> monitoredList = new HashSet<String>();
-		
-		for(Map.Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
+
+		Map<String, Set<String>> ipWithJdbcRef = getIpWithJdbcRefByEnv(env);
+		for (Map.Entry<String, Set<String>> entry : ipWithJdbcRef.entrySet()) {
 			monitoredList.addAll(entry.getValue());
 		}
-		
+
 		return monitoredList;
 	}
-	
+
 	@RequestMapping(value = "/getJdbcRefList", method = RequestMethod.GET)
 	@ResponseBody
-	public Set<String> getJdbcRefList() {
-		return getJdbcRefSet();
+	public Set<String> getJdbcRefList() throws IOException {
+		return getJdbcRefSet(lionService.getEnv());
 	}
 
 	@RequestMapping(value = "/servers", method = RequestMethod.GET)

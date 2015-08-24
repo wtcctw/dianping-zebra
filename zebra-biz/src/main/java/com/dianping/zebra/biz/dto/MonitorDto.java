@@ -34,7 +34,7 @@ public class MonitorDto {
 	
 	public enum ErrorStyle {
 		
-		Success(0,"OK"),JdbcError(-1,"jdbcRef wrong"),ConnectError(2,"无法连接到数据库"),EnvError(3,"环境错误");
+		Success(0,"OK"),JdbcError(-1,"jdbcRef wrong"),ConnectError(2,"数据库连接失败，请检查权限!"),EnvError(3,"环境错误");
 		
 		
 		public final int errorCode;

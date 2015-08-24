@@ -903,34 +903,40 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
     		angular.forEach($scope.readList,function(readId) {
         		var readIdWithoutWeight = readId.substring(0,readId.indexOf(':'));
         		var readIdWeight = readId.substring(readId.indexOf(':')+1,readId.length);
+        		var weightzero = false;
+        		var notactive   = false;
         		
     			if(config.id == readIdWithoutWeight) {
     				if(readIdWeight == '0') {
-						readNum -= 1;
-					} else {
-        				angular.forEach(config.properties,function(property) {
-            				if(property.key.indexOf('active') > 0) {
-            					if(property.newValue != 'true') {
-            						readNum -= 1;
-            					}
-            				}
+						weightiszero = true;
+					}
+        			
+    				angular.forEach(config.properties,function(property) {
+            			if(property.key.indexOf('active') > 0) {
+            				if(property.newValue != 'true') {
+            					notactive = true;
+           					}
+           				}
             				
-            				if(property.key.indexOf('url') > 0 || property.key.indexOf('Url') > 0) {
-            					var readIp = property.newValue.match("[\\d+\\.]+");
-            					
-            					if(!readIp) {
-            						alert("读库RUL格式错误!");
-            						
-            						return false;
-            					}
-            					
-            					if(readIp[0] == writeIp[0]) {
-            						isVIPRight = true;
-            					}
+           				if(property.key.indexOf('url') > 0 || property.key.indexOf('Url') > 0) {
+           					var readIp = property.newValue.match("[\\d+\\.]+");
+           					
+           					if(!readIp) {
+           						alert("读库RUL格式错误!");
+           						
+           						return false;
+           					}
+           					
+           					if(readIp[0] == writeIp[0]) {
+            					isVIPRight = true;
             				}
-            			});
-        			}
-    			} 
+            			}
+            		});
+    				
+    				if(weightzero || notactive) {
+    					readNum -= 1;
+    				}
+    			}
     		});
     	});
     	

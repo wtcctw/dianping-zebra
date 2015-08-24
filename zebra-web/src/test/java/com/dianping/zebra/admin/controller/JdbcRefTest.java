@@ -17,7 +17,7 @@ public class JdbcRefTest {
 	@Test
 	public void TestMC() {
 		try {
-			testMC.addJdbcRef("zebra","qa");
+			testMC.testConnection("zebra");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
