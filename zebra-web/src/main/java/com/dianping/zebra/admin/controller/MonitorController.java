@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -107,15 +109,10 @@ public class MonitorController extends BasicController {
 
 				try {
 					con = DriverManager.getConnection(jdbcUrl, username, password);
-					
 				} catch (SQLException se) {
 					return false;
 				} finally {
 					close(con);
-					
-					if(con == null) {
-						return false;
-					}
 				}
 			} else {
 				return false;
@@ -128,11 +125,11 @@ public class MonitorController extends BasicController {
 	private String buildJdbcUrl(DataSourceConfig dsConfig) {
 		String url = dsConfig.getJdbcUrl();
 
-		int pos = url.indexOf("&connectTimeout");
-		if (pos > 0) {
-			url = url.substring(0, pos);
+		Pattern p = Pattern.compile("\\:\\d+");
+		Matcher m = p.matcher(url);
+		if(m.find()) {
+			url = url.substring(0, m.end());
 		}
-		url += "&connectTimeout=1000";
 		
 		return url;
 	}
