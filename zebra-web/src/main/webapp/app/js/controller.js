@@ -912,7 +912,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
         		
     			if(config.id == readIdWithoutWeight) {
     				if(readIdWeight == '0') {
-						weightiszero = true;
+    					weightzero = true;
 					}
         			
     				angular.forEach(config.properties,function(property) {
@@ -925,7 +925,7 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
            				if(property.key.indexOf('url') > 0 || property.key.indexOf('Url') > 0) {
            					var readIp = property.newValue.match("[\\d+\\.]+");
            					
-           					if(!readIp) {
+           					if(!readIp || readIp == 'undefined') {
            						alert("读库RUL格式错误!");
            						
            						return false;
