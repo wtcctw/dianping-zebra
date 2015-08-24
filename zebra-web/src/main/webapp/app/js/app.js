@@ -123,6 +123,10 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/syncTask',
         templateUrl: 'app/template/syncTask.html',
         controller: 'syncTask'
+    }).state('syncServers', {
+        url: '/syncServers',
+        templateUrl: 'app/template/syncServers.html',
+        controller: 'syncServers'
     }).state('monitor-manager', {
         url: '/monitor-manager',
         templateUrl: 'app/template/monitor-manager.html',

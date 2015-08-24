@@ -78,6 +78,10 @@ zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     }
 });
 
+zebraWeb.controller('syncServers', function ($scope, $http){
+	
+});
+
 zebraWeb.controller('syncTask', function ($scope, $http, $modal,syncService){
 	$scope.load = function () {
         $http.get('/a/shard/' + $scope.config.env + '/config').success(function (data, status, headers, config) {
