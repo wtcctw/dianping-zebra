@@ -43,10 +43,11 @@
 				<td>{{syncTaskPlan.executor}}</td>
 				<td>{{syncTaskPlan.executor1}}</td>
 				<td>{{syncTaskPlan.executor2}}</td>
-				<td ng-if="syncTaskPlan.status == 1">初始化</td>
-				<td ng-if="syncTaskPlan.status == 2">运行中</td>
+				<td ng-if="syncTaskPlan.status == 1">暂停</td>
+				<td ng-if="syncTaskPlan.status == 2">运行</td>
 				<td >
-					<button ng-if="syncTaskPlan.status == 1" class="btn btn-xs btn-primary" ng-click="schedule(syncTaskPlan.pumaClientName)">生效</button>
+					<button ng-if="syncTaskPlan.status == 1" class="btn btn-xs btn-primary" ng-click="schedule(syncTaskPlan.pumaClientName)">启动</button>
+					<button ng-if="syncTaskPlan.status == 2" class="btn btn-xs btn-danger" ng-click="suspend(syncTaskPlan.pumaClientName)">暂停</button>
 				</td>
 				<td>
 					<button class="btn btn-xs btn-primary" ng-click="edit(syncTaskPlan)">编辑</button>	

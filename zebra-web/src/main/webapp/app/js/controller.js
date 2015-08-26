@@ -109,6 +109,18 @@ zebraWeb.controller('syncTask', function ($scope, $http, $modal,syncService){
     	}
     }
     
+    $scope.suspend = function (pumaClientName){
+    	if(pumaClientName){
+    		$http.get('/a/syncTask/suspend?pumaClientName=' + pumaClientName).success(function (data, status, headers, config) {
+    			$scope.syncTaskPlans.forEach(function (item){
+    				if(item.pumaClientName == pumaClientName){
+    					item.status = 1;
+    				}
+    			});
+    		});
+    	}
+    }
+    
     $scope.edit = function (pumaTask) {
     	syncService.openEditModal(pumaTask);
     }
