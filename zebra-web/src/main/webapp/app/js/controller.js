@@ -749,27 +749,38 @@ zebraWeb.controller('config-edit', function ($scope, $http, name, close, configS
     $scope.initRWList = function() {
     	var start = 0;
     	var end   = 0;
+    	var firstString = null;
+    	var secondString = null;
     	
     	start = $scope.data.config.indexOf('(') +1;
     	end   = $scope.data.config.indexOf(')');
-    	
     	if(start <= end) {
-        	var readStrings = $scope.data.config.substring(start,end);
-        	var readStrs    = readStrings.split(',');
-        	
-        	angular.forEach(readStrs,function(key) {
-        		$scope.readList.push(key);
-        	});
-        	
+    		firstString = $scope.data.config.substring(start,end);
     	}
-
     	start = $scope.data.config.lastIndexOf('(') +1;
     	end   = $scope.data.config.lastIndexOf(')');
-    	
     	if(start <= end) {
-        	var writeString = $scope.data.config.substring(start,end);
-
-        	$scope.writeList.push(writeString);
+    		secondString = $scope.data.config.substring(start,end);
+    	}
+    	
+    	if(firstString!=null && secondString!=null) {
+    		if(firstString.indexOf(":") >0) {
+    	       	var readStrs    = firstString.split(',');
+    	       	
+    	       	angular.forEach(readStrs,function(key) {
+    	       		$scope.readList.push(key);
+            	});
+    	       	
+    	       	$scope.writeList.push(secondString);
+    		} else {
+    			$scope.writeList.push(firstString);
+    			
+    			var readStrs    = secondString.split(',');
+    	       	
+    	       	angular.forEach(readStrs,function(key) {
+    	       		$scope.readList.push(key);
+            	});
+    		}
     	}
     }
     
