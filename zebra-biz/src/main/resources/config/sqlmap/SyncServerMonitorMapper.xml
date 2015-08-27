@@ -12,16 +12,17 @@
         SELECT * FROM SyncServerMonitor
     </select>
 
-    <insert id="create" parameterType="ShardDumpTaskEntity">
+    <insert id="create" parameterType="SyncServerMonitorEntity">
         INSERT INTO SyncServerMonitor
-        (Name,`Load`,UpdateTime)
+        (Name,`IP`,`Load`,UpdateTime)
         VALUES
-        (#{name},#{load},NOW())
+        (#{name},#{ip},#{load},NOW())
     </insert>
 
-    <update id="update" parameterType="ShardDumpTaskEntity">
+    <update id="update" parameterType="SyncServerMonitorEntity">
         UPDATE SyncServerMonitor SET
         `Load` = #{load},
+        `IP` = #{ip},
         UpdateTime = NOW()
         WHERE Name = #{name}
     </update>

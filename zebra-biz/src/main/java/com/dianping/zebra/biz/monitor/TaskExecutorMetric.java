@@ -1,4 +1,4 @@
-package com.dianping.zebra.syncservice.monitor;
+package com.dianping.zebra.biz.monitor;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
