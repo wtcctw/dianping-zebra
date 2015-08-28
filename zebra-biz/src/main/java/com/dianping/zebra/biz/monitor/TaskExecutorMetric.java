@@ -69,7 +69,7 @@ public class TaskExecutorMetric {
 	}
 
 	public void addSyncBinlogNumber(String table, long number) {
-		this.totalBinlogNumber.incrementAndGet();
+		this.totalSyncBinlogNumber.incrementAndGet();
 		AtomicLong atomicLong = everyTableSyncBinlogNumber.get(table);
 
 		if (atomicLong == null) {
