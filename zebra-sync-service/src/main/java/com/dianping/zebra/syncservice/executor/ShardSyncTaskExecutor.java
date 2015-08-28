@@ -367,7 +367,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
 				try {
-					BinlogMessage data = client.get(1000, 1, TimeUnit.SECONDS);
+					BinlogMessage data = client.get(100, 1, TimeUnit.SECONDS);
 					List<Event> binlogEvents = data.getBinlogEvents();
 					for (com.dianping.puma.core.event.Event event : binlogEvents) {
 						onEvent(event);
