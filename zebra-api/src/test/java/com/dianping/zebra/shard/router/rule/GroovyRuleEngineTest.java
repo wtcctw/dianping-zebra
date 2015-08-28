@@ -39,6 +39,16 @@ public class GroovyRuleEngineTest {
 	}
 
 	@Test
+	public void testMD5(){
+		RuleEngine ruleEngine = new GroovyRuleEngine("(crc32(md5(#bid# + \"_\" + #uid#))/10).toLong()%10");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		valMap.put("bid", "1849791204");
+		valMap.put("uid", "200867475132416");
+		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
+		System.out.println(retVal);
+	}
+
+	@Test
 	public void testData() {
 		RuleEngine ruleEngine = new GroovyRuleEngine("#AddTime#");
 		Map<String, Object> valMap = new HashMap<String, Object>();
