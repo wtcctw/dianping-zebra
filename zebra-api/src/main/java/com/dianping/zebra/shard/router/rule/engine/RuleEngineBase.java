@@ -1,6 +1,9 @@
 package com.dianping.zebra.shard.router.rule.engine;
 
+import com.dianping.zebra.util.StringUtils;
+
 import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,6 +33,10 @@ public class RuleEngineBase {
 		}
 
 		throw new IllegalArgumentException();
+	}
+
+	public String md5(String input) throws NoSuchAlgorithmException {
+		return StringUtils.md5(input);
 	}
 
 	public long crc32(Object str, String encode) throws UnsupportedEncodingException {
