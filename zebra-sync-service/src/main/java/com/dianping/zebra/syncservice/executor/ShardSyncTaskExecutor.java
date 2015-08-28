@@ -40,6 +40,7 @@ import com.dianping.zebra.syncservice.util.SqlBuilder;
 import com.google.common.collect.Lists;
 
 public class ShardSyncTaskExecutor implements TaskExecutor {
+
 	private final static Logger eventLogger = LoggerFactory.getLogger("EventSkip");
 
 	private final static Logger logger = LoggerFactory.getLogger(ShardSyncTaskExecutor.class);
@@ -48,11 +49,11 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	private final AtomicLong hitTimes = new AtomicLong();
 
-	private final static int MAX_TRY_TIMES = 10;
+	private final int MAX_TRY_TIMES = 10;
 
-	private final static int NUMBER_OF_PROCESSORS = 5;
+	private final int MAX_QUEUE_SIZE = 1000;
 
-	private final static int MAX_QUEUE_SIZE = 10000;
+	private final int NUMBER_OF_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
 	protected volatile PumaClient client;
 
@@ -143,7 +144,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 		for (int k = 0; k < this.eventQueues.length; k++) {
 			BlockingQueue<RowChangedEvent> queue = this.eventQueues[k];
-			RowEventProcessor processor = new RowEventProcessor(queue);
+			RowEventProcessor processor = new RowEventProcessor(k, queue);
 			Thread thread = new Thread(processor);
 			thread.setDaemon(true);
 			thread.setName(String.format("RowEventProcessor-%d", k));
@@ -220,17 +221,17 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 		this.clientThread.setName("PumaSyncTask-" + task.getPumaClientName());
 	}
 
-	class RowEventProcessor implements Runnable {
+	public class RowEventProcessor implements Runnable {
+
+		private int processorId;
+
 		private final BlockingQueue<RowChangedEvent> queue;
 
 		private volatile BinlogInfo binlogInfo;
 
-		public RowEventProcessor(BlockingQueue<RowChangedEvent> queue) {
+		public RowEventProcessor(int processorId, BlockingQueue<RowChangedEvent> queue) {
+			this.processorId = processorId;
 			this.queue = queue;
-		}
-
-		public BinlogInfo getBinlogInfo() {
-			return binlogInfo;
 		}
 
 		@Override
@@ -239,6 +240,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				RowChangedEvent event;
 				try {
 					event = queue.take();
+					metric.decreaseEachQueueSize(processorId);
 				} catch (InterruptedException e) {
 					break;
 				}
@@ -255,16 +257,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 					try {
 						process(event);
 
-						metric.getTotalSyncBinlogNumber().incrementAndGet();
-						AtomicLong atomicLong = metric.getEveryTableSyncBinlogNumber().get(event.getTable());
-
-						if (atomicLong == null) {
-							atomicLong = new AtomicLong(1);
-							metric.getEveryTableSyncBinlogNumber().put(event.getTable(), atomicLong);
-						} else {
-							atomicLong.incrementAndGet();
-						}
-
+						metric.addSyncBinlogNumber(event.getTable(), 1);
 						this.binlogInfo = event.getBinlogInfo();
 						break;
 					} catch (DuplicateKeyException e) {
@@ -328,6 +321,10 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			for (String pk : splits) {
 				rowEvent.getColumns().get(pk).setKey(true);
 			}
+		}
+
+		public BinlogInfo getBinlogInfo() {
+			return binlogInfo;
 		}
 	}
 
@@ -400,17 +397,16 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			if (!(event instanceof RowChangedEvent)) {
 				return;
 			}
-			
+
 			RowChangedEvent rowEvent = (RowChangedEvent) event;
 			if (rowEvent.isTransactionBegin() || rowEvent.isTransactionCommit()) {
 				return;
 			}
 
-
 			String tableName = rowEvent.getTable();
 			String originTableName = task.getTableNamesMapping().get(tableName);
 			PumaClientSyncTaskBaseEntity pumaClientSyncTaskBaseEntity = task.getPumaBaseEntities().get(originTableName);
-			
+
 			String pk = pumaClientSyncTaskBaseEntity.getPk();
 			String[] pks = pk.split("\\+");
 			RowChangedEvent.ColumnInfo columnInfo = rowEvent.getColumns().get(pks[0]);
@@ -419,7 +415,8 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 				int index = getIndex(columnInfo);
 				lastSendBinlogInfo[index] = rowEvent.getBinlogInfo();
 				eventQueues[index].put(rowEvent);
-				
+
+				metric.addEachQueueSize(index);
 				metric.getTotalBinlogNumber().incrementAndGet();
 			} catch (InterruptedException e) {
 			}

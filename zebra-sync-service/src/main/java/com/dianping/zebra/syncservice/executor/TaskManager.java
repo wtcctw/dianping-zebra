@@ -27,9 +27,9 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 @Component
-public class ExecutorManager {
+public class TaskManager {
 
-	private final static Logger logger = LoggerFactory.getLogger(ExecutorManager.class);
+	private final static Logger logger = LoggerFactory.getLogger(TaskManager.class);
 
 	@Autowired
 	private ShardDumpService shardDumpService;
