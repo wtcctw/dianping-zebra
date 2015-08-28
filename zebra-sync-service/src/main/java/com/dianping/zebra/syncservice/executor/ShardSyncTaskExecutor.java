@@ -51,7 +51,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 
 	private final int MAX_TRY_TIMES = 10;
 
-	private final int MAX_QUEUE_SIZE = 1000;
+	private final int MAX_QUEUE_SIZE = 500;
 
 	private final int NUMBER_OF_PROCESSORS = Runtime.getRuntime().availableProcessors();
 
@@ -147,7 +147,7 @@ public class ShardSyncTaskExecutor implements TaskExecutor {
 			RowEventProcessor processor = new RowEventProcessor(k, queue);
 			Thread thread = new Thread(processor);
 			thread.setDaemon(true);
-			thread.setName(String.format("RowEventProcessor-%d", k));
+			thread.setName(String.format("RowEventProcessor-%s-%d", this.getName(), k));
 
 			rowEventProcessors[k] = processor;
 			rowEventProcesserThreads[k] = thread;
