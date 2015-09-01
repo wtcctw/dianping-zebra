@@ -83,6 +83,14 @@ public class PumaClientSyncTaskController extends BasicController {
 			dao.updateSyncTaskStatus(pumaClientName, 2);
 		}
 	}
+	
+	@RequestMapping(value = "/suspend", method = RequestMethod.GET)
+	@ResponseBody
+	public void suspendExecutePlan(String pumaClientName) {
+		if (StringUtils.isNotBlank(pumaClientName)) {
+			dao.updateSyncTaskStatus(pumaClientName, 1);
+		}
+	}
 
 	private void insertOrUpdate(List<PumaClientSyncTaskEntity> allEntities, PumaClientSyncTaskDto dto) {
 		PumaClientSyncTaskEntity tmp = null;

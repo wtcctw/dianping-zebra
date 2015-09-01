@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.dianping.zebra.syncservice.executor.ExecutorManager;
-import com.dianping.zebra.syncservice.monitor.TaskExecutorMetric;
+import com.dianping.zebra.biz.monitor.TaskExecutorMetric;
+import com.dianping.zebra.syncservice.executor.TaskManager;
 
 @Controller
 @RequestMapping(value = "/status")
 public class StatusController {
 
 	@Autowired
-	private ExecutorManager executorManager;
+	private TaskManager executorManager;
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody

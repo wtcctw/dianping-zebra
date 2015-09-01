@@ -2,49 +2,54 @@ package com.dianping.zebra.biz.entity;
 
 import java.util.Date;
 
-/**
- * Dozer @ 6/4/15
- * mail@dozer.cc
- * http://www.dozer.cc
- */
 public class SyncServerMonitorEntity {
-    private int id;
+	private int id;
 
-    private String name;
+	private String name;
 
-    private double load;
+	private String ip;
 
-    private Date updateTime;
+	private double load;
 
-    public int getId() {
-        return id;
-    }
+	private Date updateTime;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public int getId() {
+		return id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public double getLoad() {
-        return load;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setLoad(double load) {
-        this.load = load;
-    }
+	public String getIp() {
+		return ip;
+	}
 
-    public Date getUpdateTime() {
-        return updateTime;
-    }
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
 
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
+	public double getLoad() {
+		return load;
+	}
+
+	public void setLoad(double load) {
+		this.load = load;
+	}
+
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
+	}
 }

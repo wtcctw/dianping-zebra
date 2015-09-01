@@ -21,15 +21,15 @@ import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.dao.PumaClientSyncTaskMapper;
 import com.dianping.zebra.biz.entity.PumaClientSyncTaskEntity;
 import com.dianping.zebra.biz.entity.ShardDumpTaskEntity;
+import com.dianping.zebra.biz.monitor.TaskExecutorMetric;
 import com.dianping.zebra.biz.service.ShardDumpService;
-import com.dianping.zebra.syncservice.monitor.TaskExecutorMetric;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 @Component
-public class ExecutorManager {
+public class TaskManager {
 
-	private final static Logger logger = LoggerFactory.getLogger(ExecutorManager.class);
+	private final static Logger logger = LoggerFactory.getLogger(TaskManager.class);
 
 	@Autowired
 	private ShardDumpService shardDumpService;
