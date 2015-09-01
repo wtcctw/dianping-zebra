@@ -15,8 +15,6 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
-import com.dianping.zebra.shard.config.RouterConfigException;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -27,25 +25,18 @@ import java.util.regex.Matcher;
  */
 public abstract class AbstractDimensionRule implements DimensionRule {
 
-	protected String shardColumn;
+	protected Set<String> shardColumns = new HashSet<String>();
 
 	protected boolean isMaster;
 	
 	protected boolean needSync;
 
 	public void initShardColumn(String rule) {
-		Set<String> shardColumns = new HashSet<String>();
 		Matcher matcher = RULE_COLUMN_PATTERN.matcher(rule);
 		
 		while (matcher.find()) {
 			shardColumns.add(matcher.group(1));
 		}
-		
-		if (shardColumns.size() != 1) {
-			throw new RouterConfigException("Sharding rule only support one column now.");
-		}
-		
-		shardColumn = shardColumns.iterator().next();
 	}
 
 	public void setMaster(boolean isMaster) {

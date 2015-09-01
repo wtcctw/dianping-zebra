@@ -17,7 +17,7 @@ package com.dianping.zebra.shard.router.rule;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -50,7 +50,36 @@ public class ShardColumnValueUtil {
 		if (dmlSql instanceof Insert) {
 			return evalInsert((Insert) dmlSql, column, params);
 		}
+
+		List<OrExpressionGroup> expGroups = buildExpression(dmlSql, table);
+		if (expGroups == null || expGroups.isEmpty()) {
+			return null;
+		}
+
+		EvalContext context = buildEvalContext(dmlSql, table, column, params);
+
+		if (expGroups.size() == 1) {
+			return eval(expGroups.get(0), context);
+		}
+
+		Expression exp = expGroups.get(0);
+		for (int i = 1; i < expGroups.size() - 1; i++) {
+			exp = new ExpressionGroup(exp, expGroups.get(i));
+		}
+
+		return evalAnd(exp, expGroups.get(expGroups.size() - 1), context);
+	}
+
+	private static EvalContext buildEvalContext(DMLCommon dmlSql, String table, String column, List<Object> params) {
+		Set<String> tableAliases = dmlSql.getTableAliases(table);
+		tableAliases.add(table);
+
+		return new EvalContext(tableAliases, column, params);
+	}
+
+	private static List<OrExpressionGroup> buildExpression(DMLCommon dmlSql, String table) {
 		WhereCondition whereCondition = null;
+
 		if (dmlSql instanceof Select) {
 			whereCondition = ((Select) dmlSql).getWhere();
 		} else if (dmlSql instanceof Update) {
@@ -59,38 +88,29 @@ public class ShardColumnValueUtil {
 			whereCondition = ((Delete) dmlSql).getWhere();
 		}
 		List<OrExpressionGroup> expGroups = new ArrayList<OrExpressionGroup>();
-		List<TableName> tbNames = dmlSql.getTbNames();
-		for (TableName tbName : tbNames) {
+		
+		for (TableName tbName : dmlSql.getTbNames()) {
 			if (tbName instanceof TableNameSubQueryImp && ((TableNameSubQueryImp) tbName).containsTable(table)) {
 				expGroups.add(((TableNameSubQueryImp) tbName).getSubSelect().getWhere().getExpGroup());
 			}
 		}
+		
 		expGroups.add(whereCondition.getExpGroup());
-		if (expGroups == null || expGroups.isEmpty()) {
-			return null;
-		}
-		Set<String> tableAliases = dmlSql.getTableAliases(table);
-		tableAliases.add(table);
-		EvalContext context = new EvalContext(tableAliases, column, params);
-		if (expGroups.size() == 1) {
-			return eval(expGroups.get(0), context);
-		}
-		Expression exp = expGroups.get(0);
-		for (int i = 1; i < expGroups.size() - 1; i++) {
-			exp = new ExpressionGroup(exp, expGroups.get(i));
-		}
-		return evalAnd(exp, expGroups.get(expGroups.size() - 1), context);
+
+		return expGroups;
 	}
 
-	public static Set<Object> evalAnd(Expression expLeft, Expression expRight, EvalContext context) {
+	private static Set<Object> evalAnd(Expression expLeft, Expression expRight, EvalContext context) {
 		Set<Object> leftResult = eval(expLeft, context);
 		Set<Object> rightResult = eval(expRight, context);
+
 		return intersection(leftResult, rightResult);
 	}
 
 	private static Set<Object> evalOr(Expression expLeft, Expression expRight, EvalContext context) {
 		Set<Object> leftResult = eval(expLeft, context);
 		Set<Object> rightResult = eval(expRight, context);
+		
 		return union(leftResult, rightResult);
 	}
 
@@ -104,8 +124,10 @@ public class ShardColumnValueUtil {
 			if (expressions.size() == 1) {
 				return eval(expressions.get(0), context);
 			}
+			
 			return evalOr(expressions.get(0), expressions.get(1), context);
 		}
+		
 		if (expression instanceof ExpressionGroup) {
 			ExpressionGroup andExpression = ((ExpressionGroup) expression);
 			List<Expression> expressions = andExpression.getExpressions();
@@ -115,17 +137,19 @@ public class ShardColumnValueUtil {
 			if (expressions.size() == 1) {
 				return eval(expressions.get(0), context);
 			}
+			
 			return evalAnd(expressions.get(0), expressions.get(1), context);
 		}
+		
 		if (expression instanceof ComparableAndInExpression) {
-			Set<Comparative> evalSet = ((ComparableAndInExpression) expression)
-				.eval(context.tableAliases, context.column, context.params);
+			Set<Comparative> evalSet = ((ComparableAndInExpression) expression).eval(context.tableAliases, context.column,
+			      context.params);
 			/*
-			 * 暂时只考虑EQ条件参与路由判断,以后有按照值范围分库分表策略时再考虑诸如>,>=,<,<=等情况，这些条件
-			 * 牵扯到相互之间的merge，相对复杂，需要时再添加进来
+			 * 暂时只考虑EQ条件参与路由判断,以后有按照值范围分库分表策略时再考虑诸如>,>=,<,<=等情况，这些条件 牵扯到相互之间的merge，相对复杂，需要时再添加进来
 			 */
 			return filterEQ(evalSet);
 		}
+		
 		return Collections.emptySet();
 	}
 
@@ -137,6 +161,7 @@ public class ShardColumnValueUtil {
 		if (rightResult.isEmpty()) {
 			return leftResult;
 		}
+		
 		return CollectionUtils.intersection(leftResult, rightResult);
 	}
 
@@ -145,6 +170,7 @@ public class ShardColumnValueUtil {
 			return Collections.emptySet();
 		}
 		leftResult.addAll(rightResult);
+		
 		return leftResult;
 	}
 
@@ -152,17 +178,21 @@ public class ShardColumnValueUtil {
 		if (comparatives.isEmpty()) {
 			return Collections.emptySet();
 		}
-		Set<Object> filtered = new HashSet<Object>();
+
+		Set<Object> filtered = new LinkedHashSet<Object>();
+
 		for (Comparative comparative : comparatives) {
 			if (comparative.getComparison() == Comparative.Equivalent) {
 				filtered.add(comparative.getValue());
 			}
 		}
+
 		return filtered;
 	}
 
 	private static Set<Object> evalInsert(Insert insertSql, String column, List<Object> params) {
-		Set<Object> evalSet = new HashSet<Object>();
+		Set<Object> evalSet = new LinkedHashSet<Object>();
+
 		List<Column> columns = insertSql.getColumns().getColumnsList();
 		for (int i = 0; i < columns.size(); i++) {
 			Column columnObj = columns.get(i);
@@ -180,9 +210,9 @@ public class ShardColumnValueUtil {
 			}
 		}
 		if (evalSet.isEmpty()) {
-			throw new ShardRouterException(
-				"Router column[" + column + "] not found in insert sql[" + insertSql + "].");
+			throw new ShardRouterException("Router column[" + column + "] not found in insert sql[" + insertSql + "].");
 		}
+
 		return evalSet;
 	}
 

@@ -29,11 +29,11 @@ import java.util.*;
 public class WhitelistDimensionRule extends AbstractDimensionRule {
 
 	private String dataSource;
-	
+
 	private String table;
-	
+
 	private RuleEngine ruleEngine;
-	
+
 	public void init(ExceptionConfig exceptionConfig) {
 		this.dataSource = exceptionConfig.getDb();
 		this.table = exceptionConfig.getTable();
@@ -45,14 +45,10 @@ public class WhitelistDimensionRule extends AbstractDimensionRule {
 	@Override
 	public boolean match(ShardMatchContext matchContext) {
 		ShardMatchResult matchResult = matchContext.getMatchResult();
-		Set<Object> colValues = matchContext.getColValues();
-		for (Iterator<Object> iter = colValues.iterator(); iter.hasNext();) {
-			//new map every time, for concurrent execute later
-			Object colVal = iter.next();
-			Map<String, Object> valMap = new HashMap<String, Object>();
-			valMap.put(shardColumn, colVal);
+		List<Map<String, Object>> colValues = matchContext.getColValues();
+		for (Map<String, Object> valMap : colValues) {
 			if ((Boolean) ruleEngine.eval(new RuleEngineEvalContext(valMap))) {
-				colValues.remove(colVal);
+				colValues.remove(valMap);
 				if (!matchResult.isDbAndTablesSetted()) {
 					matchResult.addDBAndTable(dataSource, table);
 				}

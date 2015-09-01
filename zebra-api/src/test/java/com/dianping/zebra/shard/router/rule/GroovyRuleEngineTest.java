@@ -47,6 +47,16 @@ public class GroovyRuleEngineTest {
 		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
 		System.out.println(retVal);
 	}
+	
+	@Test
+	public void testMD5_2(){
+		RuleEngine ruleEngine = new GroovyRuleEngine("(crc32(md5(#id# + #name#))/10).toLong()%4");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		valMap.put("id", 1849791);
+		valMap.put("name", "hao.zhu");
+		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
+		System.out.println(retVal);
+	}
 
 	@Test
 	public void testData() {

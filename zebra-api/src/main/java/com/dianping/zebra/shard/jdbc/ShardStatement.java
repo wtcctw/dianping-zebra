@@ -60,8 +60,6 @@ public class ShardStatement implements Statement {
 
 	protected Set<ResultSet> attachedResultSets = new HashSet<ResultSet>();
 
-	protected List<String> batchedArgs;
-
 	protected List<Statement> actualStatements = new ArrayList<Statement>();
 
 	protected ResultSet results;
@@ -155,14 +153,7 @@ public class ShardStatement implements Statement {
 	 */
 	@Override
 	public void addBatch(String sql) throws SQLException {
-		checkClosed();
-
-		if (batchedArgs == null) {
-			batchedArgs = new ArrayList<String>();
-		}
-		if (sql != null) {
-			batchedArgs.add(sql);
-		}
+		throw new UnsupportedOperationException("Zebra unsupport addBatch");
 	}
 
 	protected ResultSet beforeQuery(String sql) throws SQLException {
@@ -218,11 +209,7 @@ public class ShardStatement implements Statement {
 	 */
 	@Override
 	public void clearBatch() throws SQLException {
-		checkClosed();
-
-		if (batchedArgs != null) {
-			batchedArgs.clear();
-		}
+		throw new UnsupportedOperationException("Zebra unsupport clearBatch");
 	}
 
 	/*

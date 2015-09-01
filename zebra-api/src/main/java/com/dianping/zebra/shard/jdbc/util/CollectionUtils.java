@@ -18,7 +18,6 @@ package com.dianping.zebra.shard.jdbc.util;
 import java.util.*;
 
 /**
- * TODO Comment of CollectionUtils
  * 
  * @author danson.liu
  * 
@@ -29,10 +28,10 @@ public class CollectionUtils {
 	private static Integer	INTEGER_ONE	= Integer.valueOf(1);
 
 	public static Set intersection(final Set a, final Set b) {
-		Set set = new HashSet();
+		Set set = new LinkedHashSet();
 		Map mapa = getCardinalityMap(a);
 		Map mapb = getCardinalityMap(b);
-		Set elts = new HashSet(a);
+		Set elts = new LinkedHashSet(a);
 		elts.addAll(b);
 		Iterator it = elts.iterator();
 		while (it.hasNext()) {

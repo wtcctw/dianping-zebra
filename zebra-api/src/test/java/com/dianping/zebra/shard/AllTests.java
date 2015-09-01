@@ -30,6 +30,7 @@ import org.junit.runners.Suite.SuiteClasses;
         ShardConnectionTest.class,
         ShardStatementTest.class,
         ShardPreparedStatementTest.class,
+        ShardPreparedStatementMultiKeyTest.class,
 
         //parser
         SelectTest.class,
