@@ -1,0 +1,120 @@
+<div class="page-header">
+	<h1>
+		分库分表 <small> <i class="ace-icon fa fa-angle-double-right">
+				自动创库创表</i>
+		</small>
+	</h1>
+</div>
+
+<div class="row">
+	<div class="col-xs-12">
+		<form class="form-inline" role="form">
+			<label class="label label-lg label-primary arrowed-right"
+				for="form-field-1">环境</label> <select class="form-control input-sm"
+				ng-model="config.env" ng-options="env for env in config.envs"></select>
+			<label class="control-label" for="form-field-1">逻辑库名：</label> <input
+				class="form-control input-sm" ng-model="dbName" type="text"
+				placeholder="dbname"> <label class="control-label"
+				for="form-field-1">分库数量：</label> <input style="width: 100px;"
+				class="form-control" type="number" min="1" max="100" step="1"
+				ng-model="dbNumber" />
+			<button ng-show="isLogin" class="btn btn-primary btn-sm"
+				ng-click="makeDbRule()">确定</button>
+		</form>
+		<hr>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-xs-5">
+		<table ng-show="showAddIp"
+			class="table table-bordered table-hover table-condensed">
+			<thead>
+				<th style="width: 30%">ip</th>
+				<th style="width: 60%">分库规则</th>
+				<th style="width: 10%"><button ng-show="!showAddTable"
+						class="btn btn-primary btn-mini" ng-click="newIpRule()">添加</button></th>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in ipRules">
+					<td><input ng-show="!item.makesure" style="width: 200px;"
+						type="text" ng-model="item.ip" /><label ng-show="item.makesure"
+						class="control-label" for="form-field-1">{{item.ip}}</label></td>
+					<td><label ng-show="showDbRole" class="control-label"
+						for="form-field-1">{{item.dbRule}}</label></td>
+					<td><button ng-show="!item.makesure && !showAddTable"
+							ng-click="makeIpRule(item)" class="btn btn-primary btn-mini">完成</button>
+						<button ng-show="item.makesure && !showAddTable"
+							ng-click="deleteIpRule(item.ip)" class="btn btn-warning btn-mini">删除</button></td>
+				</tr>
+			</tbody>
+		</table>
+		<button ng-show="showAddIp && !showAddTable" ng-click="createIpRule()"
+			class="btn btn-primary btn-sm">确认</button>
+	</div>
+
+	<div class="col-xs-7">
+		<table ng-show="showAddTable"
+			class="table table-bordered table-hover table-condensed">
+			<thead>
+				<th style="width: 20%">表名</th>
+				<th style="width: 10%">数量</th>
+				<th style="width: 60%">分表sql</th>
+				<th style="width: 10%"><button class="btn btn-primary btn-mini"
+						ng-click="newTableRule()">添加</button></th>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in tableRules">
+					<td><input ng-show="!item.makesure" style="width: 200px;"
+						type="text" ng-model="item.tableName" /><label
+						ng-show="item.makesure" class="control-label" for="form-field-1">{{item.tableName}}</label></td>
+					<td><input ng-show="!item.makesure" style="width: 50px;"
+						class="form-control" type="number" min="1" max="100" step="1"
+						ng-model="item.tableNumber" /><label ng-show="item.makesure"
+						class="control-label" for="form-field-1">{{item.tableNumber}}</label></td>
+					<td><textarea ng-show="!item.makesure" ng-model="item.sql"
+							class="form-control" id="form-field-8" placeholder="请输入sql语句建表"
+							style="margin: 0px -0.34375px 0px 0px; width: 300px; height: 30px;"></textarea>
+						<label ng-show="item.makesure" class="control-label"
+						for="form-field-1">{{item.sql}}</label></td>
+					<td><button ng-show="!item.makesure" ng-click="makeTableRule(item)"
+							class="btn btn-primary btn-mini">确认</button>
+						<button ng-show="item.makesure" ng-click="deleteTableRule(item.tableName)"
+							class="btn btn-warning btn-mini">删除</button></td>
+				</tr>
+			</tbody>
+		</table>
+		<button ng-show="showAddTable" ng-click="startCreate()"
+			class="btn btn-primary btn-sm">开始执行</button>
+	</div>
+</div>
+<hr>
+
+<div class="row">
+	<div class="col-xs-12">
+		<table ng-show="startCreate"
+			class="table table-bordered table-hover table-condensed">
+			<thead>
+				<th style="width: 40%">库名</th>
+				<th style="width: 40%">表名</th>
+				<th style="width: 20%">结果</th>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in doCreate">
+					<td>{{item.dbName}}</td>
+					<td>{{item.tableName}}</td>
+					<td>
+						<button ng-show="item.success" class="btn btn-warning btn-xs"
+							disabled="disabled">
+							<i class="ace-icon glyphicon glyphicon-ok bigger-110 icon-only"></i>
+						</button>
+						<button ng-show="!item.success" class="btn btn-warning btn-xs"
+							disabled="disabled">
+							<i class="ace-icon glyphicon glyphicon-remove bigger-110 icon-only"></i>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

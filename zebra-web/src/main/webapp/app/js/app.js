@@ -131,9 +131,17 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/monitor-manager',
         templateUrl: 'app/template/monitor-manager.html',
         controller: 'monitor-manager'
+    }).state('monitor-alarm', {
+        url: '/monitor-alarm',
+        templateUrl: 'app/template/monitor-alarm.html',
+        controller: 'monitor-alarm'
     }).state('monitor-history', {
         url: '/monitor-history',
         templateUrl: 'app/template/monitor-history.html',
         controller: 'monitor-history'
+    }).state('createDb', {
+        url: '/createDb',
+        templateUrl: 'app/template/createDb.html',
+        controller: 'createDb'
     });
 });
