@@ -1363,3 +1363,195 @@ zebraWeb.controller('merge-edit', function ($scope, $http, $log, name, close) {
         }
     }
 });
+
+zebraWeb.controller('monitor-alarm', function ($scope, $http) {
+	
+});
+
+zebraWeb.controller('createDb', function ($scope, $http) {
+	
+	$scope.makeDbRule = function() {
+		if(!$scope.dbName) {
+			alert("请输入逻辑库名!");
+			return;
+		}
+		
+		if(!$scope.dbNumber) {
+			$scope.dbNumber = 1;
+		}
+		
+		$scope.showAddIp = true;
+	}
+	
+	$scope.ipRules = [];
+	
+	$scope.newIpRule = function() {
+		var doAdd = true;
+		
+		angular.forEach($scope.ipRules,function(ipRule) {
+			if(!ipRule.ip) {
+				doAdd = false;
+			}
+		});
+		
+		if(doAdd) {
+			var ipRule = {
+					ip : "",
+					dbRule : [],
+					makesure : false
+				};
+			
+			$scope.ipRules.push(ipRule);
+		}
+	}
+	
+	$scope.makeIpRule = function(ipRule) {
+		if(!ipRule.ip) {
+			alert("请输入ip!");
+			return;
+		}
+		
+		var makesure = true;
+		var ipNumbers = 0;
+		
+		angular.forEach($scope.ipRules,function(ipNode) {
+			if(ipNode.makesure) {
+				ipNumbers += 1;
+			}
+			
+			if(ipRule.ip == ipNode.ip && ipNode.makesure == true) {
+				alert("ip已存在!");
+				makesure = false;
+			}
+		});
+		
+		if(ipNumbers >= $scope.dbNumber) {
+			alert("ip数多于分库数，不允许添加新的ip");
+			makesure = false;
+		}
+		
+		ipRule.makesure = makesure;
+	}
+	
+	$scope.deleteIpRule = function(ip) {
+		angular.forEach($scope.ipRules,function(ipRule,index) {
+			if(ipRule.ip == ip && ipRule.makesure == true ) {
+				$scope.ipRules.splice(index,1);
+			}
+		});
+	}
+	
+	$scope.data = [];
+	
+	$scope.createIpRule = function() {
+		var dbIndex = 0;
+		while(dbIndex<$scope.dbNumber) {
+			angular.forEach($scope.ipRules,function(ipRule) {
+				if(ipRule.makesure && dbIndex<$scope.dbNumber) {
+				    ipRule.dbRule.push($scope.dbName+dbIndex);
+					dbIndex += 1;
+				}
+			});
+			
+			if(dbIndex == 0) {
+				alert("请添加ip");
+				return;
+			}
+		}
+		
+		$scope.showDbRole   = true;
+		$scope.showAddTable = true;
+	}
+	
+	$scope.tableRules = [];
+	
+	$scope.newTableRule = function() {
+		var doAdd = true;
+		
+		angular.forEach($scope.tableRules,function(tableRule) {
+			if(!tableRule.tableName) {
+				doAdd = false;
+			}
+		});
+		
+		if(doAdd) {
+			var tableRule = {
+					tableName : "",
+					tableNumber : 1,
+					sql : "",
+					tableRule : [],
+					makesure : false
+				};
+			
+			$scope.tableRules.push(tableRule);
+		}
+	}
+	
+	$scope.makeTableRule = function(tableRule) {
+		if(!tableRule.tableName) {
+			alert("请输入表名!");
+			return;
+		}
+		
+		if(!tableRule.sql) {
+			alert("请输入建表sql!");
+			return;
+		}
+			
+		var makesure = true;
+		angular.forEach($scope.tableRules,function(tableNode) {
+			if(tableRule.tableName == tableNode.tableName && tableNode.makesure == true) {
+				alert("该表已存在!");
+				makesure = false;
+			}
+		});
+		
+		if(false) {
+			//sql检查;
+		}
+		
+		for(var i=0; i<tableRule.tableNumber; i++) {
+			tableRule.tableRule.push(tableRule.tableName+i);
+		}
+		
+		tableRule.makesure = makesure;
+	}
+	
+	$scope.deleteTableRule = function(tableName) {
+		angular.forEach($scope.tableRules,function(tableRule,index) {
+			if(tableRule.tableName == tableName && tableRule.makesure == true) {
+				$scope.tableRules.splice(index,1);
+			}
+		});
+	}
+	
+	$scope.doCreate = [];
+	
+	$scope.startCreate = function() {
+		var sqlInfo = [];
+		angular.forEach($scope.ipRules, function(ipRule) {
+			if(ipRule.makesure) {
+				angular.forEach(ipRule.dbRule,function(dsName) {
+					angular.forEach($scope.tableRules,function(tableRule) {
+						if(tableRule.makesure) {
+							angular.forEach(tableRule.tableRule,function(tableName) {
+								var info = {
+										ip : ipRule.ip,
+										dsName : dsName,
+										tableName : tableName,
+										sql : tableRule.sql
+								};
+								sqlInfo.push(info);
+							});
+						}
+					});
+				});
+			}
+		});
+		
+		
+		$scope.startCreate = true;
+		
+		
+	}
+});

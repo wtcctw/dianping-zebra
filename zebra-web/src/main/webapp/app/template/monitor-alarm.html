@@ -1,0 +1,98 @@
+<div class="page-header ng-scope">
+	<h1>
+		监控 <small> <i class="ace-icon fa fa-angle-double-right"></i>
+			告警管理
+		</small>
+	</h1>
+</div>
+
+<div class="row">
+	<div class="col-xs-12">
+		<form class="form-horizontal" role="form">
+			<div class="form-group">
+				<label class="col-xs-3 control-label">选择数据库:</label>
+				<div class="col-xs-8">
+					<div isteven-multi-select input-model="dbNames"
+						output-model="dbNamesChosed" item-label="dbNames"
+						button-label="dbNames" tick-property="ticked" max-height="200px"
+						selection-mode="single"></div>
+
+				</div>
+				<button class="btn btn-default btn-primary" ng-click="searchDs()">查询</button>
+			</div>
+		</form>
+		<hr>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-xs-12">
+		<form class="form-horizontal" role="form">
+			<div class="form-group">
+				<label class="col-xs-4 control-label">dsName :</label>
+				<div class="col-xs-8">
+					<input readOnly="true" style="width: 200px;" type="text"
+						ng-model="dsName" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label no-padding-left">自动markup
+					:</label>
+				<div class="col-xs-8">
+					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
+						ng-model="automarkup" type="checkbox"> <span class="lbl"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">自动markdown :</label>
+				<div class="col-xs-8">
+					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
+						ng-model="automarkdpwn" type="checkbox"> <span class="lbl"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">发送告警的延迟时间 :</label>
+				<div class="col-xs-8">
+					<input style="width: 100px;" class="form-control" type="number"
+						min="-1" max="3600" step="1" ng-model="delayAlarmTime" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">markdown的延迟时间 :</label>
+				<div class="col-xs-8">
+					<input style="width: 100px;" class="form-control" type="number"
+						min="-1" max="3600" step="1" ng-model="delayMarkdownTime" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">延迟达到设置时自动markdown:</label>
+				<div class="col-xs-8">
+					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
+						ng-model="autodelaymarkdown" type="checkbox"> <span
+						class="lbl"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-4 control-label">负责人:</label>
+				<div class="col-xs-8">
+					<button class="btn btn-white btn-info btn-bold"
+						ng-click="editowners()">
+						<i class="ace-icon fa fa-users bigger-120 blue"></i> 编辑
+					</button>
+				</div>
+			</div>
+		</form>
+		<hr>
+		<div class="buttern-group col-xs-offset-3">
+			<button class="btn btn-white btn-primary btn-bold">
+				<i class="ace-icon fa fa-floppy-o bigger-120 blue"></i> 保存
+			</button>
+			<button class="btn btn-white btn-danger btn-bold">
+				<i class="ace-icon fa fa-trash-o bigger-120 red"></i> 删除
+			</button>
+			<button class="btn btn-white btn-default btn-round">
+				<i class="ace-icon fa fa-times red2"></i> 取消
+			</button>
+		</div>
+	</div>
+</div>
