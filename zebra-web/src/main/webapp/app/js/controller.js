@@ -27,6 +27,26 @@ zebraWeb.controller('alert', function ($rootScope, $scope) {
     }, 4000);
 });
 
+zebraWeb.controller('instances', function ($rootScope, $scope) {
+});
+
+zebraWeb.controller('database-info', function ($rootScope, $scope) {
+});
+
+zebraWeb.controller('database-accouts', function ($rootScope, $scope) {
+});
+
+zebraWeb.controller('database-manager', function ($rootScope, $scope) {
+});
+zebraWeb.controller('database-monitor', function ($rootScope, $scope) {
+});
+zebraWeb.controller('database-settings', function ($rootScope, $scope) {
+});
+zebraWeb.controller('database-alarm', function ($rootScope, $scope) {
+});
+zebraWeb.controller('database-backup', function ($rootScope, $scope) {
+});
+
 zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
     $scope.load = function () {
         $http.get('/a/shard/migrate/dump/' + $scope.name).success(function (data, status, headers, config) {
