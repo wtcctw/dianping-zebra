@@ -1,26 +1,21 @@
 <div class="page-header">
 	<h1>
-		实例管理 <small> <i class="ace-icon fa fa-angle-double-right">实例列表</i>
-		</small>
+		实例列表
 		<form style="float:right" class="inline-block">
 			<button class="btn btn-default">创建实例</button>
 		</form>
 	</h1>
 </div>
 <div class="inline-block">
-	<ul class="nav nav-pills ng-scope">
-		<li class="active"><a class="btn-link ng-binding">全部</a></li>
-		<li><a class="btn btn-link ng-binding">宝山</a></li>
-		<li><a class="btn btn-link ng-binding">南汇</a></li>
-		<li><a class="btn btn-link ng-binding">桂桥</a></li>
+	<ul class="nav nav-pills">
+		<li class="active"><a class="btn-link">全部</a></li>
+		<li ng-repeat="zone in zones"><a class="btn btn-link">{{zone}}</a></li>
 	</ul>
 </div>
 <div class="inline-block">
-	<ul class="nav nav-pills ng-scope">
-		<li class="active"><a class="btn-link ng-binding">全部</a></li>
-		<li><a class="btn btn-link ng-binding">交易前台</a></li>
-		<li><a class="btn btn-link ng-binding">交易后台</a></li>
-		<li><a class="btn btn-link ng-binding">平台产品</a></li>
+	<ul class="nav nav-pills">
+		<li class="active"><a class="btn-link">全部</a></li>
+		<li ng-repeat="bu in bus"><a class="btn btn-link">{{bu}}</a></li>
 	</ul>
 </div>
 <div>
@@ -38,16 +33,16 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr>
-				<td>rdsj43h97v9hbka102a2</td>
-				<td>运行中</td>
-				<td>读写实例</td>
-				<td>MySQL5.6</td>
-				<td>宝山</td>
-				<td>交易前台</td>
-				<td>苗发平</td>
+			<tr ng-repeat="data in datas">
+				<td>{{data.name}}</td>
+				<td>{{data.status}}</td>
+				<td>{{data.type}}</td>
+				<td>{{data.version}}</td>
+				<td>{{data.zone}}</td>
+				<td>{{data.bu}}</td>
+				<td>{{data.dba}}</td>
 				<td>
-					<button class="btn btn-xs btn-primary" ng-click="edit(syncTaskPlan)">管理</button></td>
+					<button class="btn btn-xs btn-primary" ng-click="manager(data.name)">管理</button></td>
 			</tr>
 		</tbody>
 	</table>

@@ -26,17 +26,6 @@ zebraWeb.controller('alert', function ($rootScope, $scope) {
     }, 4000);
 });
 
-zebraWeb.controller('instances', function ($rootScope, $scope) {
-});
-
-zebraWeb.controller('database-info', function ($rootScope, $scope) {
-});
-
-zebraWeb.controller('database-accouts', function ($rootScope, $scope) {
-});
-
-zebraWeb.controller('database-manager', function ($rootScope, $scope) {
-});
 zebraWeb.controller('database-monitor', function ($rootScope, $scope) {
 });
 zebraWeb.controller('database-settings', function ($rootScope, $scope) {

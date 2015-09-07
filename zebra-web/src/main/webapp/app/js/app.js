@@ -155,10 +155,18 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/database-accouts',
         templateUrl: 'app/template/database-accouts.html',
         controller: 'database-accouts'
+    }).state('database-accouts-create', {
+        url: '/database-accouts-create',
+        templateUrl: 'app/template/database-accouts-create.html',
+        controller: 'database-accouts'
     }).state('database-manager', {
         url: '/database-manager',
         templateUrl: 'app/template/database-manager.html',
         controller: 'database-manager'
+    }).state('database-manager-create', {
+        url: '/database-manager-create',
+        templateUrl: 'app/template/database-manager-create.html',
+        controller: 'database-manager-create'
     }).state('database-monitor', {
         url: '/database-monitor',
         templateUrl: 'app/template/database-monitor.html',
