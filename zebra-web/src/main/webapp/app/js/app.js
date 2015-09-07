@@ -183,6 +183,10 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/database-alarm',
         templateUrl: 'app/template/database-alarm.html',
         controller: 'database-alarm'
+    }).state('database-alarm-create', {
+        url: '/database-alarm-create',
+        templateUrl: 'app/template/database-alarm-create.html',
+        controller: 'database-alarm-create'
     }).state('database-performance', {
         url: '/database-performance',
         templateUrl: 'app/template/database-performance.html',

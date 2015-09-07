@@ -2,10 +2,74 @@
 	<h1>
 		实例管理 <small> <i class="ace-icon fa fa-angle-double-right">阈值告警</i>
 		</small>
-		<form style="float:right" class="inline-block">
+		<form style="float: right" class="inline-block">
 			<button class="btn btn-default">登录数据库</button>
 			<button class="btn btn-default">重启实例</button>
 			<button class="btn btn-default">备份实例</button>
 		</form>
 	</h1>
+</div>
+<button class="btn btn-primary" ng-click="create()">新增阀值报警</button>
+<div>
+	<table class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>监控项</th>
+				<th>统计周期</th>
+				<th>报警规则</th>
+				<th>状态</th>
+				<th>报警联系人组</th>
+				<th>描述</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>IOPS使用率</td>
+				<td>5分钟</td>
+				<td>阈值 >= 80%</td>
+				<td>正常</td>
+				<td>云账号报警联系人</td>
+				<td></td>
+				<td><a href="">修改设置</a>&nbsp;&nbsp;<a href="">删除</a></td>
+			</tr>
+			<tr>
+				<td>CPU使用率</td>
+				<td>5分钟</td>
+				<td>阈值 >= 80%</td>
+				<td>正常</td>
+				<td>云账号报警联系人</td>
+				<td></td>
+				<td><a href="">修改设置</a>&nbsp;&nbsp;<a href="">删除</a></td>
+			</tr>
+			<tr>
+				<td>连接数使用率</td>
+				<td>5分钟</td>
+				<td>阈值 >= 80%</td>
+				<td>正常</td>
+				<td>云账号报警联系人</td>
+				<td></td>
+				<td><a href="">修改设置</a>&nbsp;&nbsp;<a href="">删除</a></td>
+			</tr>
+			<tr>
+				<td>磁盘空间使用率</td>
+				<td>5分钟</td>
+				<td>阈值 >= 80%</td>
+				<td>正常</td>
+				<td>云账号报警联系人</td>
+				<td></td>
+				<td><a href="">修改设置</a>&nbsp;&nbsp;<a href="">删除</a></td>
+			</tr>
+			<tr>
+				<td>主从延迟</td>
+				<td>5分钟</td>
+				<td>阈值 >= 180</td>
+				<td>正常</td>
+				<td>云账号报警联系人</td>
+				<td></td>
+				<td><a href="">修改设置</a>&nbsp;&nbsp;<a href="">删除</a></td>
+			</tr>
+		</tbody>
+	</table>
+
 </div>

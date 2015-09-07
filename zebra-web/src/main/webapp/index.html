@@ -2,7 +2,7 @@
 <html ng-app="ZebraWeb">
 
 <head lang="en">
-    <title>{{site.title?site.title:'关系型数据库服务Zebra'}}</title>
+    <title>{{site.title?site.title:'关系型数据库服务FCDB'}}</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,7 +44,7 @@
     <div id="navbar" class="navbar navbar-default" ng-controller="header">
         <div class="navbar-container" id="navbar-container">
             <div class="navbar-header pull-left">
-                <a class="navbar-brand" href="#"><small><i class="fa fa-leaf"></i>&nbsp;关系型数据库服务Zebra</small></a>
+                <a class="navbar-brand" href="#"><small><i class="fa fa-leaf"></i>&nbsp;关系型数据库服务FCDB</small></a>
             </div>
 
             <div class="navbar-buttons navbar-header pull-right" role="navigation">
@@ -116,7 +116,7 @@
                         </li>
                         <li active-link="active">
                             <a href="#/database-monitor">
-                                <i class="menu-icon fa fa-caret-right"></i> 系统资源监控(一期)
+                                <i class="menu-icon fa fa-caret-right"></i> 系统资源监控(二期)
                             </a>
                             <b class="arrow"></b>
                         </li>
@@ -128,13 +128,13 @@
                         </li>
                         <li active-link="active">
                             <a href="#/database-backup">
-                                <i class="menu-icon fa fa-caret-right"></i> 备份管理(二期)
+                                <i class="menu-icon fa fa-caret-right"></i> 备份管理(一期)
                             </a>
                             <b class="arrow"></b>
                         </li>
                         <li active-link="active">
                             <a href="#/database-performance">
-                                <i class="menu-icon fa fa-caret-right"></i> 性能优化(二期)
+                                <i class="menu-icon fa fa-caret-right"></i> 性能优化(一期)
                             </a>
                             <b class="arrow"></b>
                         </li>
@@ -291,6 +291,7 @@
 <script src="app/js/controller-database-info.js"></script>
 <script src="app/js/controller-database-accouts.js"></script>
 <script src="app/js/controller-database-manager.js"></script>
+<script src="app/js/controller-database-alarm.js"></script>
 
 
 <!-- ace scripts -->
