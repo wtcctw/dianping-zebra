@@ -175,5 +175,9 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/database-alarm',
         templateUrl: 'app/template/database-alarm.html',
         controller: 'database-alarm'
+    }).state('database-performance', {
+        url: '/database-performance',
+        templateUrl: 'app/template/database-performance.html',
+        controller: 'database-performance'
     });
 });

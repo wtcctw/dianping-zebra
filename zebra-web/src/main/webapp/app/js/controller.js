@@ -17,7 +17,6 @@ zebraWeb.config(function ($httpProvider, loginServiceProvider, alertServiceProvi
     });
 });
 
-
 zebraWeb.controller('alert', function ($rootScope, $scope) {
     setInterval(function () {
         if ($rootScope.alertList) {
@@ -45,6 +44,8 @@ zebraWeb.controller('database-settings', function ($rootScope, $scope) {
 zebraWeb.controller('database-alarm', function ($rootScope, $scope) {
 });
 zebraWeb.controller('database-backup', function ($rootScope, $scope) {
+});
+zebraWeb.controller('database-performance', function ($rootScope, $scope) {
 });
 
 zebraWeb.controller('shard-migrate-dump', function ($scope, $http) {
