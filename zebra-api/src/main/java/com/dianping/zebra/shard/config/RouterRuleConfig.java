@@ -18,9 +18,12 @@ package com.dianping.zebra.shard.config;
 import java.io.Serializable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class RouterRuleConfig implements Serializable {
-    private List<TableShardRuleConfig> tableShardConfigs;
+    /**
+	 * 
+	 */
+   private static final long serialVersionUID = -3944193626687964466L;
+	private List<TableShardRuleConfig> tableShardConfigs;
 
     public List<TableShardRuleConfig> getTableShardConfigs() {
         return tableShardConfigs;

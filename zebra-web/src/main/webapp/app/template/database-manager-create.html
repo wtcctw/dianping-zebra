@@ -1,0 +1,50 @@
+<div class="page-header">
+	<h1>
+		实例管理 <small> <i class="ace-icon fa fa-angle-double-right">创建新库</i>
+		</small>
+		<small> <a href="#/database-manager">返回数据库管理</a>
+		</small>
+		<form style="float:right" class="inline-block">
+			<button class="btn btn-default">登录数据库</button>
+			<button class="btn btn-default">重启实例</button>
+			<button class="btn btn-default">备份实例</button>
+		</form>
+	</h1>
+</div>
+<div>
+	<form class="form-horizontal" role="form">
+		<div class="form-group">
+			<label class="col-sm-3 control-label">数据库(DB)名称</label>
+			<div class="col-sm-9">
+				<input type="text" id="form-field-1" placeholder=""
+					class="col-xs-10 col-sm-5">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">授权账号</label>
+			<div class="col-sm-9">
+				<select class="col-xs-10 col-sm-5" ng-model="accouts"
+						ng-options="accout for accout in accouts"></select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-3 control-label">备注说明</label>
+			<div class="col-sm-9">
+				<input type="text" id="form-field-1" placeholder=""
+					class="col-xs-10 col-sm-5">
+			</div>
+		</div>
+		<div class="clearfix form-actions">
+			<div class="col-md-offset-3 col-md-9">
+				<button class="btn btn-info" type="button">
+					<i class="ace-icon fa fa-check bigger-110"></i> 提交
+				</button>
+
+				&nbsp; &nbsp; &nbsp;
+				<button class="btn" type="reset">
+					<i class="ace-icon fa fa-undo bigger-110"></i> 返回
+				</button>
+			</div>
+		</div>
+	</form>
+</div>

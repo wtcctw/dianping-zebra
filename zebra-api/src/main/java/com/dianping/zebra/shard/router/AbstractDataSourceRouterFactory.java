@@ -19,8 +19,9 @@ import com.dianping.zebra.shard.router.rule.WhitelistDimensionRule;
 
 public abstract class AbstractDataSourceRouterFactory implements DataSourceRouterFactory {
 
-	public static RouterRule build(RouterRuleConfig routerConfig) {
+	protected RouterRule build(RouterRuleConfig routerConfig) {
 		RouterRule routerRule = new RouterRule();
+		
 		Map<String, TableShardRule> tableShardRules = new HashMap<String, TableShardRule>();
 		for (TableShardRuleConfig ruleConfig : routerConfig.getTableShardConfigs()) {
 			List<TableShardDimensionConfig> dimensionConfigs = ruleConfig.getDimensionConfigs();
@@ -35,13 +36,15 @@ public abstract class AbstractDataSourceRouterFactory implements DataSourceRoute
 			}
 		}
 		routerRule.setTableShardRules(tableShardRules);
+
 		return routerRule;
 	}
 
-	private static void arrangeDimensionConfigs(List<TableShardDimensionConfig> dimensionConfigs) {
+	private void arrangeDimensionConfigs(List<TableShardDimensionConfig> dimensionConfigs) {
 		if (dimensionConfigs.size() == 1) {
 			dimensionConfigs.get(0).setMaster(true);
 		}
+
 		Collections.sort(dimensionConfigs, new Comparator<TableShardDimensionConfig>() {
 			@Override
 			public int compare(TableShardDimensionConfig o1, TableShardDimensionConfig o2) {
@@ -50,14 +53,15 @@ public abstract class AbstractDataSourceRouterFactory implements DataSourceRoute
 		});
 	}
 
-	private static DimensionRule buildDimensionRule(TableShardDimensionConfig dimensionConfig) {
+	private DimensionRule buildDimensionRule(TableShardDimensionConfig dimensionConfig) {
 		DimensionRuleImpl rule = new DimensionRuleImpl();
 		rule.setWhiteListRules(buildWhitelistDimensionRules(dimensionConfig.getExceptions(), dimensionConfig.isMaster()));
 		rule.init(dimensionConfig);
+
 		return rule;
 	}
 
-	private static List<DimensionRule> buildWhitelistDimensionRules(List<ExceptionConfig> exceptions, boolean isMaster) {
+	private List<DimensionRule> buildWhitelistDimensionRules(List<ExceptionConfig> exceptions, boolean isMaster) {
 		if (exceptions == null || exceptions.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -68,6 +72,7 @@ public abstract class AbstractDataSourceRouterFactory implements DataSourceRoute
 			rule.setMaster(isMaster);
 			rules.add(rule);
 		}
+
 		return rules;
 	}
 }

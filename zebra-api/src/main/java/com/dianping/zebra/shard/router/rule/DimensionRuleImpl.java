@@ -15,13 +15,18 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * @author danson.liu
@@ -60,7 +65,8 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		this.tableName = dimensionConfig.getTableName();
 		this.dataSourceProvider = new SimpleDataSourceProvider(dimensionConfig.getTableName(),
 		      dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
-		allDBAndTables.putAll(this.dataSourceProvider.getAllDBAndTables());
+		this.allDBAndTables.putAll(this.dataSourceProvider.getAllDBAndTables());
+
 		for (DimensionRule whiteListRule : this.whiteListRules) {
 			Map<String, Set<String>> whiteListDBAndTables = whiteListRule.getAllDBAndTables();
 			for (Entry<String, Set<String>> allDBAndTable : whiteListDBAndTables.entrySet()) {
@@ -80,12 +86,34 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		ShardMatchResult matchResult = matchContext.getMatchResult();
 		boolean onlyMatchMaster = matchContext.onlyMatchMaster(); // 非Select
 		boolean onlyMatchOnce = matchContext.onlyMatchOnce(); // Select
-		// Insert必须要有主维度，否则这里抛错
-		Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
-		      matchContext.getParams());
-		if (shardColValues == null || shardColValues.isEmpty()) {
+		List<Map<String, Object>> colsList = new LinkedList<Map<String, Object>>();
+
+		for (String shardColumn : shardColumns) {
+			Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
+			      matchContext.getParams());
+
+			if (shardColValues != null && shardColValues.size() > 0) {
+				if (colsList.isEmpty()) {
+					for (Object col : shardColValues) {
+						Map<String, Object> map = new HashMap<String, Object>();
+
+						map.put(shardColumn, col);
+						colsList.add(map);
+					}
+				} else {
+					int index = 0;
+					for (Object col : shardColValues) {
+						Map<String, Object> map = colsList.get(index);
+
+						map.put(shardColumn, col);
+					}
+				}
+			}
+		}
+
+		if (colsList.isEmpty()) {
 			if (onlyMatchMaster && isMaster) {
-				// 如果Update和Insert没有设置master维度，则设置主路由的所有表
+				// 如果Update和Delete没有设置master维度，则设置主路由的所有表
 				matchResult.setDbAndTables(allDBAndTables);
 				matchResult.setDbAndTablesSetted(true);
 
@@ -101,15 +129,14 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 			}
 		}
 
-		matchContext.setColValues(shardColValues);
+		matchContext.setColValues(colsList);
+
 		for (DimensionRule whiteListRule : whiteListRules) {
 			whiteListRule.match(matchContext);
 		}
 
 		if (!matchResult.isDbAndTablesSetted()) {
-			for (Object colVal : matchContext.getColValues()) {
-				Map<String, Object> valMap = new HashMap<String, Object>();
-				valMap.put(shardColumn, colVal);
+			for (Map<String, Object> valMap : colsList) {
 				RuleEngineEvalContext context = new RuleEngineEvalContext(valMap);
 
 				Number dbPos = (Number) ruleEngine.eval(context);

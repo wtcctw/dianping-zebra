@@ -15,11 +15,11 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
+import java.util.List;
+import java.util.Map;
+
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
 import com.dianping.zebra.shard.parser.sqlParser.Select;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author danson.liu
@@ -30,7 +30,7 @@ public class ShardMatchContext {
 
 	private final List<Object> params;
 
-	private Set<Object> colValues;
+	private List<Map<String, Object>> colValues;
 
 	private ShardMatchResult matchResult = new ShardMatchResult();
 
@@ -60,11 +60,11 @@ public class ShardMatchContext {
 		return params;
 	}
 
-	public Set<Object> getColValues() {
+	public List<Map<String, Object>> getColValues() {
 		return colValues;
 	}
 
-	public void setColValues(Set<Object> colValues) {
+	public void setColValues(List<Map<String, Object>> colValues) {
 		this.colValues = colValues;
 	}
 

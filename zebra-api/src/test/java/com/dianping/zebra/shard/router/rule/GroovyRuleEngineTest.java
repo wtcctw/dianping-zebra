@@ -40,10 +40,20 @@ public class GroovyRuleEngineTest {
 
 	@Test
 	public void testMD5(){
-		RuleEngine ruleEngine = new GroovyRuleEngine("(crc32(md5(#bid# + \"_\" + #uid#))/10).toLong()%10");
+		RuleEngine ruleEngine = new GroovyRuleEngine("(crc32(md5(#bid# + \"_\" +#uid#))).toLong()%10");
 		Map<String, Object> valMap = new HashMap<String, Object>();
 		valMap.put("bid", "1849791204");
 		valMap.put("uid", "200867475132416");
+		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
+		System.out.println(retVal);
+	}
+	
+	@Test
+	public void testMD5_2(){
+		RuleEngine ruleEngine = new GroovyRuleEngine("(crc32(md5(#id# + #name#))/10).toLong()%4");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		valMap.put("id", 1849791);
+		valMap.put("name", "hao.zhu");
 		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
 		System.out.println(retVal);
 	}

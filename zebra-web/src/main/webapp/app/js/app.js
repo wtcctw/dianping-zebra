@@ -143,5 +143,53 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/createDb',
         templateUrl: 'app/template/createDb.html',
         controller: 'createDb'
+    }).state('instances', {
+        url: '/instances',
+        templateUrl: 'app/template/instances.html',
+        controller: 'instances'
+    }).state('database-info', {
+        url: '/database-info',
+        templateUrl: 'app/template/database-info.html',
+        controller: 'database-info'
+    }).state('database-accouts', {
+        url: '/database-accouts',
+        templateUrl: 'app/template/database-accouts.html',
+        controller: 'database-accouts'
+    }).state('database-accouts-create', {
+        url: '/database-accouts-create',
+        templateUrl: 'app/template/database-accouts-create.html',
+        controller: 'database-accouts'
+    }).state('database-manager', {
+        url: '/database-manager',
+        templateUrl: 'app/template/database-manager.html',
+        controller: 'database-manager'
+    }).state('database-manager-create', {
+        url: '/database-manager-create',
+        templateUrl: 'app/template/database-manager-create.html',
+        controller: 'database-manager-create'
+    }).state('database-monitor', {
+        url: '/database-monitor',
+        templateUrl: 'app/template/database-monitor.html',
+        controller: 'database-monitor'
+    }).state('database-settings', {
+        url: '/database-settings',
+        templateUrl: 'app/template/database-settings.html',
+        controller: 'database-settings'
+    }).state('database-backup', {
+        url: '/database-backup',
+        templateUrl: 'app/template/database-backup.html',
+        controller: 'database-backup'
+    }).state('database-alarm', {
+        url: '/database-alarm',
+        templateUrl: 'app/template/database-alarm.html',
+        controller: 'database-alarm'
+    }).state('database-alarm-create', {
+        url: '/database-alarm-create',
+        templateUrl: 'app/template/database-alarm-create.html',
+        controller: 'database-alarm-create'
+    }).state('database-performance', {
+        url: '/database-performance',
+        templateUrl: 'app/template/database-performance.html',
+        controller: 'database-performance'
     });
 });

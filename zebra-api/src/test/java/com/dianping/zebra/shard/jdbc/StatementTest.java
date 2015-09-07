@@ -52,42 +52,6 @@ public class StatementTest extends ZebraBaseTestCase {
 		return new ShardStatement();
 	}
 
-	@Test
-	public void testAddBatch() throws Exception {
-		ShardStatement stmt = new ShardStatement();
-		String[] batchSqls = new String[] { "SELECT * FROM A", "SELECT * FROM B" };
-		for (String sql : batchSqls) {
-			stmt.addBatch(sql);
-		}
-
-		Field field = ShardStatement.class.getDeclaredField("batchedArgs");
-		field.setAccessible(true);
-		@SuppressWarnings("unchecked")
-		List<String> batchedArgs = (List<String>) field.get(stmt);
-		Assert.assertEquals(2, batchedArgs.size());
-		int index = 0;
-		for (String sql : batchSqls) {
-			Assert.assertEquals(sql, batchedArgs.get(index++));
-		}
-	}
-
-	@Test
-	public void testclearBatch() throws Exception {
-		ShardStatement stmt = new ShardStatement();
-		String[] batchSqls = new String[] { "SELECT * FROM A", "SELECT * FROM B" };
-		for (String sql : batchSqls) {
-			stmt.addBatch(sql);
-		}
-
-		stmt.clearBatch();
-
-		Field field = ShardStatement.class.getDeclaredField("batchedArgs");
-		field.setAccessible(true);
-		@SuppressWarnings("unchecked")
-		List<String> batchedArgs = (List<String>) field.get(stmt);
-		Assert.assertEquals(0, batchedArgs.size());
-	}
-
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testClose() throws Exception {

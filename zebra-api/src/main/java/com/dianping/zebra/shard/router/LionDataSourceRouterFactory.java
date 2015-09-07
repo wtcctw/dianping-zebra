@@ -13,7 +13,7 @@ public class LionDataSourceRouterFactory extends AbstractDataSourceRouterFactory
 
 	public LionDataSourceRouterFactory(String ruleName) {
 		LionConfigService configService = LionConfigService.getInstance();
-		
+
 		this.routerConfig = new Gson().fromJson(configService.getProperty(LionKey.getShardConfigKey(ruleName)),
 		      RouterRuleConfig.class);
 

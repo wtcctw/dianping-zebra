@@ -18,8 +18,12 @@ package com.dianping.zebra.shard.config;
 import java.io.Serializable;
 import java.util.List;
 
-@SuppressWarnings("serial")
 public class TableShardRuleConfig implements Serializable{
+
+	/**
+	 * 
+	 */
+   private static final long serialVersionUID = -5543539985358909050L;
 
 	private String tableName;
 	
