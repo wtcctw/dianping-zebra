@@ -60,7 +60,8 @@ public class MonitorController extends BasicController {
 
 	private Type type1 = new TypeToken<Map<String, InstanceStatusDto>>() {
 	}.getType();
-
+	
+	/*查询敷在最低的监控机器*/
 	private String findLowLoadMachine(Map<String, Set<String>> ipWithJdbcRef) {
 		String bestIp = null;
 		int load = Integer.MAX_VALUE;
@@ -77,7 +78,8 @@ public class MonitorController extends BasicController {
 
 		return bestIp;
 	}
-
+	
+	/*测试账号是否有该jdbcRef所在ip的访问权限*/
 	public boolean testConnection(String jdbcRef) {
 		String username = lionService.getConfigFromZk(USER_NAME);
 		String password = lionService.getConfigFromZk(USER_PASSWD);
@@ -122,6 +124,7 @@ public class MonitorController extends BasicController {
 		return true;
 	}
 
+	/*截取形如xxx:xxx://127.0.0.1:3306 状ip*/
 	private String buildJdbcUrl(DataSourceConfig dsConfig) {
 		String url = dsConfig.getJdbcUrl();
 
@@ -134,6 +137,7 @@ public class MonitorController extends BasicController {
 		return url;
 	}
 
+	/*关闭数据库链接*/
 	private void close(Connection con) {
 		if (con != null) {
 			try {
@@ -143,6 +147,7 @@ public class MonitorController extends BasicController {
 		}
 	}
 
+	/*自动将jdbcRef添加到负载最低的监控机器上*/
 	@RequestMapping(value = "/addJdbcRef", method = RequestMethod.GET)
 	@ResponseBody
 	public Object addJdbcRef(String env, String jdbcRef) throws IOException {
@@ -188,6 +193,7 @@ public class MonitorController extends BasicController {
 		return new MonitorDto(MonitorDto.ErrorStyle.Success);
 	}
 
+	/*将该jdbcRef从监控中移除*/
 	@RequestMapping(value = "/removeJdbcRef", method = RequestMethod.GET)
 	@ResponseBody
 	public Object removeJdbcRef(String env, String jdbcRef) throws IOException {
@@ -269,6 +275,7 @@ public class MonitorController extends BasicController {
 		return new MonitorDto(MonitorDto.ErrorStyle.Success);
 	}
 
+	/*检测jdbcRef是否存在*/
 	public boolean isRightJdbcRef(String env, String jdbcRef) throws IOException {
 		if (StringUtils.isBlank(jdbcRef)) {
 			return false;
@@ -279,6 +286,7 @@ public class MonitorController extends BasicController {
 		return jdbcRefSet.contains(jdbcRef);
 	}
 
+	/*获取指定环境的监控信息*/
 	private Map<String, Set<String>> getIpWithJdbcRefByEnv(String env) throws IOException {
 		String config = lionService.getConfigByHttp(env, LION_KEY);
 
@@ -298,6 +306,7 @@ public class MonitorController extends BasicController {
 		}
 	}
 
+	/*获取监控机器状态*/
 	@RequestMapping(value = "/getStatus", method = RequestMethod.GET)
 	@ResponseBody
 	public Object getStatus(String ip) throws Exception {

@@ -1365,9 +1365,211 @@ zebraWeb.controller('merge-edit', function ($scope, $http, $log, name, close) {
 });
 
 zebraWeb.controller('monitor-alarm', function ($scope, $http) {
+	$scope.load = function() {
+		$http.post('/a/alarm/getProjectConfig').success(function (data, status, headers, config) {
+			$scope.data = data;
+			$scope.getDbList();
+		});
+	}
 	
+	$scope.dbNames = [];
+	
+	$scope.dbNamesChosed = [];
+	
+	$scope.getDbList = function() {
+		$http.get('/a/monitor/getJdbcRefList').success(function (data, status, headers, config) {
+			var list = [];
+			if(data != null) {
+				angular.forEach(data, function(value){
+					var jsonValue = {
+							"dbName" : value,
+							"ticked" : false
+					};
+					
+					list.push(jsonValue);
+				});
+			}
+			
+			$scope.dbNames = list;
+		});
+	}
+	
+	var getDbConfig = function() {
+		angular.forEach($scope.dbNamesChosed, function(data) {
+			if(data.ticked && data.dbName != $scope.key) {
+		        $scope.key = data.dbName;
+		        
+		        angular.forEach($scope.data,function(jdbcRefConfig) {
+					if(jdbcRefConfig.key == 'zebra-default') {
+						$scope.defaultConfig = jdbcRefConfig.config;
+					}
+				});
+				
+		        $scope.isFind = false;
+				angular.forEach($scope.data,function(jdbcRefConfig) {
+					if(jdbcRefConfig.key == $scope.key) {
+						if(jdbcRefConfig.config) {
+							$scope.configs.autoMarkupForDown    = jdbcRefConfig.config.autoMarkupForDown;
+							$scope.configs.autoMarkdownForDown  = jdbcRefConfig.config.autoMarkdownForDown;
+							$scope.configs.autoMarkupForDelay   = jdbcRefConfig.config.autoMarkupForDelay;
+							$scope.configs.autoMarkdownForDelay = jdbcRefConfig.config.autoMarkdownForDelay;
+							$scope.configs.minDelayTime         = jdbcRefConfig.config.minDelayTime;
+							$scope.configs.maxDelayTime         = jdbcRefConfig.config.maxDelayTime;
+							
+							$scope.oldConfig = jdbcRefConfig.config;
+							$scope.isFind = true;
+						}
+					}
+				});
+				
+				if(!$scope.isFind) {
+					$scope.configs = {
+							autoMarkupForDown    : $scope.defaultConfig.autoMarkupForDown,
+							autoMarkdownForDown  : $scope.defaultConfig.autoMarkdownForDown,
+							autoMarkupForDelay   : $scope.defaultConfig.autoMarkupForDelay,
+							autoMarkdownForDelay : $scope.defaultConfig.autoMarkdownForDelay,
+							minDelayTime         : $scope.defaultConfig.minDelayTime,
+							maxDelayTime         : $scope.defaultConfig.maxDelayTime
+					};
+				}
+				
+				$scope.owners = $scope.data.owners;
+				if(!$scope.owners) {
+					$scope.owners = [];
+				}
+				
+				angular.forEach($scope.owners,function(owner){
+					if(!owner.permission) {
+						owner.permission = 0;
+					}
+					owner.change   = (owner.permission & 1) > 0;
+					owner.delay    = (owner.permission & (1<<1)) > 0;
+					owner.markdown = (owner.permission & (1<<2)) > 0;
+				});
+
+		        $scope.showConfig = true;
+			}
+		});
+	}
+
+	$scope.newOwner = function() {
+		var doAdd = true;
+		
+		angular.forEach($scope.owners,function(owner) {
+			if(!owner.name) {
+				doAdd = false;
+			}
+		});
+		
+		if(doAdd) {
+			var newOwner = {
+					name   : "",
+					tel    : "",
+				    wechat : "",
+				    change : false,
+					delay  : false,
+					markdown : false,
+					makesure : false
+				};
+			
+			$scope.owners.push(newOwner);
+		}
+	}
+	
+	$scope.makeOwner = function(owner) {
+		if(!owner.tel) {
+			alert("请输入电话!");
+			return;
+		}
+		
+		if(!owner.wechat) {
+			alert("请输入微信!");
+			return;
+		}
+			
+		var makesure = true;
+		angular.forEach($scope.owners,function(own) {
+			if(owner.tel == own.tel && own.makesure == true) {
+				alert("此人已存在!");
+				makesure = false;
+			}
+		});
+		
+		owner.makesure = makesure;
+	}
+	
+	$scope.deleteOwner = function(tel) {
+		angular.forEach($scope.owners,function(owner,index) {
+			if(owner.tel == tel && owner.makesure == true) {
+				$scope.owners.splice(index,1);
+			}
+		});
+	}
+	
+	$scope.$watch(function() {
+		getDbConfig()
+	});
+	
+	$scope.newOwners = [];
+	
+	$scope.submit = function() {
+		angular.forEach($scope.owners,function(value) {
+			if(value.makesure) {
+				var ownerInfo = {
+					name : value.name,
+					tel  : value.tel,
+					wechat : value.wechat,
+					permission : 0
+				};
+				
+				if(value.change) {
+					ownerInfo.permission |= 1;
+				}
+				if(value.dalay) {
+					ownerInfo.permission |= (1<<1);
+				}
+				if(value.markdown) {
+					ownerInfo.permission |= (1<<2);
+				}
+				
+				$scope.newOwners.push(ownerInfo);
+			}
+		});
+		
+		var newDbConfig = {
+				key : $scope.key,
+				config : $scope.configs,
+				owners : $scope.newOwners
+		};
+		
+		if($scope.isFind) {
+			$http.post('/a/alarm/sendChangeMassage?key='+$scope.key, angular.toJson($scope.oldConfig), angular.toJson($scope.configs)).success(function (data, status, headers, config) {
+			});
+		} else {
+			$http.post('/a/alarm/sendChangeMassage?key='+$scope.key, angular.toJson($scope.defaultConfig), angular.toJson($scope.configs)).success(function (data, status, headers, config) {
+			});
+		}
+		
+		$http.post('/a/alarm/saveConfig',angular.toJson(newDbConfig)).success(function (data, status, headers, config) {
+			alert("保存成功");
+		});
+	}
+	
+	$scope.reset = function() {
+		$scope.configs = {
+				autoMarkupForDown    : $scope.defaultConfig.autoMarkupForDown,
+				autoMarkdownForDown  : $scope.defaultConfig.autoMarkdownForDown,
+				autoMarkupForDelay   : $scope.defaultConfig.autoMarkupForDelay,
+				autoMarkdownForDelay : $scope.defaultConfig.autoMarkdownForDelay,
+				minDelayTime         : $scope.defaultConfig.minDelayTime,
+				maxDelayTime         : $scope.defaultConfig.maxDelayTime
+		};
+	}
+	
+	$scope.load();
 });
 
+/*建库建表
 zebraWeb.controller('createDb', function ($scope, $http) {
 	
 	$scope.makeDbRule = function() {
@@ -1551,7 +1753,6 @@ zebraWeb.controller('createDb', function ($scope, $http) {
 		
 		
 		$scope.startCreate = true;
-		
-		
 	}
 });
+*/

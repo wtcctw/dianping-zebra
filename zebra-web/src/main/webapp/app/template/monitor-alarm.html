@@ -10,89 +10,119 @@
 	<div class="col-xs-12">
 		<form class="form-horizontal" role="form">
 			<div class="form-group">
-				<label class="col-xs-3 control-label">选择数据库:</label>
-				<div class="col-xs-8">
+				<label class="col-xs-4 control-label">选择数据库:</label>
+				<div class="col-xs-7">
 					<div isteven-multi-select input-model="dbNames"
-						output-model="dbNamesChosed" item-label="dbNames"
-						button-label="dbNames" tick-property="ticked" max-height="200px"
-						selection-mode="single"></div>
-
+						output-model="dbNamesChosed" item-label="dbName"
+						button-label="dbName" tick-property="ticked" max-height="200px"
+						selection-mode="single">
+					</div>
 				</div>
-				<button class="btn btn-default btn-primary" ng-click="searchDs()">查询</button>
 			</div>
 		</form>
 		<hr>
 	</div>
 </div>
 
-<div class="row">
+<div ng-show="showConfig" class="row">
 	<div class="col-xs-12">
 		<form class="form-horizontal" role="form">
 			<div class="form-group">
-				<label class="col-xs-4 control-label">dsName :</label>
-				<div class="col-xs-8">
-					<input readOnly="true" style="width: 200px;" type="text"
-						ng-model="dsName" />
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-xs-4 control-label no-padding-left">自动markup
+				<label class="col-xs-5 control-label no-padding-left">无法连接到数据库被markdown后自动markup
 					:</label>
-				<div class="col-xs-8">
+				<div class="col-xs-7">
 					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
-						ng-model="automarkup" type="checkbox"> <span class="lbl"></span>
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-xs-4 control-label">自动markdown :</label>
-				<div class="col-xs-8">
-					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
-						ng-model="automarkdpwn" type="checkbox"> <span class="lbl"></span>
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-xs-4 control-label">发送告警的延迟时间 :</label>
-				<div class="col-xs-8">
-					<input style="width: 100px;" class="form-control" type="number"
-						min="-1" max="3600" step="1" ng-model="delayAlarmTime" />
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-xs-4 control-label">markdown的延迟时间 :</label>
-				<div class="col-xs-8">
-					<input style="width: 100px;" class="form-control" type="number"
-						min="-1" max="3600" step="1" ng-model="delayMarkdownTime" />
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-xs-4 control-label">延迟达到设置时自动markdown:</label>
-				<div class="col-xs-8">
-					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
-						ng-model="autodelaymarkdown" type="checkbox"> <span
+						ng-model="configs.autoMarkupForDown" type="checkbox"> <span
 						class="lbl"></span>
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-xs-4 control-label">负责人:</label>
-				<div class="col-xs-8">
-					<button class="btn btn-white btn-info btn-bold"
-						ng-click="editowners()">
-						<i class="ace-icon fa fa-users bigger-120 blue"></i> 编辑
-					</button>
+				<label class="col-xs-5 control-label">无法连接到数据库时自动markdown :</label>
+				<div class="col-xs-7">
+					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
+						ng-model="configs.autoMarkdownForDown" type="checkbox"> <span class="lbl"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-5 control-label">因延迟markdown后自动markup:</label>
+				<div class="col-xs-7">
+					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
+						ng-model="configs.autoMarkupForDelay" type="checkbox">
+					<span class="lbl"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-5 control-label">延迟达到上限时自动markdown:</label>
+				<div class="col-xs-7">
+					<input name="switch-field-1" class="ace ace-switch ace-switch-3"
+						ng-model="configs.autoMarkdownForDelay" type="checkbox">
+					<span class="lbl"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-5 control-label">当延迟到达{{configs.minDelayTime}}秒时发送告警 :</label>
+				<div class="col-xs-7">
+					<input style="width: 80px;" class="form-control" type="number"
+						min="0" max="3600" step="1" ng-model="configs.minDelayTime"/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-xs-5 control-label">当延迟到达{{configs.maxDelayTime}}秒时markdown :</label>
+				<div class="col-xs-7">
+					<input ng-disabled="!configs.autoMarkdownForDelay" style="width: 80px;" class="form-control" type="number"
+						min="0" max="3600" step="1" ng-model="configs.maxDelayTime"/>
 				</div>
 			</div>
 		</form>
+		
+				<table class="table table-bordered table-hover table-condensed">
+			<thead>
+				<th style="width:10%">姓名</th>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </th>
+				<th style="width:20%">手机</th>
+				<th style="width:20%">邮箱</th>
+				<th style="width:40%">通知</th>
+				<th style="width:10%"><button class="btn btn-primary btn-mini"
+						ng-click="newOwner()">添加</button></th>
+			</thead>
+			<tbody>
+				<tr ng-repeat="owner in owners">
+					<td><input ng-show="!owner.makesure" style="width: 200px;"
+						type="text" ng-model="owner.name" /><label
+						ng-show="owner.makesure" class="control-label" for="form-field-1">{{owner.name}}</label></td>
+					<td><input ng-show="!owner.makesure" style="width: 200px;"
+						type="text" ng-model="owner.tel" /><label
+						ng-show="owner.makesure" class="control-label" for="form-field-1">{{owner.tel}}</label></td>
+					<td><input ng-show="!owner.makesure" style="width: 200px;"
+						type="text" ng-model="owner.wechat" /><label
+						ng-show="owner.makesure" class="control-label" for="form-field-1">{{owner.wechat}}</label></td>
+					<td><div class="control-group">
+					        <div class="checkbox">
+							    <label>
+									<input ng-model="owner.change" ng-disabled="owner.makesure" type="checkbox" class="ace">
+									<span class="lbl">变更通知</span>
+								</label>
+							    <label>
+								    <input ng-model="owner.delay" ng-disabled="owner.makesure" type="checkbox" class="ace">
+									<span class="lbl">延迟告警</span>
+								</label>
+								<label>
+									<input ng-model="owner.markdown" ng-disabled="owner.makesure" type="checkbox" class="ace">
+									<span class="lbl">markdown告警</span>
+								</label>
+							</div>
+						</div></td>
+					<td><button ng-show="!owner.makesure" ng-click="makeOwner(owner)"
+							class="btn btn-primary btn-mini">确认</button>
+						<button ng-show="owner.makesure" ng-click="deleteOwner(owner.tel)"
+							class="btn btn-warning btn-mini">删除</button></td>
+				</tr>
+			</tbody>
+		</table>
+		
 		<hr>
-		<div class="buttern-group col-xs-offset-3">
-			<button class="btn btn-white btn-primary btn-bold">
-				<i class="ace-icon fa fa-floppy-o bigger-120 blue"></i> 保存
-			</button>
-			<button class="btn btn-white btn-danger btn-bold">
-				<i class="ace-icon fa fa-trash-o bigger-120 red"></i> 删除
-			</button>
-			<button class="btn btn-white btn-default btn-round">
-				<i class="ace-icon fa fa-times red2"></i> 取消
-			</button>
+		<div class="buttern-group col-xs-offset-4">
+			<button class="btn btn-info" ng-click="submit()"> 提交</button>
+			<button class="btn btn-danger" ng-click="reset()">恢复默认</button>
 		</div>
 	</div>
 </div>

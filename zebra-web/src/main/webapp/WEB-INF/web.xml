@@ -35,6 +35,7 @@
         <url-pattern>/a/flowcontrol/save</url-pattern>
         <url-pattern>/a/flowcontrol/delete</url-pattern>
         <url-pattern>/a/update/*</url-pattern>
+        <url-pattern>/a/alarm/*</url-pattern>
         <url-pattern>/a/monitor/removeJdbcRef</url-pattern>
         <url-pattern>/a/monitor/submit</url-pattern>
         <url-pattern>/a/monitor/getStatus</url-pattern>
