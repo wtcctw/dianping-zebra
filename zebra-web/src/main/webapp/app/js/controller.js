@@ -1415,9 +1415,11 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 					}
 				});
 				
-		        $scope.isFind = false;
+		        var isFind = false;
 				angular.forEach($scope.data,function(jdbcRefConfig) {
 					if(jdbcRefConfig.key == $scope.key) {
+						$scope.owners = jdbcRefConfig.owners;
+
 						if(jdbcRefConfig.config) {
 							$scope.configs.autoMarkupForDown    = jdbcRefConfig.config.autoMarkupForDown;
 							$scope.configs.autoMarkdownForDown  = jdbcRefConfig.config.autoMarkdownForDown;
@@ -1426,13 +1428,12 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 							$scope.configs.minDelayTime         = jdbcRefConfig.config.minDelayTime;
 							$scope.configs.maxDelayTime         = jdbcRefConfig.config.maxDelayTime;
 							
-							$scope.oldConfig = jdbcRefConfig.config;
-							$scope.isFind = true;
+							isFind = true;
 						}
 					}
 				});
 				
-				if(!$scope.isFind) {
+				if(!isFind) {
 					$scope.configs = {
 							autoMarkupForDown    : $scope.defaultConfig.autoMarkupForDown,
 							autoMarkdownForDown  : $scope.defaultConfig.autoMarkdownForDown,
@@ -1443,7 +1444,6 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 					};
 				}
 				
-				$scope.owners = $scope.data.owners;
 				if(!$scope.owners) {
 					$scope.owners = [];
 				}
@@ -1455,6 +1455,7 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 					owner.change   = (owner.permission & 1) > 0;
 					owner.delay    = (owner.permission & (1<<1)) > 0;
 					owner.markdown = (owner.permission & (1<<2)) > 0;
+					owner.makesure = true;
 				});
 
 		        $scope.showConfig = true;
@@ -1520,6 +1521,19 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 		getDbConfig()
 	});
 	
+	$scope.ischanged = function() {
+		if($scope.configs.autoMarkupForDown == $scope.defaultConfig.autoMarkupForDown &&
+		   $scope.configs.autoMarkdownForDown == $scope.defaultConfig.autoMarkdownForDown &&
+		   $scope.configs.autoMarkupForDelay == $scope.defaultConfig.autoMarkupForDelay &&
+		   $scope.configs.autoMarkdownForDelay == $scope.defaultConfig.autoMarkdownForDelay &&
+		   $scope.configs.minDelayTime == $scope.defaultConfig.minDelayTime &&
+		   $scope.configs.maxDelayTime == $scope.defaultConfig.maxDelayTime) {
+			
+			return false;
+		}
+		return true;
+	}
+	
 	$scope.newOwners = [];
 	
 	$scope.submit = function() {
@@ -1546,21 +1560,34 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 			}
 		});
 		
-		var newDbConfig = {
-				key : $scope.key,
-				config : $scope.configs,
-				owners : $scope.newOwners
-		};
 		
-		if($scope.isFind) {
-			$http.post('/a/alarm/sendChangeMassage?key='+$scope.key, angular.toJson($scope.oldConfig), angular.toJson($scope.configs)).success(function (data, status, headers, config) {
-			});
+		var newDbConfig;
+		if($scope.ischanged()) {
+			newDbConfig = {
+					key : $scope.key,
+					config : $scope.configs,
+					owners : $scope.newOwners
+			};
 		} else {
-			$http.post('/a/alarm/sendChangeMassage?key='+$scope.key, angular.toJson($scope.defaultConfig), angular.toJson($scope.configs)).success(function (data, status, headers, config) {
-			});
+			newDbConfig = {
+					key : $scope.key,
+					owners : $scope.newOwners
+			};
 		}
 		
-		$http.post('/a/alarm/saveConfig',angular.toJson(newDbConfig)).success(function (data, status, headers, config) {
+		var isFind = false;
+		angular.forEach($scope.data,function(project,index) {
+			if(project.key == newDbConfig.key) {
+				$scope.data.splice(index,1,newDbConfig);
+				isFind = true;
+			}
+		});
+		
+		if(!isFind) {
+			$scope.data.push(newDbConfig);
+		}
+		
+		$http.post('/a/alarm/saveConfig',angular.toJson($scope.data)).success(function (data, status, headers, config) {
 			alert("保存成功");
 		});
 	}
