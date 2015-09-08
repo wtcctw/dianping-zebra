@@ -163,6 +163,10 @@ zebraWeb.config(function ($stateProvider, $urlRouterProvider) {
         url: '/database-manager',
         templateUrl: 'app/template/database-manager.html',
         controller: 'database-manager'
+    }).state('database-manager-datasource', {
+        url: '/database-manager-datasource',
+        templateUrl: 'app/template/database-manager-datasource.html',
+        controller: 'database-manager-datasource'
     }).state('database-manager-create', {
         url: '/database-manager-create',
         templateUrl: 'app/template/database-manager-create.html',

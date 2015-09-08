@@ -1,0 +1,45 @@
+<div class="page-header">
+	<h1>
+		实例管理 <small> <i class="ace-icon fa fa-angle-double-right">数据源管理</i>
+		<small> <a href="#/database-manager">返回数据库管理</a>
+		</small>
+		<form style="float:right" class="inline-block">
+			<button class="btn btn-default">登录数据库</button>
+			<button class="btn btn-default">重启实例</button>
+			<button class="btn btn-default">备份实例</button>
+		</form>
+	</h1>
+</div>
+
+<div>
+	<table class="table table-striped table-bordered table-hover">
+		<thead>
+			<tr>
+				<th>数据源Key</th>
+				<th>数据源Value</th>
+				<th>描述</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th>dianping</th>
+				<th>(dianping-s1-read:1),(dianping-m1-write)</th>
+				<th>点评库</th>
+				<th><button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit('dianping')">配置</button>&nbsp;&nbsp;<button class="btn btn-xs btn-success">测试</button></th>
+			</tr>
+			<tr>
+				<th>dianping.op</th>
+				<th>(dianping-m11-write:1),(dianping-m11-write)</th>
+				<th>点评库运营</th>
+				<th><button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit('dianping.op')">配置</button>&nbsp;&nbsp;<button class="btn btn-xs btn-success">测试</button></th>
+			</tr>
+			<tr>
+				<th>dianping.sdw</th>
+				<th>(dianping-s1-read:1),(dianping-m1-write)</th>
+				<th>点评库dw和搜索使用</th>
+				<th><button ng-show="isLogin" class="btn btn-xs btn-primary" ng-click="edit('dianping.sdw')">配置</button>&nbsp;&nbsp;<button class="btn btn-xs btn-success">测试</button></th>
+			</tr>
+		</tbody>
+	</table>
+</div>
