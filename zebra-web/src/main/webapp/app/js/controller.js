@@ -1435,9 +1435,8 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http, $window) {
 						owners = jdbcRefConfig.owners;
 						if(jdbcRefConfig.config) {
 							$scope.configs = {
-									autoMarkupForDown    : jdbcRefConfig.config.autoMarkupForDown,
+									autoMarkup           : jdbcRefConfig.config.autoMarkup,
 									autoMarkdownForDown  : jdbcRefConfig.config.autoMarkdownForDown,
-									autoMarkupForDelay   : jdbcRefConfig.config.autoMarkupForDelay,
 									autoMarkdownForDelay : jdbcRefConfig.config.autoMarkdownForDelay,
 									minDelayTime         : jdbcRefConfig.config.minDelayTime,
 									maxDelayTime         : jdbcRefConfig.config.maxDelayTime
@@ -1450,9 +1449,8 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http, $window) {
 				
 				if(!isFind) {
 					$scope.configs = {
-							autoMarkupForDown    : $scope.defaultConfig.autoMarkupForDown,
+							autoMarkup    : $scope.defaultConfig.autoMarkup,
 							autoMarkdownForDown  : $scope.defaultConfig.autoMarkdownForDown,
-							autoMarkupForDelay   : $scope.defaultConfig.autoMarkupForDelay,
 							autoMarkdownForDelay : $scope.defaultConfig.autoMarkdownForDelay,
 							minDelayTime         : $scope.defaultConfig.minDelayTime,
 							maxDelayTime         : $scope.defaultConfig.maxDelayTime
@@ -1535,9 +1533,8 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http, $window) {
 	});
 	
 	$scope.ischanged = function() {
-		if($scope.configs.autoMarkupForDown == $scope.defaultConfig.autoMarkupForDown &&
+		if($scope.configs.autoMarkup == $scope.defaultConfig.autoMarkup &&
 		   $scope.configs.autoMarkdownForDown == $scope.defaultConfig.autoMarkdownForDown &&
-		   $scope.configs.autoMarkupForDelay == $scope.defaultConfig.autoMarkupForDelay &&
 		   $scope.configs.autoMarkdownForDelay == $scope.defaultConfig.autoMarkdownForDelay &&
 		   $scope.configs.minDelayTime == $scope.defaultConfig.minDelayTime &&
 		   $scope.configs.maxDelayTime == $scope.defaultConfig.maxDelayTime) {
@@ -1609,9 +1606,8 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http, $window) {
 	
 	$scope.reset = function() {
 		$scope.configs = {
-				autoMarkupForDown    : $scope.defaultConfig.autoMarkupForDown,
+				autoMarkup    : $scope.defaultConfig.autoMarkup,
 				autoMarkdownForDown  : $scope.defaultConfig.autoMarkdownForDown,
-				autoMarkupForDelay   : $scope.defaultConfig.autoMarkupForDelay,
 				autoMarkdownForDelay : $scope.defaultConfig.autoMarkdownForDelay,
 				minDelayTime         : $scope.defaultConfig.minDelayTime,
 				maxDelayTime         : $scope.defaultConfig.maxDelayTime
