@@ -12,13 +12,19 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.dianping.cat.Cat;
+import com.dianping.zebra.biz.entity.AlarmProjectConfigContent;
+import com.dianping.zebra.biz.entity.AlarmResource;
 import com.dianping.zebra.biz.service.HaHandler;
 import com.dianping.zebra.biz.service.HaHandler.Operator;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
 public class MySQLMonitorThread extends Thread {
+
+	@Autowired
+	ProjectConfigHandler projectConfigHandler;
 
 	private static final Logger logger = LogManager.getLogger(MySQLMonitorThread.class);
 
@@ -37,16 +43,17 @@ public class MySQLMonitorThread extends Thread {
 
 	private Status currentState = Status.INIT;
 
-	private long lastAlarmTime = 0L;
-
 	private long ALARM_INTERVAL = 5 * 60 * 1000L;
 
 	private String jdbcUrl;
-	
+
 	private String host;
-	
-	public MySQLMonitorThread(DataSourceMonitorConfig monitorConfig, DataSourceConfig config, HaHandler haHandler,
-	      AlarmManager alarmManager) {
+
+	private AlarmProjectConfigContent projectConfig;
+
+	public MySQLMonitorThread(AlarmProjectConfigContent projectConfig, DataSourceMonitorConfig monitorConfig,
+			DataSourceConfig config, HaHandler haHandler, AlarmManager alarmManager) {
+		this.projectConfig = projectConfig;
 		this.monitorConfig = monitorConfig;
 		this.config = config;
 
@@ -55,7 +62,7 @@ public class MySQLMonitorThread extends Thread {
 		URI uri = URI.create(cleanURI);
 		this.jdbcUrl = "jdbc:" + uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
 		this.host = uri.getHost();
-		
+
 		this.hahandler = haHandler;
 		this.alarmManager = alarmManager;
 	}
@@ -63,13 +70,13 @@ public class MySQLMonitorThread extends Thread {
 	private void close(Connection con, Statement stmt) {
 		if (stmt != null) {
 			try {
-			stmt.close();
+				stmt.close();
 			} catch (SQLException ignore) {
 			}
 		}
 		if (con != null) {
 			try {
-			con.close();
+				con.close();
 			} catch (SQLException ingore) {
 			}
 		}
@@ -98,16 +105,17 @@ public class MySQLMonitorThread extends Thread {
 		}
 
 		// 确保tomcat加载应用完成，sleep 30秒
-		  // 同时限制不能频繁的markup和markdown，之间至少间隔30秒
+		// 同时限制不能频繁的markup和markdown，之间至少间隔30秒
 		try {
 			TimeUnit.SECONDS.sleep(30);
 		} catch (InterruptedException e) {
 			return;
 		}
 
-		if (!config.getActive() && monitorConfig.isAutoMarkUp()) {
+		if (!config.getActive() && projectConfig.isAutoMarkup()) {
 			doMarkUp();
-		} else if (config.getActive() && monitorConfig.isAutoMarkDown()) {
+		} else if (config.getActive()
+				&& (projectConfig.isAutoMarkdownForDown() || projectConfig.isAutoMarkdownForDown())) {
 			doMarkDown();
 		} else {
 			currentState = config.getActive() ? Status.ALIVE : Status.DEAD;
@@ -117,6 +125,7 @@ public class MySQLMonitorThread extends Thread {
 	private void doMarkDown() {
 		FixedLengthLinkedList timestamp = new FixedLengthLinkedList(monitorConfig);
 		FixedLengthLinkedList nulldurationstamp = new FixedLengthLinkedList(monitorConfig);
+		long lastAlarmTime = 0L;
 
 		currentState = Status.ALIVE;
 		while (!Thread.currentThread().isInterrupted()) {
@@ -124,92 +133,112 @@ public class MySQLMonitorThread extends Thread {
 			Statement stmt = null;
 
 			try {
-			con = DriverManager.getConnection(this.jdbcUrl, monitorConfig.getUsername(), monitorConfig.getPassword());
-			stmt = con.createStatement();
-			stmt.setQueryTimeout(1);
-			stmt.executeQuery("SELECT 1");
+				con = DriverManager.getConnection(this.jdbcUrl, monitorConfig.getUsername(),
+						monitorConfig.getPassword());
+				stmt = con.createStatement();
+				stmt.setQueryTimeout(1);
+				stmt.executeQuery("SELECT 1");
 
-			if (isDelay(stmt, nulldurationstamp)) {
-				break;
-			}
-			// 如果能连上，则清空队列中的异常；因为要求连续的异常
-			timestamp.clear();
+				if (isDelay(stmt, nulldurationstamp, lastAlarmTime)) {
+					break;
+				}
+				// 如果能连上，则清空队列中的异常；因为要求连续的异常
+				timestamp.clear();
 			} catch (SQLException e) {
-			timestamp.addLast(System.currentTimeMillis());
+				timestamp.addLast(System.currentTimeMillis());
 
-			Cat.logError(e);
-			if (timestamp.shouldAction()) {
-				hahandler.markdown(config.getId(), Operator.ZEBRA);
-				logger.info("markDown " + config.getId());
+				Cat.logError(e);
 
-				alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA", delay));
+				if (timestamp.shouldAction()) {
+					if (projectConfig.isAutoMarkdownForDown()) {
+						hahandler.markdown(config.getId(), Operator.ZEBRA);
+						logger.info("markDown " + config.getId());
 
-				break;
-			}
+						alarmManager.alarm(AlarmResource.MARKDOWN,
+								new AlarmContent(config.getId(), "ZEBRA", "ZEBRA", host, "MarkDown", delay));
+
+						break;
+					} else {
+						alarmManager.alarm(AlarmResource.MARKDOWN,
+								new AlarmContent(config.getId(), "ZEBRA", "ZEBRA", host, "忽略", delay));
+
+						timestamp.clear();
+					}
+				}
 			} finally {
-			lastUpdatedTime = System.currentTimeMillis();
-			close(con, stmt);
+				lastUpdatedTime = System.currentTimeMillis();
+				close(con, stmt);
 			}
 
 			try {
-			TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
+				TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
 			} catch (InterruptedException e) {
-			break;
+				break;
 			}
 		}
 	}
 
-	private boolean isDelay(Statement stmt, FixedLengthLinkedList nulldurationstamp) {
+	private boolean isDelay(Statement stmt, FixedLengthLinkedList nulldurationstamp, long lastAlarmTime) {
 		boolean isDelay = false;
 
 		try {
 			ResultSet rs = stmt.executeQuery("show slave status");
 			while (rs.next()) {
-			Object o = rs.getObject("Seconds_Behind_Master");
-			if (o == null) {
+				Object o = rs.getObject("Seconds_Behind_Master");
+				if (o == null) {
 					nulldurationstamp.addLast(System.currentTimeMillis());
 					if (nulldurationstamp.shouldAction()) {
-						hahandler.markdown(config.getId(), Operator.ZEBRA);
-						logger.info("markDown" + config.getId());
+						if (projectConfig.isAutoMarkdownForDelay()) {
+							hahandler.markdown(config.getId(), Operator.ZEBRA);
+							logger.info("markDown" + config.getId());
 
-						alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA", -1));
-						
-						
-						isDelay = true;
-						break;
-					}
-			} else if (o instanceof BigInteger) {
-				delay = ((BigInteger)o).intValue();
+							alarmManager.alarm(AlarmResource.MARKDOWN,
+									new AlarmContent(config.getId(), "ZEBRA", "ZEBRA", host, "MarkDown", -1));
 
-				if (delay >= monitorConfig.getDelayTime() / 3 && delay < monitorConfig.getDelayTime() / 2) {
-					if (lastAlarmTime == 0L) {
-						alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,null, delay));
+							isDelay = true;
+							break;
+						} else {
+							alarmManager.alarm(AlarmResource.MARKDOWN,
+									new AlarmContent(config.getId(), "ZEBRA", "ZEBRA", host, "忽略", -1));
 
-						lastAlarmTime = System.currentTimeMillis();
-					} else {
-						long interval = System.currentTimeMillis() - lastAlarmTime;
-
-						if (interval >= ALARM_INTERVAL) {
-						alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,null, delay));
+							nulldurationstamp.clear();
 						}
 					}
+				} else if (o instanceof BigInteger) {
+					delay = ((BigInteger) o).intValue();
+
+					if (delay >= projectConfig.getMinDelayTime()) {
+						if (lastAlarmTime == 0L) {
+							alarmManager.alarm(AlarmResource.DELAY,
+									new AlarmContent(config.getId(), "ZEBRA", "ZEBRA", host, null, delay));
+
+							lastAlarmTime = System.currentTimeMillis();
+						} else {
+							long interval = System.currentTimeMillis() - lastAlarmTime;
+
+							if (interval >= ALARM_INTERVAL) {
+								alarmManager.alarm(AlarmResource.DELAY,
+										new AlarmContent(config.getId(), "ZEBRA", "ZEBRA", host, null, delay));
+							}
+						}
+					}
+
+					if (delay >= projectConfig.getMaxDelayTime() && projectConfig.isAutoMarkdownForDelay()) {
+							hahandler.markdown(config.getId(), Operator.ZEBRA);
+							logger.info("markDown " + config.getId());
+
+							isDelay = true;
+							alarmManager.alarm(AlarmResource.MARKDOWN,
+									new AlarmContent(config.getId(), "ZEBRA", "ZEBRA", host, "MarkDowN", delay));
+
+							break;
+					}
+
+					nulldurationstamp.clear();
+				} else {
+					logger.error("unknown Seconds_Behind_Master:" + config.getId());
 				}
-
-				if (delay >= monitorConfig.getDelayTime()) {
-					hahandler.markdown(config.getId(), Operator.ZEBRA);
-					logger.info("markDown " + config.getId());
-
-					isDelay = true;
-					alarmManager.alarm(new AlarmContent(config.getId(),"ZEBRA","ZEBRA",host,"MarkDown by ZEBRA", delay));
-					
-					break;
-				}
-
-				nulldurationstamp.clear();
-			} else {
-				logger.error("unknown Seconds_Behind_Master:" + config.getId());
-			}
-			break;
+				break;
 			}
 		} catch (SQLException ignore) {
 		}
@@ -225,31 +254,32 @@ public class MySQLMonitorThread extends Thread {
 			Connection con = null;
 			Statement stmt = null;
 			try {
-			con = DriverManager.getConnection(this.jdbcUrl, monitorConfig.getUsername(), monitorConfig.getPassword());
-			stmt = con.createStatement();
-			stmt.executeQuery("SELECT 1");
+				con = DriverManager.getConnection(this.jdbcUrl, monitorConfig.getUsername(),
+						monitorConfig.getPassword());
+				stmt = con.createStatement();
+				stmt.executeQuery("SELECT 1");
 
-			timestamp.addLast(System.currentTimeMillis());
+				timestamp.addLast(System.currentTimeMillis());
 
-			if (timestamp.shouldAction()) {
-				hahandler.markup(config.getId(), Operator.ZEBRA);
-				logger.info("markUp " + config.getId());
+				if (timestamp.shouldAction()) {
+					hahandler.markup(config.getId(), Operator.ZEBRA);
+					logger.info("markUp " + config.getId());
 
-				break;
-			}
+					break;
+				}
 			} catch (SQLException ignore) {
-			Cat.logError(ignore);
-			// 如果不能连上，则清空队列中正常的次数；
-			timestamp.clear();
+				Cat.logError(ignore);
+				// 如果不能连上，则清空队列中正常的次数；
+				timestamp.clear();
 			} finally {
-			lastUpdatedTime = System.currentTimeMillis();
-			close(con, stmt);
+				lastUpdatedTime = System.currentTimeMillis();
+				close(con, stmt);
 			}
 
 			try {
-			TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
+				TimeUnit.SECONDS.sleep(monitorConfig.getPingIntervalSeconds());
 			} catch (InterruptedException e) {
-			break;
+				break;
 			}
 		}
 	}
@@ -273,7 +303,7 @@ public class MySQLMonitorThread extends Thread {
 
 		public void addLast(Long e) {
 			if (this.size() >= monitorConfig.getPingFailLimit()) {
-			super.removeFirst();
+				super.removeFirst();
 			}
 
 			super.addLast(e);

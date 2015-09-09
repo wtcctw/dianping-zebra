@@ -16,15 +16,11 @@ import com.dianping.zebra.util.StringUtils;
 public class AlarmManager {
 
 	private static final String LION_KEY_SMS = "zebra.syncservice.alarm.sms";
-
 	private static final String LION_KEY_WEIXIN = "zebra.syncservice.alarm.weixin";
 
 	private static final String DELIM = ",";
-
 	private Set<String> smsTargets = new HashSet<String>();
-
 	private Set<String> weixinTargets = new HashSet<String>();
-
 	@Autowired
 	private AlarmService alarmService;
 
@@ -57,15 +53,13 @@ public class AlarmManager {
 		}
 
 		for (String email : weixinTargets) {
-			alarmService.sendWeixin(email, content.getTitle(), content.getWeiXinContent());
+			alarmService.sendWeixin(email.substring(0,email.indexOf("@")),content.getWeiXinContent());
 		}
 	}
 
 	public static class AlarmContent {
 		private String syncTaskName;
-
 		private String fromSyncIp;
-
 		private String toSyncIp;
 
 		public AlarmContent(String syncTaskName, String fromSyncIp, String toSyncIp) {
@@ -77,7 +71,7 @@ public class AlarmManager {
 		public String getSmsContent() {
 			if (StringUtils.isNotBlank(toSyncIp)) {
 				return String.format("[%s] 同步任务:%s 在同步服务器1:%s已挂,灾备到同步服务器2:%s", getTitle(), syncTaskName, fromSyncIp,
-				      toSyncIp);
+						toSyncIp);
 			} else {
 				return String.format("[%s] 同步任务:%s 在同步服务器1:%s已挂,无法找到其灾备服务器!", getTitle(), syncTaskName, fromSyncIp);
 			}
@@ -89,9 +83,9 @@ public class AlarmManager {
 
 		public String getWeiXinContent() {
 			if (StringUtils.isNotBlank(toSyncIp)) {
-				return String.format("[同步任务:%s 在同步服务器1:%s已挂,灾备到同步服务器2:%s]", syncTaskName, fromSyncIp, toSyncIp);
+				return String.format("[%s]同步任务:%s在同步服务器1:%s已挂,灾备到同步服务器2:%s", getTitle(), syncTaskName, fromSyncIp, toSyncIp);
 			} else {
-				return String.format("[同步任务:%s 在同步服务器1:%s已挂,无法找到其灾备服务器!!]", syncTaskName, fromSyncIp);
+				return String.format("[%s]同步任务:%s在同步服务器1:%s已挂,无法找到其灾备服务器!!", getTitle(), syncTaskName, fromSyncIp);
 			}
 		}
 	}

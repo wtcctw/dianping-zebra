@@ -26,7 +26,7 @@ public class AlarmServiceTest {
 	
 	@Test
 	public void testWexin(){
-		boolean success = alarmService.sendWeixin("hao.zhu@dianping.com", "test", "test");
+		boolean success = alarmService.sendWeixin("hao.zhu", "test");
 		
 		System.out.println(success);
 	}

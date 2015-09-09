@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.biz.dto.MHAResultDto;
+import com.dianping.zebra.biz.entity.AlarmResource;
 import com.dianping.zebra.biz.service.HaHandler;
 import com.dianping.zebra.biz.service.HaHandler.Operator;
 import com.dianping.zebra.biz.service.LionService;
-import com.dianping.zebra.admin.util.MHAAlarmContent;
+import com.dianping.zebra.admin.util.AlarmContent;
 import com.dianping.zebra.admin.manager.MHAAlarmManager;
 
 /**
@@ -53,7 +54,7 @@ public class MHAController extends BasicController {
 			if (dsIds != null) {
 				for (String dsId : dsIds) {
 					haHandler.markdown(dsId, Operator.MHA);
-					mhaAlarmManager.alarm(new MHAAlarmContent(dsId,"MHA","MAH",ip,"MarkDown by MHA"));
+					mhaAlarmManager.alarm(AlarmResource.MARKDOWN,new AlarmContent(dsId,"MHA","MHA",ip,"MarkDown by MHA"));
 				}
 			}
 

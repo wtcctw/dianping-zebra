@@ -1374,11 +1374,12 @@ zebraWeb.controller('merge-edit', function ($scope, $http, $log, name, close) {
     }
 });
 
-zebraWeb.controller('monitor-alarm', function ($scope, $http) {
+zebraWeb.controller('monitor-alarm', function ($scope, $http, $window) {
 	$scope.load = function() {
 		$http.post('/a/alarm/getProjectConfig').success(function (data, status, headers, config) {
 			$scope.data = data;
 			$scope.getDbList();
+
 		});
 	}
 	
@@ -1412,21 +1413,35 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 		        angular.forEach($scope.data,function(jdbcRefConfig) {
 					if(jdbcRefConfig.key == 'zebra-default') {
 						$scope.defaultConfig = jdbcRefConfig.config;
+						$scope.dafaultOwners = jdbcRefConfig.owners;
 					}
 				});
+		        
+		        var owners = [];
+		        angular.forEach($scope.dafaultOwners,function(defaultOwner) {
+		        	var owner = {
+		        			name : defaultOwner.name,
+		        			tel  : defaultOwner.tel,
+		        			wechat : defaultOwner.wechat,
+		        			permission : defaultOwner.permission
+		        	};
+		        	
+		        	owners.push(owner);
+		        });
 				
 		        var isFind = false;
 				angular.forEach($scope.data,function(jdbcRefConfig) {
 					if(jdbcRefConfig.key == $scope.key) {
-						$scope.owners = jdbcRefConfig.owners;
-
+						owners = jdbcRefConfig.owners;
 						if(jdbcRefConfig.config) {
-							$scope.configs.autoMarkupForDown    = jdbcRefConfig.config.autoMarkupForDown;
-							$scope.configs.autoMarkdownForDown  = jdbcRefConfig.config.autoMarkdownForDown;
-							$scope.configs.autoMarkupForDelay   = jdbcRefConfig.config.autoMarkupForDelay;
-							$scope.configs.autoMarkdownForDelay = jdbcRefConfig.config.autoMarkdownForDelay;
-							$scope.configs.minDelayTime         = jdbcRefConfig.config.minDelayTime;
-							$scope.configs.maxDelayTime         = jdbcRefConfig.config.maxDelayTime;
+							$scope.configs = {
+									autoMarkupForDown    : jdbcRefConfig.config.autoMarkupForDown,
+									autoMarkdownForDown  : jdbcRefConfig.config.autoMarkdownForDown,
+									autoMarkupForDelay   : jdbcRefConfig.config.autoMarkupForDelay,
+									autoMarkdownForDelay : jdbcRefConfig.config.autoMarkdownForDelay,
+									minDelayTime         : jdbcRefConfig.config.minDelayTime,
+									maxDelayTime         : jdbcRefConfig.config.maxDelayTime
+							};
 							
 							isFind = true;
 						}
@@ -1444,9 +1459,7 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 					};
 				}
 				
-				if(!$scope.owners) {
-					$scope.owners = [];
-				}
+				$scope.owners = owners;
 				
 				angular.forEach($scope.owners,function(owner){
 					if(!owner.permission) {
@@ -1493,8 +1506,8 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 			return;
 		}
 		
-		if(!owner.wechat) {
-			alert("请输入微信!");
+		if(!owner.wechat && (owner.indexOf('@dianping.com')>0)) {
+			alert("请输入正确的邮箱!");
 			return;
 		}
 			
@@ -1518,7 +1531,7 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 	}
 	
 	$scope.$watch(function() {
-		getDbConfig()
+		getDbConfig();
 	});
 	
 	$scope.ischanged = function() {
@@ -1534,9 +1547,8 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 		return true;
 	}
 	
-	$scope.newOwners = [];
-	
 	$scope.submit = function() {
+		var newOwners = [];
 		angular.forEach($scope.owners,function(value) {
 			if(value.makesure) {
 				var ownerInfo = {
@@ -1549,14 +1561,14 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 				if(value.change) {
 					ownerInfo.permission |= 1;
 				}
-				if(value.dalay) {
+				if(value.delay) {
 					ownerInfo.permission |= (1<<1);
 				}
 				if(value.markdown) {
 					ownerInfo.permission |= (1<<2);
 				}
 				
-				$scope.newOwners.push(ownerInfo);
+				newOwners.push(ownerInfo);
 			}
 		});
 		
@@ -1565,13 +1577,14 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 		if($scope.ischanged()) {
 			newDbConfig = {
 					key : $scope.key,
-					config : $scope.configs,
-					owners : $scope.newOwners
+					owners : newOwners,
+					config : $scope.configs
 			};
 		} else {
 			newDbConfig = {
 					key : $scope.key,
-					owners : $scope.newOwners
+					owners : newOwners,
+					config : null
 			};
 		}
 		
@@ -1589,6 +1602,8 @@ zebraWeb.controller('monitor-alarm', function ($scope, $http) {
 		
 		$http.post('/a/alarm/saveConfig',angular.toJson($scope.data)).success(function (data, status, headers, config) {
 			alert("保存成功");
+			
+			$window.location.reload();
 		});
 	}
 	

@@ -8,6 +8,7 @@ import javax.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dianping.zebra.biz.entity.AlarmProjectConfigContent;
 import com.dianping.zebra.biz.service.HaHandler;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
@@ -22,16 +23,22 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 
 	@Autowired
 	private DataSourceMonitorConfigBuilder monitorConfigBuilder;
+	
+	@Autowired
+	private ProjectConfigHandler projectConfigHandler;
 
 	private Map<String, MySQLMonitorThread> monitorThreads = new ConcurrentHashMap<String, MySQLMonitorThread>();
 
 	@Override
 	public synchronized void startOrRefreshMonitor(DataSourceConfig config) {
 		String dsId = config.getId();
+		
+		AlarmProjectConfigContent projectConfig = projectConfigHandler.getProjectConfigByKey(dsId.substring(0, dsId.indexOf("-")));
+		
 		DataSourceMonitorConfig monitorConfig = monitorConfigBuilder.buildMonitorConfig(dsId);
 
 		if (!this.monitorThreads.containsKey(dsId)) {
-			MySQLMonitorThread monitor = new MySQLMonitorThread(monitorConfig, config, hahandler, alarmManager);
+			MySQLMonitorThread monitor = new MySQLMonitorThread(projectConfig,monitorConfig, config, hahandler, alarmManager);
 			monitor.setName("Dal-Monitor-(" + config.getId() + ")");
 			monitor.setDaemon(true);
 			monitor.start();
@@ -41,7 +48,7 @@ public class MySQLMonitorThreadGroupImpl implements MySQLMonitorThreadGroup {
 			MySQLMonitorThread thread = this.monitorThreads.remove(dsId);
 			thread.interrupt();
 
-			MySQLMonitorThread monitor = new MySQLMonitorThread(monitorConfig, config, hahandler, alarmManager);
+			MySQLMonitorThread monitor = new MySQLMonitorThread(projectConfig,monitorConfig, config, hahandler, alarmManager);
 			monitor.setName("Dal-Monitor-(" + config.getId() + ")");
 			monitor.setDaemon(true);
 			monitor.start();

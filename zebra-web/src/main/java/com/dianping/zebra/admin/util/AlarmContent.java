@@ -1,6 +1,6 @@
 package com.dianping.zebra.admin.util;
 
-public class MHAAlarmContent {
+public class AlarmContent {
 	
 	private String op;                 //insert
 	
@@ -22,7 +22,7 @@ public class MHAAlarmContent {
 	
 	private String content;            //内容
 	
-	public MHAAlarmContent(String hostname,String title,String user,String ip,String content) {
+	public AlarmContent(String hostname,String title,String user,String ip,String content) {
 		this.hostname = hostname;
 		this.title    = title;
 		this.user     = user;

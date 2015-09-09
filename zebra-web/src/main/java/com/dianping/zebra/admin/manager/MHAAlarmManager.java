@@ -1,37 +1,32 @@
 package com.dianping.zebra.admin.manager;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.dianping.lion.client.ConfigCache;
-import com.dianping.zebra.admin.util.MHAAlarmContent;
+import com.dianping.zebra.admin.util.AlarmContent;
+import com.dianping.zebra.biz.entity.AlarmProjectContent;
+import com.dianping.zebra.biz.entity.AlarmResource;
+import com.dianping.zebra.biz.entity.OwnerContent;
 import com.dianping.zebra.biz.service.AlarmService;
 import com.dianping.zebra.biz.service.HttpService;
-import com.dianping.zebra.util.StringUtils;
+import com.dianping.zebra.biz.service.LionService;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-@Component
+import jodd.util.StringUtil;
+
+@Component("MHAAlarmManager")
 public class MHAAlarmManager {
 
-	private static final String LION_KEY_SMS = "zebra.monitorservice.alarm.sms";
-
-	private static final String LION_KEY_WEIXIN = "zebra.monitorservice.alarm.weixin";
-	
-	private static final String LION_ALARM_HOSTNAME = "zebra.monitorservice.alarm.catalarmhost";
-
-	private static final String DELIM = ",";
-
-	private Set<String> smsTargets = new HashSet<String>();
-
-	private Set<String> weixinTargets = new HashSet<String>();
-	
-	private String catHost = null;
+	@Autowired
+	private LionService lionService;
 
 	@Autowired
 	private AlarmService alarmService;
@@ -39,45 +34,84 @@ public class MHAAlarmManager {
 	@Autowired
 	private HttpService httpService;
 
-	@PostConstruct
-	public void init() {
-		String smsValue = ConfigCache.getInstance().getProperty(LION_KEY_SMS);
+	private static final String LION_KEY_PROJECTCONFIG = "zebra-web.monitor.projectconfig";
 
-		if (StringUtils.isNotBlank(smsValue)) {
-			String[] splits = smsValue.split(DELIM);
+	private static final String LION_KEY_CATHOST = "zebra.monitorservice.alarm.catalarmhost";
 
-			for (String split : splits) {
-			smsTargets.add(split);
+	private final static String DEFAULT_PROJECTCONFIG = "zebra-default";
+
+	private Gson gson = new Gson();
+
+	private Type type = new TypeToken<List<AlarmProjectContent>>() {
+	}.getType();
+
+	/*根据告警类型，生成不同的告警内容并向 微信，短信,cat数据库大盘发送告警*/
+	public void alarm(int job, AlarmContent alarmContent) {
+		String jdbcRef = alarmContent.getHostname().substring(0, alarmContent.getHostname().indexOf("-"));
+		List<OwnerContent> owners = getOwnersByKey(jdbcRef);
+
+		if (owners != null && owners.size() > 0) {
+			for (OwnerContent owner : owners) {
+				try {
+					if((owner.getPermission() & (1<<AlarmResource.MARKDOWN)) > 0) {
+						alarmService.sendSms(owner.getTel(), makeAlarmMessage(job, alarmContent));
+						alarmService.sendWeixin(owner.getWechat().substring(0,owner.getWechat().indexOf("@")),makeAlarmMessage(job, alarmContent));
+					}
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 
-		String weixinValue = ConfigCache.getInstance().getProperty(LION_KEY_WEIXIN);
+		sendCat(alarmContent);
+	}
 
-		if (StringUtils.isNotBlank(weixinValue)) {
-			String[] splits = weixinValue.split(DELIM);
+	/*获取该key所对应的负责人列表 如没有找见该key 则使用默认负责人*/
+	public List<OwnerContent> getOwnersByKey(String key) {
+		List<OwnerContent> result = null;
 
-			for (String split : splits) {
-			weixinTargets.add(split);
+		if (StringUtil.isNotBlank(key)) {
+			List<AlarmProjectContent> projects = getProjectConfigs();
+
+			for (AlarmProjectContent projectInfo : projects) {
+				if (key.equals(projectInfo.getKey())) {
+					result = projectInfo.getOwners();
+					break;
+				}
+			}
+
+			if (result == null) {
+				for (AlarmProjectContent projectInfo : projects) {
+					if (projectInfo.getKey().equals(DEFAULT_PROJECTCONFIG)) {
+						result = projectInfo.getOwners();
+						break;
+					}
+				}
 			}
 		}
-		
-		catHost = ConfigCache.getInstance().getProperty(LION_ALARM_HOSTNAME);
-	}
-	
-	public String getTitle() {
-		return "Zebra-MHA markDown告警:";
+
+		return result;
 	}
 
-	public String makeSmsContent(MHAAlarmContent alarmcontent) {
-		return String.format("[%s] 主库:%s , %s ,请尽快处理!", getTitle(), alarmcontent.getHostname(),
-		      alarmcontent.getContent());
+	private List<AlarmProjectContent> getProjectConfigs() {
+
+		return gson.fromJson(lionService.getConfigFromZk(LION_KEY_PROJECTCONFIG), type);
 	}
 
-	public String makeWeiXinContent(MHAAlarmContent alarmcontent) {
-		return String.format("[主库:%s , %s ,请尽快处理!]", alarmcontent.getHostname(), alarmcontent.getContent());
+	/*发送cat的数据库大盘提示*/
+	public void sendCat(AlarmContent alarmContent) {
+		try {
+			String param = makeCatAlarmParam(alarmContent);
+			String catHost = lionService.getConfigFromZk(LION_KEY_CATHOST);
+			String url = catHost + param;
+
+			httpService.sendGet(url);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	public String makeAlarmParam(MHAAlarmContent alarmcontent) {
+
+	private String makeCatAlarmParam(AlarmContent alarmcontent) throws UnsupportedEncodingException {
 		alarmcontent.setOp("insert");
 		alarmcontent.setType("SQL");
 		alarmcontent.setStatus("1");
@@ -89,31 +123,30 @@ public class MHAAlarmManager {
 		}
 		alarmcontent.setDomain(domain);
 
-		return "op=" + alarmcontent.getOp() + "&type=" + alarmcontent.getType() + "&title="
-		      + alarmcontent.getTitle() + "&domain=" + alarmcontent.getDomain() + "&hostname="
-		      + alarmcontent.getHostname() + "&ip=" + alarmcontent.getIp() + "&user=" + alarmcontent.getUser()
-		      + "&status=" + alarmcontent.getStatus() + "&alterationDate=" + alarmcontent.getAlterationDate()
-		      + "&content=" + alarmcontent.getContent();
+		return "op=" + alarmcontent.getOp() + "&type=" + alarmcontent.getType() + "&title=" + alarmcontent.getTitle()
+				+ "&domain=" + alarmcontent.getDomain() + "&hostname=" + alarmcontent.getHostname() + "&ip="
+				+ alarmcontent.getIp() + "&user=" + alarmcontent.getUser() + "&status=" + alarmcontent.getStatus()
+				+ "&alterationDate=" + URLEncoder.encode(alarmcontent.getAlterationDate(), "UTF-8") + "&content="
+				+ URLEncoder.encode(alarmcontent.getContent(), "UTF-8");
 	}
 
-	public void sendCat(MHAAlarmContent alarmContent) {
-		String param = makeAlarmParam(alarmContent);
-		String url = catHost + param;
+	/*生成告警信息内容*/
+	public String makeAlarmMessage(int job, AlarmContent alarmContent) throws UnsupportedEncodingException {
+		String result = null;
 
-		httpService.sendGet(url);
-	}
-	
-	public void alarm(MHAAlarmContent alarmContent) {
-
-		for (String mobile : smsTargets) {
-			alarmService.sendSms(mobile, makeSmsContent(alarmContent));
+		switch (job) {
+		case AlarmResource.MARKDOWN:
+			result = String.format("[%s]主库:%s,%s,请尽快处理!", getTitle(), alarmContent.getHostname(),
+					URLEncoder.encode(alarmContent.getContent(),"UTF-8"));
+			break;
+		default:
+			break;
 		}
 
-		for (String email : weixinTargets) {
-			alarmService.sendWeixin(email, alarmContent.getTitle(), makeWeiXinContent(alarmContent));
-		}
-
-		sendCat(alarmContent);
+		return result;
 	}
-	
+
+	public String getTitle() {
+		return "Zebra-MHA告警";
+	}
 }

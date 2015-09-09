@@ -12,7 +12,7 @@ public class AlarmServiceImpl implements AlarmService {
 
 	private static final String SMS_URL = "http://paas-sevice09.nh:8080/sms/send";
 
-	private static final String WEXIN_URL = "http://dpoa.api.dianping.com/app/monitor/cat/push";
+	private static final String WEXIN_URL = "http://ops-auth01.nh/api/sendWeixin";
 
 	@Autowired
 	private HttpService httpService;
@@ -31,11 +31,11 @@ public class AlarmServiceImpl implements AlarmService {
 	}
 
 	@Override
-	public boolean sendWeixin(String email, String title, String content) {
-		if (StringUtils.isNotBlank(email) && StringUtils.isNotBlank(title) && StringUtils.isNotBlank(content)) {
-			String params = String.format("email=%s&title=%s&content=%s", email, title, content);
+	public boolean sendWeixin(String id, String content) {
+		if (StringUtils.isNotBlank(id) && StringUtils.isNotBlank(content)) {
+			String params = String.format("?users=%s&text=%s",id,content);
 
-			String response = httpService.sendPost(WEXIN_URL, params);
+			String response = httpService.sendGet(WEXIN_URL+params);
 
 			return response.contains("200");
 		}

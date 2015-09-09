@@ -4,6 +4,6 @@ public interface AlarmService {
 	
 	public boolean sendSms(String mobile,String body);
 	
-	public boolean sendWeixin(String email, String title, String content);
+	public boolean sendWeixin(String id, String content);
 
 }
