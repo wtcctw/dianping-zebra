@@ -18,6 +18,8 @@
 				<th>数据库名</th>
 				<th>数据库状态</th>
 				<th>字符集</th>
+				<th>BU</th>
+				<th>负责人</th>
 				<th>描述</th>
 				<th>操作</th>
 			</tr>
@@ -25,10 +27,16 @@
 		<tbody>
 			<tr>
 				<th>dianping</th>
-				<th>运行中</th>
+				<th>运行中 
+					<button class="btn btn-xs btn-default" ng-click="status()">
+						<i class="ace-icon glyphicon glyphicon-list bigger-80"></i>
+					</button>
+				</th>
 				<th>utf8</th>
+				<th>平台产品</th>
+				<th>朱浩</th>
 				<th>无</th>
-				<th><button class="btn btn-xs btn-primary" ng-click="show('dianping')">数据源配置管理</button>&nbsp;&nbsp;<button class="btn btn-xs btn-primary">迁库</button>&nbsp;&nbsp;<button class="btn btn-xs btn-primary">拆库</button></th>
+				<th><button class="btn btn-xs btn-primary" ng-click="show('dianping')">数据源配置管理</button>&nbsp;&nbsp;<button class="btn btn-xs btn-primary">可访问应用登记</button>&nbsp;&nbsp;<button class="btn btn-xs btn-primary">迁库</button>&nbsp;&nbsp;<button class="btn btn-xs btn-primary">拆库</button></th>
 			</tr>
 		</tbody>
 	</table>
