@@ -312,7 +312,6 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 				p.setValidationInterval(30000); // 5 min
 				p.setTimeBetweenEvictionRunsMillis(300000); // 30 min
 				p.setMinEvictableIdleTimeMillis(1800000);
-				p.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.StatementCache");
 
 				org.apache.tomcat.jdbc.pool.DataSource datasource = new org.apache.tomcat.jdbc.pool.DataSource();
 				datasource.setPoolProperties(p);
