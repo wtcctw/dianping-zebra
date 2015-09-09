@@ -6,10 +6,14 @@ zebraWeb.controller('database-manager', function ($rootScope, $scope,$location) 
 	$scope.show = function(jdbcRef){
 		$location.path("/database-manager-datasource").search({"jdbcRef":jdbcRef});
 	}
+	
+	$scope.status = function(){
+		
+	}
 });
 
 zebraWeb.controller('database-manager-create', function ($rootScope, $scope,$location) {
-	$scope.accouts = ["root","test","test123"];
+	$scope.bus = ["平台产品","交易后台","交易前台"];
 });
 
 zebraWeb.controller('database-manager-datasource', function ($rootScope, $scope,$location,configService) {
