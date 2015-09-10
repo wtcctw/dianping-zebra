@@ -1,7 +1,6 @@
 package com.dianping.zebra.biz.entity;
 
 public class OwnerContent {
-	
 	private String name;
 
 	private String tel;
