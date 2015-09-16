@@ -12,6 +12,7 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
+import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.shard.router.ShardRouter;
 
@@ -27,6 +28,8 @@ import java.util.concurrent.Executor;
 public class ShardConnection implements Connection {
 
 	private ShardRouter router;
+
+	private DataSourceRepository dataSourceRepository;
 
 	private Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 
@@ -195,6 +198,7 @@ public class ShardConnection implements Connection {
 		stmt.setAutoCommit(autoCommit);
 		stmt.setReadOnly(readOnly);
 		stmt.setConnection(this);
+		stmt.setDataSourceRepository(dataSourceRepository);
 
 		attachedStatements.add(stmt);
 
@@ -459,6 +463,7 @@ public class ShardConnection implements Connection {
 		checkClosed();
 
 		ShardPreparedStatement stmt = new ShardPreparedStatement();
+		stmt.setDataSourceRepository(dataSourceRepository);
 		stmt.setRouter(router);
 		stmt.setAutoCommit(autoCommit);
 		stmt.setReadOnly(readOnly);
@@ -683,11 +688,15 @@ public class ShardConnection implements Connection {
 		throw new UnsupportedOperationException("Zebra unsupport setSchema");
 	}
 
+	public void setDataSourceRepository(DataSourceRepository dataSourceRepository) {
+		this.dataSourceRepository = dataSourceRepository;
+	}
+
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setTransactionIsolation(int)
-	 */
+		 * (non-Javadoc)
+		 *
+		 * @see java.sql.Connection#setTransactionIsolation(int)
+		 */
 	@Override
 	public void setTransactionIsolation(int level) throws SQLException {
 		checkClosed();

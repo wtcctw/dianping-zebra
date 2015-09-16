@@ -37,7 +37,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 	private Mockery	context	= new Mockery();
 
 	protected String[] getSupportedOps() {
-		return new String[] { "DPConnection", "getAttachedStatements", "setAttachedStatements", "setClosed",
+		return new String[] { "setDataSourceRepository", "DPConnection", "getAttachedStatements", "setAttachedStatements", "setClosed",
 				"getRealConnection", "setRealConnection","setActualConnections","getUsername", "setUsername", "getPassword",
 				"setPassword", "getRouter", "setRouter", "close", "commit", "createStatement", "getAutoCommit",
 				"getMetaData", "getTransactionIsolation", "isClosed", "isReadOnly", "prepareStatement", "rollback",

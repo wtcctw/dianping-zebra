@@ -12,17 +12,6 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.LionConfigService;
@@ -30,11 +19,20 @@ import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.config.PropertyConfigService;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.shard.router.DataSourceRepository;
+import com.dianping.zebra.shard.router.DataSourceRouterFactory;
 import com.dianping.zebra.shard.router.LionDataSourceRouterFactory;
 import com.dianping.zebra.shard.router.ShardRouter;
-import com.dianping.zebra.shard.router.DataSourceRouterFactory;
-import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.util.StringUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import javax.sql.DataSource;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * @author Leo Liang
@@ -50,6 +48,8 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private DataSourceRouterFactory routerFactory;
 
+	private DataSourceRepository dataSourceRepository;
+
 	private ShardRouter router;
 
 	private volatile boolean switchOn = true;
@@ -61,7 +61,9 @@ public class ShardDataSource extends AbstractDataSource {
 	private volatile boolean closed = false;
 
 	public void close() throws SQLException {
-		DataSourceRepository.close();
+		if(dataSourceRepository != null) {
+			dataSourceRepository.close();
+		}
 
 		if (originDataSource instanceof GroupDataSource) {
 			try {
@@ -97,6 +99,7 @@ public class ShardDataSource extends AbstractDataSource {
 		if (switchOn) {
 			ShardConnection connection = new ShardConnection(username, password);
 			connection.setRouter(router);
+			connection.setDataSourceRepository(dataSourceRepository);
 
 			return connection;
 		} else {
@@ -163,10 +166,14 @@ public class ShardDataSource extends AbstractDataSource {
 		this.router = routerFactory.getRouter();
 		this.router.init();
 
+		if (dataSourceRepository == null) {
+			dataSourceRepository = DataSourceRepository.getInstance();
+		}
+
 		if (dataSourcePool != null) {
-			DataSourceRepository.init(dataSourcePool);
+			dataSourceRepository.init(dataSourcePool);
 		} else {
-			DataSourceRepository.init(this.router.getRouterRule());
+			dataSourceRepository.init(this.router.getRouterRule());
 		}
 
 		logger.info(String.format("ShardDataSource(%s) successfully initialized.", ruleName));
@@ -198,5 +205,9 @@ public class ShardDataSource extends AbstractDataSource {
 
 	public void setSwitchOn(boolean switchOn) {
 		this.switchOn = switchOn;
+	}
+
+	public void setDataSourceRepository(DataSourceRepository dataSourceRepository) {
+		this.dataSourceRepository = dataSourceRepository;
 	}
 }

@@ -188,7 +188,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						String dbIndex = targetedSql.getDataSourceName();
-						conn = DataSourceRepository.getDataSource(dbIndex).getConnection();
+						conn = dataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
@@ -235,7 +235,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						String dbIndex = targetedSql.getDataSourceName();
-						conn = DataSourceRepository.getDataSource(dbIndex).getConnection();
+						conn = dataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);

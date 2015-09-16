@@ -35,64 +35,77 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DataSourceRepository {
 
-    private static Map<String, DataSource> dataSources = new ConcurrentHashMap<String, DataSource>();
+	private static volatile DataSourceRepository instance = null;
 
-    private DataSourceRepository() {
-    }
+	private Map<String, DataSource> dataSources = new ConcurrentHashMap<String, DataSource>();
 
-    public static DataSource getDataSource(String dsName) {
-        return dataSources.get(dsName.toLowerCase());
-    }
+	public DataSourceRepository() {
+	}
 
-    public static boolean contains(String name) {
-        return dataSources.containsKey(name);
-    }
+	public static DataSourceRepository getInstance() {
+		if (instance == null) {
+			synchronized (DataSourceRepository.class) {
+				if (instance == null) {
+					instance = new DataSourceRepository();
+				}
+			}
+		}
+		return instance;
+	}
 
-    public static void put(String name, DataSource dataSource) {
-        dataSources.put(name, dataSource);
-    }
+	public DataSource getDataSource(String dsName) {
+		return dataSources.get(dsName.toLowerCase());
+	}
 
-    public static void init(Map<String, DataSource> dataSourcePool) {
-        for (Entry<String, DataSource> dataSourceEntry : dataSourcePool.entrySet()) {
-            String dbIndex = dataSourceEntry.getKey();
-            DataSource dataSource = dataSourceEntry.getValue();
+	public boolean contains(String name) {
+		return dataSources.containsKey(name);
+	}
 
-            dataSources.put(dbIndex, dataSource);
-        }
-    }
+	public void put(String name, DataSource dataSource) {
+		dataSources.put(name, dataSource);
+	}
 
-    public static void init(RouterRule routerRule) {
-        for (TableShardRule shardRule : routerRule.getTableShardRules().values()) {
-            for (DimensionRule dimensionRule : shardRule.getDimensionRules()) {
-                for (String jdbcRef : dimensionRule.getAllDBAndTables().keySet()) {
-                    if (!dataSources.containsKey(jdbcRef)) {
-                        GroupDataSource groupDataSource = new GroupDataSource(jdbcRef);
-                        groupDataSource.setPoolType("tomcat-jdbc");
-                        groupDataSource.setForceWriteOnLogin(false); // HACK turn off
-                        groupDataSource.init();
+	public void init(Map<String, DataSource> dataSourcePool) {
+		for (Entry<String, DataSource> dataSourceEntry : dataSourcePool.entrySet()) {
+			String dbIndex = dataSourceEntry.getKey();
+			DataSource dataSource = dataSourceEntry.getValue();
 
-                        dataSources.put(jdbcRef, groupDataSource);
-                    }
-                }
-            }
-        }
-    }
+			dataSources.put(dbIndex, dataSource);
+		}
+	}
 
-    public static void close() throws SQLException {
-        List<SQLException> exps = new ArrayList<SQLException>();
+	public void init(RouterRule routerRule) {
+		for (TableShardRule shardRule : routerRule.getTableShardRules().values()) {
+			for (DimensionRule dimensionRule : shardRule.getDimensionRules()) {
+				for (String jdbcRef : dimensionRule.getAllDBAndTables().keySet()) {
+					if (!dataSources.containsKey(jdbcRef)) {
+						GroupDataSource groupDataSource = new GroupDataSource(jdbcRef);
+						groupDataSource.setPoolType("tomcat-jdbc");
+						groupDataSource.setForceWriteOnLogin(false); // HACK turn off
+						groupDataSource.init();
 
-        for (DataSource ds : dataSources.values()) {
-            if (ds instanceof GroupDataSource) {
-                try {
-                    ((GroupDataSource) ds).close();
-                } catch (SQLException e) {
-                    exps.add(e);
-                }
-            }
-        }
+						dataSources.put(jdbcRef, groupDataSource);
+					}
+				}
+			}
+		}
+	}
 
-        dataSources.clear();
+	public void close() throws SQLException {
+		List<SQLException> exps = new ArrayList<SQLException>();
 
-        JDBCUtils.throwSQLExceptionIfNeeded(exps);
-    }
+		for (DataSource ds : dataSources.values()) {
+			if (ds instanceof GroupDataSource) {
+				try {
+					((GroupDataSource) ds).close();
+				} catch (SQLException e) {
+					exps.add(e);
+				}
+			}
+		}
+
+		dataSources.clear();
+
+		JDBCUtils.throwSQLExceptionIfNeeded(exps);
+	}
 }

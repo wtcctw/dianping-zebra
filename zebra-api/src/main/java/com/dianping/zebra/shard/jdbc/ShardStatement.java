@@ -42,6 +42,8 @@ public class ShardStatement implements Statement {
 
 	protected ShardConnection connection;
 
+	protected DataSourceRepository dataSourceRepository;
+
 	private boolean closed;
 
 	private boolean readOnly;
@@ -108,7 +110,7 @@ public class ShardStatement implements Statement {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						String dbIndex = targetedSql.getDataSourceName();
-						conn = DataSourceRepository.getDataSource(dbIndex).getConnection();
+						conn = dataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
@@ -369,7 +371,7 @@ public class ShardStatement implements Statement {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
 					if (conn == null) {
 						String dbIndex = targetedSql.getDataSourceName();
-						conn = DataSourceRepository.getDataSource(dbIndex).getConnection();
+						conn = dataSourceRepository.getDataSource(dbIndex).getConnection();
 						conn.setAutoCommit(autoCommit);
 
 						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
@@ -788,11 +790,15 @@ public class ShardStatement implements Statement {
 		this.router = router;
 	}
 
+	public void setDataSourceRepository(DataSourceRepository dataSourceRepository) {
+		this.dataSourceRepository = dataSourceRepository;
+	}
+
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Wrapper#unwrap(java.lang.Class)
-	 */
+		 * (non-Javadoc)
+		 *
+		 * @see java.sql.Wrapper#unwrap(java.lang.Class)
+		 */
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		throw new UnsupportedOperationException("Zebra unsupport unwrap");

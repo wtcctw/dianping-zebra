@@ -40,7 +40,7 @@ public class StatementTest extends ZebraBaseTestCase {
 	private Mockery	context	= new Mockery();
 
 	protected String[] getSupportedOps() {
-		return new String[] { "getEventNotifier", "setSyncEventNotifier", "getAttachedResultSets",
+		return new String[] { "setDataSourceRepository", "getEventNotifier", "setSyncEventNotifier", "getAttachedResultSets",
 				"setAttachedResultSets", "setResultSetType", "setResultSetConcurrency", "setResultSetHoldability",
 				"getConnectionWrapper", "setConnection", "isReadOnly", "setReadOnly", "isAutoCommit",
 				"setAutoCommit", "getRouter", "setRouter", "checkClosed", "addBatch", "clearBatch", "close", "execute",
