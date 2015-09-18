@@ -60,7 +60,18 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private volatile boolean closed = false;
 
+	private final PropertyChangeListener switchOnListener = new PropertyChangeListener() {
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			if (LionKey.getShardSiwtchOnKey(ruleName).equals(evt.getPropertyName())) {
+				switchOn = "true".equals(evt.getNewValue());
+			}
+		}
+	};
+
 	public void close() throws SQLException {
+		configService.removePropertyChangeListener(switchOnListener);
+
 		if(dataSourceRepository != null) {
 			dataSourceRepository.close();
 		}
@@ -145,14 +156,7 @@ public class ShardDataSource extends AbstractDataSource {
 				}
 			}
 
-			configService.addPropertyChangeListener(new PropertyChangeListener() {
-				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
-					if (LionKey.getShardSiwtchOnKey(ruleName).equals(evt.getPropertyName())) {
-						switchOn = "true".equals(evt.getNewValue());
-					}
-				}
-			});
+			configService.addPropertyChangeListener(switchOnListener);
 		} else {
 			if (dataSourcePool == null || dataSourcePool.isEmpty()) {
 				throw new IllegalArgumentException("dataSourcePool is required.");
