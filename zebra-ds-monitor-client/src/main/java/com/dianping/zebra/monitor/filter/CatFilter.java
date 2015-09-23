@@ -35,6 +35,8 @@ public class CatFilter extends DefaultJdbcFilter {
     public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
         chain.closeSingleDataSource(source, chain);
         Cat.logEvent("DataSource.Destoryed", source.getConfig().getId());
+        
+        //TODO : unregister CAT statusExtension when close dataSource
     }
 
     @Override
