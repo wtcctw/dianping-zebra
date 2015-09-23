@@ -18,6 +18,7 @@ package com.dianping.zebra.shard.router.rule.engine;
 import com.dianping.zebra.shard.config.RouterConfigException;
 import com.dianping.zebra.shard.router.rule.AbstractDimensionRule;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
+
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 
@@ -36,7 +37,6 @@ public class GroovyRuleEngine implements RuleEngine {
 
 	private static final Map<String, Class<?>> RULE_CLASS_CACHE = new ConcurrentHashMap<String, Class<?>>();
 
-	@SuppressWarnings("resource")
 	public GroovyRuleEngine(String rule) {
 		try {
 			engineObj = getGroovyObject(rule);
@@ -45,6 +45,7 @@ public class GroovyRuleEngine implements RuleEngine {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	private static final GroovyObject getGroovyObject(String rule)
 		throws IllegalAccessException, InstantiationException {
 		if (!RULE_CLASS_CACHE.containsKey(rule)) {
@@ -55,7 +56,7 @@ public class GroovyRuleEngine implements RuleEngine {
 						.append("class RuleEngineBaseImpl extends " + RuleEngineBase.class.getName() + "{")
 						.append("Object execute(Map context) {").append(matcher.replaceAll("context.get(\"$1\")"))
 						.append("}").append("}");
-					GroovyClassLoader loader = new GroovyClassLoader(AbstractDimensionRule.class.getClassLoader());
+               GroovyClassLoader loader = new GroovyClassLoader(AbstractDimensionRule.class.getClassLoader());
 					Class<?> engineClazz = loader.parseClass(engineClazzImpl.toString());
 					RULE_CLASS_CACHE.put(rule, engineClazz);
 				}
