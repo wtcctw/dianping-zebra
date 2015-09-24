@@ -43,7 +43,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	
 	private AtomicInteger closeAttmpet = new AtomicInteger(1);
 	
-	private static final int MAX_CLOSE_ATTEMPT = 10;
+	private static final int MAX_CLOSE_ATTEMPT = 600;
 
 	public SingleDataSource(DataSourceConfig config, List<JdbcFilter> filters) {
 		this.dsId = config.getId();
@@ -97,7 +97,9 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
 				org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
 
-				if (ds.getActive() == 0) {
+				logger.info(this.closeAttmpet.getAndIncrement() + " attempt to close datasource [" + dsId + "]");
+
+				if (ds.getActive() == 0 || this.closeAttmpet.get() >= MAX_CLOSE_ATTEMPT) {
 					logger.info("closing old datasource [" + dsId + "]");
 
 					ds.close();
