@@ -80,7 +80,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 	}
 
-	static public class ReadOrWriteRole {
+	public static class ReadOrWriteRole {
 		private boolean isRead;
 
 		private boolean isWrite;

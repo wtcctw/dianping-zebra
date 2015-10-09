@@ -92,8 +92,8 @@ public class CatFilter extends DefaultJdbcFilter {
             throw exp;
         } finally {
             try {
+            	 logSqlMethodEvent(sql, batchedSql, isBatched, sqlParams);
                 logSqlDatabaseEvent(conn);
-                logSqlMethodEvent(sql, batchedSql, isBatched, sqlParams);
             } catch (Throwable exp) {
                 Cat.logError(exp);
             }
