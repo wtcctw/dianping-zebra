@@ -28,7 +28,14 @@ public class SqlAliasManager {
     private static final Object PRESENT = new Object();
 
     public static String getAvatarSqlAlias() {
-        return ExecutionContextHolder.getContext().get(SQL_NAME);
+   	 String sqlName1 = ExecutionContextHolder.getContext().get(SQL_NAME);
+   	 String sqlName2 = DaoContextHolder.getContext().get(SQL_NAME);
+   	 
+   	 if(StringUtils.isNotBlank(sqlName1)){
+   		 return sqlName1;
+   	 }else{
+   		 return sqlName2;
+   	 }
     }
 
     private static String getCachedTruncatedSql(String sql) {
@@ -69,13 +76,15 @@ public class SqlAliasManager {
     }
 
     public static void setSqlAlias(String sql) {
-        String sqlName = ExecutionContextHolder.getContext().get(SQL_NAME);
+        String sqlName1 = ExecutionContextHolder.getContext().get(SQL_NAME);
+        String sqlName2 = DaoContextHolder.getContext().get(SQL_NAME);
 
-        if (StringUtils.isBlank(sqlName)) {
+        if(StringUtils.isNotBlank(sqlName1)){
+      	  sqlAlias.set(sqlName1);
+        }else if(StringUtils.isNotBlank(sqlName2)){
+      	  sqlAlias.set(sqlName2);
+        }else{
             sqlAlias.set(getCachedTruncatedSql(sql));
-        } else {
-            sqlAlias.set(sqlName);
         }
     }
-
 }
