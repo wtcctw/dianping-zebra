@@ -17,7 +17,6 @@ public class AsyncMapperExecutor {
 
 	private static int MAX_POOL_SIZE = 20;
 
-	// TODO 1. dynamic pool size 2. documents
 	private static ExecutorService executorService = null;
 
 	public static void init() {
