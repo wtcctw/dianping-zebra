@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+    <bean class="com.dianping.zebra.dao.mybatis.ZebraMapperScannerConfigurer">
+        <property name="basePackage" value="com.dianping.zebra.dao.mapper" />
+        <!--可不配，默认值为10 -->
+        <property name="initPoolSize" value="10"></property>
+        <!--可不配，默认值为20 -->
+        <property name="maxPoolSize" value="20"></property>
+    </bean>
+</beans>
