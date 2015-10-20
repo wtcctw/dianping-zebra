@@ -17,9 +17,9 @@ public class AsyncMapperExecutor {
 
 	private static final int MAX_QUEUE_SIZE = 1000;
 
-	private static int CORE_POOL_SIZE = 10;
+	private static int CORE_POOL_SIZE = 50;
 
-	private static int MAX_POOL_SIZE = 20;
+	private static int MAX_POOL_SIZE = 100;
 
 	private static ThreadPoolExecutor executorService = null;
 
