@@ -56,7 +56,7 @@ public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostP
 
 	private BeanNameGenerator nameGenerator;
 	
-	private int initPoolSize = 10;
+	private int corePoolSize = 10;
 	
 	private int maxPoolSize = 20;
 
@@ -221,7 +221,7 @@ public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostP
 	public void afterPropertiesSet() throws Exception {
 		notNull(this.basePackage, "Property 'basePackage' is required");
 		
-		AsyncMapperExecutor.init(initPoolSize, maxPoolSize);
+		AsyncMapperExecutor.init(corePoolSize, maxPoolSize);
 	}
 
 	/**
@@ -231,12 +231,14 @@ public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostP
 		// left intentionally blank
 	}
 
-	public int getInitPoolSize() {
-		return initPoolSize;
+
+	public int getCorePoolSize() {
+		return corePoolSize;
 	}
 
-	public void setInitPoolSize(int initPoolSize) {
-		this.initPoolSize = initPoolSize;
+	public void setCorePoolSize(int corePoolSize) {
+		this.corePoolSize = corePoolSize;
+		AsyncMapperExecutor.setCorePoolSize(corePoolSize);
 	}
 
 	public int getMaxPoolSize() {
@@ -245,6 +247,7 @@ public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostP
 
 	public void setMaxPoolSize(int maxPoolSize) {
 		this.maxPoolSize = maxPoolSize;
+		AsyncMapperExecutor.setMaximumPoolSize(maxPoolSize);
 	}
 
 	/**
