@@ -6,9 +6,5 @@
 
     <bean class="com.dianping.zebra.dao.mybatis.ZebraMapperScannerConfigurer">
         <property name="basePackage" value="com.dianping.zebra.dao.mapper" />
-        <!--可不配，默认值为10 -->
-        <property name="initPoolSize" value="10"></property>
-        <!--可不配，默认值为20 -->
-        <property name="maxPoolSize" value="20"></property>
     </bean>
 </beans>

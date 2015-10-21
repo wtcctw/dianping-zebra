@@ -15,19 +15,19 @@ import com.dianping.cat.status.StatusExtensionRegister;
 
 public class AsyncMapperExecutor {
 
-	private static final int MAX_QUEUE_SIZE = 1000;
+	private static int MAX_QUEUE_SIZE;
 
-	private static int CORE_POOL_SIZE = 50;
+	private static int CORE_POOL_SIZE;
 
-	private static int MAX_POOL_SIZE = 100;
+	private static int MAX_POOL_SIZE;
 
-	private static ThreadPoolExecutor executorService = null;
+	private static volatile ThreadPoolExecutor executorService = null;
 
-	private static CatStatusExtension catExt = null;
+	private static volatile CatStatusExtension catExt = null;
 
 	public static void init() {
-		if (executorService != null) {
-			executorService = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, 0L, TimeUnit.SECONDS,
+		if (executorService == null) {
+			executorService = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, 60L, TimeUnit.SECONDS,
 			      new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE), new ThreadFactory() {
 
 				      private AtomicInteger counter = new AtomicInteger(1);
@@ -43,15 +43,16 @@ public class AsyncMapperExecutor {
 			      });
 		}
 
-		if (catExt != null) {
+		if (catExt == null) {
 			catExt = new CatStatusExtension();
 			StatusExtensionRegister.getInstance().register(catExt);
 		}
 	}
 
-	public static void init(int corePoolSize, int maxPoolSize) {
+	public static void init(int corePoolSize, int maxPoolSize, int queueSize) {
 		CORE_POOL_SIZE = corePoolSize;
 		MAX_POOL_SIZE = maxPoolSize;
+		MAX_QUEUE_SIZE = queueSize;
 
 		init();
 	}
@@ -112,7 +113,7 @@ public class AsyncMapperExecutor {
 			Map<String, String> properties = new HashMap<String, String>();
 
 			properties.put("ActiveCount", String.valueOf(executorService.getActiveCount()));
-			properties.put("LargestPoolSize", String.valueOf(executorService.getLargestPoolSize()));
+			properties.put("PoolSize", String.valueOf(executorService.getPoolSize()));
 			properties.put("QueueSize", String.valueOf(executorService.getQueue().size()));
 
 			return properties;

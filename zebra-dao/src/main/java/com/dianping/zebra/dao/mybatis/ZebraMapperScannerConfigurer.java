@@ -3,6 +3,7 @@ package com.dianping.zebra.dao.mybatis;
 import static org.springframework.util.Assert.notNull;
 
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -27,6 +28,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.StringUtils;
 
+import com.dianping.lion.EnvZooKeeperConfig;
+import com.dianping.lion.client.ConfigCache;
+import com.dianping.lion.client.ConfigChange;
 import com.dianping.zebra.dao.AsyncMapperExecutor;
 
 public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostProcessor, InitializingBean,
@@ -55,10 +59,24 @@ public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostP
 	private boolean processPropertyPlaceHolders;
 
 	private BeanNameGenerator nameGenerator;
-	
-	private int corePoolSize = 10;
-	
-	private int maxPoolSize = 20;
+
+	// add by hao.zhu
+	private Map<String, String> lionKeyMap = new HashMap<String, String>();
+
+	private int corePoolSize = 20;
+
+	private int maxPoolSize = 200;
+
+	private int queueSize = 500;
+
+	public ZebraMapperScannerConfigurer() {
+		this.corePoolSize = Integer.parseInt(ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(
+		      "zebra-dao.executepool.corePoolSize"));
+		this.maxPoolSize = Integer.parseInt(ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(
+		      "zebra-dao.executepool.maxPoolSize"));
+		this.queueSize = Integer.parseInt(ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(
+		      "zebra-dao.executepool.queueSize"));
+	}
 
 	/**
 	 * This property lets you set the base package for your mapper interface files.
@@ -220,8 +238,29 @@ public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostP
 	 */
 	public void afterPropertiesSet() throws Exception {
 		notNull(this.basePackage, "Property 'basePackage' is required");
-		
-		AsyncMapperExecutor.init(corePoolSize, maxPoolSize);
+
+		AsyncMapperExecutor.init(corePoolSize, maxPoolSize, queueSize);
+
+		if (lionKeyMap.size() > 0) {
+			ConfigCache.getInstance().addChange(new ConfigChange() {
+				@Override
+				public void onChange(String key, String value) {
+					String poolSize = lionKeyMap.get(key);
+
+					if (poolSize != null && poolSize.length() > 0) {
+						if (poolSize.equals("corePoolSize")) {
+							corePoolSize = Integer.parseInt(value);
+
+							AsyncMapperExecutor.setCorePoolSize(corePoolSize);
+						} else if (poolSize.equals("maxPoolSize")) {
+							maxPoolSize = Integer.parseInt(value);
+
+							AsyncMapperExecutor.setMaximumPoolSize(maxPoolSize);
+						}
+					}
+				}
+			});
+		}
 	}
 
 	/**
@@ -231,23 +270,55 @@ public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostP
 		// left intentionally blank
 	}
 
-
 	public int getCorePoolSize() {
 		return corePoolSize;
 	}
 
-	public void setCorePoolSize(int corePoolSize) {
-		this.corePoolSize = corePoolSize;
-		AsyncMapperExecutor.setCorePoolSize(corePoolSize);
+	public void setCorePoolSize(String corePoolSize) {
+		try {
+			this.corePoolSize = Integer.parseInt(corePoolSize);
+		} catch (NumberFormatException e) {
+			corePoolSize = corePoolSize.trim();
+			String lionKey = corePoolSize.trim().substring(2, corePoolSize.length() - 1);
+			this.lionKeyMap.put(lionKey, "corePoolSize");
+			this.corePoolSize = Integer.parseInt(ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(
+			      lionKey));
+		}
+
+		AsyncMapperExecutor.setCorePoolSize(this.corePoolSize);
 	}
 
 	public int getMaxPoolSize() {
 		return maxPoolSize;
 	}
 
-	public void setMaxPoolSize(int maxPoolSize) {
-		this.maxPoolSize = maxPoolSize;
-		AsyncMapperExecutor.setMaximumPoolSize(maxPoolSize);
+	public void setMaxPoolSize(String maxPoolSize) {
+		try {
+			this.maxPoolSize = Integer.parseInt(maxPoolSize);
+		} catch (NumberFormatException e) {
+			maxPoolSize = maxPoolSize.trim();
+			String lionKey = maxPoolSize.trim().substring(2, maxPoolSize.length() - 1);
+			this.lionKeyMap.put(lionKey, "maxPoolSize");
+			this.maxPoolSize = Integer.parseInt(ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(
+			      lionKey));
+		}
+
+		AsyncMapperExecutor.setMaximumPoolSize(this.maxPoolSize);
+	}
+
+	public int getQueueSize() {
+		return queueSize;
+	}
+
+	public void setQueueSize(String queueSize) {
+		try {
+			this.queueSize = Integer.parseInt(queueSize);
+		} catch (NumberFormatException e) {
+			queueSize = queueSize.trim();
+			String lionKey = queueSize.trim().substring(2, queueSize.length() - 1);
+			this.queueSize = Integer.parseInt(ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(
+			      lionKey));
+		}
 	}
 
 	/**
@@ -326,5 +397,4 @@ public class ZebraMapperScannerConfigurer implements BeanDefinitionRegistryPostP
 			return null;
 		}
 	}
-
 }
