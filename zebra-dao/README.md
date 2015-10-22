@@ -69,7 +69,7 @@
 		<property name="typeAliasesPackage" value="com.dianping.zebra.dao.entity" />
 	</bean>
 
-<!--事务管理器，如不需要，可不定义-->
+	<!--事务管理器，如不需要，可不定义-->
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="datasource" />
 	</bean>
