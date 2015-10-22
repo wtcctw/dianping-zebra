@@ -44,11 +44,11 @@
 
 	<bean class="com.dianping.zebra.dao.mybatis.ZebraMapperScannerConfigurer">
         <property name="basePackage" value="com.dianping.zebra.dao.mapper" />
-        <!--可不配，默认值为20 -->
+        <!--可不配，默认值为20,支持配置在lion中并动态刷新 -->
         <property name="initPoolSize" value="20"></property>
-        <!--可不配，默认值为200 -->
+        <!--可不配，默认值为200，支持配置在lion中并动态刷新 -->
         <property name="maxPoolSize" value="200"></property>
-        <!--可不配，默认值为500 -->
+        <!--可不配，默认值为500，支持配置在lion中，但不能够动态刷新 -->
         <property name="queueSize" value="500"></property>
     </bean>
 
