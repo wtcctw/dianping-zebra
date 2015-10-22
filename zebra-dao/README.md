@@ -60,17 +60,18 @@
 		<property name="jdbcRef" value="你需访问数据库的jdbcRef" />
 	</bean>
 
-	<bean id="zebraSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<!--指定数据源-->
 		<property name="dataSource" ref="datasource"/>
-		<!--指定Mapper文件地址-->
+		<!--指定Mapper文件地址，需要改写-->
 		<property name="mapperLocations" value="classpath*:config/sqlmap/**/*.xml" />
-		<!--指定entity的package-->
-		<property name="typeAliasesPackage" value="你所对应的entity的package，例如(com.dianping.zebra.dao.entity)" />
+		<!--指定entity的package,需要改写-->
+		<property name="typeAliasesPackage" value="com.dianping.zebra.dao.entity" />
 	</bean>
 
+<!--事务管理器，如不需要，可不定义-->
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="zebraDataSource" />
+		<property name="dataSource" ref="datasource" />
 	</bean>
 
     
