@@ -1,8 +1,6 @@
 package com.dianping.zebra.dao;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -10,8 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.dianping.cat.status.StatusExtension;
-import com.dianping.cat.status.StatusExtensionRegister;
+import com.dianping.zebra.dao.concurrent.MonitorableThreadPoolExecutor;
 
 public class AsyncMapperExecutor {
 
@@ -23,29 +20,22 @@ public class AsyncMapperExecutor {
 
 	private static volatile ThreadPoolExecutor executorService = null;
 
-	private static volatile CatStatusExtension catExt = null;
-
 	public static void init() {
 		if (executorService == null) {
-			executorService = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, 60L, TimeUnit.SECONDS,
-			      new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE), new ThreadFactory() {
+			executorService = new MonitorableThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, 60L, TimeUnit.SECONDS,
+					new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE), new ThreadFactory() {
 
-				      private AtomicInteger counter = new AtomicInteger(1);
+						private AtomicInteger counter = new AtomicInteger(1);
 
-				      @Override
-				      public Thread newThread(Runnable r) {
-					      Thread t = new Thread(r);
-					      t.setName("Zebra-Dao-Executor-" + counter.getAndIncrement());
-					      t.setDaemon(true);
+						@Override
+						public Thread newThread(Runnable r) {
+							Thread t = new Thread(r);
+							t.setName("Zebra-Dao-Executor-" + counter.getAndIncrement());
+							t.setDaemon(true);
 
-					      return t;
-				      }
-			      });
-		}
-
-		if (catExt == null) {
-			catExt = new CatStatusExtension();
-			StatusExtensionRegister.getInstance().register(catExt);
+							return t;
+						}
+					});
 		}
 	}
 
@@ -94,29 +84,5 @@ public class AsyncMapperExecutor {
 		}
 
 		MAX_POOL_SIZE = maximumPoolSize;
-	}
-
-	static class CatStatusExtension implements StatusExtension {
-
-		@Override
-		public String getId() {
-			return "Zebra-Dao-Pool";
-		}
-
-		@Override
-		public String getDescription() {
-			return null;
-		}
-
-		@Override
-		public Map<String, String> getProperties() {
-			Map<String, String> properties = new HashMap<String, String>();
-
-			properties.put("ActiveCount", String.valueOf(executorService.getActiveCount()));
-			properties.put("PoolSize", String.valueOf(executorService.getPoolSize()));
-			properties.put("QueueSize", String.valueOf(executorService.getQueue().size()));
-
-			return properties;
-		}
 	}
 }
