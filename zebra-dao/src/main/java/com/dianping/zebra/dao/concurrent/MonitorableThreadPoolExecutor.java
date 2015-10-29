@@ -14,11 +14,11 @@ public class MonitorableThreadPoolExecutor extends ThreadPoolExecutor {
 
 	private volatile CatStatusExtension catExt = null;
 
-	public MonitorableThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-			BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
+	public MonitorableThreadPoolExecutor(String name, int corePoolSize, int maximumPoolSize, long keepAliveTime,
+			TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
 
-		catExt = new CatStatusExtension("Zebra-Dao-Pool", this);
+		catExt = new CatStatusExtension(name, this);
 		StatusExtensionRegister.getInstance().register(catExt);
 	}
 

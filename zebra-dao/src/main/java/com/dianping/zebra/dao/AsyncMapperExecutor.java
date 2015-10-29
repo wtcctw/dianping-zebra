@@ -22,8 +22,8 @@ public class AsyncMapperExecutor {
 
 	public static void init() {
 		if (executorService == null) {
-			executorService = new MonitorableThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, 60L, TimeUnit.SECONDS,
-					new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE), new ThreadFactory() {
+			executorService = new MonitorableThreadPoolExecutor("Zebra-Dao-Pool", CORE_POOL_SIZE, MAX_POOL_SIZE, 60L,
+					TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE), new ThreadFactory() {
 
 						private AtomicInteger counter = new AtomicInteger(1);
 
