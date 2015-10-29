@@ -2,14 +2,14 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
 
-	<appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+	<appender name="ZebraConsoleAppender" class="org.apache.log4j.ConsoleAppender">
 		<param name="Threshold" value="WARN" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss}:%p %t %c - %m%n" />
 		</layout>
 	</appender>
 
-	<appender name="FileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+	<appender name="ZebraFileAppender" class="org.apache.log4j.DailyRollingFileAppender">
 		<param name="file" value="/data/applogs/zebra/zebra.log" />
 		<param name="append" value="true" />
 		<param name="encoding" value="GBK" />
@@ -20,8 +20,8 @@
 
 	<logger name="com.dianping.zebra" additivity="true">
 		<level value="INFO" />
-		<appender-ref ref="FileAppender" />
-		<appender-ref ref="ConsoleAppender" />
+		<appender-ref ref="ZebraFileAppender" />
+		<appender-ref ref="ZebraConsoleAppender" />
 	</logger>
 
 </log4j:configuration>
