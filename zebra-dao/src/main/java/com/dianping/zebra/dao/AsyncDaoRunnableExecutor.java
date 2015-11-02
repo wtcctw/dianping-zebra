@@ -24,18 +24,23 @@ public class AsyncDaoRunnableExecutor<T> implements Runnable {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void run() {
+		T result = null;
+		boolean success = false;
 		try {
 			DaoContextHolder.setSqlName(method.getName());
 
-			T result = (T) method.invoke(mapper, args);
-
-			if (callback != null) {
-				callback.onSuccess(result);
-			}
+			result = (T) method.invoke(mapper, args);
+			success = true;
 		} catch (Exception e) {
+			// 仅仅捕获数据库访问异常
 			callback.onException(e);
 		} finally {
 			DaoContextHolder.clearSqlName();
+		}
+
+		if (success) {
+			// 不要捕获在onSuccess中业务逻辑自身的异常
+			callback.onSuccess(result);
 		}
 	}
 }

@@ -21,11 +21,11 @@ public class AsyncDaoCallableExecutor implements Callable<Object> {
 
 	@Override
 	public Object call() throws Exception {
-		try{
+		try {
 			DaoContextHolder.setSqlName(method.getName());
 
 			return method.invoke(mapper, args);
-		}finally{
+		} finally {
 			DaoContextHolder.clearSqlName();
 		}
 	}

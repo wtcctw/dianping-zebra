@@ -54,7 +54,7 @@ public class AsyncMapperProxy<T> implements InvocationHandler, Serializable {
 			throw new AsyncDaoException("Cannot find any target method for future method[" + method.getName() + "]");
 		} else {
 			DaoContextHolder.setSqlName(method.getName());
-			
+
 			return method.invoke(mapper, args);
 		}
 	}
