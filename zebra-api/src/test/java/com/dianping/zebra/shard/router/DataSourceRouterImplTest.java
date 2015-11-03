@@ -41,7 +41,6 @@ public class DataSourceRouterImplTest {
 		DataSourceRepository.getInstance().init(createDataSourcePool());
 		DataSourceRouterFactory routerFactory = new ClassPathXmlDataSourceRouterFactory("db-router-rule.xml");
 		router = routerFactory.getRouter();
-		router.init();
 	}
 
 	public void baseTest(String sql, List<Object> params) {

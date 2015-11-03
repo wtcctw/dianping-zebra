@@ -168,7 +168,6 @@ public class ShardDataSource extends AbstractDataSource {
 		}
 
 		this.router = routerFactory.getRouter();
-		this.router.init();
 
 		if (dataSourceRepository == null) {
 			dataSourceRepository = DataSourceRepository.getInstance();

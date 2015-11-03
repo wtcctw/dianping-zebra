@@ -49,17 +49,84 @@ public class ShardRouterImpl implements ShardRouter {
 
 	private RouterRule routerRule;
 
-	private final Map<String, DMLCommon> parsedSqlCache = Collections.synchronizedMap(new LRUCache<String, DMLCommon>(1000));
+	private final Map<String, DMLCommon> parsedSqlCache = Collections
+			.synchronizedMap(new LRUCache<String, DMLCommon>(1000));
 
-	private final Map<String, PreParsedSql> preParsedSqlCache = Collections
-	      .synchronizedMap(new LRUCache<String, PreParsedSql>(1000));
+	private final Map<String, PreProcessedSql> preParsedSqlCache = Collections
+			.synchronizedMap(new LRUCache<String, PreProcessedSql>(1000));
 
-	private static final String SKIP_MAX_STUB = "?";
+	private final String SKIP_MAX_STUB = "?";
 
-	private static Pattern pattern = Pattern.compile("\\n|`");
+	private final Pattern pattern = Pattern.compile("\\n|`");
+
+	@Override
+	public RouterRule getRouterRule() {
+		return this.routerRule;
+	}
+
+	@Override
+	public RouterResult router(final String sql, List<Object> params) throws ShardRouterException {
+		RouterResult routerResult = new RouterResult();
+
+		// 1. pre-process sql
+		PreProcessedSql preProcessedSql = preProcess(sql);
+
+		// 2. parse sql
+		DMLCommon dmlSql = null;
+		try {
+			dmlSql = parseSql(preProcessedSql.getPreParsedSql());
+		} catch (Exception e) {
+			throw new ShardRouterException(e);
+		}
+
+		// 3. router
+		TableShardRule tableShardRule = findTableShardRule(dmlSql.getRelatedTables());
+		ShardMatchResult shardResult = tableShardRule.eval(dmlSql, params);
+
+		// 4. re-write target sql & build router result
+		int skip = dmlSql.getSkip(params);
+		int max = dmlSql.getMax(params);
+		boolean acrossTable = isCrossTable(shardResult.getDbAndTables());
+
+		routerResult.setAcrossTable(acrossTable);
+		routerResult.setTargetedSqls(createTargetedSqls(shardResult.getDbAndTables(), acrossTable, preProcessedSql,
+				dmlSql, tableShardRule.getTableName(), skip, max));
+		routerResult.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
+
+		return enrichRouterResult(routerResult, dmlSql, tableShardRule == null ? null : tableShardRule.getGeneratedPK(),
+				skip, max);
+	}
+
+	public void setRouterRule(RouterRule routerRule) {
+		this.routerRule = routerRule;
+	}
+
+	@Override
+	public boolean validate(String sql) throws SyntaxException, ShardRouterException {
+		DMLCommon dmlSql = null;
+
+		try {
+			dmlSql = parseSql(sql);
+		} catch (Exception e) {
+			throw new SyntaxException(e);
+		}
+
+		if (dmlSql != null) {
+			Set<String> relatedTables = dmlSql.getRelatedTables();
+			TableShardRule tableShardRule = findTableShardRule(relatedTables);
+
+			if (tableShardRule == null) {
+				throw new ShardRouterException("Cannot find any Shard Rule for table " + relatedTables);
+			} else {
+				return true;
+			}
+		} else {
+			return false;
+		}
+	}
 
 	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable,
-	      PreParsedSql sql, DMLCommon dmlSql, String logicTable, int skip, int max) {
+			PreProcessedSql sql, DMLCommon dmlSql, String logicTable, int skip, int max) {
 		String tmpSql = reconstructSqlLimit(acrossTable, sql.getPreParsedSql(), dmlSql, skip, max);
 
 		List<RouterTarget> result = new ArrayList<RouterTarget>();
@@ -82,7 +149,8 @@ public class ShardRouterImpl implements ShardRouter {
 		return result;
 	}
 
-	private RouterResult enrichRouterResult(RouterResult result, DMLCommon dmlSql, String generatedPK, int skip, int max) {
+	private RouterResult enrichRouterResult(RouterResult result, DMLCommon dmlSql, String generatedPK, int skip,
+			int max) {
 		result.setColumns(dmlSql instanceof Select ? ((Select) dmlSql).getColumns() : null);
 		result.setGroupBys(dmlSql instanceof Select ? ((Select) dmlSql).getWhere().getGroupByColumns() : null);
 		result.setHasDistinct(dmlSql instanceof Select ? ((Select) dmlSql).hasDistinct() : false);
@@ -105,21 +173,22 @@ public class ShardRouterImpl implements ShardRouter {
 				matchedTableShardRule = tmp;
 				matchedTimes++;
 			}
-		}
 
-		if (matchedTimes > 1) {
-			throw new ShardRouterException("Matched more than one table shard rules is not supported now.");
+			if (matchedTimes > 1) {
+				throw new ShardRouterException("Matched more than one table shard rules is not supported now.");
+			}
 		}
 
 		if (matchedTableShardRule == null) {
 			throw new ShardRouterException("Cannot find any table shard rule for table " + relatedTables);
-		} else {
-			return matchedTableShardRule;
 		}
+
+		return matchedTableShardRule;
 	}
 
 	private MyWhereCondition.LimitInfo getLimitInfo(DMLCommon dmlSql) {
 		MyWhereCondition where = null;
+
 		if (dmlSql instanceof MySelect) {
 			where = (MyWhereCondition) ((MySelect) dmlSql).getWhere();
 		} else if (dmlSql instanceof MyUpdate) {
@@ -127,37 +196,12 @@ public class ShardRouterImpl implements ShardRouter {
 		} else if (dmlSql instanceof MyDelete) {
 			where = (MyWhereCondition) ((MyDelete) dmlSql).getWhere();
 		}
+
 		return where != null ? where.limitInfo : null;
 	}
 
-	@Override
-	public RouterRule getRouterRule() {
-		return this.routerRule;
-	}
-
-	@Override
-	public void init() {
-	}
-	
-	private PreParsedSql preParseSql(final String sql){
-		PreParsedSql preParsedSql = preParsedSqlCache.get(sql);
-		
-		if(preParsedSql == null){
-			String realSql = pattern.matcher(sql).replaceAll("");
-			if (realSql.endsWith(";")) {
-				realSql = realSql.substring(0, realSql.length() - 1);
-			}
-			
-			String comment = SqlUtils.parseSqlComment(realSql);
-			realSql = StringUtils.stripComments(realSql, "'\"", "'\"", true, false, true, true).trim();
-			preParsedSql = new PreParsedSql();
-			preParsedSql.setComment(comment);
-			preParsedSql.setFormattedSql(realSql);
-			
-			preParsedSqlCache.put(sql, preParsedSql);
-		}
-		
-		return preParsedSql;
+	private boolean isCrossTable(Map<String, Set<String>> dbAndTables) {
+		return dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
 	}
 
 	private DMLCommon parseSql(final String sql) throws RecognitionException, IOException {
@@ -173,7 +217,29 @@ public class ShardRouterImpl implements ShardRouter {
 		}
 	}
 
-	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, DMLCommon dmlSql, int skip, int max) {
+	private PreProcessedSql preProcess(final String sql) {
+		PreProcessedSql preProcessedSql = preParsedSqlCache.get(sql);
+
+		if (preProcessedSql == null) {
+			String realSql = pattern.matcher(sql).replaceAll("");
+			if (realSql.endsWith(";")) {
+				realSql = realSql.substring(0, realSql.length() - 1);
+			}
+
+			String comment = SqlUtils.parseSqlComment(realSql);
+			realSql = StringUtils.stripComments(realSql, "'\"", "'\"", true, false, true, true).trim();
+			preProcessedSql = new PreProcessedSql();
+			preProcessedSql.setComment(comment);
+			preProcessedSql.setFormattedSql(realSql);
+
+			preParsedSqlCache.put(sql, preProcessedSql);
+		}
+
+		return preProcessedSql;
+	}
+
+	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, DMLCommon dmlSql, int skip,
+			int max) {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
@@ -244,63 +310,7 @@ public class ShardRouterImpl implements ShardRouter {
 		return sql;
 	}
 
-	@Override
-	public RouterResult router(final String sql, List<Object> params) throws ShardRouterException {
-		try {
-			RouterResult routerResult = new RouterResult();
-			PreParsedSql preParsedSql = preParseSql(sql);
-
-			DMLCommon dmlSql = parseSql(preParsedSql.getPreParsedSql());
-			int skip = dmlSql.getSkip(params);
-			int max = dmlSql.getMax(params);
-			Set<String> relatedTables = dmlSql.getRelatedTables();
-			TableShardRule tableShardRule = findTableShardRule(relatedTables);
-
-			ShardMatchResult shardResult = tableShardRule.eval(dmlSql, params);
-			Map<String, Set<String>> dbAndTables = shardResult.getDbAndTables();
-			boolean acrossTable = dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
-
-			routerResult.setAcrossTable(acrossTable);
-			routerResult.setTargetedSqls(createTargetedSqls(dbAndTables, acrossTable, preParsedSql, dmlSql,
-			      tableShardRule.getTableName(), skip, max));
-			routerResult.setNewParams(reconstructParams(params, acrossTable, dmlSql, skip, max));
-
-			return enrichRouterResult(routerResult, dmlSql,
-			      tableShardRule == null ? null : tableShardRule.getGeneratedPK(), skip, max);
-		} catch (Exception e) {
-			throw new ShardRouterException("DataSource route failed, cause: ", e);
-		}
-	}
-
-	public void setRouterRule(RouterRule routerRule) {
-		this.routerRule = routerRule;
-	}
-
-	@Override
-	public boolean validate(String sql) throws SyntaxException, ShardRouterException {
-		DMLCommon dmlSql = null;
-
-		try {
-			dmlSql = parseSql(sql);
-		} catch (Exception e) {
-			throw new SyntaxException(e);
-		}
-
-		if (dmlSql != null) {
-			Set<String> relatedTables = dmlSql.getRelatedTables();
-			TableShardRule tableShardRule = findTableShardRule(relatedTables);
-
-			if (tableShardRule == null) {
-				throw new ShardRouterException("Cannot find any Shard Rule for table " + relatedTables);
-			} else {
-				return true;
-			}
-		} else {
-			return false;
-		}
-	}
-
-	public static class PreParsedSql {
+	class PreProcessedSql {
 		private String preParsedSql;
 
 		private String comment;

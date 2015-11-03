@@ -61,25 +61,29 @@ public class TableShardRule {
 
 	public ShardMatchResult eval(DMLCommon dmlSql, List<Object> params) {
 		ShardMatchContext matchContext = new ShardMatchContext(dmlSql, params);
+		
 		for (DimensionRule rule : rules) {
-			boolean isContinue = rule.match(matchContext);
-			if (!isContinue) {
+			if (!rule.match(matchContext)) {
 				break;
 			}
 		}
-		ShardMatchResult matchResult = matchContext.getMatchResult();
+
 		afterMatch(matchContext);
-		return matchResult;
+		
+		return matchContext.getMatchResult();
 	}
 
 	private void afterMatch(ShardMatchContext matchContext) {
 		DMLCommon dmlSql = matchContext.getDmlSql();
 		ShardMatchResult matchResult = matchContext.getMatchResult();
 		boolean dbAndTbsIsEmpty = matchResult.isDbAndTbsEmpty();
+		
 		if (dmlSql instanceof Insert && dbAndTbsIsEmpty) {
 			throw new ShardRouterException("Insert clause[" + dmlSql + "] can't be routed.");
 		}
+		
 		Map<String, Set<String>> potentialDBAndTbs = matchResult.getPotentialDBAndTbs();
+		
 		if (potentialDBAndTbs != null && !potentialDBAndTbs.isEmpty()) {
 			if (!matchResult.isDbAndTablesSetted()) {
 				matchResult.addDBAndTables(potentialDBAndTbs);

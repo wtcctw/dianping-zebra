@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.parser.sqlParser.Select;
 
 /**
  * @author danson.liu
@@ -45,15 +44,6 @@ public class ShardMatchContext {
 
 	public DMLCommon getDmlSql() {
 		return dmlSql;
-	}
-
-	public boolean onlyMatchMaster() {
-		//是否只有Insert才需要强制匹配Master Rule?
-		return !(dmlSql instanceof Select);
-	}
-
-	public boolean onlyMatchOnce() {
-		return dmlSql instanceof Select;
 	}
 
 	public List<Object> getParams() {

@@ -28,12 +28,12 @@ public abstract class AbstractDimensionRule implements DimensionRule {
 	protected Set<String> shardColumns = new HashSet<String>();
 
 	protected boolean isMaster;
-	
+
 	protected boolean needSync;
 
 	public void initShardColumn(String rule) {
 		Matcher matcher = RULE_COLUMN_PATTERN.matcher(rule);
-		
+
 		while (matcher.find()) {
 			shardColumns.add(matcher.group(1));
 		}
@@ -42,8 +42,8 @@ public abstract class AbstractDimensionRule implements DimensionRule {
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
 	}
-	
-	public void setNeedSync(boolean needSync){
+
+	public void setNeedSync(boolean needSync) {
 		this.needSync = needSync;
 	}
 }

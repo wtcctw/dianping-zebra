@@ -17,6 +17,7 @@ package com.dianping.zebra.shard.router.rule;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
+import com.dianping.zebra.shard.parser.sqlParser.Insert;
+import com.dianping.zebra.shard.parser.sqlParser.Select;
+import com.dianping.zebra.shard.router.ShardRouterException;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
@@ -64,7 +68,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		this.needSync = dimensionConfig.isNeedSync();
 		this.tableName = dimensionConfig.getTableName();
 		this.dataSourceProvider = new SimpleDataSourceProvider(dimensionConfig.getTableName(),
-		      dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
+				dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
 		this.allDBAndTables.putAll(this.dataSourceProvider.getAllDBAndTables());
 
 		for (DimensionRule whiteListRule : this.whiteListRules) {
@@ -84,40 +88,49 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 	@Override
 	public boolean match(ShardMatchContext matchContext) {
 		ShardMatchResult matchResult = matchContext.getMatchResult();
-		boolean onlyMatchMaster = matchContext.onlyMatchMaster(); // 非Select
-		boolean onlyMatchOnce = matchContext.onlyMatchOnce(); // Select
-		List<Map<String, Object>> colsList = new LinkedList<Map<String, Object>>();
+		List<Map<String, Object>> colValues = new LinkedList<Map<String, Object>>();
 
 		for (String shardColumn : shardColumns) {
 			Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
-			      matchContext.getParams());
+					matchContext.getParams());
 
-			if (shardColValues != null && shardColValues.size() > 0) {
-				if (colsList.isEmpty()) {
-					for (Object col : shardColValues) {
-						Map<String, Object> map = new HashMap<String, Object>();
+			if (shardColumns.size() > 1 && shardColValues.size() > 1) {
+				throw new ShardRouterException("Under multiple shard columns, more than one value for column["
+						+ shardColumn + "] is not supported!");
+			}
 
-						map.put(shardColumn, col);
-						colsList.add(map);
-					}
+			for (Object col : shardColValues) {
+				if (shardColumns.size() == 1) {
+					Map<String, Object> cols = new HashMap<String, Object>();
+					cols.put(shardColumn, col);
+
+					colValues.add(cols);
 				} else {
-					int index = 0;
-					for (Object col : shardColValues) {
-						Map<String, Object> map = colsList.get(index);
+					if (colValues.isEmpty()) {
+						Map<String, Object> cols = new HashMap<String, Object>();
+						cols.put(shardColumn, col);
 
-						map.put(shardColumn, col);
+						colValues.add(cols);
+					} else {
+						Map<String, Object> cols = colValues.get(0);
+						cols.put(shardColumn, col);
 					}
 				}
 			}
 		}
 
-		if (colsList.isEmpty()) {
-			if (onlyMatchMaster && isMaster) {
+		boolean isSelect = matchContext.getDmlSql() instanceof Select;
+		if (colValues.isEmpty()) {
+			if (matchContext.getDmlSql() instanceof Insert) {
+				throw new ShardRouterException("Router failed since there is no shard column value found.");
+			}
+
+			if (!isSelect && isMaster) {
 				// 如果Update和Delete没有设置master维度，则设置主路由的所有表
 				matchResult.setDbAndTables(allDBAndTables);
 				matchResult.setDbAndTablesSetted(true);
 
-				return !onlyMatchOnce;
+				return false;
 			} else {
 				// Select没有带任何维度
 				if (!matchResult.isPotentialDBAndTbsSetted()) {
@@ -127,29 +140,29 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 
 				return true;
 			}
-		}
+		} else {
+			matchContext.setColValues(colValues);
 
-		matchContext.setColValues(colsList);
-
-		for (DimensionRule whiteListRule : whiteListRules) {
-			whiteListRule.match(matchContext);
-		}
-
-		if (!matchResult.isDbAndTablesSetted()) {
-			for (Map<String, Object> valMap : colsList) {
-				RuleEngineEvalContext context = new RuleEngineEvalContext(valMap);
-
-				Number dbPos = (Number) ruleEngine.eval(context);
-				DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
-				String table = dataSource.evalTable(context);
-
-				matchResult.addDBAndTable(dataSource.getDbIndex(), table);
+			for (DimensionRule whiteListRule : whiteListRules) {
+				whiteListRule.match(matchContext);
 			}
 
-			matchResult.setDbAndTablesSetted(true);
-		}
+			if (!matchResult.isDbAndTablesSetted()) {
+				for (Iterator<Map<String, Object>> iterator = colValues.iterator(); iterator.hasNext();) {
+					RuleEngineEvalContext context = new RuleEngineEvalContext(iterator.next());
 
-		return !onlyMatchOnce;
+					Number dbPos = (Number) ruleEngine.eval(context);
+					DataSourceBO dataSource = dataSourceProvider.getDataSource(dbPos.intValue());
+					String table = dataSource.evalTable(context);
+
+					matchResult.addDBAndTable(dataSource.getDbIndex(), table);
+				}
+
+				matchResult.setDbAndTablesSetted(true);
+			}
+
+			return !isSelect;
+		}
 	}
 
 	public void setRuleEngine(RuleEngine ruleEngine) {

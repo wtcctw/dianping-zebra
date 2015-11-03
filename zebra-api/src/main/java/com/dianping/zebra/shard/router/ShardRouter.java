@@ -30,5 +30,4 @@ public interface ShardRouter {
 
 	RouterRule getRouterRule();
 
-	void init();
 }

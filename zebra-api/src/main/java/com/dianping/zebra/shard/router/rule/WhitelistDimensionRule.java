@@ -46,14 +46,16 @@ public class WhitelistDimensionRule extends AbstractDimensionRule {
 	public boolean match(ShardMatchContext matchContext) {
 		ShardMatchResult matchResult = matchContext.getMatchResult();
 		List<Map<String, Object>> colValues = matchContext.getColValues();
-		for (Map<String, Object> valMap : colValues) {
-			if ((Boolean) ruleEngine.eval(new RuleEngineEvalContext(valMap))) {
-				colValues.remove(valMap);
+
+		for (Iterator<Map<String, Object>> iterator = colValues.iterator(); iterator.hasNext();) {
+			if ((Boolean) ruleEngine.eval(new RuleEngineEvalContext(iterator.next()))) {
+				iterator.remove();
 				if (!matchResult.isDbAndTablesSetted()) {
 					matchResult.addDBAndTable(dataSource, table);
 				}
 			}
 		}
+
 		return true;
 	}
 
