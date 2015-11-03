@@ -11,7 +11,7 @@
 
 用户文档请看这里：[User Guide](/arch/zebra/blob/master/zebra-dao/README.md)
 
-#### zebra-dao
+#### zebra-ds-monitor-client
 具备SQL监控的功能，打点到CAT上，配合zebra-api一起使用
 
 ### Latest Version
