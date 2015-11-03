@@ -26,7 +26,8 @@ import java.util.regex.Pattern;
 
 import org.antlr.runtime.RecognitionException;
 
-import com.dianping.zebra.shard.jdbc.util.LRUCache;
+import com.dianping.zebra.shard.exception.ShardRouterException;
+import com.dianping.zebra.shard.exception.SyntaxException;
 import com.dianping.zebra.shard.parser.qlParser.DPMySQLParser;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
 import com.dianping.zebra.shard.parser.sqlParser.Insert;
@@ -39,6 +40,7 @@ import com.dianping.zebra.shard.parser.valueObject.variable.BindVar;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardMatchResult;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.shard.util.LRUCache;
 import com.dianping.zebra.util.SqlUtils;
 import com.dianping.zebra.util.StringUtils;
 

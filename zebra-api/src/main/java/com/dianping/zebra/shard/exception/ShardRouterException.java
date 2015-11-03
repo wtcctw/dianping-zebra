@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router;
+package com.dianping.zebra.shard.exception;
 
 /**
  * @author danson.liu

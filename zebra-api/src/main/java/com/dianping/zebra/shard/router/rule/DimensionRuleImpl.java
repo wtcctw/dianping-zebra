@@ -25,9 +25,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
+import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.sqlParser.Insert;
 import com.dianping.zebra.shard.parser.sqlParser.Select;
-import com.dianping.zebra.shard.router.ShardRouterException;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;

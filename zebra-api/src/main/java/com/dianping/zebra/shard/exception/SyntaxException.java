@@ -1,4 +1,4 @@
-package com.dianping.zebra.shard.router;
+package com.dianping.zebra.shard.exception;
 
 public class SyntaxException extends Exception {
 

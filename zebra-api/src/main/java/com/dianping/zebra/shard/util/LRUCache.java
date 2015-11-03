@@ -1,4 +1,4 @@
-package com.dianping.zebra.shard.jdbc.util;
+package com.dianping.zebra.shard.util;
 /**
  * Project: ${zebra-client.aid}
  * 

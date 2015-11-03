@@ -17,8 +17,12 @@ package com.dianping.zebra.shard.config;
 
 import java.io.Serializable;
 
-@SuppressWarnings("serial")
 public class ExceptionConfig implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5187189052650156734L;
 
 	private String condition;
 	

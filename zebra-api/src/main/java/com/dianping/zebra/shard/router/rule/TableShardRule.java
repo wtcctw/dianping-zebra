@@ -15,9 +15,9 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
+import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
 import com.dianping.zebra.shard.parser.sqlParser.Insert;
-import com.dianping.zebra.shard.router.ShardRouterException;
 
 import java.util.ArrayList;
 import java.util.List;

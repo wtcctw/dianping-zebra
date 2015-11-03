@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.jdbc.util;
+package com.dianping.zebra.shard.util;
 
 import java.util.*;
 

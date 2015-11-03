@@ -14,6 +14,8 @@ package com.dianping.zebra.shard.router;
 
 import java.util.List;
 
+import com.dianping.zebra.shard.exception.ShardRouterException;
+import com.dianping.zebra.shard.exception.SyntaxException;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 
 /**

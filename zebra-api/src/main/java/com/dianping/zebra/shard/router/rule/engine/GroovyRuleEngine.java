@@ -15,7 +15,7 @@
  */
 package com.dianping.zebra.shard.router.rule.engine;
 
-import com.dianping.zebra.shard.config.RouterConfigException;
+import com.dianping.zebra.shard.exception.RouterConfigException;
 import com.dianping.zebra.shard.router.rule.AbstractDimensionRule;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 

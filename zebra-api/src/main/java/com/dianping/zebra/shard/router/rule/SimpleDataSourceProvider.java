@@ -15,7 +15,7 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
-import com.dianping.zebra.shard.config.RouterConfigException;
+import com.dianping.zebra.shard.exception.RouterConfigException;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.util.StringUtils;

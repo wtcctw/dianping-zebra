@@ -21,7 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.dianping.zebra.shard.jdbc.util.CollectionUtils;
+import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.condition.ComparableAndInExpression;
 import com.dianping.zebra.shard.parser.condition.Comparative;
 import com.dianping.zebra.shard.parser.condition.Expression;
@@ -37,7 +37,7 @@ import com.dianping.zebra.shard.parser.sqlParser.Update;
 import com.dianping.zebra.shard.parser.tableObject.TableName;
 import com.dianping.zebra.shard.parser.tableObject.imp.TableNameSubQueryImp;
 import com.dianping.zebra.shard.parser.valueObject.ValueObject;
-import com.dianping.zebra.shard.router.ShardRouterException;
+import com.dianping.zebra.shard.util.CollectionUtils;
 
 /**
  * 计算相关DML语句对于指定的column可能的值
