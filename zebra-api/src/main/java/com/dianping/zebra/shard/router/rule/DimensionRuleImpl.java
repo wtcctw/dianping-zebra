@@ -91,6 +91,7 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 		List<Map<String, Object>> colValues = new LinkedList<Map<String, Object>>();
 
 		for (String shardColumn : shardColumns) {
+			// Insert必须要有主维度，否则这里抛错
 			Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
 					matchContext.getParams());
 

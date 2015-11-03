@@ -1,6 +1,13 @@
 ##  更新说明
+### zebra-api 2.7.8
+* [+] 增加了规则中多Column的支持
+* [/] 修正了若干bug
 
-### 2.7.7 NEW!
+### zebra-dao 0.1.0
+* [+] 异步dao的支持
+* [+] cat监控的支持
+
+### 2.7.7
 * [/] 重构了分库分表的部分代码，修正了分库分表的若干bug
 * [+] 增加了GroupDataSource的socketTimeout的设置功能
 
