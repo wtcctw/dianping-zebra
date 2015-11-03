@@ -6,8 +6,8 @@
 1. 对业务隐藏数据源相关配置，比如主库或者从库的位置、用户名以及密码等
 2. 实时响应配置变化，应用自刷新无需重启
 3. 读写分离，支持多种场景的自定义路由策略
-4. 支持分库分表，具体接入请参考文档[README_SHARD.md](/arch/zebra/zebra-api/blob/master/README_SHARD.md)
-5. 底层多数据源支持：c3p0或者tomcat-jdbc
+4. 支持分库分表，具体接入请[参考文档](/arch/zebra/blob/master/zebra-api/README_SHARD.md)
+5. 底层多数据源支持：`c3p0`或者`tomcat-jdbc`
 6. 丰富的监控信息在`CAT`上展现
 7. 支持DBA方便的对数据库进行维护，如写库切换，读库上线下线，用户名密码变更等
 8. 支持SQL流控，DBA可以在后台按照比例对指定SQL语句进行限制访问
@@ -16,7 +16,7 @@
 
 ### POM依赖
 
-目前的最新版本为`2.7.8`，并配合数据监控组件zebra-ds-monitor-client一起使用
+目前的最新版本为`2.7.8`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
 
 	<dependency>
     	<groupId>com.dianping.zebra</groupId>
@@ -84,8 +84,7 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
 ### 特殊情况配置
-1.如果业务对主从延迟要求很高，不能容忍一点延迟，比如支付等业务，可以根据需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。
-一般情况下，除非对主从延迟要求很高，一般应用`不建议`使用该配置。
+1.如果业务对主从延迟要求很高，不能容忍一点延迟，比如支付等业务，可以根据需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。一般情况下，除非对主从延迟要求很高，一般应用`不建议`使用该配置。
 
     <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
     	<property name="jdbcRef" value="tuangou2010" /> 

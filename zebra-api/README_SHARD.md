@@ -4,7 +4,7 @@
 在数据库单表记录行数达到很大的量的时候，需要对这个单表进行水平拆分。zebra-api就是数据库水平拆分的解决方案。
 
 1.	对业务透明，业务写的SQL只知道逻辑的库名和逻辑的表名
-2. 对大部分SQL都支持，[支持的SQL列表](/arch/zebra/zebra-api/blob/master/README_SHARD_SQL.md)
+2. 对大部分SQL都支持，[支持的SQL列表](/arch/zebra/blob/master/zebra-api/README_SHARD_SQL.md)
 
 目前，暂不支持路由配置变更，业务代码进行动态刷新的功能。
 
