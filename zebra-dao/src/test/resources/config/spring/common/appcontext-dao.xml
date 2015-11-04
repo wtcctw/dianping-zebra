@@ -6,5 +6,6 @@
 
     <bean class="com.dianping.zebra.dao.mybatis.ZebraMapperScannerConfigurer">
         <property name="basePackage" value="com.dianping.zebra.dao.mapper" />
+        <property name="corePoolSize" value="${zebra-dao.executepool.corePoolSize}"></property>
     </bean>
 </beans>

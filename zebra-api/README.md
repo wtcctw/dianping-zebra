@@ -112,7 +112,7 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 A：`Zebra`内需要启动多线程，而在构造函数中启动线程是不安全的，所以需要这两个方法来启动和销毁线程。
 
 #### Q：我想看jdbcRef的配置，在哪里可以看到？
-A：想要理解并查看配置，请看文档 [README_CONFIG.md](/arch/zebra/blob/master/README_CONFIG.md)
+A：想要理解并查看配置，请看文档 [README_CONFIG.md](/arch/zebra/blob/master/zebra-api/README_CONFIG.md)
 
 #### Q：GroupDataSource是如何根据jdbcRef读取配置的?
 A：根据jdbcRef可以找到groupds.{jdbcRef}.mapping这个key，从而读到这个值；根据里面的值再进一步的去寻找ds的值，从而构建出一份配置文件，然后进行初始化。
