@@ -31,12 +31,13 @@ import java.util.List;
 public class CatFilter extends DefaultJdbcFilter {
     private static final String CAT_TYPE = "DAL";
 
+    private GroupDataSourceMonitor monitor = null;
+    
     @Override
     public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
         chain.closeSingleDataSource(source, chain);
         Cat.logEvent("DataSource.Destoryed", source.getConfig().getId());
-        
-        //TODO : unregister CAT statusExtension when close dataSource
+        StatusExtensionRegister.getInstance().unregister(this.monitor);
     }
 
     @Override
@@ -119,7 +120,8 @@ public class CatFilter extends DefaultJdbcFilter {
         Transaction transaction = Cat.newTransaction(CAT_TYPE, "DataSource.Init-" + source.getJdbcRef());
         try {
             chain.initGroupDataSource(source, chain);
-            StatusExtensionRegister.getInstance().register(new GroupDataSourceMonitor(source));
+            this.monitor = new GroupDataSourceMonitor(source);
+            StatusExtensionRegister.getInstance().register(this.monitor);
             transaction.setStatus(Message.SUCCESS);
         } catch (RuntimeException e) {
             Cat.logError(e);
