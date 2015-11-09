@@ -40,9 +40,8 @@ public class GroupConnection implements Connection {
 
 	private DataSource writeDataSource;
 
-	public GroupConnection(DataSource readDataSource, DataSource writeDataSource,
-			ReadWriteStrategy readWriteStrategy, RouterType routerType,
-			List<JdbcFilter> filters) {
+	public GroupConnection(DataSource readDataSource, DataSource writeDataSource, ReadWriteStrategy readWriteStrategy,
+			RouterType routerType, List<JdbcFilter> filters) {
 		super();
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
@@ -127,8 +126,7 @@ public class GroupConnection implements Connection {
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
 				@Override
-				public void closeGroupConnection(GroupConnection source, JdbcFilter chain)
-						throws SQLException {
+				public void closeGroupConnection(GroupConnection source, JdbcFilter chain) throws SQLException {
 					if (index < filters.size()) {
 						filters.get(index++).closeGroupConnection(source, chain);
 					} else {
@@ -162,7 +160,8 @@ public class GroupConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createArrayOf(java.lang.String, java.lang.Object[])
+	 * @see java.sql.Connection#createArrayOf(java.lang.String,
+	 * java.lang.Object[])
 	 */
 	@Override
 	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
@@ -251,7 +250,8 @@ public class GroupConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.sql.Connection#createStruct(java.lang.String, java.lang.Object[])
+	 * @see java.sql.Connection#createStruct(java.lang.String,
+	 * java.lang.Object[])
 	 */
 	@Override
 	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
@@ -512,7 +512,11 @@ public class GroupConnection implements Connection {
 	 */
 	@Override
 	public boolean isReadOnly() throws SQLException {
-		throw new UnsupportedOperationException("isReadOnly");
+		if (routerType != null && routerType == RouterType.LOAD_BALANCE) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/*
@@ -635,7 +639,8 @@ public class GroupConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
+	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int,
+	 * int)
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
@@ -661,7 +666,8 @@ public class GroupConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, java.lang.String[])
+	 * @see java.sql.Connection#prepareStatement(java.lang.String,
+	 * java.lang.String[])
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
@@ -710,7 +716,8 @@ public class GroupConnection implements Connection {
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see java.sql.Connection#setClientInfo(java.lang.String, java.lang.String)
+	 * @see java.sql.Connection#setClientInfo(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public void setClientInfo(String name, String value) throws SQLClientInfoException {

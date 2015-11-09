@@ -39,6 +39,7 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 		Connection conn = getDataSource().getConnection();
 
 		assertFalse(conn.isClosed());
+		assertFalse(conn.isReadOnly());
 		assertTrue(conn.getAutoCommit());
 		conn.setAutoCommit(false);
 		assertFalse(conn.getAutoCommit());
