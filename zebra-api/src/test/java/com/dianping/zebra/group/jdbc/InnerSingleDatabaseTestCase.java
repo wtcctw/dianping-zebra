@@ -54,7 +54,7 @@ public abstract class InnerSingleDatabaseTestCase extends H2DatabaseTestCase {
 			}
 		}
 	}
-
+	
 	protected abstract String getConfigManagerType();
 
 	protected DataSource getDataSource() {

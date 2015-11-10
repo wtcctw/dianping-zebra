@@ -1,13 +1,14 @@
 package com.dianping.zebra.group.jdbc;
 
-import junit.framework.Assert;
-import org.junit.Test;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Arrays;
+
+import org.junit.Test;
+
+import junit.framework.Assert;
 
 public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
@@ -46,7 +47,7 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 	protected String getSchema() {
 		return getClass().getResource("/schema.sql").getPath();
 	}
-
+	
 	@Test
 	public void test_preparedStatement_api_support() throws Exception {
 
@@ -87,25 +88,35 @@ public class DPGroupPreparedStatementTest extends MultiDatabaseTestCase {
 
 				Assert.assertEquals(stmt.executeUpdate(), 1);
 				stmt.close();
-
-				// 测试批量更新
-				stmt = conn.prepareStatement("insert into PERSON(NAME,LAST_NAME,AGE) values(?,?,?)");
-
+				conn.close();
+				return null;
+			}
+		});
+	}
+	
+	@Test
+	public void test_preparedStatement_batch_support() throws Exception {
+		
+		execute(new ConnectionCallback() {
+			@Override
+			public Object doInConnection(Connection conn) throws Exception {
+				PreparedStatement stmt = conn.prepareStatement("insert into PERSON(NAME,LAST_NAME,AGE) values(?,?,?)");
+				
 				stmt.setString(1, "zhuhao");
 				stmt.setString(2, "zhuhao");
 				stmt.setInt(3, 2);
 				stmt.addBatch();
-
+				
 				stmt.setString(1, "damon");
 				stmt.setString(2, "zhuhao");
 				stmt.setInt(3, 12);
 				stmt.addBatch();
-
+				
 				int[] updateCounts = stmt.executeBatch();
-
+				
 				Assert.assertEquals(updateCounts.length, 2);
 				stmt.close();
-
+				
 				conn.close();
 				return null;
 			}

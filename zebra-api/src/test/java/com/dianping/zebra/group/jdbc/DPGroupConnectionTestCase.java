@@ -446,7 +446,7 @@ public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 			}
 		});
 	}
-
+	
 	@Override
 	protected String getConfigManagerType() {
 		return Constants.CONFIG_MANAGER_TYPE_LOCAL;
