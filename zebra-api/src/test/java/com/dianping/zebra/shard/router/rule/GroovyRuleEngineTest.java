@@ -79,4 +79,13 @@ public class GroovyRuleEngineTest {
 		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
 		System.out.println(retVal);
 	}
+	
+	@Test
+	public void testData2() {
+		RuleEngine ruleEngine = new GroovyRuleEngine("#id# == 0 ? 0 : 0");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		valMap.put("id", 2);
+		Object retVal = ruleEngine.eval(new RuleEngineEvalContext(valMap));
+		System.out.println(retVal);
+	}
 }
