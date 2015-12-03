@@ -7,7 +7,8 @@
   </parent>
   
   <modelVersion>4.0.0</modelVersion>
-	<artifactId>zebra-dao</artifactId>
+  <name>zebra-dao</name>
+  <artifactId>zebra-dao</artifactId>
 	<version>0.1.0</version>
 
 	<packaging>jar</packaging>
