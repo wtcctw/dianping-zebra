@@ -10,7 +10,7 @@ public class LionDataSourceRouterFactoryTest {
 		
 		ShardRouter router = factory.getRouter();
 		
-		RouterResult router2 = router.router("select * from Users where id = 2", null);
+		RouterResult router2 = router.router("select * from Users where id = 1", null);
 		
 		for(RouterTarget rt : router2.getTargetedSqls()){
 			System.out.println(rt.getDataSourceName());

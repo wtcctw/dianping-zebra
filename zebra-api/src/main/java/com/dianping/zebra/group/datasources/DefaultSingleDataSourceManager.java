@@ -16,8 +16,7 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 	private BlockingQueue<SingleDataSource> toBeClosedDataSource = new LinkedBlockingQueue<SingleDataSource>();
 
 	@Override
-	public synchronized SingleDataSource createDataSource(DataSourceConfig config,
-			List<JdbcFilter> filters) {
+	public synchronized SingleDataSource createDataSource(DataSourceConfig config, List<JdbcFilter> filters) {
 		return new SingleDataSource(config, filters);
 	}
 
@@ -38,14 +37,14 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 			dataSourceMonitor.start();
 		}
 	}
-	
+
 	@Override
-	public synchronized void stop(){
-		if(dataSourceMonitor != null){
+	public synchronized void stop() {
+		if (dataSourceMonitor != null) {
 			dataSourceMonitor.interrupt();
 		}
 	}
-	
+
 	class CloseDataSourceTask implements Runnable {
 		@Override
 		public void run() {
@@ -57,10 +56,10 @@ public class DefaultSingleDataSourceManager implements SingleDataSourceManager {
 				} catch (DalException e) {
 					if (dataSource != null) {
 						try {
-	                  TimeUnit.MILLISECONDS.sleep(100);
-                  } catch (InterruptedException e1) {
-                  }
-						
+							TimeUnit.MILLISECONDS.sleep(100);
+						} catch (InterruptedException e1) {
+						}
+
 						toBeClosedDataSource.offer(dataSource);
 					}
 				} catch (Exception ignore) {
