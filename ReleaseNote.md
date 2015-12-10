@@ -1,4 +1,8 @@
 ##  更新说明
+### zebra-api 2.7.9
+* [+] 增加了GroupDataSource的安全访问检测
+* [/] 修正了若干日志的输出
+
 ### zebra-api 2.7.8
 * [+] 增加了规则中多Column的支持
 * [/] 修正了若干bug
