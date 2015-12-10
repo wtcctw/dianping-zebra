@@ -4,6 +4,7 @@ import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.util.StringUtils;
 import com.google.common.collect.Lists;
 import junit.framework.Assert;
@@ -46,6 +47,19 @@ public class GroupDataSourceTest extends MultiDatabaseTestCase {
 		return groupConfig;
 	}
 
+	@Test
+	public void test_group_datasource_security_check_success() {
+		getDataSource();
+	}
+	
+	@Test(expected=DalException.class)
+	public void test_group_datasource_security_check_fail() {
+		GroupDataSource ds = new GroupDataSource("sample.ds.error");
+		ds.setConfigManagerType(getConfigManagerType());
+		ds.init();
+	}
+
+	
 	@Test
 	public void test_build_group_datasource_config_filter_with_same() {
 		GroupDataSourceConfig config = new GroupDataSourceConfig();

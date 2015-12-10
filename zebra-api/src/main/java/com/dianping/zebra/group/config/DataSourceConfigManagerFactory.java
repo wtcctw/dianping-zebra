@@ -1,9 +1,7 @@
 package com.dianping.zebra.group.config;
 
-import com.dianping.zebra.Constants;
-import com.dianping.zebra.config.LionConfigService;
-import com.dianping.zebra.config.PropertyConfigService;
-import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.config.ConfigServiceFactory;
 
 public final class DataSourceConfigManagerFactory {
 
@@ -11,17 +9,8 @@ public final class DataSourceConfigManagerFactory {
 	}
 
 	public static DataSourceConfigManager getConfigManager(String configManagerType, String name) {
-		DataSourceConfigManager dataSourceConfigManager = null;
-
-		if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
-			PropertyConfigService configService = new PropertyConfigService(name);
-			configService.init();
-			dataSourceConfigManager = new DefaultDataSourceConfigManager(name, configService);
-		} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
-			dataSourceConfigManager = new DefaultDataSourceConfigManager(name, LionConfigService.getInstance());
-		} else {
-			throw new IllegalConfigException(String.format("illegal dataSourceConfigManagerType[%s]", configManagerType));
-		}
+		ConfigService configService = ConfigServiceFactory.getConfigService(configManagerType, name);
+		DataSourceConfigManager dataSourceConfigManager =  new DefaultDataSourceConfigManager(name, configService);
 
 		dataSourceConfigManager.init();
 

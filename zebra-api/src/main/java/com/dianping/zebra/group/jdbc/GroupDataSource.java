@@ -19,6 +19,9 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.config.ConfigServiceFactory;
+import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.SystemConfigManager;
@@ -40,6 +43,7 @@ import com.dianping.zebra.group.router.ReadWriteStrategyWrapper;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.log.LoggerLoader;
+import com.dianping.zebra.util.AppPropertiesUtils;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.StringUtils;
 
@@ -110,8 +114,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 	}
 
-	// Append extra jdbcUrl parameters like "zeroDateTimeBehavior=convertToNull" after default jdbcUrl.
-	// This is used to auto-replace dataSource bean to avoid the case that the default jdbcUrl is not same as its original jdbcUrl.
+	// Append extra jdbcUrl parameters like "zeroDateTimeBehavior=convertToNull"
+	// after default jdbcUrl.
+	// This is used to auto-replace dataSource bean to avoid the case that the
+	// default jdbcUrl is not same as its original jdbcUrl.
 	// In normal case, this is not used.
 	protected void buildExtraJdbcUrlParams(GroupDataSourceConfig newGroupConfig) {
 		Object extraJdbcUrlParamsObject = this.springProperties.get(Constants.SPRING_PROPERTY_EXTRA_JDBC_URL_PARAMS);
@@ -267,7 +273,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
 				@Override
-				public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException {
+				public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain)
+						throws SQLException {
 					if (index < filters.size()) {
 						return filters.get(index++).getGroupConnection(source, chain);
 					} else {
@@ -347,6 +354,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			logger.info("initialize a new GroupDataSource by using jdbcRef[" + jdbcRef + "].");
 		}
 
+		this.securityCheck();
 		this.initConfig();
 		this.initFilters();
 
@@ -367,6 +375,30 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 	}
 
+	/**
+	 * check whether your app has enough authority to access the database.
+	 */
+	protected void securityCheck() {
+		String database = jdbcRef;
+
+		int pos = jdbcRef.indexOf('.');
+		if (pos > 0) {
+			database = jdbcRef.substring(0, pos);
+		}
+
+		ConfigService configService = ConfigServiceFactory.getConfigService(configManagerType, jdbcRef);
+		String property = configService.getProperty(LionKey.getDatabaseSecurityConfigKey(database));
+
+		if (StringUtils.isNotBlank(property)) {
+			String appName = AppPropertiesUtils.getAppName();
+
+			if (!property.contains(appName)) {
+				throw new DalException(
+						"Access deny ! Your app is not allowed to access this database, please register your app on http://zebra.dp/");
+			}
+		}
+	}
+
 	protected void initConfig() {
 		this.dataSourceConfigManager = DataSourceConfigManagerFactory.getConfigManager(configManagerType, jdbcRef);
 		this.dataSourceConfigManager.addListerner(new GroupDataSourceConfigChangedListener());
@@ -377,10 +409,10 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	private void initDataSources() {
 		try {
 			this.readDataSource = new LoadBalancedDataSource(getLoadBalancedConfig(groupConfig.getDataSourceConfigs()),
-			      this.filters, systemConfigManager.getSystemConfig());
+					this.filters, systemConfigManager.getSystemConfig());
 			this.readDataSource.init();
 			this.writeDataSource = new FailOverDataSource(getFailoverConfig(groupConfig.getDataSourceConfigs()),
-			      this.filters);
+					this.filters);
 			this.writeDataSource.init();
 		} catch (RuntimeException e) {
 			try {
@@ -460,11 +492,11 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		boolean preparedSwitch = false;
 		try {
 			newReadDataSource = new LoadBalancedDataSource(
-			      getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.filters,
-			      systemConfigManager.getSystemConfig());
+					getLoadBalancedConfig(groupDataSourceConfig.getDataSourceConfigs()), this.filters,
+					systemConfigManager.getSystemConfig());
 			newReadDataSource.init();
 			newWriteDataSource = new FailOverDataSource(getFailoverConfig(groupDataSourceConfig.getDataSourceConfigs()),
-			      this.filters);
+					this.filters);
 			newWriteDataSource.init();
 
 			preparedSwitch = true;

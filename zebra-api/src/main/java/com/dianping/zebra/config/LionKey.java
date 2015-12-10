@@ -3,17 +3,16 @@ package com.dianping.zebra.config;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.util.StringUtils;
 
-/**
- * Dozer @ 2015-02
- * mail@dozer.cc
- * http://www.dozer.cc
- */
 public final class LionKey {
     private LionKey() {
     }
 
-    public static String getGroupDsConfigKey(String groupDssName) {
-        return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, groupDssName, "mapping");
+    public static String getJdbcRefConfigKey(String jdbcRef) {
+        return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, jdbcRef, "mapping");
+    }
+    
+    public static String getDatabaseSecurityConfigKey(String database) {
+        return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, database, "security");
     }
 
     public static String getDsJdbcUrlConfigKey(String dsName) {
