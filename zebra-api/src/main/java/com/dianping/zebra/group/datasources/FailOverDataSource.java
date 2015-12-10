@@ -24,8 +24,9 @@ import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.dianping.zebra.util.StringUtils;
 
 /**
- * features: 1. auto-detect master database by select @@read_only</br> 2. auto check the master database.</br> 3. if cannot find any
- * master database in the initial phase, fail fast.</br>
+ * features: 1. auto-detect master database by select @@read_only</br>
+ * 2. auto check the master database.</br>
+ * 3. if cannot find any master database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
 	private final static Logger logger = LogManager.getLogger(FailOverDataSource.class);
@@ -50,10 +51,11 @@ public class FailOverDataSource extends AbstractDataSource {
 		StringBuilder sb = new StringBuilder(100);
 
 		for (Map.Entry<String, DataSourceConfig> config : configs.entrySet()) {
-			sb.append(String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s,properties=%s]", config
-			      .getValue().getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(), StringUtils
-			      .repeat("*", config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length()),
-			      config.getValue().getDriverClass(), config.getValue().getProperties()));
+			sb.append(String.format("[datasource=%s,url=%s,username=%s,password=%s,driverClass=%s,properties=%s]",
+					config.getValue().getId(), config.getValue().getJdbcUrl(), config.getValue().getUsername(),
+					StringUtils.repeat("*",
+							config.getValue().getPassword() == null ? 0 : config.getValue().getPassword().length()),
+					config.getValue().getDriverClass(), config.getValue().getProperties()));
 		}
 
 		return sb.toString();
@@ -93,7 +95,16 @@ public class FailOverDataSource extends AbstractDataSource {
 		try {
 			FindMasterDataSourceResult result = monitor.findMasterDataSource();
 			if (!result.isMasterExist()) {
-				String error_message = String.format("Cannot find any master dataSource. Configs=%s", getConfigSummary());
+				String configSummary = getConfigSummary();
+				String error_message = null;
+
+				if (StringUtils.isBlank(configSummary)) {
+					error_message = "DataSource config is empty, please contact DBA to properly config it.";
+				} else {
+					error_message = String.format(
+							"Cannot find any master dataSource, this is probably due to the 'readOnly' property of each mysql instance is true. For your convenient, the dal configs = %s",
+							configSummary);
+				}
 
 				if (forceCheckMaster) {
 					MasterDsNotFoundException exp = new MasterDsNotFoundException(error_message, result.getException());
@@ -102,7 +113,7 @@ public class FailOverDataSource extends AbstractDataSource {
 					logger.warn(error_message, result.getException());
 				}
 			} else {
-				logger.info("FailOverDataSource find master success!");
+				logger.info("FailOverDataSource find master mysql instance success!");
 			}
 		} catch (WeakReferenceGCException e) {
 			logger.error("should never be here!", e);
@@ -225,7 +236,7 @@ public class FailOverDataSource extends AbstractDataSource {
 				JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
 					@Override
 					public FindMasterDataSourceResult findMasterFailOverDataSource(MasterDataSourceMonitor source,
-					      JdbcFilter chain) {
+							JdbcFilter chain) {
 						if (index < filters.size()) {
 							return filters.get(index++).findMasterFailOverDataSource(source, chain);
 						} else {
