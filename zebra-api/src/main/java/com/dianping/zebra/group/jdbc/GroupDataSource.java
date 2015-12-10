@@ -19,6 +19,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.annotation.Internal;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.ConfigServiceFactory;
 import com.dianping.zebra.config.LionKey;
@@ -114,11 +115,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 	}
 
-	// Append extra jdbcUrl parameters like "zeroDateTimeBehavior=convertToNull"
-	// after default jdbcUrl.
-	// This is used to auto-replace dataSource bean to avoid the case that the
-	// default jdbcUrl is not same as its original jdbcUrl.
-	// In normal case, this is not used.
+	/**
+	 * Append extra jdbcUrl parameters like "zeroDateTimeBehavior=convertToNull"
+	 * after default jdbcUrl.This is used to auto-replace dataSource bean to
+	 * avoid the case that the default jdbcUrl is not same as its original
+	 * jdbcUrl. In normal case, this is not used.
+	 */
+	@Internal
 	protected void buildExtraJdbcUrlParams(GroupDataSourceConfig newGroupConfig) {
 		Object extraJdbcUrlParamsObject = this.springProperties.get(Constants.SPRING_PROPERTY_EXTRA_JDBC_URL_PARAMS);
 
@@ -381,20 +384,20 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	protected void securityCheck() {
 		ConfigService configService = ConfigServiceFactory.getConfigService(configManagerType, jdbcRef);
 		String on = configService.getProperty(LionKey.getDatabaseSecuritySwitchKey());
-		
-		if("true".equalsIgnoreCase(on)){
+
+		if ("true".equalsIgnoreCase(on)) {
 			String database = jdbcRef;
-			
+
 			int pos = jdbcRef.indexOf('.');
 			if (pos > 0) {
 				database = jdbcRef.substring(0, pos);
 			}
-			
+
 			String property = configService.getProperty(LionKey.getDatabaseSecurityConfigKey(database));
-			
+
 			if (StringUtils.isNotBlank(property)) {
 				String appName = AppPropertiesUtils.getAppName();
-				
+
 				if (!property.contains(appName)) {
 					throw new DalException(
 							"Access deny ! Your app is not allowed to access this database, please register your app on http://zebra.dp/");
@@ -673,6 +676,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	// Compatible old GroupDataSource < 2.4.8
+	@Deprecated
 	public void setName(String name) {
 		this.jdbcRef = name;
 	}

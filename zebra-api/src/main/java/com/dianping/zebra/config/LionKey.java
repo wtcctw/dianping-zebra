@@ -51,10 +51,6 @@ public final class LionKey {
         return String.format("%s.%s.%s", Constants.DEFAULT_SHARDING_PRFIX, ruleName, "switch");
     }
 
-    public static String getShardOriginDatasourceKey(String ruleName) {
-        return String.format("%s.%s.%s", Constants.DEFAULT_SHARDING_PRFIX, ruleName, "origin");
-    }
-
     public static boolean isShardConfigKey(String key) {
         return StringUtils.isNotBlank(key) && key.endsWith("shard");
     }
