@@ -14,6 +14,10 @@ public final class LionKey {
     public static String getDatabaseSecurityConfigKey(String database) {
         return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_GROUP_PRFIX, database, "security");
     }
+    
+    public static String getDatabaseSecuritySwitchKey() {
+    	return "zebra.system.security";
+    }
 
     public static String getDsJdbcUrlConfigKey(String dsName) {
         return String.format("%s.%s.%s", Constants.DEFAULT_DATASOURCE_SINGLE_PRFIX, dsName, "jdbc.url");

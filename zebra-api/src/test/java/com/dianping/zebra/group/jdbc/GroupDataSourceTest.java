@@ -54,7 +54,7 @@ public class GroupDataSourceTest extends MultiDatabaseTestCase {
 	
 	@Test(expected=DalException.class)
 	public void test_group_datasource_security_check_fail() {
-		GroupDataSource ds = new GroupDataSource("sample.ds.error");
+		GroupDataSource ds = new GroupDataSource("sample.ds.security");
 		ds.setConfigManagerType(getConfigManagerType());
 		ds.init();
 	}

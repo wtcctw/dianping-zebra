@@ -379,22 +379,26 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	 * check whether your app has enough authority to access the database.
 	 */
 	protected void securityCheck() {
-		String database = jdbcRef;
-
-		int pos = jdbcRef.indexOf('.');
-		if (pos > 0) {
-			database = jdbcRef.substring(0, pos);
-		}
-
 		ConfigService configService = ConfigServiceFactory.getConfigService(configManagerType, jdbcRef);
-		String property = configService.getProperty(LionKey.getDatabaseSecurityConfigKey(database));
-
-		if (StringUtils.isNotBlank(property)) {
-			String appName = AppPropertiesUtils.getAppName();
-
-			if (!property.contains(appName)) {
-				throw new DalException(
-						"Access deny ! Your app is not allowed to access this database, please register your app on http://zebra.dp/");
+		String on = configService.getProperty(LionKey.getDatabaseSecuritySwitchKey());
+		
+		if("true".equalsIgnoreCase(on)){
+			String database = jdbcRef;
+			
+			int pos = jdbcRef.indexOf('.');
+			if (pos > 0) {
+				database = jdbcRef.substring(0, pos);
+			}
+			
+			String property = configService.getProperty(LionKey.getDatabaseSecurityConfigKey(database));
+			
+			if (StringUtils.isNotBlank(property)) {
+				String appName = AppPropertiesUtils.getAppName();
+				
+				if (!property.contains(appName)) {
+					throw new DalException(
+							"Access deny ! Your app is not allowed to access this database, please register your app on http://zebra.dp/");
+				}
 			}
 		}
 	}
