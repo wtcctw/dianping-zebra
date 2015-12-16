@@ -13,7 +13,7 @@
 	<dependency>
 		<groupId>com.dianping.zebra</groupId>
 		<artifactId>zebra-dao</artifactId>
-		<version>0.1.0-SNAPSHOT</version>
+		<version>0.1.0</version>
 	</dependency>
 	
 	<!--Zebra数据源相关依赖，必须要2.7.8以上-->
