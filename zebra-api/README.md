@@ -16,7 +16,7 @@
 
 ### POM依赖
 
-目前的最新版本为`2.7.8`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
+目前的最新版本为`2.7.9`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
 
 	<dependency>
     	<groupId>com.dianping.zebra</groupId>
@@ -41,7 +41,7 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 
 ## Spring 配置
 
-### 在 Spring 中 DataSource 的配置
+### 完整连接池配置
 
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
         <!-- 唯一确定数据库的key，请咨询DBA使用哪个key -->
@@ -56,6 +56,8 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
         <property name="initialPoolSize" value="${lion.key.initialPoolSize}" />
         <!-- 该值对应tomcat-jdbc的"maxWait" -->
         <property name="checkoutTimeout" value="1000" />
+        <!-- 关闭登录用户走写库，为兼容默认值是true，如无需要请关闭该特性 -->
+        <property name="forceWriteOnLogin" value="false" />
     	<property name="maxIdleTime" value="1800" />
 		<property name="idleConnectionTestPeriod" value="60" />
 		<property name="acquireRetryAttempts" value="3" />
@@ -70,21 +72,28 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 支持c3p0所有数据源配置，而对于tomcat-jdbc，仅支持上述几个连接池大小的配置。
 对于tomcat-jdbc的其他配置，zebra配置了一套默认值。
 
-### 在 Spring 中使用默认 DataSource 的配置
+### 简单连接池配置（部分使用默认配置）
 
     <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="tuangou2010" /> 
+		<!-- 选择使用背后使用哪种数据源，"c3p0"或者"tomcat-jdbc"，可以不配，默认值为"c3p0" -->
+        <property name="poolType" value="c3p0" /> 
+        <!-- 关闭登录用户走写库，为兼容默认值是true，如无需要请关闭该特性 -->
+        <property name="forceWriteOnLogin" value="false" />
     </bean>
 
 ### 配置说明
 
-其中，`jdbcRef`属性是该数据库的在`Lion`中的业务名称，一般是数据库名的全小写，`zebra`会自动根据这个名字到`Lion`上查找`jdbcUrl`,`user`,`password`和`driverClass`。其余C3P0参数可以在项目Spring里面直接定义，也可以使用Lion中定义的值。
-1. C3P0参数是在`bean`中直接定义的，那么C3P0的参数将不具有动态刷新的功能。
-2. C3P0参数是在`bean`中，读取`Lion`中定义的值，那么一旦修改了`Lion`的参数值后，该数据源将进行自刷新。
-3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
-4. 对于连接池的每一个配置，如果业务方配置了，就会覆盖默认配置；如果业务方没有配置过，则继续使用默认配置。
+其中，`jdbcRef`属性是访问该数据库的key，一般是数据库名的全小写(`大小写敏感`)，`zebra`会自动根据这个key到`Lion`上查找`jdbcUrl`,`user`,`password`,`driverClass`和`C3P0`的参数。业务也可以使用自定义的C3P0参数覆盖掉默认值，具体来说，有以下几种情况：
 
-### 特殊情况配置
+1. C3P0参数值是在`bean`中直接写死，那么C3P0的参数将不具有动态刷新的功能。
+2. C3P0参数值是在`bean`中配置的是`Lion`中key，那么该key的`Lion`值覆盖掉zebra的默认值。而且一旦修改了`Lion`上key的后，该数据源将进行自刷新。
+3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
+
+### 事务处理
+`zebra`是一个读写分离的数据源，如果在事务中，那默认所有在事务中的操作均将路由到主库进行操作。
+
+### 特殊配置介绍
 1.如果业务对主从延迟要求很高，不能容忍一点延迟，比如支付等业务，可以根据需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。一般情况下，除非对主从延迟要求很高，一般应用`不建议`使用该配置。
 
     <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
@@ -166,4 +175,4 @@ A：为了方便升级，不用业务修改代码，zebra可以对数据库级�
     1. 从datasource中获取jdbcUrl，从而知道是该datasource会访问哪个库
     2. 判断该数据库是否在`Lion`的白名单`groupds.autoreplace.database`配置过
     3. 如果配置过，则进行替换。替换时，判断用户名如果是读用户，则替换过的GroupDataSource只能读；如果是写用户，则替换过的GroupDataSource只能写。
-替换的DataSource仅限于c3p0和dpdl两种数据源。
+替换的DataSource仅限于c3p0和dpdl两种数据源。原则上，该功能对新库不进行使用，只对老库进行使用。
