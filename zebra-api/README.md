@@ -29,7 +29,7 @@
         <version>${version}</version>
     </dependency>
     
-zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载路径中去。确保web.xml中引入额外的spring文件，
+zebra-ds-monitor-client还需要额外配置一个xml文件到应用spring加载路径中去。确保web.xml中引入额外的spring文件，
 
 	classpath*:config/spring/common/appcontext-ds-replacer.xml
 
