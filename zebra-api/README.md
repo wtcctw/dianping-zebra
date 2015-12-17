@@ -14,7 +14,7 @@
 
 ## 使用说明
 
-### POM依赖
+### 第一步：添加POM依赖
 
 目前的最新版本为`2.7.9`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
 
@@ -29,19 +29,21 @@
         <version>${version}</version>
     </dependency>
     
-zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载路径中去。确保web.xml中引入以下两个xml文件
+zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载路径中去。确保web.xml中引入额外的spring文件，
 
-	classpath*:config/spring/common/appcontext-ds-monitor.xml 	
 	classpath*:config/spring/common/appcontext-ds-replacer.xml
 
+如果不想引入该文件，也可以自行添加一个spring的Bean。
+
+	<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoReplacer"/>
     
-### 其他依赖说明
+#### 其他依赖说明
 
 * 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`cat-client`到`1.1.3`之上，`dpsf-net`升级到`2.1.21`之上,`lion-client`升级到`0.4.8`之上的版本。
 
-## Spring 配置
+### 第二步：通过Spring方式使用
 
-### 完整连接池配置
+#### 完整连接池配置
 
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
         <!-- 唯一确定数据库的key，请咨询DBA使用哪个key -->
@@ -72,7 +74,7 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 支持c3p0所有数据源配置，而对于tomcat-jdbc，仅支持上述几个连接池大小的配置。
 对于tomcat-jdbc的其他配置，zebra配置了一套默认值。
 
-### 简单连接池配置（部分使用默认配置）
+#### 简化版本连接池配置（使用默认配置）
 
     <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
 		<property name="jdbcRef" value="tuangou2010" /> 
@@ -82,7 +84,7 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
         <property name="forceWriteOnLogin" value="false" />
     </bean>
 
-### 配置说明
+#### 配置说明
 
 其中，`jdbcRef`属性是访问该数据库的key，一般是数据库名的全小写(`大小写敏感`)，`zebra`会自动根据这个key到`Lion`上查找`jdbcUrl`,`user`,`password`,`driverClass`和`C3P0`的参数。业务也可以使用自定义的C3P0参数覆盖掉默认值，具体来说，有以下几种情况：
 
@@ -90,10 +92,10 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 2. C3P0参数值是在`bean`中配置的是`Lion`中key，那么该key的`Lion`值覆盖掉zebra的默认值。而且一旦修改了`Lion`上key的后，该数据源将进行自刷新。
 3. 业务也可以不配置任何C3P0参数，所有参数将直接继承自`jdbcRef`所给出的默认配置。但不推荐这种方式，因为C3P0的配置属于业务方，使用默认配置无法做到业务隔离。
 
-### 事务处理
+#### 事务处理
 `zebra`是一个读写分离的数据源，如果在事务中，那默认所有在事务中的操作均将路由到主库进行操作。
 
-### 特殊配置介绍
+#### 特殊配置介绍
 1.如果业务对主从延迟要求很高，不能容忍一点延迟，比如支付等业务，可以根据需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。一般情况下，除非对主从延迟要求很高，一般应用`不建议`使用该配置。
 
     <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
@@ -116,6 +118,18 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 3.SocketTimeout支持。为了更及时的从数据库故障中恢复，线上将会对所有的jdbcurl的参数加入这个参数，默认值是60000(60秒)。这个的影响是，如果有慢SQL超过了60秒，SQL执行将会失败。所以业务可以在GroupDataSource中设置这个值来覆盖默认值。
 
     <property name="socketTimeout" value="600000"/>
+
+### 第二步（Optional）：直接代码中使用
+		
+		GroupDataSource dataSource = new GroupDataSource("jdbcRef");
+		dataSource.setForceWriteOnLogin(false);
+		
+		//Set other datasource properties if you want
+		
+		dataSource.init();
+		
+		//Now dataSource is ready for use
+    
 
 ### 常见问题
 #### Q：为什么要加`init-method`，不加会怎么样？
