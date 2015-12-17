@@ -7,14 +7,14 @@
 2. 实时响应配置变化，应用自刷新无需重启
 3. 读写分离，支持多种场景的自定义路由策略
 4. 支持分库分表，具体接入请[参考文档](/arch/zebra/blob/master/zebra-api/README_SHARD.md)
-5. 底层多数据源支持：`c3p0`或者`tomcat-jdbc`
+5. 底层多数据源支持:`c3p0`或者`tomcat-jdbc`
 6. 丰富的监控信息在`CAT`上展现
 7. 支持DBA方便的对数据库进行维护，如写库切换，读库上线下线，用户名密码变更等
 8. 支持SQL流控，DBA可以在后台按照比例对指定SQL语句进行限制访问
 
 ## 使用说明
 
-### 第一步：添加POM依赖
+### 第一步:添加POM依赖
 
 目前的最新版本为`2.7.9`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
 
@@ -41,7 +41,7 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 
 * 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`cat-client`到`1.1.3`之上，`dpsf-net`升级到`2.1.21`之上,`lion-client`升级到`0.4.8`之上的版本。
 
-### 第二步：通过Spring方式使用
+### 第二步:通过Spring方式使用
 
 #### 完整连接池配置
 
@@ -119,7 +119,7 @@ zebra-ds-monitor-client还需要额外配置两个xml文件到应用spring加载
 
     <property name="socketTimeout" value="600000"/>
 
-### 第二步（Optional）：直接代码中使用
+### 第二步(Optional):直接代码中使用
 		
 		GroupDataSource dataSource = new GroupDataSource("jdbcRef");
 		dataSource.setForceWriteOnLogin(false);
