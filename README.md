@@ -30,7 +30,7 @@
 	<dependency>
 		<groupId>com.dianping.zebra</groupId>
 		<artifactId>zebra-dao</artifactId>
-		<version>0.1.0</version>
+		<version>0.1.1</version>
 	</dependency>
 	
 
