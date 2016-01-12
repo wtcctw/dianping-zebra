@@ -35,10 +35,14 @@ public class AsyncMapperProxy<T> implements InvocationHandler, Serializable {
 
 			AsyncDaoCallback callback = null;
 			for (Object arg : args) {
-				if (!AsyncDaoCallback.class.isAssignableFrom(arg.getClass())) {
-					newArgs[i++] = arg;
+				if (arg != null) {
+					if (!AsyncDaoCallback.class.isAssignableFrom(arg.getClass())) {
+						newArgs[i++] = arg;
+					} else {
+						callback = (AsyncDaoCallback) arg;
+					}
 				} else {
-					callback = (AsyncDaoCallback) arg;
+					newArgs[i++] = arg;
 				}
 			}
 
@@ -98,9 +102,11 @@ public class AsyncMapperProxy<T> implements InvocationHandler, Serializable {
 
 		int count = 0;
 		for (Object arg : args) {
-			if (AsyncDaoCallback.class.isAssignableFrom(arg.getClass())) {
-				hasAsyncCallback = true;
-				count++;
+			if (arg != null) {
+				if (AsyncDaoCallback.class.isAssignableFrom(arg.getClass())) {
+					hasAsyncCallback = true;
+					count++;
+				}
 			}
 		}
 
