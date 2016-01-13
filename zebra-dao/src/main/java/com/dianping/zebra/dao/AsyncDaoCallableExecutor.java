@@ -22,7 +22,7 @@ public class AsyncDaoCallableExecutor implements Callable<Object> {
 	@Override
 	public Object call() throws Exception {
 		try {
-			DaoContextHolder.setSqlName(method.getName());
+			DaoContextHolder.setSqlName(mapper.getClass().getSimpleName() + "." + method.getName());
 
 			return method.invoke(mapper, args);
 		} finally {

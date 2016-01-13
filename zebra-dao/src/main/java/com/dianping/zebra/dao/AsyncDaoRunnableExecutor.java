@@ -27,7 +27,7 @@ public class AsyncDaoRunnableExecutor<T> implements Runnable {
 		T result = null;
 		boolean success = false;
 		try {
-			DaoContextHolder.setSqlName(method.getName());
+			DaoContextHolder.setSqlName(mapper.getClass().getSimpleName() + "." + method.getName());
 
 			result = (T) method.invoke(mapper, args);
 			success = true;
