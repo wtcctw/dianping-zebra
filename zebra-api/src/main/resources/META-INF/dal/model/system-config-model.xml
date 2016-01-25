@@ -5,10 +5,15 @@
 		<element name="retry-times" value-type="int" primitive="true" default-value="0"/>
 		<entity-ref name="sql-flow-control" type="map"
 			names="sql-flow-controls" method-find-or-create="true" />
+		<entity-ref name="data-center" type="map" names="data-centers" />
 	</entity>
 	<entity name="sql-flow-control">
 		<attribute name="sql-id" value-type="String" key="true" />
 		<attribute name="allow-percent" value-type="int" primitive="true" default-value="100"/>
 		<attribute name="app" value-type="String" />
 	</entity>
+	<entity name="data-center">
+        <attribute name="name" value-type="String" key="true"  />
+        <attribute name="ip-prefix" value-type="String" />
+    </entity>
 </model>

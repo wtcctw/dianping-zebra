@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.group.config.system.entity.DataCenter;
 import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.config.system.transform.DefaultSaxParser;
@@ -43,7 +44,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 			this.systemConfig = initSystemConfig();
 		} catch (Exception e) {
 			throw new IllegalConfigException(String.format(
-			      "Fail to initialize DefaultSystemConfigManager with config file[%s].", DEFAULT_LOCAL_CONFIG), e);
+					"Fail to initialize DefaultSystemConfigManager with config file[%s].", DEFAULT_LOCAL_CONFIG), e);
 		}
 	}
 
@@ -52,8 +53,34 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 
 		config.setRetryTimes(getProperty(getKey(Constants.ELEMENT_RETRY_TIMES), config.getRetryTimes()));
 		buildFlowControl(config);
+		buildDataCenter(config);
 
 		return config;
+	}
+
+	private void buildDataCenter(SystemConfig config) {
+		String dataCenterValue = getProperty(getKey(Constants.ELEMENT_DATA_CENTER), null);
+
+		if (StringUtils.isNotBlank(dataCenterValue)) {
+			logger.info("start to build data centers...");
+
+			String[] kvPairs = dataCenterValue.split(";");
+
+			if (kvPairs != null) {
+				for (String kvPair : kvPairs) {
+					String[] kv = kvPair.split(":");
+
+					if (kv != null && kv.length == 2) {
+						DataCenter dc = new DataCenter(kv[0]);
+
+						dc.setIpPrefix(kv[1]);
+						config.addDataCenter(dc);
+					} else {
+						logger.warn("Data center config format is incompatible = " + kvPair);
+					}
+				}
+			}
+		}
 	}
 
 	private void buildFlowControl(SystemConfig config) {
@@ -74,7 +101,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 						if ("_global_".equalsIgnoreCase(app) || appName.equalsIgnoreCase(app)) {
 							tmpConfig.addSqlFlowControl(sqlFlowControl);
 							logger.info(String.format("get new flow control [ %s : %d ]", sqlFlowControl.getSqlId(),
-							      sqlFlowControl.getAllowPercent()));
+									sqlFlowControl.getAllowPercent()));
 						}
 					}
 				} else {

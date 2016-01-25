@@ -37,7 +37,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 	private SystemConfig systemConfig;
 
 	public LoadBalancedDataSource(Map<String, DataSourceConfig> loadBalancedConfigMap, List<JdbcFilter> filters,
-	      SystemConfig systemConfig) {
+			SystemConfig systemConfig) {
 		this.dataSources = new HashMap<String, SingleDataSource>();
 		this.loadBalancedConfigMap = loadBalancedConfigMap;
 		this.filters = filters;
@@ -114,7 +114,7 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 			try {
 				JdbcDriverClassHelper.loadDriverClass(config.getDriverClass(), config.getJdbcUrl());
 				Connection conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(),
-				      config.getPassword());
+						config.getPassword());
 
 				if (conn != null) {
 					conn.close();
@@ -129,6 +129,6 @@ public class LoadBalancedDataSource extends AbstractDataSource {
 			this.dataSources.put(config.getId(), dataSource);
 		}
 
-		this.router = new RetryConnectDataSourceRouter(loadBalancedConfigMap);
+		this.router = new RetryConnectDataSourceRouter(loadBalancedConfigMap, systemConfig.getDataCenters());
 	}
 }
