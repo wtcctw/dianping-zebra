@@ -39,6 +39,14 @@ public abstract class AbstractDimensionRule implements DimensionRule {
 		}
 	}
 
+	public boolean isMaster() {
+		return isMaster;
+	}
+
+	public boolean needSync() {
+		return needSync;
+	}
+
 	public void setMaster(boolean isMaster) {
 		this.isMaster = isMaster;
 	}

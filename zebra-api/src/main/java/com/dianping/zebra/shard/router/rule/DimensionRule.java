@@ -33,6 +33,10 @@ public interface DimensionRule {
 	 * @return 是否需要继续下一个规则的匹配
 	 */
 	boolean match(ShardMatchContext matchContext);
+
+	boolean isMaster();
+	
+	boolean needSync();
 	
 	Map<String, Set<String>> getAllDBAndTables();
 }
