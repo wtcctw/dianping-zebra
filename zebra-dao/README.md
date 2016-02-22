@@ -20,12 +20,12 @@
 	<dependency>
 		<groupId>com.dianping.zebra</groupId>
 		<artifactId>zebra-api</artifactId>
-		<version>2.7.9</version>
+		<version>2.7.10</version>
 	</dependency>
 	<dependency>
 		<groupId>com.dianping.zebra</groupId>
 		<artifactId>zebra-ds-monitor-client</artifactId>
-		<version>2.7.9</version>
+		<version>2.7.10</version>
 	</dependency>
 	
 	<!--Spring 相关依赖，请指定版本-->

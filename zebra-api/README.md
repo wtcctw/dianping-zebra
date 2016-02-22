@@ -16,7 +16,7 @@
 
 ### 第一步:添加POM依赖
 
-目前的最新版本为`2.7.9`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
+目前的最新版本为`2.7.10`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
 
 	<dependency>
     	<groupId>com.dianping.zebra</groupId>
