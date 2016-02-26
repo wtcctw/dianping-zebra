@@ -99,7 +99,6 @@ public class PageInterceptor implements Interceptor {
 		
 		if(daoName == null){
 			String[] splits = id.split("\\.");
-			
 			int len = splits.length;
 			
 			if(len < 2){
