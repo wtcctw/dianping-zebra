@@ -26,19 +26,21 @@ public class PageTest {
 	private HeartbeatMapper dao;
 
 	@Test
-	public void testPhysicalPageWithPaginate() {
+	public void testPhysicalPageWithPaginate() throws IOException {
 		PageModel paginate = new PageModel(2, 100);
 		dao.getAll(paginate);
 
 		System.out.println(paginate.getRecordCount());
 		Assert.assertEquals(100, paginate.getRecords().size());
+		System.in.read();
 	}
 
 	@Test
-	public void testPhysicalPageWithBound() {
+	public void testPhysicalPageWithBound() throws IOException {
 		List<HeartbeatEntity> rows = dao.getPage(new RowBounds(0, 100));
 
 		System.out.println(rows.size());
+		System.in.read();
 	}
 
 	@Test
@@ -64,7 +66,6 @@ public class PageTest {
 			public void onException(Exception e) {
 			}
 		});
-
 		System.in.read();
 	}
 
