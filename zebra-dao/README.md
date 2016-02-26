@@ -209,7 +209,20 @@ zebra-dao支持同时获得总条数(totalRecord)和数据(records)。配完上�
 
 #### 分页功能的异步支持
 使用RowBounds的方式，对于回调和Future都支持。
-使用PageModel的方式，仅仅支持回调的方式，不支持Future的方式，这是因为该方式强制要求方法没有返回值。
+使用PageModel的方式，仅仅支持回调的方式，不支持Future的方式，这是因为该方式强制要求方法没有返回值。在回调方式使用中，有以下的注意点：
+
+	dao.getAll(model, new AsyncDaoCallback<PageModel>() {
+		@Override
+		public void onSuccess(PageModel pageModel) {
+			//回调传入的pageModel为null，请使用model，因为结果在model中
+			System.out.println(model.getRecordCount());
+			System.out.println(model.getRecords().size());
+		}
+
+		@Override
+		public void onException(Exception e) {
+		}
+	});
 
 ## 监控
 在CAT的heartbeat中，可以看到有关线程池的信息，heartbeat是CAT每分钟的采样，目前对线程池采样了3个指标：
