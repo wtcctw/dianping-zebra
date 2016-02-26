@@ -6,7 +6,6 @@ import java.lang.reflect.Method;
 import java.util.concurrent.Future;
 
 import com.dianping.zebra.dao.annotation.TargetMethod;
-import com.dianping.zebra.group.util.DaoContextHolder;
 
 public class AsyncMapperProxy<T> implements InvocationHandler, Serializable {
 
@@ -57,8 +56,6 @@ public class AsyncMapperProxy<T> implements InvocationHandler, Serializable {
 
 			throw new AsyncDaoException("Cannot find any target method for future method[" + method.getName() + "]");
 		} else {
-			DaoContextHolder.setSqlName(method.getDeclaringClass().getSimpleName() + "." + method.getName());
-
 			return method.invoke(mapper, args);
 		}
 	}
