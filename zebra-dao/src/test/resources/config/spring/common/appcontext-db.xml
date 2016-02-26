@@ -25,6 +25,7 @@
 		<property name="dataSource" ref="zebraDataSource" />
 		<property name="mapperLocations" value="classpath*:config/sqlmap/**/*.xml" />
 		<property name="typeAliasesPackage" value="com.dianping.zebra.dao.entity" />
+		<property name="configLocation" value="classpath:config/mybatis/mybatis-configuration.xml" />
 	</bean>
 
 	<bean id="transactionManager"
