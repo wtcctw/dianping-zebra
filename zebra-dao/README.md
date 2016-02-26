@@ -1,7 +1,7 @@
 # zebra-dao
 
 ## 简介
-`zebra-dao`是在`mybatis`基础上进一步封装的`异步数据源`,它有以下的功能点：
+`zebra-dao`是在`mybatis`基础上进一步封装的`异步数据源`,它的产生背景是公司要求服务完全异步化，一个服务可能包括RPC调用请求、MemCached请求、KV存储请求以及MySQL数据库调用，目前其它三种请求的组件都有异步化的接口，但是数据库调用并没有。所以，在这个情况下，开发了这个异步化的DAO。目前，大众点评内部已有多个业务接入使用，已经接受了线上环境的验证和考验。
 
 1. 实现`回调`和`Future`两种方式的异步dao
 2. 在mybatis基础上支持分页功能
@@ -177,7 +177,7 @@ HeartbeatMapper Java文件是这么定义的，其中`RowBounds`中定义分页�
 	List<HeartbeatEntity> getAll(RowBounds rb);
 	
 #### 物理分页
-理分页指的是在SQL查询过程中实现分页，依托与不同的数据库厂商，实现也会不同。zebra-dao扩展了一个拦截器，实现了改写SQL达到了物理分页的功能。下面举例说明如何使用：
+物理分页指的是在SQL查询过程中实现分页，依托与不同的数据库厂商，实现也会不同。zebra-dao扩展了一个拦截器，实现了改写SQL达到了物理分页的功能。下面举例说明如何使用：
 
 在Spring的配置中修改sqlSessionFactory，添加configLocation
 
