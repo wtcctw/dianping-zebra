@@ -14,7 +14,7 @@
 	<dependency>
 		<groupId>com.dianping.zebra</groupId>
 		<artifactId>zebra-dao</artifactId>
-		<version>0.1.4</version>
+		<version>0.1.5</version>
 	</dependency>
 	
 	<!--Zebra数据源相关依赖，必须要2.7.8以上-->
