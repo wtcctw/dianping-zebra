@@ -32,7 +32,6 @@ public class PageTest {
 
 		System.out.println(paginate.getRecordCount());
 		Assert.assertEquals(100, paginate.getRecords().size());
-		System.in.read();
 	}
 
 	@Test
@@ -40,7 +39,6 @@ public class PageTest {
 		List<HeartbeatEntity> rows = dao.getPage(new RowBounds(0, 100));
 
 		System.out.println(rows.size());
-		System.in.read();
 	}
 
 	@Test

@@ -35,8 +35,8 @@ public class UserDaoTest {
 		user.setTel("123412412");
 		user.setName("peter");
 		user.setRole(1);
-		user.setEmail("hao.zhu@dianping.com");
-		user.setAlias("hao.zhu");
+		user.setEmail("hao.zhu12@dianping.com");
+		user.setAlias("hao.zhu12");
 		
 		int insertUser = dao.insertUser(user);
 		System.out.println(insertUser);
@@ -49,8 +49,8 @@ public class UserDaoTest {
 		user.setTel("123412412");
 		user.setName("peter");
 		user.setRole(1);
-		user.setEmail("hao.zhu@dianping.com");
-		user.setAlias("hao.zhu");
+		user.setEmail("hao.zhu12@dianping.com");
+		user.setAlias("hao.zhu12");
 		
 		System.out.println("before: " + System.currentTimeMillis());
 
@@ -78,8 +78,8 @@ public class UserDaoTest {
 		user.setTel("123412412");
 		user.setName("peter");
 		user.setRole(1);
-		user.setEmail("hao.zhu@dianping.com");
-		user.setAlias("hao.zhu");
+		user.setEmail("hao.zhu12@dianping.com");
+		user.setAlias("hao.zhu12");
 
 		System.out.println("before: " + System.currentTimeMillis());
 
