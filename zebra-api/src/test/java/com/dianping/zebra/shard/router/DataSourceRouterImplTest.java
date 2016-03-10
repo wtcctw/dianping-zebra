@@ -15,6 +15,8 @@ import javax.sql.DataSource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.dianping.zebra.shard.exception.ShardRouterException;
+import com.dianping.zebra.shard.exception.ZebraParseException;
 import com.dianping.zebra.shard.jdbc.MockDataSource;
 
 public class DataSourceRouterImplTest {
@@ -44,7 +46,16 @@ public class DataSourceRouterImplTest {
 	}
 
 	public void baseTest(String sql, List<Object> params) {
-		RouterResult target = router.router(sql, params);
+		RouterResult target = null;
+		try {
+			target = router.router(sql, params);
+		} catch (ShardRouterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ZebraParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		assertNotNull(target);
 		List<RouterTarget> targetedSqls = target.getTargetedSqls();
 		printSql(targetedSqls);
@@ -61,7 +72,16 @@ public class DataSourceRouterImplTest {
 	}
 
 	public void singleTargetTest(String sql, List<Object> params, String targetDs, String targetTable) {
-		RouterResult target = router.router(sql, params);
+		RouterResult target = null;
+		try {
+			target = router.router(sql, params);
+		} catch (ShardRouterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ZebraParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		assertNotNull(target);
 		List<RouterTarget> targetedSqls = target.getTargetedSqls();
 		printSql(targetedSqls);

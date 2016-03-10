@@ -15,18 +15,14 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
-import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.parser.sqlParser.Insert;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author danson.liu
- */
+import com.dianping.zebra.shard.exception.ShardRouterException;
+import com.dianping.zebra.shard.parser.MySQLParserResult;
+
 public class TableShardRule {
 
 	private final String tableName;
@@ -39,9 +35,9 @@ public class TableShardRule {
 		this.tableName = tableName;
 	}
 
-    public List<DimensionRule> getDimensionRules(){
-        return this.rules;
-    }
+	public List<DimensionRule> getDimensionRules() {
+		return this.rules;
+	}
 
 	public void addDimensionRules(List<DimensionRule> dimensionRules) {
 		if (dimensionRules != null) {
@@ -59,9 +55,9 @@ public class TableShardRule {
 		return tableName;
 	}
 
-	public ShardMatchResult eval(DMLCommon dmlSql, List<Object> params) {
-		ShardMatchContext matchContext = new ShardMatchContext(dmlSql, params);
-		
+	public ShardMatchResult eval(MySQLParserResult parseResult, List<Object> params) {
+		ShardMatchContext matchContext = new ShardMatchContext(parseResult, params);
+
 		for (DimensionRule rule : rules) {
 			if (!rule.match(matchContext)) {
 				break;
@@ -69,21 +65,21 @@ public class TableShardRule {
 		}
 
 		afterMatch(matchContext);
-		
+
 		return matchContext.getMatchResult();
 	}
 
 	private void afterMatch(ShardMatchContext matchContext) {
-		DMLCommon dmlSql = matchContext.getDmlSql();
+		MySQLParserResult parseResult = matchContext.getParseResult();
 		ShardMatchResult matchResult = matchContext.getMatchResult();
 		boolean dbAndTbsIsEmpty = matchResult.isDbAndTbsEmpty();
-		
-		if (dmlSql instanceof Insert && dbAndTbsIsEmpty) {
-			throw new ShardRouterException("Insert clause[" + dmlSql + "] can't be routed.");
+
+		if (parseResult.isInsert() && dbAndTbsIsEmpty) {
+			throw new ShardRouterException("Insert clause[" + parseResult + "] can't be routed.");
 		}
-		
+
 		Map<String, Set<String>> potentialDBAndTbs = matchResult.getPotentialDBAndTbs();
-		
+
 		if (potentialDBAndTbs != null && !potentialDBAndTbs.isEmpty()) {
 			if (!matchResult.isDbAndTablesSetted()) {
 				matchResult.addDBAndTables(potentialDBAndTbs);

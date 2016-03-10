@@ -17,9 +17,8 @@ package com.dianping.zebra.shard.router;
 
 import java.util.List;
 
-import com.dianping.zebra.shard.parser.sqlParser.Columns;
-import com.dianping.zebra.shard.parser.sqlParser.DMLCommon;
-import com.dianping.zebra.shard.parser.sqlParser.OrderBy;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
+import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 
 /**
  * @author danson.liu
@@ -30,19 +29,23 @@ public class RouterResult {
 	/**
 	 * 无需考虑skip时的返回值，a: sql中确实没有, b: 只有一条select sql，无需考虑result sets merge
 	 */
-	public static final int NO_SKIP = DMLCommon.DEFAULT_SKIP_MAX;
+	public static final int NO_SKIP = Integer.MIN_VALUE;
 
-	public static final int NO_MAX = DMLCommon.DEFAULT_SKIP_MAX;
+	public static final int NO_MAX = Integer.MAX_VALUE;
 
 	private List<RouterTarget> targetedSqls;
 	
-	private List<OrderBy> orderBys;
+//	private List<OrderBy> orderBys;
 	
 	private int skip = NO_SKIP;
 	
 	private int max = NO_MAX;
 	
-	private Columns columns;
+//	private Columns columns;
+	
+	private List<SQLSelectItem> selectLists;
+	
+	private SQLOrderBy orderBy;
 	
 	/**
 	 * 路由涉及到的拆分表的自增主键名
@@ -65,13 +68,13 @@ public class RouterResult {
 		this.targetedSqls = targetedSqls;
 	}
 
-	public List<OrderBy> getOrderBys() {
-		return orderBys;
-	}
-
-	public void setOrderBys(List<OrderBy> orderBys) {
-		this.orderBys = orderBys;
-	}
+//	public List<OrderBy> getOrderBys() {
+//		return orderBys;
+//	}
+//
+//	public void setOrderBys(List<OrderBy> orderBys) {
+//		this.orderBys = orderBys;
+//	}
 
 	public int getSkip() {
 		return skip;
@@ -88,17 +91,33 @@ public class RouterResult {
 	public void setMax(int max) {
 		this.max = max;
 	}
-
-	public Columns getColumns() {
-		return columns;
-	}
-
-	public void setColumns(Columns columns) {
-		this.columns = columns;
-	}
+//
+//	public Columns getColumns() {
+//		return columns;
+//	}
+//
+//	public void setColumns(Columns columns) {
+//		this.columns = columns;
+//	}
 
 	public List<Object> getNewParams() {
 		return newParams;
+	}
+
+	public List<SQLSelectItem> getSelectLists() {
+		return selectLists;
+	}
+
+	public void setSelectLists(List<SQLSelectItem> selectLists) {
+		this.selectLists = selectLists;
+	}
+
+	public SQLOrderBy getOrderBy() {
+		return orderBy;
+	}
+
+	public void setOrderBy(SQLOrderBy orderBy) {
+		this.orderBy = orderBy;
 	}
 
 	public void setNewParams(List<Object> newParams) {

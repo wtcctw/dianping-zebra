@@ -49,14 +49,20 @@
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
 		</dependency>
+		<!-- TODO: delete it -->
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr</artifactId>
 		</dependency>
+		<!-- TODO: delete it -->
 		<dependency>
-			<!-- TODO: delete it -->
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>1.0.17</version>
 		</dependency>
 
 		<!-- for test -->

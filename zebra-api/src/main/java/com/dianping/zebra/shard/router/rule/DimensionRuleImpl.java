@@ -26,15 +26,10 @@ import java.util.Set;
 
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.parser.sqlParser.Insert;
-import com.dianping.zebra.shard.parser.sqlParser.Select;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 
-/**
- * @author danson.liu
- */
 public class DimensionRuleImpl extends AbstractDimensionRule {
 
 	private String tableName;
@@ -92,8 +87,8 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 
 		for (String shardColumn : shardColumns) {
 			// Insert必须要有主维度，否则这里抛错
-			Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getDmlSql(), tableName, shardColumn,
-					matchContext.getParams());
+			Set<Object> shardColValues = ShardColumnValueUtil.eval(matchContext.getParseResult(), tableName,
+					shardColumn, matchContext.getParams());
 
 			if (shardColumns.size() > 1 && shardColValues.size() > 1) {
 				throw new ShardRouterException("Under multiple shard columns, more than one value for column["
@@ -120,9 +115,9 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 			}
 		}
 
-		boolean isSelect = matchContext.getDmlSql() instanceof Select;
+		boolean isSelect = matchContext.getParseResult().isSelect();
 		if (colValues.isEmpty()) {
-			if (matchContext.getDmlSql() instanceof Insert) {
+			if (matchContext.getParseResult().isInsert()) {
 				throw new ShardRouterException("Router failed since there is no shard column value found.");
 			}
 

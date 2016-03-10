@@ -6,13 +6,15 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.dianping.zebra.shard.exception.ShardRouterException;
+import com.dianping.zebra.shard.exception.ZebraParseException;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
 
 public class LionDataSourceRouterFactoryTest {
 
 	@Test
-	public void test() {
+	public void test() throws ShardRouterException, ZebraParseException {
 		LionDataSourceRouterFactory factory = new LionDataSourceRouterFactory("dppoiuser");
 
 		ShardRouter router = factory.getRouter();

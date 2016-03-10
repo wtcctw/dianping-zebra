@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.jdbc.data.DataPool;
 import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.shard.router.RouterResult;
@@ -667,7 +666,7 @@ public class ShardStatement implements Statement {
 		try {
 			routerTarget = router.router(sql, params);
 			executableCheck(routerTarget);
-		} catch (ShardRouterException e) {
+		} catch (Exception e) {
 			throw new SQLException(e);
 		}
 		
