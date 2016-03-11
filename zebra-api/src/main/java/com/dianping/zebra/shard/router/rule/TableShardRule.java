@@ -21,7 +21,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.parser.MySQLParserResult;
+import com.dianping.zebra.shard.parser.MySQLParseResult;
+import com.dianping.zebra.util.SqlType;
 
 public class TableShardRule {
 
@@ -55,7 +56,7 @@ public class TableShardRule {
 		return tableName;
 	}
 
-	public ShardMatchResult eval(MySQLParserResult parseResult, List<Object> params) {
+	public ShardMatchResult eval(MySQLParseResult parseResult, List<Object> params) {
 		ShardMatchContext matchContext = new ShardMatchContext(parseResult, params);
 
 		for (DimensionRule rule : rules) {
@@ -70,11 +71,11 @@ public class TableShardRule {
 	}
 
 	private void afterMatch(ShardMatchContext matchContext) {
-		MySQLParserResult parseResult = matchContext.getParseResult();
+		MySQLParseResult parseResult = matchContext.getParseResult();
 		ShardMatchResult matchResult = matchContext.getMatchResult();
 		boolean dbAndTbsIsEmpty = matchResult.isDbAndTbsEmpty();
 
-		if (parseResult.isInsert() && dbAndTbsIsEmpty) {
+		if ((parseResult.getType() == SqlType.INSERT) && dbAndTbsIsEmpty) {
 			throw new ShardRouterException("Insert clause[" + parseResult + "] can't be routed.");
 		}
 

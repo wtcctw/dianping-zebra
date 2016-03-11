@@ -27,7 +27,7 @@ import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.exception.ZebraParseException;
 import com.dianping.zebra.shard.parser.DefaultSQLRewrite;
 import com.dianping.zebra.shard.parser.MySQLParser;
-import com.dianping.zebra.shard.parser.MySQLParserResult;
+import com.dianping.zebra.shard.parser.MySQLParseResult;
 import com.dianping.zebra.shard.parser.SQLRewrite;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardMatchResult;
@@ -36,12 +36,12 @@ import com.dianping.zebra.shard.router.rule.TableShardRule;
 /**
  * @author damon.zhu
  */
-public class ShardRouterImpl implements ShardRouter {
+public class DefaultShardRouter implements ShardRouter {
 
 	private RouterRule routerRule;
 
 	private TableShardRuleMarcher tableShardRuleMarcher;
-	
+
 	private SQLRewrite sqlRewrite;
 
 	@Override
@@ -53,7 +53,7 @@ public class ShardRouterImpl implements ShardRouter {
 	public RouterResult router(final String sql, List<Object> params) throws ShardRouterException, ZebraParseException {
 		RouterResult routerResult = new RouterResult();
 
-		MySQLParserResult parseResult = MySQLParser.parse(sql);
+		MySQLParseResult parseResult = MySQLParser.parse(sql);
 
 		// 3. router
 		TableShardRule tableShardRule = tableShardRuleMarcher.march(this.routerRule, parseResult, params);
@@ -63,11 +63,12 @@ public class ShardRouterImpl implements ShardRouter {
 		boolean acrossTable = isCrossTable(shardResult.getDbAndTables());
 
 		routerResult.setAcrossTable(acrossTable);
-		routerResult.setTargetedSqls(createTargetedSqls(shardResult.getDbAndTables(), acrossTable,
-				parseResult, tableShardRule.getTableName()));
+		routerResult.setTargetedSqls(createTargetedSqls(shardResult.getDbAndTables(), acrossTable, parseResult,
+				tableShardRule.getTableName()));
 		routerResult.setNewParams(reconstructParams(params, acrossTable, parseResult, routerResult));
 
-		return enrichRouterResult(routerResult, parseResult, tableShardRule == null ? null : tableShardRule.getGeneratedPK());
+		return enrichRouterResult(routerResult, parseResult,
+				tableShardRule == null ? null : tableShardRule.getGeneratedPK());
 	}
 
 	public void setRouterRule(RouterRule routerRule) {
@@ -82,7 +83,8 @@ public class ShardRouterImpl implements ShardRouter {
 		return false;
 	}
 
-	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable,MySQLParserResult parseResult, String logicTable) {
+	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable,
+			MySQLParseResult parseResult, String logicTable) {
 		List<RouterTarget> result = new ArrayList<RouterTarget>();
 		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
 			RouterTarget targetedSql = new RouterTarget(entry.getKey());
@@ -90,8 +92,9 @@ public class ShardRouterImpl implements ShardRouter {
 			for (String physicalTable : entry.getValue()) {
 				String _sql = sqlRewrite.rewrite(parseResult, physicalTable);
 
-				if (parseResult.getHintComment() != null) {
-					targetedSql.addSql(parseResult.getHintComment() + _sql);
+				String hintComment = parseResult.getRouterContext().getHintComment();
+				if (hintComment != null) {
+					targetedSql.addSql(hintComment + _sql);
 				} else {
 					targetedSql.addSql(_sql);
 				}
@@ -103,19 +106,19 @@ public class ShardRouterImpl implements ShardRouter {
 		return result;
 	}
 
-	private RouterResult enrichRouterResult(RouterResult result, MySQLParserResult parserResult, String generatedPK) {
-		if(result.getSkip() == Integer.MIN_VALUE){
-			result.setSkip(parserResult.getOffset());
+	private RouterResult enrichRouterResult(RouterResult result, MySQLParseResult parserResult, String generatedPK) {
+		if (result.getSkip() == Integer.MIN_VALUE) {
+			result.setSkip(parserResult.getMergeContext().getOffset());
 		}
-		if(result.getMax() == Integer.MAX_VALUE){
-			result.setMax(parserResult.getLimit());
+		if (result.getMax() == Integer.MAX_VALUE) {
+			result.setMax(parserResult.getMergeContext().getLimit());
 		}
-		
+
 		result.setGeneratedPK(generatedPK);
-		result.setOrderBy(parserResult.getOrderBy());
-		result.setSelectLists(parserResult.getSelectLists());
-		result.setGroupBys(parserResult.getGroupByColumns());
-		result.setHasDistinct(parserResult.distinct());
+		result.setOrderBy(parserResult.getMergeContext().getOrderBy());
+		result.setSelectLists(parserResult.getMergeContext().getSelectLists());
+		result.setGroupBys(parserResult.getMergeContext().getGroupByColumns());
+		result.setHasDistinct(parserResult.getMergeContext().isDistinct());
 
 		return result;
 	}
@@ -124,24 +127,33 @@ public class ShardRouterImpl implements ShardRouter {
 		return dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
 	}
 
-	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, MySQLParserResult parseResult,RouterResult rr) {
+	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, MySQLParseResult parseResult,
+			RouterResult rr) {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
-			Limit limitExpr = parseResult.getLimitExpr();
+			Limit limitExpr = parseResult.getMergeContext().getLimitExpr();
 			if (limitExpr != null) {
 				int offset = Integer.MIN_VALUE;
-				if(limitExpr.getOffset() instanceof SQLVariantRefExpr){
-					SQLVariantRefExpr ref = (SQLVariantRefExpr)limitExpr.getOffset();
-					offset = (Integer)newParams.get(ref.getIndex());
-					newParams.set(ref.getIndex(), new Integer(0));//TODO ,improve it ,performance issue
+				if (limitExpr.getOffset() instanceof SQLVariantRefExpr) {
+					SQLVariantRefExpr ref = (SQLVariantRefExpr) limitExpr.getOffset();
+					offset = (Integer) newParams.get(ref.getIndex());
+					newParams.set(ref.getIndex(), new Integer(0));// TODO
+																	// ,improve
+																	// it
+																	// ,performance
+																	// issue
 					rr.setSkip(offset);
 				}
-				
-				if(limitExpr.getRowCount() instanceof SQLVariantRefExpr){
-					SQLVariantRefExpr ref = (SQLVariantRefExpr)limitExpr.getRowCount();
-					int limit = (Integer)newParams.get(ref.getIndex());
-					newParams.set(ref.getIndex(), offset + limit);//TODO ,improve it ,performance issue
+
+				if (limitExpr.getRowCount() instanceof SQLVariantRefExpr) {
+					SQLVariantRefExpr ref = (SQLVariantRefExpr) limitExpr.getRowCount();
+					int limit = (Integer) newParams.get(ref.getIndex());
+					newParams.set(ref.getIndex(), offset + limit);// TODO
+																	// ,improve
+																	// it
+																	// ,performance
+																	// issue
 					rr.setMax(limit);
 				}
 			}

@@ -145,6 +145,7 @@ public class MultiDBLifeCycleTest extends ZebraMultiDBBaseTestCase {
 			Assert.assertEquals(1, rows.size());
 			Assert.assertEquals(89, rows.get(0).intValue());
 		} catch (Exception e) {
+			e.printStackTrace();
 			Assert.fail();
 		} finally {
 			if (conn != null) {

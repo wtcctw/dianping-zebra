@@ -21,45 +21,37 @@ import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 
 /**
- * @author danson.liu
+ * 
+ * @author hao.zhu
  *
  */
 public class RouterResult {
 
-	/**
-	 * 无需考虑skip时的返回值，a: sql中确实没有, b: 只有一条select sql，无需考虑result sets merge
-	 */
 	public static final int NO_SKIP = Integer.MIN_VALUE;
 
 	public static final int NO_MAX = Integer.MAX_VALUE;
 
 	private List<RouterTarget> targetedSqls;
-	
-//	private List<OrderBy> orderBys;
-	
-	private int skip = NO_SKIP;
-	
-	private int max = NO_MAX;
-	
-//	private Columns columns;
-	
-	private List<SQLSelectItem> selectLists;
-	
-	private SQLOrderBy orderBy;
-	
-	/**
-	 * 路由涉及到的拆分表的自增主键名
-	 */
-	private String generatedPK;
-	
-	private boolean acrossTable;
-	
-	private List<String> groupBys;
-	
-	private boolean hasDistinct;
-	
+
 	private List<Object> newParams;
-	
+
+	private int skip = NO_SKIP;
+
+	private int max = NO_MAX;
+
+	private List<SQLSelectItem> selectLists;
+
+	private SQLOrderBy orderBy;
+
+	private String generatedPK;
+
+	private boolean acrossTable;
+
+	private List<String> groupBys;
+
+	private boolean hasDistinct;
+
+
 	public List<RouterTarget> getTargetedSqls() {
 		return targetedSqls;
 	}
@@ -67,14 +59,6 @@ public class RouterResult {
 	public void setTargetedSqls(List<RouterTarget> targetedSqls) {
 		this.targetedSqls = targetedSqls;
 	}
-
-//	public List<OrderBy> getOrderBys() {
-//		return orderBys;
-//	}
-//
-//	public void setOrderBys(List<OrderBy> orderBys) {
-//		this.orderBys = orderBys;
-//	}
 
 	public int getSkip() {
 		return skip;
@@ -91,14 +75,6 @@ public class RouterResult {
 	public void setMax(int max) {
 		this.max = max;
 	}
-//
-//	public Columns getColumns() {
-//		return columns;
-//	}
-//
-//	public void setColumns(Columns columns) {
-//		this.columns = columns;
-//	}
 
 	public List<Object> getNewParams() {
 		return newParams;
@@ -131,7 +107,7 @@ public class RouterResult {
 	public void setGroupBys(List<String> groupBys) {
 		this.groupBys = groupBys;
 	}
-	
+
 	public boolean isAcrossTable() {
 		return acrossTable;
 	}

@@ -30,7 +30,7 @@ public class LionDataSourceRouterFactory extends AbstractDataSourceRouterFactory
 
 	@Override
 	public ShardRouter getRouter() {
-		ShardRouterImpl router = new ShardRouterImpl();
+		DefaultShardRouter router = new DefaultShardRouter();
 		RouterRule routerRule = build(routerConfig);
 		router.setRouterRule(routerRule);
 

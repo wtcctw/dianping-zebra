@@ -29,6 +29,7 @@ import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
+import com.dianping.zebra.util.SqlType;
 
 public class DimensionRuleImpl extends AbstractDimensionRule {
 
@@ -115,9 +116,9 @@ public class DimensionRuleImpl extends AbstractDimensionRule {
 			}
 		}
 
-		boolean isSelect = matchContext.getParseResult().isSelect();
+		boolean isSelect = (matchContext.getParseResult().getType() == SqlType.SELECT);
 		if (colValues.isEmpty()) {
-			if (matchContext.getParseResult().isInsert()) {
+			if (matchContext.getParseResult().getType() == SqlType.INSERT) {
 				throw new ShardRouterException("Router failed since there is no shard column value found.");
 			}
 

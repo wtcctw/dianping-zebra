@@ -10,7 +10,7 @@ import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 public class DefaultSQLRewrite implements SQLRewrite {
 
 	@Override
-	public String rewrite(MySQLParserResult pr, String physicalTableName) {
+	public String rewrite(MySQLParseResult pr, String physicalTableName) {
 		SQLStatement stmt = pr.getStmt();
 
 		StringBuilder out = new StringBuilder();
