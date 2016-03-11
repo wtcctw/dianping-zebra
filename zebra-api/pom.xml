@@ -51,11 +51,6 @@
 		</dependency>
 		<!-- TODO: delete it -->
 		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr</artifactId>
-		</dependency>
-		<!-- TODO: delete it -->
-		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
