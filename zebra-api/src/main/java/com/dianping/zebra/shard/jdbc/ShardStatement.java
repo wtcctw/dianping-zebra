@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.dianping.zebra.shard.jdbc.data.DataPool;
+import com.dianping.zebra.shard.merge.DataPool;
 import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.shard.router.RouterTarget;

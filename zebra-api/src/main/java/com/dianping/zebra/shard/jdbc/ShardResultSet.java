@@ -36,9 +36,9 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.zebra.shard.jdbc.data.DataMerger;
-import com.dianping.zebra.shard.jdbc.data.DataPool;
-import com.dianping.zebra.shard.jdbc.data.DefaultDataMerger;
+import com.dianping.zebra.shard.merge.DataMerger;
+import com.dianping.zebra.shard.merge.DataPool;
+import com.dianping.zebra.shard.merge.DefaultDataMerger;
 import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.util.JDBCUtils;
 

@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.jdbc.data;
+package com.dianping.zebra.shard.merge;
 
 import java.sql.ResultSet;
 import java.sql.RowId;
@@ -38,12 +38,12 @@ import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
-import com.dianping.zebra.shard.jdbc.data.processor.AggregateDataProcessException;
-import com.dianping.zebra.shard.jdbc.data.processor.AggregateDataProcessor;
-import com.dianping.zebra.shard.jdbc.data.processor.CountDataProcessor;
-import com.dianping.zebra.shard.jdbc.data.processor.MaxDataProcessor;
-import com.dianping.zebra.shard.jdbc.data.processor.MinDataProcessor;
-import com.dianping.zebra.shard.jdbc.data.processor.SumDataProcessor;
+import com.dianping.zebra.shard.merge.processor.AggregateDataProcessException;
+import com.dianping.zebra.shard.merge.processor.AggregateDataProcessor;
+import com.dianping.zebra.shard.merge.processor.CountDataProcessor;
+import com.dianping.zebra.shard.merge.processor.MaxDataProcessor;
+import com.dianping.zebra.shard.merge.processor.MinDataProcessor;
+import com.dianping.zebra.shard.merge.processor.SumDataProcessor;
 import com.dianping.zebra.shard.router.RouterResult;
 
 /**
