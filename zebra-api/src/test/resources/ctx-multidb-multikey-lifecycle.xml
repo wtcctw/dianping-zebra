@@ -76,7 +76,7 @@
 			</map>	
 		</property>
 		<property name="routerFactory">
-			<bean class="com.dianping.zebra.shard.router.ClassPathXmlDataSourceRouterFactory">
+			<bean class="com.dianping.zebra.shard.router.XmlResourceRouterFactory">
 				<constructor-arg value="router-rule-multidb-multikey-lifecycle.xml"/>
 			</bean>
 		</property>
