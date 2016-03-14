@@ -85,14 +85,16 @@ public class DefaultDataMerger implements DataMerger {
 			dataPool.setResultSets(actualResultSets);
 			dataPool.setInMemory(false);
 		} else if ((routerTarget.getTargetedSqls().size() > 1
-				|| routerTarget.getTargetedSqls().get(0).getSqls().size() > 1) && (routerTarget.getOrderBy() == null)
-				&& !hasGroupByFunctionColumns(routerTarget) && !routerTarget.isHasDistinct()) {
+				|| routerTarget.getTargetedSqls().get(0).getSqls().size() > 1)
+				&& (routerTarget.getMergeContext().getOrderBy() == null)
+				&& !hasGroupByFunctionColumns(routerTarget.getMergeContext())
+				&& !routerTarget.getMergeContext().isDistinct()) {
 			dataPool.setResultSets(actualResultSets);
 			dataPool.setInMemory(false);
 		} else {
 			dataPool.setInMemory(true);
 			dataPool.setResultSets(actualResultSets);
-			List<RowData> rowDatas = popResultSets(actualResultSets, routerTarget);
+			List<RowData> rowDatas = popResultSets(actualResultSets, routerTarget.getMergeContext());
 
 			if (rowDatas == null || rowDatas.size() == 0) {
 				dataPool.setMemoryData(rowDatas);
@@ -101,25 +103,25 @@ public class DefaultDataMerger implements DataMerger {
 
 			List<RowData> afterDistinctDatas = rowDatas;
 
-			if (routerTarget.isHasDistinct()) {
-				afterDistinctDatas = procDistinct(rowDatas, routerTarget);
+			if (routerTarget.getMergeContext().isDistinct()) {
+				afterDistinctDatas = procDistinct(rowDatas);
 			}
-			List<RowData> afterGroupByDatas = procAggregateFunction(afterDistinctDatas, routerTarget);
+			List<RowData> afterGroupByDatas = procAggregateFunction(afterDistinctDatas, routerTarget.getMergeContext());
 
-			List<RowData> afterOrderByDatas = procOrderBy(afterGroupByDatas, routerTarget);
+			List<RowData> afterOrderByDatas = procOrderBy(afterGroupByDatas, routerTarget.getMergeContext());
 
 			dataPool.setMemoryData(afterOrderByDatas);
 		}
 
 		if (routerTarget.getTargetedSqls().size() > 1 || routerTarget.getTargetedSqls().get(0).getSqls().size() > 1) {
-			dataPool.setMax(routerTarget.getMax());
-			dataPool.setSkip(routerTarget.getSkip());
+			dataPool.setMax(routerTarget.getMergeContext().getLimit());
+			dataPool.setSkip(routerTarget.getMergeContext().getOffset());
 			dataPool.procLimit();
 		}
 
 	}
 
-	private List<RowData> procDistinct(List<RowData> sourceData, RouterResult routerTarget) {
+	private List<RowData> procDistinct(List<RowData> sourceData) {
 		Set<RowData> distinctRowSet = new HashSet<RowData>();
 		for (RowData row : sourceData) {
 			distinctRowSet.add(row);
@@ -127,9 +129,9 @@ public class DefaultDataMerger implements DataMerger {
 		return new ArrayList<RowData>(distinctRowSet);
 	}
 
-	private List<RowData> procOrderBy(List<RowData> sourceData, final RouterResult routerTarget) throws SQLException {
-		if (routerTarget.getOrderBy() != null) {
-			SQLOrderBy orderBy = routerTarget.getOrderBy();
+	private List<RowData> procOrderBy(List<RowData> sourceData, final MergeContext mergeContext) throws SQLException {
+		if (mergeContext.getOrderBy() != null) {
+			SQLOrderBy orderBy = mergeContext.getOrderBy();
 			final List<SQLSelectOrderByItem> items = orderBy.getItems();
 			Collections.sort(sourceData, new Comparator<RowData>() {
 				@Override
@@ -190,18 +192,18 @@ public class DefaultDataMerger implements DataMerger {
 		return sourceData;
 	}
 
-	private List<RowData> procAggregateFunction(List<RowData> sourceData, RouterResult routerTarget)
+	private List<RowData> procAggregateFunction(List<RowData> sourceData, MergeContext mergeContext)
 			throws SQLException {
 		List<RowData> processedDatas = new ArrayList<RowData>();
 
 		// 没有group by并且没有聚合函数，则直接返回源数据
-		if ((routerTarget.getGroupBys() == null || routerTarget.getGroupBys().size() <= 0)
-				&& !hasGroupByFunctionColumns(routerTarget)) {
+		if ((mergeContext.getOrderBy() == null || mergeContext.getGroupByColumns().size() <= 0)
+				&& !hasGroupByFunctionColumns(mergeContext)) {
 			return sourceData;
 		}
 
 		Map<String, SQLSelectItem> columnNameFunctionMapping = new HashMap<String, SQLSelectItem>();
-		for (SQLSelectItem column : routerTarget.getSelectLists()) {
+		for (SQLSelectItem column : mergeContext.getSelectLists()) {
 			String name = null;
 			if (column.getExpr() instanceof SQLAggregateExpr) {
 				SQLAggregateExpr expr = (SQLAggregateExpr) column.getExpr();
@@ -217,7 +219,7 @@ public class DefaultDataMerger implements DataMerger {
 			columnNameFunctionMapping.put(column.getAlias() == null ? name : column.getAlias(), column);
 		}
 
-		if (routerTarget.getGroupBys() == null || routerTarget.getGroupBys().size() <= 0) {
+		if (mergeContext.getGroupByColumns() == null || mergeContext.getGroupByColumns().size() <= 0) {
 			RowData aggregateRow = null;
 			for (RowData row : sourceData) {
 				if (aggregateRow == null) {
@@ -228,18 +230,18 @@ public class DefaultDataMerger implements DataMerger {
 			}
 			processedDatas.add(aggregateRow);
 		} else {
-			procGroupBy(sourceData, routerTarget, processedDatas, columnNameFunctionMapping);
+			procGroupBy(sourceData, mergeContext, processedDatas, columnNameFunctionMapping);
 		}
 
 		return processedDatas;
 	}
 
-	private void procGroupBy(List<RowData> sourceData, RouterResult routerTarget, List<RowData> processedDatas,
+	private void procGroupBy(List<RowData> sourceData, MergeContext mergeContext, List<RowData> processedDatas,
 			Map<String, SQLSelectItem> columnNameFunctionMapping) throws SQLException {
 		// 因为group by后面跟的只能是列名，但是如果select中包含别名，则ColumnData中存放的是别名
 		// 所以先获得列名和别名的map
 		Map<String, String> columnNameAliasMapping = new HashMap<String, String>();
-		for (SQLSelectItem column : routerTarget.getSelectLists()) {
+		for (SQLSelectItem column : mergeContext.getSelectLists()) {
 			// int pos = -1;
 			// String simpleName = ((SQLName)column.getExpr()).getSimpleName();
 			// if ((pos = routerTarget.getGroupBys().indexOf(simpleName)) >= 0)
@@ -264,14 +266,14 @@ public class DefaultDataMerger implements DataMerger {
 		}
 
 		List<Integer> groupByColumnIndexes = new ArrayList<Integer>();
-		for (String columnName : routerTarget.getGroupBys()) {
+		for (String columnName : mergeContext.getGroupByColumns()) {
 			groupByColumnIndexes.add(sourceData.get(0).get(columnNameAliasMapping.containsKey(columnName)
 					? columnNameAliasMapping.get(columnName) : columnName).getColumnIndex());
 		}
 
 		Map<MultiKey, RowData> tmpMap = new LinkedHashMap<MultiKey, RowData>();
 		for (RowData row : sourceData) {
-			List<Object> groupByValues = new ArrayList<Object>(routerTarget.getGroupBys().size());
+			List<Object> groupByValues = new ArrayList<Object>(mergeContext.getGroupByColumns().size());
 
 			for (Integer groupByColIndex : groupByColumnIndexes) {
 				groupByValues.add(row.get(groupByColIndex).getValue());
@@ -318,7 +320,7 @@ public class DefaultDataMerger implements DataMerger {
 		}
 	}
 
-	private List<RowData> popResultSets(List<ResultSet> actualResultSets, RouterResult routerTarget)
+	private List<RowData> popResultSets(List<ResultSet> actualResultSets, MergeContext mergeContext)
 			throws SQLException {
 
 		List<RowData> rows = new ArrayList<RowData>();
@@ -328,7 +330,7 @@ public class DefaultDataMerger implements DataMerger {
 
 				RowData row = new RowData(actualResultSets.get(resultSetIndex));
 
-				for (SQLSelectItem col : routerTarget.getSelectLists()) {
+				for (SQLSelectItem col : mergeContext.getSelectLists()) {
 					String simpleName = null;
 					if (col.getExpr() instanceof SQLIdentifierExpr || col.getExpr() instanceof SQLPropertyExpr) {
 						simpleName = ((SQLName) col.getExpr()).getSimpleName();
@@ -368,8 +370,8 @@ public class DefaultDataMerger implements DataMerger {
 
 	}
 
-	private boolean hasGroupByFunctionColumns(RouterResult routerTarget) {
-		for (SQLSelectItem col : routerTarget.getSelectLists()) {
+	private boolean hasGroupByFunctionColumns(MergeContext mergeContext) {
+		for (SQLSelectItem col : mergeContext.getSelectLists()) {
 			if (col.getExpr() instanceof SQLAggregateExpr) {
 				return true;
 			}

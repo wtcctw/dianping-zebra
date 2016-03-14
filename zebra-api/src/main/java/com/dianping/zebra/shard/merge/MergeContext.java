@@ -8,9 +8,14 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
 
 public class MergeContext {
-	private int offset = Integer.MIN_VALUE;
+	
+	public static final int NO_OFFSET = Integer.MIN_VALUE;
 
-	private int limit = Integer.MAX_VALUE;
+	public static final int NO_LIMIT = Integer.MAX_VALUE;
+	
+	private int offset = NO_OFFSET;
+
+	private int limit = NO_LIMIT;
 
 	private Limit limitExpr;
 

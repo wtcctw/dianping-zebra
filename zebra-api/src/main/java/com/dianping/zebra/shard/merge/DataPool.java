@@ -15,13 +15,23 @@
  */
 package com.dianping.zebra.shard.merge;
 
-import com.dianping.zebra.shard.router.RouterResult;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -57,9 +67,9 @@ public class DataPool {
 
 	private int rowNum = 0;
 
-	private int skip = RouterResult.NO_SKIP;
+	private int skip = MergeContext.NO_OFFSET;
 
-	private int max = RouterResult.NO_MAX;
+	private int max = MergeContext.NO_LIMIT;
 
 	private boolean wasNull = false;
 
@@ -72,7 +82,7 @@ public class DataPool {
 	public boolean next() throws SQLException {
 		rowNum++;
 		if (!inMemory) {
-			if (max != RouterResult.NO_MAX && rowNum > max) {
+			if (max != MergeContext.NO_LIMIT && rowNum > max) {
 				return false;
 			}
 			if (!resultSets.get(resultSetIndex).next()) {
@@ -102,7 +112,8 @@ public class DataPool {
 	}
 
 	/**
-	 * @param skip the skip to set
+	 * @param skip
+	 *            the skip to set
 	 */
 	public void setSkip(int skip) {
 		this.skip = skip;
@@ -116,7 +127,8 @@ public class DataPool {
 	}
 
 	/**
-	 * @param max the max to set
+	 * @param max
+	 *            the max to set
 	 */
 	public void setMax(int max) {
 		this.max = max;
@@ -125,7 +137,8 @@ public class DataPool {
 	/**
 	 * 设定内存数据(<tt>List</tt>)
 	 *
-	 * @param memoryData the memoryData to set
+	 * @param memoryData
+	 *            the memoryData to set
 	 */
 	public void setMemoryData(List<RowData> memoryData) {
 		this.memoryData = memoryData;
@@ -141,14 +154,16 @@ public class DataPool {
 	}
 
 	/**
-	 * @param inMemory the inMemory to set
+	 * @param inMemory
+	 *            the inMemory to set
 	 */
 	public void setInMemory(boolean inMemory) {
 		this.inMemory = inMemory;
 	}
 
 	/**
-	 * @param resultSets the resultSets to set
+	 * @param resultSets
+	 *            the resultSets to set
 	 */
 	public void setResultSets(List<ResultSet> resultSets) {
 		this.resultSets = resultSets;
@@ -163,18 +178,18 @@ public class DataPool {
 	 */
 	public void procLimit() throws SQLException {
 		if (inMemory) {
-			int fromIndex = skip == RouterResult.NO_SKIP ? 0 : skip;
+			int fromIndex = skip == MergeContext.NO_OFFSET ? 0 : skip;
 			if (fromIndex >= memoryData.size()) {
 				this.memoryData = new ArrayList<RowData>();
 				return;
 			}
-			int toIndex = max == RouterResult.NO_MAX ? memoryData.size() : fromIndex + max;
+			int toIndex = max == MergeContext.NO_LIMIT ? memoryData.size() : fromIndex + max;
 			toIndex = toIndex > memoryData.size() ? memoryData.size() : toIndex;
 			List<RowData> subDataList = memoryData.subList(fromIndex, toIndex);
 
 			this.memoryData = new ArrayList<RowData>(subDataList);
 		} else {
-			if (skip != RouterResult.NO_SKIP) {
+			if (skip != MergeContext.NO_OFFSET) {
 				int rowSkipped = 0;
 				for (int i = 0; i < resultSets.size(); i++) {
 					resultSetIndex = i;
@@ -461,7 +476,7 @@ public class DataPool {
 	public Date getDate(int columnIndex, Calendar cal) throws SQLException {
 		if (inMemory) {
 			throw new UnsupportedOperationException(
-				"Zebra unsupport getDate with Calendar in a multi actual datasource query.");
+					"Zebra unsupport getDate with Calendar in a multi actual datasource query.");
 		} else {
 			return resultSets.get(columnIndex).getDate(columnIndex, cal);
 		}
@@ -470,7 +485,7 @@ public class DataPool {
 	public Date getDate(String columnName, Calendar cal) throws SQLException {
 		if (inMemory) {
 			throw new UnsupportedOperationException(
-				"Zebra unsupport getDate with Calendar in a multi actual datasource query.");
+					"Zebra unsupport getDate with Calendar in a multi actual datasource query.");
 		} else {
 			return resultSets.get(resultSetIndex).getDate(columnName, cal);
 		}
@@ -777,7 +792,7 @@ public class DataPool {
 	public Time getTime(int columnIndex, Calendar cal) throws SQLException {
 		if (inMemory) {
 			throw new UnsupportedOperationException(
-				"Zebra unsupport getTime with Calendar in a multi actual datasource query.");
+					"Zebra unsupport getTime with Calendar in a multi actual datasource query.");
 		} else {
 			return resultSets.get(resultSetIndex).getTime(columnIndex, cal);
 		}
@@ -786,7 +801,7 @@ public class DataPool {
 	public Time getTime(String columnName, Calendar cal) throws SQLException {
 		if (inMemory) {
 			throw new UnsupportedOperationException(
-				"Zebra unsupport getTime with Calendar in a multi actual datasource query.");
+					"Zebra unsupport getTime with Calendar in a multi actual datasource query.");
 		} else {
 			return resultSets.get(resultSetIndex).getTime(columnName, cal);
 		}
@@ -813,7 +828,7 @@ public class DataPool {
 	public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
 		if (inMemory) {
 			throw new UnsupportedOperationException(
-				"Zebra unsupport getTimestamp with Calendar in a multi actual datasource query.");
+					"Zebra unsupport getTimestamp with Calendar in a multi actual datasource query.");
 		} else {
 			return resultSets.get(resultSetIndex).getTimestamp(columnIndex, cal);
 		}
@@ -822,7 +837,7 @@ public class DataPool {
 	public Timestamp getTimestamp(String columnName, Calendar cal) throws SQLException {
 		if (inMemory) {
 			throw new UnsupportedOperationException(
-				"Zebra unsupport getTimestamp with Calendar in a multi actual datasource query.");
+					"Zebra unsupport getTimestamp with Calendar in a multi actual datasource query.");
 		} else {
 			return resultSets.get(resultSetIndex).getTimestamp(columnName, cal);
 		}

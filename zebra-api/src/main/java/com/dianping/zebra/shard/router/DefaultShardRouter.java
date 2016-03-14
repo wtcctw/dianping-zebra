@@ -26,8 +26,8 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.L
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.exception.ZebraParseException;
 import com.dianping.zebra.shard.parser.DefaultSQLRewrite;
-import com.dianping.zebra.shard.parser.MySQLParser;
 import com.dianping.zebra.shard.parser.MySQLParseResult;
+import com.dianping.zebra.shard.parser.MySQLParser;
 import com.dianping.zebra.shard.parser.SQLRewrite;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardMatchResult;
@@ -60,15 +60,15 @@ public class DefaultShardRouter implements ShardRouter {
 		ShardMatchResult shardResult = tableShardRule.eval(parseResult, params);
 
 		// 4. re-write target sql & build router result
-		boolean acrossTable = isCrossTable(shardResult.getDbAndTables());
+		// boolean acrossTable = isCrossTable(shardResult.getDbAndTables());
 
-		routerResult.setAcrossTable(acrossTable);
-		routerResult.setTargetedSqls(createTargetedSqls(shardResult.getDbAndTables(), acrossTable, parseResult,
-				tableShardRule.getTableName()));
-		routerResult.setNewParams(reconstructParams(params, acrossTable, parseResult, routerResult));
+		// routerResult.setAcrossTable(acrossTable);
+		routerResult.setMergeContext(parseResult.getMergeContext());
+		routerResult.setTargetedSqls(
+				createTargetedSqls(shardResult.getDbAndTables(), parseResult, tableShardRule.getTableName()));
+		routerResult.setNewParams(reconstructParams(params, parseResult, routerResult));
 
-		return enrichRouterResult(routerResult, parseResult,
-				tableShardRule == null ? null : tableShardRule.getGeneratedPK());
+		return routerResult;
 	}
 
 	public void setRouterRule(RouterRule routerRule) {
@@ -83,8 +83,8 @@ public class DefaultShardRouter implements ShardRouter {
 		return false;
 	}
 
-	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, boolean acrossTable,
-			MySQLParseResult parseResult, String logicTable) {
+	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, MySQLParseResult parseResult,
+			String logicTable) {
 		List<RouterTarget> result = new ArrayList<RouterTarget>();
 		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
 			RouterTarget targetedSql = new RouterTarget(entry.getKey());
@@ -106,29 +106,29 @@ public class DefaultShardRouter implements ShardRouter {
 		return result;
 	}
 
-	private RouterResult enrichRouterResult(RouterResult result, MySQLParseResult parserResult, String generatedPK) {
-		if (result.getSkip() == Integer.MIN_VALUE) {
-			result.setSkip(parserResult.getMergeContext().getOffset());
-		}
-		if (result.getMax() == Integer.MAX_VALUE) {
-			result.setMax(parserResult.getMergeContext().getLimit());
-		}
+//	private RouterResult enrichRouterResult(RouterResult result, MySQLParseResult parserResult, String generatedPK) {
+		// if (result.getSkip() == Integer.MIN_VALUE) {
+		// result.setSkip(parserResult.getMergeContext().getOffset());
+		// }
+		// if (result.getMax() == Integer.MAX_VALUE) {
+		// result.setMax(parserResult.getMergeContext().getLimit());
+		// }
+		//
+		// result.setGeneratedPK(generatedPK);
+		// result.setOrderBy(parserResult.getMergeContext().getOrderBy());
+		// result.setSelectLists(parserResult.getMergeContext().getSelectLists());
+		// result.setGroupBys(parserResult.getMergeContext().getGroupByColumns());
+		// result.setHasDistinct(parserResult.getMergeContext().isDistinct());
+//		result.setMergeContext(parserResult.getMergeContext());
+//
+//		return result;
+//	}
 
-		result.setGeneratedPK(generatedPK);
-		result.setOrderBy(parserResult.getMergeContext().getOrderBy());
-		result.setSelectLists(parserResult.getMergeContext().getSelectLists());
-		result.setGroupBys(parserResult.getMergeContext().getGroupByColumns());
-		result.setHasDistinct(parserResult.getMergeContext().isDistinct());
+//	private boolean isCrossTable(Map<String, Set<String>> dbAndTables) {
+//		return dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
+//	}
 
-		return result;
-	}
-
-	private boolean isCrossTable(Map<String, Set<String>> dbAndTables) {
-		return dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
-	}
-
-	private List<Object> reconstructParams(List<Object> params, boolean acrossTable, MySQLParseResult parseResult,
-			RouterResult rr) {
+	private List<Object> reconstructParams(List<Object> params, MySQLParseResult parseResult, RouterResult rr) {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
@@ -143,7 +143,7 @@ public class DefaultShardRouter implements ShardRouter {
 																	// it
 																	// ,performance
 																	// issue
-					rr.setSkip(offset);
+					rr.getMergeContext().setOffset(offset);
 				}
 
 				if (limitExpr.getRowCount() instanceof SQLVariantRefExpr) {
@@ -154,7 +154,7 @@ public class DefaultShardRouter implements ShardRouter {
 																	// it
 																	// ,performance
 																	// issue
-					rr.setMax(limit);
+					rr.getMergeContext().setLimit(limit);
 				}
 			}
 		}
