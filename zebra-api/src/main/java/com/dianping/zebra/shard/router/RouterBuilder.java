@@ -19,8 +19,8 @@ package com.dianping.zebra.shard.router;
  * @author danson.liu
  *
  */
-public interface RouterFactory {
+public interface RouterBuilder {
 	
-	ShardRouter getRouter();
+	ShardRouter build();
 
 }

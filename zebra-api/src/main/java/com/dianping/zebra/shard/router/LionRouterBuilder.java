@@ -8,10 +8,10 @@ import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.google.gson.Gson;
 
-public class LionRouterFactory extends AbstractRouterFactory implements RouterFactory {
+public class LionRouterBuilder extends AbstractRouterBuilder implements RouterBuilder {
 	private final RouterRuleConfig routerConfig;
 
-	public LionRouterFactory(String ruleName) {
+	public LionRouterBuilder(String ruleName) {
 		LionConfigService configService = LionConfigService.getInstance();
 
 		this.routerConfig = new Gson().fromJson(configService.getProperty(LionKey.getShardConfigKey(ruleName)),
@@ -29,7 +29,7 @@ public class LionRouterFactory extends AbstractRouterFactory implements RouterFa
 	}
 
 	@Override
-	public ShardRouter getRouter() {
+	public ShardRouter build() {
 		DefaultShardRouter router = new DefaultShardRouter();
 		RouterRule routerRule = build(routerConfig);
 		router.setRouterRule(routerRule);

@@ -17,7 +17,7 @@ import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
 import com.dianping.zebra.shard.router.rule.WhitelistDimensionRule;
 
-public abstract class AbstractRouterFactory implements RouterFactory {
+public abstract class AbstractRouterBuilder implements RouterBuilder {
 
 	protected RouterRule build(RouterRuleConfig routerConfig) {
 		RouterRule routerRule = new RouterRule();
