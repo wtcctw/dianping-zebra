@@ -16,7 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.exception.ZebraParseException;
+import com.dianping.zebra.shard.exception.SQLParseException;
 import com.dianping.zebra.shard.jdbc.MockDataSource;
 
 public class DataSourceRouterImplTest {
@@ -52,15 +52,15 @@ public class DataSourceRouterImplTest {
 		} catch (ShardRouterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ZebraParseException e) {
+		} catch (SQLParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		assertNotNull(target);
-		List<RouterTarget> targetedSqls = target.getTargetedSqls();
+		List<RouterTarget> targetedSqls = target.getSqls();
 		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty());
-		assertTrue(!target.getNewParams().isEmpty());
+		assertTrue(!target.getParams().isEmpty());
 	}
 
 	private void printSql(List<RouterTarget> targetedSqls) {
@@ -78,15 +78,15 @@ public class DataSourceRouterImplTest {
 		} catch (ShardRouterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ZebraParseException e) {
+		} catch (SQLParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		assertNotNull(target);
-		List<RouterTarget> targetedSqls = target.getTargetedSqls();
+		List<RouterTarget> targetedSqls = target.getSqls();
 		printSql(targetedSqls);
 		assertTrue(targetedSqls != null && !targetedSqls.isEmpty() && targetedSqls.size() == 1);
-		assertTrue(!target.getNewParams().isEmpty());
+		assertTrue(!target.getParams().isEmpty());
 
 		RouterTarget targetedSql = targetedSqls.get(0);
 		assertTrue(targetedSql.getDataSourceName().equalsIgnoreCase(targetDs)

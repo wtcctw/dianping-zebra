@@ -1,10 +1,10 @@
 package com.dianping.zebra.shard.parser.visitor;
 
-import com.dianping.zebra.shard.parser.MySQLParseResult;
+import com.dianping.zebra.shard.parser.SQLParsedResult;
 
 public class MySQLInsertASTVisitor extends AbstractMySQLASTVisitor {
 
-	public MySQLInsertASTVisitor(MySQLParseResult result) {
+	public MySQLInsertASTVisitor(SQLParsedResult result) {
 		super(result);
 	}
 

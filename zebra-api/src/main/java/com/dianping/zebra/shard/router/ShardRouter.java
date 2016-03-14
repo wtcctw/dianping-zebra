@@ -15,21 +15,19 @@ package com.dianping.zebra.shard.router;
 import java.util.List;
 
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.exception.ZebraParseException;
+import com.dianping.zebra.shard.exception.SQLParseException;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 
 /**
- * 数据源路由
+ * Sharding Router
  *
- * @author damonzhu
+ * @author hao.zhu
  */
 public interface ShardRouter {
 
-	RouterResult router(String sql, List<Object> params) throws  ShardRouterException, ZebraParseException;
+	RouterResult router(String sql, List<Object> params) throws ShardRouterException, SQLParseException;
 
-	// 如果语法错误，则抛出SyntaxException;如果不符合路由策略，则抛出ShardRouterException
-	boolean validate(String sql) throws ZebraParseException, ShardRouterException;
+	boolean validate(String sql) throws SQLParseException, ShardRouterException;
 
 	RouterRule getRouterRule();
-
 }

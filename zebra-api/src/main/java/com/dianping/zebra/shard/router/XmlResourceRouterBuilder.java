@@ -41,10 +41,9 @@ public class XmlResourceRouterBuilder extends AbstractRouterBuilder implements R
 
     @Override
     public ShardRouter build() {
-        DefaultShardRouter router = new DefaultShardRouter();
-        RouterRuleConfig routerConfig = routerConfigLoader.loadConfig(routerRuleFile);
-        RouterRule routerRule = build(routerConfig);
-        router.setRouterRule(routerRule);
-        return router;
+    	RouterRuleConfig routerConfig = routerConfigLoader.loadConfig(routerRuleFile);
+    	RouterRule routerRule = build(routerConfig);
+
+    	return new DefaultShardRouter(routerRule);
     }
 }

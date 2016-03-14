@@ -5,16 +5,16 @@ import java.util.Set;
 
 public class RouterContext {
 	
-	private Set<String> tableSets = new HashSet<String>();
+	private Set<String> tableSet = new HashSet<String>();
 	
 	private String hintComment;
 
-	public Set<String> getTableSets() {
-		return tableSets;
+	public Set<String> getTableSet() {
+		return tableSet;
 	}
 
-	public void setTableSets(Set<String> tableSets) {
-		this.tableSets = tableSets;
+	public void setTableSets(Set<String> tableSet) {
+		this.tableSet = tableSet;
 	}
 
 	public String getHintComment() {

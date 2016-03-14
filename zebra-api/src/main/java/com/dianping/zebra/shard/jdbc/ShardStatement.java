@@ -103,7 +103,7 @@ public class ShardStatement implements Statement {
 		int affectedRows = 0;
 		List<SQLException> exceptions = new ArrayList<SQLException>();
 
-		for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
+		for (RouterTarget targetedSql : routerTarget.getSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
@@ -364,7 +364,7 @@ public class ShardStatement implements Statement {
 
 		List<SQLException> exceptions = new ArrayList<SQLException>();
 
-		for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
+		for (RouterTarget targetedSql : routerTarget.getSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());

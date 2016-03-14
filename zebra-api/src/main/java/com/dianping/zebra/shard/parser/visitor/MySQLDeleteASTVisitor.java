@@ -1,10 +1,10 @@
 package com.dianping.zebra.shard.parser.visitor;
 
-import com.dianping.zebra.shard.parser.MySQLParseResult;
+import com.dianping.zebra.shard.parser.SQLParsedResult;
 
 public class MySQLDeleteASTVisitor extends AbstractMySQLASTVisitor {
 
-	public MySQLDeleteASTVisitor(MySQLParseResult result) {
+	public MySQLDeleteASTVisitor(SQLParsedResult result) {
 		super(result);
 	}
 

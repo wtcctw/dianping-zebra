@@ -24,66 +24,84 @@ import java.util.Set;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.exception.ZebraParseException;
+import com.dianping.zebra.shard.exception.SQLParseException;
 import com.dianping.zebra.shard.parser.DefaultSQLRewrite;
-import com.dianping.zebra.shard.parser.MySQLParseResult;
-import com.dianping.zebra.shard.parser.MySQLParser;
+import com.dianping.zebra.shard.parser.SQLParsedResult;
+import com.dianping.zebra.shard.parser.SQLParser;
 import com.dianping.zebra.shard.parser.SQLRewrite;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardMatchResult;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
 
 /**
- * @author damon.zhu
+ * @author hao.zhu
  */
 public class DefaultShardRouter implements ShardRouter {
 
+	private SQLRewrite sqlRewrite = new DefaultSQLRewrite();
+
 	private RouterRule routerRule;
 
-	private TableShardRuleMarcher tableShardRuleMarcher;
+	public DefaultShardRouter(RouterRule routerRule) {
+		this(routerRule, new DefaultSQLRewrite());
+	}
 
-	private SQLRewrite sqlRewrite;
+	public DefaultShardRouter(RouterRule routerRule, SQLRewrite sqlRewrite) {
+		this.routerRule = routerRule;
+		this.sqlRewrite = sqlRewrite;
+	}
+
+	@Override
+	public RouterResult router(final String sql, List<Object> params) throws ShardRouterException, SQLParseException {
+		RouterResult routerResult = new RouterResult();
+		SQLParsedResult parsedResult = SQLParser.parse(sql);
+
+		TableShardRule tableShardRule = findShardRule(parsedResult.getRouterContext(), params);
+		ShardMatchResult shardResult = tableShardRule.eval(parsedResult, params);
+		
+		routerResult.setMergeContext(parsedResult.getMergeContext());
+		routerResult
+				.setSqls(createTargetedSqls(shardResult.getDbAndTables(), parsedResult, tableShardRule.getTableName()));
+		routerResult.setParams(reconstructParams(params, parsedResult, routerResult));
+
+		return routerResult;
+	}
+
+	@Override
+	public boolean validate(String sql) throws SQLParseException, ShardRouterException {
+		return false;
+	}
 
 	@Override
 	public RouterRule getRouterRule() {
 		return this.routerRule;
 	}
 
-	@Override
-	public RouterResult router(final String sql, List<Object> params) throws ShardRouterException, ZebraParseException {
-		RouterResult routerResult = new RouterResult();
+	public TableShardRule findShardRule(RouterContext context, List<Object> params) throws ShardRouterException {
+		Map<String, TableShardRule> tableShardRules = this.routerRule.getTableShardRules();
+		TableShardRule tableShardRule = null;
 
-		MySQLParseResult parseResult = MySQLParser.parse(sql);
+		int matchedTimes = 0;
+		for (String relatedTable : context.getTableSet()) {
+			TableShardRule tmp = tableShardRules.get(relatedTable);
+			if (tmp != null) {
+				tableShardRule = tmp;
+				matchedTimes++;
+			}
 
-		// 3. router
-		TableShardRule tableShardRule = tableShardRuleMarcher.march(this.routerRule, parseResult, params);
-		ShardMatchResult shardResult = tableShardRule.eval(parseResult, params);
+			if (matchedTimes > 1) {
+				throw new ShardRouterException("More than one table shard rules is not supported now.");
+			}
+		}
 
-		// 4. re-write target sql & build router result
-		// boolean acrossTable = isCrossTable(shardResult.getDbAndTables());
+		if (tableShardRule == null) {
+			throw new ShardRouterException("No table shard rule can be found for table " + context.getTableSet());
+		}
 
-		// routerResult.setAcrossTable(acrossTable);
-		routerResult.setMergeContext(parseResult.getMergeContext());
-		routerResult.setTargetedSqls(
-				createTargetedSqls(shardResult.getDbAndTables(), parseResult, tableShardRule.getTableName()));
-		routerResult.setNewParams(reconstructParams(params, parseResult, routerResult));
-
-		return routerResult;
+		return tableShardRule;
 	}
 
-	public void setRouterRule(RouterRule routerRule) {
-		this.routerRule = routerRule;
-		// TODO improve it
-		this.tableShardRuleMarcher = new DefaultTableShardRuleMarcher();
-		this.sqlRewrite = new DefaultSQLRewrite();
-	}
-
-	@Override
-	public boolean validate(String sql) throws ZebraParseException, ShardRouterException {
-		return false;
-	}
-
-	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, MySQLParseResult parseResult,
+	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, SQLParsedResult parseResult,
 			String logicTable) {
 		List<RouterTarget> result = new ArrayList<RouterTarget>();
 		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
@@ -106,29 +124,7 @@ public class DefaultShardRouter implements ShardRouter {
 		return result;
 	}
 
-//	private RouterResult enrichRouterResult(RouterResult result, MySQLParseResult parserResult, String generatedPK) {
-		// if (result.getSkip() == Integer.MIN_VALUE) {
-		// result.setSkip(parserResult.getMergeContext().getOffset());
-		// }
-		// if (result.getMax() == Integer.MAX_VALUE) {
-		// result.setMax(parserResult.getMergeContext().getLimit());
-		// }
-		//
-		// result.setGeneratedPK(generatedPK);
-		// result.setOrderBy(parserResult.getMergeContext().getOrderBy());
-		// result.setSelectLists(parserResult.getMergeContext().getSelectLists());
-		// result.setGroupBys(parserResult.getMergeContext().getGroupByColumns());
-		// result.setHasDistinct(parserResult.getMergeContext().isDistinct());
-//		result.setMergeContext(parserResult.getMergeContext());
-//
-//		return result;
-//	}
-
-//	private boolean isCrossTable(Map<String, Set<String>> dbAndTables) {
-//		return dbAndTables.size() > 1 || dbAndTables.entrySet().iterator().next().getValue().size() > 1;
-//	}
-
-	private List<Object> reconstructParams(List<Object> params, MySQLParseResult parseResult, RouterResult rr) {
+	private List<Object> reconstructParams(List<Object> params, SQLParsedResult parseResult, RouterResult rr) {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);

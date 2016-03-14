@@ -38,7 +38,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.parser.MySQLParseResult;
+import com.dianping.zebra.shard.parser.SQLParsedResult;
 import com.dianping.zebra.util.SqlType;
 
 /**
@@ -48,7 +48,7 @@ import com.dianping.zebra.util.SqlType;
  */
 public class ShardColumnValueUtil {
 
-	public static Set<Object> eval(MySQLParseResult parseResult, String table, String column, List<Object> params) {
+	public static Set<Object> eval(SQLParsedResult parseResult, String table, String column, List<Object> params) {
 		if (parseResult.getType() == SqlType.INSERT) {
 			return evalInsert(parseResult, column, params);
 		}
@@ -79,7 +79,7 @@ public class ShardColumnValueUtil {
 		return result;
 	}
 
-	private static SQLExpr getWhere(MySQLParseResult parseResult) {
+	private static SQLExpr getWhere(SQLParsedResult parseResult) {
 		SQLExpr expr = null;
 		SQLStatement stmt = parseResult.getStmt();
 
@@ -142,7 +142,7 @@ public class ShardColumnValueUtil {
 		return column.equals(indentifier) || ("`" + column + "`").equals(indentifier);
 	}
 
-	private static Set<Object> evalInsert(MySQLParseResult parseResult, String column, List<Object> params) {
+	private static Set<Object> evalInsert(SQLParsedResult parseResult, String column, List<Object> params) {
 		Set<Object> evalSet = new LinkedHashSet<Object>();
 		MySqlInsertStatement stmt = (MySqlInsertStatement) parseResult.getStmt();
 

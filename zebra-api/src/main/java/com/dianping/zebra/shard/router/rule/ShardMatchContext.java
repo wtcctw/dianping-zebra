@@ -18,11 +18,11 @@ package com.dianping.zebra.shard.router.rule;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.zebra.shard.parser.MySQLParseResult;
+import com.dianping.zebra.shard.parser.SQLParsedResult;
 
 public class ShardMatchContext {
 
-	private final MySQLParseResult parseResult;
+	private final SQLParsedResult parseResult;
 
 	private final List<Object> params;
 
@@ -30,7 +30,7 @@ public class ShardMatchContext {
 
 	private ShardMatchResult matchResult = new ShardMatchResult();
 
-	public ShardMatchContext(MySQLParseResult parseResult, List<Object> params) {
+	public ShardMatchContext(SQLParsedResult parseResult, List<Object> params) {
 		this.parseResult = parseResult;
 		this.params = params;
 	}
@@ -39,7 +39,7 @@ public class ShardMatchContext {
 		return matchResult;
 	}
 
-	public MySQLParseResult getParseResult() {
+	public SQLParsedResult getParseResult() {
 		return parseResult;
 	}
 

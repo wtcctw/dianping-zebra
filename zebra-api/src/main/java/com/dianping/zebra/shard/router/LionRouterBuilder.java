@@ -30,10 +30,7 @@ public class LionRouterBuilder extends AbstractRouterBuilder implements RouterBu
 
 	@Override
 	public ShardRouter build() {
-		DefaultShardRouter router = new DefaultShardRouter();
 		RouterRule routerRule = build(routerConfig);
-		router.setRouterRule(routerRule);
-
-		return router;
+		return new DefaultShardRouter(routerRule);
 	}
 }

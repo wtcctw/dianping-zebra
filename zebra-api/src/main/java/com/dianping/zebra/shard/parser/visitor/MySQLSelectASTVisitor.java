@@ -10,11 +10,11 @@ import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectGroupByClause;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
-import com.dianping.zebra.shard.parser.MySQLParseResult;
+import com.dianping.zebra.shard.parser.SQLParsedResult;
 
 public class MySQLSelectASTVisitor extends AbstractMySQLASTVisitor {
 
-	public MySQLSelectASTVisitor(MySQLParseResult result) {
+	public MySQLSelectASTVisitor(SQLParsedResult result) {
 		super(result);
 	}
 

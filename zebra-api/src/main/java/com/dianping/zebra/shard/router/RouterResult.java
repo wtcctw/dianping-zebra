@@ -26,30 +26,26 @@ import com.dianping.zebra.shard.merge.MergeContext;
  */
 public class RouterResult {
 
-	// public static final int NO_SKIP = Integer.MIN_VALUE;
-	//
-	// public static final int NO_MAX = Integer.MAX_VALUE;
+	private List<RouterTarget> sqls;
 
-	private List<RouterTarget> targetedSqls;
-
-	private List<Object> newParams;
+	private List<Object> params;
 
 	private MergeContext mergeContext;
 
-	public List<RouterTarget> getTargetedSqls() {
-		return targetedSqls;
+	public List<RouterTarget> getSqls() {
+		return sqls;
 	}
 
-	public void setTargetedSqls(List<RouterTarget> targetedSqls) {
-		this.targetedSqls = targetedSqls;
+	public void setSqls(List<RouterTarget> sqls) {
+		this.sqls = sqls;
 	}
 
-	public List<Object> getNewParams() {
-		return newParams;
+	public List<Object> getParams() {
+		return params;
 	}
 
-	public void setNewParams(List<Object> newParams) {
-		this.newParams = newParams;
+	public void setParams(List<Object> newParams) {
+		this.params = newParams;
 	}
 
 	public MergeContext getMergeContext() {
@@ -59,101 +55,4 @@ public class RouterResult {
 	public void setMergeContext(MergeContext mergeContext) {
 		this.mergeContext = mergeContext;
 	}
-
-	// private int skip = NO_SKIP;
-	//
-	// private int max = NO_MAX;
-	//
-	// private List<SQLSelectItem> selectLists;
-	//
-	// private SQLOrderBy orderBy;
-	//
-	// private String generatedPK;
-	//
-	// private boolean acrossTable;
-	//
-	// private List<String> groupBys;
-	//
-	// private boolean hasDistinct;
-	//
-	//
-	// public List<RouterTarget> getTargetedSqls() {
-	// return targetedSqls;
-	// }
-	//
-	// public void setTargetedSqls(List<RouterTarget> targetedSqls) {
-	// this.targetedSqls = targetedSqls;
-	// }
-	//
-	// public int getSkip() {
-	// return skip;
-	// }
-	//
-	// public void setSkip(int skip) {
-	// this.skip = skip;
-	// }
-	//
-	// public int getMax() {
-	// return max;
-	// }
-	//
-	// public void setMax(int max) {
-	// this.max = max;
-	// }
-	//
-	// public List<Object> getNewParams() {
-	// return newParams;
-	// }
-	//
-	// public List<SQLSelectItem> getSelectLists() {
-	// return selectLists;
-	// }
-	//
-	// public void setSelectLists(List<SQLSelectItem> selectLists) {
-	// this.selectLists = selectLists;
-	// }
-	//
-	// public SQLOrderBy getOrderBy() {
-	// return orderBy;
-	// }
-	//
-	// public void setOrderBy(SQLOrderBy orderBy) {
-	// this.orderBy = orderBy;
-	// }
-	//
-	// public void setNewParams(List<Object> newParams) {
-	// this.newParams = newParams;
-	// }
-	//
-	// public List<String> getGroupBys() {
-	// return groupBys;
-	// }
-	//
-	// public void setGroupBys(List<String> groupBys) {
-	// this.groupBys = groupBys;
-	// }
-	//
-	// public boolean isAcrossTable() {
-	// return acrossTable;
-	// }
-	//
-	// public void setAcrossTable(boolean acrossTable) {
-	// this.acrossTable = acrossTable;
-	// }
-	//
-	// public boolean isHasDistinct() {
-	// return hasDistinct;
-	// }
-	//
-	// public void setHasDistinct(boolean hasDistinct) {
-	// this.hasDistinct = hasDistinct;
-	// }
-	//
-	// public String getGeneratedPK() {
-	// return generatedPK;
-	// }
-	//
-	// public void setGeneratedPK(String generatedPK) {
-	// this.generatedPK = generatedPK;
-	// }
 }

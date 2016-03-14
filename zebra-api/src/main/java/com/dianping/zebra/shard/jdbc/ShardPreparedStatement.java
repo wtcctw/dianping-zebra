@@ -171,7 +171,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 
 		RouterResult routerTarget = routingAndCheck(sql, getParams());
 
-		rewriteAndMergeParms(routerTarget.getNewParams());
+		rewriteAndMergeParms(routerTarget.getParams());
 
 		ShardResultSet rs = new ShardResultSet();
 		rs.setStatement(this);
@@ -181,7 +181,7 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 
 		List<SQLException> exceptions = new ArrayList<SQLException>();
 
-		for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
+		for (RouterTarget targetedSql : routerTarget.getSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
@@ -223,12 +223,12 @@ public class ShardPreparedStatement extends ShardStatement implements PreparedSt
 
 		RouterResult routerTarget = routingAndCheck(sql, getParams());
 
-		rewriteAndMergeParms(routerTarget.getNewParams());
+		rewriteAndMergeParms(routerTarget.getParams());
 
 		int affectedRows = 0;
 		List<SQLException> exceptions = new ArrayList<SQLException>();
 
-		for (RouterTarget targetedSql : routerTarget.getTargetedSqls()) {
+		for (RouterTarget targetedSql : routerTarget.getSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
 				try {
 					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());

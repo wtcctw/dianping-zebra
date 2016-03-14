@@ -7,21 +7,21 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.exception.ZebraParseException;
+import com.dianping.zebra.shard.exception.SQLParseException;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
 
 public class LionDataSourceRouterFactoryTest {
 
 	@Test
-	public void test() throws ShardRouterException, ZebraParseException {
+	public void test() throws ShardRouterException, SQLParseException {
 		LionRouterBuilder factory = new LionRouterBuilder("dppoiuser");
 
 		ShardRouter router = factory.build();
 
 		RouterResult router2 = router.router("select * from Users where id = 1", null);
 
-		for (RouterTarget rt : router2.getTargetedSqls()) {
+		for (RouterTarget rt : router2.getSqls()) {
 			System.out.println(rt.getDataSourceName());
 			for (String sql : rt.getSqls()) {
 				System.out.println(sql);

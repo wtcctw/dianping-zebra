@@ -77,15 +77,15 @@ public class DefaultDataMerger implements DataMerger {
 	 */
 	public void merge(DataPool dataPool, RouterResult routerTarget, List<ResultSet> actualResultSets)
 			throws SQLException {
-		if (routerTarget.getTargetedSqls() == null || routerTarget.getTargetedSqls().size() == 0) {
+		if (routerTarget.getSqls() == null || routerTarget.getSqls().size() == 0) {
 			throw new SQLException("Can not proc merge, since no router result.");
 		}
 
-		if (routerTarget.getTargetedSqls().size() == 1 && routerTarget.getTargetedSqls().get(0).getSqls().size() == 1) {
+		if (routerTarget.getSqls().size() == 1 && routerTarget.getSqls().get(0).getSqls().size() == 1) {
 			dataPool.setResultSets(actualResultSets);
 			dataPool.setInMemory(false);
-		} else if ((routerTarget.getTargetedSqls().size() > 1
-				|| routerTarget.getTargetedSqls().get(0).getSqls().size() > 1)
+		} else if ((routerTarget.getSqls().size() > 1
+				|| routerTarget.getSqls().get(0).getSqls().size() > 1)
 				&& (routerTarget.getMergeContext().getOrderBy() == null)
 				&& !hasGroupByFunctionColumns(routerTarget.getMergeContext())
 				&& !routerTarget.getMergeContext().isDistinct()) {
@@ -113,7 +113,7 @@ public class DefaultDataMerger implements DataMerger {
 			dataPool.setMemoryData(afterOrderByDatas);
 		}
 
-		if (routerTarget.getTargetedSqls().size() > 1 || routerTarget.getTargetedSqls().get(0).getSqls().size() > 1) {
+		if (routerTarget.getSqls().size() > 1 || routerTarget.getSqls().get(0).getSqls().size() > 1) {
 			dataPool.setMax(routerTarget.getMergeContext().getLimit());
 			dataPool.setSkip(routerTarget.getMergeContext().getOffset());
 			dataPool.procLimit();
