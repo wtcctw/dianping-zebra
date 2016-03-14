@@ -30,7 +30,7 @@ public class SimpleDataSourceProviderTest {
 	}
 	
 	@Test
-	public void test_rule_parser() throws Exception {
+	public void test_rule_parser_alldb() throws Exception {
 		SimpleDataSourceProvider target = new SimpleDataSourceProvider("UOD_Order","a,b_[2-4]","alldb:[_Operation0,_Operation31]","0");
 	
 		Map<String, Set<String>> allDBAndTables = target.getAllDBAndTables();
@@ -45,5 +45,25 @@ public class SimpleDataSourceProviderTest {
 		Assert.assertTrue(dataSource.getPhysicalTables().contains("UOD_Order_Operation0"));
 		Assert.assertTrue(dataSource.getPhysicalTables().contains("UOD_Order_Operation7"));
 		Assert.assertFalse(dataSource.getPhysicalTables().contains("UOD_Order_Operation8"));
+	}
+	
+	@Test
+	public void test_rule_parser_everydb() throws Exception {
+		SimpleDataSourceProvider target = new SimpleDataSourceProvider("UOD_Order","a,b","everydb:[_Operation0,_Operation7]","0");
+	
+		Map<String, Set<String>> allDBAndTables = target.getAllDBAndTables();
+		Assert.assertEquals(2, allDBAndTables.size());
+		Assert.assertEquals(8, allDBAndTables.get("a").size());
+		Assert.assertEquals(8, allDBAndTables.get("b").size());
+		
+		DataSourceBO dataSource = target.getDataSource(0);
+		Assert.assertEquals(8, dataSource.getPhysicalTables().size());
+		Assert.assertTrue(dataSource.getPhysicalTables().contains("UOD_Order_Operation0"));
+		Assert.assertTrue(dataSource.getPhysicalTables().contains("UOD_Order_Operation7"));
+		
+		dataSource = target.getDataSource(1);
+		Assert.assertEquals(8, dataSource.getPhysicalTables().size());
+		Assert.assertTrue(dataSource.getPhysicalTables().contains("UOD_Order_Operation0"));
+		Assert.assertTrue(dataSource.getPhysicalTables().contains("UOD_Order_Operation7"));
 	}
 }
