@@ -15,7 +15,7 @@ public class LionDataSourceRouterFactoryTest {
 
 	@Test
 	public void test() throws ShardRouterException, ZebraParseException {
-		LionDataSourceRouterFactory factory = new LionDataSourceRouterFactory("dppoiuser");
+		LionRouterFactory factory = new LionRouterFactory("dppoiuser");
 
 		ShardRouter router = factory.getRouter();
 
@@ -31,7 +31,7 @@ public class LionDataSourceRouterFactoryTest {
 
 	@Test
 	public void test1() {
-		LionDataSourceRouterFactory factory = new LionDataSourceRouterFactory("unifiedorder");
+		LionRouterFactory factory = new LionRouterFactory("unifiedorder");
 
 		ShardRouter router = factory.getRouter();
 		Map<String, TableShardRule> tableShardRules = router.getRouterRule().getTableShardRules();

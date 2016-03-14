@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule;
+package com.dianping.zebra.shard.router.rule.datasource;
 
 import com.dianping.zebra.shard.exception.RouterConfigException;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;

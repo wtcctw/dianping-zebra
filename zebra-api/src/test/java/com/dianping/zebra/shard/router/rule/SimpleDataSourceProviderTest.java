@@ -1,19 +1,26 @@
 package com.dianping.zebra.shard.router.rule;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
 
-import junit.framework.Assert;
+import com.dianping.zebra.shard.router.rule.datasource.DataSourceBO;
+import com.dianping.zebra.shard.router.rule.datasource.SimpleDataSourceProvider;
 
-import static org.junit.Assert.assertArrayEquals;
+import junit.framework.Assert;
 
 public class SimpleDataSourceProviderTest {
 	@Test
 	public void test_split_db() throws Exception {
-		SimpleDataSourceProvider target = new SimpleDataSourceProvider();
-		assertArrayEquals(new String[] { "a", "b_2", "b_3", "b_4", "c" }, target.splitDb("a,b_[2-4],c").toArray());
+		SimpleDataSourceProvider target = new SimpleDataSourceProvider("UOD_Order","a,b_[2-4]","alldb:[_Operation0,_Operation31]","0");
+		Set<String> hashSet = new HashSet<String>();
+		hashSet.add("a");
+		hashSet.add("b_2");
+		hashSet.add("b_3");
+		hashSet.add("b_4");
+		Assert.assertEquals(hashSet, target.getAllDBAndTables().keySet());
 	}
 	
 	@Test

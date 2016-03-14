@@ -22,13 +22,13 @@ import com.dianping.zebra.shard.router.rule.RouterRule;
 /**
  * @author danson.liu
  */
-public class ClassPathXmlDataSourceRouterFactory extends AbstractDataSourceRouterFactory implements DataSourceRouterFactory {
+public class XmlResourceRouterFactory extends AbstractRouterFactory implements RouterFactory {
 
     private final String routerRuleFile;
 
     private XmlDataSourceRouterConfigLoader routerConfigLoader = new XmlDataSourceRouterConfigLoader();
 
-    public ClassPathXmlDataSourceRouterFactory(String routerRuleFile) {
+    public XmlResourceRouterFactory(String routerRuleFile) {
         this.routerRuleFile = routerRuleFile;
     }
 

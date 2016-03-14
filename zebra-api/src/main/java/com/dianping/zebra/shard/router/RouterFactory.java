@@ -1,7 +1,7 @@
 /**
  * Project: com.dianping.zebra.zebra-client-0.1.0
  * 
- * File Created at 2011-6-15
+ * File Created at 2011-6-13
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,19 +13,14 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule;
-
-import java.util.Map;
-import java.util.Set;
+package com.dianping.zebra.shard.router;
 
 /**
  * @author danson.liu
  *
  */
-public interface DataSourceProvider {
-
-	DataSourceBO getDataSource(int dbPos);
-
-	Map<String, Set<String>> getAllDBAndTables();
+public interface RouterFactory {
+	
+	ShardRouter getRouter();
 
 }

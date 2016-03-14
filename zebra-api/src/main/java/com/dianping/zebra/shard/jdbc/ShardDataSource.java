@@ -25,8 +25,8 @@ import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.ConfigServiceFactory;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.shard.router.DataSourceRepository;
-import com.dianping.zebra.shard.router.DataSourceRouterFactory;
-import com.dianping.zebra.shard.router.LionDataSourceRouterFactory;
+import com.dianping.zebra.shard.router.RouterFactory;
+import com.dianping.zebra.shard.router.LionRouterFactory;
 import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.util.StringUtils;
 
@@ -41,7 +41,7 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private Map<String, DataSource> dataSourcePool;
 
-	private DataSourceRouterFactory routerFactory;
+	private RouterFactory routerFactory;
 
 	private DataSourceRepository dataSourceRepository;
 
@@ -90,7 +90,7 @@ public class ShardDataSource extends AbstractDataSource {
 			}
 
 			if (routerFactory == null) {
-				routerFactory = new LionDataSourceRouterFactory(ruleName);
+				routerFactory = new LionRouterFactory(ruleName);
 			}
 		} else {
 			if (dataSourcePool == null || dataSourcePool.isEmpty()) {
@@ -133,7 +133,7 @@ public class ShardDataSource extends AbstractDataSource {
 		this.dataSourceRepository = dataSourceRepository;
 	}
 
-	public void setRouterFactory(DataSourceRouterFactory routerFactory) {
+	public void setRouterFactory(RouterFactory routerFactory) {
 		this.routerFactory = routerFactory;
 	}
 
