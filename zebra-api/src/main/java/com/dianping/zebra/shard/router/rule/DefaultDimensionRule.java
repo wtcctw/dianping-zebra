@@ -26,52 +26,41 @@ import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
-import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
-import com.dianping.zebra.shard.router.rule.mapping.DBTablesMapping;
-import com.dianping.zebra.shard.router.rule.mapping.DBTablesMappingManager;
-import com.dianping.zebra.shard.router.rule.mapping.SimpleDBTablesMappingManager;
+import com.dianping.zebra.shard.router.rule.mapping.TableMappingManager;
+import com.dianping.zebra.shard.router.rule.mapping.TableMapping;
+import com.dianping.zebra.shard.router.rule.mapping.SimpleTableMappingManager;
 
+/**
+ * 
+ * @author hao.zhu
+ *
+ */
 public class DefaultDimensionRule extends AbstractDimensionRule {
 
-	private RuleEngine ruleEngine;
+	private RuleEngine dbRuleEngine;
+
+	private RuleEngine tableRuleEngine;
 
 	private List<DimensionRule> whiteListRules;
 
-	private DBTablesMappingManager dataSourceProvider;
+	private TableMappingManager tablesMappingManager;
 
 	private Map<String, Set<String>> allDBAndTables = new HashMap<String, Set<String>>();
 
-	public Map<String, Set<String>> getAllDBAndTables() {
-		return allDBAndTables;
-	}
-
-	public RuleEngine getRuleEngine() {
-		return ruleEngine;
-	}
-
-	public List<DimensionRule> getWhiteListRules() {
-		return whiteListRules;
-	}
-
-	public void init(TableShardDimensionConfig dimensionConfig) {
+	public DefaultDimensionRule(TableShardDimensionConfig dimensionConfig) {
 		this.isMaster = dimensionConfig.isMaster();
 		this.needSync = dimensionConfig.isNeedSync();
-		this.dataSourceProvider = new SimpleDBTablesMappingManager(dimensionConfig.getTableName(),
-				dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix(), dimensionConfig.getTbRule());
-		this.allDBAndTables.putAll(this.dataSourceProvider.getAllMappings());
-
-		for (DimensionRule whiteListRule : this.whiteListRules) {
-			Map<String, Set<String>> whiteListDBAndTables = whiteListRule.getAllDBAndTables();
-			for (Entry<String, Set<String>> allDBAndTable : whiteListDBAndTables.entrySet()) {
-				String db = allDBAndTable.getKey();
-				if (!allDBAndTables.containsKey(db)) {
-					allDBAndTables.put(db, new HashSet<String>());
-				}
-				allDBAndTables.get(db).addAll(allDBAndTable.getValue());
-			}
-		}
-		this.ruleEngine = new GroovyRuleEngine(dimensionConfig.getDbRule());
+		this.tablesMappingManager = new SimpleTableMappingManager(dimensionConfig.getTableName(),
+				dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix());
+		this.allDBAndTables.putAll(this.tablesMappingManager.getAllMappings());
+		this.dbRuleEngine = new GroovyRuleEngine(dimensionConfig.getDbRule());
+		this.tableRuleEngine = new GroovyRuleEngine(dimensionConfig.getTbRule());
 		this.initShardColumn(dimensionConfig.getDbRule());
+	}
+
+	@Override
+	public Map<String, Set<String>> getAllDBAndTables() {
+		return allDBAndTables;
 	}
 
 	@Override
@@ -92,12 +81,12 @@ public class DefaultDimensionRule extends AbstractDimensionRule {
 
 		for (ColumnValue evalContext : matchContext.getColumnValues()) {
 			if (!evalContext.isUsed()) {
-				RuleEngineEvalContext evalCxt = new RuleEngineEvalContext(evalContext.getValue());
 				evalContext.setUsed(true);
 
-				Number dbPos = (Number) ruleEngine.eval(evalCxt);
-				DBTablesMapping dataSource = dataSourceProvider.getMappingByIndex(dbPos.intValue());
-				String table = dataSource.evalTable(evalCxt);
+				Number dbPos = (Number) dbRuleEngine.eval(evalContext.getValue());
+				TableMapping dataSource = tablesMappingManager.getTableMappingByIndex(dbPos.intValue());
+				Number tablePos = (Number) tableRuleEngine.eval(evalContext.getValue());
+				String table = dataSource.getTables().get(tablePos.intValue());
 
 				result.addDbAndTable(dataSource.getDbIndex(), table);
 			}
@@ -106,12 +95,19 @@ public class DefaultDimensionRule extends AbstractDimensionRule {
 		return result;
 	}
 
-	public void setRuleEngine(RuleEngine ruleEngine) {
-		this.ruleEngine = ruleEngine;
-	}
-
-	public void setWhiteListRules(List<DimensionRule> whiteListRules) {
+	public void setExceptionalRules(List<DimensionRule> whiteListRules) {
 		this.whiteListRules = whiteListRules;
+		
+		for (DimensionRule whiteListRule : this.whiteListRules) {
+			Map<String, Set<String>> whiteListDBAndTables = whiteListRule.getAllDBAndTables();
+			for (Entry<String, Set<String>> allDBAndTable : whiteListDBAndTables.entrySet()) {
+				String db = allDBAndTable.getKey();
+				if (!allDBAndTables.containsKey(db)) {
+					allDBAndTables.put(db, new HashSet<String>());
+				}
+				allDBAndTables.get(db).addAll(allDBAndTable.getValue());
+			}
+		}
 	}
 
 	@Override

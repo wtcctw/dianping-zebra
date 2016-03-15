@@ -15,17 +15,20 @@
  */
 package com.dianping.zebra.shard.router.rule.mapping;
 
-import com.dianping.zebra.shard.exception.RouterConfigException;
-import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
-import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
-import com.dianping.zebra.util.StringUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.util.*;
+import com.dianping.zebra.shard.exception.RouterConfigException;
+import com.dianping.zebra.util.StringUtils;
 
 /**
  * @author hao.zhu
  */
-public class SimpleDBTablesMappingManager implements DBTablesMappingManager {
+public class SimpleTableMappingManager implements TableMappingManager {
 
 	public static final String TB_SUFFIX_STYLE_ALL = "alldb";
 
@@ -37,41 +40,36 @@ public class SimpleDBTablesMappingManager implements DBTablesMappingManager {
 
 	private final String tbSuffix;
 
-	private final String tbRule;
+	private List<TableMapping> tableMappings = new ArrayList<TableMapping>();
 
-	private List<DBTablesMapping> dbTablesMappings = new ArrayList<DBTablesMapping>();
-
-	public SimpleDBTablesMappingManager(String tableName, String dbIndexes, String tbSuffix, String tbRule) {
+	public SimpleTableMappingManager(String tableName, String dbIndexes, String tbSuffix) {
 		this.tableName = tableName;
 		this.dbIndexes = dbIndexes;
 		this.tbSuffix = tbSuffix;
-		this.tbRule = tbRule;
 		this.init();
 	}
 
 	private void init() {
 		List<String> dbs = splitDb(dbIndexes);
-		RuleEngine tableRuleEngine = new GroovyRuleEngine(tbRule);
 		for (String db : dbs) {
 			String jdbcRef = db.trim();
 
-			DBTablesMapping mapping = new DBTablesMapping(jdbcRef);
-			mapping.setTableRuleEngine(tableRuleEngine);
-			dbTablesMappings.add(mapping);
+			TableMapping mapping = new TableMapping(jdbcRef);
+			tableMappings.add(mapping);
 		}
 
-		setTables2DataSource(dbTablesMappings);
+		setTables2DataSource(tableMappings);
 	}
 
 	@Override
-	public DBTablesMapping getMappingByIndex(int dbPos) {
-		return dbTablesMappings.get(dbPos);
+	public TableMapping getTableMappingByIndex(int dbPos) {
+		return tableMappings.get(dbPos);
 	}
 
 	@Override
 	public Map<String, Set<String>> getAllMappings() {
 		Map<String, Set<String>> dbAndTables = new HashMap<String, Set<String>>();
-		for (DBTablesMapping dataSourceBO : dbTablesMappings) {
+		for (TableMapping dataSourceBO : tableMappings) {
 			String db = dataSourceBO.getDbIndex();
 			if (!dbAndTables.containsKey(db)) {
 				dbAndTables.put(db, new HashSet<String>());
@@ -104,7 +102,7 @@ public class SimpleDBTablesMappingManager implements DBTablesMappingManager {
 		return result;
 	}
 
-	private void setTables2DataSource(List<DBTablesMapping> dataSourceBOs) {
+	private void setTables2DataSource(List<TableMapping> dataSourceBOs) {
 		String tbSuffixStyle = StringUtils.substringBefore(tbSuffix, ":");
 		String tbSuffixRange = StringUtils.substringAfter(tbSuffix, ":");
 		tbSuffixRange = StringUtils.substringBetween(tbSuffixRange, "[", "]");

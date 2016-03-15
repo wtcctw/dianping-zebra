@@ -20,25 +20,20 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * @author danson.liu
+ * @author hao.zhu
  *
  */
 public interface DimensionRule {
 
-	Pattern RULE_COLUMN_PATTERN = Pattern.compile("#(.+?)#");
+	public static final Pattern RULE_COLUMN_PATTERN = Pattern.compile("#(.+?)#");
 
-	/**
-	 * 
-	 * @param matchContext
-	 * @return 是否需要继续下一个规则的匹配
-	 */
 	ShardEvalResult eval(ShardEvalContext evalContext);
+
+	Map<String, Set<String>> getAllDBAndTables();
+	
+	Set<String> getShardColumns();
 
 	boolean isMaster();
 	
 	boolean needSync();
-	
-	Map<String, Set<String>> getAllDBAndTables();
-	
-	Set<String> getShardColumns();
 }

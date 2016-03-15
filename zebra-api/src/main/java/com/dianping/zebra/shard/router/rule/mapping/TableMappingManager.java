@@ -1,7 +1,7 @@
 /**
  * Project: com.dianping.zebra.zebra-client-0.1.0
  * 
- * File Created at 2011-6-17
+ * File Created at 2011-6-15
  * $Id$
  * 
  * Copyright 2010 dianping.com.
@@ -13,23 +13,19 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule.engine;
+package com.dianping.zebra.shard.router.rule.mapping;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
- * 为了之后的RuleEngine扩展，所以提供该Context类
- * @author danson.liu
+ * @author hao.zhu
+ *
  */
-public class RuleEngineEvalContext {
+public interface TableMappingManager {
 
-	private final Map<String, Object> valMap;
+	TableMapping getTableMappingByIndex(int dbPos);
 
-	public RuleEngineEvalContext(Map<String, Object> valMap) {
-		this.valMap = valMap;
-	}
+	Map<String, Set<String>> getAllMappings();
 
-	public Map<String, Object> getValMap() {
-		return valMap;
-	}
 }

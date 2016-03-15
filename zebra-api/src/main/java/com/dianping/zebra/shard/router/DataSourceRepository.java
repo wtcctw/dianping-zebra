@@ -27,7 +27,7 @@ import javax.sql.DataSource;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.TableShardRule2;
+import com.dianping.zebra.shard.router.rule.TableShardRule;
 import com.dianping.zebra.util.JDBCUtils;
 
 /**
@@ -76,7 +76,7 @@ public class DataSourceRepository {
 	}
 
 	public void init(RouterRule routerRule) {
-		for (TableShardRule2 shardRule : routerRule.getTableShardRules().values()) {
+		for (TableShardRule shardRule : routerRule.getTableShardRules().values()) {
 			for (DimensionRule dimensionRule : shardRule.getDimensionRules()) {
 				for (String jdbcRef : dimensionRule.getAllDBAndTables().keySet()) {
 					if (!dataSources.containsKey(jdbcRef)) {

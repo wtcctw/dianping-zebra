@@ -15,17 +15,32 @@
  */
 package com.dianping.zebra.shard.router.rule.mapping;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author hao.zhu
- *
+ * 
  */
-public interface DBTablesMappingManager {
+public class TableMapping {
 
-	DBTablesMapping getMappingByIndex(int dbPos);
+	private final String dbIndex;
 
-	Map<String, Set<String>> getAllMappings();
+	private final List<String> tables = new ArrayList<String>(32);
 
+	public TableMapping(String dbIndex) {
+		this.dbIndex = dbIndex;
+	}
+
+	public void addTables(String tableName) {
+		this.tables.add(tableName);
+	}
+
+	public List<String> getTables() {
+		return tables;
+	}
+
+	public String getDbIndex() {
+		return dbIndex;
+	}
 }

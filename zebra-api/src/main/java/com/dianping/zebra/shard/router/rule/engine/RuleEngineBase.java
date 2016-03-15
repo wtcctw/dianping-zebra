@@ -11,11 +11,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.zip.CRC32;
 
-/**
- * Dozer @ 2015-02
- * mail@dozer.cc
- * http://www.dozer.cc
- */
 public class RuleEngineBase {
 	public static final int SKIP = -1;
 

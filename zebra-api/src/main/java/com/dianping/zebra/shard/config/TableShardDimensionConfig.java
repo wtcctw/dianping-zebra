@@ -37,7 +37,7 @@ public class TableShardDimensionConfig implements Serializable {
 	
 	private boolean needSync;
 	
-	private List<ExceptionConfig> exceptions;
+	private List<ExceptionalDimensionConfig> exceptionalDimensionConfig;
 
 	private String tableName;
 
@@ -89,12 +89,12 @@ public class TableShardDimensionConfig implements Serializable {
 		this.needSync = needSync;
 	}
 
-	public List<ExceptionConfig> getExceptions() {
-		return exceptions;
+	public List<ExceptionalDimensionConfig> getExceptionalDimensionConfig() {
+		return exceptionalDimensionConfig;
 	}
 
-	public void setExceptions(List<ExceptionConfig> exceptions) {
-		this.exceptions = exceptions;
+	public void setExceptionalDimensionConfig(List<ExceptionalDimensionConfig> exceptions) {
+		this.exceptionalDimensionConfig = exceptions;
 	}
 
 	public void setTableName(String tableName) {

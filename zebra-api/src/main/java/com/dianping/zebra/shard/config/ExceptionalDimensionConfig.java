@@ -17,7 +17,7 @@ package com.dianping.zebra.shard.config;
 
 import java.io.Serializable;
 
-public class ExceptionConfig implements Serializable {
+public class ExceptionalDimensionConfig implements Serializable {
 
 	/**
 	 * 

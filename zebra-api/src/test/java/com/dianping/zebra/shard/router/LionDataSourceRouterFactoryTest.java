@@ -9,7 +9,7 @@ import org.junit.Test;
 import com.dianping.zebra.shard.exception.SQLParseException;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
-import com.dianping.zebra.shard.router.rule.TableShardRule2;
+import com.dianping.zebra.shard.router.rule.TableShardRule;
 
 public class LionDataSourceRouterFactoryTest {
 
@@ -34,10 +34,10 @@ public class LionDataSourceRouterFactoryTest {
 		LionRouterBuilder factory = new LionRouterBuilder("unifiedorder");
 
 		ShardRouter router = factory.build();
-		Map<String, TableShardRule2> tableShardRules = router.getRouterRule().getTableShardRules();
+		Map<String, TableShardRule> tableShardRules = router.getRouterRule().getTableShardRules();
 
-		for (Entry<String, TableShardRule2> entry : tableShardRules.entrySet()) {
-			TableShardRule2 rule = entry.getValue();
+		for (Entry<String, TableShardRule> entry : tableShardRules.entrySet()) {
+			TableShardRule rule = entry.getValue();
 			System.out.println("Logical Table Name : " + entry.getKey());
 
 			for (DimensionRule dimesion : rule.getDimensionRules()) {

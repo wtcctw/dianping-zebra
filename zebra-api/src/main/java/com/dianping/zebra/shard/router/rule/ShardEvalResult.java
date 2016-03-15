@@ -15,8 +15,8 @@ public class ShardEvalResult {
 	public void setDbAndTables(Map<String, Set<String>> dbAndTables) {
 		this.dbAndTables = dbAndTables;
 	}
-	
-	public void addDbAndTable(String dataSource, String table){
+
+	public void addDbAndTable(String dataSource, String table) {
 		if (!dbAndTables.containsKey(dataSource)) {
 			dbAndTables.put(dataSource, new HashSet<String>());
 		}

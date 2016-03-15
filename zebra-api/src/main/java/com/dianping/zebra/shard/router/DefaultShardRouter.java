@@ -32,7 +32,7 @@ import com.dianping.zebra.shard.parser.SQLRewrite;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext;
 import com.dianping.zebra.shard.router.rule.ShardEvalResult;
-import com.dianping.zebra.shard.router.rule.TableShardRule2;
+import com.dianping.zebra.shard.router.rule.TableShardRule;
 
 /**
  * @author hao.zhu
@@ -57,7 +57,7 @@ public class DefaultShardRouter implements ShardRouter {
 		RouterResult routerResult = new RouterResult();
 		SQLParsedResult parsedResult = SQLParser.parse(sql);
 
-		TableShardRule2 tableShardRule = findShardRule(parsedResult.getRouterContext(), params);
+		TableShardRule tableShardRule = findShardRule(parsedResult.getRouterContext(), params);
 		ShardEvalResult shardResult = tableShardRule.eval(new ShardEvalContext(parsedResult, params));
 
 		routerResult.setMergeContext(parsedResult.getMergeContext());
@@ -77,13 +77,13 @@ public class DefaultShardRouter implements ShardRouter {
 		return this.routerRule;
 	}
 
-	private TableShardRule2 findShardRule(RouterContext context, List<Object> params) throws ShardRouterException {
-		Map<String, TableShardRule2> tableShardRules = this.routerRule.getTableShardRules();
-		TableShardRule2 tableShardRule = null;
+	private TableShardRule findShardRule(RouterContext context, List<Object> params) throws ShardRouterException {
+		Map<String, TableShardRule> tableShardRules = this.routerRule.getTableShardRules();
+		TableShardRule tableShardRule = null;
 
 		int matchedTimes = 0;
 		for (String relatedTable : context.getTableSet()) {
-			TableShardRule2 tmp = tableShardRules.get(relatedTable);
+			TableShardRule tmp = tableShardRules.get(relatedTable);
 			if (tmp != null) {
 				tableShardRule = tmp;
 				matchedTimes++;

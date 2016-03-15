@@ -15,12 +15,14 @@
  */
 package com.dianping.zebra.shard.router.rule.engine;
 
+import java.util.Map;
+
 /**
  * @author danson.liu
  *
  */
 public interface RuleEngine {
 
-	Object eval(RuleEngineEvalContext evalContext);
+	Object eval(Map<String, Object> valMap);
 
 }

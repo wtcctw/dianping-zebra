@@ -7,26 +7,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.zebra.shard.config.ExceptionConfig;
+import com.dianping.zebra.shard.config.ExceptionalDimensionConfig;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.router.rule.DefaultDimensionRule;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
 import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.TableShardRule2;
-import com.dianping.zebra.shard.router.rule.WhitelistDimensionRule;
+import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.shard.router.rule.ExceptionalDimensionRule;
 
 public abstract class AbstractRouterBuilder implements RouterBuilder {
 
 	protected RouterRule build(RouterRuleConfig routerConfig) {
 		RouterRule routerRule = new RouterRule();
-		
-		Map<String, TableShardRule2> tableShardRules = new HashMap<String, TableShardRule2>();
+
+		Map<String, TableShardRule> tableShardRules = new HashMap<String, TableShardRule>();
 		for (TableShardRuleConfig ruleConfig : routerConfig.getTableShardConfigs()) {
 			List<TableShardDimensionConfig> dimensionConfigs = ruleConfig.getDimensionConfigs();
 			if (dimensionConfigs != null && !dimensionConfigs.isEmpty()) {
-				TableShardRule2 shardRule = new TableShardRule2(ruleConfig.getTableName());
+				TableShardRule shardRule = new TableShardRule(ruleConfig.getTableName());
 				shardRule.setGeneratedPk(ruleConfig.getGeneratedPK());
 				arrangeDimensionConfigs(dimensionConfigs);
 				for (TableShardDimensionConfig dimensionConfig : dimensionConfigs) {
@@ -54,20 +54,20 @@ public abstract class AbstractRouterBuilder implements RouterBuilder {
 	}
 
 	private DimensionRule buildDimensionRule(TableShardDimensionConfig dimensionConfig) {
-		DefaultDimensionRule rule = new DefaultDimensionRule();
-		rule.setWhiteListRules(buildWhitelistDimensionRules(dimensionConfig.getExceptions(), dimensionConfig.isMaster()));
-		rule.init(dimensionConfig);
+		DefaultDimensionRule rule = new DefaultDimensionRule(dimensionConfig);
+		rule.setExceptionalRules(
+				buildExceptionalRules(dimensionConfig.getExceptionalDimensionConfig(), dimensionConfig.isMaster()));
 
 		return rule;
 	}
 
-	private List<DimensionRule> buildWhitelistDimensionRules(List<ExceptionConfig> exceptions, boolean isMaster) {
+	private List<DimensionRule> buildExceptionalRules(List<ExceptionalDimensionConfig> exceptions, boolean isMaster) {
 		if (exceptions == null || exceptions.isEmpty()) {
 			return Collections.emptyList();
 		}
 		List<DimensionRule> rules = new ArrayList<DimensionRule>();
-		for (ExceptionConfig exception : exceptions) {
-			WhitelistDimensionRule rule = new WhitelistDimensionRule();
+		for (ExceptionalDimensionConfig exception : exceptions) {
+			ExceptionalDimensionRule rule = new ExceptionalDimensionRule();
 			rule.init(exception);
 			rule.setMaster(isMaster);
 			rules.add(rule);

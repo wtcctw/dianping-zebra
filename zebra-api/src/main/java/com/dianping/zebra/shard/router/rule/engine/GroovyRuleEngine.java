@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 /**
- * TODO 对groovy-all jar包进行瘦身，官方没有，自行提出一个groovy-core包
  *
  * @author danson.liu, Dozer
  */
@@ -47,16 +46,16 @@ public class GroovyRuleEngine implements RuleEngine {
 
 	@SuppressWarnings("resource")
 	private static final GroovyObject getGroovyObject(String rule)
-		throws IllegalAccessException, InstantiationException {
+			throws IllegalAccessException, InstantiationException {
 		if (!RULE_CLASS_CACHE.containsKey(rule)) {
 			synchronized (GroovyRuleEngine.class) {
 				if (!RULE_CLASS_CACHE.containsKey(rule)) {
 					Matcher matcher = DimensionRule.RULE_COLUMN_PATTERN.matcher(rule);
 					StringBuilder engineClazzImpl = new StringBuilder(200)
-						.append("class RuleEngineBaseImpl extends " + RuleEngineBase.class.getName() + "{")
-						.append("Object execute(Map context) {").append(matcher.replaceAll("context.get(\"$1\")"))
-						.append("}").append("}");
-               GroovyClassLoader loader = new GroovyClassLoader(AbstractDimensionRule.class.getClassLoader());
+							.append("class RuleEngineBaseImpl extends " + RuleEngineBase.class.getName() + "{")
+							.append("Object execute(Map context) {").append(matcher.replaceAll("context.get(\"$1\")"))
+							.append("}").append("}");
+					GroovyClassLoader loader = new GroovyClassLoader(AbstractDimensionRule.class.getClassLoader());
 					Class<?> engineClazz = loader.parseClass(engineClazzImpl.toString());
 					RULE_CLASS_CACHE.put(rule, engineClazz);
 				}
@@ -66,8 +65,7 @@ public class GroovyRuleEngine implements RuleEngine {
 	}
 
 	@Override
-	public Object eval(RuleEngineEvalContext evalContext) {
-		Map<String, Object> valMap = evalContext.getValMap();
+	public Object eval(Map<String, Object> valMap) {
 		return engineObj.invokeMethod("execute", valMap);
 	}
 }

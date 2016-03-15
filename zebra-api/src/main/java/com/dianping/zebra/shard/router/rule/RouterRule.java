@@ -19,19 +19,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author danson.liu
+ * @author hao.zhu
  *
  */
 public class RouterRule {
 	
-	private Map<String, TableShardRule2> tableShardRules = new HashMap<String, TableShardRule2>();
+	private Map<String, TableShardRule> tableShardRules = new HashMap<String, TableShardRule>();
 
-	public Map<String, TableShardRule2> getTableShardRules() {
+	public Map<String, TableShardRule> getTableShardRules() {
 		return tableShardRules;
 	}
 
-	public void setTableShardRules(Map<String, TableShardRule2> tableShardRules) {
+	public void setTableShardRules(Map<String, TableShardRule> tableShardRules) {
 		this.tableShardRules = tableShardRules;
 	}
-
 }

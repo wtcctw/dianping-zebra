@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 /**
- * @author damon.zhu
+ * @author hao.zhu
  *
  */
 public abstract class AbstractDimensionRule implements DimensionRule {
@@ -39,10 +39,12 @@ public abstract class AbstractDimensionRule implements DimensionRule {
 		}
 	}
 
+	@Override
 	public boolean isMaster() {
 		return isMaster;
 	}
 
+	@Override
 	public boolean needSync() {
 		return needSync;
 	}

@@ -13,7 +13,6 @@ public class ShardEvalContext {
 	private List<ColumnValue> columnValues;
 
 	public ShardEvalContext(SQLParsedResult parseResult, List<Object> params) {
-		super();
 		this.parseResult = parseResult;
 		this.params = params;
 	}

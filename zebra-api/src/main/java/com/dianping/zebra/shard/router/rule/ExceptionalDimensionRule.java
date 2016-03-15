@@ -20,17 +20,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.dianping.zebra.shard.config.ExceptionConfig;
+import com.dianping.zebra.shard.config.ExceptionalDimensionConfig;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
-import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 
 /**
  * @author hao.zhu
  *
  */
-public class WhitelistDimensionRule extends AbstractDimensionRule {
+public class ExceptionalDimensionRule extends AbstractDimensionRule {
 
 	private String dataSource;
 
@@ -38,7 +37,7 @@ public class WhitelistDimensionRule extends AbstractDimensionRule {
 
 	private RuleEngine ruleEngine;
 
-	public void init(ExceptionConfig exceptionConfig) {
+	public void init(ExceptionalDimensionConfig exceptionConfig) {
 		this.dataSource = exceptionConfig.getDb();
 		this.table = exceptionConfig.getTable();
 		String condition = exceptionConfig.getCondition();
@@ -61,7 +60,7 @@ public class WhitelistDimensionRule extends AbstractDimensionRule {
 
 		for (ColumnValue evalContext : ctx.getColumnValues()) {
 			if(!evalContext.isUsed()){
-				if ((Boolean) ruleEngine.eval(new RuleEngineEvalContext(evalContext.getValue()))) {
+				if ((Boolean) ruleEngine.eval(evalContext.getValue())) {
 					result.addDbAndTable(dataSource, table);
 					evalContext.setUsed(true);
 				}

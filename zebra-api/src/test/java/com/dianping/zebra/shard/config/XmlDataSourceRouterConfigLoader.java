@@ -106,17 +106,17 @@ public class XmlDataSourceRouterConfigLoader {
 			if(needSync != null) {
 				dimensionConfig.setNeedSync(Boolean.parseBoolean(needSync));
 			}
-			dimensionConfig.setExceptions(parseExceptionConfigs(dimensionItem));
+			dimensionConfig.setExceptionalDimensionConfig(parseExceptionConfigs(dimensionItem));
 			dimensionConfigs.add(dimensionConfig);
 		}
 		return dimensionConfigs;
 	}
 
-	private List<ExceptionConfig> parseExceptionConfigs(Element dimensionItem) {
-		List<ExceptionConfig> exceptionConfigs = new ArrayList<ExceptionConfig>();
+	private List<ExceptionalDimensionConfig> parseExceptionConfigs(Element dimensionItem) {
+		List<ExceptionalDimensionConfig> exceptionConfigs = new ArrayList<ExceptionalDimensionConfig>();
 		NodeList exceptionNodes = dimensionItem.getElementsByTagName("exception");
 		for (int i = 0; i < exceptionNodes.getLength(); i++) {
-			ExceptionConfig exceptionConfig = new ExceptionConfig();
+			ExceptionalDimensionConfig exceptionConfig = new ExceptionalDimensionConfig();
 			Element exceptionItem = (Element) exceptionNodes.item(i);
 			exceptionConfig.setCondition(exceptionItem.getAttribute("condition"));
 			exceptionConfig.setDb(exceptionItem.getAttribute("db"));
