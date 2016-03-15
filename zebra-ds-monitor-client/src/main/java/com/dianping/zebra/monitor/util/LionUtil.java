@@ -1,10 +1,12 @@
 package com.dianping.zebra.monitor.util;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
+
+import com.dianping.cat.Cat;
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.LionException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.TypedStringValue;
 
 /**
  * Created by Dozer on 8/13/14.
@@ -31,7 +33,12 @@ public final class LionUtil {
 
 	public static String getLionConfig(String key) {
 		try {
-			return ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key);
+			String property = ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).getProperty(key);
+
+			if (property == null) {
+				Cat.logEvent("DAL.NullValueLionKey", key);
+			}
+			return property;
 		} catch (LionException e) {
 			return null;
 		}

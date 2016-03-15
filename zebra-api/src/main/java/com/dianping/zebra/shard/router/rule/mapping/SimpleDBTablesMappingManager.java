@@ -109,28 +109,41 @@ public class SimpleDBTablesMappingManager implements DBTablesMappingManager {
 		String tbSuffixRange = StringUtils.substringAfter(tbSuffix, ":");
 		tbSuffixRange = StringUtils.substringBetween(tbSuffixRange, "[", "]");
 		String[] ranges = tbSuffixRange.split(",");
-		int numPartLen = getNumberPartLength(ranges[1]);
-		int startNumPartLen = getNumberPartLength(ranges[0]);
-		String suffix = getTableSuffix(ranges[0]);
-		int startNum = Integer.parseInt(StringUtils.substring(ranges[0], -1 * startNumPartLen));
-		int endNum = Integer.parseInt(StringUtils.substring(ranges[1], -1 * numPartLen));
-		int dsSize = dataSourceBOs.size();
-		if (TB_SUFFIX_STYLE_ALL.equals(tbSuffixStyle)) {
-			int tableNum = endNum - startNum + 1;
-			int tablesEachDB = (tableNum % dsSize == 0) ? tableNum / dsSize : tableNum / dsSize + 1;
-			for (int i = 0; i < dataSourceBOs.size(); i++) {
-				for (int j = 0; j < tablesEachDB; j++) {
-					dataSourceBOs.get(i).addTables(tableName + suffix + zeroPadding(startNum++, numPartLen));
+		if (ranges.length == 2) {
+			int numPartLen = getNumberPartLength(ranges[1]);
+			int startNumPartLen = getNumberPartLength(ranges[0]);
+			String suffix = getTableSuffix(ranges[0]);
+			int startNum = Integer.parseInt(StringUtils.substring(ranges[0], -1 * startNumPartLen));
+			int endNum = Integer.parseInt(StringUtils.substring(ranges[1], -1 * numPartLen));
+			int dsSize = dataSourceBOs.size();
+			if (TB_SUFFIX_STYLE_ALL.equals(tbSuffixStyle)) {
+				int tableNum = endNum - startNum + 1;
+				int tablesEachDB = (tableNum % dsSize == 0) ? tableNum / dsSize : tableNum / dsSize + 1;
+				for (int i = 0; i < dataSourceBOs.size(); i++) {
+					for (int j = 0; j < tablesEachDB; j++) {
+						dataSourceBOs.get(i).addTables(tableName + suffix + zeroPadding(startNum++, numPartLen));
+					}
 				}
-			}
-		} else if (TB_SUFFIX_STYLE_EVERY.equals(tbSuffixStyle)) {
-			for (int i = 0; i < dataSourceBOs.size(); i++) {
-				for (int j = startNum; j <= endNum; j++) {
-					dataSourceBOs.get(i).addTables(tableName + suffix + zeroPadding(j, numPartLen));
+			} else if (TB_SUFFIX_STYLE_EVERY.equals(tbSuffixStyle)) {
+				for (int i = 0; i < dataSourceBOs.size(); i++) {
+					for (int j = startNum; j <= endNum; j++) {
+						dataSourceBOs.get(i).addTables(tableName + suffix + zeroPadding(j, numPartLen));
+					}
 				}
+			} else {
+				throw new RouterConfigException("TbSuffix property can only be 'alldb' or 'everydb'.");
 			}
 		} else {
-			throw new RouterConfigException("TbSuffix property can only be 'alldb' or 'everydb'.");
+			if (TB_SUFFIX_STYLE_ALL.equals(tbSuffixStyle)) {
+				if (dataSourceBOs.size() > 1) {
+					throw new RouterConfigException("'alldb' cannot support only one table for multiple database");
+				}
+				dataSourceBOs.get(0).addTables(tableName);
+			} else if (TB_SUFFIX_STYLE_EVERY.equals(tbSuffixStyle)) {
+				for (int i = 0; i < dataSourceBOs.size(); i++) {
+					dataSourceBOs.get(i).addTables(tableName);
+				}
+			}
 		}
 	}
 

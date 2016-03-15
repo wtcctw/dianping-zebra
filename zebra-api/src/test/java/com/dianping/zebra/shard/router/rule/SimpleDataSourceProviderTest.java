@@ -23,12 +23,25 @@ public class SimpleDataSourceProviderTest {
 		Assert.assertEquals(hashSet, target.getAllMappings().keySet());
 	}
 	
+	
 	@Test
-	public void test_split_db1() throws Exception {
-		SimpleDBTablesMappingManager target = new SimpleDBTablesMappingManager("UOD_Order","a","alldb:[_Operation,_Operation]","0");
-		Set<String> hashSet = new HashSet<String>();
-		hashSet.add("a");
-		Assert.assertEquals(hashSet, target.getAllMappings().keySet());
+	public void test_split_table1() throws Exception {
+		SimpleDBTablesMappingManager target = new SimpleDBTablesMappingManager("DP_GroupFollowNote","mysqldianpinggroup_dbo","alldb:[]","0");
+	
+		Map<String, Set<String>> allDBAndTables = target.getAllMappings();
+		Assert.assertEquals(1, allDBAndTables.size());
+		Assert.assertEquals(1, allDBAndTables.get("mysqldianpinggroup_dbo").size());
+		Assert.assertEquals(true, allDBAndTables.get("mysqldianpinggroup_dbo").contains("DP_GroupFollowNote"));
+	}
+	
+	@Test
+	public void test_split_table2() throws Exception {
+		SimpleDBTablesMappingManager target = new SimpleDBTablesMappingManager("DP_GroupFollowNote","mysqldianpinggroup_dbo","alldb:[*]","0");
+		
+		Map<String, Set<String>> allDBAndTables = target.getAllMappings();
+		Assert.assertEquals(1, allDBAndTables.size());
+		Assert.assertEquals(1, allDBAndTables.get("mysqldianpinggroup_dbo").size());
+		Assert.assertEquals(true, allDBAndTables.get("mysqldianpinggroup_dbo").contains("DP_GroupFollowNote"));
 	}
 	
 	@Test
