@@ -27,4 +27,13 @@ public class SimpleDataSourceProviderTest {
 		
 		System.out.println(allDBAndTables);
 	}
+	
+	@Test
+	public void test_split_table1() throws Exception {
+		SimpleDataSourceProvider target = new SimpleDataSourceProvider("DP_GroupFollowNote","mysqldianpinggroup_dbo","alldb:[]","0");
+	
+		Map<String, Set<String>> allDBAndTables = target.getAllDBAndTables();
+		
+		System.out.println(allDBAndTables);
+	}
 }
