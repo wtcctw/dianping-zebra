@@ -1,4 +1,4 @@
-package com.dianping.zebra.shard.router;
+package com.dianping.zebra.shard.router.builder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,11 +11,12 @@ import com.dianping.zebra.shard.config.ExceptionalDimensionConfig;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
-import com.dianping.zebra.shard.router.rule.DefaultDimensionRule;
-import com.dianping.zebra.shard.router.rule.DimensionRule;
-import com.dianping.zebra.shard.router.rule.RouterRule;
+import com.dianping.zebra.shard.router.RouterBuilder;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
-import com.dianping.zebra.shard.router.rule.ExceptionalDimensionRule;
+import com.dianping.zebra.shard.router.rule.dimension.DefaultDimensionRule;
+import com.dianping.zebra.shard.router.rule.dimension.DimensionRule;
+import com.dianping.zebra.shard.router.rule.dimension.ExceptionalDimensionRule;
+import com.dianping.zebra.shard.router.rule.RouterRule;
 
 public abstract class AbstractRouterBuilder implements RouterBuilder {
 

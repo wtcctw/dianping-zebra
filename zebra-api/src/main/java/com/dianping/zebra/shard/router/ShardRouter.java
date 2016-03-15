@@ -15,8 +15,8 @@ package com.dianping.zebra.shard.router;
 import java.util.List;
 
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.exception.SQLParseException;
 import com.dianping.zebra.shard.router.rule.RouterRule;
+import com.dianping.zebra.shard.exception.SQLParseException;
 
 /**
  * Sharding Router

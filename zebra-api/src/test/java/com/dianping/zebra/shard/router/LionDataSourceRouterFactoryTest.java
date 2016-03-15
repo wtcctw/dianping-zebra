@@ -8,8 +8,10 @@ import org.junit.Test;
 
 import com.dianping.zebra.shard.exception.SQLParseException;
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.router.rule.DimensionRule;
+import com.dianping.zebra.shard.router.RouterResult.RouterTarget;
+import com.dianping.zebra.shard.router.builder.LionRouterBuilder;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.shard.router.rule.dimension.DimensionRule;
 
 public class LionDataSourceRouterFactoryTest {
 

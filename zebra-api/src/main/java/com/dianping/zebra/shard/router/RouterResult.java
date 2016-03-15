@@ -15,6 +15,7 @@
  */
 package com.dianping.zebra.shard.router;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.dianping.zebra.shard.merge.MergeContext;
@@ -54,5 +55,39 @@ public class RouterResult {
 
 	public void setMergeContext(MergeContext mergeContext) {
 		this.mergeContext = mergeContext;
+	}
+	
+	public static class RouterTarget {
+
+		private String dbIndex;
+
+		private List<String> sqls;
+
+		public RouterTarget(String dbIndex) {
+			this.dbIndex = dbIndex;
+		}
+		
+		public String getDataSourceName() {
+			return dbIndex;
+		}
+
+		public void setDataSourceName(String dbIndex) {
+			this.dbIndex = dbIndex;
+		}
+
+		public List<String> getSqls() {
+			return sqls;
+		}
+
+		public void setSqls(List<String> sqls) {
+			this.sqls = sqls;
+		}
+
+		public void addSql(String sql) {
+			if (this.sqls == null) {
+				this.sqls = new ArrayList<String>();
+			}
+			this.sqls.add(sql);
+		}
 	}
 }

@@ -76,7 +76,7 @@
 			</map>	
 		</property>
 		<property name="routerFactory">
-			<bean class="com.dianping.zebra.shard.router.XmlResourceRouterBuilder">
+			<bean class="com.dianping.zebra.shard.router.builder.XmlResourceRouterBuilder">
 				<constructor-arg value="router-rule-multidb-lifecycle.xml"/>
 			</bean>
 		</property>

@@ -12,8 +12,8 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.util.JDBCUtils;
+import com.dianping.zebra.shard.jdbc.executor.DataSourceRepository;
 import com.dianping.zebra.shard.router.ShardRouter;
 
 import java.sql.*;

@@ -1,10 +1,13 @@
-package com.dianping.zebra.shard.router;
+package com.dianping.zebra.shard.router.builder;
 
 import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.LionKey;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
+import com.dianping.zebra.shard.router.DefaultShardRouter;
+import com.dianping.zebra.shard.router.RouterBuilder;
+import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.google.gson.Gson;
 

@@ -16,8 +16,8 @@
 package com.dianping.zebra.shard.router.rule.engine;
 
 import com.dianping.zebra.shard.exception.RouterConfigException;
-import com.dianping.zebra.shard.router.rule.AbstractDimensionRule;
-import com.dianping.zebra.shard.router.rule.DimensionRule;
+import com.dianping.zebra.shard.router.rule.dimension.AbstractDimensionRule;
+import com.dianping.zebra.shard.router.rule.dimension.DimensionRule;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;

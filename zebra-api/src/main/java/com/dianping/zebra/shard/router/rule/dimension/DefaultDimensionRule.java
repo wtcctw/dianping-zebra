@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule;
+package com.dianping.zebra.shard.router.rule.dimension;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,12 +23,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
+import com.dianping.zebra.shard.router.rule.ShardEvalContext;
+import com.dianping.zebra.shard.router.rule.ShardEvalResult;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
-import com.dianping.zebra.shard.router.rule.mapping.TableMappingManager;
-import com.dianping.zebra.shard.router.rule.mapping.TableMapping;
-import com.dianping.zebra.shard.router.rule.mapping.SimpleTableMappingManager;
+import com.dianping.zebra.shard.router.rule.tableset.TableSets;
+import com.dianping.zebra.shard.router.rule.tableset.TableSetsManager;
+import com.dianping.zebra.shard.router.rule.tableset.DefaultTableSetsManager;
 
 /**
  * 
@@ -43,16 +45,16 @@ public class DefaultDimensionRule extends AbstractDimensionRule {
 
 	private List<DimensionRule> whiteListRules;
 
-	private TableMappingManager tablesMappingManager;
+	private TableSetsManager tablesMappingManager;
 
 	private Map<String, Set<String>> allDBAndTables = new HashMap<String, Set<String>>();
 
 	public DefaultDimensionRule(TableShardDimensionConfig dimensionConfig) {
 		this.isMaster = dimensionConfig.isMaster();
 		this.needSync = dimensionConfig.isNeedSync();
-		this.tablesMappingManager = new SimpleTableMappingManager(dimensionConfig.getTableName(),
+		this.tablesMappingManager = new DefaultTableSetsManager(dimensionConfig.getTableName(),
 				dimensionConfig.getDbIndexes(), dimensionConfig.getTbSuffix());
-		this.allDBAndTables.putAll(this.tablesMappingManager.getAllMappings());
+		this.allDBAndTables.putAll(this.tablesMappingManager.getAllTableSets());
 		this.dbRuleEngine = new GroovyRuleEngine(dimensionConfig.getDbRule());
 		this.tableRuleEngine = new GroovyRuleEngine(dimensionConfig.getTbRule());
 		this.initShardColumn(dimensionConfig.getDbRule());
@@ -84,11 +86,11 @@ public class DefaultDimensionRule extends AbstractDimensionRule {
 				evalContext.setUsed(true);
 
 				Number dbPos = (Number) dbRuleEngine.eval(evalContext.getValue());
-				TableMapping dataSource = tablesMappingManager.getTableMappingByIndex(dbPos.intValue());
+				TableSets tableSet = tablesMappingManager.getTableSetsByPos(dbPos.intValue());
 				Number tablePos = (Number) tableRuleEngine.eval(evalContext.getValue());
-				String table = dataSource.getTables().get(tablePos.intValue());
+				String table = tableSet.getTableSets().get(tablePos.intValue());
 
-				result.addDbAndTable(dataSource.getDbIndex(), table);
+				result.addDbAndTable(tableSet.getDbIndex(), table);
 			}
 		}
 

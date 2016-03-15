@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule.mapping;
+package com.dianping.zebra.shard.router.rule.tableset;
 
 import java.util.Map;
 import java.util.Set;
@@ -22,10 +22,10 @@ import java.util.Set;
  * @author hao.zhu
  *
  */
-public interface TableMappingManager {
+public interface TableSetsManager {
 
-	TableMapping getTableMappingByIndex(int dbPos);
+	TableSets getTableSetsByPos(int dbPos);
 
-	Map<String, Set<String>> getAllMappings();
+	Map<String, Set<String>> getAllTableSets();
 
 }

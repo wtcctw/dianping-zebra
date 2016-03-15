@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule.mapping;
+package com.dianping.zebra.shard.router.rule.tableset;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ import com.dianping.zebra.util.StringUtils;
 /**
  * @author hao.zhu
  */
-public class SimpleTableMappingManager implements TableMappingManager {
+public class DefaultTableSetsManager implements TableSetsManager {
 
 	public static final String TB_SUFFIX_STYLE_ALL = "alldb";
 
@@ -40,9 +40,9 @@ public class SimpleTableMappingManager implements TableMappingManager {
 
 	private final String tbSuffix;
 
-	private List<TableMapping> tableMappings = new ArrayList<TableMapping>();
+	private List<TableSets> tableMappings = new ArrayList<TableSets>();
 
-	public SimpleTableMappingManager(String tableName, String dbIndexes, String tbSuffix) {
+	public DefaultTableSetsManager(String tableName, String dbIndexes, String tbSuffix) {
 		this.tableName = tableName;
 		this.dbIndexes = dbIndexes;
 		this.tbSuffix = tbSuffix;
@@ -54,7 +54,7 @@ public class SimpleTableMappingManager implements TableMappingManager {
 		for (String db : dbs) {
 			String jdbcRef = db.trim();
 
-			TableMapping mapping = new TableMapping(jdbcRef);
+			TableSets mapping = new TableSets(jdbcRef);
 			tableMappings.add(mapping);
 		}
 
@@ -62,20 +62,20 @@ public class SimpleTableMappingManager implements TableMappingManager {
 	}
 
 	@Override
-	public TableMapping getTableMappingByIndex(int dbPos) {
+	public TableSets getTableSetsByPos(int dbPos) {
 		return tableMappings.get(dbPos);
 	}
 
 	@Override
-	public Map<String, Set<String>> getAllMappings() {
+	public Map<String, Set<String>> getAllTableSets() {
 		Map<String, Set<String>> dbAndTables = new HashMap<String, Set<String>>();
-		for (TableMapping dataSourceBO : tableMappings) {
+		for (TableSets dataSourceBO : tableMappings) {
 			String db = dataSourceBO.getDbIndex();
 			if (!dbAndTables.containsKey(db)) {
 				dbAndTables.put(db, new HashSet<String>());
 			}
 			Set<String> tableSet = dbAndTables.get(db);
-			for (String physicalTable : dataSourceBO.getTables()) {
+			for (String physicalTable : dataSourceBO.getTableSets()) {
 				tableSet.add(physicalTable);
 			}
 		}
@@ -102,7 +102,7 @@ public class SimpleTableMappingManager implements TableMappingManager {
 		return result;
 	}
 
-	private void setTables2DataSource(List<TableMapping> dataSourceBOs) {
+	private void setTables2DataSource(List<TableSets> dataSourceBOs) {
 		String tbSuffixStyle = StringUtils.substringBefore(tbSuffix, ":");
 		String tbSuffixRange = StringUtils.substringAfter(tbSuffix, ":");
 		tbSuffixRange = StringUtils.substringBetween(tbSuffixRange, "[", "]");
@@ -119,13 +119,13 @@ public class SimpleTableMappingManager implements TableMappingManager {
 				int tablesEachDB = (tableNum % dsSize == 0) ? tableNum / dsSize : tableNum / dsSize + 1;
 				for (int i = 0; i < dataSourceBOs.size(); i++) {
 					for (int j = 0; j < tablesEachDB; j++) {
-						dataSourceBOs.get(i).addTables(tableName + suffix + zeroPadding(startNum++, numPartLen));
+						dataSourceBOs.get(i).addIntoTableSets(tableName + suffix + zeroPadding(startNum++, numPartLen));
 					}
 				}
 			} else if (TB_SUFFIX_STYLE_EVERY.equals(tbSuffixStyle)) {
 				for (int i = 0; i < dataSourceBOs.size(); i++) {
 					for (int j = startNum; j <= endNum; j++) {
-						dataSourceBOs.get(i).addTables(tableName + suffix + zeroPadding(j, numPartLen));
+						dataSourceBOs.get(i).addIntoTableSets(tableName + suffix + zeroPadding(j, numPartLen));
 					}
 				}
 			} else {
@@ -136,10 +136,10 @@ public class SimpleTableMappingManager implements TableMappingManager {
 				if (dataSourceBOs.size() > 1) {
 					throw new RouterConfigException("'alldb' cannot support only one table for multiple database");
 				}
-				dataSourceBOs.get(0).addTables(tableName);
+				dataSourceBOs.get(0).addIntoTableSets(tableName);
 			} else if (TB_SUFFIX_STYLE_EVERY.equals(tbSuffixStyle)) {
 				for (int i = 0; i < dataSourceBOs.size(); i++) {
-					dataSourceBOs.get(i).addTables(tableName);
+					dataSourceBOs.get(i).addIntoTableSets(tableName);
 				}
 			}
 		}

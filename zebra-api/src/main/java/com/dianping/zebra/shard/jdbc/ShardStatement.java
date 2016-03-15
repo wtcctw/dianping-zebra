@@ -22,10 +22,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.dianping.zebra.shard.jdbc.executor.DataSourceRepository;
 import com.dianping.zebra.shard.merge.DataPool;
-import com.dianping.zebra.shard.router.DataSourceRepository;
 import com.dianping.zebra.shard.router.RouterResult;
-import com.dianping.zebra.shard.router.RouterTarget;
+import com.dianping.zebra.shard.router.RouterResult.RouterTarget;
 import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.SqlType;

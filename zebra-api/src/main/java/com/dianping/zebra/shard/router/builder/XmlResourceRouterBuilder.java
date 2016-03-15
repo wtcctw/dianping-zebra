@@ -13,10 +13,13 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router;
+package com.dianping.zebra.shard.router.builder;
 
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.XmlDataSourceRouterConfigLoader;
+import com.dianping.zebra.shard.router.DefaultShardRouter;
+import com.dianping.zebra.shard.router.RouterBuilder;
+import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 
 /**

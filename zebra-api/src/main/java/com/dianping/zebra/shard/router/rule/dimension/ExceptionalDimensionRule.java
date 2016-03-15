@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule;
+package com.dianping.zebra.shard.router.rule.dimension;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.dianping.zebra.shard.config.ExceptionalDimensionConfig;
+import com.dianping.zebra.shard.router.rule.ShardEvalContext;
+import com.dianping.zebra.shard.router.rule.ShardEvalResult;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;

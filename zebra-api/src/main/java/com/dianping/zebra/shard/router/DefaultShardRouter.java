@@ -29,6 +29,7 @@ import com.dianping.zebra.shard.parser.DefaultSQLRewrite;
 import com.dianping.zebra.shard.parser.SQLParsedResult;
 import com.dianping.zebra.shard.parser.SQLParser;
 import com.dianping.zebra.shard.parser.SQLRewrite;
+import com.dianping.zebra.shard.router.RouterResult.RouterTarget;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext;
 import com.dianping.zebra.shard.router.rule.ShardEvalResult;

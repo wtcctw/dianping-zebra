@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router;
+package com.dianping.zebra.shard.jdbc.executor;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,9 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.shard.router.rule.DimensionRule;
 import com.dianping.zebra.shard.router.rule.RouterRule;
 import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.shard.router.rule.dimension.DimensionRule;
 import com.dianping.zebra.util.JDBCUtils;
 
 /**

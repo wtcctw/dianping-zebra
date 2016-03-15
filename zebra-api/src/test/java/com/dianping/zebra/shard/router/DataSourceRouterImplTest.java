@@ -15,9 +15,12 @@ import javax.sql.DataSource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.jdbc.MockDataSource;
+import com.dianping.zebra.shard.jdbc.executor.DataSourceRepository;
+import com.dianping.zebra.shard.router.RouterResult.RouterTarget;
+import com.dianping.zebra.shard.router.builder.XmlResourceRouterBuilder;
 
 public class DataSourceRouterImplTest {
 	private static ShardRouter router;
