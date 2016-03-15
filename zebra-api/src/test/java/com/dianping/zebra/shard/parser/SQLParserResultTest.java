@@ -11,7 +11,7 @@ import com.dianping.zebra.shard.exception.SQLParseException;
 
 import junit.framework.Assert;
 
-public class MySQLParserResultTest {
+public class SQLParserResultTest {
 
 	@Test
 	public void testTableSetsForSelect() throws SQLParseException {

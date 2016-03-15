@@ -15,10 +15,12 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -39,6 +41,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.SQLParsedResult;
+import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.util.SqlType;
 
 /**
@@ -48,12 +51,40 @@ import com.dianping.zebra.util.SqlType;
  */
 public class ShardColumnValueUtil {
 
-	public static Set<Object> eval(SQLParsedResult parseResult, String table, String column, List<Object> params) {
+	public static List<ColumnValue> eval(ShardEvalContext ctx, Set<String> shardColumns) {
+		List<ColumnValue> result = new LinkedList<ColumnValue>();
+
+		Map<Integer, Map<String, Object>> tmpResult = new LinkedHashMap<Integer, Map<String, Object>>();
+		for (String shardColumn : shardColumns) {
+			Set<Object> columnValues = eval(ctx.getParseResult(), ctx.getParams(), shardColumn);
+			int index = 0;
+			for (Object o : columnValues) {
+				Map<String, Object> map = tmpResult.get(index);
+
+				if (map == null) {
+					map = new HashMap<String, Object>();
+					tmpResult.put(index, map);
+				}
+
+				map.put(shardColumn, o);
+				index++;
+			}
+		}
+
+		for (Map<String, Object> columnValues : tmpResult.values()) {
+			ColumnValue columnValue = new ColumnValue(columnValues);
+			result.add(columnValue);
+		}
+
+		return result;
+	}
+
+	private static Set<Object> eval(SQLParsedResult parseResult, List<Object> params, String column) {
 		if (parseResult.getType() == SqlType.INSERT) {
 			return evalInsert(parseResult, column, params);
 		}
 
-		Set<Object> result = new HashSet<Object>();
+		Set<Object> result = new LinkedHashSet<Object>();
 		// TODO handle table in the future
 		SQLExpr where = getWhere(parseResult);
 		if (where != null) {

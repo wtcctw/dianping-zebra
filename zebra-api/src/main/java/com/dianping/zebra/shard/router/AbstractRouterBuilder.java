@@ -11,10 +11,10 @@ import com.dianping.zebra.shard.config.ExceptionConfig;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
+import com.dianping.zebra.shard.router.rule.DefaultDimensionRule;
 import com.dianping.zebra.shard.router.rule.DimensionRule;
-import com.dianping.zebra.shard.router.rule.DimensionRuleImpl;
 import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.shard.router.rule.TableShardRule2;
 import com.dianping.zebra.shard.router.rule.WhitelistDimensionRule;
 
 public abstract class AbstractRouterBuilder implements RouterBuilder {
@@ -22,12 +22,12 @@ public abstract class AbstractRouterBuilder implements RouterBuilder {
 	protected RouterRule build(RouterRuleConfig routerConfig) {
 		RouterRule routerRule = new RouterRule();
 		
-		Map<String, TableShardRule> tableShardRules = new HashMap<String, TableShardRule>();
+		Map<String, TableShardRule2> tableShardRules = new HashMap<String, TableShardRule2>();
 		for (TableShardRuleConfig ruleConfig : routerConfig.getTableShardConfigs()) {
 			List<TableShardDimensionConfig> dimensionConfigs = ruleConfig.getDimensionConfigs();
 			if (dimensionConfigs != null && !dimensionConfigs.isEmpty()) {
-				TableShardRule shardRule = new TableShardRule(ruleConfig.getTableName());
-				shardRule.setGeneratedPK(ruleConfig.getGeneratedPK());
+				TableShardRule2 shardRule = new TableShardRule2(ruleConfig.getTableName());
+				shardRule.setGeneratedPk(ruleConfig.getGeneratedPK());
 				arrangeDimensionConfigs(dimensionConfigs);
 				for (TableShardDimensionConfig dimensionConfig : dimensionConfigs) {
 					shardRule.addDimensionRule(buildDimensionRule(dimensionConfig));
@@ -54,7 +54,7 @@ public abstract class AbstractRouterBuilder implements RouterBuilder {
 	}
 
 	private DimensionRule buildDimensionRule(TableShardDimensionConfig dimensionConfig) {
-		DimensionRuleImpl rule = new DimensionRuleImpl();
+		DefaultDimensionRule rule = new DefaultDimensionRule();
 		rule.setWhiteListRules(buildWhitelistDimensionRules(dimensionConfig.getExceptions(), dimensionConfig.isMaster()));
 		rule.init(dimensionConfig);
 

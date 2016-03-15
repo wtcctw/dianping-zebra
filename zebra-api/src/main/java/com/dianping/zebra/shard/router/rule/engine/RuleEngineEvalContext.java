@@ -32,5 +32,4 @@ public class RuleEngineEvalContext {
 	public Map<String, Object> getValMap() {
 		return valMap;
 	}
-
 }

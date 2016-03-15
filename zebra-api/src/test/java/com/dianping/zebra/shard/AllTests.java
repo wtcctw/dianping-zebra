@@ -20,10 +20,11 @@ import com.dianping.zebra.shard.jdbc.SingleDBPreparedStatementGroupFollowNoteInt
 import com.dianping.zebra.shard.jdbc.SingleDBPreparedStatementLifeCycleTest;
 import com.dianping.zebra.shard.jdbc.SpecialSQLTest;
 import com.dianping.zebra.shard.jdbc.StatementTest;
-import com.dianping.zebra.shard.parser.MySQLParserResultTest;
+import com.dianping.zebra.shard.parser.SQLParserResultTest;
 import com.dianping.zebra.shard.parser.SQLRewriteTest;
 import com.dianping.zebra.shard.router.DataSourceRouterImplTest;
 import com.dianping.zebra.shard.router.rule.GroovyRuleEngineTest;
+import com.dianping.zebra.shard.router.rule.SimpleDataSourceProviderTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -45,15 +46,16 @@ import com.dianping.zebra.shard.router.rule.GroovyRuleEngineTest;
         ShardStatementTest.class,
         ShardPreparedStatementTest.class,
         ShardPreparedStatementMultiKeyTest.class,
+        ShardSupportedCaseTest.class,
 
         //parser
-        MySQLParserResultTest.class,
+        SQLParserResultTest.class,
         SQLRewriteTest.class,
 
         //router
         DataSourceRouterImplTest.class,
-        ShardSupportedCaseTest.class,
-        GroovyRuleEngineTest.class
+        GroovyRuleEngineTest.class,
+        SimpleDataSourceProviderTest.class
 })
 public class AllTests {
 

@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule.datasource;
+package com.dianping.zebra.shard.router.rule.mapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,27 +22,27 @@ import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 
 /**
- * @author danson.liu
+ * @author hao.zhu
  * 
  */
-public class DataSourceBO {
+public class DBTablesMapping {
 
 	private final String dbIndex;
 
-	private List<String> physicalTables = new ArrayList<String>(80);
+	private List<String> tables = new ArrayList<String>(32);
 
 	private RuleEngine tableRuleEngine;
 
-	public DataSourceBO(String dbIndex) {
+	public DBTablesMapping(String dbIndex) {
 		this.dbIndex = dbIndex;
 	}
 
-	public void addPhysicalTables(String tableName) {
-		this.physicalTables.add(tableName);
+	public void addTables(String tableName) {
+		this.tables.add(tableName);
 	}
 
-	public List<String> getPhysicalTables() {
-		return physicalTables;
+	public List<String> getTables() {
+		return tables;
 	}
 
 	public void setTableRuleEngine(RuleEngine tableRuleEngine) {
@@ -55,6 +55,6 @@ public class DataSourceBO {
 
 	public String evalTable(RuleEngineEvalContext context) {
 		Number tablePos = (Number) tableRuleEngine.eval(context);
-		return physicalTables.get(tablePos.intValue());
+		return tables.get(tablePos.intValue());
 	}
 }

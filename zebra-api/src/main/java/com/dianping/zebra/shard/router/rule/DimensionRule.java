@@ -32,11 +32,13 @@ public interface DimensionRule {
 	 * @param matchContext
 	 * @return 是否需要继续下一个规则的匹配
 	 */
-	boolean match(ShardMatchContext matchContext);
+	ShardEvalResult eval(ShardEvalContext evalContext);
 
 	boolean isMaster();
 	
 	boolean needSync();
 	
 	Map<String, Set<String>> getAllDBAndTables();
+	
+	Set<String> getShardColumns();
 }

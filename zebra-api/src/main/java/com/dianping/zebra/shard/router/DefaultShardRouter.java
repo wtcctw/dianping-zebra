@@ -23,15 +23,16 @@ import java.util.Set;
 
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
-import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.DefaultSQLRewrite;
 import com.dianping.zebra.shard.parser.SQLParsedResult;
 import com.dianping.zebra.shard.parser.SQLParser;
 import com.dianping.zebra.shard.parser.SQLRewrite;
 import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.router.rule.ShardMatchResult;
-import com.dianping.zebra.shard.router.rule.TableShardRule;
+import com.dianping.zebra.shard.router.rule.ShardEvalContext;
+import com.dianping.zebra.shard.router.rule.ShardEvalResult;
+import com.dianping.zebra.shard.router.rule.TableShardRule2;
 
 /**
  * @author hao.zhu
@@ -56,13 +57,12 @@ public class DefaultShardRouter implements ShardRouter {
 		RouterResult routerResult = new RouterResult();
 		SQLParsedResult parsedResult = SQLParser.parse(sql);
 
-		TableShardRule tableShardRule = findShardRule(parsedResult.getRouterContext(), params);
-		ShardMatchResult shardResult = tableShardRule.eval(parsedResult, params);
-		
+		TableShardRule2 tableShardRule = findShardRule(parsedResult.getRouterContext(), params);
+		ShardEvalResult shardResult = tableShardRule.eval(new ShardEvalContext(parsedResult, params));
+
 		routerResult.setMergeContext(parsedResult.getMergeContext());
-		routerResult
-				.setSqls(createTargetedSqls(shardResult.getDbAndTables(), parsedResult, tableShardRule.getTableName()));
-		routerResult.setParams(reconstructParams(params, parsedResult, routerResult));
+		routerResult.setSqls(buildSqls(shardResult.getDbAndTables(), parsedResult, tableShardRule.getTableName()));
+		routerResult.setParams(buildParams(params, parsedResult, routerResult));
 
 		return routerResult;
 	}
@@ -77,13 +77,13 @@ public class DefaultShardRouter implements ShardRouter {
 		return this.routerRule;
 	}
 
-	public TableShardRule findShardRule(RouterContext context, List<Object> params) throws ShardRouterException {
-		Map<String, TableShardRule> tableShardRules = this.routerRule.getTableShardRules();
-		TableShardRule tableShardRule = null;
+	private TableShardRule2 findShardRule(RouterContext context, List<Object> params) throws ShardRouterException {
+		Map<String, TableShardRule2> tableShardRules = this.routerRule.getTableShardRules();
+		TableShardRule2 tableShardRule = null;
 
 		int matchedTimes = 0;
 		for (String relatedTable : context.getTableSet()) {
-			TableShardRule tmp = tableShardRules.get(relatedTable);
+			TableShardRule2 tmp = tableShardRules.get(relatedTable);
 			if (tmp != null) {
 				tableShardRule = tmp;
 				matchedTimes++;
@@ -101,9 +101,10 @@ public class DefaultShardRouter implements ShardRouter {
 		return tableShardRule;
 	}
 
-	private List<RouterTarget> createTargetedSqls(Map<String, Set<String>> dbAndTables, SQLParsedResult parseResult,
+	private List<RouterTarget> buildSqls(Map<String, Set<String>> dbAndTables, SQLParsedResult parseResult,
 			String logicTable) {
-		List<RouterTarget> result = new ArrayList<RouterTarget>();
+		List<RouterTarget> sqls = new ArrayList<RouterTarget>();
+
 		for (Entry<String, Set<String>> entry : dbAndTables.entrySet()) {
 			RouterTarget targetedSql = new RouterTarget(entry.getKey());
 
@@ -118,13 +119,14 @@ public class DefaultShardRouter implements ShardRouter {
 				}
 			}
 
-			result.add(targetedSql);
+			sqls.add(targetedSql);
 		}
 
-		return result;
+		return sqls;
 	}
 
-	private List<Object> reconstructParams(List<Object> params, SQLParsedResult parseResult, RouterResult rr) {
+	// TODO maybe consider putting into merge later
+	private List<Object> buildParams(List<Object> params, SQLParsedResult parseResult, RouterResult rr) {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
@@ -134,22 +136,17 @@ public class DefaultShardRouter implements ShardRouter {
 				if (limitExpr.getOffset() instanceof SQLVariantRefExpr) {
 					SQLVariantRefExpr ref = (SQLVariantRefExpr) limitExpr.getOffset();
 					offset = (Integer) newParams.get(ref.getIndex());
-					newParams.set(ref.getIndex(), new Integer(0));// TODO
-																	// ,improve
-																	// it
-																	// ,performance
-																	// issue
+					newParams.set(ref.getIndex(), new Integer(0));
 					rr.getMergeContext().setOffset(offset);
 				}
 
 				if (limitExpr.getRowCount() instanceof SQLVariantRefExpr) {
 					SQLVariantRefExpr ref = (SQLVariantRefExpr) limitExpr.getRowCount();
 					int limit = (Integer) newParams.get(ref.getIndex());
-					newParams.set(ref.getIndex(), offset + limit);// TODO
-																	// ,improve
-																	// it
-																	// ,performance
-																	// issue
+					if (offset != Integer.MIN_VALUE) {
+						newParams.set(ref.getIndex(), offset + limit);
+					}
+
 					rr.getMergeContext().setLimit(limit);
 				}
 			}

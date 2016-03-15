@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule.datasource;
+package com.dianping.zebra.shard.router.rule.mapping;
 
 import com.dianping.zebra.shard.exception.RouterConfigException;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
@@ -23,9 +23,9 @@ import com.dianping.zebra.util.StringUtils;
 import java.util.*;
 
 /**
- * @author danson.liu
+ * @author hao.zhu
  */
-public class SimpleDataSourceProvider implements DataSourceProvider {
+public class SimpleDBTablesMappingManager implements DBTablesMappingManager {
 
 	public static final String TB_SUFFIX_STYLE_ALL = "alldb";
 
@@ -39,16 +39,9 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 
 	private final String tbRule;
 
-	private List<DataSourceBO> dataSourceBOs = new ArrayList<DataSourceBO>(6);
+	private List<DBTablesMapping> dbTablesMappings = new ArrayList<DBTablesMapping>();
 
-	protected SimpleDataSourceProvider() {
-		this.tableName = null;
-		this.dbIndexes = null;
-		this.tbSuffix = null;
-		this.tbRule = null;
-	}
-
-	public SimpleDataSourceProvider(String tableName, String dbIndexes, String tbSuffix, String tbRule) {
+	public SimpleDBTablesMappingManager(String tableName, String dbIndexes, String tbSuffix, String tbRule) {
 		this.tableName = tableName;
 		this.dbIndexes = dbIndexes;
 		this.tbSuffix = tbSuffix;
@@ -62,15 +55,36 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 		for (String db : dbs) {
 			String jdbcRef = db.trim();
 
-			DataSourceBO dataSourceBO = new DataSourceBO(jdbcRef);
-			dataSourceBO.setTableRuleEngine(tableRuleEngine);
-			dataSourceBOs.add(dataSourceBO);
+			DBTablesMapping mapping = new DBTablesMapping(jdbcRef);
+			mapping.setTableRuleEngine(tableRuleEngine);
+			dbTablesMappings.add(mapping);
 		}
 
-		setTables2DataSource(dataSourceBOs);
+		setTables2DataSource(dbTablesMappings);
 	}
 
-	protected List<String> splitDb(String dbIndexes) {
+	@Override
+	public DBTablesMapping getMappingByIndex(int dbPos) {
+		return dbTablesMappings.get(dbPos);
+	}
+
+	@Override
+	public Map<String, Set<String>> getAllMappings() {
+		Map<String, Set<String>> dbAndTables = new HashMap<String, Set<String>>();
+		for (DBTablesMapping dataSourceBO : dbTablesMappings) {
+			String db = dataSourceBO.getDbIndex();
+			if (!dbAndTables.containsKey(db)) {
+				dbAndTables.put(db, new HashSet<String>());
+			}
+			Set<String> tableSet = dbAndTables.get(db);
+			for (String physicalTable : dataSourceBO.getTables()) {
+				tableSet.add(physicalTable);
+			}
+		}
+		return dbAndTables;
+	}
+
+	private List<String> splitDb(String dbIndexes) {
 		List<String> result = new ArrayList<String>();
 		String[] dbConfig = dbIndexes.split(",");
 		for (String config : dbConfig) {
@@ -90,7 +104,7 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 		return result;
 	}
 
-	private void setTables2DataSource(List<DataSourceBO> dataSourceBOs) {
+	private void setTables2DataSource(List<DBTablesMapping> dataSourceBOs) {
 		String tbSuffixStyle = StringUtils.substringBefore(tbSuffix, ":");
 		String tbSuffixRange = StringUtils.substringAfter(tbSuffix, ":");
 		tbSuffixRange = StringUtils.substringBetween(tbSuffixRange, "[", "]");
@@ -106,13 +120,13 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 			int tablesEachDB = (tableNum % dsSize == 0) ? tableNum / dsSize : tableNum / dsSize + 1;
 			for (int i = 0; i < dataSourceBOs.size(); i++) {
 				for (int j = 0; j < tablesEachDB; j++) {
-					dataSourceBOs.get(i).addPhysicalTables(tableName + suffix + zeroPadding(startNum++, numPartLen));
+					dataSourceBOs.get(i).addTables(tableName + suffix + zeroPadding(startNum++, numPartLen));
 				}
 			}
 		} else if (TB_SUFFIX_STYLE_EVERY.equals(tbSuffixStyle)) {
 			for (int i = 0; i < dataSourceBOs.size(); i++) {
 				for (int j = startNum; j <= endNum; j++) {
-					dataSourceBOs.get(i).addPhysicalTables(tableName + suffix + zeroPadding(j, numPartLen));
+					dataSourceBOs.get(i).addTables(tableName + suffix + zeroPadding(j, numPartLen));
 				}
 			}
 		} else {
@@ -148,26 +162,4 @@ public class SimpleDataSourceProvider implements DataSourceProvider {
 		}
 		return len;
 	}
-
-	@Override
-	public DataSourceBO getDataSource(int dbPos) {
-		return dataSourceBOs.get(dbPos);
-	}
-
-	@Override
-	public Map<String, Set<String>> getAllDBAndTables() {
-		Map<String, Set<String>> dbAndTables = new HashMap<String, Set<String>>();
-		for (DataSourceBO dataSourceBO : dataSourceBOs) {
-			String db = dataSourceBO.getDbIndex();
-			if (!dbAndTables.containsKey(db)) {
-				dbAndTables.put(db, new HashSet<String>());
-			}
-			Set<String> tableSet = dbAndTables.get(db);
-			for (String physicalTable : dataSourceBO.getPhysicalTables()) {
-				tableSet.add(physicalTable);
-			}
-		}
-		return dbAndTables;
-	}
-
 }

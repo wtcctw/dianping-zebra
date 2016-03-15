@@ -15,15 +15,19 @@
  */
 package com.dianping.zebra.shard.router.rule;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.dianping.zebra.shard.config.ExceptionConfig;
+import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.shard.router.rule.engine.GroovyRuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngine;
 import com.dianping.zebra.shard.router.rule.engine.RuleEngineEvalContext;
 
-import java.util.*;
-
 /**
- * @author danson.liu
+ * @author hao.zhu
  *
  */
 public class WhitelistDimensionRule extends AbstractDimensionRule {
@@ -43,28 +47,32 @@ public class WhitelistDimensionRule extends AbstractDimensionRule {
 	}
 
 	@Override
-	public boolean match(ShardMatchContext matchContext) {
-		ShardMatchResult matchResult = matchContext.getMatchResult();
-		List<Map<String, Object>> colValues = matchContext.getColValues();
-
-		for (Iterator<Map<String, Object>> iterator = colValues.iterator(); iterator.hasNext();) {
-			if ((Boolean) ruleEngine.eval(new RuleEngineEvalContext(iterator.next()))) {
-				iterator.remove();
-				if (!matchResult.isDbAndTablesSetted()) {
-					matchResult.addDBAndTable(dataSource, table);
-				}
-			}
-		}
-
-		return true;
-	}
-
-	@Override
 	public Map<String, Set<String>> getAllDBAndTables() {
 		Map<String, Set<String>> dbAndTables = new HashMap<String, Set<String>>(1);
 		Set<String> tableSet = new HashSet<String>(1);
 		tableSet.add(table);
 		dbAndTables.put(dataSource, tableSet);
 		return dbAndTables;
+	}
+
+	@Override
+	public ShardEvalResult eval(ShardEvalContext ctx) {
+		ShardEvalResult result = new ShardEvalResult();
+
+		for (ColumnValue evalContext : ctx.getColumnValues()) {
+			if(!evalContext.isUsed()){
+				if ((Boolean) ruleEngine.eval(new RuleEngineEvalContext(evalContext.getValue()))) {
+					result.addDbAndTable(dataSource, table);
+					evalContext.setUsed(true);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	@Override
+	public Set<String> getShardColumns() {
+		return this.shardColumns;
 	}
 }

@@ -24,13 +24,13 @@ import java.util.Map;
  */
 public class RouterRule {
 	
-	private Map<String, TableShardRule> tableShardRules = new HashMap<String, TableShardRule>();
+	private Map<String, TableShardRule2> tableShardRules = new HashMap<String, TableShardRule2>();
 
-	public Map<String, TableShardRule> getTableShardRules() {
+	public Map<String, TableShardRule2> getTableShardRules() {
 		return tableShardRules;
 	}
 
-	public void setTableShardRules(Map<String, TableShardRule> tableShardRules) {
+	public void setTableShardRules(Map<String, TableShardRule2> tableShardRules) {
 		this.tableShardRules = tableShardRules;
 	}
 

@@ -13,19 +13,19 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.router.rule.datasource;
+package com.dianping.zebra.shard.router.rule.mapping;
 
 import java.util.Map;
 import java.util.Set;
 
 /**
- * @author danson.liu
+ * @author hao.zhu
  *
  */
-public interface DataSourceProvider {
+public interface DBTablesMappingManager {
 
-	DataSourceBO getDataSource(int dbPos);
+	DBTablesMapping getMappingByIndex(int dbPos);
 
-	Map<String, Set<String>> getAllDBAndTables();
+	Map<String, Set<String>> getAllMappings();
 
 }
