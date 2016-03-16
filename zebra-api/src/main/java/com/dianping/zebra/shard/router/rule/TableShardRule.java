@@ -23,6 +23,7 @@ import java.util.Set;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.shard.router.rule.dimension.DimensionRule;
+import com.dianping.zebra.shard.util.ShardColumnValueUtil;
 import com.dianping.zebra.util.SqlType;
 
 public class TableShardRule {

@@ -25,6 +25,7 @@ import com.dianping.zebra.shard.parser.SQLRewriteTest;
 import com.dianping.zebra.shard.router.DataSourceRouterImplTest;
 import com.dianping.zebra.shard.router.rule.GroovyRuleEngineTest;
 import com.dianping.zebra.shard.router.rule.SimpleDataSourceProviderTest;
+import com.dianping.zebra.shard.util.ShardColumnValueUtilTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -55,7 +56,10 @@ import com.dianping.zebra.shard.router.rule.SimpleDataSourceProviderTest;
         //router
         DataSourceRouterImplTest.class,
         GroovyRuleEngineTest.class,
-        SimpleDataSourceProviderTest.class
+        SimpleDataSourceProviderTest.class,
+        
+        //util
+        ShardColumnValueUtilTest.class
 })
 public class AllTests {
 
