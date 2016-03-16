@@ -9,14 +9,22 @@ import com.dianping.zebra.dao.AsyncDaoCallback;
 import com.dianping.zebra.dao.annotation.TargetMethod;
 import com.dianping.zebra.dao.entity.UserEntity;
 
+/**
+ * test async
+ * @author damonzhu
+ *
+ */
 public interface UserMapper {
 
 	/**
 	 *
 	 */
-	public UserEntity findUserById(@Param("userId") int userId);
-
 	public void findUserById(@Param("userId") int userId, AsyncDaoCallback<UserEntity> callback);
+	
+	public UserEntity findUserById(@Param("userId") int userId);
+	
+	@TargetMethod(name = "findUserById")
+	public Future<UserEntity> findUserByIdByFuture(@Param("userId") int userId);
 
 	public List<UserEntity> getAll();
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,15 @@ public class UserDaoTest {
 		UserEntity user = dao.findUserById(1);
 
 		System.out.println(user);
+	}
+	
+	@Test
+	public void testSelectFuture() throws InterruptedException, ExecutionException, TimeoutException {
+		Future<UserEntity> future = dao.findUserByIdByFuture(1);
+		
+		UserEntity userEntity = future.get();
+		
+		System.out.println(userEntity);
 	}
 
 	@Test
