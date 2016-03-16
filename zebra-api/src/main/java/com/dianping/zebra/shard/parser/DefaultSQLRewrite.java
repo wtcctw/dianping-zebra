@@ -10,11 +10,11 @@ import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 public class DefaultSQLRewrite implements SQLRewrite {
 
 	@Override
-	public String rewrite(SQLParsedResult pr, String physicalTableName) {
+	public String rewrite(SQLParsedResult pr, String logicalTable, String physicalTable) {
 		SQLStatement stmt = pr.getStmt();
 
 		StringBuilder out = new StringBuilder();
-		RewriteTableNameOutputVisitor visitor = new RewriteTableNameOutputVisitor(out, physicalTableName);
+		RewriteTableNameOutputVisitor visitor = new RewriteTableNameOutputVisitor(out, logicalTable, physicalTable);
 
 		stmt.accept(visitor);
 
@@ -23,21 +23,23 @@ public class DefaultSQLRewrite implements SQLRewrite {
 
 	class RewriteTableNameOutputVisitor extends MySqlOutputVisitor {
 
-		private String physicalName;
+		private String physicalTable;
 
-		public RewriteTableNameOutputVisitor(Appendable appender, String physicalName) {
+		private String logicalTable;
+
+		public RewriteTableNameOutputVisitor(Appendable appender, String logicalTable, String physicalTable) {
 			super(appender);
-			this.physicalName = physicalName;
+			this.logicalTable = logicalTable;
+			this.physicalTable = physicalTable;
 		}
 
 		@Override
 		public boolean visit(SQLExprTableSource x) {
-			SQLName name = (SQLName)x.getExpr();
-			//need a Table bind
-			if(physicalName.contains(name.getSimpleName()) && !name.getSimpleName().equals("DP_Group")){
-				print0(physicalName);
-			}else{
-		        x.getExpr().accept(this);
+			SQLName name = (SQLName) x.getExpr();
+			if (logicalTable.equalsIgnoreCase(name.getSimpleName())) {
+				print0(physicalTable);
+			} else {
+				x.getExpr().accept(this);
 			}
 
 			if (x.getAlias() != null) {
