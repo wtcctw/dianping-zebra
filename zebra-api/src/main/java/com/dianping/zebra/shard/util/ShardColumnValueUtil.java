@@ -154,19 +154,10 @@ public class ShardColumnValueUtil {
 				pairs.put(indentifier.getName(), right);
 			} else if (left instanceof SQLBinaryOpExpr) {
 				eval((SQLBinaryOpExpr) left, column, pairs);
-			}
-
-			// TODO ignore operator first,later to handler it
-
-			if (right instanceof SQLIdentifierExpr) {
-				SQLIdentifierExpr indentifier = (SQLIdentifierExpr) left;
-				pairs.put(indentifier.getName(), right);
-			} else if (left instanceof SQLPropertyExpr) {
-				SQLPropertyExpr indentifier = (SQLPropertyExpr) left;
-				pairs.put(indentifier.getName(), right);
-			} else if (right instanceof SQLBinaryOpExpr) {
+				// TODO ignore operator first,later to handler it
 				eval((SQLBinaryOpExpr) right, column, pairs);
 			}
+
 		}
 	}
 
@@ -178,12 +169,17 @@ public class ShardColumnValueUtil {
 		Set<Object> evalSet = new LinkedHashSet<Object>();
 		MySqlInsertStatement stmt = (MySqlInsertStatement) parseResult.getStmt();
 
-		// TODO how to handle batch?
 		List<SQLExpr> columns = stmt.getColumns();
-		ValuesClause values = stmt.getValues();
+		List<ValuesClause> valuesList = stmt.getValuesList();
+
+		if (valuesList.size() > 1) {
+			throw new ShardRouterException("Multipal rows insertion is currently unsupported!");
+		}
+
+		ValuesClause values = valuesList.get(0);
 		for (int i = 0; i < columns.size(); i++) {
 			SQLName columnObj = (SQLName) columns.get(i);
-			if (column.equalsIgnoreCase(columnObj.getSimpleName())) {
+			if (evalColumn(columnObj.getSimpleName(), column)) {
 				SQLExpr sqlExpr = values.getValues().get(i);
 				if (sqlExpr instanceof SQLVariantRefExpr) {
 					evalSet.add(params.get(i));
@@ -194,7 +190,7 @@ public class ShardColumnValueUtil {
 			}
 		}
 		if (evalSet.isEmpty()) {
-			throw new ShardRouterException("Router column[" + column + "] not found in the sql");
+			throw new ShardRouterException("Router column[" + column + "] not found in the sql!");
 		}
 
 		return evalSet;
