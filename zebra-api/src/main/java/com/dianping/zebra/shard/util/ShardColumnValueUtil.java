@@ -30,6 +30,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOperator;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
@@ -103,6 +104,17 @@ public class ShardColumnValueUtil {
 					} else if (value instanceof SQLVariantRefExpr) {
 						SQLVariantRefExpr ref = (SQLVariantRefExpr) value;
 						result.add(params.get(ref.getIndex()));
+					}else if(value instanceof SQLInListExpr){
+						SQLInListExpr inListExpr = (SQLInListExpr)value;
+						
+						for(SQLExpr expr : inListExpr.getTargetList()){
+							if(expr instanceof SQLValuableExpr){
+								result.add(((SQLValuableExpr) expr).getValue());
+							}else{
+								SQLVariantRefExpr ref = (SQLVariantRefExpr) expr;
+								result.add(params.get(ref.getIndex()));
+							}
+						}
 					}
 				}
 			}
@@ -131,7 +143,12 @@ public class ShardColumnValueUtil {
 		SQLBinaryOpExpr where = null;
 		if (sqlExpr instanceof SQLBinaryOpExpr) {
 			where = (SQLBinaryOpExpr) sqlExpr;
-		} else {
+		} else if(sqlExpr instanceof SQLInListExpr){
+			SQLInListExpr inListExpr = (SQLInListExpr)sqlExpr;
+			SQLIdentifierExpr indentifier = (SQLIdentifierExpr) inListExpr.getExpr();
+			pairs.put(indentifier.getName(), inListExpr);
+			return;
+		}else {
 			return;
 		}
 
@@ -154,10 +171,8 @@ public class ShardColumnValueUtil {
 				pairs.put(indentifier.getName(), right);
 			} else if (left instanceof SQLBinaryOpExpr) {
 				eval((SQLBinaryOpExpr) left, column, pairs);
-				// TODO ignore operator first,later to handler it
 				eval((SQLBinaryOpExpr) right, column, pairs);
 			}
-
 		}
 	}
 

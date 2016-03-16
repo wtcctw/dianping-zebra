@@ -20,7 +20,6 @@ public class ShardColumnValueUtilTest {
 
 	@Test
 	public void testMultipalShardColumn1() throws SQLParseException {
-
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` = 1 and `d` = 2");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
@@ -38,7 +37,6 @@ public class ShardColumnValueUtilTest {
 
 	@Test
 	public void testMultipalShardColumn2() throws SQLParseException {
-
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` = 1 and `d` = ?");
 		List<Object> params = new ArrayList<Object>();
 		params.add(2);
@@ -57,7 +55,6 @@ public class ShardColumnValueUtilTest {
 
 	@Test
 	public void testMultipalShardColumn3() throws SQLParseException {
-
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` = 1 and `d` = ? and `e` = 1");
 		List<Object> params = new ArrayList<Object>();
 		params.add(2);
@@ -78,7 +75,6 @@ public class ShardColumnValueUtilTest {
 
 	@Test(expected = ShardRouterException.class)
 	public void testMultipalInsertion() throws SQLParseException {
-
 		SQLParsedResult parseResult = SQLParser.parse(
 				"INSERT INTO `User` (`Name`,`Tel`,`Alias`,`Email`)VALUES('zhuhao','123','hao.zhu','z@d'),('zhuhao1','1233','hao.zhu1','z@d')");
 		List<Object> params = null;
@@ -88,12 +84,11 @@ public class ShardColumnValueUtilTest {
 
 		ShardColumnValueUtil.eval(ctx, shardColumns);
 	}
-	
+
 	@Test
 	public void testSingleInsertion() throws SQLParseException {
-
-		SQLParsedResult parseResult = SQLParser.parse(
-				"INSERT INTO `User` (`Name`,`Tel`,`Alias`,`Email`)VALUES('zhuhao','123','hao.zhu','z@d')");
+		SQLParsedResult parseResult = SQLParser
+				.parse("INSERT INTO `User` (`Name`,`Tel`,`Alias`,`Email`)VALUES('zhuhao','123','hao.zhu','z@d')");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
 		Set<String> shardColumns = new HashSet<String>();
@@ -106,4 +101,72 @@ public class ShardColumnValueUtilTest {
 		Assert.assertEquals("zhuhao", columnValue.getValue().get("Name"));
 	}
 
+	@Test
+	public void testLargerThan() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` >= 1");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("c");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(0, values.size());
+	}
+
+	@Test
+	public void testLessThan() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` <= 1");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("c");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(0, values.size());
+	}
+
+	@Test
+	public void testNotEqual() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` != 1");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("c");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(0, values.size());
+	}
+
+	@Test
+	public void testIn() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` in (1,2,3,4)");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("c");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(4, values.size());
+	}
+	
+	@Test
+	public void testPreparedIn() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` in (?,?,?,?)");
+		List<Object> params  = new ArrayList<Object>();
+		params.add(1);
+		params.add(2);
+		params.add(3);
+		params.add(4);
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("c");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(4, values.size());
+	}
 }
