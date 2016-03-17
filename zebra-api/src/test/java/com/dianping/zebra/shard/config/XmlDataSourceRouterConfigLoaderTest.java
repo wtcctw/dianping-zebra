@@ -1,5 +1,6 @@
 package com.dianping.zebra.shard.config;
 
+import com.dianping.zebra.shard.router.builder.XmlDataSourceRouterConfigLoader;
 import com.google.gson.Gson;
 import org.junit.Test;
 

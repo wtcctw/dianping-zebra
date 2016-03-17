@@ -13,12 +13,16 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.config;
+package com.dianping.zebra.shard.router.builder;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.dianping.zebra.shard.config.ExceptionalDimensionConfig;
+import com.dianping.zebra.shard.config.RouterRuleConfig;
+import com.dianping.zebra.shard.config.TableShardDimensionConfig;
+import com.dianping.zebra.shard.config.TableShardRuleConfig;
 import com.dianping.zebra.shard.exception.RouterConfigException;
 
 import javax.xml.parsers.DocumentBuilder;
