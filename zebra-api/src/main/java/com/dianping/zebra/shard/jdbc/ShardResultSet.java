@@ -855,10 +855,6 @@ public class ShardResultSet implements ResultSet {
 		return statement;
 	}
 
-	public ShardStatement getShardStatement() {
-		return statement;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 

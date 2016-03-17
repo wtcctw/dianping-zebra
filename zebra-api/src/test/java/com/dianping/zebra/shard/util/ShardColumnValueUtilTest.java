@@ -152,11 +152,11 @@ public class ShardColumnValueUtilTest {
 
 		Assert.assertEquals(4, values.size());
 	}
-	
+
 	@Test
 	public void testPreparedIn() throws SQLParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` in (?,?,?,?)");
-		List<Object> params  = new ArrayList<Object>();
+		List<Object> params = new ArrayList<Object>();
 		params.add(1);
 		params.add(2);
 		params.add(3);
@@ -168,5 +168,19 @@ public class ShardColumnValueUtilTest {
 		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
 
 		Assert.assertEquals(4, values.size());
+	}
+
+	@Test
+	public void testPreparedIn2() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse(
+				"SELECT A.ReceiptID, A.UserID, A.DealGroupID, A.DealID from RS_Receipt A WHERE A.UserID IN (28152647,22050) AND A.ReceiptID IN (234460949,234400906,234400907,234400908) ORDER BY A.ReceiptID");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("UserID");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(2, values.size());
 	}
 }

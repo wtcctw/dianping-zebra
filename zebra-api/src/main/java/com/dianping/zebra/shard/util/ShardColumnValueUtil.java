@@ -145,8 +145,8 @@ public class ShardColumnValueUtil {
 			where = (SQLBinaryOpExpr) sqlExpr;
 		} else if(sqlExpr instanceof SQLInListExpr){
 			SQLInListExpr inListExpr = (SQLInListExpr)sqlExpr;
-			SQLIdentifierExpr indentifier = (SQLIdentifierExpr) inListExpr.getExpr();
-			pairs.put(indentifier.getName(), inListExpr);
+			SQLName indentifier = (SQLName) inListExpr.getExpr();
+			pairs.put(indentifier.getSimpleName(), inListExpr);
 			return;
 		}else {
 			return;
