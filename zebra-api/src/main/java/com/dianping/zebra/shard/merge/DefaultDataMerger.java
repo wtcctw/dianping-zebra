@@ -308,9 +308,13 @@ public class DefaultDataMerger implements DataMerger {
 				SQLAggregateExpr aggregateExpr = (SQLAggregateExpr) columnType.getExpr();
 				AggregateDataProcessor dataProcessor = aggregateFunctionProcessors.get(aggregateExpr.getMethodName());
 				if (dataProcessor != null) {
-					newRowData.get(col.getColumnIndex()).setValue(
-							dataProcessor.process(newRowData.get(col.getColumnIndex()).getValue(), col.getValue()));
-
+					ColumnData oldCol = newRowData.get(col.getColumnIndex());
+					Object value = dataProcessor.process(oldCol.getValue(), col.getValue());
+					
+					if(value != null){
+						oldCol.setWasNull(false);
+					}
+					oldCol.setValue(value);
 				} else {
 					throw new SQLException("Zebra unsupported groupby function exists");
 				}

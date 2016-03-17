@@ -240,7 +240,12 @@ public class DataPool {
 	public Array getArray(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Array) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Array) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getArray(columnIndex);
 		}
@@ -249,7 +254,12 @@ public class DataPool {
 	public Array getArray(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Array) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Array) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getArray(columnName);
 		}
@@ -258,7 +268,12 @@ public class DataPool {
 	public InputStream getAsciiStream(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (InputStream) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (InputStream) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getAsciiStream(columnIndex);
 		}
@@ -267,7 +282,12 @@ public class DataPool {
 	public InputStream getAsciiStream(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (InputStream) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (InputStream) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getAsciiStream(columnName);
 		}
@@ -276,7 +296,12 @@ public class DataPool {
 	public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (BigDecimal) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (BigDecimal) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBigDecimal(columnIndex);
 		}
@@ -285,7 +310,12 @@ public class DataPool {
 	public BigDecimal getBigDecimal(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (BigDecimal) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (BigDecimal) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBigDecimal(columnName);
 		}
@@ -295,7 +325,12 @@ public class DataPool {
 	public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return ((BigDecimal) memoryData.get(rowNum - 1).get(columnIndex).getValue()).setScale(scale);
+
+			if (wasNull) {
+				return null;
+			} else {
+				return ((BigDecimal) memoryData.get(rowNum - 1).get(columnIndex).getValue()).setScale(scale);
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBigDecimal(columnIndex, scale);
 		}
@@ -305,7 +340,12 @@ public class DataPool {
 	public BigDecimal getBigDecimal(String columnName, int scale) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return ((BigDecimal) memoryData.get(rowNum - 1).get(columnName).getValue()).setScale(scale);
+
+			if (wasNull) {
+				return null;
+			} else {
+				return ((BigDecimal) memoryData.get(rowNum - 1).get(columnName).getValue()).setScale(scale);
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBigDecimal(columnName, scale);
 		}
@@ -314,7 +354,12 @@ public class DataPool {
 	public InputStream getBinaryStream(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (InputStream) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (InputStream) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBinaryStream(columnIndex);
 		}
@@ -323,7 +368,12 @@ public class DataPool {
 	public InputStream getBinaryStream(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (InputStream) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (InputStream) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBinaryStream(columnName);
 		}
@@ -332,7 +382,12 @@ public class DataPool {
 	public Blob getBlob(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Blob) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Blob) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBlob(columnIndex);
 		}
@@ -341,7 +396,12 @@ public class DataPool {
 	public Blob getBlob(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Blob) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Blob) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBlob(columnName);
 		}
@@ -350,7 +410,12 @@ public class DataPool {
 	public boolean getBoolean(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Boolean) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return false;
+			} else {
+				return (Boolean) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBoolean(columnIndex);
 		}
@@ -359,7 +424,12 @@ public class DataPool {
 	public boolean getBoolean(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Boolean) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return false;
+			} else {
+				return (Boolean) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBoolean(columnName);
 		}
@@ -368,7 +438,12 @@ public class DataPool {
 	public byte getByte(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Byte) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Byte) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getByte(columnIndex);
 		}
@@ -377,7 +452,12 @@ public class DataPool {
 	public byte getByte(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Byte) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Byte) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getByte(columnName);
 		}
@@ -386,7 +466,12 @@ public class DataPool {
 	public byte[] getBytes(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (byte[]) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (byte[]) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBytes(columnIndex);
 		}
@@ -395,7 +480,12 @@ public class DataPool {
 	public byte[] getBytes(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (byte[]) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (byte[]) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getBytes(columnName);
 		}
@@ -404,7 +494,12 @@ public class DataPool {
 	public Reader getCharacterStream(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Reader) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Reader) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getCharacterStream(columnIndex);
 		}
@@ -413,7 +508,12 @@ public class DataPool {
 	public Reader getCharacterStream(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Reader) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Reader) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getCharacterStream(columnName);
 		}
@@ -422,7 +522,12 @@ public class DataPool {
 	public Clob getClob(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Clob) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Clob) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getClob(columnIndex);
 		}
@@ -431,14 +536,18 @@ public class DataPool {
 	public Clob getClob(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Clob) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Clob) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getClob(columnName);
 		}
 	}
 
 	public int getConcurrency() throws SQLException {
-
 		if (inMemory) {
 			return memoryData.get(rowNum - 1).getConcurrency();
 		} else {
@@ -458,7 +567,12 @@ public class DataPool {
 	public Date getDate(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Date) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Date) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getDate(columnIndex);
 		}
@@ -467,7 +581,12 @@ public class DataPool {
 	public Date getDate(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Date) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Date) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getDate(columnName);
 		}
@@ -494,7 +613,12 @@ public class DataPool {
 	public double getDouble(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Double) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Double) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getDouble(columnIndex);
 		}
@@ -503,7 +627,12 @@ public class DataPool {
 	public double getDouble(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Double) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Double) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getDouble(columnName);
 		}
@@ -512,7 +641,12 @@ public class DataPool {
 	public float getFloat(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Float) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Float) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getFloat(columnIndex);
 		}
@@ -521,7 +655,12 @@ public class DataPool {
 	public float getFloat(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Float) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Float) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getFloat(columnName);
 		}
@@ -538,11 +677,16 @@ public class DataPool {
 	public int getInt(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			Object val = memoryData.get(rowNum - 1).get(columnIndex).getValue();
-			if (val instanceof Integer) {
-				return (Integer) val;
+
+			if (wasNull) {
+				return 0;
 			} else {
-				return Integer.parseInt(val.toString());
+				Object val = memoryData.get(rowNum - 1).get(columnIndex).getValue();
+				if (val instanceof Integer) {
+					return (Integer) val;
+				} else {
+					return Integer.parseInt(val.toString());
+				}
 			}
 		} else {
 			return resultSets.get(resultSetIndex).getInt(columnIndex);
@@ -552,11 +696,16 @@ public class DataPool {
 	public int getInt(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			Object val = memoryData.get(rowNum - 1).get(columnName).getValue();
-			if (val instanceof Integer) {
-				return (Integer) val;
+
+			if (wasNull) {
+				return 0;
 			} else {
-				return Integer.parseInt(val.toString());
+				Object val = memoryData.get(rowNum - 1).get(columnName).getValue();
+				if (val instanceof Integer) {
+					return (Integer) val;
+				} else {
+					return Integer.parseInt(val.toString());
+				}
 			}
 		} else {
 			return resultSets.get(resultSetIndex).getInt(columnName);
@@ -566,16 +715,26 @@ public class DataPool {
 	public long getLong(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Long) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Long) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
-			return resultSets.get(resultSetIndex).getInt(columnIndex);
+			return resultSets.get(resultSetIndex).getLong(columnIndex);
 		}
 	}
 
 	public long getLong(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Long) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Long) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getLong(columnName);
 		}
@@ -592,7 +751,12 @@ public class DataPool {
 	public Reader getNCharacterStream(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Reader) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Reader) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getNCharacterStream(columnIndex);
 		}
@@ -601,7 +765,12 @@ public class DataPool {
 	public Reader getNCharacterStream(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Reader) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Reader) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getNCharacterStream(columnName);
 		}
@@ -610,7 +779,12 @@ public class DataPool {
 	public NClob getNClob(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (NClob) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (NClob) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getNClob(columnIndex);
 		}
@@ -619,7 +793,12 @@ public class DataPool {
 	public NClob getNClob(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (NClob) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (NClob) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getNClob(columnName);
 		}
@@ -628,7 +807,12 @@ public class DataPool {
 	public String getNString(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (String) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (String) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getNString(columnIndex);
 		}
@@ -637,7 +821,12 @@ public class DataPool {
 	public String getNString(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (String) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (String) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getNString(columnName);
 		}
@@ -684,7 +873,12 @@ public class DataPool {
 	public Ref getRef(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Ref) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Ref) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getRef(columnIndex);
 		}
@@ -702,7 +896,12 @@ public class DataPool {
 	public RowId getRowId(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (RowId) memoryData.get(rowNum - 1).get(columnIndex).getRowId();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (RowId) memoryData.get(rowNum - 1).get(columnIndex).getRowId();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getRowId(columnIndex);
 		}
@@ -711,7 +910,12 @@ public class DataPool {
 	public RowId getRowId(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (RowId) memoryData.get(rowNum - 1).get(columnName).getRowId();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (RowId) memoryData.get(rowNum - 1).get(columnName).getRowId();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getRowId(columnName);
 		}
@@ -720,7 +924,12 @@ public class DataPool {
 	public SQLXML getSQLXML(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (SQLXML) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (SQLXML) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getSQLXML(columnIndex);
 		}
@@ -729,7 +938,12 @@ public class DataPool {
 	public SQLXML getSQLXML(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (SQLXML) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (SQLXML) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getSQLXML(columnName);
 		}
@@ -738,7 +952,12 @@ public class DataPool {
 	public short getShort(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Short) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Short) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getShort(columnIndex);
 		}
@@ -747,7 +966,12 @@ public class DataPool {
 	public short getShort(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Short) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return 0;
+			} else {
+				return (Short) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getShort(columnName);
 		}
@@ -756,7 +980,12 @@ public class DataPool {
 	public String getString(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (String) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (String) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getString(columnIndex);
 		}
@@ -765,7 +994,11 @@ public class DataPool {
 	public String getString(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (String) memoryData.get(rowNum - 1).get(columnName).getValue();
+			if (wasNull) {
+				return null;
+			} else {
+				return (String) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getString(columnName);
 		}
@@ -774,7 +1007,12 @@ public class DataPool {
 	public Time getTime(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Time) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Time) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getTime(columnIndex);
 		}
@@ -783,7 +1021,12 @@ public class DataPool {
 	public Time getTime(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Time) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Time) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getTime(columnName);
 		}
@@ -810,7 +1053,12 @@ public class DataPool {
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (Timestamp) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Timestamp) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getTimestamp(columnIndex);
 		}
@@ -819,7 +1067,12 @@ public class DataPool {
 	public Timestamp getTimestamp(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (Timestamp) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (Timestamp) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getTimestamp(columnName);
 		}
@@ -860,7 +1113,12 @@ public class DataPool {
 	public URL getURL(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (URL) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (URL) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getURL(columnIndex);
 		}
@@ -869,7 +1127,12 @@ public class DataPool {
 	public URL getURL(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (URL) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (URL) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getURL(columnName);
 		}
@@ -879,7 +1142,12 @@ public class DataPool {
 	public InputStream getUnicodeStream(int columnIndex) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnIndex).isWasNull();
-			return (InputStream) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (InputStream) memoryData.get(rowNum - 1).get(columnIndex).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getUnicodeStream(columnIndex);
 		}
@@ -889,7 +1157,12 @@ public class DataPool {
 	public InputStream getUnicodeStream(String columnName) throws SQLException {
 		if (inMemory) {
 			wasNull = memoryData.get(rowNum - 1).get(columnName).isWasNull();
-			return (InputStream) memoryData.get(rowNum - 1).get(columnName).getValue();
+
+			if (wasNull) {
+				return null;
+			} else {
+				return (InputStream) memoryData.get(rowNum - 1).get(columnName).getValue();
+			}
 		} else {
 			return resultSets.get(resultSetIndex).getUnicodeStream(columnName);
 		}
