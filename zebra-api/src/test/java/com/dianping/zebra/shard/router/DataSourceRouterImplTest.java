@@ -247,4 +247,12 @@ public class DataSourceRouterImplTest {
 
 		baseTest(sql, params);
 	}
+	
+	@Test
+	public void testCase18() {
+		String sql = "SELECT * FROM DP_GroupFollowNote WHERE NoteID in (?,?,?,?)";
+		List<Object> params = Arrays.asList((Object) 1, 300,100,103);
+
+		baseTest(sql, params);
+	}
 }

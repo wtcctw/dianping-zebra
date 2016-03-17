@@ -326,7 +326,6 @@ public class DefaultDataMerger implements DataMerger {
 
 	private List<RowData> popResultSets(List<ResultSet> actualResultSets, MergeContext mergeContext)
 			throws SQLException {
-
 		List<RowData> rows = new ArrayList<RowData>();
 
 		for (int resultSetIndex = 0; resultSetIndex < actualResultSets.size(); resultSetIndex++) {

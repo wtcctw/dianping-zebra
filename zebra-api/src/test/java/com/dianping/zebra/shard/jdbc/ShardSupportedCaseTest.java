@@ -74,6 +74,15 @@ public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
     public void test_select() throws SQLException {
         assert SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), "select * from test").size() > 0;
     }
+    
+    @Test
+    public void test_select_with_in() throws SQLException {
+    	String sql = "select classid from test where id in (1,2,3)";
+        List<List<Object>> data = SqlExecuteHelper.executeQuery(getZebraDs().getConnection(), sql);
+        
+        System.out.println(data);
+    }
+
 
     @Test
     public void test_select_with_where_and_order_by() throws SQLException {
