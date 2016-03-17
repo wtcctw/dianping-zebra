@@ -11,6 +11,11 @@ import com.dianping.zebra.dao.annotation.TargetMethod;
 import com.dianping.zebra.dao.entity.HeartbeatEntity;
 import com.dianping.zebra.dao.plugin.page.PageModel;
 
+/**
+ * test pagination
+ * @author damonzhu
+ *
+ */
 public interface HeartbeatMapper {
 
 	// RowBound
