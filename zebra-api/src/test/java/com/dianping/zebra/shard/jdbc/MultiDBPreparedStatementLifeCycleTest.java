@@ -727,6 +727,7 @@ public class MultiDBPreparedStatementLifeCycleTest extends ZebraMultiDBBaseTestC
 			Assert.assertEquals("fff", rows.get(0).get("type"));
 			Assert.assertEquals(43, rows.get(0).get("classid"));
 		} catch (Exception e) {
+			e.printStackTrace();
 			Assert.fail();
 		} finally {
 			if (conn != null) {

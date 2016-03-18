@@ -153,8 +153,16 @@ public class ShardConnection extends UnsupportedShardConnection implements Conne
 		return stmt;
 	}
 
-	public Connection getRealConnection(String jdbcRef) {
-		return actualConnections.get(jdbcRef);
+	public Connection getRealConnection(String jdbcRef,boolean autoCommit) throws SQLException {
+		Connection conn = actualConnections.get(jdbcRef);
+		
+		if(conn == null){
+			conn = dataSourceRepository.getDataSource(jdbcRef).getConnection();
+			conn.setAutoCommit(autoCommit);
+			actualConnections.put(jdbcRef, conn);
+		}
+		
+		return conn;
 	}
 
 	public void setRealConnection(String jdbcRef, Connection conn) {

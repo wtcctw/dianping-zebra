@@ -87,4 +87,8 @@ public class SqlAliasManager {
             sqlAlias.set(getCachedTruncatedSql(sql));
         }
     }
+    
+    public static void setSqlAlias2(String alias){
+    	sqlAlias.set(alias);
+    }
 }

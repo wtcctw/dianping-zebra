@@ -36,6 +36,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.dianping.zebra.group.jdbc.param.ArrayParamContext;
 import com.dianping.zebra.group.jdbc.param.AsciiParamContext;
@@ -67,14 +70,18 @@ import com.dianping.zebra.group.jdbc.param.TimeParamContext;
 import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
 import com.dianping.zebra.group.jdbc.param.UnicodeStreamParamContext;
+import com.dianping.zebra.group.util.SqlAliasManager;
+import com.dianping.zebra.shard.jdbc.parallel.PreparedStatementExecuteQueryCallable;
+import com.dianping.zebra.shard.jdbc.parallel.PreparedStatementExecuteUpdateCallable;
+import com.dianping.zebra.shard.jdbc.parallel.UpdateResult;
 import com.dianping.zebra.shard.jdbc.unsupport.UnsupportedShardPreparedStatement;
 import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.shard.router.RouterResult.RouterTarget;
-import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.SqlType;
 
 /**
  * @author Leo Liang
+ * @author hao.zhu
  */
 public class ShardPreparedStatement extends UnsupportedShardPreparedStatement implements PreparedStatement {
 
@@ -88,7 +95,7 @@ public class ShardPreparedStatement extends UnsupportedShardPreparedStatement im
 
 	private List<ParamContext> params = new ArrayList<ParamContext>();
 
-	protected PreparedStatement _prepareStatement(Connection connection, String targetSql) throws SQLException {
+	protected PreparedStatement createPrepareStatement(Connection connection, String targetSql) throws SQLException {
 		PreparedStatement stmt = null;
 		if (getResultSetType() != -1 && getResultSetConcurrency() != -1 && getResultSetHoldability() != -1) {
 			stmt = connection.prepareStatement(targetSql, getResultSetType(), getResultSetConcurrency(),
@@ -153,26 +160,26 @@ public class ShardPreparedStatement extends UnsupportedShardPreparedStatement im
 
 		attachedResultSets.add(rs);
 
-		List<SQLException> exceptions = new ArrayList<SQLException>();
-
+		List<Callable<ResultSet>> callables = new ArrayList<Callable<ResultSet>>();
 		for (RouterTarget targetedSql : routerTarget.getSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
-				try {
-					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
-					if (conn == null) {
-						String dbIndex = targetedSql.getDataSourceName();
-						conn = dataSourceRepository.getDataSource(dbIndex).getConnection();
-						conn.setAutoCommit(autoCommit);
+				Connection conn = connection.getRealConnection(targetedSql.getDatabaseName(), autoCommit);
+				PreparedStatement stmt = createPrepareStatement(conn, executableSql);
+				actualStatements.add(stmt);
+				setParams(stmt);
 
-						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
-					}
-					PreparedStatement stmt = _prepareStatement(conn, executableSql);
-					actualStatements.add(stmt);
-					setParams(stmt);
-					rs.getActualResultSets().add(stmt.executeQuery());
-				} catch (SQLException e) {
-					exceptions.add(e);
-				}
+				callables.add(new PreparedStatementExecuteQueryCallable(stmt, SqlAliasManager.getSqlAlias()));
+			}
+		}
+
+		List<Future<ResultSet>> futures = executorService.invokeSQLs(callables, 1000L, TimeUnit.MILLISECONDS);
+
+		for (Future<ResultSet> f : futures) {
+			try {
+				rs.addResultSet(f.get());
+			} catch (Exception e) {
+				// normally can't be here!
+				throw new SQLException(e);
 			}
 		}
 
@@ -180,8 +187,6 @@ public class ShardPreparedStatement extends UnsupportedShardPreparedStatement im
 		this.updateCount = -1;
 
 		rs.init();
-
-		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
 
 		return this.results;
 	}
@@ -195,39 +200,38 @@ public class ShardPreparedStatement extends UnsupportedShardPreparedStatement im
 		rewriteAndMergeParms(routerTarget.getParams());
 
 		int affectedRows = 0;
-		List<SQLException> exceptions = new ArrayList<SQLException>();
-
+		List<Callable<UpdateResult>> tasks = new ArrayList<Callable<UpdateResult>>();
+		
 		for (RouterTarget targetedSql : routerTarget.getSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
-				try {
-					Connection conn = connection.getRealConnection(targetedSql.getDataSourceName());
-					if (conn == null) {
-						String dbIndex = targetedSql.getDataSourceName();
-						conn = dataSourceRepository.getDataSource(dbIndex).getConnection();
-						conn.setAutoCommit(autoCommit);
-
-						connection.setRealConnection(targetedSql.getDataSourceName(), conn);
-					}
-					PreparedStatement stmt = _prepareStatement(conn, executableSql);
+					Connection conn = connection.getRealConnection(targetedSql.getDatabaseName(), autoCommit);
+					PreparedStatement stmt = createPrepareStatement(conn, executableSql);
 					actualStatements.add(stmt);
 					setParams(stmt);
 
-					affectedRows += stmt.executeUpdate();
-
-					// 把insert语句返回的生成key保存在当前会话中
-					if (executableSql.trim().charAt(0) == 'i' || executableSql.trim().charAt(0) == 'I') {
-						this.generatedKey = stmt.getGeneratedKeys();
-					}
-				} catch (SQLException e) {
-					exceptions.add(e);
-				}
+					tasks.add(new PreparedStatementExecuteUpdateCallable(stmt, SqlAliasManager.getSqlAlias(), executableSql));
 			}
 		}
 
+		List<Future<UpdateResult>> futures = executorService.invokeSQLs(tasks, 1000L, TimeUnit.MILLISECONDS);
+		
+		for(Future<UpdateResult> f : futures){
+			try {
+				UpdateResult updateResult = f.get();
+				
+				affectedRows += updateResult.getAffectedRows();
+				
+				if(updateResult.getGeneratedKey() != null){
+					this.generatedKey = updateResult.getGeneratedKey();
+				}
+			} catch (Exception e) {
+				//normally can't be here
+				throw new SQLException(e);
+			}
+		}
+		
 		this.results = null;
 		this.updateCount = affectedRows;
-
-		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
 
 		return affectedRows;
 	}

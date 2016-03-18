@@ -24,7 +24,7 @@ public class LionDataSourceRouterFactoryTest {
 		RouterResult router2 = router.router("select * from Users where id = 1", null);
 
 		for (RouterTarget rt : router2.getSqls()) {
-			System.out.println(rt.getDataSourceName());
+			System.out.println(rt.getDatabaseName());
 			for (String sql : rt.getSqls()) {
 				System.out.println(sql);
 			}

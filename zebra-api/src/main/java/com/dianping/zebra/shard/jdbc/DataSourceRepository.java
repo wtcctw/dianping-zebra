@@ -58,10 +58,6 @@ public class DataSourceRepository {
 		return dataSources.get(dsName.toLowerCase());
 	}
 
-	public boolean contains(String name) {
-		return dataSources.containsKey(name);
-	}
-
 	public void put(String name, DataSource dataSource) {
 		dataSources.put(name, dataSource);
 	}

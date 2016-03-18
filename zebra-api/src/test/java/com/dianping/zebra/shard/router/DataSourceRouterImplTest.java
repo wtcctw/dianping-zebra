@@ -69,7 +69,7 @@ public class DataSourceRouterImplTest {
 	private void printSql(List<RouterTarget> targetedSqls) {
 		for (RouterTarget targetedSql : targetedSqls) {
 			for (String sql : targetedSql.getSqls()) {
-				System.out.println(String.format("[%s]  %s", targetedSql.getDataSourceName(), sql));
+				System.out.println(String.format("[%s]  %s", targetedSql.getDatabaseName(), sql));
 			}
 		}
 	}
@@ -92,7 +92,7 @@ public class DataSourceRouterImplTest {
 		assertTrue(!target.getParams().isEmpty());
 
 		RouterTarget targetedSql = targetedSqls.get(0);
-		assertTrue(targetedSql.getDataSourceName().equalsIgnoreCase(targetDs)
+		assertTrue(targetedSql.getDatabaseName().equalsIgnoreCase(targetDs)
 		      && targetedSql.getSqls().get(0).contains(targetTable));
 	}
 

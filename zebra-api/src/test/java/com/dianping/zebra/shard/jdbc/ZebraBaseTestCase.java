@@ -47,7 +47,6 @@ public abstract class ZebraBaseTestCase {
 
 	@Test
 	public void testUnsupportedOps() throws Exception {
-
 		Method[] methods = getTestObj().getClass().getDeclaredMethods();
 		for (Method method : methods) {
 			if (!Arrays.asList(getSupportedOps()).contains(method.getName()) && method.getModifiers() == 1) {

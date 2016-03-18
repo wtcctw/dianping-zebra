@@ -59,20 +59,20 @@ public class RouterResult {
 	
 	public static class RouterTarget {
 
-		private String dbIndex;
+		private String dbName;
 
 		private List<String> sqls;
 
-		public RouterTarget(String dbIndex) {
-			this.dbIndex = dbIndex;
+		public RouterTarget(String dbName) {
+			this.dbName = dbName;
 		}
 		
-		public String getDataSourceName() {
-			return dbIndex;
+		public String getDatabaseName() {
+			return dbName;
 		}
 
-		public void setDataSourceName(String dbIndex) {
-			this.dbIndex = dbIndex;
+		public void setDatabaseName(String dbName) {
+			this.dbName = dbName;
 		}
 
 		public List<String> getSqls() {

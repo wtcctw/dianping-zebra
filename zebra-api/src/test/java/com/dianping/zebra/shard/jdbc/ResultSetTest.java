@@ -30,7 +30,7 @@ public class ResultSetTest extends ZebraBaseTestCase {
 	 */
 	@Override
 	protected String[] getSupportedOps() {
-		return new String[] { "setRouterTarget", "getActualResultSets", "setActualResultSets", "getStatement","getShardStatement",
+		return new String[] { "setRouterTarget", "addResultSet", "getStatement","getShardStatement",
 				"setStatement", "close", "findColumn", "getArray", "getAsciiStream", "getBigDecimal",
 				"getBinaryStream", "getBlob", "getBoolean", "getByte", "getBytes", "getCharacterStream", "getClob",
 				"getConcurrency", "getCursorName", "getDate", "getDouble", "getFetchDirection", "getFetchSize",

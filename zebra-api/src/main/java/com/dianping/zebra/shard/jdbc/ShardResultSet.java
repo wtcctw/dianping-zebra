@@ -104,8 +104,8 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 		return dataPool.findColumn(columnLabel);
 	}
 
-	public List<ResultSet> getActualResultSets() {
-		return actualResultSets;
+	public void addResultSet(ResultSet rs){
+		this.actualResultSets.add(rs);
 	}
 
 	@Override
@@ -580,10 +580,6 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 			init();
 		}
 		return dataPool.next();
-	}
-
-	public void setActualResultSets(List<ResultSet> actualResultSets) {
-		this.actualResultSets = actualResultSets;
 	}
 
 	public void setDataPool(DataPool dataPool) {
