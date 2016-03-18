@@ -25,7 +25,6 @@ import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.ConfigServiceFactory;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.shard.router.RouterBuilder;
-import com.dianping.zebra.shard.jdbc.executor.DataSourceRepository;
 import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.shard.router.builder.LionRouterBuilder;
 import com.dianping.zebra.util.StringUtils;

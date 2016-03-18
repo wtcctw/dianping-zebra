@@ -12,20 +12,28 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
-import com.dianping.zebra.util.JDBCUtils;
-import com.dianping.zebra.shard.jdbc.executor.DataSourceRepository;
-import com.dianping.zebra.shard.router.ShardRouter;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.sql.*;
-import java.util.*;
-import java.util.concurrent.Executor;
+import com.dianping.zebra.shard.jdbc.unsupport.UnsupportedShardConnection;
+import com.dianping.zebra.shard.router.ShardRouter;
+import com.dianping.zebra.util.JDBCUtils;
 
 /**
  * @author Leo Liang
  * @author hao.zhu
  * 
  */
-public class ShardConnection implements Connection {
+public class ShardConnection extends UnsupportedShardConnection implements Connection {
 
 	private ShardRouter router;
 
@@ -49,34 +57,14 @@ public class ShardConnection implements Connection {
 	public ShardConnection(String username, String password) {
 	}
 
-	public void abort(Executor executor) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport abort");
-	}
-
 	private void checkClosed() throws SQLException {
 		if (closed) {
 			throw new SQLException("No operations allowed after connection closed.");
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#clearWarnings()
-	 */
-	@Override
-	public void clearWarnings() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport clearWarnings");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#close()
-	 */
 	@Override
 	public void close() throws SQLException {
-
 		if (closed) {
 			return;
 		}
@@ -108,11 +96,6 @@ public class ShardConnection implements Connection {
 		JDBCUtils.throwSQLExceptionIfNeeded(innerExceptions);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#commit()
-	 */
 	@Override
 	public void commit() throws SQLException {
 		checkClosed();
@@ -134,61 +117,6 @@ public class ShardConnection implements Connection {
 		JDBCUtils.throwSQLExceptionIfNeeded(innerExceptions);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createArrayOf(java.lang.String, java.lang.Object[])
-	 */
-	@Override
-	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport createArrayOf");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createBlob()
-	 */
-	@Override
-	public Blob createBlob() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport createBlob");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createClob()
-	 */
-	@Override
-	public Clob createClob() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport createClob");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createNClob()
-	 */
-	@Override
-	public NClob createNClob() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport createNClob");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createSQLXML()
-	 */
-	@Override
-	public SQLXML createSQLXML() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport createSQLXML");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createStatement()
-	 */
 	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
@@ -205,11 +133,6 @@ public class ShardConnection implements Connection {
 		return stmt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createStatement(int, int)
-	 */
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
 		ShardStatement stmt = (ShardStatement) createStatement();
@@ -220,29 +143,14 @@ public class ShardConnection implements Connection {
 		return stmt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createStatement(int, int, int)
-	 */
 	@Override
 	public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-	      throws SQLException {
+			throws SQLException {
 		ShardStatement stmt = (ShardStatement) createStatement(resultSetType, resultSetConcurrency);
 
 		stmt.setResultSetHoldability(resultSetHoldability);
 
 		return stmt;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#createStruct(java.lang.String, java.lang.Object[])
-	 */
-	@Override
-	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport createStruct");
 	}
 
 	public Connection getRealConnection(String jdbcRef) {
@@ -269,195 +177,36 @@ public class ShardConnection implements Connection {
 		return attachedStatements;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getAutoCommit()
-	 */
 	@Override
 	public boolean getAutoCommit() throws SQLException {
 		return autoCommit;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getCatalog()
-	 */
-	@Override
-	public String getCatalog() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getCatalog");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getClientInfo()
-	 */
-	@Override
-	public Properties getClientInfo() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getClientInfo");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getClientInfo(java.lang.String)
-	 */
-	@Override
-	public String getClientInfo(String name) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getClientInfo");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getHoldability()
-	 */
-	@Override
-	public int getHoldability() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getHoldability");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getMetaData()
-	 */
 	@Override
 	public DatabaseMetaData getMetaData() throws SQLException {
 		checkClosed();
 		return new ShardDatabaseMetaData();
 	}
 
-	public int getNetworkTimeout() throws SQLException {
-		throw new UnsupportedOperationException("getNetworkTimeout");
-	}
-
 	public ShardRouter getRouter() {
 		return router;
 	}
 
-	public String getSchema() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getSchema");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getTransactionIsolation()
-	 */
 	@Override
 	public int getTransactionIsolation() throws SQLException {
 		return transactionIsolation;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getTypeMap()
-	 */
-	@Override
-	public Map<String, Class<?>> getTypeMap() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getTypeMap");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#getWarnings()
-	 */
-	@Override
-	public SQLWarning getWarnings() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport getWarnings");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#isClosed()
-	 */
 	@Override
 	public boolean isClosed() throws SQLException {
 		return closed;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#isReadOnly()
-	 */
 	@Override
 	public boolean isReadOnly() throws SQLException {
 		return readOnly;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#isValid(int)
-	 */
-	@Override
-	public boolean isValid(int timeout) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport isValid");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
-	 */
-	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport isWrapperFor");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#nativeSQL(java.lang.String)
-	 */
-	@Override
-	public String nativeSQL(String sql) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport nativeSQL");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareCall(java.lang.String)
-	 */
-	@Override
-	public CallableStatement prepareCall(String sql) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport prepareCall");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareCall(java.lang.String, int, int)
-	 */
-	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport prepareCall");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareCall(java.lang.String, int, int, int)
-	 */
-	@Override
-	public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-	      int resultSetHoldability) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport prepareCall");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String)
-	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
 		checkClosed();
@@ -475,11 +224,6 @@ public class ShardConnection implements Connection {
 		return stmt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int)
-	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
 		ShardPreparedStatement stmt = (ShardPreparedStatement) prepareStatement(sql);
@@ -487,38 +231,24 @@ public class ShardConnection implements Connection {
 		return stmt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int)
-	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-	      throws SQLException {
+			throws SQLException {
 		ShardPreparedStatement stmt = (ShardPreparedStatement) prepareStatement(sql);
 		stmt.setResultSetType(resultSetType);
 		stmt.setResultSetConcurrency(resultSetConcurrency);
 		return stmt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int, int, int)
-	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-	      int resultSetHoldability) throws SQLException {
-		ShardPreparedStatement stmt = (ShardPreparedStatement) prepareStatement(sql, resultSetType, resultSetConcurrency);
+			int resultSetHoldability) throws SQLException {
+		ShardPreparedStatement stmt = (ShardPreparedStatement) prepareStatement(sql, resultSetType,
+				resultSetConcurrency);
 		stmt.setResultSetHoldability(resultSetHoldability);
 		return stmt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, int[])
-	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
 		ShardPreparedStatement stmt = (ShardPreparedStatement) prepareStatement(sql);
@@ -526,11 +256,6 @@ public class ShardConnection implements Connection {
 		return stmt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#prepareStatement(java.lang.String, java.lang.String[])
-	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
 		ShardPreparedStatement stmt = (ShardPreparedStatement) prepareStatement(sql);
@@ -538,24 +263,8 @@ public class ShardConnection implements Connection {
 		return stmt;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#releaseSavepoint(java.sql.Savepoint)
-	 */
-	@Override
-	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport releaseSavePoint");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#rollback()
-	 */
 	@Override
 	public void rollback() throws SQLException {
-
 		checkClosed();
 
 		if (autoCommit) {
@@ -575,16 +284,6 @@ public class ShardConnection implements Connection {
 		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#rollback(java.sql.Savepoint)
-	 */
-	@Override
-	public void rollback(Savepoint savepoint) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport rollback with savepoint");
-	}
-
 	public void setActualConnections(Map<String, Connection> actualConnections) {
 		this.actualConnections = actualConnections;
 	}
@@ -593,66 +292,12 @@ public class ShardConnection implements Connection {
 		this.attachedStatements = attachedStatements;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setAutoCommit(boolean)
-	 */
 	@Override
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
 		checkClosed();
 		this.autoCommit = autoCommit;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setCatalog(java.lang.String)
-	 */
-	@Override
-	public void setCatalog(String catalog) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setCatalog");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setClientInfo(java.util.Properties)
-	 */
-	@Override
-	public void setClientInfo(Properties properties) throws SQLClientInfoException {
-		throw new UnsupportedOperationException("Zebra unsupport setClientInfo");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setClientInfo(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public void setClientInfo(String name, String value) throws SQLClientInfoException {
-		throw new UnsupportedOperationException("Zebra unsupport setClientInfo");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setHoldability(int)
-	 */
-	@Override
-	public void setHoldability(int holdability) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setHoldability");
-	}
-
-	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setNetworkTimeout");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setReadOnly(boolean)
-	 */
 	@Override
 	public void setReadOnly(boolean readOnly) throws SQLException {
 		checkClosed();
@@ -664,62 +309,13 @@ public class ShardConnection implements Connection {
 		this.router = router;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setSavepoint()
-	 */
-	@Override
-	public Savepoint setSavepoint() throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setSavepoint");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setSavepoint(java.lang.String)
-	 */
-	@Override
-	public Savepoint setSavepoint(String name) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setSavepoint");
-	}
-
-	public void setSchema(String schema) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setSchema");
-	}
-
 	public void setDataSourceRepository(DataSourceRepository dataSourceRepository) {
 		this.dataSourceRepository = dataSourceRepository;
 	}
 
-	/*
-		 * (non-Javadoc)
-		 *
-		 * @see java.sql.Connection#setTransactionIsolation(int)
-		 */
 	@Override
 	public void setTransactionIsolation(int level) throws SQLException {
 		checkClosed();
 		this.transactionIsolation = level;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Connection#setTypeMap(java.util.Map)
-	 */
-	@Override
-	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setTypeMap");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.Wrapper#unwrap(java.lang.Class)
-	 */
-	@Override
-	public <T> T unwrap(Class<T> iface) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport unwrap");
 	}
 }
