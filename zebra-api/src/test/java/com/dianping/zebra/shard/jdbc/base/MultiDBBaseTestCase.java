@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.jdbc;
+package com.dianping.zebra.shard.jdbc.base;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,15 +37,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO Comment of ZebraMultiDBBaseTestCase
- * 
  * @author Leo Liang
  * 
  */
-public abstract class ZebraMultiDBBaseTestCase {
+public abstract class MultiDBBaseTestCase {
 
-	private List<CreateTableScriptEntry>	createdTableList	= new ArrayList<CreateTableScriptEntry>();
-	protected static ApplicationContext		context;
+	private List<CreateTableScriptEntry> createdTableList = new ArrayList<CreateTableScriptEntry>();
+	protected static ApplicationContext context;
 
 	protected abstract String getDBBaseUrl();
 
@@ -120,8 +118,8 @@ public abstract class ZebraMultiDBBaseTestCase {
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document configDoc = builder.parse(ZebraMultiDBBaseTestCase.class.getClassLoader().getResourceAsStream(
-				getDataFile()));
+		Document configDoc = builder
+				.parse(MultiDBBaseTestCase.class.getClassLoader().getResourceAsStream(getDataFile()));
 		XPathFactory xpathFactory = XPathFactory.newInstance();
 		XPath xpath = xpathFactory.newXPath();
 		NodeList databaseList = (NodeList) xpath.compile("/dataset/database").evaluate(configDoc,
@@ -222,8 +220,8 @@ public abstract class ZebraMultiDBBaseTestCase {
 	private void parseCreateScriptConfigFile() throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document configDoc = builder.parse(ZebraMultiDBBaseTestCase.class.getClassLoader().getResourceAsStream(
-				getCreateScriptConfigFile()));
+		Document configDoc = builder
+				.parse(MultiDBBaseTestCase.class.getClassLoader().getResourceAsStream(getCreateScriptConfigFile()));
 		XPathFactory xpathFactory = XPathFactory.newInstance();
 		XPath xpath = xpathFactory.newXPath();
 		NodeList databaseList = (NodeList) xpath.compile("/databases/database").evaluate(configDoc,
@@ -244,8 +242,8 @@ public abstract class ZebraMultiDBBaseTestCase {
 	}
 
 	private static class CreateTableScriptEntry {
-		private String				dbName;
-		private Map<String, String>	tableNameScriptMapping;
+		private String dbName;
+		private Map<String, String> tableNameScriptMapping;
 
 		/**
 		 * @return the dbName
@@ -280,8 +278,8 @@ public abstract class ZebraMultiDBBaseTestCase {
 	}
 
 	private static class DBDataEntry {
-		private String			dbName;
-		private List<String>	scripts;
+		private String dbName;
+		private List<String> scripts;
 
 		/**
 		 * @return the dbName

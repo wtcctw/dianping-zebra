@@ -13,12 +13,16 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.jdbc;
+package com.dianping.zebra.shard.jdbc.specification;
 
 import junit.framework.Assert;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;
+
+import com.dianping.zebra.shard.jdbc.ShardConnection;
+import com.dianping.zebra.shard.jdbc.ShardStatement;
+import com.dianping.zebra.shard.jdbc.base.BaseTestCase;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
@@ -35,7 +39,7 @@ import java.util.Set;
  * @author Leo Liang
  * 
  */
-public class StatementTest extends ZebraBaseTestCase {
+public class StatementTest extends BaseTestCase {
 
 	private Mockery	context	= new Mockery();
 

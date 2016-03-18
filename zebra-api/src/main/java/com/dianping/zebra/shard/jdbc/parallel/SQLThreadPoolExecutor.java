@@ -97,7 +97,8 @@ public class SQLThreadPoolExecutor extends ThreadPoolExecutor {
 						throw new SQLException(ee.getCause());
 					} catch (TimeoutException toe) {
 						cancelAll(futures);
-						throw new SQLException("One of your sql's execution time is beyond 1 seconds", toe);
+						throw new SQLException(
+								"One of your sql's execution time is beyond " + executeTimeOut + " milliseconds.", toe);
 					} catch (InterruptedException e) {
 						cancelAll(futures);
 						throw new SQLException(e);

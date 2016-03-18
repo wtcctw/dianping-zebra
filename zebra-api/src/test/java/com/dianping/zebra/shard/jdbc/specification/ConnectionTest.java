@@ -13,13 +13,19 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.jdbc;
+package com.dianping.zebra.shard.jdbc.specification;
 
 import junit.framework.Assert;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;
+
+import com.dianping.zebra.shard.jdbc.ShardConnection;
+import com.dianping.zebra.shard.jdbc.ShardDatabaseMetaData;
+import com.dianping.zebra.shard.jdbc.ShardPreparedStatement;
+import com.dianping.zebra.shard.jdbc.ShardStatement;
+import com.dianping.zebra.shard.jdbc.base.BaseTestCase;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -32,16 +38,16 @@ import java.util.Set;
  * 
  */
 @SuppressWarnings("resource")
-public class ConnectionTest extends ZebraBaseTestCase {
+public class ConnectionTest extends BaseTestCase {
 
-	private Mockery	context	= new Mockery();
+	private Mockery context = new Mockery();
 
 	protected String[] getSupportedOps() {
-		return new String[] { "setDataSourceRepository", "DPConnection", "getAttachedStatements", "setAttachedStatements", "setClosed",
-				"getRealConnection", "setRealConnection","setActualConnections","getUsername", "setUsername", "getPassword",
-				"setPassword", "getRouter", "setRouter", "close", "commit", "createStatement", "getAutoCommit",
-				"getMetaData", "getTransactionIsolation", "isClosed", "isReadOnly", "prepareStatement", "rollback",
-				"setAutoCommit", "setReadOnly", "setTransactionIsolation", "setSyncEventNotifier", "getEventNotifier"};
+		return new String[] { "setDataSourceRepository", "getAttachedStatements", "setAttachedStatements", "setClosed",
+				"getRealConnection", "setRealConnection", "setActualConnections", "getUsername", "setUsername",
+				"getPassword", "setPassword", "getRouter", "setRouter", "close", "commit", "createStatement",
+				"getAutoCommit", "getMetaData", "getTransactionIsolation", "isClosed", "isReadOnly", "prepareStatement",
+				"rollback", "setAutoCommit", "setReadOnly", "setTransactionIsolation" };
 	}
 
 	protected Object getTestObj() {
@@ -86,7 +92,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 		Assert.assertTrue(conn.isClosed());
 	}
 
-//	@Test
+	// @Test
 	public void testCloseThrowException() throws Exception {
 		ShardConnection conn = new ShardConnection();
 
@@ -127,7 +133,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	}
 
-//	@Test
+	// @Test
 	public void testCloseThrowException2() throws Exception {
 		ShardConnection conn = new ShardConnection();
 
@@ -170,7 +176,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	@Test
 	public void testCommit() throws Exception {
-      ShardConnection conn = new ShardConnection();
+		ShardConnection conn = new ShardConnection();
 
 		Map<String, Connection> actualConnections = new HashMap<String, Connection>();
 		final Connection conn1 = context.mock(Connection.class, "conn1");
@@ -195,7 +201,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	}
 
-//	@Test
+	// @Test
 	public void testCommitThrowException() throws Exception {
 		ShardConnection conn = new ShardConnection();
 
@@ -396,7 +402,7 @@ public class ConnectionTest extends ZebraBaseTestCase {
 
 	}
 
-//	@Test
+	// @Test
 	public void testRollbackThrowException() throws Exception {
 		ShardConnection conn = new ShardConnection();
 

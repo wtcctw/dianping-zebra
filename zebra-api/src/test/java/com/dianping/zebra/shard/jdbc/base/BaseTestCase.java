@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.jdbc;
+package com.dianping.zebra.shard.jdbc.base;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,17 +23,15 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * TODO Comment of ZebraBaseTestCase
- * 
  * @author Leo Liang
  * 
  */
-public abstract class ZebraBaseTestCase {
+public abstract class BaseTestCase {
 	protected abstract String[] getSupportedOps();
 
 	protected abstract Object getTestObj();
 
-	private static Map<String, Object>	primitiveTypeMapping	= new HashMap<String, Object>();
+	private static Map<String, Object> primitiveTypeMapping = new HashMap<String, Object>();
 
 	static {
 		primitiveTypeMapping.put("int", new Integer(0));
@@ -61,8 +59,8 @@ public abstract class ZebraBaseTestCase {
 				}
 
 				try {
-					System.out.println("Test unsupported Ops for method: " + getTestObj().getClass() + "#"
-							+ method.getName());
+					System.out.println(
+							"Test unsupported Ops for method: " + getTestObj().getClass() + "#" + method.getName());
 					method.invoke(getTestObj(), paramList.toArray(new Object[0]));
 					Assert.fail("Unsupported method doesn't throw UnsupportedOperationException. Method:"
 							+ method.getName());

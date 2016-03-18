@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.jdbc;
+package com.dianping.zebra.shard.jdbc.base;
 
 import org.dbunit.DBTestCase;
 import org.dbunit.DatabaseUnitException;
@@ -47,10 +47,10 @@ import java.util.List;
  * @author Leo Liang
  * 
  */
-public abstract class ZebraSingleDBBaseTestCase extends DBTestCase {
+public abstract class SingleDBBaseTestCase extends DBTestCase {
 
-	private List<CreateTableScriptEntry>	createdTableList	= new ArrayList<CreateTableScriptEntry>();
-	protected ApplicationContext			context;
+	private List<CreateTableScriptEntry> createdTableList = new ArrayList<CreateTableScriptEntry>();
+	protected ApplicationContext context;
 
 	protected abstract String getDataSetFilePath();
 
@@ -64,25 +64,19 @@ public abstract class ZebraSingleDBBaseTestCase extends DBTestCase {
 		return "org.h2.Driver";
 	}
 
-	public ZebraSingleDBBaseTestCase() {
+	public SingleDBBaseTestCase() {
 		System.setProperty(PropertiesBasedJdbcDatabaseTester.DBUNIT_DRIVER_CLASS, getDriverName());
 		System.setProperty(PropertiesBasedJdbcDatabaseTester.DBUNIT_CONNECTION_URL, getDBUrl());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.dbunit.DatabaseTestCase#setUpDatabaseConfig(org.dbunit.database.
-	 * DatabaseConfig)
-	 */
 	@Override
 	protected void setUpDatabaseConfig(DatabaseConfig config) {
 		config.setProperty(DatabaseConfig.PROPERTY_DATATYPE_FACTORY, new H2DataTypeFactory());
 	}
 
 	protected IDataSet getDataSet() throws Exception {
-		return new FlatXmlDataSetBuilder().build(ZebraSingleDBBaseTestCase.class.getClassLoader().getResourceAsStream(
-				getDataSetFilePath()));
+		return new FlatXmlDataSetBuilder()
+				.build(SingleDBBaseTestCase.class.getClassLoader().getResourceAsStream(getDataSetFilePath()));
 	}
 
 	protected DatabaseOperation getSetUpOperation() throws Exception {
@@ -93,8 +87,8 @@ public abstract class ZebraSingleDBBaseTestCase extends DBTestCase {
 		return new CompositeOperation(new DatabaseOperation[] { new DatabaseOperation() {
 
 			@Override
-			public void execute(IDatabaseConnection connection, IDataSet dataSet) throws DatabaseUnitException,
-					SQLException {
+			public void execute(IDatabaseConnection connection, IDataSet dataSet)
+					throws DatabaseUnitException, SQLException {
 
 				DatabaseConfig databaseConfig = connection.getConfig();
 				IStatementFactory statementFactory = (IStatementFactory) databaseConfig
@@ -122,8 +116,8 @@ public abstract class ZebraSingleDBBaseTestCase extends DBTestCase {
 		return new DatabaseOperation() {
 
 			@Override
-			public void execute(IDatabaseConnection connection, IDataSet dataSet) throws DatabaseUnitException,
-					SQLException {
+			public void execute(IDatabaseConnection connection, IDataSet dataSet)
+					throws DatabaseUnitException, SQLException {
 
 				DatabaseConfig databaseConfig = connection.getConfig();
 				IStatementFactory statementFactory = (IStatementFactory) databaseConfig
@@ -158,12 +152,12 @@ public abstract class ZebraSingleDBBaseTestCase extends DBTestCase {
 	protected void parseCreateTableScriptFile() throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		Document configDoc = builder.parse(ZebraSingleDBBaseTestCase.class.getClassLoader().getResourceAsStream(
-				getCreateTableScriptPath()));
+		Document configDoc = builder
+				.parse(SingleDBBaseTestCase.class.getClassLoader().getResourceAsStream(getCreateTableScriptPath()));
 		XPathFactory xpathFactory = XPathFactory.newInstance();
 		XPath xpath = xpathFactory.newXPath();
-		NodeList tableScriptList = (NodeList) xpath.compile("/tables/table")
-				.evaluate(configDoc, XPathConstants.NODESET);
+		NodeList tableScriptList = (NodeList) xpath.compile("/tables/table").evaluate(configDoc,
+				XPathConstants.NODESET);
 		for (int i = 0; i < tableScriptList.getLength(); i++) {
 			CreateTableScriptEntry entry = new CreateTableScriptEntry();
 			Element ele = (Element) tableScriptList.item(i);
@@ -174,8 +168,8 @@ public abstract class ZebraSingleDBBaseTestCase extends DBTestCase {
 	}
 
 	private static class CreateTableScriptEntry {
-		private String	tableName;
-		private String	createTableScript;
+		private String tableName;
+		private String createTableScript;
 
 		/**
 		 * @return the tableName

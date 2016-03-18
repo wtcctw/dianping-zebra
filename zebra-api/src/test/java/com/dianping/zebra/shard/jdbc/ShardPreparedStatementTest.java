@@ -9,7 +9,9 @@ import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ShardPreparedStatementTest extends ZebraMultiDBBaseTestCase {
+import com.dianping.zebra.shard.jdbc.base.MultiDBBaseTestCase;
+
+public class ShardPreparedStatementTest extends MultiDBBaseTestCase {
 
 	private String insertSql = "insert into test(name,id,score,type,classid) values('damon.zhu',2,30,'stu',1)";
 

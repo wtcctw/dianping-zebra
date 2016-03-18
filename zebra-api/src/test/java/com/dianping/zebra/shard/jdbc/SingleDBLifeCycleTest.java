@@ -18,6 +18,8 @@ package com.dianping.zebra.shard.jdbc;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import com.dianping.zebra.shard.jdbc.base.SingleDBBaseTestCase;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,7 +35,7 @@ import java.util.Map;
  * @author Leo Liang
  * 
  */
-public class SingleDBLifeCycleTest extends ZebraSingleDBBaseTestCase {
+public class SingleDBLifeCycleTest extends SingleDBBaseTestCase {
 
 	/*
 	 * (non-Javadoc)

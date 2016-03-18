@@ -15,13 +15,15 @@
  */
 package com.dianping.zebra.shard.jdbc;
 
+import com.dianping.zebra.shard.jdbc.base.BaseTestCase;
+
 /**
  * TODO Comment of ResultSetTest
  * 
  * @author Leo Liang
  * 
  */
-public class ResultSetTest extends ZebraBaseTestCase {
+public class ResultSetTest extends BaseTestCase {
 
 	/*
 	 * (non-Javadoc)

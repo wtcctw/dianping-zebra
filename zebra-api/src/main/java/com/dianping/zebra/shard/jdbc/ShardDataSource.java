@@ -154,7 +154,7 @@ public class ShardDataSource extends AbstractDataSource {
 		SQLThreadPoolExecutor.workQueueSize = parallelWorkQueueSize;
 	}
 
-	public void setParalleExecuteTimeOut(int parallelExecuteTimeOut) {
+	public void setParallelExecuteTimeOut(int parallelExecuteTimeOut) {
 		SQLThreadPoolExecutor.executeTimeOut = parallelExecuteTimeOut;
 	}
 }

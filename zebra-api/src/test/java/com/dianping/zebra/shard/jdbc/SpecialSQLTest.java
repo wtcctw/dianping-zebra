@@ -18,6 +18,8 @@ package com.dianping.zebra.shard.jdbc;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import com.dianping.zebra.shard.jdbc.base.SingleDBBaseTestCase;
+
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Arrays;
@@ -28,7 +30,7 @@ import java.util.List;
  * @author Leo Liang
  * 
  */
-public class SpecialSQLTest extends ZebraSingleDBBaseTestCase {
+public class SpecialSQLTest extends SingleDBBaseTestCase {
 
 	/*
 	 * (non-Javadoc)

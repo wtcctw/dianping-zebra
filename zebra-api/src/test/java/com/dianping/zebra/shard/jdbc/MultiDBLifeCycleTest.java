@@ -18,6 +18,8 @@ package com.dianping.zebra.shard.jdbc;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import com.dianping.zebra.shard.jdbc.base.MultiDBBaseTestCase;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,47 +30,23 @@ import java.util.*;
 /**
  * @author Leo Liang
  */
-public class MultiDBLifeCycleTest extends ZebraMultiDBBaseTestCase {
+public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.zebra.jdbc.ZebraMultiDBBaseTestCase#getDBBaseUrl()
-	 */
 	@Override
 	protected String getDBBaseUrl() {
 		return "jdbc:h2:mem:";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.zebra.jdbc.ZebraMultiDBBaseTestCase#getCreateScriptConfigFile
-	 * ()
-	 */
 	@Override
 	protected String getCreateScriptConfigFile() {
 		return "db-datafiles/createtable-multidb-lifecycle.xml";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.zebra.jdbc.ZebraMultiDBBaseTestCase#getDataFile()
-	 */
 	@Override
 	protected String getDataFile() {
 		return "db-datafiles/data-multidb-lifecycle.xml";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.zebra.jdbc.ZebraMultiDBBaseTestCase#getSpringConfigLocations
-	 * ()
-	 */
 	@Override
 	protected String[] getSpringConfigLocations() {
 		return new String[] { "ctx-multidb-lifecycle.xml" };

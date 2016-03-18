@@ -1,5 +1,6 @@
 package com.dianping.zebra.shard.jdbc;
 
+import com.dianping.zebra.shard.jdbc.base.MultiDBBaseTestCase;
 import com.dianping.zebra.util.SqlExecuteHelper;
 import com.google.common.collect.Lists;
 
@@ -32,7 +33,7 @@ import java.util.List;
  * isMaster="false"
  * ==============================================
  */
-public class ShardSupportedCaseTest extends ZebraMultiDBBaseTestCase {
+public class ShardSupportedCaseTest extends MultiDBBaseTestCase {
     @Override
     protected String getDBBaseUrl() {
         return "jdbc:h2:mem:";

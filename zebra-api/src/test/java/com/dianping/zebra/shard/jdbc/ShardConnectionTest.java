@@ -11,7 +11,9 @@ import javax.sql.DataSource;
 
 import org.junit.Test;
 
-public class ShardConnectionTest extends ZebraMultiDBBaseTestCase {
+import com.dianping.zebra.shard.jdbc.base.MultiDBBaseTestCase;
+
+public class ShardConnectionTest extends MultiDBBaseTestCase {
 
 	@Override
 	protected String getDBBaseUrl() {
