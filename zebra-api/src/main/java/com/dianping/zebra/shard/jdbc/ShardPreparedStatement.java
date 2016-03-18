@@ -38,7 +38,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import com.dianping.zebra.group.jdbc.param.ArrayParamContext;
 import com.dianping.zebra.group.jdbc.param.AsciiParamContext;
@@ -73,6 +72,7 @@ import com.dianping.zebra.group.jdbc.param.UnicodeStreamParamContext;
 import com.dianping.zebra.group.util.SqlAliasManager;
 import com.dianping.zebra.shard.jdbc.parallel.PreparedStatementExecuteQueryCallable;
 import com.dianping.zebra.shard.jdbc.parallel.PreparedStatementExecuteUpdateCallable;
+import com.dianping.zebra.shard.jdbc.parallel.SQLThreadPoolExecutor;
 import com.dianping.zebra.shard.jdbc.parallel.UpdateResult;
 import com.dianping.zebra.shard.jdbc.unsupport.UnsupportedShardPreparedStatement;
 import com.dianping.zebra.shard.router.RouterResult;
@@ -172,7 +172,7 @@ public class ShardPreparedStatement extends UnsupportedShardPreparedStatement im
 			}
 		}
 
-		List<Future<ResultSet>> futures = executorService.invokeSQLs(callables, 1000L, TimeUnit.MILLISECONDS);
+		List<Future<ResultSet>> futures = SQLThreadPoolExecutor.getInstance().invokeSQLs(callables);
 
 		for (Future<ResultSet> f : futures) {
 			try {
@@ -201,35 +201,36 @@ public class ShardPreparedStatement extends UnsupportedShardPreparedStatement im
 
 		int affectedRows = 0;
 		List<Callable<UpdateResult>> tasks = new ArrayList<Callable<UpdateResult>>();
-		
+
 		for (RouterTarget targetedSql : routerTarget.getSqls()) {
 			for (String executableSql : targetedSql.getSqls()) {
-					Connection conn = connection.getRealConnection(targetedSql.getDatabaseName(), autoCommit);
-					PreparedStatement stmt = createPrepareStatement(conn, executableSql);
-					actualStatements.add(stmt);
-					setParams(stmt);
+				Connection conn = connection.getRealConnection(targetedSql.getDatabaseName(), autoCommit);
+				PreparedStatement stmt = createPrepareStatement(conn, executableSql);
+				actualStatements.add(stmt);
+				setParams(stmt);
 
-					tasks.add(new PreparedStatementExecuteUpdateCallable(stmt, SqlAliasManager.getSqlAlias(), executableSql));
+				tasks.add(
+						new PreparedStatementExecuteUpdateCallable(stmt, SqlAliasManager.getSqlAlias(), executableSql));
 			}
 		}
 
-		List<Future<UpdateResult>> futures = executorService.invokeSQLs(tasks, 1000L, TimeUnit.MILLISECONDS);
-		
-		for(Future<UpdateResult> f : futures){
+		List<Future<UpdateResult>> futures = SQLThreadPoolExecutor.getInstance().invokeSQLs(tasks);
+
+		for (Future<UpdateResult> f : futures) {
 			try {
 				UpdateResult updateResult = f.get();
-				
+
 				affectedRows += updateResult.getAffectedRows();
-				
-				if(updateResult.getGeneratedKey() != null){
+
+				if (updateResult.getGeneratedKey() != null) {
 					this.generatedKey = updateResult.getGeneratedKey();
 				}
 			} catch (Exception e) {
-				//normally can't be here
+				// normally can't be here
 				throw new SQLException(e);
 			}
 		}
-		
+
 		this.results = null;
 		this.updateCount = affectedRows;
 

@@ -22,13 +22,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.dianping.zebra.group.util.SqlAliasManager;
-import com.dianping.zebra.shard.jdbc.parallel.ExtendedThreadPoolExecutor;
+import com.dianping.zebra.shard.jdbc.parallel.SQLThreadPoolExecutor;
 import com.dianping.zebra.shard.jdbc.parallel.StatementExecuteQueryCallable;
 import com.dianping.zebra.shard.jdbc.parallel.StatementExecuteUpdateCallable;
 import com.dianping.zebra.shard.jdbc.parallel.UpdateResult;
@@ -47,21 +43,6 @@ import com.dianping.zebra.util.SqlUtils;
  * 
  */
 public class ShardStatement extends UnsupportedShardStatement implements Statement {
-
-	protected static volatile ExtendedThreadPoolExecutor executorService = new ExtendedThreadPoolExecutor(32, 64, 60L,
-			TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(500), new ThreadFactory() {
-
-				private AtomicInteger counter = new AtomicInteger(1);
-
-				@Override
-				public Thread newThread(Runnable r) {
-					Thread t = new Thread(r);
-					t.setName("Zebra-Shard-Executor-" + counter.getAndIncrement());
-					t.setDaemon(true);
-
-					return t;
-				}
-			});;
 
 	private ShardRouter router;
 
@@ -139,7 +120,7 @@ public class ShardStatement extends UnsupportedShardStatement implements Stateme
 			}
 		}
 
-		List<Future<UpdateResult>> futures = executorService.invokeSQLs(tasks, 1000L, TimeUnit.MILLISECONDS);
+		List<Future<UpdateResult>> futures = SQLThreadPoolExecutor.getInstance().invokeSQLs(tasks);
 
 		for (Future<UpdateResult> f : futures) {
 			try {
@@ -305,7 +286,7 @@ public class ShardStatement extends UnsupportedShardStatement implements Stateme
 
 		}
 
-		List<Future<ResultSet>> futures = executorService.invokeSQLs(callables, 1000L, TimeUnit.MILLISECONDS);
+		List<Future<ResultSet>> futures = SQLThreadPoolExecutor.getInstance().invokeSQLs(callables);
 
 		for (Future<ResultSet> f : futures) {
 			try {

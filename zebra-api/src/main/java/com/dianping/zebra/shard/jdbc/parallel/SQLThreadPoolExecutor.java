@@ -9,23 +9,59 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class ExtendedThreadPoolExecutor extends ThreadPoolExecutor {
+public class SQLThreadPoolExecutor extends ThreadPoolExecutor {
 
-	public ExtendedThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
+	public static int corePoolSize = 32;
+
+	public static int maxPoolSize = 64;
+
+	public static int workQueueSize = 500;
+
+	public static long executeTimeOut = 1000L;
+
+	private static volatile SQLThreadPoolExecutor executor = null;
+
+	private SQLThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit,
 			BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
 		super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
 	}
 
-	public <T> List<Future<T>> invokeSQLs(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
-			throws SQLException {
+	public static SQLThreadPoolExecutor getInstance() {
+		if (executor == null) {
+			synchronized (SQLThreadPoolExecutor.class) {
+				if (executor == null) {
+					executor = new SQLThreadPoolExecutor(corePoolSize, maxPoolSize, 60L, TimeUnit.SECONDS,
+							new LinkedBlockingQueue<Runnable>(workQueueSize), new ThreadFactory() {
+
+								private AtomicInteger counter = new AtomicInteger(1);
+
+								@Override
+								public Thread newThread(Runnable r) {
+									Thread t = new Thread(r);
+									t.setName("Zebra-Shard-Executor-" + counter.getAndIncrement());
+									t.setDaemon(true);
+
+									return t;
+								}
+							});
+				}
+			}
+		}
+
+		return executor;
+	}
+
+	public <T> List<Future<T>> invokeSQLs(Collection<? extends Callable<T>> tasks) throws SQLException {
 		if (tasks == null)
 			throw new NullPointerException();
-		long nanos = unit.toNanos(timeout);
+		long nanos = TimeUnit.MILLISECONDS.toNanos(executeTimeOut);
 		ArrayList<Future<T>> futures = new ArrayList<Future<T>>(tasks.size());
 		boolean done = false;
 		try {

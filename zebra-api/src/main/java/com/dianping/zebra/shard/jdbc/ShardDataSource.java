@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.ConfigServiceFactory;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
+import com.dianping.zebra.shard.jdbc.parallel.SQLThreadPoolExecutor;
 import com.dianping.zebra.shard.router.RouterBuilder;
 import com.dianping.zebra.shard.router.ShardRouter;
 import com.dianping.zebra.shard.router.builder.LionRouterBuilder;
@@ -138,5 +139,21 @@ public class ShardDataSource extends AbstractDataSource {
 
 	public void setRuleName(String ruleName) {
 		this.ruleName = ruleName;
+	}
+	
+	public void setParallelCorePoolSize(int parallelCorePoolSize){
+		SQLThreadPoolExecutor.corePoolSize = parallelCorePoolSize;
+	}
+	
+	public void setParallelMaxPoolSize(int parallelMaxPoolSize){
+		SQLThreadPoolExecutor.maxPoolSize = parallelMaxPoolSize;
+	}
+	
+	public void setParallelWorkQueueSize(int parallelWorkQueueSize){
+		SQLThreadPoolExecutor.workQueueSize = parallelWorkQueueSize;
+	}
+	
+	public void setParalleExecuteTimeOut(int parallelExecuteTimeOut){
+		SQLThreadPoolExecutor.executeTimeOut = parallelExecuteTimeOut;
 	}
 }
