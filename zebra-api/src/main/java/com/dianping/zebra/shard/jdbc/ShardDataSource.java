@@ -51,38 +51,6 @@ public class ShardDataSource extends AbstractDataSource {
 
 	private volatile boolean closed = false;
 
-	public void close() throws SQLException {
-		if (dataSourceRepository != null) {
-			dataSourceRepository.close();
-		}
-
-		closed = true;
-
-		logger.info(String.format("ShardDataSource(%s) successfully closed.", ruleName));
-	}
-
-	@Override
-	public Connection getConnection() throws SQLException {
-		return getConnection(null, null);
-	}
-
-	@Override
-	public Connection getConnection(String username, String password) throws SQLException {
-		if (closed) {
-			throw new SQLException("Datasource has been closed!");
-		}
-
-		ShardConnection connection = new ShardConnection(username, password);
-		connection.setRouter(router);
-		connection.setDataSourceRepository(dataSourceRepository);
-
-		return connection;
-	}
-
-	public ShardRouter getRouter() {
-		return router;
-	}
-
 	public void init() {
 		if (StringUtils.isNotBlank(ruleName)) {
 			if (configService == null) {
@@ -117,6 +85,39 @@ public class ShardDataSource extends AbstractDataSource {
 		logger.info(String.format("ShardDataSource(%s) successfully initialized.", ruleName));
 	}
 
+	@Override
+	public Connection getConnection() throws SQLException {
+		return getConnection(null, null);
+	}
+
+	@Override
+	public Connection getConnection(String username, String password) throws SQLException {
+		if (closed) {
+			throw new SQLException("Datasource has been closed!");
+		}
+
+		ShardConnection connection = new ShardConnection(username, password);
+		connection.setRouter(router);
+		connection.setDataSourceRepository(dataSourceRepository);
+
+		return connection;
+	}
+
+	public ShardRouter getRouter() {
+		return router;
+	}
+
+	@Override
+	public void close() throws SQLException {
+		if (dataSourceRepository != null) {
+			dataSourceRepository.close();
+		}
+
+		closed = true;
+
+		logger.info(String.format("ShardDataSource(%s) successfully closed.", ruleName));
+	}
+
 	public void setConfigService(ConfigService configService) {
 		this.configService = configService;
 	}
@@ -140,20 +141,20 @@ public class ShardDataSource extends AbstractDataSource {
 	public void setRuleName(String ruleName) {
 		this.ruleName = ruleName;
 	}
-	
-	public void setParallelCorePoolSize(int parallelCorePoolSize){
+
+	public void setParallelCorePoolSize(int parallelCorePoolSize) {
 		SQLThreadPoolExecutor.corePoolSize = parallelCorePoolSize;
 	}
-	
-	public void setParallelMaxPoolSize(int parallelMaxPoolSize){
+
+	public void setParallelMaxPoolSize(int parallelMaxPoolSize) {
 		SQLThreadPoolExecutor.maxPoolSize = parallelMaxPoolSize;
 	}
-	
-	public void setParallelWorkQueueSize(int parallelWorkQueueSize){
+
+	public void setParallelWorkQueueSize(int parallelWorkQueueSize) {
 		SQLThreadPoolExecutor.workQueueSize = parallelWorkQueueSize;
 	}
-	
-	public void setParalleExecuteTimeOut(int parallelExecuteTimeOut){
+
+	public void setParalleExecuteTimeOut(int parallelExecuteTimeOut) {
 		SQLThreadPoolExecutor.executeTimeOut = parallelExecuteTimeOut;
 	}
 }
