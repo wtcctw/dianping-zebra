@@ -17,6 +17,7 @@ import com.dianping.zebra.shard.jdbc.SingleDBLifeCycleTest;
 import com.dianping.zebra.shard.jdbc.SingleDBPreparedStatementGroupFollowNoteIntegrationTest;
 import com.dianping.zebra.shard.jdbc.SingleDBPreparedStatementLifeCycleTest;
 import com.dianping.zebra.shard.jdbc.SpecialSQLTest;
+import com.dianping.zebra.shard.jdbc.parallel.SQLThreadPoolExecutorTest;
 import com.dianping.zebra.shard.jdbc.specification.ConnectionTest;
 import com.dianping.zebra.shard.jdbc.specification.DataSourceTest;
 import com.dianping.zebra.shard.jdbc.specification.StatementTest;
@@ -33,8 +34,10 @@ import com.dianping.zebra.shard.util.ShardColumnValueUtilTest;
         XmlDataSourceRouterConfigLoaderTest.class,
 
         //jdbc
-        ConnectionTest.class,
         DataSourceTest.class,
+        ConnectionTest.class,
+        StatementTest.class,
+        
         MultiDBLifeCycleTest.class,
         MultiDBPreparedStatementLifeCycleTest.class,
         ResultSetTest.class,
@@ -42,12 +45,13 @@ import com.dianping.zebra.shard.util.ShardColumnValueUtilTest;
         SingleDBPreparedStatementGroupFollowNoteIntegrationTest.class,
         SingleDBPreparedStatementLifeCycleTest.class,
         SpecialSQLTest.class,
-        StatementTest.class,
         ShardConnectionTest.class,
         ShardStatementTest.class,
         ShardPreparedStatementTest.class,
         ShardPreparedStatementMultiKeyTest.class,
         ShardSupportedCaseTest.class,
+        
+        SQLThreadPoolExecutorTest.class,
 
         //parser
         SQLParserResultTest.class,

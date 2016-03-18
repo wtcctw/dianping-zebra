@@ -75,7 +75,7 @@ public class FailoverDataSourceTest {
 
 		doReturn(errorCoon).when(monitor).getConnection(any(DataSourceConfig.class));
 		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-			  FailOverDataSource.CheckMasterDataSourceResult.ERROR);
+				FailOverDataSource.CheckMasterDataSourceResult.ERROR);
 		verify(errorCoon, atLeastOnce()).createStatement();
 	}
 
@@ -86,7 +86,7 @@ public class FailoverDataSourceTest {
 
 		doReturn(coon).when(monitor).getConnection(any(DataSourceConfig.class));
 		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-			  FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
+				FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE);
 		verify(coon, atLeastOnce()).createStatement();
 	}
 
@@ -97,7 +97,7 @@ public class FailoverDataSourceTest {
 
 		doReturn(readOnlyCoon).when(monitor).getConnection(any(DataSourceConfig.class));
 		Assert.assertEquals(monitor.isMasterDataSource(configs.get("db1")),
-			  FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
+				FailOverDataSource.CheckMasterDataSourceResult.READ_ONLY);
 		verify(readOnlyCoon, atLeastOnce()).createStatement();
 	}
 
@@ -130,65 +130,68 @@ public class FailoverDataSourceTest {
 		verify(readOnlyCoon, atLeastOnce()).createStatement();
 	}
 
-//	@Test(timeout = 30000)
-//	public void test_hot_switch() throws SQLException, InterruptedException {
-//		FailOverDataSource ds = new FailOverDataSource(configs, null);
-//		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
-//
-//		ConnectionAnswer connectionAnswer = new ConnectionAnswer();
-//		connectionAnswer.setCoon(coon);
-//
-//		// use the db1
-//		doAnswer(connectionAnswer).when(monitor).getConnection(configs.get("db1"));
-//		doReturn(coon).when(monitor).getConnection(configs.get("db2"));
-//
-//		new Thread(monitor).start();
-//
-//		while (monitor.getSleepTimes() < 2) {
-//			Thread.sleep(10);
-//		}
-//		Assert.assertEquals("db1", ds.getCurrentDataSourceMBean().getId());
-//
-//		verify(coon, atLeastOnce()).createStatement();
-//		verify(readOnlyCoon, never()).createStatement();
-//
-//		// fail over db1
-//		connectionAnswer.setCoon(readOnlyCoon);
-//
-//		while (monitor.getSleepTimes() < 4) {
-//			Thread.sleep(10);
-//		}
-//		Assert.assertEquals("db2", ds.getCurrentDataSourceMBean().getId());
-//		verify(coon, atLeast(2)).createStatement();
-//		verify(readOnlyCoon, times(2)).createStatement();
-//	}
-//
-//	@Test(timeout = 5000)
-//	public void test_thread_auto_close() throws Exception {
-//		FailOverDataSource ds = new FailOverDataSource(configs, null);
-//		FailOverDataSource.MasterDataSourceMonitor monitor = spy(new FailOverDataSource.MasterDataSourceMonitor(ds));
-//
-//		FailOverDataSource.FindMasterDataSourceResult result = new FailOverDataSource.FindMasterDataSourceResult();
-//		result.setMasterExist(true);
-//
-//		doReturn(result).when(monitor).findMasterDataSource();
-//		doReturn(FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE).when(monitor)
-//			  .isMasterDataSource(any(DataSourceConfig.class));
-//
-//		Thread t = new Thread(monitor);
-//		t.start();
-//
-//		//清空引用，强制GC
-//		ds = null;
-//		System.gc();
-//
-//		while (true) {
-//			Thread.sleep(500);
-//			if (!t.isAlive()) {
-//				break;
-//			}
-//		}
-//	}
+	// @Test(timeout = 30000)
+	// public void test_hot_switch() throws SQLException, InterruptedException {
+	// FailOverDataSource ds = new FailOverDataSource(configs, null);
+	// FailOverDataSource.MasterDataSourceMonitor monitor = spy(new
+	// FailOverDataSource.MasterDataSourceMonitor(ds));
+	//
+	// ConnectionAnswer connectionAnswer = new ConnectionAnswer();
+	// connectionAnswer.setCoon(coon);
+	//
+	// // use the db1
+	// doAnswer(connectionAnswer).when(monitor).getConnection(configs.get("db1"));
+	// doReturn(coon).when(monitor).getConnection(configs.get("db2"));
+	//
+	// new Thread(monitor).start();
+	//
+	// while (monitor.getSleepTimes() < 2) {
+	// Thread.sleep(10);
+	// }
+	// Assert.assertEquals("db1", ds.getCurrentDataSourceMBean().getId());
+	//
+	// verify(coon, atLeastOnce()).createStatement();
+	// verify(readOnlyCoon, never()).createStatement();
+	//
+	// // fail over db1
+	// connectionAnswer.setCoon(readOnlyCoon);
+	//
+	// while (monitor.getSleepTimes() < 4) {
+	// Thread.sleep(10);
+	// }
+	// Assert.assertEquals("db2", ds.getCurrentDataSourceMBean().getId());
+	// verify(coon, atLeast(2)).createStatement();
+	// verify(readOnlyCoon, times(2)).createStatement();
+	// }
+	//
+	// @Test(timeout = 5000)
+	// public void test_thread_auto_close() throws Exception {
+	// FailOverDataSource ds = new FailOverDataSource(configs, null);
+	// FailOverDataSource.MasterDataSourceMonitor monitor = spy(new
+	// FailOverDataSource.MasterDataSourceMonitor(ds));
+	//
+	// FailOverDataSource.FindMasterDataSourceResult result = new
+	// FailOverDataSource.FindMasterDataSourceResult();
+	// result.setMasterExist(true);
+	//
+	// doReturn(result).when(monitor).findMasterDataSource();
+	// doReturn(FailOverDataSource.CheckMasterDataSourceResult.READ_WRITE).when(monitor)
+	// .isMasterDataSource(any(DataSourceConfig.class));
+	//
+	// Thread t = new Thread(monitor);
+	// t.start();
+	//
+	// //清空引用，强制GC
+	// ds = null;
+	// System.gc();
+	//
+	// while (true) {
+	// Thread.sleep(500);
+	// if (!t.isAlive()) {
+	// break;
+	// }
+	// }
+	// }
 
 	class ConnectionAnswer implements Answer<Connection> {
 		private Connection coon;
