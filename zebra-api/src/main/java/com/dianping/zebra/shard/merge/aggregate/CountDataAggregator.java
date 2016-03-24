@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.merge.processor;
+package com.dianping.zebra.shard.merge.aggregate;
 
 /**
  * <p>
@@ -28,7 +28,7 @@ package com.dianping.zebra.shard.merge.processor;
  * @author Leo Liang
  * 
  */
-public class CountDataProcessor implements AggregateDataProcessor {
+public class CountDataAggregator implements DataAggregator {
 
 	/**
 	 * 根据旧值(处理当前列之前的累加count值)和当前值返回当前值和旧值的和作为新的count值
@@ -38,9 +38,9 @@ public class CountDataProcessor implements AggregateDataProcessor {
 	 * @param currentValue
 	 *            当前值
 	 * @return count结果
-	 * @throws AggregateDataProcessException
+	 * @throws DataAggregateException
 	 */
-	public Object process(Object oldValue, Object currentValue) throws AggregateDataProcessException {
+	public Object process(Object oldValue, Object currentValue) throws DataAggregateException {
 		if (currentValue == null) {
 			return oldValue;
 		}
@@ -52,7 +52,7 @@ public class CountDataProcessor implements AggregateDataProcessor {
 		}
 
 		if (oldValue.getClass() != type) {
-			throw new AggregateDataProcessException("oldValue.class != currentValue.class");
+			throw new DataAggregateException("oldValue.class != currentValue.class");
 		}
 
 		if (currentValue instanceof Integer) {
@@ -62,7 +62,7 @@ public class CountDataProcessor implements AggregateDataProcessor {
 		} else if (currentValue instanceof Long) {
 			return (Long) oldValue + (Long) currentValue;
 		} else {
-			throw new AggregateDataProcessException("Can not process groupby function count() for type: "
+			throw new DataAggregateException("Can not process groupby function count() for type: "
 					+ currentValue.getClass());
 		}
 	}

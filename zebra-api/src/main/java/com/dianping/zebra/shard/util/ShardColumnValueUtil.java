@@ -104,13 +104,13 @@ public class ShardColumnValueUtil {
 					} else if (value instanceof SQLVariantRefExpr) {
 						SQLVariantRefExpr ref = (SQLVariantRefExpr) value;
 						result.add(params.get(ref.getIndex()));
-					}else if(value instanceof SQLInListExpr){
-						SQLInListExpr inListExpr = (SQLInListExpr)value;
-						
-						for(SQLExpr expr : inListExpr.getTargetList()){
-							if(expr instanceof SQLValuableExpr){
+					} else if (value instanceof SQLInListExpr) {
+						SQLInListExpr inListExpr = (SQLInListExpr) value;
+
+						for (SQLExpr expr : inListExpr.getTargetList()) {
+							if (expr instanceof SQLValuableExpr) {
 								result.add(((SQLValuableExpr) expr).getValue());
-							}else{
+							} else if (expr instanceof SQLVariantRefExpr) {
 								SQLVariantRefExpr ref = (SQLVariantRefExpr) expr;
 								result.add(params.get(ref.getIndex()));
 							}
@@ -143,12 +143,12 @@ public class ShardColumnValueUtil {
 		SQLBinaryOpExpr where = null;
 		if (sqlExpr instanceof SQLBinaryOpExpr) {
 			where = (SQLBinaryOpExpr) sqlExpr;
-		} else if(sqlExpr instanceof SQLInListExpr){
-			SQLInListExpr inListExpr = (SQLInListExpr)sqlExpr;
+		} else if (sqlExpr instanceof SQLInListExpr) {
+			SQLInListExpr inListExpr = (SQLInListExpr) sqlExpr;
 			SQLName indentifier = (SQLName) inListExpr.getExpr();
 			pairs.put(indentifier.getSimpleName(), inListExpr);
 			return;
-		}else {
+		} else {
 			return;
 		}
 

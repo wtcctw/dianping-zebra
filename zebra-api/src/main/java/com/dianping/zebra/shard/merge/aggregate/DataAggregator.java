@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.merge.processor;
+package com.dianping.zebra.shard.merge.aggregate;
 
 /**
  * <p>
@@ -23,7 +23,7 @@ package com.dianping.zebra.shard.merge.processor;
  * @author Leo Liang
  * 
  */
-public interface AggregateDataProcessor {
+public interface DataAggregator {
 
 	/**
 	 * 根据旧值和当前值计算新值并返回<br>
@@ -36,8 +36,8 @@ public interface AggregateDataProcessor {
 	 * @param currentValue
 	 *            当前值
 	 * @return 新的计算结果值
-	 * @throws AggregateDataProcessException
+	 * @throws DataAggregateException
 	 */
-	public Object process(Object oldValue, Object currentValue) throws AggregateDataProcessException;
+	public Object process(Object oldValue, Object currentValue) throws DataAggregateException;
 
 }

@@ -75,7 +75,6 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 
 	@Override
 	public void close() throws SQLException {
-
 		if (closed) {
 			return;
 		}

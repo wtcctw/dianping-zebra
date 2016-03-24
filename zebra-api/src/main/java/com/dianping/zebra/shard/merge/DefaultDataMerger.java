@@ -38,12 +38,12 @@ import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
-import com.dianping.zebra.shard.merge.processor.AggregateDataProcessException;
-import com.dianping.zebra.shard.merge.processor.AggregateDataProcessor;
-import com.dianping.zebra.shard.merge.processor.CountDataProcessor;
-import com.dianping.zebra.shard.merge.processor.MaxDataProcessor;
-import com.dianping.zebra.shard.merge.processor.MinDataProcessor;
-import com.dianping.zebra.shard.merge.processor.SumDataProcessor;
+import com.dianping.zebra.shard.merge.aggregate.DataAggregateException;
+import com.dianping.zebra.shard.merge.aggregate.DataAggregator;
+import com.dianping.zebra.shard.merge.aggregate.CountDataAggregator;
+import com.dianping.zebra.shard.merge.aggregate.MaxDataAggregator;
+import com.dianping.zebra.shard.merge.aggregate.MinDataAggregator;
+import com.dianping.zebra.shard.merge.aggregate.SumDataAggregator;
 import com.dianping.zebra.shard.router.RouterResult;
 
 /**
@@ -54,14 +54,14 @@ import com.dianping.zebra.shard.router.RouterResult;
  * @author Leo Liang
  */
 public class DefaultDataMerger implements DataMerger {
-	private static Map<String, AggregateDataProcessor> aggregateFunctionProcessors;
+	private static Map<String, DataAggregator> aggregateFunctionProcessors;
 
 	static {
-		aggregateFunctionProcessors = new HashMap<String, AggregateDataProcessor>();
-		aggregateFunctionProcessors.put("MAX", new MaxDataProcessor());
-		aggregateFunctionProcessors.put("MIN", new MinDataProcessor());
-		aggregateFunctionProcessors.put("COUNT", new CountDataProcessor());
-		aggregateFunctionProcessors.put("SUM", new SumDataProcessor());
+		aggregateFunctionProcessors = new HashMap<String, DataAggregator>();
+		aggregateFunctionProcessors.put("MAX", new MaxDataAggregator());
+		aggregateFunctionProcessors.put("MIN", new MinDataAggregator());
+		aggregateFunctionProcessors.put("COUNT", new CountDataAggregator());
+		aggregateFunctionProcessors.put("SUM", new SumDataAggregator());
 	}
 
 	/**
@@ -84,8 +84,7 @@ public class DefaultDataMerger implements DataMerger {
 		if (routerTarget.getSqls().size() == 1 && routerTarget.getSqls().get(0).getSqls().size() == 1) {
 			dataPool.setResultSets(actualResultSets);
 			dataPool.setInMemory(false);
-		} else if ((routerTarget.getSqls().size() > 1
-				|| routerTarget.getSqls().get(0).getSqls().size() > 1)
+		} else if ((routerTarget.getSqls().size() > 1 || routerTarget.getSqls().get(0).getSqls().size() > 1)
 				&& (routerTarget.getMergeContext().getOrderBy() == null)
 				&& !hasGroupByFunctionColumns(routerTarget.getMergeContext())
 				&& !routerTarget.getMergeContext().isDistinct()) {
@@ -167,16 +166,6 @@ public class DefaultDataMerger implements DataMerger {
 									return compareRes < 0 ? 1 : -1;
 								}
 							}
-							// if (orderByEle.getType() != null &&
-							// orderByEle.getType().equals("ASC")) {
-							// if (compareRes != 0) {
-							// return compareRes;
-							// }
-							// } else {
-							// if (compareRes != 0) {
-							// return compareRes < 0 ? 1 : -1;
-							// }
-							// }
 						}
 
 						return 0;
@@ -242,16 +231,6 @@ public class DefaultDataMerger implements DataMerger {
 		// 所以先获得列名和别名的map
 		Map<String, String> columnNameAliasMapping = new HashMap<String, String>();
 		for (SQLSelectItem column : mergeContext.getSelectLists()) {
-			// int pos = -1;
-			// String simpleName = ((SQLName)column.getExpr()).getSimpleName();
-			// if ((pos = routerTarget.getGroupBys().indexOf(simpleName)) >= 0)
-			// {
-			// if (column.getAlias() != null &&
-			// column.getAlias().trim().length() != 0) {
-			// columnNameAliasMapping.put(routerTarget.getGroupBys().get(pos),
-			// column.getAlias());
-			// }
-			// }
 			SQLExpr expr = column.getExpr();
 			if (expr instanceof SQLAggregateExpr) {
 				SQLAggregateExpr aggregateExpr = (SQLAggregateExpr) expr;
@@ -306,12 +285,12 @@ public class DefaultDataMerger implements DataMerger {
 				}
 				SQLSelectItem columnType = columnNameFunctionMapping.get(col.getColumnName());
 				SQLAggregateExpr aggregateExpr = (SQLAggregateExpr) columnType.getExpr();
-				AggregateDataProcessor dataProcessor = aggregateFunctionProcessors.get(aggregateExpr.getMethodName());
+				DataAggregator dataProcessor = aggregateFunctionProcessors.get(aggregateExpr.getMethodName());
 				if (dataProcessor != null) {
 					ColumnData oldCol = newRowData.get(col.getColumnIndex());
 					Object value = dataProcessor.process(oldCol.getValue(), col.getValue());
-					
-					if(value != null){
+
+					if (value != null) {
 						oldCol.setWasNull(false);
 					}
 					oldCol.setValue(value);
@@ -319,7 +298,7 @@ public class DefaultDataMerger implements DataMerger {
 					throw new SQLException("Zebra unsupported groupby function exists");
 				}
 			}
-		} catch (AggregateDataProcessException e) {
+		} catch (DataAggregateException e) {
 			throw new SQLException("Proc aggregate merge failed.");
 		}
 	}
@@ -378,10 +357,6 @@ public class DefaultDataMerger implements DataMerger {
 			if (col.getExpr() instanceof SQLAggregateExpr) {
 				return true;
 			}
-			// if (col.get instanceof Sum || col instanceof Count || col
-			// instanceof Max || col instanceof Min) {
-			// return true;
-			// }
 		}
 
 		return false;

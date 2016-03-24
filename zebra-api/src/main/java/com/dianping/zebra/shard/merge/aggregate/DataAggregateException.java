@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.merge.processor;
+package com.dianping.zebra.shard.merge.aggregate;
 
 /**
  * <tt>AggregateDataProcessor</tt>处理中抛出的异常
@@ -21,11 +21,11 @@ package com.dianping.zebra.shard.merge.processor;
  * @author Leo Liang
  * 
  */
-public class AggregateDataProcessException extends Exception {
+public class DataAggregateException extends Exception {
 
 	private static final long	serialVersionUID	= -4563750786940638103L;
 
-	public AggregateDataProcessException(String msg) {
+	public DataAggregateException(String msg) {
 		super(msg);
 	}
 
