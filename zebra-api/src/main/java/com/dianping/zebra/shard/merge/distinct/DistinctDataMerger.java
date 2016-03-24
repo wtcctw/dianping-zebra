@@ -10,18 +10,18 @@ import com.dianping.zebra.shard.merge.DataMerger;
 import com.dianping.zebra.shard.merge.MergeContext;
 import com.dianping.zebra.shard.merge.RowData;
 
-public class DistinctDataMerger implements DataMerger{
+public class DistinctDataMerger implements DataMerger {
 
 	@Override
 	public List<RowData> process(List<RowData> sourceData, MergeContext mergeContext) throws SQLException {
-		if(mergeContext.isDistinct()){
+		if (mergeContext.isDistinct()) {
 			Set<RowData> distinctRowSet = new HashSet<RowData>();
 			for (RowData row : sourceData) {
 				distinctRowSet.add(row);
 			}
 			return new ArrayList<RowData>(distinctRowSet);
+		} else {
+			return sourceData;
 		}
-		
-		return null;
 	}
 }

@@ -30,12 +30,15 @@ import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+
+import com.dianping.zebra.shard.jdbc.unsupport.UnsupportedShardResultSet;
 
 /**
  * 数据池， 用于隐藏真实数据的来源。<br>
@@ -55,7 +58,7 @@ import java.util.Map;
  *
  * @author Leo Liang
  */
-public class DataPool {
+public class ShardResultSetAdaptor extends UnsupportedShardResultSet implements ResultSet{
 
 	protected List<ResultSet> resultSets = new ArrayList<ResultSet>();
 
@@ -1176,4 +1179,40 @@ public class DataPool {
 		}
 	}
 
+	@Override
+	public void close() throws SQLException {
+	}
+
+	@Override
+	public int getRow() throws SQLException {
+		return 0;
+	}
+
+	@Override
+	public void setFetchDirection(int direction) throws SQLException {
+	}
+
+	@Override
+	public int getFetchDirection() throws SQLException {
+		return 0;
+	}
+
+	@Override
+	public void setFetchSize(int rows) throws SQLException {
+	}
+
+	@Override
+	public int getFetchSize() throws SQLException {
+		return 0;
+	}
+
+	@Override
+	public Statement getStatement() throws SQLException {
+		return null;
+	}
+
+	@Override
+	public boolean isClosed() throws SQLException {
+		return false;
+	}
 }

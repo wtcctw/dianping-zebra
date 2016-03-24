@@ -60,7 +60,7 @@ public class DefaultDataMerger {
 	 * </ol>
 	 * </p>
 	 */
-	public void merge(DataPool dataPool, RouterResult routerTarget, List<ResultSet> actualResultSets)
+	public void merge(ShardResultSetAdaptor adaptor, RouterResult routerTarget, List<ResultSet> actualResultSets)
 			throws SQLException {
 		List<RouterTarget> sqls = routerTarget.getSqls();
 		MergeContext mergeContext = routerTarget.getMergeContext();
@@ -70,19 +70,19 @@ public class DefaultDataMerger {
 		}
 
 		if (sqls.size() == 1 && sqls.get(0).getSqls().size() == 1) {
-			dataPool.setResultSets(actualResultSets);
-			dataPool.setInMemory(false);
+			adaptor.setResultSets(actualResultSets);
+			adaptor.setInMemory(false);
 		} else if ((sqls.size() > 1 || sqls.get(0).getSqls().size() > 1) && (mergeContext.getOrderBy() == null)
 				&& !mergeContext.hasAggregateExpr() && !mergeContext.isDistinct()) {
-			dataPool.setResultSets(actualResultSets);
-			dataPool.setInMemory(false);
+			adaptor.setResultSets(actualResultSets);
+			adaptor.setInMemory(false);
 		} else {
-			dataPool.setInMemory(true);
-			dataPool.setResultSets(actualResultSets);
+			adaptor.setInMemory(true);
+			adaptor.setResultSets(actualResultSets);
 			List<RowData> rowDatas = popResultSets(actualResultSets, mergeContext);
 
 			if (rowDatas == null || rowDatas.size() == 0) {
-				dataPool.setMemoryData(rowDatas);
+				adaptor.setMemoryData(rowDatas);
 				return;
 			}
 
@@ -90,13 +90,13 @@ public class DefaultDataMerger {
 			List<RowData> afterGroupByDatas = groubyMerger.process(afterDistinctDatas, mergeContext);
 			List<RowData> afterOrderByDatas = orderbyMerger.process(afterGroupByDatas, mergeContext);
 
-			dataPool.setMemoryData(afterOrderByDatas);
+			adaptor.setMemoryData(afterOrderByDatas);
 		}
 
 		if (sqls.size() > 1 || sqls.get(0).getSqls().size() > 1) {
-			dataPool.setMax(mergeContext.getLimit());
-			dataPool.setSkip(mergeContext.getOffset());
-			dataPool.procLimit();
+			adaptor.setMax(mergeContext.getLimit());
+			adaptor.setSkip(mergeContext.getOffset());
+			adaptor.procLimit();
 		}
 	}
 

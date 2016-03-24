@@ -29,7 +29,6 @@ import com.dianping.zebra.shard.jdbc.parallel.StatementExecuteQueryCallable;
 import com.dianping.zebra.shard.jdbc.parallel.StatementExecuteUpdateCallable;
 import com.dianping.zebra.shard.jdbc.parallel.UpdateResult;
 import com.dianping.zebra.shard.jdbc.unsupport.UnsupportedShardStatement;
-import com.dianping.zebra.shard.merge.DataPool;
 import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.shard.router.RouterResult.RouterTarget;
 import com.dianping.zebra.shard.router.ShardRouter;
@@ -154,13 +153,10 @@ public class ShardStatement extends UnsupportedShardStatement implements Stateme
 			generatedKey.beforeFirst();
 			rsList.add(generatedKey);
 
-			DataPool dataPool = new DataPool();
-			dataPool.setResultSets(rsList);
-			dataPool.setInMemory(false);
-
 			ShardResultSet rs = new ShardResultSet();
 			rs.setStatement(this);
-			rs.setDataPool(dataPool);
+			rs.setResultSets(rsList);
+			rs.setInMemory(false);
 
 			attachedResultSets.add(rs);
 

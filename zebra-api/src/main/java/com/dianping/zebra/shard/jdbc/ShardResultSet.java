@@ -35,9 +35,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.zebra.shard.jdbc.unsupport.UnsupportedShardResultSet;
-import com.dianping.zebra.shard.merge.DataPool;
 import com.dianping.zebra.shard.merge.DefaultDataMerger;
+import com.dianping.zebra.shard.merge.ShardResultSetAdaptor;
 import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.util.JDBCUtils;
 
@@ -46,11 +45,9 @@ import com.dianping.zebra.util.JDBCUtils;
  * @author Leo Liang
  * 
  */
-public class ShardResultSet extends UnsupportedShardResultSet implements ResultSet {
+public class ShardResultSet extends ShardResultSetAdaptor implements ResultSet {
 
 	private ShardStatement statement;
-
-	private DataPool dataPool = new DataPool();
 
 	private DefaultDataMerger dataMerger = new DefaultDataMerger();
 
@@ -90,7 +87,7 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 			}
 		} finally {
 			closed = true;
-			dataPool.clear();
+			clear();
 		}
 
 		JDBCUtils.throwSQLExceptionIfNeeded(exceptions);
@@ -99,191 +96,191 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 	@Override
 	public int findColumn(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.findColumn(columnLabel);
+		return super.findColumn(columnLabel);
 	}
 
-	public void addResultSet(ResultSet rs){
+	public void addResultSet(ResultSet rs) {
 		this.actualResultSets.add(rs);
 	}
 
 	@Override
 	public Array getArray(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getArray(columnIndex);
+		return super.getArray(columnIndex);
 	}
 
 	@Override
 	public Array getArray(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getArray(columnLabel);
+		return super.getArray(columnLabel);
 	}
 
 	@Override
 	public InputStream getAsciiStream(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getAsciiStream(columnIndex);
+		return super.getAsciiStream(columnIndex);
 	}
 
 	@Override
 	public InputStream getAsciiStream(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getAsciiStream(columnLabel);
+		return super.getAsciiStream(columnLabel);
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getBigDecimal(columnIndex);
+		return super.getBigDecimal(columnIndex);
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
 		checkClosed();
-		return dataPool.getBigDecimal(columnIndex, scale);
+		return super.getBigDecimal(columnIndex, scale);
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getBigDecimal(columnLabel);
+		return super.getBigDecimal(columnLabel);
 	}
 
 	@Override
 	public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
 		checkClosed();
-		return dataPool.getBigDecimal(columnLabel, scale);
+		return super.getBigDecimal(columnLabel, scale);
 	}
 
 	@Override
 	public InputStream getBinaryStream(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getBinaryStream(columnIndex);
+		return super.getBinaryStream(columnIndex);
 	}
 
 	@Override
 	public InputStream getBinaryStream(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getBinaryStream(columnLabel);
+		return super.getBinaryStream(columnLabel);
 	}
 
 	@Override
 	public Blob getBlob(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getBlob(columnIndex);
+		return super.getBlob(columnIndex);
 	}
 
 	@Override
 	public Blob getBlob(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getBlob(columnLabel);
+		return super.getBlob(columnLabel);
 	}
 
 	@Override
 	public boolean getBoolean(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getBoolean(columnIndex);
+		return super.getBoolean(columnIndex);
 	}
 
 	@Override
 	public boolean getBoolean(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getBoolean(columnLabel);
+		return super.getBoolean(columnLabel);
 	}
 
 	@Override
 	public byte getByte(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getByte(columnIndex);
+		return super.getByte(columnIndex);
 	}
 
 	@Override
 	public byte getByte(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getByte(columnLabel);
+		return super.getByte(columnLabel);
 	}
 
 	@Override
 	public byte[] getBytes(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getBytes(columnIndex);
+		return super.getBytes(columnIndex);
 	}
 
 	@Override
 	public byte[] getBytes(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getBytes(columnLabel);
+		return super.getBytes(columnLabel);
 	}
 
 	@Override
 	public Reader getCharacterStream(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getCharacterStream(columnIndex);
+		return super.getCharacterStream(columnIndex);
 	}
 
 	@Override
 	public Reader getCharacterStream(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getCharacterStream(columnLabel);
+		return super.getCharacterStream(columnLabel);
 	}
 
 	@Override
 	public Clob getClob(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getClob(columnIndex);
+		return super.getClob(columnIndex);
 	}
 
 	@Override
 	public Clob getClob(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getClob(columnLabel);
+		return super.getClob(columnLabel);
 	}
 
 	@Override
 	public int getConcurrency() throws SQLException {
 		checkClosed();
-		return dataPool.getConcurrency();
+		return super.getConcurrency();
 	}
 
 	@Override
 	public String getCursorName() throws SQLException {
 		checkClosed();
-		return dataPool.getCursorName();
+		return super.getCursorName();
 	}
 
 	@Override
 	public Date getDate(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getDate(columnIndex);
+		return super.getDate(columnIndex);
 	}
 
 	@Override
 	public Date getDate(int columnIndex, Calendar cal) throws SQLException {
 		checkClosed();
-		return dataPool.getDate(columnIndex, cal);
+		return super.getDate(columnIndex, cal);
 	}
 
 	@Override
 	public Date getDate(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getDate(columnLabel);
+		return super.getDate(columnLabel);
 	}
 
 	@Override
 	public Date getDate(String columnLabel, Calendar cal) throws SQLException {
 		checkClosed();
-		return dataPool.getDate(columnLabel, cal);
+		return super.getDate(columnLabel, cal);
 	}
 
 	@Override
 	public double getDouble(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getDouble(columnIndex);
+		return super.getDouble(columnIndex);
 	}
 
 	@Override
 	public double getDouble(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getDouble(columnLabel);
+		return super.getDouble(columnLabel);
 	}
 
 	@Override
@@ -301,163 +298,163 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 	@Override
 	public float getFloat(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getFloat(columnIndex);
+		return super.getFloat(columnIndex);
 	}
 
 	@Override
 	public float getFloat(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getFloat(columnLabel);
+		return super.getFloat(columnLabel);
 	}
 
 	@Override
 	public int getHoldability() throws SQLException {
 		checkClosed();
-		return dataPool.getHoldability();
+		return super.getHoldability();
 	}
 
 	@Override
 	public int getInt(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getInt(columnIndex);
+		return super.getInt(columnIndex);
 	}
 
 	@Override
 	public int getInt(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getInt(columnLabel);
+		return super.getInt(columnLabel);
 	}
 
 	@Override
 	public long getLong(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getLong(columnIndex);
+		return super.getLong(columnIndex);
 	}
 
 	@Override
 	public long getLong(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getLong(columnLabel);
+		return super.getLong(columnLabel);
 	}
 
 	@Override
 	public ResultSetMetaData getMetaData() throws SQLException {
 		checkClosed();
-		return dataPool.getMetaData();
+		return super.getMetaData();
 	}
 
 	@Override
 	public Reader getNCharacterStream(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getNCharacterStream(columnIndex);
+		return super.getNCharacterStream(columnIndex);
 	}
 
 	@Override
 	public Reader getNCharacterStream(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getNCharacterStream(columnLabel);
+		return super.getNCharacterStream(columnLabel);
 	}
 
 	@Override
 	public NClob getNClob(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getNClob(columnIndex);
+		return super.getNClob(columnIndex);
 	}
 
 	@Override
 	public NClob getNClob(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getNClob(columnLabel);
+		return super.getNClob(columnLabel);
 	}
 
 	@Override
 	public String getNString(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getNString(columnIndex);
+		return super.getNString(columnIndex);
 	}
 
 	@Override
 	public String getNString(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getNString(columnLabel);
+		return super.getNString(columnLabel);
 	}
 
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getObject(columnIndex);
+		return super.getObject(columnIndex);
 	}
 
 	@Override
 	public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
 		checkClosed();
-		return dataPool.getObject(columnIndex, map);
+		return super.getObject(columnIndex, map);
 	}
 
 	@Override
 	public Object getObject(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getObject(columnLabel);
+		return super.getObject(columnLabel);
 	}
 
 	@Override
 	public Object getObject(String columnLabel, Map<String, Class<?>> map) throws SQLException {
 		checkClosed();
-		return dataPool.getObject(columnLabel, map);
+		return super.getObject(columnLabel, map);
 	}
 
 	@Override
 	public Ref getRef(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getRef(columnIndex);
+		return super.getRef(columnIndex);
 	}
 
 	@Override
 	public Ref getRef(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getRef(columnLabel);
+		return super.getRef(columnLabel);
 	}
 
 	@Override
 	public int getRow() throws SQLException {
 		checkClosed();
-		return dataPool.getCurrentRowNo();
+		return super.getCurrentRowNo();
 	}
 
 	@Override
 	public RowId getRowId(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getRowId(columnIndex);
+		return super.getRowId(columnIndex);
 	}
 
 	@Override
 	public RowId getRowId(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getRowId(columnLabel);
+		return super.getRowId(columnLabel);
 	}
 
 	@Override
 	public short getShort(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getShort(columnIndex);
+		return super.getShort(columnIndex);
 	}
 
 	@Override
 	public short getShort(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getShort(columnLabel);
+		return super.getShort(columnLabel);
 	}
 
 	@Override
 	public SQLXML getSQLXML(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getSQLXML(columnIndex);
+		return super.getSQLXML(columnIndex);
 	}
 
 	@Override
 	public SQLXML getSQLXML(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getSQLXML(columnLabel);
+		return super.getSQLXML(columnLabel);
 	}
 
 	@Override
@@ -468,91 +465,91 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 	@Override
 	public String getString(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getString(columnIndex);
+		return super.getString(columnIndex);
 	}
 
 	@Override
 	public String getString(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getString(columnLabel);
+		return super.getString(columnLabel);
 	}
 
 	@Override
 	public Time getTime(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getTime(columnIndex);
+		return super.getTime(columnIndex);
 	}
 
 	@Override
 	public Time getTime(int columnIndex, Calendar cal) throws SQLException {
 		checkClosed();
-		return dataPool.getTime(columnIndex, cal);
+		return super.getTime(columnIndex, cal);
 	}
 
 	@Override
 	public Time getTime(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getTime(columnLabel);
+		return super.getTime(columnLabel);
 	}
 
 	@Override
 	public Time getTime(String columnLabel, Calendar cal) throws SQLException {
 		checkClosed();
-		return dataPool.getTime(columnLabel, cal);
+		return super.getTime(columnLabel, cal);
 	}
 
 	@Override
 	public Timestamp getTimestamp(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getTimestamp(columnIndex);
+		return super.getTimestamp(columnIndex);
 	}
 
 	@Override
 	public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
 		checkClosed();
-		return dataPool.getTimestamp(columnIndex, cal);
+		return super.getTimestamp(columnIndex, cal);
 	}
 
 	@Override
 	public Timestamp getTimestamp(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getTimestamp(columnLabel);
+		return super.getTimestamp(columnLabel);
 	}
 
 	@Override
 	public Timestamp getTimestamp(String columnLabel, Calendar cal) throws SQLException {
 		checkClosed();
-		return dataPool.getTimestamp(columnLabel, cal);
+		return super.getTimestamp(columnLabel, cal);
 	}
 
 	@Override
 	public int getType() throws SQLException {
 		checkClosed();
-		return dataPool.getType();
+		return super.getType();
 	}
 
 	@Override
 	public InputStream getUnicodeStream(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getUnicodeStream(columnIndex);
+		return super.getUnicodeStream(columnIndex);
 	}
 
 	@Override
 	public InputStream getUnicodeStream(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getUnicodeStream(columnLabel);
+		return super.getUnicodeStream(columnLabel);
 	}
 
 	@Override
 	public URL getURL(int columnIndex) throws SQLException {
 		checkClosed();
-		return dataPool.getURL(columnIndex);
+		return super.getURL(columnIndex);
 	}
 
 	@Override
 	public URL getURL(String columnLabel) throws SQLException {
 		checkClosed();
-		return dataPool.getURL(columnLabel);
+		return super.getURL(columnLabel);
 	}
 
 	public void init() throws SQLException {
@@ -560,7 +557,7 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 
 		if (!dataInited) {
 			if (routerTarget != null) {
-				dataMerger.merge(dataPool, routerTarget, actualResultSets);
+				dataMerger.merge(this, routerTarget, actualResultSets);
 			}
 			dataInited = true;
 		}
@@ -577,11 +574,7 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 		if (!dataInited) {
 			init();
 		}
-		return dataPool.next();
-	}
-
-	public void setDataPool(DataPool dataPool) {
-		this.dataPool = dataPool;
+		return super.next();
 	}
 
 	@Override
@@ -618,7 +611,7 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 	public boolean wasNull() throws SQLException {
 		checkClosed();
 
-		return dataPool.wasNull();
+		return super.wasNull();
 	}
 
 }
