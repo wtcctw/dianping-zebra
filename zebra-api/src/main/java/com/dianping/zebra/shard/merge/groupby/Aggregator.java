@@ -13,7 +13,9 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.merge.aggregate;
+package com.dianping.zebra.shard.merge.groupby;
+
+import com.dianping.zebra.shard.merge.groupby.aggregate.AggregateException;
 
 /**
  * <p>
@@ -23,7 +25,7 @@ package com.dianping.zebra.shard.merge.aggregate;
  * @author Leo Liang
  * 
  */
-public interface DataAggregator {
+public interface Aggregator {
 
 	/**
 	 * 根据旧值和当前值计算新值并返回<br>
@@ -36,8 +38,8 @@ public interface DataAggregator {
 	 * @param currentValue
 	 *            当前值
 	 * @return 新的计算结果值
-	 * @throws DataAggregateException
+	 * @throws AggregateException
 	 */
-	public Object process(Object oldValue, Object currentValue) throws DataAggregateException;
+	public Object process(Object oldValue, Object currentValue) throws AggregateException;
 
 }

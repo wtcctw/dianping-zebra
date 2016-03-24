@@ -13,9 +13,11 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.merge.aggregate;
+package com.dianping.zebra.shard.merge.groupby.aggregate;
 
 import java.math.BigDecimal;
+
+import com.dianping.zebra.shard.merge.groupby.Aggregator;
 
 /**
  * <p>
@@ -30,7 +32,7 @@ import java.math.BigDecimal;
  * @author Leo Liang
  * 
  */
-public class SumDataAggregator implements DataAggregator {
+public class SumAggregator implements Aggregator {
 
 	/**
 	 * 根据旧值(处理当前列之前的累加sum值)和当前值返回当前值和旧值的和作为新的sum值
@@ -40,9 +42,9 @@ public class SumDataAggregator implements DataAggregator {
 	 * @param currentValue
 	 *            当前值
 	 * @return sum结果
-	 * @throws DataAggregateException
+	 * @throws AggregateException
 	 */
-	public Object process(Object oldValue, Object currentValue) throws DataAggregateException {
+	public Object process(Object oldValue, Object currentValue) throws AggregateException {
 		if (currentValue == null) {
 			return oldValue;
 		}
@@ -54,7 +56,7 @@ public class SumDataAggregator implements DataAggregator {
 		}
 
 		if (oldValue.getClass() != type) {
-			throw new DataAggregateException("oldValue.class != currentValue.class");
+			throw new AggregateException("oldValue.class != currentValue.class");
 		}
 
 		if (currentValue instanceof Integer) {
@@ -70,7 +72,7 @@ public class SumDataAggregator implements DataAggregator {
 		} else if (currentValue instanceof BigDecimal) {
 			return ((BigDecimal) oldValue).add((BigDecimal) currentValue);
 		} else {
-			throw new DataAggregateException("Can not process groupby function sum() for type: "
+			throw new AggregateException("Can not process groupby function sum() for type: "
 					+ currentValue.getClass());
 		}
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLOrderBy;
+import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
 
@@ -81,5 +82,15 @@ public class MergeContext {
 
 	public void setDistinct(boolean distinct) {
 		this.distinct = distinct;
+	}
+	
+	public boolean hasAggregateExpr() {
+		for (SQLSelectItem col : this.selectLists) {
+			if (col.getExpr() instanceof SQLAggregateExpr) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

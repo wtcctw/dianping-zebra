@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.dianping.zebra.shard.jdbc.unsupport.UnsupportedShardResultSet;
-import com.dianping.zebra.shard.merge.DataMerger;
 import com.dianping.zebra.shard.merge.DataPool;
 import com.dianping.zebra.shard.merge.DefaultDataMerger;
 import com.dianping.zebra.shard.router.RouterResult;
@@ -53,7 +52,7 @@ public class ShardResultSet extends UnsupportedShardResultSet implements ResultS
 
 	private DataPool dataPool = new DataPool();
 
-	private DataMerger dataMerger = new DefaultDataMerger();
+	private DefaultDataMerger dataMerger = new DefaultDataMerger();
 
 	private boolean dataInited = false;
 

@@ -13,13 +13,15 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.merge.aggregate;
+package com.dianping.zebra.shard.merge.groupby.aggregate;
 
 import java.math.BigDecimal;
 
+import com.dianping.zebra.shard.merge.groupby.Aggregator;
+
 /**
  * <p>
- * 处理max()函数的数据处理器
+ * 处理min()函数的数据处理器
  * </p>
  * 
  * <p>
@@ -30,19 +32,19 @@ import java.math.BigDecimal;
  * @author Leo Liang
  * 
  */
-public class MaxDataAggregator implements DataAggregator {
+public class MinAggregator implements Aggregator {
 
 	/**
-	 * 根据旧值(处理当前列之前的最大值)和当前值返回当前值和旧值的最大值
+	 * 根据旧值(处理当前列之前的最小值)和当前值返回当前值和旧值的最小值
 	 * 
 	 * @param oldValue
 	 *            旧值
 	 * @param currentValue
 	 *            当前值
-	 * @return max结果
-	 * @throws DataAggregateException
+	 * @return min结果
+	 * @throws AggregateException
 	 */
-	public Object process(Object oldValue, Object currentValue) throws DataAggregateException {
+	public Object process(Object oldValue, Object currentValue) throws AggregateException {
 		if (currentValue == null) {
 			return oldValue;
 		}
@@ -54,24 +56,24 @@ public class MaxDataAggregator implements DataAggregator {
 		}
 
 		if (oldValue.getClass() != type) {
-			throw new DataAggregateException("oldValue.class != currentValue.class");
+			throw new AggregateException("oldValue.class != currentValue.class");
 		}
 
 		if (currentValue instanceof Integer) {
-			return (Integer) oldValue > (Integer) currentValue ? (Integer) oldValue : (Integer) currentValue;
+			return (Integer) oldValue < (Integer) currentValue ? (Integer) oldValue : (Integer) currentValue;
 		} else if (currentValue instanceof Long) {
-			return (Long) oldValue > (Long) currentValue ? (Long) oldValue : (Long) currentValue;
+			return (Long) oldValue < (Long) currentValue ? (Long) oldValue : (Long) currentValue;
 		} else if (currentValue instanceof Short) {
-			return (Short) oldValue > (Short) currentValue ? (Short) oldValue : (Short) currentValue;
+			return (Short) oldValue < (Short) currentValue ? (Short) oldValue : (Short) currentValue;
 		} else if (currentValue instanceof Float) {
-			return (Float) oldValue > (Float) currentValue ? (Float) oldValue : (Float) currentValue;
+			return (Float) oldValue < (Float) currentValue ? (Float) oldValue : (Float) currentValue;
 		} else if (currentValue instanceof Double) {
-			return (Double) oldValue > (Double) currentValue ? (Double) oldValue : (Double) currentValue;
+			return (Double) oldValue < (Double) currentValue ? (Double) oldValue : (Double) currentValue;
 		} else if (currentValue instanceof BigDecimal) {
-			return ((BigDecimal) oldValue).compareTo((BigDecimal) currentValue) == 1 ? (BigDecimal) oldValue
+			return ((BigDecimal) oldValue).compareTo((BigDecimal) currentValue) == -1 ? (BigDecimal) oldValue
 					: (BigDecimal) currentValue;
 		} else {
-			throw new DataAggregateException("Can not process groupby function max() for type: "
+			throw new AggregateException("Can not process groupby function min() for type: "
 					+ currentValue.getClass());
 		}
 	}

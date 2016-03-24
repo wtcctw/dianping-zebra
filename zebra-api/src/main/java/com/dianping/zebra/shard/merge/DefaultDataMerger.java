@@ -19,32 +19,20 @@ import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLName;
-import com.alibaba.druid.sql.ast.SQLOrderBy;
-import com.alibaba.druid.sql.ast.SQLOrderingSpecification;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.expr.SQLAllColumnExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
-import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
-import com.dianping.zebra.shard.merge.aggregate.DataAggregateException;
-import com.dianping.zebra.shard.merge.aggregate.DataAggregator;
-import com.dianping.zebra.shard.merge.aggregate.CountDataAggregator;
-import com.dianping.zebra.shard.merge.aggregate.MaxDataAggregator;
-import com.dianping.zebra.shard.merge.aggregate.MinDataAggregator;
-import com.dianping.zebra.shard.merge.aggregate.SumDataAggregator;
+import com.dianping.zebra.shard.merge.distinct.DistinctDataMerger;
+import com.dianping.zebra.shard.merge.groupby.GroupByDataMerger;
+import com.dianping.zebra.shard.merge.orderby.OrderByDataMerger;
 import com.dianping.zebra.shard.router.RouterResult;
+import com.dianping.zebra.shard.router.RouterResult.RouterTarget;
 
 /**
  * <p>
@@ -53,16 +41,13 @@ import com.dianping.zebra.shard.router.RouterResult;
  *
  * @author Leo Liang
  */
-public class DefaultDataMerger implements DataMerger {
-	private static Map<String, DataAggregator> aggregateFunctionProcessors;
+public class DefaultDataMerger {
 
-	static {
-		aggregateFunctionProcessors = new HashMap<String, DataAggregator>();
-		aggregateFunctionProcessors.put("MAX", new MaxDataAggregator());
-		aggregateFunctionProcessors.put("MIN", new MinDataAggregator());
-		aggregateFunctionProcessors.put("COUNT", new CountDataAggregator());
-		aggregateFunctionProcessors.put("SUM", new SumDataAggregator());
-	}
+	private DistinctDataMerger distinctMerger = new DistinctDataMerger();
+
+	private GroupByDataMerger groubyMerger = new GroupByDataMerger();
+
+	private OrderByDataMerger orderbyMerger = new OrderByDataMerger();
 
 	/**
 	 * <p>
@@ -77,229 +62,41 @@ public class DefaultDataMerger implements DataMerger {
 	 */
 	public void merge(DataPool dataPool, RouterResult routerTarget, List<ResultSet> actualResultSets)
 			throws SQLException {
-		if (routerTarget.getSqls() == null || routerTarget.getSqls().size() == 0) {
+		List<RouterTarget> sqls = routerTarget.getSqls();
+		MergeContext mergeContext = routerTarget.getMergeContext();
+
+		if (sqls == null || sqls.size() == 0) {
 			throw new SQLException("Can not proc merge, since no router result.");
 		}
 
-		if (routerTarget.getSqls().size() == 1 && routerTarget.getSqls().get(0).getSqls().size() == 1) {
+		if (sqls.size() == 1 && sqls.get(0).getSqls().size() == 1) {
 			dataPool.setResultSets(actualResultSets);
 			dataPool.setInMemory(false);
-		} else if ((routerTarget.getSqls().size() > 1 || routerTarget.getSqls().get(0).getSqls().size() > 1)
-				&& (routerTarget.getMergeContext().getOrderBy() == null)
-				&& !hasGroupByFunctionColumns(routerTarget.getMergeContext())
-				&& !routerTarget.getMergeContext().isDistinct()) {
+		} else if ((sqls.size() > 1 || sqls.get(0).getSqls().size() > 1) && (mergeContext.getOrderBy() == null)
+				&& !mergeContext.hasAggregateExpr() && !mergeContext.isDistinct()) {
 			dataPool.setResultSets(actualResultSets);
 			dataPool.setInMemory(false);
 		} else {
 			dataPool.setInMemory(true);
 			dataPool.setResultSets(actualResultSets);
-			List<RowData> rowDatas = popResultSets(actualResultSets, routerTarget.getMergeContext());
+			List<RowData> rowDatas = popResultSets(actualResultSets, mergeContext);
 
 			if (rowDatas == null || rowDatas.size() == 0) {
 				dataPool.setMemoryData(rowDatas);
 				return;
 			}
 
-			List<RowData> afterDistinctDatas = rowDatas;
-
-			if (routerTarget.getMergeContext().isDistinct()) {
-				afterDistinctDatas = procDistinct(rowDatas);
-			}
-			List<RowData> afterGroupByDatas = procAggregateFunction(afterDistinctDatas, routerTarget.getMergeContext());
-
-			List<RowData> afterOrderByDatas = procOrderBy(afterGroupByDatas, routerTarget.getMergeContext());
+			List<RowData> afterDistinctDatas = distinctMerger.process(rowDatas, mergeContext);
+			List<RowData> afterGroupByDatas = groubyMerger.process(afterDistinctDatas, mergeContext);
+			List<RowData> afterOrderByDatas = orderbyMerger.process(afterGroupByDatas, mergeContext);
 
 			dataPool.setMemoryData(afterOrderByDatas);
 		}
 
-		if (routerTarget.getSqls().size() > 1 || routerTarget.getSqls().get(0).getSqls().size() > 1) {
-			dataPool.setMax(routerTarget.getMergeContext().getLimit());
-			dataPool.setSkip(routerTarget.getMergeContext().getOffset());
+		if (sqls.size() > 1 || sqls.get(0).getSqls().size() > 1) {
+			dataPool.setMax(mergeContext.getLimit());
+			dataPool.setSkip(mergeContext.getOffset());
 			dataPool.procLimit();
-		}
-
-	}
-
-	private List<RowData> procDistinct(List<RowData> sourceData) {
-		Set<RowData> distinctRowSet = new HashSet<RowData>();
-		for (RowData row : sourceData) {
-			distinctRowSet.add(row);
-		}
-		return new ArrayList<RowData>(distinctRowSet);
-	}
-
-	private List<RowData> procOrderBy(List<RowData> sourceData, final MergeContext mergeContext) throws SQLException {
-		if (mergeContext.getOrderBy() != null) {
-			SQLOrderBy orderBy = mergeContext.getOrderBy();
-			final List<SQLSelectOrderByItem> items = orderBy.getItems();
-			Collections.sort(sourceData, new Comparator<RowData>() {
-				@Override
-				public int compare(RowData o1, RowData o2) {
-					try {
-						for (SQLSelectOrderByItem orderByEle : items) {
-							SQLName identifier = (SQLName) orderByEle.getExpr();
-
-							Object value1 = o1.get(identifier.getSimpleName()).getValue();
-							Class<?> type1 = o1.get(identifier.getSimpleName()).getType();
-							Object value2 = o2.get(identifier.getSimpleName()).getValue();
-							Class<?> type2 = o2.get(identifier.getSimpleName()).getType();
-
-							if (!type1.equals(type2)) {
-								throw new SQLException("Invalid data");
-							}
-
-							if (!Comparable.class.isAssignableFrom(type1)) {
-								throw new SQLException(
-										"Can not orderBy column : " + identifier + " which isn't comparable.");
-							}
-
-							@SuppressWarnings({ "unchecked", "rawtypes" })
-							int compareRes = ((Comparable) value1).compareTo((Comparable) value2);
-
-							if (orderByEle.getType() == null
-									|| ((SQLOrderingSpecification) orderByEle.getType()).name().equals("ASC")) {
-								if (compareRes != 0) {
-									return compareRes;
-								}
-							} else {
-								if (compareRes != 0) {
-									return compareRes < 0 ? 1 : -1;
-								}
-							}
-						}
-
-						return 0;
-
-					} catch (SQLException e) {
-						throw new RuntimeException(e);
-					}
-				}
-
-			});
-		}
-
-		return sourceData;
-	}
-
-	private List<RowData> procAggregateFunction(List<RowData> sourceData, MergeContext mergeContext)
-			throws SQLException {
-		List<RowData> processedDatas = new ArrayList<RowData>();
-
-		// 没有group by并且没有聚合函数，则直接返回源数据
-		if ((mergeContext.getOrderBy() == null || mergeContext.getGroupByColumns().size() <= 0)
-				&& !hasGroupByFunctionColumns(mergeContext)) {
-			return sourceData;
-		}
-
-		Map<String, SQLSelectItem> columnNameFunctionMapping = new HashMap<String, SQLSelectItem>();
-		for (SQLSelectItem column : mergeContext.getSelectLists()) {
-			String name = null;
-			if (column.getExpr() instanceof SQLAggregateExpr) {
-				SQLAggregateExpr expr = (SQLAggregateExpr) column.getExpr();
-				SQLExpr argument = expr.getArguments().get(0);
-				if (argument instanceof SQLAllColumnExpr) {
-					name = expr.getMethodName() + "(*)";
-				} else {
-					name = expr.getMethodName() + "(" + ((SQLName) argument).getSimpleName() + ")";
-				}
-			} else {
-				name = ((SQLName) column.getExpr()).getSimpleName();
-			}
-			columnNameFunctionMapping.put(column.getAlias() == null ? name : column.getAlias(), column);
-		}
-
-		if (mergeContext.getGroupByColumns() == null || mergeContext.getGroupByColumns().size() <= 0) {
-			RowData aggregateRow = null;
-			for (RowData row : sourceData) {
-				if (aggregateRow == null) {
-					aggregateRow = new RowData(row);
-				} else {
-					calAggregateFunctionValue(columnNameFunctionMapping, row, aggregateRow, null);
-				}
-			}
-			processedDatas.add(aggregateRow);
-		} else {
-			procGroupBy(sourceData, mergeContext, processedDatas, columnNameFunctionMapping);
-		}
-
-		return processedDatas;
-	}
-
-	private void procGroupBy(List<RowData> sourceData, MergeContext mergeContext, List<RowData> processedDatas,
-			Map<String, SQLSelectItem> columnNameFunctionMapping) throws SQLException {
-		// 因为group by后面跟的只能是列名，但是如果select中包含别名，则ColumnData中存放的是别名
-		// 所以先获得列名和别名的map
-		Map<String, String> columnNameAliasMapping = new HashMap<String, String>();
-		for (SQLSelectItem column : mergeContext.getSelectLists()) {
-			SQLExpr expr = column.getExpr();
-			if (expr instanceof SQLAggregateExpr) {
-				SQLAggregateExpr aggregateExpr = (SQLAggregateExpr) expr;
-				SQLName identifier = (SQLName) aggregateExpr.getArguments().get(0);
-				columnNameAliasMapping.put(identifier.getSimpleName(), column.getAlias());
-			} else {
-				if (column.getAlias() != null) {
-					SQLName identifier = (SQLName) expr;
-					columnNameAliasMapping.put(identifier.getSimpleName(), column.getAlias());
-				}
-			}
-		}
-
-		List<Integer> groupByColumnIndexes = new ArrayList<Integer>();
-		for (String columnName : mergeContext.getGroupByColumns()) {
-			groupByColumnIndexes.add(sourceData.get(0).get(columnNameAliasMapping.containsKey(columnName)
-					? columnNameAliasMapping.get(columnName) : columnName).getColumnIndex());
-		}
-
-		Map<MultiKey, RowData> tmpMap = new LinkedHashMap<MultiKey, RowData>();
-		for (RowData row : sourceData) {
-			List<Object> groupByValues = new ArrayList<Object>(mergeContext.getGroupByColumns().size());
-
-			for (Integer groupByColIndex : groupByColumnIndexes) {
-				groupByValues.add(row.get(groupByColIndex).getValue());
-			}
-
-			// 多个group by的值作为一个MultiKey用于聚合Map
-			MultiKey multiKey = new MultiKey(groupByValues);
-
-			RowData groupByRowData = tmpMap.get(multiKey);
-
-			if (groupByRowData == null) {
-				groupByRowData = new RowData(row);
-				tmpMap.put(multiKey, groupByRowData);
-			} else {
-				calAggregateFunctionValue(columnNameFunctionMapping, row, groupByRowData, groupByColumnIndexes);
-			}
-		}
-
-		for (Map.Entry<MultiKey, RowData> entry : tmpMap.entrySet()) {
-			processedDatas.add(entry.getValue());
-		}
-	}
-
-	private void calAggregateFunctionValue(Map<String, SQLSelectItem> columnNameFunctionMapping, RowData row,
-			RowData newRowData, List<Integer> ignoreColumnList) throws SQLException {
-		try {
-			for (ColumnData col : row.getColumnDatas()) {
-				if (ignoreColumnList != null && ignoreColumnList.contains(col.getColumnIndex())) {
-					continue;
-				}
-				SQLSelectItem columnType = columnNameFunctionMapping.get(col.getColumnName());
-				SQLAggregateExpr aggregateExpr = (SQLAggregateExpr) columnType.getExpr();
-				DataAggregator dataProcessor = aggregateFunctionProcessors.get(aggregateExpr.getMethodName());
-				if (dataProcessor != null) {
-					ColumnData oldCol = newRowData.get(col.getColumnIndex());
-					Object value = dataProcessor.process(oldCol.getValue(), col.getValue());
-
-					if (value != null) {
-						oldCol.setWasNull(false);
-					}
-					oldCol.setValue(value);
-				} else {
-					throw new SQLException("Zebra unsupported groupby function exists");
-				}
-			}
-		} catch (DataAggregateException e) {
-			throw new SQLException("Proc aggregate merge failed.");
 		}
 	}
 
@@ -349,16 +146,5 @@ public class DefaultDataMerger implements DataMerger {
 		}
 
 		return rows;
-
-	}
-
-	private boolean hasGroupByFunctionColumns(MergeContext mergeContext) {
-		for (SQLSelectItem col : mergeContext.getSelectLists()) {
-			if (col.getExpr() instanceof SQLAggregateExpr) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

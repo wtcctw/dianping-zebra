@@ -57,19 +57,19 @@ import java.util.Map;
  */
 public class DataPool {
 
-	private List<ResultSet> resultSets = new ArrayList<ResultSet>();
+	protected List<ResultSet> resultSets = new ArrayList<ResultSet>();
 
-	private List<RowData> memoryData;
+	protected List<RowData> memoryData;
 
-	private boolean inMemory;
+	protected boolean inMemory;
 
-	private int resultSetIndex = 0;
+	protected int resultSetIndex = 0;
 
-	private int rowNum = 0;
+	protected int rowNum = 0;
 
-	private int skip = MergeContext.NO_OFFSET;
+	protected int skip = MergeContext.NO_OFFSET;
 
-	private int max = MergeContext.NO_LIMIT;
+	protected int max = MergeContext.NO_LIMIT;
 
 	private boolean wasNull = false;
 
