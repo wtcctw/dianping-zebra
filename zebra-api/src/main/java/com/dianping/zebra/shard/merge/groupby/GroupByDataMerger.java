@@ -15,7 +15,6 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.dianping.zebra.shard.merge.ColumnData;
 import com.dianping.zebra.shard.merge.MergeContext;
 import com.dianping.zebra.shard.merge.DataMerger;
-import com.dianping.zebra.shard.merge.MultiKey;
 import com.dianping.zebra.shard.merge.RowData;
 import com.dianping.zebra.shard.merge.groupby.aggregate.CountAggregator;
 import com.dianping.zebra.shard.merge.groupby.aggregate.AggregateException;

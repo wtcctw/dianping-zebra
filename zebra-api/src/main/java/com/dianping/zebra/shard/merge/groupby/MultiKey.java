@@ -13,7 +13,7 @@
  * accordance with the terms of the license agreement you entered into
  * with dianping.com.
  */
-package com.dianping.zebra.shard.merge;
+package com.dianping.zebra.shard.merge.groupby;
 
 import java.io.Serializable;
 import java.util.List;
