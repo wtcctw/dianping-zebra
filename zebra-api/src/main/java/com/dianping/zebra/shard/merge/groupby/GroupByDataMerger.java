@@ -7,17 +7,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.SQLName;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
-import com.alibaba.druid.sql.ast.expr.SQLAllColumnExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.dianping.zebra.shard.merge.ColumnData;
-import com.dianping.zebra.shard.merge.MergeContext;
 import com.dianping.zebra.shard.merge.DataMerger;
+import com.dianping.zebra.shard.merge.MergeContext;
 import com.dianping.zebra.shard.merge.RowData;
-import com.dianping.zebra.shard.merge.groupby.aggregate.CountAggregator;
 import com.dianping.zebra.shard.merge.groupby.aggregate.AggregateException;
+import com.dianping.zebra.shard.merge.groupby.aggregate.CountAggregator;
 import com.dianping.zebra.shard.merge.groupby.aggregate.MaxAggregator;
 import com.dianping.zebra.shard.merge.groupby.aggregate.MinAggregator;
 import com.dianping.zebra.shard.merge.groupby.aggregate.SumAggregator;
@@ -38,27 +35,11 @@ public class GroupByDataMerger implements DataMerger {
 		List<RowData> processedDatas = new ArrayList<RowData>();
 
 		// 没有group by并且没有聚合函数，则直接返回源数据
-		if ((mergeContext.getOrderBy() == null || mergeContext.getGroupByColumns().size() <= 0)
-				&& !mergeContext.hasAggregateExpr()) {
+		if (mergeContext.getGroupByColumns().size() <= 0 && !mergeContext.isAggregate()) {
 			return sourceData;
 		}
 
-		Map<String, SQLSelectItem> columnNameFunctionMapping = new HashMap<String, SQLSelectItem>();
-		for (SQLSelectItem column : mergeContext.getSelectLists()) {
-			String name = null;
-			if (column.getExpr() instanceof SQLAggregateExpr) {
-				SQLAggregateExpr expr = (SQLAggregateExpr) column.getExpr();
-				SQLExpr argument = expr.getArguments().get(0);
-				if (argument instanceof SQLAllColumnExpr) {
-					name = expr.getMethodName() + "(*)";
-				} else {
-					name = expr.getMethodName() + "(" + ((SQLName) argument).getSimpleName() + ")";
-				}
-			} else {
-				name = ((SQLName) column.getExpr()).getSimpleName();
-			}
-			columnNameFunctionMapping.put(column.getAlias() == null ? name : column.getAlias(), column);
-		}
+		Map<String, SQLSelectItem> columnNameFunctionMapping = mergeContext.getSelectItemMap();
 
 		if (mergeContext.getGroupByColumns() == null || mergeContext.getGroupByColumns().size() <= 0) {
 			RowData aggregateRow = null;
@@ -108,20 +89,7 @@ public class GroupByDataMerger implements DataMerger {
 			Map<String, SQLSelectItem> columnNameFunctionMapping) throws SQLException {
 		// 因为group by后面跟的只能是列名，但是如果select中包含别名，则ColumnData中存放的是别名
 		// 所以先获得列名和别名的map
-		Map<String, String> columnNameAliasMapping = new HashMap<String, String>();
-		for (SQLSelectItem column : mergeContext.getSelectLists()) {
-			SQLExpr expr = column.getExpr();
-			if (expr instanceof SQLAggregateExpr) {
-				SQLAggregateExpr aggregateExpr = (SQLAggregateExpr) expr;
-				SQLName identifier = (SQLName) aggregateExpr.getArguments().get(0);
-				columnNameAliasMapping.put(identifier.getSimpleName(), column.getAlias());
-			} else {
-				if (column.getAlias() != null) {
-					SQLName identifier = (SQLName) expr;
-					columnNameAliasMapping.put(identifier.getSimpleName(), column.getAlias());
-				}
-			}
-		}
+		Map<String, String> columnNameAliasMapping = mergeContext.getColumnNameAliasMapping();
 
 		List<Integer> groupByColumnIndexes = new ArrayList<Integer>();
 		for (String columnName : mergeContext.getGroupByColumns()) {

@@ -1,19 +1,21 @@
 package com.dianping.zebra.shard.merge;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.druid.sql.ast.SQLOrderBy;
-import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
 
 public class MergeContext {
-	
+
 	public static final int NO_OFFSET = Integer.MIN_VALUE;
 
 	public static final int NO_LIMIT = Integer.MAX_VALUE;
-	
+
 	private int offset = NO_OFFSET;
 
 	private int limit = NO_LIMIT;
@@ -22,11 +24,15 @@ public class MergeContext {
 
 	private List<String> groupByColumns = new ArrayList<String>();
 
-	private List<SQLSelectItem> selectLists = new ArrayList<SQLSelectItem>();
+	private Map<String, SQLSelectItem> selectItemMap = new LinkedHashMap<String, SQLSelectItem>();
+	
+	private Map<String,String> columnNameAliasMapping = new HashMap<String, String>();
 
 	private SQLOrderBy orderBy;
 
 	private boolean distinct;
+	
+	private boolean aggregate;
 
 	public int getOffset() {
 		return offset;
@@ -59,13 +65,22 @@ public class MergeContext {
 	public void setGroupByColumns(List<String> groupByColumns) {
 		this.groupByColumns = groupByColumns;
 	}
+	
 
-	public List<SQLSelectItem> getSelectLists() {
-		return selectLists;
+	public Map<String, SQLSelectItem> getSelectItemMap() {
+		return selectItemMap;
 	}
 
-	public void setSelectLists(List<SQLSelectItem> selectLists) {
-		this.selectLists = selectLists;
+	public void setSelectItemMap(Map<String, SQLSelectItem> selectItemMap) {
+		this.selectItemMap = selectItemMap;
+	}
+
+	public Map<String, String> getColumnNameAliasMapping() {
+		return columnNameAliasMapping;
+	}
+
+	public void setColumnNameAliasMapping(Map<String, String> columnNameAliasMapping) {
+		this.columnNameAliasMapping = columnNameAliasMapping;
 	}
 
 	public SQLOrderBy getOrderBy() {
@@ -83,14 +98,12 @@ public class MergeContext {
 	public void setDistinct(boolean distinct) {
 		this.distinct = distinct;
 	}
-	
-	public boolean hasAggregateExpr() {
-		for (SQLSelectItem col : this.selectLists) {
-			if (col.getExpr() instanceof SQLAggregateExpr) {
-				return true;
-			}
-		}
 
-		return false;
+	public boolean isAggregate() {
+		return aggregate;
+	}
+
+	public void setAggregate(boolean aggregate) {
+		this.aggregate = aggregate;
 	}
 }

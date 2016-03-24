@@ -151,6 +151,7 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 			Assert.assertEquals(42, rows.get(0).get("b").intValue());
 			Assert.assertEquals(47, rows.get(1).get("a").intValue());
 		} catch (Exception e) {
+			e.printStackTrace();
 			Assert.fail();
 		} finally {
 			if (conn != null) {
@@ -885,7 +886,6 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 			}
 			Assert.assertEquals(17, rows.size());
 		} catch (Exception e) {
-			e.printStackTrace();
 			Assert.fail();
 		} finally {
 			if (conn != null) {

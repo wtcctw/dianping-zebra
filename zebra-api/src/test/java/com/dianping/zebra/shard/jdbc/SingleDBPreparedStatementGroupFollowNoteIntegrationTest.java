@@ -95,6 +95,7 @@ public class SingleDBPreparedStatementGroupFollowNoteIntegrationTest extends Sin
 			System.out.println("Test 1 ------------------------------------------------------");
 			Assert.assertEquals(8, count);
 		} catch (Exception e) {
+			e.printStackTrace();
 			Assert.fail();
 		} finally {
 			if (conn != null) {

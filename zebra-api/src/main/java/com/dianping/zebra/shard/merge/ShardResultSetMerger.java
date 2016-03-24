@@ -20,13 +20,8 @@ import java.sql.RowId;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
-import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.SQLName;
-import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
-import com.alibaba.druid.sql.ast.expr.SQLAllColumnExpr;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
-import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.dianping.zebra.shard.merge.distinct.DistinctDataMerger;
 import com.dianping.zebra.shard.merge.groupby.GroupByDataMerger;
@@ -72,7 +67,7 @@ public class ShardResultSetMerger {
 		if (sqls.size() == 1 && sqls.get(0).getSqls().size() == 1) {
 			adaptor.setResultSets(actualResultSets);
 		} else if ((sqls.size() > 1 || sqls.get(0).getSqls().size() > 1) && (mergeContext.getOrderBy() == null)
-				&& !mergeContext.hasAggregateExpr() && !mergeContext.isDistinct()) {
+				&& !mergeContext.isAggregate() && !mergeContext.isDistinct()) {
 			adaptor.setResultSets(actualResultSets);
 		} else {
 			adaptor.setResultSets(actualResultSets);
@@ -105,23 +100,9 @@ public class ShardResultSetMerger {
 			while (actualResultSets.get(resultSetIndex).next()) {
 				RowData row = new RowData(actualResultSets.get(resultSetIndex));
 
-				for (SQLSelectItem col : mergeContext.getSelectLists()) {
-					String simpleName = null;
-					if (col.getExpr() instanceof SQLIdentifierExpr || col.getExpr() instanceof SQLPropertyExpr) {
-						simpleName = ((SQLName) col.getExpr()).getSimpleName();
-					} else if (col.getExpr() instanceof SQLAggregateExpr) {
-						SQLAggregateExpr expr = (SQLAggregateExpr) col.getExpr();
-						SQLExpr argument = expr.getArguments().get(0);
-						if (argument instanceof SQLAllColumnExpr) {
-							simpleName = expr.getMethodName() + "(*)";
-						} else {
-							simpleName = expr.getMethodName() + "(" + ((SQLName) argument).getSimpleName() + ")";
-						}
-					}
-
-					String columnName = col.getAlias() == null ? simpleName : col.getAlias();
-					int columnIndex = actualResultSets.get(resultSetIndex).findColumn(columnName);// todo:count(id)
-																									// 报错，此时没有字段名
+				for (Entry<String, SQLSelectItem> col : mergeContext.getSelectItemMap().entrySet()) {
+					String columnName = col.getKey();
+					int columnIndex = actualResultSets.get(resultSetIndex).findColumn(columnName);
 					Object value = actualResultSets.get(resultSetIndex).getObject(columnIndex);
 					boolean wasNull = actualResultSets.get(resultSetIndex).wasNull();
 					RowId rowId = null;
