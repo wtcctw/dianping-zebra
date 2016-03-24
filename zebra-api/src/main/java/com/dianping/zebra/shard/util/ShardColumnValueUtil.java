@@ -15,13 +15,13 @@
  */
 package com.dianping.zebra.shard.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
@@ -90,18 +90,19 @@ public class ShardColumnValueUtil {
 		// TODO handle table in the future
 		SQLExpr where = getWhere(parseResult);
 		if (where != null) {
-			LinkedHashMap<String, Object> pairs = new LinkedHashMap<String, Object>();
+			List<Pair> pairs = new ArrayList<Pair>();
 
-			eval(where, column, pairs);
+			eval(where, pairs);
 
-			for (Entry<String, Object> pair : pairs.entrySet()) {
-				String identifier = pair.getKey();
-				Object value = pair.getValue();
+			for (Pair pair : pairs) {
+				String identifier = pair.getIdentifier();
+				Object value = pair.getObj();
+				SQLBinaryOperator operator = pair.getOperator();
 
 				if (evalColumn(identifier, column)) {
-					if (value instanceof SQLValuableExpr) {
+					if (value instanceof SQLValuableExpr && operator == SQLBinaryOperator.Equality) {
 						result.add(((SQLValuableExpr) value).getValue());
-					} else if (value instanceof SQLVariantRefExpr) {
+					} else if (value instanceof SQLVariantRefExpr && operator == SQLBinaryOperator.Equality) {
 						SQLVariantRefExpr ref = (SQLVariantRefExpr) value;
 						result.add(params.get(ref.getIndex()));
 					} else if (value instanceof SQLInListExpr) {
@@ -139,14 +140,14 @@ public class ShardColumnValueUtil {
 		return expr;
 	}
 
-	private static void eval(SQLExpr sqlExpr, String column, LinkedHashMap<String, Object> pairs) {
+	private static void eval(SQLExpr sqlExpr, List<Pair> pairs) {
 		SQLBinaryOpExpr where = null;
 		if (sqlExpr instanceof SQLBinaryOpExpr) {
 			where = (SQLBinaryOpExpr) sqlExpr;
 		} else if (sqlExpr instanceof SQLInListExpr) {
 			SQLInListExpr inListExpr = (SQLInListExpr) sqlExpr;
 			SQLName indentifier = (SQLName) inListExpr.getExpr();
-			pairs.put(indentifier.getSimpleName(), inListExpr);
+			pairs.add(new Pair(indentifier.getSimpleName(), null, inListExpr));
 			return;
 		} else {
 			return;
@@ -154,9 +155,11 @@ public class ShardColumnValueUtil {
 
 		SQLBinaryOperator operator = where.getOperator();
 
-		if (operator != SQLBinaryOperator.Equality) {
-			eval(where.getLeft(), column, pairs);
-			eval(where.getRight(), column, pairs);
+		if (operator != SQLBinaryOperator.Equality && operator != SQLBinaryOperator.GreaterThan
+				&& operator != SQLBinaryOperator.GreaterThanOrEqual && operator != SQLBinaryOperator.LessThan
+				&& operator != SQLBinaryOperator.LessThanOrEqual && operator != SQLBinaryOperator.NotEqual) {
+			eval(where.getLeft(), pairs);
+			eval(where.getRight(), pairs);
 
 			return;
 		} else {
@@ -165,13 +168,13 @@ public class ShardColumnValueUtil {
 
 			if (left instanceof SQLIdentifierExpr) {
 				SQLIdentifierExpr indentifier = (SQLIdentifierExpr) left;
-				pairs.put(indentifier.getName(), right);
+				pairs.add(new Pair(indentifier.getName(), operator, right));
 			} else if (left instanceof SQLPropertyExpr) {
 				SQLPropertyExpr indentifier = (SQLPropertyExpr) left;
-				pairs.put(indentifier.getName(), right);
+				pairs.add(new Pair(indentifier.getName(), operator, right));
 			} else if (left instanceof SQLBinaryOpExpr) {
-				eval((SQLBinaryOpExpr) left, column, pairs);
-				eval((SQLBinaryOpExpr) right, column, pairs);
+				eval((SQLBinaryOpExpr) left, pairs);
+				eval((SQLBinaryOpExpr) right, pairs);
 			}
 		}
 	}
@@ -209,5 +212,32 @@ public class ShardColumnValueUtil {
 		}
 
 		return evalSet;
+	}
+
+	private static class Pair {
+		private String identifier;
+
+		private SQLBinaryOperator operator;
+
+		private Object obj;
+
+		public Pair(String identifier, SQLBinaryOperator operator, Object obj) {
+			super();
+			this.identifier = identifier;
+			this.operator = operator;
+			this.obj = obj;
+		}
+
+		public String getIdentifier() {
+			return identifier;
+		}
+
+		public SQLBinaryOperator getOperator() {
+			return operator;
+		}
+
+		public Object getObj() {
+			return obj;
+		}
 	}
 }

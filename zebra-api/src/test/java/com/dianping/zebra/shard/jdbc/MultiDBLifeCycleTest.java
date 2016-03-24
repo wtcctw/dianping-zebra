@@ -893,4 +893,31 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 			}
 		}
 	}
+	
+	@Test
+	public void testMultiRouterResult23() throws Exception {
+		DataSource ds = (DataSource) context.getBean("zebraDS");
+		Connection conn = null;
+		try {
+			conn = ds.getConnection();
+			Statement stmt = conn.createStatement();
+			long now = System.currentTimeMillis();
+			stmt.execute("select * from test where id = 3 or id = 4");
+			System.out.println("time = "  + (System.currentTimeMillis() - now));
+			ResultSet rs = stmt.getResultSet();
+			List<Map<String, Long>> rows = new ArrayList<Map<String, Long>>();
+			while (rs.next()) {
+				Map<String, Long> row = new HashMap<String, Long>();
+				row.put(rs.getString("type"), rs.getLong("score"));
+				rows.add(row);
+			}
+			Assert.assertEquals(4, rows.size());
+		} catch (Exception e) {
+			Assert.fail();
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
+	}
 }

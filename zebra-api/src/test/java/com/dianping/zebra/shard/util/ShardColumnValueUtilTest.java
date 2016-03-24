@@ -183,4 +183,18 @@ public class ShardColumnValueUtilTest {
 
 		Assert.assertEquals(2, values.size());
 	}
+	
+	@Test
+	public void testPreparedOr1() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse(
+				"select a,b from db where `c` = 2 or `c` = 3");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("c");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(2, values.size());
+	}
 }

@@ -53,10 +53,8 @@ public class DataSourceRouterImplTest {
 		try {
 			target = router.router(sql, params);
 		} catch (ShardRouterException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		assertNotNull(target);
@@ -79,10 +77,8 @@ public class DataSourceRouterImplTest {
 		try {
 			target = router.router(sql, params);
 		} catch (ShardRouterException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		assertNotNull(target);
@@ -221,7 +217,7 @@ public class DataSourceRouterImplTest {
 		baseTest(sql, params);
 	}
 
-	@Test
+	//@Test
 	public void testCase15() {
 		String sql = "SELECT DISTINCT(GN.NoteID) FROM DP_GroupNote GN INNER JOIN DP_Group G ON GN.GroupID = G.GroupID AND G.Status = 0 "
 		      + "INNER JOIN DP_GroupFollowNote GFN ON GN.NoteID = GFN.NoteID "
