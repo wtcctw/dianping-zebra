@@ -58,13 +58,13 @@ import com.dianping.zebra.shard.jdbc.unsupport.UnsupportedShardResultSet;
  *
  * @author Leo Liang
  */
-public class ShardResultSetAdaptor extends UnsupportedShardResultSet implements ResultSet{
+public class ShardResultSetAdaptor extends UnsupportedShardResultSet implements ResultSet {
 
 	protected List<ResultSet> resultSets = new ArrayList<ResultSet>();
 
 	protected List<RowData> memoryData;
 
-	protected boolean inMemory;
+	protected boolean inMemory = false;
 
 	protected int resultSetIndex = 0;
 
@@ -144,6 +144,7 @@ public class ShardResultSetAdaptor extends UnsupportedShardResultSet implements 
 	 *            the memoryData to set
 	 */
 	public void setMemoryData(List<RowData> memoryData) {
+		this.inMemory = true;
 		this.memoryData = memoryData;
 	}
 
@@ -156,18 +157,6 @@ public class ShardResultSetAdaptor extends UnsupportedShardResultSet implements 
 		return inMemory;
 	}
 
-	/**
-	 * @param inMemory
-	 *            the inMemory to set
-	 */
-	public void setInMemory(boolean inMemory) {
-		this.inMemory = inMemory;
-	}
-
-	/**
-	 * @param resultSets
-	 *            the resultSets to set
-	 */
 	public void setResultSets(List<ResultSet> resultSets) {
 		this.resultSets = resultSets;
 	}

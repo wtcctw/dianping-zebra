@@ -41,45 +41,21 @@ import junit.framework.Assert;
  */
 public class MultiDBPreparedStatementLifeCycleTest extends MultiDBBaseTestCase {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.zebra.jdbc.ZebraMultiDBBaseTestCase#getDBBaseUrl()
-	 */
 	@Override
 	protected String getDBBaseUrl() {
 		return "jdbc:h2:mem:";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.zebra.jdbc.ZebraMultiDBBaseTestCase#getCreateScriptConfigFile
-	 * ()
-	 */
 	@Override
 	protected String getCreateScriptConfigFile() {
 		return "db-datafiles/createtable-multidb-lifecycle.xml";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.dianping.zebra.jdbc.ZebraMultiDBBaseTestCase#getDataFile()
-	 */
 	@Override
 	protected String getDataFile() {
 		return "db-datafiles/data-multidb-lifecycle.xml";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.dianping.zebra.jdbc.ZebraMultiDBBaseTestCase#getSpringConfigLocations
-	 * ()
-	 */
 	@Override
 	protected String[] getSpringConfigLocations() {
 		return new String[] { "ctx-multidb-lifecycle.xml" };

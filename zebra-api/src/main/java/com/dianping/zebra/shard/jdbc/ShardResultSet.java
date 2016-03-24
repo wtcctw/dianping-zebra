@@ -35,7 +35,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import com.dianping.zebra.shard.merge.DefaultDataMerger;
+import com.dianping.zebra.shard.merge.ShardResultSetMerger;
 import com.dianping.zebra.shard.merge.ShardResultSetAdaptor;
 import com.dianping.zebra.shard.router.RouterResult;
 import com.dianping.zebra.util.JDBCUtils;
@@ -49,7 +49,7 @@ public class ShardResultSet extends ShardResultSetAdaptor implements ResultSet {
 
 	private ShardStatement statement;
 
-	private DefaultDataMerger dataMerger = new DefaultDataMerger();
+	private ShardResultSetMerger dataMerger = new ShardResultSetMerger();
 
 	private boolean dataInited = false;
 

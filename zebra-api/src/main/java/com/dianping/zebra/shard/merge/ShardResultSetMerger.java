@@ -41,7 +41,7 @@ import com.dianping.zebra.shard.router.RouterResult.RouterTarget;
  *
  * @author Leo Liang
  */
-public class DefaultDataMerger {
+public class ShardResultSetMerger {
 
 	private DistinctDataMerger distinctMerger = new DistinctDataMerger();
 
@@ -71,13 +71,10 @@ public class DefaultDataMerger {
 
 		if (sqls.size() == 1 && sqls.get(0).getSqls().size() == 1) {
 			adaptor.setResultSets(actualResultSets);
-			adaptor.setInMemory(false);
 		} else if ((sqls.size() > 1 || sqls.get(0).getSqls().size() > 1) && (mergeContext.getOrderBy() == null)
 				&& !mergeContext.hasAggregateExpr() && !mergeContext.isDistinct()) {
 			adaptor.setResultSets(actualResultSets);
-			adaptor.setInMemory(false);
 		} else {
-			adaptor.setInMemory(true);
 			adaptor.setResultSets(actualResultSets);
 			List<RowData> rowDatas = popResultSets(actualResultSets, mergeContext);
 
@@ -106,7 +103,6 @@ public class DefaultDataMerger {
 
 		for (int resultSetIndex = 0; resultSetIndex < actualResultSets.size(); resultSetIndex++) {
 			while (actualResultSets.get(resultSetIndex).next()) {
-
 				RowData row = new RowData(actualResultSets.get(resultSetIndex));
 
 				for (SQLSelectItem col : mergeContext.getSelectLists()) {
@@ -138,7 +134,6 @@ public class DefaultDataMerger {
 					ColumnData columnData = new ColumnData(columnIndex, columnName, value,
 							value == null ? null : value.getClass(), rowId, wasNull);
 					row.addColumn(columnData);
-
 				}
 
 				rows.add(row);

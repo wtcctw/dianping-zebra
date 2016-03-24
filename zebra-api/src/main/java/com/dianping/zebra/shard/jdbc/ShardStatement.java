@@ -156,7 +156,6 @@ public class ShardStatement extends UnsupportedShardStatement implements Stateme
 			ShardResultSet rs = new ShardResultSet();
 			rs.setStatement(this);
 			rs.setResultSets(rsList);
-			rs.setInMemory(false);
 
 			attachedResultSets.add(rs);
 

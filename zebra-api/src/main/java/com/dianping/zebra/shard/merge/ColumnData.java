@@ -188,4 +188,8 @@ public class ColumnData implements Serializable {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "[columnIndex=" + columnIndex + ", value=" + value + "]";
+	}
 }
