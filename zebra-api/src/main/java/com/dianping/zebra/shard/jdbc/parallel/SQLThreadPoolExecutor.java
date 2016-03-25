@@ -65,8 +65,9 @@ public class SQLThreadPoolExecutor extends ThreadPoolExecutor {
 		ArrayList<Future<T>> futures = new ArrayList<Future<T>>(tasks.size());
 		boolean done = false;
 		try {
-			for (Callable<T> t : tasks)
+			for (Callable<T> t : tasks) {
 				futures.add(newTaskFor(t));
+			}
 
 			final long deadline = System.nanoTime() + nanos;
 			final int size = futures.size();
@@ -85,22 +86,19 @@ public class SQLThreadPoolExecutor extends ThreadPoolExecutor {
 			for (int i = 0; i < size; i++) {
 				Future<T> f = futures.get(i);
 				if (!f.isDone()) {
-					if (nanos <= 0L)
+					if (nanos <= 0L){
 						return futures;
+					}
 					try {
 						f.get(nanos, TimeUnit.NANOSECONDS);
 					} catch (CancellationException ce) {
-						cancelAll(futures);
 						throw new SQLException(ce);
 					} catch (ExecutionException ee) {
-						cancelAll(futures);
 						throw new SQLException(ee.getCause());
 					} catch (TimeoutException toe) {
-						cancelAll(futures);
 						throw new SQLException(
 								"One of your sql's execution time is beyond " + executeTimeOut + " milliseconds.", toe);
 					} catch (InterruptedException e) {
-						cancelAll(futures);
 						throw new SQLException(e);
 					}
 					nanos = deadline - System.nanoTime();
@@ -109,16 +107,10 @@ public class SQLThreadPoolExecutor extends ThreadPoolExecutor {
 			done = true;
 			return futures;
 		} finally {
-			if (!done)
-				for (int i = 0, size = futures.size(); i < size; i++)
+			if (!done){
+				for (int i = 0, size = futures.size(); i < size; i++) {
 					futures.get(i).cancel(true);
-		}
-	}
-
-	private <T> void cancelAll(ArrayList<Future<T>> futures) {
-		for (Future<T> f : futures) {
-			if (!f.isCancelled()) {
-				f.cancel(true);
+				}
 			}
 		}
 	}

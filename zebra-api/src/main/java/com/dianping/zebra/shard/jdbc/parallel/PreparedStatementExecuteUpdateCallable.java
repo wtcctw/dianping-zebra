@@ -18,7 +18,9 @@ public class PreparedStatementExecuteUpdateCallable implements Callable<UpdateRe
 
 	@Override
 	public UpdateResult call() throws Exception {
+		long now = System.currentTimeMillis();
 		int executeUpdate = stmt.executeUpdate();
+		System.out.println("UpdateTime Time = " + (System.currentTimeMillis() - now));
 		
 		if (sql.trim().charAt(0) == 'i' || sql.trim().charAt(0) == 'I') {
 			return new UpdateResult(executeUpdate, stmt.getGeneratedKeys());
