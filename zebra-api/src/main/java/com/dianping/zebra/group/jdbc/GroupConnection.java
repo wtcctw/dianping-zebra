@@ -28,7 +28,7 @@ public class GroupConnection implements Connection {
 
 	private List<Statement> openedStatements = new ArrayList<Statement>();
 
-	private Connection rConnection;
+	private volatile Connection rConnection;
 
 	private DataSource readDataSource;
 
@@ -36,7 +36,7 @@ public class GroupConnection implements Connection {
 
 	private int transactionIsolation = -1;
 
-	private Connection wConnection;
+	private volatile Connection wConnection;
 
 	private DataSource writeDataSource;
 
@@ -388,7 +388,11 @@ public class GroupConnection implements Connection {
 
 	private Connection getReadConnection() throws SQLException {
 		if (rConnection == null) {
-			rConnection = readDataSource.getConnection();
+			synchronized (this) {
+				if(rConnection == null){
+					rConnection = readDataSource.getConnection();
+				}
+			}
 		}
 
 		return rConnection;
@@ -485,10 +489,14 @@ public class GroupConnection implements Connection {
 
 	private Connection getWriteConnection() throws SQLException {
 		if (wConnection == null) {
-			wConnection = writeDataSource.getConnection();
-
-			if (wConnection.getAutoCommit() != autoCommit) {
-				wConnection.setAutoCommit(autoCommit);
+			synchronized (this) {
+				if(wConnection == null){
+					wConnection = writeDataSource.getConnection();
+					
+					if (wConnection.getAutoCommit() != autoCommit) {
+						wConnection.setAutoCommit(autoCommit);
+					}
+				}
 			}
 		}
 
