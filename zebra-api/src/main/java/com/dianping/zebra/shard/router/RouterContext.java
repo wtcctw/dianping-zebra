@@ -3,11 +3,13 @@ package com.dianping.zebra.shard.router;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.dianping.zebra.shard.parser.SQLHint;
+
 public class RouterContext {
-	
+
 	private Set<String> tableSet = new HashSet<String>();
-	
-	private String hintComment;
+
+	private SQLHint sqlhint;
 
 	public Set<String> getTableSet() {
 		return tableSet;
@@ -17,11 +19,15 @@ public class RouterContext {
 		this.tableSet = tableSet;
 	}
 
-	public String getHintComment() {
-		return hintComment;
+	public SQLHint getSqlhint() {
+		return sqlhint;
 	}
 
-	public void setHintComment(String hintComment) {
-		this.hintComment = hintComment;
+	public void setSqlhint(SQLHint sqlhint) {
+		this.sqlhint = sqlhint;
+	}
+
+	public void setTableSet(Set<String> tableSet) {
+		this.tableSet = tableSet;
 	}
 }

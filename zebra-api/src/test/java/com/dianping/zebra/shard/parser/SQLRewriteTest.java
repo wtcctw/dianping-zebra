@@ -12,11 +12,11 @@ public class SQLRewriteTest {
 	public void test() throws SQLParseException {
 		DefaultSQLRewrite rewriter = new DefaultSQLRewrite();
 		SQLParsedResult result = SQLParser
-				.parse("/*zebra:+w*/select a,b /*comment**/ from db where `c` = 1 limit 10,100 #this is comment");
+				.parse("/*+zebra:w*/select a,b /*comment**/ from db where `c` = 1 limit 10,100 #this is comment");
 
 		String newSql = rewriter.rewrite(result, "db", "db1");
 
-		Assert.assertEquals("/*zebra:+w*/", result.getRouterContext().getHintComment());
+		Assert.assertEquals("/*+zebra:w*/", result.getRouterContext().getSqlhint().getForceMasterComment());
 		Assert.assertEquals("SELECT a, b\nFROM db1\nWHERE `c` = 1\nLIMIT 0, 110", newSql);
 	}
 
@@ -28,7 +28,7 @@ public class SQLRewriteTest {
 
 		String newSql = rewriter.rewrite(result, "db", "db1");
 
-		Assert.assertNull(result.getRouterContext().getHintComment());
+		Assert.assertNotNull(result.getRouterContext().getSqlhint());
 		Assert.assertEquals("SELECT a, b\nFROM db1\nWHERE `c` = 1\nLIMIT 0, 110", newSql);
 	}
 
@@ -40,7 +40,7 @@ public class SQLRewriteTest {
 
 		String newSql = rewriter.rewrite(result, "db", "db1");
 
-		Assert.assertNull(result.getRouterContext().getHintComment());
+		Assert.assertNotNull(result.getRouterContext().getSqlhint());
 		Assert.assertEquals("SELECT a, b\nFROM db1\nWHERE `c` = 1\nLIMIT 10", newSql);
 	}
 }

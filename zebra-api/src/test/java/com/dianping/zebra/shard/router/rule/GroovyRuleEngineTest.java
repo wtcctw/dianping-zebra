@@ -88,4 +88,24 @@ public class GroovyRuleEngineTest {
 		Object retVal = ruleEngine.eval(valMap);
 		System.out.println(retVal);
 	}
+	
+	@Test
+	public void testStringInt() {
+		RuleEngine ruleEngine = new GroovyRuleEngine("#id#.toInteger()");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		valMap.put("id", "1");
+		Object retVal = ruleEngine.eval(valMap);
+		System.out.println(retVal);
+		System.out.println(retVal.getClass());
+	}
+	
+	@Test
+	public void testStringLong() {
+		RuleEngine ruleEngine = new GroovyRuleEngine("#id#.toLong()");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		valMap.put("id", "1");
+		Object retVal = ruleEngine.eval(valMap);
+		System.out.println(retVal);
+		System.out.println(retVal.getClass());
+	}
 }

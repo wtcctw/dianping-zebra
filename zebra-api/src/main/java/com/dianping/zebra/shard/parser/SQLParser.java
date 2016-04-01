@@ -58,7 +58,8 @@ public class SQLParser {
 				throw new SQLParseException("UnSupported sql type in sharding jdbc.");
 			}
 
-			result.getRouterContext().setHintComment(commentHandler.getHintComment());
+			SQLHint sqlhint = SQLHint.parseHint(commentHandler.getHintComment());
+			result.getRouterContext().setSqlhint(sqlhint);
 
 			parsedSqlCache.put(sql, result);
 		}

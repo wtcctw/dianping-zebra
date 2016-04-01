@@ -21,6 +21,7 @@ import com.dianping.zebra.shard.jdbc.parallel.SQLThreadPoolExecutorTest;
 import com.dianping.zebra.shard.jdbc.specification.ConnectionTest;
 import com.dianping.zebra.shard.jdbc.specification.DataSourceTest;
 import com.dianping.zebra.shard.jdbc.specification.StatementTest;
+import com.dianping.zebra.shard.parser.SQLHintTest;
 import com.dianping.zebra.shard.parser.SQLParserResultTest;
 import com.dianping.zebra.shard.parser.SQLRewriteTest;
 import com.dianping.zebra.shard.router.DataSourceRouterImplTest;
@@ -56,6 +57,7 @@ import com.dianping.zebra.shard.util.ShardColumnValueUtilTest;
         //parser
         SQLParserResultTest.class,
         SQLRewriteTest.class,
+        SQLHintTest.class,
 
         //router
         DataSourceRouterImplTest.class,

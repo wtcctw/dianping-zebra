@@ -121,7 +121,8 @@ public abstract class UnsupportedShardStatement implements Statement {
 
 	@Override
 	public void setQueryTimeout(int seconds) throws SQLException {
-		throw new UnsupportedOperationException("Zebra unsupport setQueryTimeout");
+		// throw new UnsupportedOperationException("Zebra unsupport
+		// setQueryTimeout");
 	}
 
 	@Override

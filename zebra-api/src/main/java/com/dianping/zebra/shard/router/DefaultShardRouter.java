@@ -112,7 +112,7 @@ public class DefaultShardRouter implements ShardRouter {
 			for (String physicalTable : entry.getValue()) {
 				String _sql = sqlRewrite.rewrite(parseResult, logicTable, physicalTable);
 
-				String hintComment = parseResult.getRouterContext().getHintComment();
+				String hintComment = parseResult.getRouterContext().getSqlhint().getForceMasterComment();
 				if (hintComment != null) {
 					targetedSql.addSql(hintComment + _sql);
 				} else {
