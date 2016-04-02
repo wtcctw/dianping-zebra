@@ -866,7 +866,7 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testMultiRouterResult22() throws Exception {
 		DataSource ds = (DataSource) context.getBean("zebraDS");
@@ -876,7 +876,7 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 			Statement stmt = conn.createStatement();
 			long now = System.currentTimeMillis();
 			stmt.execute("select * from test where id in (0,1,2,3,4,5,6,7) ");
-			System.out.println("time = "  + (System.currentTimeMillis() - now));
+			System.out.println("time = " + (System.currentTimeMillis() - now));
 			ResultSet rs = stmt.getResultSet();
 			List<Map<String, Long>> rows = new ArrayList<Map<String, Long>>();
 			while (rs.next()) {
@@ -893,7 +893,7 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testMultiRouterResult23() throws Exception {
 		DataSource ds = (DataSource) context.getBean("zebraDS");
@@ -903,7 +903,7 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 			Statement stmt = conn.createStatement();
 			long now = System.currentTimeMillis();
 			stmt.execute("select * from test where id = 3 or id = 4");
-			System.out.println("time = "  + (System.currentTimeMillis() - now));
+			System.out.println("time = " + (System.currentTimeMillis() - now));
 			ResultSet rs = stmt.getResultSet();
 			List<Map<String, Long>> rows = new ArrayList<Map<String, Long>>();
 			while (rs.next()) {
@@ -912,6 +912,41 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 				rows.add(row);
 			}
 			Assert.assertEquals(4, rows.size());
+		} catch (Exception e) {
+			Assert.fail();
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
+	}
+
+	@Test
+	public void testHintShardColumn() throws Exception {
+		DataSource ds = (DataSource) context.getBean("zebraDS");
+		Connection conn = null;
+		try {
+			conn = ds.getConnection();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("select name from test where id=1 or classid = 4");
+			List<String> rows = new ArrayList<String>();
+			while (rs.next()) {
+				rows.add(rs.getString("name"));
+			}
+			Assert.assertEquals(3, rows.size());
+			Assert.assertTrue("leo1".equals(rows.get(0)));
+			Assert.assertTrue("leo1".equals(rows.get(1)));
+			Assert.assertTrue("leo0".equals(rows.get(2)));
+
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery("/*+zebra:sk=classid*/select name from test where id=1 or classid = 4");
+			rows = new ArrayList<String>();
+			while (rs.next()) {
+				rows.add(rs.getString("name"));
+			}
+			Assert.assertEquals(2, rows.size());
+			Assert.assertTrue("leo4".equals(rows.get(0)));
+			Assert.assertTrue("leo4".equals(rows.get(1)));
 		} catch (Exception e) {
 			Assert.fail();
 		} finally {

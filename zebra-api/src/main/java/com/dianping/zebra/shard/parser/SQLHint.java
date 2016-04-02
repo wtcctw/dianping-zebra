@@ -12,15 +12,9 @@ public class SQLHint {
 
 	private boolean forceMaster = false;
 
+	private String shardColumn = null;
+
 	private Map<String, List<String>> columns;
-
-	public SQLHint() {
-	}
-
-	public SQLHint(boolean forceMaster, Map<String, List<String>> columns) {
-		this.forceMaster = forceMaster;
-		this.columns = columns;
-	}
 
 	public String getForceMasterComment() {
 		if (forceMaster) {
@@ -52,8 +46,12 @@ public class SQLHint {
 							sb.setLength(0);
 						}
 					} else {
-						if (key.equalsIgnoreCase("sk")) {
-							parseSubHintShardingKey(sqlHint, sb.toString());
+						if (key.equalsIgnoreCase("skv")) {
+							parseSubHintShardingKeyValue(sqlHint, sb.toString());
+							sb.setLength(0);
+							key = null;
+						} else if (key.equalsIgnoreCase("sk")) {
+							sqlHint.setShardColumn(sb.toString());
 							sb.setLength(0);
 							key = null;
 						}
@@ -73,8 +71,11 @@ public class SQLHint {
 			}
 
 			if (key != null) {
-				if (key.equalsIgnoreCase("sk")) {
-					parseSubHintShardingKey(sqlHint, sb.toString());
+				if (key.equalsIgnoreCase("skv")) {
+					parseSubHintShardingKeyValue(sqlHint, sb.toString());
+					sb.setLength(0);
+				} else if (key.equalsIgnoreCase("sk")) {
+					sqlHint.setShardColumn(sb.toString());
 					sb.setLength(0);
 				}
 			}
@@ -85,7 +86,7 @@ public class SQLHint {
 		}
 	}
 
-	private static void parseSubHintShardingKey(SQLHint sqlHint, String subHint) {
+	private static void parseSubHintShardingKeyValue(SQLHint sqlHint, String subHint) {
 		Map<String, List<String>> columns = new HashMap<String, List<String>>();
 
 		StringBuilder sb = new StringBuilder(64);
@@ -132,5 +133,13 @@ public class SQLHint {
 
 	public Map<String, List<String>> getColumns() {
 		return columns;
+	}
+
+	public String getShardColumn() {
+		return shardColumn;
+	}
+
+	public void setShardColumn(String shardColumn) {
+		this.shardColumn = shardColumn;
 	}
 }

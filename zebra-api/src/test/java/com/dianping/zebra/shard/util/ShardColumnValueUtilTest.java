@@ -183,11 +183,24 @@ public class ShardColumnValueUtilTest {
 
 		Assert.assertEquals(2, values.size());
 	}
-	
+
+	@Test
+	public void testPreparedIn3() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse(
+				"update RS_Receipt set Status = ?, LastDate = now() where UserID IN (12323) and OrderId = ? and SerialNumber in ( ? ) and Status = ?");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("UserID");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(1, values.size());
+	}
+
 	@Test
 	public void testPreparedOr1() throws SQLParseException {
-		SQLParsedResult parseResult = SQLParser.parse(
-				"select a,b from db where `c` = 2 or `c` = 3");
+		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` = 2 or `c` = 3");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
 		Set<String> shardColumns = new HashSet<String>();
@@ -196,5 +209,61 @@ public class ShardColumnValueUtilTest {
 		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
 
 		Assert.assertEquals(2, values.size());
+	}
+	
+	@Test
+	public void testHintShardValue1() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse("/*+zebra:skv=UserId(1,2,3)*/select a,b from db where `OrderId` = 2");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("UserId");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(3, values.size());
+		Assert.assertEquals("1", values.get(0).getValue().get("UserId"));
+		Assert.assertEquals("2", values.get(1).getValue().get("UserId"));
+		Assert.assertEquals("3", values.get(2).getValue().get("UserId"));
+	}
+	
+	@Test
+	public void testHintShardValue2() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse("/*+zebra:skv=UserId(1,2,3)&OrderId(3,2,1)*/select a,b from db where `ShopId` = 2");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("UserId");
+		shardColumns.add("OrderId");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(3, values.size());
+		Assert.assertEquals("1", values.get(0).getValue().get("UserId"));
+		Assert.assertEquals("3", values.get(0).getValue().get("OrderId"));
+		Assert.assertEquals("2", values.get(1).getValue().get("UserId"));
+		Assert.assertEquals("2", values.get(1).getValue().get("OrderId"));
+		Assert.assertEquals("3", values.get(2).getValue().get("UserId"));
+		Assert.assertEquals("1", values.get(2).getValue().get("OrderId"));
+	}
+	
+	@Test
+	public void testHintShardValue3() throws SQLParseException {
+		SQLParsedResult parseResult = SQLParser.parse("/*+zebra:skv=UserId(1,2,3)*/select a,b from db where `OrderId` in ('3','2','1')");
+		List<Object> params = null;
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("UserId");
+		shardColumns.add("OrderId");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(3, values.size());
+		Assert.assertEquals("1", values.get(0).getValue().get("UserId"));
+		Assert.assertEquals("3", values.get(0).getValue().get("OrderId"));
+		Assert.assertEquals("2", values.get(1).getValue().get("UserId"));
+		Assert.assertEquals("2", values.get(1).getValue().get("OrderId"));
+		Assert.assertEquals("3", values.get(2).getValue().get("UserId"));
+		Assert.assertEquals("1", values.get(2).getValue().get("OrderId"));
 	}
 }

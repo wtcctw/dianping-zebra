@@ -63,20 +63,21 @@ public class ShardColumnValueUtil {
 		SQLHint sqlhint = ctx.getParseResult().getRouterContext().getSqlhint();
 		if (sqlhint != null && sqlhint.getColumns() != null) {
 			Map<String, List<String>> columns = sqlhint.getColumns();
-			int index = 0;
 			for (String shardColumn : shardColumns) {
 				List<String> datas = columns.get(shardColumn);
+				if (datas != null) {
+					int index = 0;
+					for (String data : datas) {
+						Map<String, Object> map = tmpResult.get(index);
 
-				for (String data : datas) {
-					Map<String, Object> map = tmpResult.get(index);
+						if (map == null) {
+							map = new HashMap<String, Object>();
+							tmpResult.put(index, map);
+						}
 
-					if (map == null) {
-						map = new HashMap<String, Object>();
-						tmpResult.put(index, map);
+						map.put(shardColumn, data);
+						index++;
 					}
-
-					map.put(shardColumn, data);
-					index++;
 				}
 			}
 		}
@@ -205,7 +206,7 @@ public class ShardColumnValueUtil {
 	}
 
 	private static boolean evalColumn(String indentifier, String column) {
-		return column.equals(indentifier) || ("`" + column + "`").equals(indentifier);
+		return column.equalsIgnoreCase(indentifier) || ("`" + column + "`").equalsIgnoreCase(indentifier);
 	}
 
 	private static Set<Object> evalInsert(SQLParsedResult parseResult, String column, List<Object> params) {

@@ -17,10 +17,10 @@ package com.dianping.zebra.shard.router.rule;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.dianping.zebra.shard.exception.ShardRouterException;
+import com.dianping.zebra.shard.parser.SQLHint;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.shard.router.rule.dimension.DimensionRule;
 import com.dianping.zebra.shard.util.ShardColumnValueUtil;
@@ -41,46 +41,77 @@ public class TableShardRule {
 	public ShardEvalResult eval(ShardEvalContext ctx) {
 		SqlType type = ctx.getParseResult().getType();
 
-		for (DimensionRule rule : rules) {
-			List<ColumnValue> columnValues = ShardColumnValueUtil.eval(ctx, rule.getShardColumns());
-			ctx.setColumnValues(columnValues);
+		// force dimension from hint
+		SQLHint sqlhint = ctx.getParseResult().getRouterContext().getSqlhint();
+		if (sqlhint != null & sqlhint.getShardColumn() != null) {
+			DimensionRule dimensionRule = findDimensionRule(sqlhint.getShardColumn());
+			ShardEvalResult result = evalDimension(ctx, type, dimensionRule);
 
-			if (type == SqlType.SELECT) {
-				if (columnValues != null && columnValues.size() > 0) {
-					return rule.eval(ctx);
-				}
-			} else if (type == SqlType.INSERT) {
-				if (rule.isMaster()) {
-					if (columnValues != null && columnValues.size() > 0) {
-						return rule.eval(ctx);
-					}
-				}
-			} else if (type == SqlType.UPDATE || type == SqlType.DELETE) {
-				if (rule.isMaster()) {
-					if (columnValues != null && columnValues.size() > 0) {
-						return rule.eval(ctx);
-					}
-				}
-			} else {
-				throw new ShardRouterException("Unsupported Sql type");
+			if (result != null) {
+				return result;
 			}
 		}
 
-		Map<String, Set<String>> masterDBAndTables = null;
 		for (DimensionRule rule : rules) {
-			if (rule.isMaster()) {
-				masterDBAndTables = rule.getAllDBAndTables();
+			ShardEvalResult result = evalDimension(ctx, type, rule);
+
+			if (result != null) {
+				return result;
 			}
 		}
 
 		if (type != SqlType.INSERT) {
 			ShardEvalResult result = new ShardEvalResult();
-			result.setDbAndTables(masterDBAndTables);
+			for (DimensionRule rule : rules) {
+				if (rule.isMaster()) {
+					result.setDbAndTables(rule.getAllDBAndTables());
+					break;
+				}
+			}
 
 			return result;
 		} else {
 			throw new ShardRouterException("Cannot find any shard columns in your insert sql.");
 		}
+	}
+
+	private DimensionRule findDimensionRule(String shardColumn) {
+		for (DimensionRule rule : rules) {
+			Set<String> shardColumns = rule.getShardColumns();
+
+			if (shardColumns.size() == 1 && shardColumns.contains(shardColumn)) {
+				return rule;
+			}
+		}
+
+		return null;
+	}
+
+	private ShardEvalResult evalDimension(ShardEvalContext ctx, SqlType type, DimensionRule rule) {
+		List<ColumnValue> columnValues = ShardColumnValueUtil.eval(ctx, rule.getShardColumns());
+		ctx.setColumnValues(columnValues);
+
+		if (type == SqlType.SELECT) {
+			if (columnValues != null && columnValues.size() > 0) {
+				return rule.eval(ctx);
+			}
+		} else if (type == SqlType.INSERT) {
+			if (rule.isMaster()) {
+				if (columnValues != null && columnValues.size() > 0) {
+					return rule.eval(ctx);
+				}
+			}
+		} else if (type == SqlType.UPDATE || type == SqlType.DELETE) {
+			if (rule.isMaster()) {
+				if (columnValues != null && columnValues.size() > 0) {
+					return rule.eval(ctx);
+				}
+			}
+		} else {
+			throw new ShardRouterException("Unsupported Sql type");
+		}
+
+		return null;
 	}
 
 	public List<DimensionRule> getDimensionRules() {
