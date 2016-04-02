@@ -8,7 +8,6 @@
 
 * INSERT INTO User WHERE (Id, Name, CityId) VALUES (1, 'test', 2)
 
-
 #### UPDATE & DELETE
 
 ##### 更新操作最好指定主维度，这样性能高
@@ -16,21 +15,17 @@
 * UPDATE User SET Name = 'new name' WHERE Id = 1
 * DELETE FROM User WHERE Id = 1
 
-
 ##### 这里虽然有主维度，但是这类操作会操作所有的主维度表，性能较差
 
 * UPDATE User SET Name = 'new name' WHERE Id > 1
-* UPDATE User SET Name = 'new name' WHERE Id IN (1,2,3,4,5)
 * UPDATE User SET Name = 'new name' WHERE Id <> 1
 * DELETE FROM User WHERE Id > 1
-* DELETE FROM User WHERE Id IN (1,2,3,4,5)
-  * DELETE FROM User WHERE Id <> 1
+* DELETE FROM User WHERE Id <> 1
 
 ##### 使用辅维度，但是也会操作所有主维度，性能较差
 
   * UPDATE User SET Name = 'new name' WHERE CityId = 2
   * DELETE FROM User WHERE CityId = 2
-
 
 ##### 使用其他字段或者不加条件，都会操作所有主维度
 
@@ -44,14 +39,14 @@
   * SELECT Id, Name, CityId WHERE Id = 1
   * SELECT Id, Name, CityId WHERE CityId = 1
   * SELECT Id, Name, CityId WHERE Id = 2 AND CityId = 1
-
+  * SELECT Id, Name, CityId WHERE Id IN (1,2,3,4)
+  * SELECT Id, Name, CityId WHERE Id = 1 OR Id = 2
 
 ##### 不指定主维度或者辅维度，会查询所有主维度的表，性能差
 
   * SELECT Id, Name, CityId FROM User
   * SELECT Id, Name, CityId FROM User WHERE Id > 1
   * SELECT Id, Name, CityId FROM User WHERE Id <> 1
-  * SELECT Id, Name, CityId FROM User WHERE Id IN (1,2,3,4)
   * SELECT Id, Name, CityId FROM User WHERE Name LIKE '%test%'
 
 
