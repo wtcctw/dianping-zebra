@@ -41,7 +41,6 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.dianping.zebra.shard.exception.ShardRouterException;
-import com.dianping.zebra.shard.parser.SQLHint;
 import com.dianping.zebra.shard.parser.SQLParsedResult;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
@@ -59,15 +58,13 @@ public class ShardColumnValueUtil {
 
 		Map<Integer, Map<String, Object>> tmpResult = new LinkedHashMap<Integer, Map<String, Object>>();
 
-		// get shard value from hint
-		SQLHint sqlhint = ctx.getParseResult().getRouterContext().getSqlhint();
-		if (sqlhint != null && sqlhint.getColumns() != null) {
-			Map<String, List<String>> columns = sqlhint.getColumns();
+		// get shard column params from threadlocal
+		if (ShardDataSourceHelper.hasAnyShardParams()) {
 			for (String shardColumn : shardColumns) {
-				List<String> datas = columns.get(shardColumn);
+				List<Object> datas = ShardDataSourceHelper.getShardParams(shardColumn);
 				if (datas != null) {
 					int index = 0;
-					for (String data : datas) {
+					for (Object data : datas) {
 						Map<String, Object> map = tmpResult.get(index);
 
 						if (map == null) {
@@ -82,7 +79,7 @@ public class ShardColumnValueUtil {
 			}
 		}
 
-		// get shard value from sql or params
+		// get shard column params from sql or params
 		for (String shardColumn : shardColumns) {
 			Set<Object> columnValues = eval(ctx.getParseResult(), ctx.getParams(), shardColumn);
 			int index = 0;

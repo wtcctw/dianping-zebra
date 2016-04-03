@@ -210,28 +210,17 @@ public class ShardColumnValueUtilTest {
 
 		Assert.assertEquals(2, values.size());
 	}
-	
-	@Test
-	public void testHintShardValue1() throws SQLParseException {
-		SQLParsedResult parseResult = SQLParser.parse("/*+zebra:skv=UserId(1,2,3)*/select a,b from db where `OrderId` = 2");
-		List<Object> params = null;
-		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
-		Set<String> shardColumns = new HashSet<String>();
-		shardColumns.add("UserId");
 
-		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
-
-		Assert.assertEquals(3, values.size());
-		Assert.assertEquals("1", values.get(0).getValue().get("UserId"));
-		Assert.assertEquals("2", values.get(1).getValue().get("UserId"));
-		Assert.assertEquals("3", values.get(2).getValue().get("UserId"));
-	}
-	
 	@Test
-	public void testHintShardValue2() throws SQLParseException {
-		SQLParsedResult parseResult = SQLParser.parse("/*+zebra:skv=UserId(1,2,3)&OrderId(3,2,1)*/select a,b from db where `ShopId` = 2");
-		List<Object> params = null;
-		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+	public void testThreadLocalShardValue1() throws SQLParseException {
+		List<Object> params = new ArrayList<Object>();
+		params.add("1");
+		params.add("2");
+		params.add("3");
+
+		ShardDataSourceHelper.setShardParams("UserId", params);
+		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `OrderId` in ('3','2','1')");
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, null);
 		Set<String> shardColumns = new HashSet<String>();
 		shardColumns.add("UserId");
 		shardColumns.add("OrderId");
@@ -246,12 +235,25 @@ public class ShardColumnValueUtilTest {
 		Assert.assertEquals("3", values.get(2).getValue().get("UserId"));
 		Assert.assertEquals("1", values.get(2).getValue().get("OrderId"));
 	}
-	
+
 	@Test
-	public void testHintShardValue3() throws SQLParseException {
-		SQLParsedResult parseResult = SQLParser.parse("/*+zebra:skv=UserId(1,2,3)*/select a,b from db where `OrderId` in ('3','2','1')");
-		List<Object> params = null;
-		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
+	public void testThreadLocalShardValue2() throws SQLParseException {
+		List<Object> params = new ArrayList<Object>();
+		params.add("1");
+		params.add("2");
+		params.add("3");
+
+		ShardDataSourceHelper.setShardParams("UserId", params);
+
+		params = new ArrayList<Object>();
+		params.add("3");
+		params.add("2");
+		params.add("1");
+
+		ShardDataSourceHelper.setShardParams("OrderId", params);
+
+		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `ShopId` = 2");
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, null);
 		Set<String> shardColumns = new HashSet<String>();
 		shardColumns.add("UserId");
 		shardColumns.add("OrderId");

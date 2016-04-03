@@ -6,7 +6,15 @@ import java.util.Map;
 import java.util.Set;
 
 public class ShardEvalResult {
-	private Map<String, Set<String>> dbAndTables = new HashMap<String, Set<String>>();
+	private Map<String, Set<String>> dbAndTables;
+
+	public ShardEvalResult() {
+		dbAndTables = new HashMap<String, Set<String>>();
+	}
+
+	public ShardEvalResult(Map<String, Set<String>> dbAndTables) {
+		this.dbAndTables = dbAndTables;
+	}
 
 	public Map<String, Set<String>> getDbAndTables() {
 		return dbAndTables;
