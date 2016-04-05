@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.dianping.zebra.shard.api.ShardDataSourceHelper;
 import com.dianping.zebra.shard.exception.SQLParseException;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.SQLParsedResult;

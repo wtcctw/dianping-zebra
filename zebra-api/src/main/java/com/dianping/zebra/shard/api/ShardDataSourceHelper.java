@@ -1,4 +1,4 @@
-package com.dianping.zebra.shard.util;
+package com.dianping.zebra.shard.api;
 
 import java.util.HashMap;
 import java.util.List;

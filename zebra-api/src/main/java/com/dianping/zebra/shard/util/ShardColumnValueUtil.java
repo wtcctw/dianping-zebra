@@ -40,6 +40,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
+import com.dianping.zebra.shard.api.ShardDataSourceHelper;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.SQLParsedResult;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext;

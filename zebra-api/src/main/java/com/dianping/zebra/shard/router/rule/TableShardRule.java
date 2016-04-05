@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.dianping.zebra.shard.api.ShardDataSourceHelper;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.SQLHint;
 import com.dianping.zebra.shard.router.rule.ShardEvalContext.ColumnValue;
 import com.dianping.zebra.shard.router.rule.dimension.DimensionRule;
 import com.dianping.zebra.shard.util.ShardColumnValueUtil;
-import com.dianping.zebra.shard.util.ShardDataSourceHelper;
 import com.dianping.zebra.util.SqlType;
 
 public class TableShardRule {
