@@ -99,7 +99,7 @@ public class TableShardRule {
 		List<ColumnValue> columnValues = ShardColumnValueUtil.eval(ctx, rule.getShardColumns());
 		ctx.setColumnValues(columnValues);
 
-		if (columnValues != null && columnValues.size() > 0) {
+		if (columnValues.size() > 0) {
 			if (type == SqlType.SELECT) {
 				return rule.eval(ctx);
 			} else if (type == SqlType.INSERT || type == SqlType.UPDATE || type == SqlType.DELETE) {
@@ -108,6 +108,10 @@ public class TableShardRule {
 				}
 			} else {
 				throw new ShardRouterException("Unsupported Sql type");
+			}
+		} else {
+			if (type == SqlType.INSERT) {
+				throw new ShardRouterException("Router column[" + rule.getShardColumns() + "] not found in the sql!");
 			}
 		}
 

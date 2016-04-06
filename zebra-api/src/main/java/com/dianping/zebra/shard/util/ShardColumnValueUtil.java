@@ -231,9 +231,6 @@ public class ShardColumnValueUtil {
 				break;
 			}
 		}
-		if (evalSet.isEmpty()) {
-			throw new ShardRouterException("Router column[" + column + "] not found in the sql!");
-		}
 
 		return evalSet;
 	}
