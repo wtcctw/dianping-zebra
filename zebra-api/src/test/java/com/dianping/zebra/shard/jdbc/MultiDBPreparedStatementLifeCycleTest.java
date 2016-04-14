@@ -385,6 +385,29 @@ public class MultiDBPreparedStatementLifeCycleTest extends MultiDBBaseTestCase {
 			}
 		}
 	}
+	
+	@Test
+	public void testMultiRouterResult8_0() throws Exception {
+		DataSource ds = (DataSource) context.getBean("zebraDS");
+		Connection conn = null;
+		try {
+			conn = ds.getConnection();
+			PreparedStatement stmt = conn.prepareStatement("select count(1) total from test");
+			stmt.execute();
+			ResultSet rs = stmt.getResultSet();
+			List<Long> rows = new ArrayList<Long>();
+			while (rs.next()) {
+				rows.add(rs.getLong("total"));
+			}
+			Assert.assertEquals(17, rows.get(0).intValue());
+		} catch (Exception e) {
+			Assert.fail();
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
+	}
 
 	@Test
 	public void testMultiRouterResult9() throws Exception {

@@ -108,4 +108,14 @@ public class GroovyRuleEngineTest {
 		System.out.println(retVal);
 		System.out.println(retVal.getClass());
 	}
+	
+	@Test
+	public void testIntAbs() {
+		RuleEngine ruleEngine = new GroovyRuleEngine("Math.abs(#UserID#).intValue()");
+		Map<String, Object> valMap = new HashMap<String, Object>();
+		valMap.put("UserID", -1);
+		Object retVal = ruleEngine.eval(valMap);
+		System.out.println(retVal);
+		System.out.println(retVal.getClass());
+	}
 }

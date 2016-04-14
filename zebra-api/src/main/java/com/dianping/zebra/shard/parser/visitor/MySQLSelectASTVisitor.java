@@ -36,7 +36,9 @@ public class MySQLSelectASTVisitor extends AbstractMySQLASTVisitor {
 				SQLExpr argument = expr.getArguments().get(0);
 				if (argument instanceof SQLAllColumnExpr) {
 					name = expr.getMethodName() + "(*)";
-				} else {
+				} else if(argument instanceof SQLIntegerExpr){
+					name = expr.getMethodName() + "(1)";
+				}else {
 					name = expr.getMethodName() + "(" + ((SQLName) argument).getSimpleName() + ")";
 					columnNameAliasMapping.put(((SQLName) argument).getSimpleName(), column.getAlias());
 				}

@@ -109,4 +109,5 @@ public class SQLParserResultTest {
 		System.out.println(stmt.getValues());
 		System.out.println(stmt.getValuesList());
 	}
+	
 }
