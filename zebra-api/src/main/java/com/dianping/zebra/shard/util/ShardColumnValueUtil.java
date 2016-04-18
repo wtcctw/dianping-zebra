@@ -60,40 +60,40 @@ public class ShardColumnValueUtil {
 		Map<Integer, Map<String, Object>> tmpResult = new LinkedHashMap<Integer, Map<String, Object>>();
 
 		// get shard column params from threadlocal
-		if (ShardDataSourceHelper.hasAnyShardParams()) {
-			for (String shardColumn : shardColumns) {
-				List<Object> datas = ShardDataSourceHelper.getShardParams(shardColumn);
-				if (datas != null) {
-					int index = 0;
-					for (Object data : datas) {
-						Map<String, Object> map = tmpResult.get(index);
+		for (String shardColumn : shardColumns) {
+			List<Object> datas = ShardDataSourceHelper.getShardParams(shardColumn);
+			if (datas != null) {
+				int index = 0;
+				for (Object data : datas) {
+					Map<String, Object> map = tmpResult.get(index);
 
-						if (map == null) {
-							map = new HashMap<String, Object>();
-							tmpResult.put(index, map);
-						}
-
-						map.put(shardColumn, data);
-						index++;
+					if (map == null) {
+						map = new HashMap<String, Object>();
+						tmpResult.put(index, map);
 					}
+
+					map.put(shardColumn, data);
+					index++;
 				}
 			}
 		}
 
 		// get shard column params from sql or params
-		for (String shardColumn : shardColumns) {
-			Set<Object> columnValues = eval(ctx.getParseResult(), ctx.getParams(), shardColumn);
-			int index = 0;
-			for (Object o : columnValues) {
-				Map<String, Object> map = tmpResult.get(index);
+		if (!ShardDataSourceHelper.extractParamsOnlyFromThreadLocal()) {
+			for (String shardColumn : shardColumns) {
+				Set<Object> columnValues = eval(ctx.getParseResult(), ctx.getParams(), shardColumn);
+				int index = 0;
+				for (Object o : columnValues) {
+					Map<String, Object> map = tmpResult.get(index);
 
-				if (map == null) {
-					map = new HashMap<String, Object>();
-					tmpResult.put(index, map);
+					if (map == null) {
+						map = new HashMap<String, Object>();
+						tmpResult.put(index, map);
+					}
+
+					map.put(shardColumn, o);
+					index++;
 				}
-
-				map.put(shardColumn, o);
-				index++;
 			}
 		}
 

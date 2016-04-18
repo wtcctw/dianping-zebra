@@ -269,4 +269,27 @@ public class ShardColumnValueUtilTest {
 		Assert.assertEquals("3", values.get(2).getValue().get("UserId"));
 		Assert.assertEquals("1", values.get(2).getValue().get("OrderId"));
 	}
+	
+	@Test
+	public void testThreadLocalShardValue3() throws SQLParseException {
+		List<Object> params = new ArrayList<Object>();
+		params.add("1");
+		params.add("2");
+		params.add("3");
+
+		ShardDataSourceHelper.setShardParams("Name", params);
+		ShardDataSourceHelper.setExtractParamsOnlyFromThreadLocal(true);
+
+		SQLParsedResult parseResult = SQLParser.parse("INSERT INTO `User` (`Name`,`Tel`,`Alias`,`Email`)VALUES('zhuhao','123','hao.zhu','z@d'),('zhuhao1','1233','hao.zhu1','z@d')");
+		ShardEvalContext ctx = new ShardEvalContext(parseResult, null);
+		Set<String> shardColumns = new HashSet<String>();
+		shardColumns.add("Name");
+
+		List<ColumnValue> values = ShardColumnValueUtil.eval(ctx, shardColumns);
+
+		Assert.assertEquals(3, values.size());
+		Assert.assertEquals("1", values.get(0).getValue().get("Name"));
+		Assert.assertEquals("2", values.get(1).getValue().get("Name"));
+		Assert.assertEquals("3", values.get(2).getValue().get("Name"));
+	}
 }

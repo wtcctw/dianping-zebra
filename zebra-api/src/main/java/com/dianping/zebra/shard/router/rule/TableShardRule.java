@@ -77,9 +77,7 @@ public class TableShardRule {
 			}
 		} finally {
 			// clear thread local
-			if (ShardDataSourceHelper.hasAnyShardParams()) {
-				ShardDataSourceHelper.removeAllShardParams();
-			}
+			ShardDataSourceHelper.clearAllThreadLocal();
 		}
 	}
 

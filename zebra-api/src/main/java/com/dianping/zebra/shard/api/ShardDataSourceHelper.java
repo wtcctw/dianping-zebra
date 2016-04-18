@@ -9,38 +9,46 @@ import com.dianping.avatar.tracker.InitialInstanceThreadLocal;
 public class ShardDataSourceHelper {
 
 	private static final ThreadLocal<ShardParamsHolder> SHARD_PARAMS = new InitialInstanceThreadLocal<ShardParamsHolder>(
-			ShardParamsHolder.class);
+			ShardParamsHolder.class){
+		
+		protected ShardParamsHolder initialValue() {
+			return new ShardParamsHolder();
+		}
+	};
+
+	private static final ThreadLocal<Boolean> EXTRACT_PARAMS_ONLY_FROM_THREAD_LOCAL = new InitialInstanceThreadLocal<Boolean>(
+			Boolean.class) {
+
+		protected Boolean initialValue() {
+			return false;
+		}
+	};
 
 	public static List<Object> getShardParams(String shardColumn) {
 		ShardParamsHolder holder = SHARD_PARAMS.get();
 
-		if (holder != null) {
-			return holder.getShardParams(shardColumn);
-		}
-
-		return null;
+		return holder.getShardParams(shardColumn);
 	}
 
 	public static void setShardParams(String shardColumn, List<Object> params) {
 		ShardParamsHolder holder = SHARD_PARAMS.get();
 
-		if (holder == null) {
-			holder = new ShardParamsHolder();
-		}
-
 		holder.setShardParams(shardColumn, params);
 	}
 
-	public static boolean hasAnyShardParams() {
-		ShardParamsHolder holder = SHARD_PARAMS.get();
-
-		return holder == null ? false : true;
-	}
-
-	public static void removeAllShardParams() {
+	public static void clearAllThreadLocal() {
 		SHARD_PARAMS.remove();
+		EXTRACT_PARAMS_ONLY_FROM_THREAD_LOCAL.remove();
 	}
 
+	public static void setExtractParamsOnlyFromThreadLocal(boolean extractParamsOnlyFromThreadLocal) {
+		EXTRACT_PARAMS_ONLY_FROM_THREAD_LOCAL.set(extractParamsOnlyFromThreadLocal);
+	}
+
+	public static boolean extractParamsOnlyFromThreadLocal() {
+		return EXTRACT_PARAMS_ONLY_FROM_THREAD_LOCAL.get();
+	}
+	
 	public static class ShardParamsHolder {
 		private Map<String, List<Object>> shardParams = new HashMap<String, List<Object>>();
 
