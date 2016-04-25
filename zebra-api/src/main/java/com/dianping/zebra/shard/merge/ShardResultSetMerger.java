@@ -85,7 +85,7 @@ public class ShardResultSetMerger {
 			adaptor.setMemoryData(afterOrderByDatas);
 		}
 
-		if (sqls.size() > 1 || sqls.get(0).getSqls().size() > 1) {
+		if (sqls.size() >= 1 || sqls.get(0).getSqls().size() >= 1) {
 			adaptor.setMax(mergeContext.getLimit());
 			adaptor.setSkip(mergeContext.getOffset());
 			adaptor.procLimit();

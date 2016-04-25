@@ -181,7 +181,7 @@ public class ShardResultSetAdaptor extends UnsupportedShardResultSet implements 
 
 			this.memoryData = new ArrayList<RowData>(subDataList);
 		} else {
-			if (skip != MergeContext.NO_OFFSET) {
+			if (skip > 0) {
 				int rowSkipped = 0;
 				for (int i = 0; i < resultSets.size(); i++) {
 					resultSetIndex = i;

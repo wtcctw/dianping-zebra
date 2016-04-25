@@ -170,7 +170,7 @@ public class SingleDBPreparedStatementGroupFollowNoteIntegrationTest extends Sin
 					.prepareStatement("SELECT * FROM DP_GroupFollowNote WHERE (NoteClass = 1 OR (NoteClass = 4 AND UserID = ?)) AND NoteID = ? LIMIT ?, ?");
 			stmt.setInt(1, 0);
 			stmt.setInt(2, 7);
-			stmt.setInt(3, 0);
+			stmt.setInt(3, 1);
 			stmt.setInt(4, 10);
 			stmt.execute();
 			ResultSet rs = stmt.getResultSet();
@@ -181,7 +181,7 @@ public class SingleDBPreparedStatementGroupFollowNoteIntegrationTest extends Sin
 				System.out.println(" FollowNoteID: " + rs.getObject(1));
 			}
 			System.out.println("Test 4 ------------------------------------------------------");
-			Assert.assertEquals(2, count);
+			Assert.assertEquals(1, count);
 		} catch (Exception e) {
 			Assert.fail();
 		} finally {
