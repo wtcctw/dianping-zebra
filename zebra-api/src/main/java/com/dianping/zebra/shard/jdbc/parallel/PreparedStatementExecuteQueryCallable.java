@@ -9,14 +9,16 @@ import com.dianping.zebra.group.util.SqlAliasManager;
 public class PreparedStatementExecuteQueryCallable implements Callable<ResultSet> {
 
 	private PreparedStatement stmt;
+	private String sqlName;
 
 	public PreparedStatementExecuteQueryCallable(PreparedStatement stmt, String sqlName) {
-		SqlAliasManager.setSqlAlias2(sqlName);
 		this.stmt = stmt;
+		this.sqlName = sqlName;
 	}
 
 	@Override
 	public ResultSet call() throws Exception {
+		SqlAliasManager.setSqlAlias2(sqlName);
 		return stmt.executeQuery();
 	}
 }
