@@ -3,7 +3,7 @@ package com.dianping.zebra.shard.jdbc.parallel;
 import java.sql.PreparedStatement;
 import java.util.concurrent.Callable;
 
-import com.dianping.zebra.group.util.SqlAliasManager;
+import com.dianping.zebra.group.util.DaoContextHolder;
 
 public class PreparedStatementExecuteUpdateCallable implements Callable<UpdateResult> {
 
@@ -19,7 +19,7 @@ public class PreparedStatementExecuteUpdateCallable implements Callable<UpdateRe
 
 	@Override
 	public UpdateResult call() throws Exception {
-		SqlAliasManager.setSqlAlias2(sqlName);
+		DaoContextHolder.setSqlName(sqlName);
 		int executeUpdate = stmt.executeUpdate();
 
 		if (sql.trim().charAt(0) == 'i' || sql.trim().charAt(0) == 'I') {

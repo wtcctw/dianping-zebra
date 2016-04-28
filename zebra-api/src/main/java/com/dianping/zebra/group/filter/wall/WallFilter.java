@@ -14,7 +14,7 @@ import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 import com.dianping.zebra.group.datasources.SingleConnection;
 import com.dianping.zebra.group.filter.DefaultJdbcFilter;
 import com.dianping.zebra.group.filter.JdbcFilter;
-import com.dianping.zebra.group.util.SqlAliasManager;
+import com.dianping.zebra.group.util.DaoContextHolder;
 import com.dianping.zebra.util.StringUtils;
 
 /**
@@ -24,7 +24,7 @@ import com.dianping.zebra.util.StringUtils;
  */
 public class WallFilter extends DefaultJdbcFilter {
 	private static final int MAX_ID_LENGTH = 8;
-	
+
 	private Map<String, String> sqlIDCache = new ConcurrentHashMap<String, String>(1024);
 
 	private Map<String, SqlFlowControl> flowControl;
@@ -36,7 +36,7 @@ public class WallFilter extends DefaultJdbcFilter {
 	protected void checkFlowControl(String id) throws SQLException {
 		if (StringUtils.isNotBlank(id) && flowControl.containsKey(id)) {
 			if (generateFlowPercent() >= flowControl.get(id).getAllowPercent()) {
-				throw new SQLException("The SQL is in the blacklist. Please contact with dba!","SQL.Blacklist");
+				throw new SQLException("The SQL is in the blacklist. Please contact with dba!", "SQL.Blacklist");
 			}
 		}
 	}
@@ -89,8 +89,8 @@ public class WallFilter extends DefaultJdbcFilter {
 		if (chain != null) {
 			sql = chain.sql(conn, sql, isPreparedStmt, chain);
 		}
-		String sqlAlias = SqlAliasManager.getAvatarSqlAlias();
-		
+		String sqlAlias = DaoContextHolder.getSqlName();
+
 		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sqlAlias)) {
 			try {
 				String id = generateId(conn, sqlAlias);

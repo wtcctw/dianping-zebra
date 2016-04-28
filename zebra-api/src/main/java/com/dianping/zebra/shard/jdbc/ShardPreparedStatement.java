@@ -69,7 +69,7 @@ import com.dianping.zebra.group.jdbc.param.TimeParamContext;
 import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
 import com.dianping.zebra.group.jdbc.param.URLParamContext;
 import com.dianping.zebra.group.jdbc.param.UnicodeStreamParamContext;
-import com.dianping.zebra.group.util.SqlAliasManager;
+import com.dianping.zebra.group.util.DaoContextHolder;
 import com.dianping.zebra.shard.jdbc.parallel.PreparedStatementExecuteQueryCallable;
 import com.dianping.zebra.shard.jdbc.parallel.PreparedStatementExecuteUpdateCallable;
 import com.dianping.zebra.shard.jdbc.parallel.SQLThreadPoolExecutor;
@@ -168,7 +168,7 @@ public class ShardPreparedStatement extends UnsupportedShardPreparedStatement im
 				actualStatements.add(stmt);
 				setParams(stmt);
 
-				callables.add(new PreparedStatementExecuteQueryCallable(stmt, SqlAliasManager.getSqlAlias()));
+				callables.add(new PreparedStatementExecuteQueryCallable(stmt, DaoContextHolder.getSqlName()));
 			}
 		}
 
@@ -210,7 +210,7 @@ public class ShardPreparedStatement extends UnsupportedShardPreparedStatement im
 				setParams(stmt);
 
 				tasks.add(
-						new PreparedStatementExecuteUpdateCallable(stmt, SqlAliasManager.getSqlAlias(), executableSql));
+						new PreparedStatementExecuteUpdateCallable(stmt, DaoContextHolder.getSqlName(), executableSql));
 			}
 		}
 

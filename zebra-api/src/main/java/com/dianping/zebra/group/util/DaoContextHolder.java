@@ -1,22 +1,12 @@
 package com.dianping.zebra.group.util;
 
-import com.dianping.avatar.tracker.ExecutionContext;
 import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.avatar.tracker.InitialInstanceThreadLocal;
 
 public class DaoContextHolder {
 	private static final String SQL_NAME = "sql_statement_name";
 
-	private static final ThreadLocal<ExecutionContext> CONTEXT = new InitialInstanceThreadLocal<ExecutionContext>(
-	      ExecutionContext.class);
-
-	/**
-	 * retrieve current app's tracker context
-	 * 
-	 * @return
-	 */
-	public static ExecutionContext getContext() {
-		return CONTEXT.get();
+	public static String getSqlName() {
+		return ExecutionContextHolder.getContext().get(SQL_NAME);
 	}
 
 	public static void setSqlName(String statementName) {

@@ -4,7 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.concurrent.Callable;
 
-import com.dianping.zebra.group.util.SqlAliasManager;
+import com.dianping.zebra.group.util.DaoContextHolder;
 
 public class PreparedStatementExecuteQueryCallable implements Callable<ResultSet> {
 
@@ -18,7 +18,7 @@ public class PreparedStatementExecuteQueryCallable implements Callable<ResultSet
 
 	@Override
 	public ResultSet call() throws Exception {
-		SqlAliasManager.setSqlAlias2(sqlName);
+		DaoContextHolder.setSqlName(sqlName);
 		return stmt.executeQuery();
 	}
 }
