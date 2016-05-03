@@ -16,7 +16,7 @@
 
 ### 第一步:添加POM依赖
 
-目前的最新版本为`2.7.10`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
+目前的最新版本为`2.8.1`，并配合数据监控组件`zebra-ds-monitor-client`一起使用
 
 	<dependency>
     	<groupId>com.dianping.zebra</groupId>
@@ -28,7 +28,7 @@
         <artifactId>zebra-ds-monitor-client</artifactId>
         <version>${version}</version>
     </dependency>
-    
+
 zebra-ds-monitor-client还需要额外配置一个xml文件到应用spring加载路径中去。确保web.xml中引入额外的spring文件，
 
 	classpath*:config/spring/common/appcontext-ds-replacer.xml
@@ -36,7 +36,7 @@ zebra-ds-monitor-client还需要额外配置一个xml文件到应用spring加载
 如果不想引入该文件，也可以自行添加一个spring的Bean。
 
 	<bean class="com.dianping.zebra.monitor.spring.DataSourceAutoReplacer"/>
-    
+
 #### 其他依赖说明
 
 * 如果想要在`CAT`中的心跳中看到数据源连接池的信息，需升级`cat-client`到`1.1.3`之上，`dpsf-net`升级到`2.1.21`之上,`lion-client`升级到`0.4.8`之上的版本。
@@ -47,9 +47,9 @@ zebra-ds-monitor-client还需要额外配置一个xml文件到应用spring加载
 
 	<bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
         <!-- 唯一确定数据库的key，请咨询DBA使用哪个key -->
-		<property name="jdbcRef" value="tuangou2010" /> 
+		<property name="jdbcRef" value="tuangou2010" />
         <!-- 选择使用背后使用哪种数据源，"c3p0"或者"tomcat-jdbc"，可以不配，默认值为"c3p0" -->
-        <property name="poolType" value="c3p0" /> 
+        <property name="poolType" value="c3p0" />
         <!-- 该值对应tomcat-jdbc的"minIdle" -->
 		<property name="minPoolSize" value="${lion.key.minPoolSize}" />
         <!-- 该值对应tomcat-jdbc的"maxActive" -->
@@ -77,9 +77,9 @@ zebra-ds-monitor-client还需要额外配置一个xml文件到应用spring加载
 #### 简化版本连接池配置（使用默认配置）
 
     <bean id="dataSource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-		<property name="jdbcRef" value="tuangou2010" /> 
+		<property name="jdbcRef" value="tuangou2010" />
 		<!-- 选择使用背后使用哪种数据源，"c3p0"或者"tomcat-jdbc"，可以不配，默认值为"c3p0" -->
-        <property name="poolType" value="c3p0" /> 
+        <property name="poolType" value="c3p0" />
         <!-- 关闭登录用户走写库，为兼容默认值是true，如无需要请关闭该特性 -->
         <property name="forceWriteOnLogin" value="false" />
     </bean>
@@ -99,19 +99,19 @@ zebra-ds-monitor-client还需要额外配置一个xml文件到应用spring加载
 1.如果业务对主从延迟要求很高，不能容忍一点延迟，比如支付等业务，可以根据需要配置两个数据源，其中一个`只走读库`，另外一个`只走写库`，可以在spring的配置中加入如下的property。一般情况下，除非对主从延迟要求很高，一般应用`不建议`使用该配置。
 
     <bean id="readDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-    	<property name="jdbcRef" value="tuangou2010" /> 
+    	<property name="jdbcRef" value="tuangou2010" />
         <property name="routerType" value="load-balance" /> <!-- 只走读库 -->
     </bean>
-    
+
     <bean id="writeDs" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-    	<property name="jdbcRef" value="tuangou2010" /> 
+    	<property name="jdbcRef" value="tuangou2010" />
         <property name="routerType" value="fail-over" /><!-- 只走写库 -->
     </bean>
-    
+
 2.关闭登录用户默认走写库的逻辑。目前，为了兼容老的DPDL登录用户走写库的逻辑，DAL也默认开启了，当然也可以通过在spring的配置中加入如下的property来关闭该功能。
 
     <bean id="datasource" class="com.dianping.zebra.group.jdbc.GroupDataSource" init-method="init">
-    	<property name="jdbcRef" value="tuangou2010" /> 
+    	<property name="jdbcRef" value="tuangou2010" />
         <property name="forceWriteOnLogin" value="false" /> <!-- 关闭登录用户走写库，默认值是true，表明开启该功能 -->
     </bean>
 
@@ -120,16 +120,16 @@ zebra-ds-monitor-client还需要额外配置一个xml文件到应用spring加载
     <property name="socketTimeout" value="600000"/>
 
 ### 第二步(Optional):直接代码中使用
-		
+
 		GroupDataSource dataSource = new GroupDataSource("jdbcRef");
 		dataSource.setForceWriteOnLogin(false);
-		
+
 		//Set other datasource properties if you want
-		
+
 		dataSource.init();
-		
+
 		//Now dataSource is ready for use
-    
+
 
 ### 常见问题
 #### Q：为什么要加`init-method`，不加会怎么样？
@@ -177,7 +177,7 @@ A: 可以在SQL前面加一个`hint`，表明这个读请求强制走写库，�
 
     /*+zebra:w*/select * from test
 
-#### Q：为什么会遇到这样的异常：java.sql.SQLException: An attempt by a client to checkout a Connection has timed out. 
+#### Q：为什么会遇到这样的异常：java.sql.SQLException: An attempt by a client to checkout a Connection has timed out.
 A：这个错误是c3p0报出来的错误，表明c3p0尝试去连接池中拿连接超时了。一般遇到这样的错误，可以有以下几个角度去解决：
     1. 是否是因为并发量太大的原因？如果是，请调整c3p0的参数，比如可以增加连接数，将maxIdleTime设置为0。
     2. 是否当时有慢查询，导致数据库拥堵？如果是，请联系DBA抓取慢查询，对sql进行优化。
@@ -185,7 +185,7 @@ A：这个错误是c3p0报出来的错误，表明c3p0尝试去连接池中拿�
 
 #### Q：什么是数据源自动替换？
 A：为了方便升级，不用业务修改代码，zebra可以对数据库级别对数据源进行动态替换。替换的技术是Spring加载完bean的时候对DataSource这个类型的bean进行替换。过程如下：
-   
+
     1. 从datasource中获取jdbcUrl，从而知道是该datasource会访问哪个库
     2. 判断该数据库是否在`Lion`的白名单`groupds.autoreplace.database`配置过
     3. 如果配置过，则进行替换。替换时，判断用户名如果是读用户，则替换过的GroupDataSource只能读；如果是写用户，则替换过的GroupDataSource只能写。

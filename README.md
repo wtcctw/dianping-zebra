@@ -1,4 +1,4 @@
-## Zebra 
+## Zebra
 `Zebra`是点评内部使用数据源、DAO以及监控等和数据库打交道的中间件集。
 
 ### Documents
@@ -18,22 +18,21 @@
 	<dependency>
 		<groupId>com.dianping.zebra</groupId>
 		<artifactId>zebra-api</artifactId>
-		<version>2.7.10</version>
+		<version>2.8.1</version>
 	</dependency>
-	
+
 	<dependency>
 		<groupId>com.dianping.zebra</groupId>
 		<artifactId>zebra-ds-monitor-client</artifactId>
-		<version>2.7.10</version>
+		<version>2.8.1</version>
 	</dependency>
-	
+
 	<dependency>
 		<groupId>com.dianping.zebra</groupId>
 		<artifactId>zebra-dao</artifactId>
-		<version>0.1.5</version>
+		<version>0.1.6</version>
 	</dependency>
-	
+
 
 ### Release Notes
 [ReleaseNote](/arch/zebra/blob/master/ReleaseNote.md)
-
