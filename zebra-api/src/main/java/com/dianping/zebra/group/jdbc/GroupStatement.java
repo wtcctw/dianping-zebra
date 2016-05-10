@@ -27,23 +27,23 @@ import com.dianping.zebra.util.SqlUtils;
  */
 public class GroupStatement implements Statement {
 
+	protected GroupConnection dpGroupConnection;
+
+	protected List<JdbcFilter> filters;
+
+	protected Statement openedStatement = null;
+
+	protected GroupResultSet currentResultSet = null;
+
 	protected List<String> batchedSqls;
 
 	protected boolean closed = false;
 
-	protected GroupResultSet currentResultSet = null;
-
-	protected GroupConnection dpGroupConnection;
-
 	protected int fetchSize;
-
-	protected List<JdbcFilter> filters;
 
 	protected int maxRows;
 
 	protected boolean moreResults = false;
-
-	protected Statement openedStatement = null;
 
 	protected int queryTimeout = 0;
 

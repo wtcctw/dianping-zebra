@@ -18,28 +18,28 @@ import java.util.concurrent.Executor;
 
 public class GroupConnection implements Connection {
 
-	private boolean autoCommit = true;
-
-	private boolean closed = false;
-
-	private ReadWriteStrategy readWriteStrategy;
-
-	private List<JdbcFilter> filters;
-
-	private List<Statement> openedStatements = new ArrayList<Statement>();
-
-	private volatile Connection rConnection;
-
 	private DataSource readDataSource;
-
-	private RouterType routerType;
-
-	private int transactionIsolation = -1;
-
-	private volatile Connection wConnection;
 
 	private DataSource writeDataSource;
 
+	private ReadWriteStrategy readWriteStrategy;
+
+	private RouterType routerType;
+
+	private List<JdbcFilter> filters;
+
+	private volatile Connection rConnection;
+
+	private volatile Connection wConnection;
+
+	private List<Statement> openedStatements = new ArrayList<Statement>();
+	
+	private int transactionIsolation = -1;
+
+	private boolean autoCommit = true;
+	
+	private boolean closed = false;
+	
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource, ReadWriteStrategy readWriteStrategy,
 			RouterType routerType, List<JdbcFilter> filters) {
 		super();
