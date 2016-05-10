@@ -2,7 +2,6 @@ package com.dianping.zebra.monitor.filter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -66,7 +65,7 @@ public class CatFilter extends DefaultJdbcFilter {
     }
 
     @Override
-    public <T> T execute(Statement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
+    public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
                          boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
         Transaction t;
         if (isBatched) {
@@ -78,7 +77,7 @@ public class CatFilter extends DefaultJdbcFilter {
         }
 
         try {
-            T result = chain.execute(source, conn, sql, batchedSql, isBatched, autoCommit, sqlParams, chain);
+            T result = chain.executeGroupStatement(source, conn, sql, batchedSql, isBatched, autoCommit, sqlParams, chain);
             t.setStatus(Transaction.SUCCESS);
 
             return result;
