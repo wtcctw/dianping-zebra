@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.filter;
+package com.dianping.zebra.filter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,110 +6,118 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
-import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.datasources.SingleDataSource;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupResultSet;
 import com.dianping.zebra.group.jdbc.GroupStatement;
+import com.dianping.zebra.single.jdbc.SingleConnection;
+import com.dianping.zebra.single.jdbc.SingleDataSource;
+import com.dianping.zebra.single.jdbc.SingleStatement;
 
 /**
- * Created by Dozer on 9/2/14.
+ * Created by Dozer on 11/11/14.
  */
-public class DefaultJdbcFilter implements JdbcFilter {
+public class DefaultJdbcFilterChain implements JdbcFilter {
+	protected final List<JdbcFilter> filters;
 
-	protected String configManagerType = Constants.CONFIG_MANAGER_TYPE_REMOTE;
+	protected int index = 0;
+
+	public DefaultJdbcFilterChain(List<JdbcFilter> filters) {
+		this.filters = filters;
+	}
 
 	@Override
 	public void closeGroupConnection(GroupConnection source, JdbcFilter chain) throws SQLException {
-		chain.closeGroupConnection(source, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void closeGroupDataSource(GroupDataSource source, JdbcFilter chain) throws SQLException {
-		chain.closeGroupDataSource(source, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException {
-		chain.closeSingleConnection(source, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException {
-		chain.closeSingleDataSource(source, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
-	      boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
-		return chain.execute(source, conn, sql, batchedSql, isBatched, autoCommit, params, chain);
+	public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public <T> T executeSingleStatement(SingleStatement source, Connection conn, String sql, List<String> batchedSql,
+			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
-		return chain.findMasterFailOverDataSource(source, chain);
+			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException {
-		return chain.getGroupConnection(source, chain);
+		throw new UnsupportedOperationException();
 	}
 
-    @Override
-    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException{
-        return chain.getRealConnection(source,sql,forceWriter,chain);
-    }
+	@Override
+	public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain)
+			throws SQLException {
+		throw new UnsupportedOperationException();
+	}
 
-
-    @Override
+	@Override
 	public int getOrder() {
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain) throws SQLException {
-		return chain.getSingleConnection(source, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void init() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void initGroupDataSource(GroupDataSource source, JdbcFilter chain) {
-		chain.initGroupDataSource(source, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public DataSource initSingleDataSource(SingleDataSource source, JdbcFilter chain) {
-		return chain.initSingleDataSource(source, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
-		chain.refreshGroupDataSource(source, propertiesName, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException {
-		return chain.resultSetNext(source, chain);
-	}
-
-	public void setConfigManagerType(String configManagerType) {
-		this.configManagerType = configManagerType;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
-		return chain.sql(conn, sql, isPreparedStmt, chain);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
-		chain.switchFailOverDataSource(source, chain);
+		throw new UnsupportedOperationException();
 	}
 }

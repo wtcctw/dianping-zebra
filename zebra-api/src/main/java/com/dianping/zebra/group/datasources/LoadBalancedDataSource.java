@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.exception.SlaveDsDisConnectedException;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.DataSourceRouter;
@@ -21,6 +21,9 @@ import com.dianping.zebra.group.router.RetryConnectDataSourceRouter;
 import com.dianping.zebra.group.router.RouterContext;
 import com.dianping.zebra.group.router.RouterTarget;
 import com.dianping.zebra.group.util.SqlAliasManager;
+import com.dianping.zebra.single.jdbc.SingleDataSource;
+import com.dianping.zebra.single.manager.SingleDataSourceManager;
+import com.dianping.zebra.single.manager.SingleDataSourceManagerFactory;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.JdbcDriverClassHelper;
 

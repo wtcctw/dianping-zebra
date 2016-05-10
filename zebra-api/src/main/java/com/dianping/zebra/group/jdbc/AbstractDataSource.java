@@ -1,8 +1,8 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.exception.DalException;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.util.StringUtils;
 
 import javax.sql.DataSource;

@@ -1,8 +1,8 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
-import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.filter.DefaultJdbcFilterChain;
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.router.ReadWriteStrategy;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.util.JDBCUtils;

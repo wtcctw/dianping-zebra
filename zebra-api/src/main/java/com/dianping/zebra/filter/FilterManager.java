@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.filter;
+package com.dianping.zebra.filter;
 
 import java.util.List;
 

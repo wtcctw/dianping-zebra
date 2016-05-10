@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.filter;
+package com.dianping.zebra.filter;
 
 import com.dianping.zebra.util.StringUtils;
 

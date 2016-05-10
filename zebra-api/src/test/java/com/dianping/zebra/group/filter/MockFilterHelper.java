@@ -6,6 +6,11 @@ package com.dianping.zebra.group.filter;
 
 import org.mockito.Mockito;
 
+import com.dianping.zebra.filter.DefaultJdbcFilter;
+import com.dianping.zebra.filter.FilterManager;
+import com.dianping.zebra.filter.FilterManagerFactory;
+import com.dianping.zebra.filter.JdbcFilter;
+
 public class MockFilterHelper {
 	private static JdbcFilter mockedFilter = Mockito.spy(new DefaultJdbcFilter());
 

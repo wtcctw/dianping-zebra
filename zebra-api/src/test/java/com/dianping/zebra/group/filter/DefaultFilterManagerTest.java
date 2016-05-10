@@ -7,6 +7,9 @@ package com.dianping.zebra.group.filter;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import com.dianping.zebra.filter.FilterManagerFactory;
+import com.dianping.zebra.filter.JdbcFilter;
+
 import java.util.List;
 
 public class DefaultFilterManagerTest {

@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.filter;
+package com.dianping.zebra.filter;
 
 /**
  * Created by Dozer on 9/2/14.

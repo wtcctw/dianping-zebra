@@ -8,7 +8,7 @@ import org.dbunit.operation.DatabaseOperation;
 import org.h2.tools.RunScript;
 import org.junit.Before;
 
-import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.filter.MockFilterHelper;
 
 public abstract class H2DatabaseTestCase {

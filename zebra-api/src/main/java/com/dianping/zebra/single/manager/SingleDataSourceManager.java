@@ -1,7 +1,8 @@
-package com.dianping.zebra.group.datasources;
+package com.dianping.zebra.single.manager;
 
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.single.jdbc.SingleDataSource;
 
 import java.util.List;
 

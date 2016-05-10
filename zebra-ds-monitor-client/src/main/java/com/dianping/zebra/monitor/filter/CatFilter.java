@@ -1,29 +1,30 @@
 package com.dianping.zebra.monitor.filter;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
 import com.dianping.cat.message.Event;
 import com.dianping.cat.message.Message;
 import com.dianping.cat.message.Transaction;
 import com.dianping.cat.status.StatusExtensionRegister;
+import com.dianping.zebra.filter.DefaultJdbcFilter;
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
-import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.datasources.SingleDataSource;
-import com.dianping.zebra.group.filter.DefaultJdbcFilter;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.jdbc.GroupStatement;
 import com.dianping.zebra.group.util.SqlAliasManager;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.monitor.util.SqlMonitorUtils;
+import com.dianping.zebra.single.jdbc.SingleConnection;
+import com.dianping.zebra.single.jdbc.SingleDataSource;
 import com.dianping.zebra.util.SqlUtils;
 import com.site.helper.Stringizers;
-
-import javax.sql.DataSource;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Created by Dozer on 9/5/14.
@@ -65,7 +66,7 @@ public class CatFilter extends DefaultJdbcFilter {
     }
 
     @Override
-    public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
+    public <T> T execute(Statement source, Connection conn, String sql, List<String> batchedSql, boolean isBatched,
                          boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
         Transaction t;
         if (isBatched) {

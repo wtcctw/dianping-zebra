@@ -1,17 +1,19 @@
 package com.dianping.zebra.group.filter;
 
-/**
- * Created by Dozer on 9/24/14.
- */
-
-import com.dianping.zebra.group.jdbc.GroupStatement;
-import junit.framework.Assert;
-import org.junit.Test;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.Test;
+
+import com.dianping.zebra.filter.DefaultJdbcFilter;
+import com.dianping.zebra.filter.DefaultJdbcFilterChain;
+import com.dianping.zebra.filter.FilterManagerFactory;
+import com.dianping.zebra.filter.JdbcFilter;
+import com.dianping.zebra.group.jdbc.GroupStatement;
+
+import junit.framework.Assert;
 
 public class FilterChainTest {
 	@Test
@@ -19,11 +21,11 @@ public class FilterChainTest {
 		final AtomicInteger counter = new AtomicInteger();
 
 		JdbcFilter filter1 = new DefaultJdbcFilter() {
-			@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+			@Override public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
 				  boolean isBatched,
 				  boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 				Assert.assertEquals(3, counter.incrementAndGet());
-				T executeResult = chain.execute(source, null, null, null, false, false, null, chain);
+				T executeResult = chain.executeGroupStatement(source, null, null, null, false, false, null, chain);
 				Assert.assertEquals(5, counter.incrementAndGet());
 				return executeResult;
 			}
@@ -34,12 +36,12 @@ public class FilterChainTest {
 		};
 
 		JdbcFilter filter2 = new DefaultJdbcFilter() {
-			@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+			@Override public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
 				  boolean isBatched,
 				  boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 
 				Assert.assertEquals(2, counter.incrementAndGet());
-				T executeResult = chain.execute(source, null, null, null, false, false, null, chain);
+				T executeResult = chain.executeGroupStatement(source, null, null, null, false, false, null, chain);
 				Assert.assertEquals(6, counter.incrementAndGet());
 				return executeResult;
 			}
@@ -50,12 +52,12 @@ public class FilterChainTest {
 		};
 
 		JdbcFilter filter3 = new DefaultJdbcFilter() {
-			@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+			@Override public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
 				  boolean isBatched,
 				  boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 
 				Assert.assertEquals(1, counter.incrementAndGet());
-				T executeResult = chain.execute(source, null, null, null, false, false, null, chain);
+				T executeResult = chain.executeGroupStatement(source, null, null, null, false, false, null, chain);
 				Assert.assertEquals(7, counter.incrementAndGet());
 				return executeResult;
 			}
@@ -71,18 +73,18 @@ public class FilterChainTest {
 
 		List<JdbcFilter> filters = FilterManagerFactory.getFilterManager().loadFilters("1,2,3");
 		JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
-			@Override public <T> T execute(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+			@Override public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
 				  boolean isBatched,
 				  boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
 				if (index < filters.size()) {
 					return filters.get(index++)
-						  .execute(source, conn, sql, batchedSql, isBatched, autoCommit, params, chain);
+						  .executeGroupStatement(source, conn, sql, batchedSql, isBatched, autoCommit, params, chain);
 				} else {
 					Assert.assertEquals(4, counter.incrementAndGet());
 					return null;
 				}
 			}
 		};
-		chain.execute(null, null, null, null, false, false, null, chain);
+		chain.executeGroupStatement(null, null, null, null, false, false, null, chain);
 	}
 }

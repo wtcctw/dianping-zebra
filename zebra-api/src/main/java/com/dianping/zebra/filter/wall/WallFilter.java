@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.filter.wall;
+package com.dianping.zebra.filter.wall;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.dianping.zebra.filter.DefaultJdbcFilter;
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
-import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.filter.DefaultJdbcFilter;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.util.DaoContextHolder;
+import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.util.StringUtils;
 
 /**

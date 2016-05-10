@@ -11,9 +11,10 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
+import com.dianping.zebra.filter.JdbcFilter;
+import com.dianping.zebra.filter.wall.WallFilter;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.google.common.collect.Lists;
 
 public class WallFilterTest {

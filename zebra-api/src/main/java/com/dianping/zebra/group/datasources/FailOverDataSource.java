@@ -12,14 +12,16 @@ import java.util.Map;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.dianping.zebra.filter.DefaultJdbcFilterChain;
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.exception.WeakReferenceGCException;
-import com.dianping.zebra.group.filter.DefaultJdbcFilterChain;
-import com.dianping.zebra.group.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
+import com.dianping.zebra.single.jdbc.SingleDataSource;
+import com.dianping.zebra.single.manager.SingleDataSourceManagerFactory;
 import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.dianping.zebra.util.StringUtils;
 

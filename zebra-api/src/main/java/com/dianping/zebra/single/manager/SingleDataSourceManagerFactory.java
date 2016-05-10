@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.datasources;
+package com.dianping.zebra.single.manager;
 
 public final class SingleDataSourceManagerFactory {
 	private volatile static SingleDataSourceManager dataSourceManager;

@@ -6,9 +6,9 @@
  */
 package com.dianping.zebra.group.jdbc;
 
-import com.dianping.zebra.group.datasources.SingleConnection;
-import com.dianping.zebra.group.filter.JdbcFilter;
+import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.jdbc.param.*;
+import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.SqlType;
 import com.dianping.zebra.util.SqlUtils;
@@ -732,5 +732,4 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
 		params.add(new AsciiParamContext(parameterIndex, new Object[] { x }));
 	}
-
 }
