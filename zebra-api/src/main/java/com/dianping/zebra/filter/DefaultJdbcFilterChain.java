@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.jdbc.GroupResultSet;
 import com.dianping.zebra.group.jdbc.GroupStatement;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.single.jdbc.SingleDataSource;
@@ -103,11 +102,6 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 
 	@Override
 	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 

@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.jdbc.GroupResultSet;
 import com.dianping.zebra.group.jdbc.GroupStatement;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.single.jdbc.SingleDataSource;
@@ -58,8 +57,6 @@ public interface JdbcFilter {
 
 	FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
 			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain);
-
-	boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException;
 
 	void closeGroupConnection(GroupConnection source, JdbcFilter chain) throws SQLException;
 

@@ -142,31 +142,6 @@ public class GroupConnection implements Connection {
 	}
 
 	@Override
-	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-		throw new UnsupportedOperationException("createArrayOf");
-	}
-
-	@Override
-	public Blob createBlob() throws SQLException {
-		throw new UnsupportedOperationException("createBlob");
-	}
-
-	@Override
-	public Clob createClob() throws SQLException {
-		throw new UnsupportedOperationException("createClob");
-	}
-
-	@Override
-	public NClob createNClob() throws SQLException {
-		throw new UnsupportedOperationException("createNClob");
-	}
-
-	@Override
-	public SQLXML createSQLXML() throws SQLException {
-		throw new UnsupportedOperationException("createSQLXML");
-	}
-
-	@Override
 	public Statement createStatement() throws SQLException {
 		checkClosed();
 		Statement stmt = new GroupStatement(this, this.filters);
@@ -188,11 +163,6 @@ public class GroupConnection implements Connection {
 		GroupStatement stmt = (GroupStatement) createStatement(resultSetType, resultSetConcurrency);
 		stmt.setResultSetHoldability(resultSetHoldability);
 		return stmt;
-	}
-
-	@Override
-	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-		throw new UnsupportedOperationException("createStruct");
 	}
 
 	@Override
@@ -222,6 +192,36 @@ public class GroupConnection implements Connection {
 		} else {
 			return conn.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
 		}
+	}
+	
+	@Override
+	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+		throw new UnsupportedOperationException("createArrayOf");
+	}
+
+	@Override
+	public Blob createBlob() throws SQLException {
+		throw new UnsupportedOperationException("createBlob");
+	}
+
+	@Override
+	public Clob createClob() throws SQLException {
+		throw new UnsupportedOperationException("createClob");
+	}
+
+	@Override
+	public NClob createNClob() throws SQLException {
+		throw new UnsupportedOperationException("createNClob");
+	}
+
+	@Override
+	public SQLXML createSQLXML() throws SQLException {
+		throw new UnsupportedOperationException("createSQLXML");
+	}
+	
+	@Override
+	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+		throw new UnsupportedOperationException("createStruct");
 	}
 
 	@Override

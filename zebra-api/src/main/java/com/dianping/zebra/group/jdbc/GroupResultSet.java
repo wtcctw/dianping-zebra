@@ -4,25 +4,33 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.SQLXML;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Map;
-
-import com.dianping.zebra.filter.DefaultJdbcFilterChain;
-import com.dianping.zebra.filter.JdbcFilter;
 
 /**
  * Created by Dozer on 9/1/14.
  */
 public class GroupResultSet implements ResultSet {
-	private final List<JdbcFilter> filters;
 
 	private final ResultSet innerResultSet;
 
-	public GroupResultSet(List<JdbcFilter> filters, ResultSet resultSet) {
+	public GroupResultSet(ResultSet resultSet) {
 		this.innerResultSet = resultSet;
-		this.filters = filters;
 	}
 
 	@Override
@@ -524,21 +532,7 @@ public class GroupResultSet implements ResultSet {
 
 	@Override
 	public boolean next() throws SQLException {
-		if (filters != null && filters.size() > 0) {
-			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
-				@Override
-				public boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException {
-					if (index < filters.size()) {
-						return filters.get(index++).resultSetNext(source, chain);
-					} else {
-						return source.innerResultSet.next();
-					}
-				}
-			};
-			return chain.resultSetNext(this, chain);
-		} else {
-			return innerResultSet.next();
-		}
+		return innerResultSet.next();
 	}
 
 	@Override

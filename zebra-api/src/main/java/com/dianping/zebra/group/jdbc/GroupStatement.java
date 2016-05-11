@@ -250,7 +250,7 @@ public class GroupStatement implements Statement {
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
 		sql = processSQL(conn, sql, false);
 		Statement stmt = createStatementInternal(conn, false);
-		currentResultSet = new GroupResultSet(this.filters, stmt.executeQuery(sql));
+		currentResultSet = new GroupResultSet(stmt.executeQuery(sql));
 		return currentResultSet;
 	}
 
@@ -393,7 +393,7 @@ public class GroupStatement implements Statement {
 	@Override
 	public ResultSet getGeneratedKeys() throws SQLException {
 		if (this.openedStatement != null) {
-			return new GroupResultSet(this.filters, this.openedStatement.getGeneratedKeys());
+			return new GroupResultSet(this.openedStatement.getGeneratedKeys());
 		} else {
 			throw new SQLException("No update operations executed before getGeneratedKeys");
 		}

@@ -155,7 +155,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		sql = processSQL(conn, sql, true);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 		setParams(pstmt);
-		this.currentResultSet = new GroupResultSet(this.filters, pstmt.executeQuery());
+		this.currentResultSet = new GroupResultSet(pstmt.executeQuery());
 		return this.currentResultSet;
 	}
 

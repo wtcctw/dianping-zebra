@@ -10,7 +10,6 @@ import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.jdbc.GroupResultSet;
 import com.dianping.zebra.group.jdbc.GroupStatement;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.single.jdbc.SingleDataSource;
@@ -99,11 +98,6 @@ public class DefaultJdbcFilter implements JdbcFilter {
 	@Override
 	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
 		chain.refreshGroupDataSource(source, propertiesName, chain);
-	}
-
-	@Override
-	public boolean resultSetNext(GroupResultSet source, JdbcFilter chain) throws SQLException {
-		return chain.resultSetNext(source, chain);
 	}
 
 	public void setConfigManagerType(String configManagerType) {
