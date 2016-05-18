@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.datasources;
+package com.dianping.zebra.single.jdbc;
 
 import com.dianping.zebra.util.JDBCUtils;
 
