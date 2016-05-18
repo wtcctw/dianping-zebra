@@ -1,7 +1,7 @@
 package com.dianping.zebra.config;
 
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.exception.ZebraConfigException;
 
 public class ConfigServiceFactory {
 	
@@ -17,7 +17,7 @@ public class ConfigServiceFactory {
 		} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
 			return LionConfigService.getInstance();
 		} else {
-			throw new IllegalConfigException(String.format("illegal configServiceType[%s]", configManagerType));
+			throw new ZebraConfigException(String.format("illegal configServiceType[%s]", configManagerType));
 		}
 	}
 }

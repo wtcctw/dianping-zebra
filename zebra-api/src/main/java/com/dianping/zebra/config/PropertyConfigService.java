@@ -1,7 +1,7 @@
 package com.dianping.zebra.config;
 
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.group.config.AdvancedPropertyChangeEvent;
-import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.util.FileUtils;
 import com.dianping.zebra.util.StringUtils;
 import org.apache.log4j.LogManager;
@@ -50,7 +50,7 @@ public class PropertyConfigService implements ConfigService {
 		if (propUrl != null) {
 			return FileUtils.toFile(propUrl);
 		} else {
-			throw new IllegalConfigException(String.format("config file[%s] doesn't exist.", this.resourceFileName));
+			throw new ZebraConfigException(String.format("config file[%s] doesn't exist.", this.resourceFileName));
 		}
 	}
 
@@ -81,7 +81,7 @@ public class PropertyConfigService implements ConfigService {
 			updateTask.start();
 		} catch (Exception e) {
 			logger.error("fail to initilize Local Config Manager for DAL", e);
-			throw new IllegalConfigException(e);
+			throw new ZebraConfigException(e);
 		}
 	}
 
@@ -92,7 +92,7 @@ public class PropertyConfigService implements ConfigService {
 			inputStream = new FileInputStream(this.resourceFile);
 			prop.load(inputStream);
 		} catch (Exception e) {
-			throw new IllegalConfigException(String.format("fail to read properties file[%s]", this.resourceFileName),
+			throw new ZebraConfigException(String.format("fail to read properties file[%s]", this.resourceFileName),
 					e);
 		} finally {
 			FileUtils.closeQuietly(inputStream);

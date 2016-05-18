@@ -44,11 +44,6 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		this.sql = sql;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.sql.PreparedStatement#addBatch()
-	 */
 	@Override
 	public void addBatch() throws SQLException {
 		if (pstBatchedArgs == null) {
@@ -143,7 +138,6 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		closeCurrentResultSet();
 
 		return executeWithFilter(new JDBCOperationCallback<ResultSet>() {
-
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
@@ -156,6 +150,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 		setParams(pstmt);
 		this.currentResultSet = new GroupResultSet(pstmt.executeQuery());
+		
 		return this.currentResultSet;
 	}
 
@@ -183,19 +178,19 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {
 		sql = processSQL(conn, sql, true);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
-
 		setParams(pstmt);
+
 		return pstmt.executeUpdate();
 	}
 
 	@Override
 	public ResultSetMetaData getMetaData() throws SQLException {
-		throw new UnsupportedOperationException("getMetaData");
+		throw new UnsupportedOperationException("zebra does not support getMetaData");
 	}
 
 	@Override
 	public ParameterMetaData getParameterMetaData() throws SQLException {
-		throw new UnsupportedOperationException("getParameterMetaData");
+		throw new UnsupportedOperationException("zebra does not support getParameterMetaData");
 	}
 
 	@Override

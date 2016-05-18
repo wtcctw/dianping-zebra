@@ -1,8 +1,8 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.filter.JdbcFilter;
-import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -64,7 +64,7 @@ public abstract class AbstractDataSource implements DataSource {
 
 	public void setConfigManagerType(String configManagerType) {
 		if (StringUtils.isBlank(configManagerType)) {
-			throw new DalException("configManagerType must not be blank");
+			throw new ZebraException("configManagerType must not be blank");
 		}
 
 		this.configManagerType = configManagerType;

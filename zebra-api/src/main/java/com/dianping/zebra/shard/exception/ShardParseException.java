@@ -1,20 +1,22 @@
 package com.dianping.zebra.shard.exception;
 
-public class SQLParseException extends Exception {
+import com.dianping.zebra.exception.ZebraException;
+
+public class ShardParseException extends ZebraException {
 
 	/**
 	 * 
 	 */
    private static final long serialVersionUID = -1814311695297681608L;
 
-	public SQLParseException() {
+	public ShardParseException() {
 		super();
 	}
 
 	/**
 	 * Constructs a new runtime exception with the specified detail message.
 	 */
-	public SQLParseException(String message) {
+	public ShardParseException(String message) {
 		super(message);
 	}
 
@@ -22,14 +24,14 @@ public class SQLParseException extends Exception {
 	 * Constructs a new runtime exception with the specified detail message and
 	 * cause.
 	 */
-	public SQLParseException(String message, Throwable cause) {
+	public ShardParseException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
 	 * Constructs a new runtime exception with the specified cause.
 	 */
-	public SQLParseException(Throwable cause) {
+	public ShardParseException(Throwable cause) {
 		super(cause);
 	}
 	

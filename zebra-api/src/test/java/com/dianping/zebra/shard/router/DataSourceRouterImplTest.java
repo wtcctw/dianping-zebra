@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardParseException;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.jdbc.DataSourceRepository;
 import com.dianping.zebra.shard.jdbc.base.MockDataSource;
@@ -54,7 +54,7 @@ public class DataSourceRouterImplTest {
 			target = router.router(sql, params);
 		} catch (ShardRouterException e) {
 			e.printStackTrace();
-		} catch (SQLParseException e) {
+		} catch (ShardParseException e) {
 			e.printStackTrace();
 		}
 		assertNotNull(target);
@@ -78,7 +78,7 @@ public class DataSourceRouterImplTest {
 			target = router.router(sql, params);
 		} catch (ShardRouterException e) {
 			e.printStackTrace();
-		} catch (SQLParseException e) {
+		} catch (ShardParseException e) {
 			e.printStackTrace();
 		}
 		assertNotNull(target);

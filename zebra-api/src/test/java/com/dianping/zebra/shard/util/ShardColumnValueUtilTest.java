@@ -8,7 +8,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.dianping.zebra.shard.api.ShardDataSourceHelper;
-import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardParseException;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.SQLParsedResult;
 import com.dianping.zebra.shard.parser.SQLParser;
@@ -20,7 +20,7 @@ import junit.framework.Assert;
 public class ShardColumnValueUtilTest {
 
 	@Test
-	public void testMultipalShardColumn1() throws SQLParseException {
+	public void testMultipalShardColumn1() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` = 1 and `d` = 2");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
@@ -37,7 +37,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testMultipalShardColumn2() throws SQLParseException {
+	public void testMultipalShardColumn2() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` = 1 and `d` = ?");
 		List<Object> params = new ArrayList<Object>();
 		params.add(2);
@@ -55,7 +55,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testMultipalShardColumn3() throws SQLParseException {
+	public void testMultipalShardColumn3() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` = 1 and `d` = ? and `e` = 1");
 		List<Object> params = new ArrayList<Object>();
 		params.add(2);
@@ -75,7 +75,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test(expected = ShardRouterException.class)
-	public void testMultipalInsertion() throws SQLParseException {
+	public void testMultipalInsertion() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse(
 				"INSERT INTO `User` (`Name`,`Tel`,`Alias`,`Email`)VALUES('zhuhao','123','hao.zhu','z@d'),('zhuhao1','1233','hao.zhu1','z@d')");
 		List<Object> params = null;
@@ -87,7 +87,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testSingleInsertion() throws SQLParseException {
+	public void testSingleInsertion() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser
 				.parse("INSERT INTO `User` (`Name`,`Tel`,`Alias`,`Email`)VALUES('zhuhao','123','hao.zhu','z@d')");
 		List<Object> params = null;
@@ -103,7 +103,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testLargerThan() throws SQLParseException {
+	public void testLargerThan() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` >= 1");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
@@ -116,7 +116,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testLessThan() throws SQLParseException {
+	public void testLessThan() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` <= 1");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
@@ -129,7 +129,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testNotEqual() throws SQLParseException {
+	public void testNotEqual() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` != 1");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
@@ -142,7 +142,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testIn() throws SQLParseException {
+	public void testIn() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` in (1,2,3,4)");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
@@ -155,7 +155,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testPreparedIn() throws SQLParseException {
+	public void testPreparedIn() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` in (?,?,?,?)");
 		List<Object> params = new ArrayList<Object>();
 		params.add(1);
@@ -172,7 +172,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testPreparedIn2() throws SQLParseException {
+	public void testPreparedIn2() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse(
 				"SELECT A.ReceiptID, A.UserID, A.DealGroupID, A.DealID from RS_Receipt A WHERE A.UserID IN (28152647,22050) AND A.ReceiptID IN (234460949,234400906,234400907,234400908) ORDER BY A.ReceiptID");
 		List<Object> params = null;
@@ -186,7 +186,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testPreparedIn3() throws SQLParseException {
+	public void testPreparedIn3() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse(
 				"update RS_Receipt set Status = ?, LastDate = now() where UserID IN (12323) and OrderId = ? and SerialNumber in ( ? ) and Status = ?");
 		List<Object> params = null;
@@ -200,7 +200,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testPreparedOr1() throws SQLParseException {
+	public void testPreparedOr1() throws ShardParseException {
 		SQLParsedResult parseResult = SQLParser.parse("select a,b from db where `c` = 2 or `c` = 3");
 		List<Object> params = null;
 		ShardEvalContext ctx = new ShardEvalContext(parseResult, params);
@@ -213,7 +213,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testThreadLocalShardValue1() throws SQLParseException {
+	public void testThreadLocalShardValue1() throws ShardParseException {
 		List<Object> params = new ArrayList<Object>();
 		params.add("1");
 		params.add("2");
@@ -238,7 +238,7 @@ public class ShardColumnValueUtilTest {
 	}
 
 	@Test
-	public void testThreadLocalShardValue2() throws SQLParseException {
+	public void testThreadLocalShardValue2() throws ShardParseException {
 		List<Object> params = new ArrayList<Object>();
 		params.add("1");
 		params.add("2");
@@ -271,7 +271,7 @@ public class ShardColumnValueUtilTest {
 	}
 	
 	@Test
-	public void testThreadLocalShardValue3() throws SQLParseException {
+	public void testThreadLocalShardValue3() throws ShardParseException {
 		List<Object> params = new ArrayList<Object>();
 		params.add("1");
 		params.add("2");

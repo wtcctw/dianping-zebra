@@ -6,11 +6,11 @@ import java.util.Map.Entry;
 
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.group.config.system.entity.DataCenter;
 import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 import com.dianping.zebra.group.config.system.entity.SystemConfig;
 import com.dianping.zebra.group.config.system.transform.DefaultSaxParser;
-import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.util.AppPropertiesUtils;
 import com.dianping.zebra.util.StringUtils;
 
@@ -43,7 +43,7 @@ public class DefaultSystemConfigManager extends AbstractConfigManager implements
 		try {
 			this.systemConfig = initSystemConfig();
 		} catch (Exception e) {
-			throw new IllegalConfigException(String.format(
+			throw new ZebraConfigException(String.format(
 					"Fail to initialize DefaultSystemConfigManager with config file[%s].", DEFAULT_LOCAL_CONFIG), e);
 		}
 	}

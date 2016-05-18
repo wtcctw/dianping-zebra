@@ -15,23 +15,27 @@
  */
 package com.dianping.zebra.shard.router.builder;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.shard.config.ExceptionalDimensionConfig;
 import com.dianping.zebra.shard.config.RouterRuleConfig;
 import com.dianping.zebra.shard.config.TableShardDimensionConfig;
 import com.dianping.zebra.shard.config.TableShardRuleConfig;
-import com.dianping.zebra.shard.exception.RouterConfigException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.*;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author danson.liu
@@ -51,10 +55,10 @@ public class XmlDataSourceRouterConfigLoader {
 			XPath xpath = xpathFactory.newXPath();
 			ruleConfig.setTableShardConfigs(parseTableShardConfig(configDoc, xpath.compile("/router-rule/table-shard-rule")));
 			return ruleConfig;
-		} catch (RouterConfigException e) {
+		} catch (ZebraConfigException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new RouterConfigException("Load router rule config failed, cause: ", e);
+			throw new ZebraConfigException("Load router rule config failed, cause: ", e);
 		}
 	}
 
@@ -76,7 +80,7 @@ public class XmlDataSourceRouterConfigLoader {
 	private void validateShardConfig(TableShardRuleConfig shardConfig) {
 		List<TableShardDimensionConfig> dimensionConfigs = shardConfig.getDimensionConfigs();
 		if (dimensionConfigs == null || dimensionConfigs.isEmpty()) {
-			throw new RouterConfigException("A shard-dimension must be set in table-shard-rule[" + shardConfig.getTableName() + "] element at least.");
+			throw new ZebraConfigException("A shard-dimension must be set in table-shard-rule[" + shardConfig.getTableName() + "] element at least.");
 		}
 		int masterCount = 0;
 		for (TableShardDimensionConfig dimensionConfig : dimensionConfigs) {
@@ -85,9 +89,9 @@ public class XmlDataSourceRouterConfigLoader {
 			}
 		}
 		if (masterCount > 1) {
-			throw new RouterConfigException("More than one master shard-dimension exists in table-shard-rule[" + shardConfig.getTableName() + "].");
+			throw new ZebraConfigException("More than one master shard-dimension exists in table-shard-rule[" + shardConfig.getTableName() + "].");
 		} else if (dimensionConfigs.size() > 1 && masterCount == 0) {
-			throw new RouterConfigException("Must set a master shard-dimension when more than one dimension exists.");
+			throw new ZebraConfigException("Must set a master shard-dimension when more than one dimension exists.");
 		}
 	}
 

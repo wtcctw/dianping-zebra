@@ -15,11 +15,13 @@
  */
 package com.dianping.zebra.shard.exception;
 
+import com.dianping.zebra.exception.ZebraException;
+
 /**
  * @author danson.liu
  *
  */
-public class ShardRouterException extends RuntimeException {
+public class ShardRouterException extends ZebraException {
 
 	/**
 	 * 

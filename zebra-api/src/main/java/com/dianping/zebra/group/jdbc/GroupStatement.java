@@ -16,7 +16,6 @@ import java.util.List;
 
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.filter.JdbcFilter;
-import com.dianping.zebra.group.exception.DalNotSupportException;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.SqlType;
@@ -136,7 +135,7 @@ public class GroupStatement implements Statement {
 	}
 
 	public void closeOnCompletion() throws SQLException {
-		throw new DalNotSupportException();
+		throw new UnsupportedOperationException("zebra does not support closeOnCompletion");
 	}
 
 	private Statement createStatementInternal(Connection conn, boolean isBatch) throws SQLException {
@@ -372,12 +371,12 @@ public class GroupStatement implements Statement {
 
 	@Override
 	public int getFetchDirection() throws SQLException {
-		throw new UnsupportedOperationException("getFetchDirection");
+		throw new UnsupportedOperationException("zebra does not support getFetchDirection");
 	}
 
 	@Override
 	public void setFetchDirection(int direction) throws SQLException {
-		throw new UnsupportedOperationException("setFetchDirection");
+		throw new UnsupportedOperationException("zebra does not support setFetchDirection");
 	}
 
 	@Override
@@ -401,12 +400,12 @@ public class GroupStatement implements Statement {
 
 	@Override
 	public int getMaxFieldSize() throws SQLException {
-		throw new UnsupportedOperationException("getMaxFieldSize");
+		throw new UnsupportedOperationException("zebra does not support getMaxFieldSize");
 	}
 
 	@Override
 	public void setMaxFieldSize(int max) throws SQLException {
-		throw new UnsupportedOperationException("setMaxFieldSize");
+		throw new UnsupportedOperationException("zebra does not support setMaxFieldSize");
 	}
 
 	@Override
@@ -426,7 +425,7 @@ public class GroupStatement implements Statement {
 
 	@Override
 	public boolean getMoreResults(int current) throws SQLException {
-		throw new UnsupportedOperationException("getMoreResults");
+		throw new UnsupportedOperationException("zebra does not support getMoreResults");
 	}
 
 	@Override
@@ -486,7 +485,7 @@ public class GroupStatement implements Statement {
 	}
 
 	public boolean isCloseOnCompletion() throws SQLException {
-		throw new DalNotSupportException();
+		throw new UnsupportedOperationException("zebra does not support isCloseOnCompletion");
 	}
 
 	@Override
@@ -496,12 +495,12 @@ public class GroupStatement implements Statement {
 
 	@Override
 	public boolean isPoolable() throws SQLException {
-		throw new DalNotSupportException();
+		throw new UnsupportedOperationException("zebra does not support isPoolable");
 	}
 
 	@Override
 	public void setPoolable(boolean poolable) throws SQLException {
-		throw new DalNotSupportException();
+		throw new UnsupportedOperationException("zebra does not support setPoolable");
 	}
 
 	@Override

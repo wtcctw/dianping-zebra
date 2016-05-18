@@ -15,16 +15,16 @@
  */
 package com.dianping.zebra.shard.router.rule.engine;
 
-import com.dianping.zebra.shard.exception.RouterConfigException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.shard.router.rule.dimension.AbstractDimensionRule;
 import com.dianping.zebra.shard.router.rule.dimension.DimensionRule;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
 
 /**
  *
@@ -40,7 +40,7 @@ public class GroovyRuleEngine implements RuleEngine {
 		try {
 			engineObj = getGroovyObject(rule);
 		} catch (Exception e) {
-			throw new RouterConfigException("Construct groovy rule engine failed, cause: ", e);
+			throw new ZebraConfigException("Construct groovy rule engine failed, cause: ", e);
 		}
 	}
 

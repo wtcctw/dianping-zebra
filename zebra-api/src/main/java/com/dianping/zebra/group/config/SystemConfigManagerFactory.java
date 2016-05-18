@@ -3,7 +3,7 @@ package com.dianping.zebra.group.config;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.LionConfigService;
 import com.dianping.zebra.config.PropertyConfigService;
-import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.exception.ZebraConfigException;
 
 public final class SystemConfigManagerFactory {
 
@@ -28,7 +28,7 @@ public final class SystemConfigManagerFactory {
 					} else if (Constants.CONFIG_MANAGER_TYPE_REMOTE.equalsIgnoreCase(configManagerType)) {
 						systemConfigManager = new DefaultSystemConfigManager(LionConfigService.getInstance());
 					} else {
-						throw new IllegalConfigException(String.format("illegal systemConfigManagerType[%s]",
+						throw new ZebraConfigException(String.format("illegal systemConfigManagerType[%s]",
 						      configManagerType));
 					}
 					systemConfigManager.init();

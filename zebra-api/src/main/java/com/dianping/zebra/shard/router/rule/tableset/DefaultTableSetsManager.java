@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.dianping.zebra.shard.exception.RouterConfigException;
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.util.StringUtils;
 
 /**
@@ -129,12 +129,12 @@ public class DefaultTableSetsManager implements TableSetsManager {
 					}
 				}
 			} else {
-				throw new RouterConfigException("TbSuffix property can only be 'alldb' or 'everydb'.");
+				throw new ZebraConfigException("TbSuffix property can only be 'alldb' or 'everydb'.");
 			}
 		} else {
 			if (TB_SUFFIX_STYLE_ALL.equals(tbSuffixStyle)) {
 				if (dataSourceBOs.size() > 1) {
-					throw new RouterConfigException("'alldb' cannot support only one table for multiple database");
+					throw new ZebraConfigException("'alldb' cannot support only one table for multiple database");
 				}
 				dataSourceBOs.get(0).addIntoTableSets(tableName);
 			} else if (TB_SUFFIX_STYLE_EVERY.equals(tbSuffixStyle)) {

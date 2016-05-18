@@ -18,7 +18,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.exception.ZebraException;
 
 /**
  * 
@@ -27,7 +27,7 @@ import com.dianping.zebra.group.exception.DalException;
  */
 public class DPGroupConnectionTestCase extends MultiDatabaseTestCase {
 
-	@Test(expected = DalException.class)
+	@Test(expected = ZebraException.class)
 	public void test_sql_connnection_without_config() {
 		GroupDataSource dataSource = new GroupDataSource("");
 		dataSource.setConfigManagerType("local");

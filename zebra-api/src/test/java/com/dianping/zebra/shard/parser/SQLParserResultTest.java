@@ -7,14 +7,14 @@ import org.junit.Test;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement.ValuesClause;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
-import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardParseException;
 
 import junit.framework.Assert;
 
 public class SQLParserResultTest {
 
 	@Test
-	public void testTableSetsForSelect() throws SQLParseException {
+	public void testTableSetsForSelect() throws ShardParseException {
 		SQLParsedResult result = SQLParser
 				.parse("/*zebra:+w*/select a,b from db where `c` in (select d from db2 where ss = '1');");
 
@@ -23,7 +23,7 @@ public class SQLParserResultTest {
 	}
 
 	@Test
-	public void testTableSetsForMin() throws SQLParseException {
+	public void testTableSetsForMin() throws ShardParseException {
 		SQLParsedResult result = SQLParser.parse("/*zebra:+w*/select min(a),b from db where `c` = 1;");
 
 		Assert.assertEquals(1, result.getRouterContext().getTableSet().size());
@@ -31,7 +31,7 @@ public class SQLParserResultTest {
 	}
 
 	@Test
-	public void testTableSetsForSelectWithLimit() throws SQLParseException {
+	public void testTableSetsForSelectWithLimit() throws ShardParseException {
 		SQLParsedResult result = SQLParser
 				.parse("/*zebra:+w*/select a,b from db where `c` = 1 and `d` = 2 or `a` = ? limit 10,100");
 
@@ -41,7 +41,7 @@ public class SQLParserResultTest {
 	}
 
 	@Test
-	public void testTableSetsForSelectWithOrderBy() throws SQLParseException {
+	public void testTableSetsForSelectWithOrderBy() throws ShardParseException {
 		SQLParsedResult result = SQLParser
 				.parse("/*zebra:+w*/select a,b from db where `c` = 1 and `d` = 2 or `a` = ? Order by c,d desc");
 
@@ -49,7 +49,7 @@ public class SQLParserResultTest {
 	}
 
 	@Test
-	public void testTableSetsForSelectWithDistinct() throws SQLParseException {
+	public void testTableSetsForSelectWithDistinct() throws ShardParseException {
 		SQLParsedResult result = SQLParser.parse(
 				"/*zebra:+w*/select distinct a,b from db where `c` = 1 and `d` = 2 or `a` = ? Order by c,d desc");
 
@@ -57,14 +57,14 @@ public class SQLParserResultTest {
 	}
 
 	@Test
-	public void testTableSetsForSelectWithGroupby() throws SQLParseException {
+	public void testTableSetsForSelectWithGroupby() throws ShardParseException {
 		SQLParsedResult result = SQLParser.parse("/*zebra:+w*/select a,b from db where `c` = 1 group by c,d");
 
 		Assert.assertEquals(2, result.getMergeContext().getGroupByColumns().size());
 	}
 
 	@Test
-	public void testTableSetsForUpdate() throws SQLParseException {
+	public void testTableSetsForUpdate() throws ShardParseException {
 		SQLParsedResult result = SQLParser.parse("update a set `a` = 1 where `b`=1;");
 
 		Assert.assertEquals(1, result.getRouterContext().getTableSet().size());
@@ -72,7 +72,7 @@ public class SQLParserResultTest {
 	}
 
 	@Test
-	public void testTableSetsForDelete() throws SQLParseException {
+	public void testTableSetsForDelete() throws ShardParseException {
 		SQLParsedResult result = SQLParser.parse("delete from a where `a`=1;");
 
 		Assert.assertEquals(1, result.getRouterContext().getTableSet().size());
@@ -80,7 +80,7 @@ public class SQLParserResultTest {
 	}
 
 	@Test
-	public void testTableSetsForInsert() throws SQLParseException {
+	public void testTableSetsForInsert() throws ShardParseException {
 		SQLParsedResult result = SQLParser.parse(
 				"INSERT INTO DP_GroupNoteScoreLog (UserID, NoteType, NoteID, Score, Comment, AddDate) VALUES (?, ?, ?, ?, ?, NOW());");
 
@@ -89,7 +89,7 @@ public class SQLParserResultTest {
 	}
 
 	@Test
-	public void testTableSetsForInsertValues() throws SQLParseException {
+	public void testTableSetsForInsertValues() throws ShardParseException {
 		SQLParsedResult result = SQLParser.parse(
 				"INSERT INTO DP_GroupNoteScoreLog (UserID, NoteType, NoteID, Score, Comment, AddDate) VALUES (?, 1212, ?, ?, ?, NOW());");
 

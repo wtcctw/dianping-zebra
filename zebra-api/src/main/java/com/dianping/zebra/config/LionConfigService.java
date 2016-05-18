@@ -5,8 +5,8 @@ import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
 import com.dianping.lion.client.LionException;
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.group.config.AdvancedPropertyChangeEvent;
-import com.dianping.zebra.group.exception.IllegalConfigException;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -86,7 +86,7 @@ public class LionConfigService implements ConfigService {
 			ConfigCache.getInstance(EnvZooKeeperConfig.getZKAddress()).addChange(configChange);
 		} catch (LionException e) {
 			logger.error("fail to initilize Remote Config Manager for DAL", e);
-			throw new IllegalConfigException(e);
+			throw new ZebraConfigException(e);
 		}
 	}
 

@@ -16,7 +16,7 @@ import java.util.List;
 
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.router.rule.RouterRule;
-import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardParseException;
 
 /**
  * Sharding Router
@@ -25,9 +25,9 @@ import com.dianping.zebra.shard.exception.SQLParseException;
  */
 public interface ShardRouter {
 
-	RouterResult router(String sql, List<Object> params) throws ShardRouterException, SQLParseException;
+	RouterResult router(String sql, List<Object> params) throws ShardRouterException, ShardParseException;
 
-	boolean validate(String sql) throws SQLParseException, ShardRouterException;
+	boolean validate(String sql) throws ShardParseException, ShardRouterException;
 
 	RouterRule getRouterRule();
 }

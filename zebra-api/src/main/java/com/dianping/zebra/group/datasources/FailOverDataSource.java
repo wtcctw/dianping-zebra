@@ -12,10 +12,10 @@ import java.util.Map;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.exception.WeakReferenceGCException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
@@ -207,7 +207,7 @@ public class FailOverDataSource extends AbstractDataSource {
 			FindMasterDataSourceResult result = new FindMasterDataSourceResult();
 
 			if (getWeakFailOverDataSource().configs.values().size() == 0) {
-				Exception exp = new IllegalConfigException("zero writer data source in config!");
+				Exception exp = new ZebraConfigException("zero writer data source in config!");
 				logger.warn(exp.getMessage(), exp);
 			}
 

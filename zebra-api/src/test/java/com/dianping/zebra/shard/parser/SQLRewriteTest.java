@@ -2,14 +2,14 @@ package com.dianping.zebra.shard.parser;
 
 import org.junit.Test;
 
-import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardParseException;
 
 import junit.framework.Assert;
 
 public class SQLRewriteTest {
 
 	@Test
-	public void test() throws SQLParseException {
+	public void test() throws ShardParseException {
 		DefaultSQLRewrite rewriter = new DefaultSQLRewrite();
 		SQLParsedResult result = SQLParser
 				.parse("/*+zebra:w*/select a,b /*comment**/ from db where `c` = 1 limit 10,100 #this is comment");
@@ -21,7 +21,7 @@ public class SQLRewriteTest {
 	}
 
 	@Test
-	public void testNoComment() throws SQLParseException {
+	public void testNoComment() throws ShardParseException {
 		DefaultSQLRewrite rewriter = new DefaultSQLRewrite();
 		SQLParsedResult result = SQLParser
 				.parse("select a,b /*comment**/ from db where `c` = 1 limit 10,100 #this is comment");
@@ -33,7 +33,7 @@ public class SQLRewriteTest {
 	}
 
 	@Test
-	public void testLimit() throws SQLParseException {
+	public void testLimit() throws ShardParseException {
 		DefaultSQLRewrite rewriter = new DefaultSQLRewrite();
 		SQLParsedResult result = SQLParser
 				.parse("select a,b /*comment**/ from db where `c` = 1 limit 10 #this is comment");

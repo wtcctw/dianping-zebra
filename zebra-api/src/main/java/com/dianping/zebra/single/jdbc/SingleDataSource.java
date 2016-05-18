@@ -14,14 +14,14 @@ import org.apache.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.exception.ZebraConfigException;
+import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.datasources.CountPunisher;
 import com.dianping.zebra.group.datasources.MarkableDataSource;
-import com.dianping.zebra.group.exception.DalException;
-import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
@@ -93,7 +93,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 					logger.info("datasource [" + dsId + "] closed");
 					state = DataSourceState.CLOSED;
 				} else {
-					throw new DalException(String.format("Cannot close dataSource[%s] since there are busy connections.",
+					throw new ZebraException(String.format("Cannot close dataSource[%s] since there are busy connections.",
 					      dsId));
 				}
 			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
@@ -109,16 +109,16 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 					logger.info("old datasource [" + dsId + "] closed");
 					state = DataSourceState.CLOSED;
 				} else {
-					throw new DalException(String.format("Cannot close dataSource[%s] since there are busy connections.",
+					throw new ZebraException(String.format("Cannot close dataSource[%s] since there are busy connections.",
 					      dsId));
 				}
 			} else {
-				Exception exp = new DalException(
+				Exception exp = new ZebraException(
 				      "fail to close dataSource since dataSource is not an instance of C3P0 or Tomcat-Jdbc.");
 				logger.warn(exp.getMessage(), exp);
 			}
 		} else {
-			Exception exp = new DalException("fail to close dataSource since dataSource is null.");
+			Exception exp = new ZebraException("fail to close dataSource since dataSource is null.");
 			logger.warn(exp.getMessage(), exp);
 		}
 	}
@@ -324,12 +324,12 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 
 				return datasource;
 			} else {
-				throw new IllegalConfigException("illegal datasource pool type : " + value.getType());
+				throw new ZebraConfigException("illegal datasource pool type : " + value.getType());
 			}
-		} catch (IllegalConfigException e) {
+		} catch (ZebraConfigException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new IllegalConfigException(e);
+			throw new ZebraConfigException(e);
 		}
 	}
 

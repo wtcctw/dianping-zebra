@@ -23,7 +23,7 @@ import java.util.Set;
 
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
-import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardParseException;
 import com.dianping.zebra.shard.exception.ShardRouterException;
 import com.dianping.zebra.shard.parser.DefaultSQLRewrite;
 import com.dianping.zebra.shard.parser.SQLParsedResult;
@@ -54,7 +54,7 @@ public class DefaultShardRouter implements ShardRouter {
 	}
 
 	@Override
-	public RouterResult router(final String sql, List<Object> params) throws ShardRouterException, SQLParseException {
+	public RouterResult router(final String sql, List<Object> params) throws ShardRouterException, ShardParseException {
 		RouterResult routerResult = new RouterResult();
 		SQLParsedResult parsedResult = SQLParser.parse(sql);
 
@@ -69,7 +69,7 @@ public class DefaultShardRouter implements ShardRouter {
 	}
 
 	@Override
-	public boolean validate(String sql) throws SQLParseException, ShardRouterException {
+	public boolean validate(String sql) throws ShardParseException, ShardRouterException {
 		return false;
 	}
 

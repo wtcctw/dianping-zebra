@@ -1,6 +1,8 @@
 package com.dianping.zebra.group.exception;
 
-public class SlaveDsDisConnectedException extends DalException {
+import com.dianping.zebra.exception.ZebraException;
+
+public class SlaveDsDisConnectedException extends ZebraException {
 
 	/**
 	 * 

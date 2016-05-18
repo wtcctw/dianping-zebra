@@ -23,6 +23,7 @@ import com.dianping.zebra.annotation.Internal;
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.ConfigServiceFactory;
 import com.dianping.zebra.config.LionKey;
+import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.filter.FilterManagerFactory;
 import com.dianping.zebra.filter.JdbcFilter;
@@ -35,7 +36,6 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.datasources.LoadBalancedDataSource;
-import com.dianping.zebra.group.exception.DalException;
 import com.dianping.zebra.group.monitor.GroupDataSourceMBean;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.router.ReadWriteStrategy;
@@ -352,7 +352,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 
 	public synchronized void init() {
 		if (StringUtils.isBlank(jdbcRef)) {
-			throw new DalException("jdbcRef cannot be empty");
+			throw new ZebraException("jdbcRef cannot be empty");
 		} else {
 			logger.info("initialize a new GroupDataSource by using jdbcRef[" + jdbcRef + "].");
 		}
@@ -399,7 +399,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 				String appName = AppPropertiesUtils.getAppName();
 
 				if (!property.contains(appName)) {
-					throw new DalException(
+					throw new ZebraException(
 							"Access deny ! Your app is not allowed to access this database, please register your app on http://zebra.dp/");
 				}
 			}
@@ -427,7 +427,7 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 			} catch (SQLException ignore) {
 			}
 
-			throw new DalException("fail to initialize group dataSource [" + jdbcRef + "]", e);
+			throw new ZebraException("fail to initialize group dataSource [" + jdbcRef + "]", e);
 		}
 	}
 
@@ -759,7 +759,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	}
 
 	public class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
-
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
 			refresh(evt.getPropertyName());

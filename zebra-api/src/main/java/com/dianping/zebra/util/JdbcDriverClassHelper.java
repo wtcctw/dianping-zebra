@@ -1,6 +1,6 @@
 package com.dianping.zebra.util;
 
-import com.dianping.zebra.group.exception.IllegalConfigException;
+import com.dianping.zebra.exception.ZebraConfigException;
 
 /**
  * Created by Dozer on 8/1/14.
@@ -23,11 +23,11 @@ public class JdbcDriverClassHelper {
 		}
 	}
 
-	public static void loadDriverClass(String driverClass, String url) throws IllegalConfigException {
+	public static void loadDriverClass(String driverClass, String url) throws ZebraConfigException {
 		try {
 			Class.forName(StringUtils.isEmpty(driverClass) ? getDriverClassNameByJdbcUrl(url) : driverClass);
 		} catch (ClassNotFoundException e) {
-			throw new IllegalConfigException("Cannot find driver class : " + url, e);
+			throw new ZebraConfigException("Cannot find driver class : " + url, e);
 		}
 	}
 }

@@ -2,11 +2,11 @@ package com.dianping.zebra.group.config;
 
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.config.datasource.transform.BaseVisitor;
-import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.util.AppPropertiesUtils;
 import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.dianping.zebra.util.Splitters;
@@ -43,7 +43,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		try {
 			this.builder = new GroupDataSourceConfigBuilder();
 		} catch (Exception e) {
-			throw new IllegalConfigException(String.format(
+			throw new ZebraConfigException(String.format(
 			      "Fail to initialize DefaultDataSourceConfigManager with config key[%s].", this.jdbcRef), e);
 		}
 	}
@@ -75,7 +75,7 @@ public class DefaultDataSourceConfigManager extends AbstractConfigManager implem
 		}
 
 		if (readNum < 1 || writeNum < 1) {
-			throw new IllegalConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
+			throw new ZebraConfigException(String.format("Not enough read or write dataSources[read:%s, write:%s].",
 			      readNum, writeNum));
 		}
 	}

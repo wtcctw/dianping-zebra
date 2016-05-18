@@ -14,7 +14,7 @@ import com.alibaba.druid.sql.parser.Lexer.CommentHandler;
 import com.alibaba.druid.sql.parser.SQLStatementParser;
 import com.alibaba.druid.sql.parser.Token;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
-import com.dianping.zebra.shard.exception.SQLParseException;
+import com.dianping.zebra.shard.exception.ShardParseException;
 import com.dianping.zebra.shard.parser.visitor.MySQLDeleteASTVisitor;
 import com.dianping.zebra.shard.parser.visitor.MySQLInsertASTVisitor;
 import com.dianping.zebra.shard.parser.visitor.MySQLSelectASTVisitor;
@@ -27,7 +27,7 @@ public class SQLParser {
 	private final static Map<String, SQLParsedResult> parsedSqlCache = Collections
 			.synchronizedMap(new LRUCache<String, SQLParsedResult>(1000));
 
-	public static SQLParsedResult parse(String sql) throws SQLParseException {
+	public static SQLParsedResult parse(String sql) throws ShardParseException {
 		if (!parsedSqlCache.containsKey(sql)) {
 			MySqlLexer lexer = new MySqlLexer(sql);
 			HintCommentHandler commentHandler = new HintCommentHandler();
@@ -55,7 +55,7 @@ public class SQLParser {
 				SQLASTVisitor visitor = new MySQLDeleteASTVisitor(result);
 				stmt.accept(visitor);
 			} else {
-				throw new SQLParseException("UnSupported sql type in sharding jdbc.");
+				throw new ShardParseException("UnSupported sql type in sharding jdbc.");
 			}
 
 			SQLHint sqlhint = SQLHint.parseHint(commentHandler.getHintComment());

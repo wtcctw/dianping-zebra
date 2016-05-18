@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.group.exception.DalException;
+import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 
 /**
@@ -38,7 +38,7 @@ public class CatFilterTest {
 		return ds;
 	}
 
-	@Test(expected = DalException.class, timeout = 30000)
+	@Test(expected = ZebraException.class, timeout = 30000)
 	public void test_connect_fail() throws SQLException {
 		GroupDataSource ds = new GroupDataSource();
 		ds.setConfigManagerType(Constants.CONFIG_MANAGER_TYPE_LOCAL);

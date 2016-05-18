@@ -36,11 +36,11 @@ import org.springframework.util.ClassUtils;
 
 import com.dianping.cat.Cat;
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.group.config.DataSourceConfigManager;
 import com.dianping.zebra.group.config.DataSourceConfigManagerFactory;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
-import com.dianping.zebra.group.exception.IllegalConfigException;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
@@ -406,7 +406,7 @@ public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, Priorit
 
 		String url = LionUtil.getLionConfig(UPLOAD_DS_INFO_KEY);
 		if (StringUtils.isBlank(url)) {
-			Exception exp = new IllegalConfigException(UPLOAD_DS_INFO_KEY + " not exists!");
+			Exception exp = new ZebraConfigException(UPLOAD_DS_INFO_KEY + " not exists!");
 			logger.warn(exp);
 		} else {
 			uploadDataSourceInfo(url, infos);
