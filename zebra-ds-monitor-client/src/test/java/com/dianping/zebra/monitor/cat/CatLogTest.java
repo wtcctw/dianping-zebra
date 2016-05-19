@@ -6,20 +6,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.junit.Test;
+
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.util.DaoContextHolder;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
 
 public class CatLogTest {
 
-	//@Test
+	@Test
 	public void testGroup() throws SQLException, IOException{
 		GroupDataSource ds = new GroupDataSource("zebra");
 		ds.init();
 		
 		Connection conn = ds.getConnection();
 		
-		DaoContextHolder.setSqlName("TestPreparead");
+		DaoContextHolder.setSqlName("TestPreparead1");
 		PreparedStatement stmt = conn.prepareStatement("select * from Cluster where Name = ?");
 		
 		stmt.setString(1, "wed");

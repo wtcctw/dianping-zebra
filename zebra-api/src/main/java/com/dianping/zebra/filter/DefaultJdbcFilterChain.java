@@ -45,14 +45,6 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 		throw new UnsupportedOperationException();
 	}
 
-	// @Override
-	// public <T> T executeGroupStatement(GroupStatement source, Connection
-	// conn, String sql, List<String> batchedSql,
-	// boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain)
-	// throws SQLException {
-	// throw new UnsupportedOperationException();
-	// }
-
 	@Override
 	public <T> T executeSingleStatement(SingleStatement source, Connection conn, String sql, List<String> batchedSql,
 			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
@@ -69,13 +61,6 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 	public GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
-
-	// @Override
-	// public Connection getRealConnection(GroupStatement source, String sql,
-	// boolean forceWriter, JdbcFilter chain)
-	// throws SQLException {
-	// throw new UnsupportedOperationException();
-	// }
 
 	@Override
 	public int getOrder() {
@@ -106,12 +91,6 @@ public class DefaultJdbcFilterChain implements JdbcFilter {
 	public void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain) {
 		throw new UnsupportedOperationException();
 	}
-
-	// @Override
-	// public String sql(SingleConnection conn, String sql, boolean
-	// isPreparedStmt, JdbcFilter chain) throws SQLException {
-	// throw new UnsupportedOperationException();
-	// }
 
 	@Override
 	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {

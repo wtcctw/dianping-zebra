@@ -88,7 +88,7 @@ public class SinglePreparedStatement extends SingleStatement implements Prepared
 	public SinglePreparedStatement(String dsId, Connection innerConnection, List<JdbcFilter> filters, Statement stmt,
 			String sql) throws SQLException {
 		super(dsId, innerConnection, stmt, filters);
-		this.sql = processSQL(sql, true);
+		this.sql = sql;
 	}
 
 	private PreparedStatement getPreparedStatement() throws SQLException {
