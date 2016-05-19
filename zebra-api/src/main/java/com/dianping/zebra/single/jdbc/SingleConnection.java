@@ -10,6 +10,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+/**
+ * 
+ * @author hao.zhu
+ *
+ */
 public class SingleConnection implements Connection {
 
 	private final String dsId;

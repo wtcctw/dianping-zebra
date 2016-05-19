@@ -27,6 +27,11 @@ import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.mchange.v2.c3p0.DataSources;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
 
+/**
+ * 
+ * @author hao.zhu
+ *
+ */
 public class SingleDataSource extends AbstractDataSource implements MarkableDataSource, SingleDataSourceMBean {
 
 	private static final Logger logger = LogManager.getLogger(SingleDataSource.class);
