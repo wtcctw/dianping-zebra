@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dianping.zebra.filter.JdbcFilter;
+import com.dianping.zebra.filter.JdbcOperationCallback;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.SqlType;
@@ -188,7 +189,7 @@ public class GroupStatement implements Statement {
 				return new int[0];
 			}
 
-			return executeInternal(new JDBCOperationCallback<int[]>() {
+			return executeInternal(new JdbcOperationCallback<int[]>() {
 				@Override
 				public int[] doAction(Connection conn) throws SQLException {
 					return executeBatchOnConnection(conn, batchedSqls);
@@ -237,7 +238,7 @@ public class GroupStatement implements Statement {
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeInternal(new JDBCOperationCallback<ResultSet>() {
+		return executeInternal(new JdbcOperationCallback<ResultSet>() {
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
@@ -277,7 +278,7 @@ public class GroupStatement implements Statement {
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeInternal(new JDBCOperationCallback<Integer>() {
+		return executeInternal(new JdbcOperationCallback<Integer>() {
 			@Override
 			public Integer doAction(Connection conn) throws SQLException {
 				try {
@@ -310,7 +311,7 @@ public class GroupStatement implements Statement {
 		}
 	}
 
-	protected <T> T executeInternal(final JDBCOperationCallback<T> callback, final String sql,
+	protected <T> T executeInternal(final JdbcOperationCallback<T> callback, final String sql,
 			final boolean forceWriter) throws SQLException {
 		Connection conn = this.dpGroupConnection.getRealConnection(sql, forceWriter);
 

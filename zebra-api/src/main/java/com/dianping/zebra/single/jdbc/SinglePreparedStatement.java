@@ -41,7 +41,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import com.dianping.zebra.filter.JdbcFilter;
-import com.dianping.zebra.group.jdbc.JDBCOperationCallback;
+import com.dianping.zebra.filter.JdbcOperationCallback;
 import com.dianping.zebra.group.jdbc.param.ArrayParamContext;
 import com.dianping.zebra.group.jdbc.param.AsciiParamContext;
 import com.dianping.zebra.group.jdbc.param.BigDecimalParamContext;
@@ -110,7 +110,7 @@ public class SinglePreparedStatement extends SingleStatement implements Prepared
 
 	@Override
 	public ResultSet executeQuery() throws SQLException {
-		return executeWithFilter(new JDBCOperationCallback<ResultSet>() {
+		return executeWithFilter(new JdbcOperationCallback<ResultSet>() {
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return getPreparedStatement().executeQuery();
@@ -120,7 +120,7 @@ public class SinglePreparedStatement extends SingleStatement implements Prepared
 
 	@Override
 	public int executeUpdate() throws SQLException {
-		return executeWithFilter(new JDBCOperationCallback<Integer>() {
+		return executeWithFilter(new JdbcOperationCallback<Integer>() {
 			@Override
 			public Integer doAction(Connection conn) throws SQLException {
 				return getPreparedStatement().executeUpdate();
@@ -135,7 +135,7 @@ public class SinglePreparedStatement extends SingleStatement implements Prepared
 				return new int[0];
 			}
 
-			return executeWithFilter(new JDBCOperationCallback<int[]>() {
+			return executeWithFilter(new JdbcOperationCallback<int[]>() {
 				@Override
 				public int[] doAction(Connection conn) throws SQLException {
 					return getPreparedStatement().executeBatch();

@@ -7,6 +7,7 @@
 package com.dianping.zebra.group.jdbc;
 
 import com.dianping.zebra.filter.JdbcFilter;
+import com.dianping.zebra.filter.JdbcOperationCallback;
 import com.dianping.zebra.group.jdbc.param.*;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.util.JDBCUtils;
@@ -109,7 +110,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				return new int[0];
 			}
 
-			return executeInternal(new JDBCOperationCallback<int[]>() {
+			return executeInternal(new JdbcOperationCallback<int[]>() {
 				@Override
 				public int[] doAction(Connection conn) throws SQLException {
 					return executeBatchOnConnection(conn);
@@ -138,7 +139,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeInternal(new JDBCOperationCallback<ResultSet>() {
+		return executeInternal(new JdbcOperationCallback<ResultSet>() {
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
@@ -159,7 +160,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeInternal(new JDBCOperationCallback<Integer>() {
+		return executeInternal(new JdbcOperationCallback<Integer>() {
 			@Override
 			public Integer doAction(Connection conn) throws SQLException {
 				try {

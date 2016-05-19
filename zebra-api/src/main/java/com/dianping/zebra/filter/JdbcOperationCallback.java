@@ -1,8 +1,8 @@
-package com.dianping.zebra.group.jdbc;
+package com.dianping.zebra.filter;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public interface JDBCOperationCallback<T> {
+public interface JdbcOperationCallback<T> {
 	T doAction(Connection conn) throws SQLException;
 }
