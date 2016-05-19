@@ -70,7 +70,7 @@ public class CatFilter extends DefaultJdbcFilter {
 			throw exp;
 		}
 	}
-	
+
 	@Override
 	public <T> T executeSingleStatement(SingleStatement source, Connection conn, String sql, List<String> batchedSql,
 			boolean isBatched, boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {

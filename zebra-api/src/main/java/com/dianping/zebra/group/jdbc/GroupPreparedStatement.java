@@ -6,25 +6,68 @@
  */
 package com.dianping.zebra.group.jdbc;
 
+import java.io.InputStream;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import com.dianping.zebra.filter.JdbcFilter;
-import com.dianping.zebra.filter.JdbcOperationCallback;
-import com.dianping.zebra.group.jdbc.param.*;
+import com.dianping.zebra.group.jdbc.param.ArrayParamContext;
+import com.dianping.zebra.group.jdbc.param.AsciiParamContext;
+import com.dianping.zebra.group.jdbc.param.BigDecimalParamContext;
+import com.dianping.zebra.group.jdbc.param.BinaryStreamParamContext;
+import com.dianping.zebra.group.jdbc.param.BlobParamContext;
+import com.dianping.zebra.group.jdbc.param.BooleanParamContext;
+import com.dianping.zebra.group.jdbc.param.ByteArrayParamContext;
+import com.dianping.zebra.group.jdbc.param.ByteParamContext;
+import com.dianping.zebra.group.jdbc.param.CharacterStreamParamContext;
+import com.dianping.zebra.group.jdbc.param.ClobParamContext;
+import com.dianping.zebra.group.jdbc.param.DateParamContext;
+import com.dianping.zebra.group.jdbc.param.DoubleParamContext;
+import com.dianping.zebra.group.jdbc.param.FloatParamContext;
+import com.dianping.zebra.group.jdbc.param.IntParamContext;
+import com.dianping.zebra.group.jdbc.param.LongParamContext;
+import com.dianping.zebra.group.jdbc.param.NCharacterStreamParamContext;
+import com.dianping.zebra.group.jdbc.param.NClobParamContext;
+import com.dianping.zebra.group.jdbc.param.NStringParamContext;
+import com.dianping.zebra.group.jdbc.param.NullParamContext;
+import com.dianping.zebra.group.jdbc.param.ObjectParamContext;
+import com.dianping.zebra.group.jdbc.param.ParamContext;
+import com.dianping.zebra.group.jdbc.param.RefParamContext;
+import com.dianping.zebra.group.jdbc.param.RowIdParamContext;
+import com.dianping.zebra.group.jdbc.param.SQLXMLParamContext;
+import com.dianping.zebra.group.jdbc.param.ShortParamContext;
+import com.dianping.zebra.group.jdbc.param.StringParamContext;
+import com.dianping.zebra.group.jdbc.param.TimeParamContext;
+import com.dianping.zebra.group.jdbc.param.TimestampParamContext;
+import com.dianping.zebra.group.jdbc.param.URLParamContext;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.SqlType;
 import com.dianping.zebra.util.SqlUtils;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
 /**
  * @author Leo Liang
+ * @author hao.zhu
  */
 public class GroupPreparedStatement extends GroupStatement implements PreparedStatement {
 
@@ -84,7 +127,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		pstmt.setFetchSize(fetchSize);
 		pstmt.setMaxRows(maxRows);
 
-		setRealStatement(pstmt);
+		setInnerStatement(pstmt);
 
 		return pstmt;
 	}
@@ -110,12 +153,9 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				return new int[0];
 			}
 
-			return executeInternal(new JdbcOperationCallback<int[]>() {
-				@Override
-				public int[] doAction(Connection conn) throws SQLException {
-					return executeBatchOnConnection(conn);
-				}
-			}, sql, true);
+			Connection conn = this.groupConnection.getRealConnection(sql, true);
+
+			return executeBatchOnConnection(conn);
 		} finally {
 			if (pstBatchedArgs != null) {
 				pstBatchedArgs.clear();
@@ -139,12 +179,9 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeInternal(new JdbcOperationCallback<ResultSet>() {
-			@Override
-			public ResultSet doAction(Connection conn) throws SQLException {
-				return executeQueryOnConnection(conn, sql);
-			}
-		}, sql, false);
+		Connection conn = this.groupConnection.getRealConnection(sql, false);
+
+		return executeQueryOnConnection(conn, sql);
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
@@ -160,20 +197,17 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeInternal(new JdbcOperationCallback<Integer>() {
-			@Override
-			public Integer doAction(Connection conn) throws SQLException {
-				try {
-					updateCount = executeUpdateOnConnection(conn);
-				} catch (SQLException e) {
-					if (conn instanceof SingleConnection) {
-						((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
-					}
-					JDBCUtils.throwWrappedSQLException(e);
-				}
-				return updateCount;
+		Connection conn = this.groupConnection.getRealConnection(sql, true);
+
+		try {
+			updateCount = executeUpdateOnConnection(conn);
+		} catch (SQLException e) {
+			if (conn instanceof SingleConnection) {
+				((SingleConnection) conn).getDataSource().getPunisher().countAndPunish(e);
 			}
-		}, sql, true);
+			JDBCUtils.throwWrappedSQLException(e);
+		}
+		return updateCount;
 	}
 
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {
@@ -181,16 +215,6 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		setParams(pstmt);
 
 		return pstmt.executeUpdate();
-	}
-
-	@Override
-	public ResultSetMetaData getMetaData() throws SQLException {
-		throw new UnsupportedOperationException("zebra does not support getMetaData");
-	}
-
-	@Override
-	public ParameterMetaData getParameterMetaData() throws SQLException {
-		throw new UnsupportedOperationException("zebra does not support getParameterMetaData");
 	}
 
 	@Override
@@ -456,5 +480,15 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	@Deprecated
 	public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
 		params.add(new AsciiParamContext(parameterIndex, new Object[] { x }));
+	}
+	
+	@Override
+	public ResultSetMetaData getMetaData() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support getMetaData");
+	}
+
+	@Override
+	public ParameterMetaData getParameterMetaData() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support getParameterMetaData");
 	}
 }

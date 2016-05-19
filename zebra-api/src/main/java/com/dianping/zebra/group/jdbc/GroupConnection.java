@@ -16,6 +16,11 @@ import java.sql.*;
 import java.util.*;
 import java.util.concurrent.Executor;
 
+/**
+ * 
+ * @author hao.zhu
+ *
+ */
 public class GroupConnection implements Connection {
 
 	private DataSource readDataSource;
@@ -24,9 +29,9 @@ public class GroupConnection implements Connection {
 
 	private ReadWriteStrategy readWriteStrategy;
 
-	private RouterType routerType;
-
 	private List<JdbcFilter> filters;
+
+	private RouterType routerType;
 
 	private volatile Connection rConnection;
 
@@ -42,16 +47,11 @@ public class GroupConnection implements Connection {
 	
 	public GroupConnection(DataSource readDataSource, DataSource writeDataSource, ReadWriteStrategy readWriteStrategy,
 			RouterType routerType, List<JdbcFilter> filters) {
-		super();
 		this.readDataSource = readDataSource;
 		this.writeDataSource = writeDataSource;
 		this.readWriteStrategy = readWriteStrategy;
 		this.filters = filters;
 		this.routerType = routerType;
-	}
-
-	public void abort(Executor executor) throws SQLException {
-		throw new UnsupportedOperationException("abort");
 	}
 
 	private void checkClosed() throws SQLException {
@@ -165,114 +165,6 @@ public class GroupConnection implements Connection {
 		return stmt;
 	}
 
-	@Override
-	public boolean getAutoCommit() throws SQLException {
-		checkClosed();
-		return this.autoCommit;
-	}
-
-	@Override
-	public void setAutoCommit(boolean autoCommit) throws SQLException {
-		checkClosed();
-		if (this.autoCommit == autoCommit) {
-			return;
-		}
-		this.autoCommit = autoCommit;
-		if (this.wConnection != null) {
-			this.wConnection.setAutoCommit(autoCommit);
-		}
-	}
-
-	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
-			int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-		if (resultSetType == Integer.MIN_VALUE) {
-			return conn.prepareCall(sql);
-		} else if (resultSetHoldability == Integer.MIN_VALUE) {
-			return conn.prepareCall(sql, resultSetType, resultSetConcurrency);
-		} else {
-			return conn.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
-		}
-	}
-	
-	@Override
-	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-		throw new UnsupportedOperationException("createArrayOf");
-	}
-
-	@Override
-	public Blob createBlob() throws SQLException {
-		throw new UnsupportedOperationException("createBlob");
-	}
-
-	@Override
-	public Clob createClob() throws SQLException {
-		throw new UnsupportedOperationException("createClob");
-	}
-
-	@Override
-	public NClob createNClob() throws SQLException {
-		throw new UnsupportedOperationException("createNClob");
-	}
-
-	@Override
-	public SQLXML createSQLXML() throws SQLException {
-		throw new UnsupportedOperationException("createSQLXML");
-	}
-	
-	@Override
-	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-		throw new UnsupportedOperationException("createStruct");
-	}
-
-	@Override
-	public String getCatalog() throws SQLException {
-		throw new UnsupportedOperationException("getCatalog");
-	}
-
-	@Override
-	public void setCatalog(String catalog) throws SQLException {
-		throw new UnsupportedOperationException("setCatalog");
-	}
-
-	@Override
-	public Properties getClientInfo() throws SQLException {
-		throw new UnsupportedOperationException("getClientInfo");
-	}
-
-	@Override
-	public void setClientInfo(Properties properties) throws SQLClientInfoException {
-		throw new UnsupportedOperationException("setClientInfo");
-	}
-
-	@Override
-	public String getClientInfo(String name) throws SQLException {
-		throw new UnsupportedOperationException("getClientInfo");
-	}
-
-	@Override
-	public int getHoldability() throws SQLException {
-		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
-	}
-
-	@Override
-	public void setHoldability(int holdability) throws SQLException {
-		throw new UnsupportedOperationException("setHoldability");
-	}
-
-	@Override
-	public DatabaseMetaData getMetaData() throws SQLException {
-		checkClosed();
-		if (rConnection != null) {
-			return rConnection.getMetaData();
-		} else {
-			return this.getWriteConnection().getMetaData();
-		}
-	}
-
-	public int getNetworkTimeout() throws SQLException {
-		throw new UnsupportedOperationException("getNetworkTimeout");
-	}
-
 	private Connection getReadConnection() throws SQLException {
 		if (rConnection == null) {
 			synchronized (this) {
@@ -307,13 +199,121 @@ public class GroupConnection implements Connection {
 			}
 		}
 	}
+	
+	@Override
+	public boolean getAutoCommit() throws SQLException {
+		checkClosed();
+		return this.autoCommit;
+	}
+
+	@Override
+	public void setAutoCommit(boolean autoCommit) throws SQLException {
+		checkClosed();
+		if (this.autoCommit == autoCommit) {
+			return;
+		}
+		this.autoCommit = autoCommit;
+		if (this.wConnection != null) {
+			this.wConnection.setAutoCommit(autoCommit);
+		}
+	}
+
+	private CallableStatement getCallableStatement(Connection conn, String sql, int resultSetType,
+			int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		if (resultSetType == Integer.MIN_VALUE) {
+			return conn.prepareCall(sql);
+		} else if (resultSetHoldability == Integer.MIN_VALUE) {
+			return conn.prepareCall(sql, resultSetType, resultSetConcurrency);
+		} else {
+			return conn.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+		}
+	}
+	
+	@Override
+	public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support createArrayOf");
+	}
+
+	@Override
+	public Blob createBlob() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support createBlob");
+	}
+
+	@Override
+	public Clob createClob() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support createClob");
+	}
+
+	@Override
+	public NClob createNClob() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support createNClob");
+	}
+
+	@Override
+	public SQLXML createSQLXML() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support createSQLXML");
+	}
+	
+	@Override
+	public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support createStruct");
+	}
+
+	@Override
+	public String getCatalog() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support getCatalog");
+	}
+
+	@Override
+	public void setCatalog(String catalog) throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support setCatalog");
+	}
+
+	@Override
+	public Properties getClientInfo() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support getClientInfo");
+	}
+
+	@Override
+	public void setClientInfo(Properties properties) throws SQLClientInfoException {
+		throw new UnsupportedOperationException("zebra does not support setClientInfo");
+	}
+
+	@Override
+	public String getClientInfo(String name) throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support getClientInfo");
+	}
+
+	@Override
+	public int getHoldability() throws SQLException {
+		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
+	}
+
+	@Override
+	public void setHoldability(int holdability) throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support setHoldability");
+	}
+
+	@Override
+	public DatabaseMetaData getMetaData() throws SQLException {
+		checkClosed();
+		if (rConnection != null) {
+			return rConnection.getMetaData();
+		} else {
+			return this.getWriteConnection().getMetaData();
+		}
+	}
+
+	public int getNetworkTimeout() throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support getNetworkTimeout");
+	}
 
 	public String getSchema() throws SQLException {
-		throw new UnsupportedOperationException("getSchema");
+		throw new UnsupportedOperationException("zebra does not support getSchema");
 	}
 
 	public void setSchema(String schema) throws SQLException {
-		throw new UnsupportedOperationException("setSchema");
+		throw new UnsupportedOperationException("zebra does not support setSchema");
 	}
 
 	@Override
@@ -329,12 +329,12 @@ public class GroupConnection implements Connection {
 
 	@Override
 	public Map<String, Class<?>> getTypeMap() throws SQLException {
-		throw new UnsupportedOperationException("getTypeMap");
+		throw new UnsupportedOperationException("zebra does not support getTypeMap");
 	}
 
 	@Override
 	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-		throw new UnsupportedOperationException("setTypeMap");
+		throw new UnsupportedOperationException("zebra does not support setTypeMap");
 	}
 
 	@Override
@@ -386,7 +386,7 @@ public class GroupConnection implements Connection {
 
 	@Override
 	public boolean isValid(int timeout) throws SQLException {
-		throw new UnsupportedOperationException("isValid");
+		throw new UnsupportedOperationException("zebra does not support isValid");
 	}
 
 	@Override
@@ -396,7 +396,7 @@ public class GroupConnection implements Connection {
 
 	@Override
 	public String nativeSQL(String sql) throws SQLException {
-		throw new UnsupportedOperationException("nativeSQL");
+		throw new UnsupportedOperationException("zebra does not support nativeSQL");
 	}
 
 	@Override
@@ -471,7 +471,7 @@ public class GroupConnection implements Connection {
 
 	@Override
 	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		throw new UnsupportedOperationException("releaseSavepoint");
+		throw new UnsupportedOperationException("zebra does not support releaseSavepoint");
 	}
 
 	@Override
@@ -488,26 +488,30 @@ public class GroupConnection implements Connection {
 
 	@Override
 	public void rollback(Savepoint savepoint) throws SQLException {
-		throw new UnsupportedOperationException("rollback with savepoint");
+		throw new UnsupportedOperationException("zebra does not support rollback with savepoint");
 	}
 
 	@Override
 	public void setClientInfo(String name, String value) throws SQLClientInfoException {
-		throw new UnsupportedOperationException("setClientInfo");
+		throw new UnsupportedOperationException("zebra does not support setClientInfo");
 	}
 
 	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-		throw new UnsupportedOperationException("setNetworkTimeout");
+		throw new UnsupportedOperationException("zebra does not support setNetworkTimeout");
 	}
 
 	@Override
 	public Savepoint setSavepoint() throws SQLException {
-		throw new UnsupportedOperationException("setSavepoint");
+		throw new UnsupportedOperationException("zebra does not support setSavepoint");
 	}
 
 	@Override
 	public Savepoint setSavepoint(String name) throws SQLException {
-		throw new UnsupportedOperationException("setSavepoint");
+		throw new UnsupportedOperationException("zebra does not support setSavepoint");
+	}
+	
+	public void abort(Executor executor) throws SQLException {
+		throw new UnsupportedOperationException("zebra does not support abort");
 	}
 
 	@SuppressWarnings("unchecked")

@@ -46,18 +46,6 @@ public interface JdbcFilter {
 
 	GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException;
 
-	// Connection getRealConnection(GroupStatement source, String sql, boolean
-	// forceWriter, JdbcFilter chain)
-	// throws SQLException;
-
-	// String sql(SingleConnection conn, String sql, boolean isPreparedStmt,
-	// JdbcFilter chain) throws SQLException;
-
-	// <T> T executeGroupStatement(GroupStatement source, Connection conn,
-	// String sql, List<String> batchedSql,
-	// boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain)
-	// throws SQLException;
-
 	FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
 			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain);
 
@@ -72,10 +60,10 @@ public interface JdbcFilter {
 
 	SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain) throws SQLException;
 
+	String processSQL(String dsId, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException;
+
 	<T> T executeSingleStatement(SingleStatement source, Connection conn, String sql, List<String> batchedSql,
 			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException;
-
-	String processSQL(String dsId, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException;
 
 	void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException;
 

@@ -41,12 +41,6 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		chain.closeSingleDataSource(source, chain);
 	}
 
-//	@Override
-//	public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
-//			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
-//		return chain.executeGroupStatement(source, conn, sql, batchedSql, isBatched, autoCommit, params, chain);
-//	}
-
 	@Override
 	public <T> T executeSingleStatement(SingleStatement source, Connection conn, String sql, List<String> batchedSql,
 			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
@@ -55,7 +49,7 @@ public class DefaultJdbcFilter implements JdbcFilter {
 
 	@Override
 	public FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
-	      FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
+			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain) {
 		return chain.findMasterFailOverDataSource(source, chain);
 	}
 
@@ -64,13 +58,7 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		return chain.getGroupConnection(source, chain);
 	}
 
-//    @Override
-//    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException{
-//        return chain.getRealConnection(source,sql,forceWriter,chain);
-//    }
-
-
-    @Override
+	@Override
 	public int getOrder() {
 		return 0;
 	}
@@ -102,11 +90,6 @@ public class DefaultJdbcFilter implements JdbcFilter {
 	public void setConfigManagerType(String configManagerType) {
 		this.configManagerType = configManagerType;
 	}
-
-//	@Override
-//	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
-//		return chain.sql(conn, sql, isPreparedStmt, chain);
-//	}
 
 	@Override
 	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {

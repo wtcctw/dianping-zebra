@@ -48,6 +48,11 @@ import com.dianping.zebra.util.AppPropertiesUtils;
 import com.dianping.zebra.util.JDBCUtils;
 import com.dianping.zebra.util.StringUtils;
 
+/**
+ * 
+ * @author hao.zhu
+ *
+ */
 public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
 
 	static {
