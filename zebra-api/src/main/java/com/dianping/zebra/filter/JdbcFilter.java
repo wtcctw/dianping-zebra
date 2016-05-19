@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.jdbc.GroupStatement;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.single.jdbc.SingleDataSource;
 import com.dianping.zebra.single.jdbc.SingleStatement;
@@ -46,14 +45,18 @@ public interface JdbcFilter {
 	void refreshGroupDataSource(GroupDataSource source, String propertiesName, JdbcFilter chain);
 
 	GroupConnection getGroupConnection(GroupDataSource source, JdbcFilter chain) throws SQLException;
-	
-	Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain)
-			throws SQLException;
 
-	String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException;
+	// Connection getRealConnection(GroupStatement source, String sql, boolean
+	// forceWriter, JdbcFilter chain)
+	// throws SQLException;
 
-	<T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
-			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException;
+	// String sql(SingleConnection conn, String sql, boolean isPreparedStmt,
+	// JdbcFilter chain) throws SQLException;
+
+	// <T> T executeGroupStatement(GroupStatement source, Connection conn,
+	// String sql, List<String> batchedSql,
+	// boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain)
+	// throws SQLException;
 
 	FailOverDataSource.FindMasterDataSourceResult findMasterFailOverDataSource(
 			FailOverDataSource.MasterDataSourceMonitor source, JdbcFilter chain);
@@ -72,8 +75,10 @@ public interface JdbcFilter {
 	<T> T executeSingleStatement(SingleStatement source, Connection conn, String sql, List<String> batchedSql,
 			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException;
 
+	String processSQL(String dsId, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException;
+
 	void closeSingleConnection(SingleConnection source, JdbcFilter chain) throws SQLException;
-	
+
 	void closeSingleDataSource(SingleDataSource source, JdbcFilter chain) throws SQLException;
 
 }

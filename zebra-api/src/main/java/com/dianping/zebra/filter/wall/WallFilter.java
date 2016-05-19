@@ -14,7 +14,6 @@ import com.dianping.zebra.group.config.SystemConfigManager;
 import com.dianping.zebra.group.config.SystemConfigManagerFactory;
 import com.dianping.zebra.group.config.system.entity.SqlFlowControl;
 import com.dianping.zebra.group.util.DaoContextHolder;
-import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.util.StringUtils;
 
 /**
@@ -45,9 +44,9 @@ public class WallFilter extends DefaultJdbcFilter {
 		return random.nextInt(100);
 	}
 
-	protected String generateId(SingleConnection conn, String sqlAlias) throws NoSuchAlgorithmException {
-		String token = String.format("/*%s*/%s", conn.getDataSourceId(), sqlAlias);
-		String resultId = sqlIDCache.get(String.format("/*%s*/%s", conn.getDataSourceId(), sqlAlias));
+	protected String generateId(String dsId, String sqlAlias) throws NoSuchAlgorithmException {
+		String token = String.format("/*%s*/%s", dsId, sqlAlias);
+		String resultId = sqlIDCache.get(String.format("/*%s*/%s", dsId, sqlAlias));
 
 		if (resultId != null) {
 			return resultId;
@@ -85,15 +84,15 @@ public class WallFilter extends DefaultJdbcFilter {
 	}
 
 	@Override
-	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
+	public String processSQL(String dsId, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
 		if (chain != null) {
-			sql = chain.sql(conn, sql, isPreparedStmt, chain);
+			sql = chain.processSQL(dsId, sql, isPreparedStmt, chain);
 		}
 		String sqlAlias = DaoContextHolder.getSqlName();
 
-		if (isPreparedStmt && conn != null && StringUtils.isNotBlank(sqlAlias)) {
+		if (isPreparedStmt && dsId != null && StringUtils.isNotBlank(sqlAlias)) {
 			try {
-				String id = generateId(conn, sqlAlias);
+				String id = generateId(dsId, sqlAlias);
 
 				checkFlowControl(id);
 

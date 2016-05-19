@@ -10,7 +10,6 @@ import com.dianping.zebra.Constants;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.jdbc.GroupConnection;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.jdbc.GroupStatement;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.single.jdbc.SingleDataSource;
 import com.dianping.zebra.single.jdbc.SingleStatement;
@@ -42,11 +41,11 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		chain.closeSingleDataSource(source, chain);
 	}
 
-	@Override
-	public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
-			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
-		return chain.executeGroupStatement(source, conn, sql, batchedSql, isBatched, autoCommit, params, chain);
-	}
+//	@Override
+//	public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+//			boolean isBatched, boolean autoCommit, Object params, JdbcFilter chain) throws SQLException {
+//		return chain.executeGroupStatement(source, conn, sql, batchedSql, isBatched, autoCommit, params, chain);
+//	}
 
 	@Override
 	public <T> T executeSingleStatement(SingleStatement source, Connection conn, String sql, List<String> batchedSql,
@@ -65,10 +64,10 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		return chain.getGroupConnection(source, chain);
 	}
 
-    @Override
-    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException{
-        return chain.getRealConnection(source,sql,forceWriter,chain);
-    }
+//    @Override
+//    public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain) throws SQLException{
+//        return chain.getRealConnection(source,sql,forceWriter,chain);
+//    }
 
 
     @Override
@@ -104,13 +103,18 @@ public class DefaultJdbcFilter implements JdbcFilter {
 		this.configManagerType = configManagerType;
 	}
 
-	@Override
-	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
-		return chain.sql(conn, sql, isPreparedStmt, chain);
-	}
+//	@Override
+//	public String sql(SingleConnection conn, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
+//		return chain.sql(conn, sql, isPreparedStmt, chain);
+//	}
 
 	@Override
 	public void switchFailOverDataSource(FailOverDataSource source, JdbcFilter chain) {
 		chain.switchFailOverDataSource(source, chain);
+	}
+
+	@Override
+	public String processSQL(String dsId, String sql, boolean isPreparedStmt, JdbcFilter chain) throws SQLException {
+		return chain.processSQL(dsId, sql, isPreparedStmt, chain);
 	}
 }

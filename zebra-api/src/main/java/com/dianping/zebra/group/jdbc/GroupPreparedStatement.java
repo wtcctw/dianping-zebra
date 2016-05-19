@@ -78,10 +78,12 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 
 			pstmt = conn.prepareStatement(sql, this.resultSetType, this.resultSetConcurrency, resultSetHoldability);
 		}
-		setRealStatement(pstmt);
+
 		pstmt.setQueryTimeout(queryTimeout);
 		pstmt.setFetchSize(fetchSize);
 		pstmt.setMaxRows(maxRows);
+
+		setRealStatement(pstmt);
 
 		return pstmt;
 	}
@@ -107,12 +109,12 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				return new int[0];
 			}
 
-			return executeWithFilter(new JDBCOperationCallback<int[]>() {
+			return executeInternal(new JDBCOperationCallback<int[]>() {
 				@Override
 				public int[] doAction(Connection conn) throws SQLException {
 					return executeBatchOnConnection(conn);
 				}
-			}, sql, pstBatchedArgs, true, true);
+			}, sql, true);
 		} finally {
 			if (pstBatchedArgs != null) {
 				pstBatchedArgs.clear();
@@ -121,7 +123,6 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 	}
 
 	private int[] executeBatchOnConnection(Connection conn) throws SQLException {
-		sql = processSQL(conn, sql, true);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 
 		for (List<ParamContext> tmpParams : pstBatchedArgs) {
@@ -137,20 +138,19 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeWithFilter(new JDBCOperationCallback<ResultSet>() {
+		return executeInternal(new JDBCOperationCallback<ResultSet>() {
 			@Override
 			public ResultSet doAction(Connection conn) throws SQLException {
 				return executeQueryOnConnection(conn, sql);
 			}
-		}, sql, params, false, false);
+		}, sql, false);
 	}
 
 	private ResultSet executeQueryOnConnection(Connection conn, String sql) throws SQLException {
-		sql = processSQL(conn, sql, true);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 		setParams(pstmt);
 		this.currentResultSet = new GroupResultSet(pstmt.executeQuery());
-		
+
 		return this.currentResultSet;
 	}
 
@@ -159,7 +159,7 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 		checkClosed();
 		closeCurrentResultSet();
 
-		return executeWithFilter(new JDBCOperationCallback<Integer>() {
+		return executeInternal(new JDBCOperationCallback<Integer>() {
 			@Override
 			public Integer doAction(Connection conn) throws SQLException {
 				try {
@@ -172,11 +172,10 @@ public class GroupPreparedStatement extends GroupStatement implements PreparedSt
 				}
 				return updateCount;
 			}
-		}, sql, params, false, true);
+		}, sql, true);
 	}
 
 	private int executeUpdateOnConnection(final Connection conn) throws SQLException {
-		sql = processSQL(conn, sql, true);
 		PreparedStatement pstmt = createPreparedStatementInternal(conn, sql);
 		setParams(pstmt);
 

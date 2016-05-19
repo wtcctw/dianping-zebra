@@ -20,13 +20,13 @@ import com.dianping.zebra.filter.DefaultJdbcFilter;
 import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
-import com.dianping.zebra.group.jdbc.GroupStatement;
 import com.dianping.zebra.group.util.SqlAliasManager;
 import com.dianping.zebra.monitor.Version;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.monitor.util.SqlMonitorUtils;
 import com.dianping.zebra.single.jdbc.SingleConnection;
 import com.dianping.zebra.single.jdbc.SingleDataSource;
+import com.dianping.zebra.single.jdbc.SingleStatement;
 import com.dianping.zebra.util.SqlUtils;
 import com.site.helper.Stringizers;
 
@@ -70,18 +70,11 @@ public class CatFilter extends DefaultJdbcFilter {
 			throw exp;
 		}
 	}
-
+	
 	@Override
-	public Connection getRealConnection(GroupStatement source, String sql, boolean forceWriter, JdbcFilter chain)
-			throws SQLException {
-		SqlAliasManager.setSqlAlias(sql);
-
-		return chain.getRealConnection(source, sql, forceWriter, chain);
-	}
-
-	@Override
-	public <T> T executeGroupStatement(GroupStatement source, Connection conn, String sql, List<String> batchedSql,
+	public <T> T executeSingleStatement(SingleStatement source, Connection conn, String sql, List<String> batchedSql,
 			boolean isBatched, boolean autoCommit, Object sqlParams, JdbcFilter chain) throws SQLException {
+		SqlAliasManager.setSqlAlias(sql);
 		Transaction t;
 		if (isBatched) {
 			t = Cat.newTransaction("SQL", "batched");
@@ -92,7 +85,7 @@ public class CatFilter extends DefaultJdbcFilter {
 		}
 
 		try {
-			T result = chain.executeGroupStatement(source, conn, sql, batchedSql, isBatched, autoCommit, sqlParams,
+			T result = chain.executeSingleStatement(source, conn, sql, batchedSql, isBatched, autoCommit, sqlParams,
 					chain);
 			t.setStatus(Transaction.SUCCESS);
 

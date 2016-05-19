@@ -6,16 +6,13 @@ package com.dianping.zebra.group.filter.wall;
 
 import java.sql.SQLException;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.dianping.avatar.tracker.ExecutionContextHolder;
-import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.filter.wall.WallFilter;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.single.jdbc.SingleConnection;
-import com.google.common.collect.Lists;
+
+import junit.framework.Assert;
 
 public class WallFilterTest {
 	@Test
@@ -26,10 +23,8 @@ public class WallFilterTest {
 		
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
-		SingleConnection conn = new SingleConnection(null, config, null, Lists.<JdbcFilter> newArrayList(filter));
-
 		ExecutionContextHolder.getContext().add("sql_statement_name", "test");
-		Assert.assertEquals("/*id:a2f3e453*/select * from test", filter.sql(conn, "select * from test", true, null));
+		Assert.assertEquals("/*id:a2f3e453*/select * from test", filter.processSQL("test-write-1", "select * from test", true, null));
 	}
 
 	@Test(expected = SQLException.class)
@@ -40,10 +35,9 @@ public class WallFilterTest {
 		
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
-		SingleConnection conn = new SingleConnection(null, config, null, Lists.<JdbcFilter> newArrayList(filter));
 		ExecutionContextHolder.getContext().add("sql_statement_name", "test");
 
-		filter.sql(conn, "select * from Test", true, null);
+		filter.processSQL("test-write-1", "select * from Test", true, null);
 	}
 
 	@Test
@@ -53,9 +47,7 @@ public class WallFilterTest {
 		
 		DataSourceConfig config = new DataSourceConfig();
 		config.setId("test-write-1");
-		SingleConnection conn = new SingleConnection(null, config, null, Lists.<JdbcFilter> newArrayList(filter));
-
-		filter.sql(conn, "select * from Test", true, null);
+		filter.processSQL("test-write-1", "select * from Test", true, null);
 	}
 
 	@Test

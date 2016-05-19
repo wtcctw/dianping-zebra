@@ -5,9 +5,6 @@ import com.dianping.zebra.exception.ZebraConfigException;
 
 public class ConfigServiceFactory {
 	
-	private ConfigServiceFactory(){
-	}
-
 	public static ConfigService getConfigService(String configManagerType, String name) {
 		if (Constants.CONFIG_MANAGER_TYPE_LOCAL.equalsIgnoreCase(configManagerType)) {
 			PropertyConfigService configService = new PropertyConfigService(name);
