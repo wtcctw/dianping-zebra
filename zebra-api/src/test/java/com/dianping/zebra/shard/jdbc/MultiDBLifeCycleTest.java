@@ -484,6 +484,29 @@ public class MultiDBLifeCycleTest extends MultiDBBaseTestCase {
 			}
 		}
 	}
+	
+	@Test
+	public void testMultiRouterResult12_1() throws Exception {
+		DataSource ds = (DataSource) context.getBean("zebraDS");
+		Connection conn = null;
+		try {
+			conn = ds.getConnection();
+			Statement stmt = conn.createStatement();
+			stmt.execute("select name from test limit 5 offset 10");
+			ResultSet rs = stmt.getResultSet();
+			List<String> rows = new ArrayList<String>();
+			while (rs.next()) {
+				rows.add(rs.getString("name"));
+			}
+			Assert.assertEquals(5, rows.size());
+		} catch (Exception e) {
+			Assert.fail();
+		} finally {
+			if (conn != null) {
+				conn.close();
+			}
+		}
+	}
 
 	@Test
 	public void testMultiRouterResult13() throws Exception {
