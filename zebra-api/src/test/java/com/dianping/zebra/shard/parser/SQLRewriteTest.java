@@ -43,4 +43,18 @@ public class SQLRewriteTest {
 		Assert.assertNotNull(result.getRouterContext().getSqlhint());
 		Assert.assertEquals("SELECT a, b\nFROM db1\nWHERE `c` = 1\nLIMIT 10", newSql);
 	}
+	
+	@Test
+	public void testLimit2() throws ShardParseException {
+		DefaultSQLRewrite rewriter = new DefaultSQLRewrite();
+		SQLParsedResult result = SQLParser
+				.parse("select a,b /*comment**/ from db where `c` = 1 limit 10 offset 10 #this is comment");
+
+		String newSql = rewriter.rewrite(result, "db", "db1");
+
+		Assert.assertNotNull(result.getRouterContext().getSqlhint());
+		Assert.assertEquals(result.getMergeContext().getLimit(),10);
+		Assert.assertEquals(result.getMergeContext().getOffset(),10);
+		Assert.assertEquals("SELECT a, b\nFROM db1\nWHERE `c` = 1\nLIMIT 0, 20", newSql);
+	}
 }
