@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.jdbc;
+package com.dianping.zebra.single.jdbc;
 
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.exception.ZebraException;

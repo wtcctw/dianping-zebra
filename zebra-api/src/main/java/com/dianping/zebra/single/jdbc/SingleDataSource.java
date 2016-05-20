@@ -20,7 +20,6 @@ import com.dianping.zebra.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
-import com.dianping.zebra.group.jdbc.AbstractDataSource;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
 import com.dianping.zebra.util.JdbcDriverClassHelper;

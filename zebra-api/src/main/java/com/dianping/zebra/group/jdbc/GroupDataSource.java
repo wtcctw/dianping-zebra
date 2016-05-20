@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.Set;
 
@@ -43,6 +42,7 @@ import com.dianping.zebra.group.router.ReadWriteStrategyWrapper;
 import com.dianping.zebra.group.router.RouterType;
 import com.dianping.zebra.group.util.SmoothReload;
 import com.dianping.zebra.log.LoggerLoader;
+import com.dianping.zebra.single.jdbc.C3P0StyleDataSource;
 import com.dianping.zebra.single.manager.SingleDataSourceManagerFactory;
 import com.dianping.zebra.util.AppPropertiesUtils;
 import com.dianping.zebra.util.JDBCUtils;
@@ -53,7 +53,7 @@ import com.dianping.zebra.util.StringUtils;
  * @author hao.zhu
  *
  */
-public class GroupDataSource extends AbstractDataSource implements GroupDataSourceMBean {
+public class GroupDataSource extends C3P0StyleDataSource implements GroupDataSourceMBean {
 
 	static {
 		LoggerLoader.init();
@@ -67,8 +67,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 	protected String poolType;// support two type : "c3p0" and "tomcat-jdbc"
 
 	protected RouterType routerType = RouterType.ROUND_ROBIN;
-
-	protected DataSourceConfig c3p0Config = new DataSourceConfig();
 
 	protected Map<String, Object> springProperties = new HashMap<String, Object>();
 
@@ -465,7 +463,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		refreshReadWriteStrategyConfig();
 	}
 
-	private void refresh(String propertyToChange) {
+	@Override
+	protected void refresh(String propertyToChange) {
 		if (!this.init) {
 			return;
 		}
@@ -556,60 +555,6 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		}
 	}
 
-	public synchronized void setAcquireIncrement(int acquireIncrement) {
-		setProperty("acquireIncrement", String.valueOf(acquireIncrement));
-	}
-
-	public synchronized void setAcquireRetryAttempts(int acquireRetryAttempts) {
-		setProperty("acquireRetryAttempts", String.valueOf(acquireRetryAttempts));
-	}
-
-	public synchronized void setAcquireRetryDelay(int acquireRetryDelay) {
-		setProperty("acquireRetryDelay", String.valueOf(acquireRetryDelay));
-	}
-
-	public synchronized void setAutoCommitOnClose(boolean autoCommitOnClose) {
-		setProperty("autoCommitOnClose", String.valueOf(autoCommitOnClose));
-	}
-
-	public synchronized void setAutomaticTestTable(String automaticTestTable) {
-		setProperty("automaticTestTable", automaticTestTable);
-	}
-
-	public synchronized void setBreakAfterAcquireFailure(boolean breakAfterAcquireFailure) {
-		setProperty("breakAfterAcquireFailure", String.valueOf(breakAfterAcquireFailure));
-	}
-
-	public synchronized void setCheckoutTimeout(int checkoutTimeout) {
-		// 如果这个属性配置成了0，在数据源挂掉，并启动切换成可用的数据源后，可能会有线程无限等待，导致老的数据源无法关闭。
-		// setProperty("checkoutTimeout", String.valueOf(checkoutTimeout));
-	}
-
-	public synchronized void setConnectionCustomizerClassName(String connectionCustomizerClassName) {
-		setProperty("connectionCustomizerClassName", connectionCustomizerClassName);
-	}
-
-	public synchronized void setConnectionTesterClassName(String connectionTesterClassName) {
-		setProperty("connectionTesterClassName", connectionTesterClassName);
-	}
-
-	public synchronized void setDataSourceName(String dataSourceName) {
-		setProperty("dataSourceName", dataSourceName);
-	}
-
-	public synchronized void setDebugUnreturnedConnectionStackTraces(boolean debugUnreturnedConnectionStackTraces) {
-		setProperty("debugUnreturnedConnectionStackTraces", String.valueOf(debugUnreturnedConnectionStackTraces));
-	}
-
-	public synchronized void setDescription(String description) {
-		setProperty("description", description);
-	}
-
-	public synchronized void setDriverClass(String driverClass) {
-		c3p0Config.setDriverClass(driverClass);
-		refresh("driverClass");
-	}
-
 	public void setExtraJdbcUrlParams(String extraJdbcUrlParams) {
 		this.springProperties.put(Constants.SPRING_PROPERTY_EXTRA_JDBC_URL_PARAMS, extraJdbcUrlParams);
 	}
@@ -618,66 +563,13 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.springProperties.put(Constants.SPRING_PROPERTY_EXTRA_JDBC_URL_PARAMS, "socketTimeout=" + socketTimeout);
 	}
 
-	public synchronized void setFactoryClassLocation(String factoryClassLocation) {
-		setProperty("factoryClassLocation", factoryClassLocation);
-	}
-
 	public synchronized void setFilter(String filter) {
 		this.springProperties.put(Constants.SPRING_PROPERTY_FILTER, filter);
 		refresh(Constants.SPRING_PROPERTY_FILTER);
 	}
 
-	public synchronized void setForceIgnoreUnresolvedTransactions(boolean forceIgnoreUnresolvedTransactions) {
-		setProperty("forceIgnoreUnresolvedTransactions", String.valueOf(forceIgnoreUnresolvedTransactions));
-	}
-
-	public synchronized void setForceWriteOnLogin(boolean turnOn) {
-		this.springProperties.put(Constants.SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN, turnOn);
-		refresh(Constants.SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN);
-	}
-
-	public synchronized void setIdleConnectionTestPeriod(int idleConnectionTestPeriod) {
-		setProperty("idleConnectionTestPeriod", String.valueOf(idleConnectionTestPeriod));
-	}
-
-	public synchronized void setInitialPoolSize(int initialPoolSize) {
-		setProperty("initialPoolSize", String.valueOf(initialPoolSize));
-	}
-
 	public synchronized void setJdbcRef(String jdbcRef) {
 		this.jdbcRef = jdbcRef;
-	}
-
-	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
-		setProperty("maxAdministrativeTaskTime", String.valueOf(maxAdministrativeTaskTime));
-	}
-
-	public synchronized void setMaxConnectionAge(int maxConnectionAge) {
-		setProperty("maxConnectionAge", String.valueOf(maxConnectionAge));
-	}
-
-	public synchronized void setMaxIdleTime(int maxIdleTime) {
-		setProperty("maxIdleTime", String.valueOf(maxIdleTime));
-	}
-
-	public synchronized void setMaxIdleTimeExcessConnections(int maxIdleTimeExcessConnections) {
-		setProperty("maxIdleTimeExcessConnections", String.valueOf(maxIdleTimeExcessConnections));
-	}
-
-	public synchronized void setMaxPoolSize(int maxPoolSize) {
-		setProperty("maxPoolSize", String.valueOf(maxPoolSize));
-	}
-
-	public synchronized void setMaxStatements(int maxStatements) {
-		setProperty("maxStatements", String.valueOf(maxStatements));
-	}
-
-	public synchronized void setMaxStatementsPerConnection(int maxStatementsPerConnection) {
-		setProperty("maxStatementsPerConnection", String.valueOf(maxStatementsPerConnection));
-	}
-
-	public synchronized void setMinPoolSize(int minPoolSize) {
-		setProperty("minPoolSize", String.valueOf(minPoolSize));
 	}
 
 	// Compatible old GroupDataSource < 2.4.8
@@ -686,56 +578,8 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.jdbcRef = name;
 	}
 
-	public synchronized void setNumHelperThreads(int numHelperThreads) {
-		setProperty("numHelperThreads", String.valueOf(numHelperThreads));
-	}
-
-	public synchronized void setOverrideDefaultPassword(String overrideDefaultPassword) {
-		setProperty("overrideDefaultPassword", overrideDefaultPassword);
-	}
-
-	public synchronized void setOverrideDefaultUser(String overrideDefaultUser) {
-		setProperty("overrideDefaultUser", overrideDefaultUser);
-	}
-
 	public synchronized void setPoolType(String poolType) {
 		this.poolType = poolType;
-	}
-
-	public synchronized void setPreferredTestQuery(String preferredTestQuery) {
-		setProperty("preferredTestQuery", preferredTestQuery);
-	}
-
-	public synchronized void setProperties(Properties properties) {
-		for (Entry<Object, Object> item : properties.entrySet()) {
-			setProperty(String.valueOf(item.getKey().toString()), String.valueOf(item.getValue()));
-		}
-	}
-
-	private void setProperty(String name, String value) {
-		logger.info(String.format("get config from lion and set c3p0 property[%s : %s].", name, value));
-
-		Any any = null;
-		for (Any a : c3p0Config.getProperties()) {
-			if (a.getName().equals(name)) {
-				any = a;
-				break;
-			}
-		}
-
-		if (any == null) {
-			any = new Any();
-			c3p0Config.getProperties().add(any);
-		}
-
-		any.setName(name);
-		any.setValue(value);
-
-		refresh(name);
-	}
-
-	public synchronized void setPropertyCycle(int propertyCycle) {
-		setProperty("propertyCycle", String.valueOf(propertyCycle));
 	}
 
 	// hack for set only use slave or master datasource
@@ -743,30 +587,20 @@ public class GroupDataSource extends AbstractDataSource implements GroupDataSour
 		this.routerType = RouterType.getRouterType(routerType);
 	}
 
-	public synchronized void setTestConnectionOnCheckin(boolean testConnectionOnCheckin) {
-		setProperty("testConnectionOnCheckin", String.valueOf(testConnectionOnCheckin));
+	public synchronized void setForceWriteOnLogin(boolean turnOn) {
+		this.springProperties.put(Constants.SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN, turnOn);
+		refresh(Constants.SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN);
 	}
-
-	public synchronized void setTestConnectionOnCheckout(boolean testConnectionOnCheckout) {
-		setProperty("testConnectionOnCheckout", String.valueOf(testConnectionOnCheckout));
-	}
-
-	public synchronized void setUnreturnedConnectionTimeout(int unreturnedConnectionTimeout) {
-		setProperty("unreturnedConnectionTimeout", String.valueOf(unreturnedConnectionTimeout));
-	}
-
-	public synchronized void setUserOverridesAsString(String userOverridesAsString) {
-		setProperty("userOverridesAsString", userOverridesAsString);
-	}
-
-	public synchronized void setUsesTraditionalReflectiveProxies(boolean usesTraditionalReflectiveProxies) {
-		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
-	}
-
+	
 	public class GroupDataSourceConfigChangedListener implements PropertyChangeListener {
 		@Override
 		public synchronized void propertyChange(PropertyChangeEvent evt) {
 			refresh(evt.getPropertyName());
 		}
+	}
+
+	@Override
+	protected Logger getLogger() {
+		return logger;
 	}
 }

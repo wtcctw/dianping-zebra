@@ -94,11 +94,6 @@ public class CatFilter extends DefaultJdbcFilter {
 			Cat.logError(exp);
 			t.setStatus(exp);
 
-			String state = exp.getSQLState();
-			if (state != null && state.equalsIgnoreCase("SQL.Blacklist")) {
-				Cat.logEvent("SQL.Blacklist", SqlAliasManager.getSqlAlias());
-			}
-
 			throw exp;
 		} finally {
 			try {
