@@ -18,6 +18,8 @@ public final class Constants {
 	public static final String CONNECTION_POOL_TYPE_C3P0 = "c3p0";
 
 	public static final String CONNECTION_POOL_TYPE_TOMCAT_JDBC = "tomcat-jdbc";
+	
+	public static final String CONNECTION_POOL_TYPE_DRUID = "druid";
 
 	public static final String CONFIG_MANAGER_TYPE_REMOTE = "remote";
 

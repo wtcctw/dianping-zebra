@@ -3,6 +3,7 @@ package com.dianping.zebra.single.pool;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -10,6 +11,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
+import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.exception.ZebraException;
@@ -77,6 +80,20 @@ public class ZebraPoolManager {
 				logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
 				return datasource;
+			} else if(value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_DRUID)) {
+				Properties props = new Properties();
+				
+				props.put("driverClass", value.getDriverClass());
+
+				for (Any any : value.getProperties()) {
+					props.put(any.getName(), any.getValue());
+				}
+				
+				DruidDataSource druidDataSource = (DruidDataSource) DruidDataSourceFactory.createDataSource(props);
+				
+				logger.info(String.format("New dataSource [%s] created.", value.getId()));
+
+				return druidDataSource;
 			} else {
 				throw new ZebraConfigException("illegal datasource pool type : " + value.getType());
 			}
@@ -117,6 +134,23 @@ public class ZebraPoolManager {
 					logger.info("closing old datasource [" + dsId + "]");
 
 					ds.close();
+
+					logger.info("old datasource [" + dsId + "] closed");
+					singleDataSource.setState(DataSourceState.CLOSED);
+				} else {
+					throw new ZebraException(
+							String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
+				}
+			} else if(dataSource instanceof DruidDataSource) {
+				DruidDataSource druidDataSource = (DruidDataSource) dataSource;
+				
+				logger.info(
+						singleDataSource.getAndIncrementCloseAttempt() + " attempt to close datasource [" + dsId + "]");
+
+				if (druidDataSource.getActiveCount() == 0 || singleDataSource.getCloseAttempt() >= MAX_CLOSE_ATTEMPT) {
+					logger.info("closing old datasource [" + dsId + "]");
+
+					druidDataSource.close();
 
 					logger.info("old datasource [" + dsId + "] closed");
 					singleDataSource.setState(DataSourceState.CLOSED);
