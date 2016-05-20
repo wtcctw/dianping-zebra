@@ -179,7 +179,7 @@ public class ZebraPoolManager {
 		return defaultValue;
 	}
 
-	public static String getStringProperty(DataSourceConfig config, String name, String defaultValue) {
+	private static String getStringProperty(DataSourceConfig config, String name, String defaultValue) {
 		for (Any any : config.getProperties()) {
 			if (any.getName().equalsIgnoreCase(name)) {
 				return any.getValue();

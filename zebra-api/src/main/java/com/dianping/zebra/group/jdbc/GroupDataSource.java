@@ -64,7 +64,7 @@ public class GroupDataSource extends C3P0StyleDataSource implements GroupDataSou
 	// config
 	protected String jdbcRef;
 
-	protected String poolType;// support two type : "c3p0" and "tomcat-jdbc"
+	protected String poolType;// support two type : "c3p0" and "tomcat-jdbc" and druid
 
 	protected RouterType routerType = RouterType.ROUND_ROBIN;
 
