@@ -19,6 +19,7 @@ import com.dianping.zebra.annotation.Internal;
 import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
+import com.dianping.zebra.filter.FilterManagerFactory;
 import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
@@ -75,6 +76,7 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 		mergeDataSourceConfig();
 
 		this.dataSource = initDataSource(this.config);
+		this.filters = FilterManagerFactory.getFilterManager().loadFilters("cat,mtrace");
 	}
 
 	private void mergeDataSourceConfig() {
