@@ -260,7 +260,7 @@ public class GroupDataSourceTest extends MultiDatabaseTestCase {
 		target.setMaxPoolSize(2);
 		target.setMinPoolSize(1);
 
-		Method method = GroupDataSource.class.getDeclaredMethod("buildC3P0Properties", GroupDataSourceConfig.class);
+		Method method = GroupDataSource.class.getDeclaredMethod("mergeC3P0Properties", GroupDataSourceConfig.class);
 		method.setAccessible(true);
 		method.invoke(target, groupConfig);
 

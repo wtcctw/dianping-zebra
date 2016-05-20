@@ -2,9 +2,7 @@ package com.dianping.zebra.single.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,20 +12,15 @@ import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
 
-import com.dianping.zebra.Constants;
 import com.dianping.zebra.exception.ZebraConfigException;
-import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
 import com.dianping.zebra.filter.FilterManagerFactory;
 import com.dianping.zebra.filter.JdbcFilter;
-import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
-import com.dianping.zebra.util.JdbcDriverClassHelper;
-import com.mchange.v2.c3p0.DataSources;
+import com.dianping.zebra.single.pool.ZebraPoolManager;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
 
 /**
@@ -38,7 +31,7 @@ import com.mchange.v2.c3p0.PoolBackedDataSource;
 public class SingleDataSource extends C3P0StyleDataSource implements DataSourceLifeCycle, SingleDataSourceMBean {
 
 	private static final Logger logger = LogManager.getLogger(SingleDataSource.class);
-	
+
 	public static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://[^:]+:\\d+/(\\w+)");
 
 	private String dsId;
@@ -54,8 +47,6 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 	private AtomicInteger closeAttmpet = new AtomicInteger(1);
 
 	private String poolType = "c3p0";
-
-	private static final int MAX_CLOSE_ATTEMPT = 600;
 
 	public SingleDataSource() {
 		this.config = new DataSourceConfig();
@@ -95,7 +86,7 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 	public synchronized void setJdbcUrl(String jdbcUrl) {
 		checkNull("jdbcUrl", jdbcUrl);
 		this.config.setJdbcUrl(jdbcUrl);
-		
+
 		Matcher matcher = JDBC_URL_PATTERN.matcher(jdbcUrl);
 		if (matcher.find()) {
 			this.config.setId(matcher.group(1));
@@ -144,46 +135,7 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 	}
 
 	public void closeOrigin() throws SQLException {
-		if (dataSource != null) {
-			if (dataSource instanceof PoolBackedDataSource) {
-				PoolBackedDataSource poolBackedDataSource = (PoolBackedDataSource) dataSource;
-
-				logger.info(this.closeAttmpet.getAndIncrement() + " attempt to close datasource [" + dsId + "]");
-
-				if (poolBackedDataSource.getNumBusyConnections() == 0 || this.closeAttmpet.get() >= MAX_CLOSE_ATTEMPT) {
-					DataSources.destroy(poolBackedDataSource);
-
-					logger.info("datasource [" + dsId + "] closed");
-					state = DataSourceState.CLOSED;
-				} else {
-					throw new ZebraException(
-							String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
-				}
-			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
-				org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
-
-				logger.info(this.closeAttmpet.getAndIncrement() + " attempt to close datasource [" + dsId + "]");
-
-				if (ds.getActive() == 0 || this.closeAttmpet.get() >= MAX_CLOSE_ATTEMPT) {
-					logger.info("closing old datasource [" + dsId + "]");
-
-					ds.close();
-
-					logger.info("old datasource [" + dsId + "] closed");
-					state = DataSourceState.CLOSED;
-				} else {
-					throw new ZebraException(
-							String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
-				}
-			} else {
-				Exception exp = new ZebraException(
-						"fail to close dataSource since dataSource is not an instance of C3P0 or Tomcat-Jdbc.");
-				logger.warn(exp.getMessage(), exp);
-			}
-		} else {
-			Exception exp = new ZebraException("fail to close dataSource since dataSource is null.");
-			logger.warn(exp.getMessage(), exp);
-		}
+		ZebraPoolManager.close(this);
 	}
 
 	public synchronized DataSourceConfig getConfig() {
@@ -240,16 +192,6 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 
 	public String getId() {
 		return this.dsId;
-	}
-
-	public int getIntProperty(DataSourceConfig config, String name, int defaultValue) {
-		for (Any any : config.getProperties()) {
-			if (any.getName().equalsIgnoreCase(name)) {
-				return Integer.parseInt(any.getValue());
-			}
-		}
-
-		return defaultValue;
 	}
 
 	@Override
@@ -309,16 +251,6 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 		return this.state;
 	}
 
-	public String getStringProperty(DataSourceConfig config, String name, String defaultValue) {
-		for (Any any : config.getProperties()) {
-			if (any.getName().equalsIgnoreCase(name)) {
-				return any.getValue();
-			}
-		}
-
-		return defaultValue;
-	}
-
 	private DataSource initDataSource(final DataSourceConfig value) {
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
@@ -338,63 +270,7 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 	}
 
 	private DataSource initDataSourceOrigin(DataSourceConfig value) {
-		try {
-			JdbcDriverClassHelper.loadDriverClass(value.getDriverClass(), value.getJdbcUrl());
-			if (value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_C3P0)) {
-				DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
-						value.getPassword());
-
-				Map<String, Object> props = new HashMap<String, Object>();
-
-				props.put("driverClass", value.getDriverClass());
-
-				for (Any any : value.getProperties()) {
-					props.put(any.getName(), any.getValue());
-				}
-
-				PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources
-						.pooledDataSource(unPooledDataSource, props);
-
-				logger.info(String.format("New dataSource [%s] created.", value.getId()));
-
-				return pooledDataSource;
-			} else if (value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_TOMCAT_JDBC)) {
-				PoolProperties p = new PoolProperties();
-				p.setUrl(value.getJdbcUrl());
-				p.setDriverClassName(value.getDriverClass());
-				p.setUsername(value.getUsername());
-				p.setPassword(value.getPassword());
-
-				p.setInitialSize(getIntProperty(value, "initialPoolSize", 5));
-				p.setMaxActive(getIntProperty(value, "maxPoolSize", 20));
-				p.setMinIdle(getIntProperty(value, "minPoolSize", 5));
-				p.setMaxIdle(getIntProperty(value, "maxPoolSize", 20));
-				p.setMaxWait(getIntProperty(value, "checkoutTimeout", 1000));
-
-				p.setRemoveAbandoned(true);
-				p.setRemoveAbandonedTimeout(60);
-				p.setTestOnBorrow(true);
-				p.setTestOnReturn(false);
-				p.setTestWhileIdle(true);
-				p.setValidationQuery(getStringProperty(value, "preferredTestQuery", "SELECT 1"));
-				p.setValidationInterval(30000); // 5 min
-				p.setTimeBetweenEvictionRunsMillis(300000); // 30 min
-				p.setMinEvictableIdleTimeMillis(1800000);
-
-				org.apache.tomcat.jdbc.pool.DataSource datasource = new org.apache.tomcat.jdbc.pool.DataSource();
-				datasource.setPoolProperties(p);
-
-				logger.info(String.format("New dataSource [%s] created.", value.getId()));
-
-				return datasource;
-			} else {
-				throw new ZebraConfigException("illegal datasource pool type : " + value.getType());
-			}
-		} catch (ZebraConfigException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new ZebraConfigException(e);
-		}
+		return ZebraPoolManager.create(value);
 	}
 
 	public boolean isAvailable() {
@@ -435,5 +311,21 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 
 	public synchronized void setPoolType(String poolType) {
 		this.poolType = poolType;
+	}
+
+	public DataSource getInnerDataSource() {
+		return this.dataSource;
+	}
+
+	public int getAndIncrementCloseAttempt() {
+		return this.closeAttmpet.getAndIncrement();
+	}
+
+	public int getCloseAttempt() {
+		return this.closeAttmpet.get();
+	}
+
+	public synchronized void setState(DataSourceState state) {
+		this.state = state;
 	}
 }
