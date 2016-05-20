@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CountPunisher {
-	private final MarkableDataSource dataSource;
+	private final DataSourceLifeCycle dataSource;
 
 	private final long timeWindow; // ms; 值为0表示关闭这个功能，无任何限制
 
@@ -27,14 +27,14 @@ public class CountPunisher {
 	 * @param timeWindow
 	 * @param limit
 	 */
-	public CountPunisher(MarkableDataSource dataSource, long timeWindow, long limit, long resetTime) {
+	public CountPunisher(DataSourceLifeCycle dataSource, long timeWindow, long limit, long resetTime) {
 		this.dataSource = dataSource;
 		this.timeWindow = timeWindow;
 		this.limit = limit;
 		this.resetTime = resetTime;
 	}
 
-	public CountPunisher(MarkableDataSource dataSource, long timeWindow, long limit) {
+	public CountPunisher(DataSourceLifeCycle dataSource, long timeWindow, long limit) {
 		this(dataSource, timeWindow, limit, 5 * 60 * 100); // 默认5分钟复位
 	}
 

@@ -92,7 +92,7 @@ public class GroupDataSource extends C3P0StyleDataSource implements GroupDataSou
 		this.jdbcRef = jdbcRef.trim();
 	}
 
-	protected void buildC3P0Properties(GroupDataSourceConfig newGroupConfig) {
+	protected void mergeC3P0Properties(GroupDataSourceConfig newGroupConfig) {
 		for (Entry<String, DataSourceConfig> entry : newGroupConfig.getDataSourceConfigs().entrySet()) {
 			DataSourceConfig config = entry.getValue();
 
@@ -183,14 +183,14 @@ public class GroupDataSource extends C3P0StyleDataSource implements GroupDataSou
 	}
 
 	protected GroupDataSourceConfig buildGroupConfig(GroupDataSourceConfig newGroupConfig) {
-		buildC3P0Properties(newGroupConfig);
-		buildSpringPropertyConfig(newGroupConfig);
-		buildPoolType(newGroupConfig);
+		mergeC3P0Properties(newGroupConfig);
+		mergeSpringPropertyConfig(newGroupConfig);
+		mergePoolType(newGroupConfig);
 
 		return newGroupConfig;
 	}
 
-	private void buildPoolType(GroupDataSourceConfig newGroupConfig) {
+	private void mergePoolType(GroupDataSourceConfig newGroupConfig) {
 		if (StringUtils.isNotBlank(this.poolType)) {
 			for (DataSourceConfig config : newGroupConfig.getDataSourceConfigs().values()) {
 				config.setType(this.poolType);
@@ -198,7 +198,7 @@ public class GroupDataSource extends C3P0StyleDataSource implements GroupDataSou
 		}
 	}
 
-	protected void buildSpringPropertyConfig(GroupDataSourceConfig newGroupConfig) {
+	protected void mergeSpringPropertyConfig(GroupDataSourceConfig newGroupConfig) {
 		buildExtraJdbcUrlParams(newGroupConfig);
 		buildFilter(newGroupConfig);
 

@@ -9,11 +9,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import com.dianping.zebra.Constants;
+import com.dianping.zebra.annotation.Internal;
 import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
@@ -31,7 +33,7 @@ import com.mchange.v2.c3p0.PoolBackedDataSource;
  * @author hao.zhu
  *
  */
-public class SingleDataSource extends AbstractDataSource implements MarkableDataSource, SingleDataSourceMBean {
+public class SingleDataSource extends C3P0StyleDataSource implements DataSourceLifeCycle, SingleDataSourceMBean {
 
 	private static final Logger logger = LogManager.getLogger(SingleDataSource.class);
 
@@ -44,17 +46,67 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	private CountPunisher punisher;
 
 	private volatile DataSourceState state = DataSourceState.INITIAL;
-	
+
 	private AtomicInteger closeAttmpet = new AtomicInteger(1);
-	
+
+	private String poolType;
+
 	private static final int MAX_CLOSE_ATTEMPT = 600;
 
+	public SingleDataSource() {
+		this.config = new DataSourceConfig();
+		this.config.setCanRead(true);
+		this.config.setCanWrite(true);
+		this.config.setActive(true);
+		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());
+	}
+
+	// internal use only
 	public SingleDataSource(DataSourceConfig config, List<JdbcFilter> filters) {
 		this.dsId = config.getId();
 		this.config = config;
 		this.punisher = new CountPunisher(this, config.getTimeWindow(), config.getPunishLimit());
 		this.filters = filters;
 		this.dataSource = initDataSource(config);
+	}
+
+	@Override
+	public void init() {
+		mergeDataSourceConfig();
+
+		this.dataSource = initDataSource(this.config);
+	}
+
+	private void mergeDataSourceConfig() {
+		if (config.getDriverClass() == null || config.getDriverClass().length() <= 0) {
+			// in case that DBA has not give default value to driverClass.
+			config.setDriverClass(c3p0Config.getDriverClass());
+		}
+
+		this.config.setType(this.poolType);
+		this.config.setProperties(c3p0Config.getProperties());
+	}
+
+	public synchronized void setJdbcUrl(String jdbcUrl) {
+		checkNull("jdbcUrl", jdbcUrl);
+		// TODO get database as dsId
+		this.config.setJdbcUrl(jdbcUrl);
+	}
+
+	public synchronized void setUser(String user) {
+		checkNull("user", user);
+		this.config.setUsername(user);
+	}
+
+	public synchronized void setPassword(String password) {
+		checkNull("password", password);
+		this.config.setPassword(password);
+	}
+
+	private void checkNull(String key, String value) {
+		if (StringUtils.isBlank(value)) {
+			throw new ZebraConfigException(key + " cannot be null!");
+		}
 	}
 
 	private void checkState() throws SQLException {
@@ -95,8 +147,8 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 					logger.info("datasource [" + dsId + "] closed");
 					state = DataSourceState.CLOSED;
 				} else {
-					throw new ZebraException(String.format("Cannot close dataSource[%s] since there are busy connections.",
-					      dsId));
+					throw new ZebraException(
+							String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
 				}
 			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
 				org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
@@ -111,12 +163,12 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 					logger.info("old datasource [" + dsId + "] closed");
 					state = DataSourceState.CLOSED;
 				} else {
-					throw new ZebraException(String.format("Cannot close dataSource[%s] since there are busy connections.",
-					      dsId));
+					throw new ZebraException(
+							String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
 				}
 			} else {
 				Exception exp = new ZebraException(
-				      "fail to close dataSource since dataSource is not an instance of C3P0 or Tomcat-Jdbc.");
+						"fail to close dataSource since dataSource is not an instance of C3P0 or Tomcat-Jdbc.");
 				logger.warn(exp.getMessage(), exp);
 			}
 		} else {
@@ -140,7 +192,8 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 		if (filters != null && filters.size() > 0) {
 			JdbcFilter chain = new DefaultJdbcFilterChain(filters) {
 				@Override
-				public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain) throws SQLException {
+				public SingleConnection getSingleConnection(SingleDataSource source, JdbcFilter chain)
+						throws SQLException {
 					if (index < filters.size()) {
 						return filters.get(index++).getSingleConnection(source, chain);
 					} else {
@@ -280,7 +333,7 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 			JdbcDriverClassHelper.loadDriverClass(value.getDriverClass(), value.getJdbcUrl());
 			if (value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_C3P0)) {
 				DataSource unPooledDataSource = DataSources.unpooledDataSource(value.getJdbcUrl(), value.getUsername(),
-				      value.getPassword());
+						value.getPassword());
 
 				Map<String, Object> props = new HashMap<String, Object>();
 
@@ -290,8 +343,8 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 					props.put(any.getName(), any.getValue());
 				}
 
-				PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources.pooledDataSource(
-				      unPooledDataSource, props);
+				PoolBackedDataSource pooledDataSource = (PoolBackedDataSource) DataSources
+						.pooledDataSource(unPooledDataSource, props);
 
 				logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
@@ -360,5 +413,18 @@ public class SingleDataSource extends AbstractDataSource implements MarkableData
 	@Override
 	public void markUp() {
 		this.state = DataSourceState.INITIAL;
+	}
+
+	@Override
+	protected Logger getLogger() {
+		return logger;
+	}
+
+	@Override
+	protected void refresh(String propertyName) {
+	}
+
+	public synchronized void setPoolType(String poolType) {
+		this.poolType = poolType;
 	}
 }
