@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
@@ -15,7 +17,6 @@ import org.apache.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import com.dianping.zebra.Constants;
-import com.dianping.zebra.annotation.Internal;
 import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
@@ -37,6 +38,8 @@ import com.mchange.v2.c3p0.PoolBackedDataSource;
 public class SingleDataSource extends C3P0StyleDataSource implements DataSourceLifeCycle, SingleDataSourceMBean {
 
 	private static final Logger logger = LogManager.getLogger(SingleDataSource.class);
+	
+	public static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://[^:]+:\\d+/(\\w+)");
 
 	private String dsId;
 
@@ -50,7 +53,7 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 
 	private AtomicInteger closeAttmpet = new AtomicInteger(1);
 
-	private String poolType;
+	private String poolType = "c3p0";
 
 	private static final int MAX_CLOSE_ATTEMPT = 600;
 
@@ -91,8 +94,12 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 
 	public synchronized void setJdbcUrl(String jdbcUrl) {
 		checkNull("jdbcUrl", jdbcUrl);
-		// TODO get database as dsId
 		this.config.setJdbcUrl(jdbcUrl);
+		
+		Matcher matcher = JDBC_URL_PATTERN.matcher(jdbcUrl);
+		if (matcher.find()) {
+			this.config.setId(matcher.group(1));
+		}
 	}
 
 	public synchronized void setUser(String user) {

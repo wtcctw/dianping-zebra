@@ -8,10 +8,10 @@ import org.apache.log4j.Logger;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 
-public abstract class C3P0StyleDataSource extends AbstractDataSource{
+public abstract class C3P0StyleDataSource extends AbstractDataSource {
 
 	protected DataSourceConfig c3p0Config = new DataSourceConfig();
-	
+
 	public synchronized void setAcquireIncrement(int acquireIncrement) {
 		setProperty("acquireIncrement", String.valueOf(acquireIncrement));
 	}
@@ -37,8 +37,7 @@ public abstract class C3P0StyleDataSource extends AbstractDataSource{
 	}
 
 	public synchronized void setCheckoutTimeout(int checkoutTimeout) {
-		// 如果这个属性配置成了0，在数据源挂掉，并启动切换成可用的数据源后，可能会有线程无限等待，导致老的数据源无法关闭。
-		// setProperty("checkoutTimeout", String.valueOf(checkoutTimeout));
+		setProperty("checkoutTimeout", String.valueOf(checkoutTimeout));
 	}
 
 	public synchronized void setConnectionCustomizerClassName(String connectionCustomizerClassName) {
@@ -65,7 +64,7 @@ public abstract class C3P0StyleDataSource extends AbstractDataSource{
 		c3p0Config.setDriverClass(driverClass);
 		refresh("driverClass");
 	}
-	
+
 	public synchronized void setFactoryClassLocation(String factoryClassLocation) {
 		setProperty("factoryClassLocation", factoryClassLocation);
 	}
@@ -81,7 +80,7 @@ public abstract class C3P0StyleDataSource extends AbstractDataSource{
 	public synchronized void setInitialPoolSize(int initialPoolSize) {
 		setProperty("initialPoolSize", String.valueOf(initialPoolSize));
 	}
-	
+
 	public synchronized void setMaxAdministrativeTaskTime(int maxAdministrativeTaskTime) {
 		setProperty("maxAdministrativeTaskTime", String.valueOf(maxAdministrativeTaskTime));
 	}
@@ -113,7 +112,7 @@ public abstract class C3P0StyleDataSource extends AbstractDataSource{
 	public synchronized void setMinPoolSize(int minPoolSize) {
 		setProperty("minPoolSize", String.valueOf(minPoolSize));
 	}
-	
+
 	public synchronized void setNumHelperThreads(int numHelperThreads) {
 		setProperty("numHelperThreads", String.valueOf(numHelperThreads));
 	}
@@ -125,15 +124,15 @@ public abstract class C3P0StyleDataSource extends AbstractDataSource{
 	public synchronized void setOverrideDefaultUser(String overrideDefaultUser) {
 		setProperty("overrideDefaultUser", overrideDefaultUser);
 	}
-	
+
 	public synchronized void setPreferredTestQuery(String preferredTestQuery) {
 		setProperty("preferredTestQuery", preferredTestQuery);
 	}
-	
+
 	public synchronized void setPropertyCycle(int propertyCycle) {
 		setProperty("propertyCycle", String.valueOf(propertyCycle));
 	}
-	
+
 	public synchronized void setTestConnectionOnCheckin(boolean testConnectionOnCheckin) {
 		setProperty("testConnectionOnCheckin", String.valueOf(testConnectionOnCheckin));
 	}
@@ -153,9 +152,11 @@ public abstract class C3P0StyleDataSource extends AbstractDataSource{
 	public synchronized void setUsesTraditionalReflectiveProxies(boolean usesTraditionalReflectiveProxies) {
 		setProperty("usesTraditionalReflectiveProxies", String.valueOf(usesTraditionalReflectiveProxies));
 	}
-	
+
 	private void setProperty(String name, String value) {
-		getLogger().info(String.format("get config from lion and set c3p0 property[%s : %s].", name, value));
+		if(getLogger().isDebugEnabled()){
+			getLogger().info(String.format("set c3p0 property[%s : %s].", name, value));
+		}
 
 		Any any = null;
 		for (Any a : c3p0Config.getProperties()) {
@@ -175,11 +176,11 @@ public abstract class C3P0StyleDataSource extends AbstractDataSource{
 
 		refresh(name);
 	}
-	
+
 	protected abstract Logger getLogger();
-	
+
 	protected abstract void refresh(String propertyName);
-	
+
 	public synchronized void setProperties(Properties properties) {
 		for (Entry<Object, Object> item : properties.entrySet()) {
 			setProperty(String.valueOf(item.getKey().toString()), String.valueOf(item.getValue()));

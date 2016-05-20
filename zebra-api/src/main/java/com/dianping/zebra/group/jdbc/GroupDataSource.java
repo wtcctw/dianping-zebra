@@ -587,6 +587,12 @@ public class GroupDataSource extends C3P0StyleDataSource implements GroupDataSou
 		this.routerType = RouterType.getRouterType(routerType);
 	}
 
+	@Override
+	public synchronized void setCheckoutTimeout(int checkoutTimeout) {
+		// do nothing
+		// 如果这个属性配置成了0，在数据源挂掉，并启动切换成可用的数据源后，可能会有线程无限等待，导致老的数据源无法关闭。
+	}
+
 	public synchronized void setForceWriteOnLogin(boolean turnOn) {
 		this.springProperties.put(Constants.SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN, turnOn);
 		refresh(Constants.SPRING_PROPERTY_FORCE_WRITE_ON_LONGIN);
