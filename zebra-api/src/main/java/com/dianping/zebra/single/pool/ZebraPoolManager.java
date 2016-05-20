@@ -80,17 +80,17 @@ public class ZebraPoolManager {
 				logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
 				return datasource;
-			} else if(value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_DRUID)) {
+			} else if (value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_DRUID)) {
 				Properties props = new Properties();
-				
+
 				props.put("driverClass", value.getDriverClass());
 
 				for (Any any : value.getProperties()) {
 					props.put(any.getName(), any.getValue());
 				}
-				
+
 				DruidDataSource druidDataSource = (DruidDataSource) DruidDataSourceFactory.createDataSource(props);
-				
+
 				logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
 				return druidDataSource;
@@ -121,8 +121,7 @@ public class ZebraPoolManager {
 					logger.info("datasource [" + dsId + "] closed");
 					singleDataSource.setState(DataSourceState.CLOSED);
 				} else {
-					throw new ZebraException(
-							String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
+					throwException(dsId);
 				}
 			} else if (dataSource instanceof org.apache.tomcat.jdbc.pool.DataSource) {
 				org.apache.tomcat.jdbc.pool.DataSource ds = (org.apache.tomcat.jdbc.pool.DataSource) dataSource;
@@ -138,25 +137,23 @@ public class ZebraPoolManager {
 					logger.info("old datasource [" + dsId + "] closed");
 					singleDataSource.setState(DataSourceState.CLOSED);
 				} else {
-					throw new ZebraException(
-							String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
+					throwException(dsId);
 				}
-			} else if(dataSource instanceof DruidDataSource) {
-				DruidDataSource druidDataSource = (DruidDataSource) dataSource;
-				
+			} else if (dataSource instanceof DruidDataSource) {
+				DruidDataSource ds = (DruidDataSource) dataSource;
+
 				logger.info(
 						singleDataSource.getAndIncrementCloseAttempt() + " attempt to close datasource [" + dsId + "]");
 
-				if (druidDataSource.getActiveCount() == 0 || singleDataSource.getCloseAttempt() >= MAX_CLOSE_ATTEMPT) {
+				if (ds.getActiveCount() == 0 || singleDataSource.getCloseAttempt() >= MAX_CLOSE_ATTEMPT) {
 					logger.info("closing old datasource [" + dsId + "]");
 
-					druidDataSource.close();
+					ds.close();
 
 					logger.info("old datasource [" + dsId + "] closed");
 					singleDataSource.setState(DataSourceState.CLOSED);
 				} else {
-					throw new ZebraException(
-							String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
+					throwException(dsId);
 				}
 			} else {
 				Exception exp = new ZebraException(
@@ -167,6 +164,10 @@ public class ZebraPoolManager {
 			Exception exp = new ZebraException("fail to close dataSource since dataSource is null.");
 			logger.warn(exp.getMessage(), exp);
 		}
+	}
+
+	private static void throwException(String dsId) {
+		throw new ZebraException(String.format("Cannot close dataSource[%s] since there are busy connections.", dsId));
 	}
 
 	private static int getIntProperty(DataSourceConfig config, String name, int defaultValue) {
