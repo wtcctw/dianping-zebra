@@ -27,7 +27,7 @@ public class ZebraPoolManager {
 
 	private static final int MAX_CLOSE_ATTEMPT = 600;
 
-	public static DataSource create(DataSourceConfig value) {
+	public static DataSource buildDataSource(DataSourceConfig value) {
 		try {
 			JdbcDriverClassHelper.loadDriverClass(value.getDriverClass(), value.getJdbcUrl());
 			if (value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_C3P0)) {

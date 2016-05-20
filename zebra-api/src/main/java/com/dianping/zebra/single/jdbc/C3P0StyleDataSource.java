@@ -154,9 +154,7 @@ public abstract class C3P0StyleDataSource extends AbstractDataSource {
 	}
 
 	private void setProperty(String name, String value) {
-		if(getLogger().isDebugEnabled()){
-			getLogger().info(String.format("set c3p0 property[%s : %s].", name, value));
-		}
+		getLogger().info(String.format("set c3p0 property[%s : %s].", name, value));
 
 		Any any = null;
 		for (Any a : c3p0Config.getProperties()) {

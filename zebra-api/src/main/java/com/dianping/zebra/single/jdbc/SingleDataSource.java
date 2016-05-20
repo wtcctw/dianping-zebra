@@ -270,7 +270,7 @@ public class SingleDataSource extends C3P0StyleDataSource implements DataSourceL
 	}
 
 	private DataSource initDataSourceOrigin(DataSourceConfig value) {
-		return ZebraPoolManager.create(value);
+		return ZebraPoolManager.buildDataSource(value);
 	}
 
 	public boolean isAvailable() {
