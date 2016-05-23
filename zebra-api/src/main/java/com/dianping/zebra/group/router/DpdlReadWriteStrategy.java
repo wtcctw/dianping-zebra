@@ -11,11 +11,13 @@ public class DpdlReadWriteStrategy implements ReadWriteStrategy {
 	private static final Logger logger = LogManager.getLogger(DpdlReadWriteStrategy.class);
 
 	private static Method getContextMethod = null;
+	
+	private static Method setContextMethod = null;
 
 	private static Method isAuthenticatedMethod = null;
 
 	private static Method setAuthenticatedMethod = null;
-
+	
 	private GroupDataSourceConfig config;
 
 	static {
@@ -24,6 +26,7 @@ public class DpdlReadWriteStrategy implements ReadWriteStrategy {
 			Class<?> contextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
 
 			getContextMethod = contextHolderClass.getDeclaredMethod("getTrackerContext", new Class[] {});
+			setContextMethod = contextHolderClass.getDeclaredMethod("setTrackerContext",new Class[]{contextClass.getClass()});
 			isAuthenticatedMethod = contextClass.getDeclaredMethod("isAuthenticated", new Class[] {});
 			setAuthenticatedMethod = contextClass.getDeclaredMethod("setAuthenticated", new Class[] { boolean.class });
 
@@ -39,9 +42,15 @@ public class DpdlReadWriteStrategy implements ReadWriteStrategy {
 		if (config != null && config.getForceWriteOnLogin()) {
 			try {
 				Object context = getContextMethod.invoke(null);
-				if (context != null) {
-					return (Boolean) isAuthenticatedMethod.invoke(context);
+				
+				if(context == null) {
+					Class<?> contextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
+					setContextMethod.invoke(null, contextClass.newInstance());
+					context = getContextMethod.invoke(null);
+					setAuthenticatedMethod.invoke(context, true);
 				}
+				
+				return (Boolean) isAuthenticatedMethod.invoke(context);
 			} catch (Exception error) {
 				logger.error(error.getMessage(), error);
 			}
@@ -53,9 +62,15 @@ public class DpdlReadWriteStrategy implements ReadWriteStrategy {
 	protected static void setReadFromMaster() {
 		try {
 			Object context = getContextMethod.invoke(null);
-			if (context != null) {
-				setAuthenticatedMethod.invoke(context, true);
+			
+//			if (context != null) {setAuthenticatedMethod.invoke(context, true);}setAuthenticatedMethod.invoke(context, true);
+			if(context == null) {
+				Class<?> contextClass = Class.forName("com.dianping.avatar.tracker.TrackerContext");
+				setContextMethod.invoke(null, contextClass.newInstance());
+				context = getContextMethod.invoke(null);
 			}
+			
+			setAuthenticatedMethod.invoke(context, true);
 		} catch (Exception error) {
 			logger.error(error.getMessage(), error);
 		}
