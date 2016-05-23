@@ -21,78 +21,77 @@ public class ZebraPoolManagerTest {
 
 	@Test
 	public void testDruid() throws SQLException {
-		
+
 		List<Any> propsList = new ArrayList<Any>();
 		Any any = new Any();
-		any.setName("initialSize");
-		any.setValue("1");
+		any.setName("initialPoolSize");
+		any.setValue("5");
 		propsList.add(any);
 		any = new Any();
-		any.setName("minIdle");
-		any.setValue("1");
-		propsList.add(any);
-		any = new Any();
-		any.setName("maxActive");
+		any.setName("maxPoolSize");
 		any.setValue("20");
 		propsList.add(any);
 		any = new Any();
-		any.setName("maxWait");
-		any.setValue("60000");
+		any.setName("minPoolSize");
+		any.setValue("5");
 		propsList.add(any);
 		any = new Any();
-		any.setName("timeBetweenEvictionRunsMillis");
-		any.setValue("60000");
+		any.setName("idleConnectionTestPeriod");
+		any.setValue("60");
 		propsList.add(any);
 		any = new Any();
-		any.setName("minEvictableIdleTimeMillis");
-		any.setValue("300000");
+		any.setName("acquireRetryAttempts");
+		any.setValue("50");
 		propsList.add(any);
 		any = new Any();
-		any.setName("validationQuery");
+		any.setName("acquireRetryDelay");
+		any.setValue("300");
+		propsList.add(any);
+		any = new Any();
+		any.setName("maxStatements");
+		any.setValue("0");
+		propsList.add(any);
+		any = new Any();
+		any.setName("numHelperThreads");
+		any.setValue("6");
+		propsList.add(any);
+		any = new Any();
+		any.setName("maxAdministrativeTaskTime");
+		any.setValue("5");
+		propsList.add(any);
+		any = new Any();
+		any.setName("preferredTestQuery");
 		any.setValue("select 1");
 		propsList.add(any);
 		any = new Any();
-		any.setName("testWhileIdle");
-		any.setValue("true");
-		propsList.add(any);
-		any = new Any();
-		any.setName("testOnBorrow");
-		any.setValue("false");
-		propsList.add(any);
-		any = new Any();
-		any.setName("testOnReturn");
-		any.setValue("false");
-		propsList.add(any);
-		any = new Any();
-		any.setName("poolPreparedStatements");
-		any.setValue("true");
-		propsList.add(any);
-		any = new Any();
-		any.setName("maxPoolPreparedStatementPerConnectionSize");
-		any.setValue("20");
+		any.setName("checkoutTimeout");
+		any.setValue("5000");
 		propsList.add(any);
 
 		DataSourceConfig config = new DataSourceConfig();
-		
+
 		config.setType(Constants.CONNECTION_POOL_TYPE_DRUID);
 		config.setActive(true);
 		config.setCanRead(true);
 		config.setCanWrite(true);
 		config.setDriverClass("com.mysql.jdbc.Driver");
 		config.setId("test-druid");
-		config.setJdbcUrl("jdbc:mysql://10.1.101.216:3306/zebra?zeroDateTimeBehavior=convertToNull&characterEncoding=UTF8&socketTimeout=60000");
-		config.setUsername("zebra_a_r");
-		config.setPassword("dp!@VTWKvafGT");
+		config.setJdbcUrl("jdbc:mysql://10.1.77.20:3306/zebra?characterEncoding=UTF8&socketTimeout=60000");
+		config.setUsername("zebra_a");
+		config.setPassword("dp!@aFDceborN");
 		config.setProperties(propsList);
-		
+
 		DataSource ds = ZebraPoolManager.buildDataSource(config);
-		
-		Connection con = ds.getConnection("zebra_a_r", "dp!@VTWKvafGT");
+
+		Connection con = ds.getConnection();
 		Statement st = con.createStatement();
-		
-		ResultSet result = st.executeQuery("select * form `cluster` where id=20");
-		System.out.println(result.getString(2));
-		
-		ZebraPoolManager.close(new SingleDataSource(config,null));
+
+		ResultSet result = st.executeQuery("select * from `Cluster` where id=20");
+
+		while (result.next()) {
+			System.out.println(result.getString(2));
+		}
+
+		ZebraPoolManager.close(new SingleDataSource(config, null));
 	}
 }

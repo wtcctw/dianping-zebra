@@ -3,7 +3,6 @@ package com.dianping.zebra.single.pool;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -12,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.exception.ZebraException;
@@ -81,15 +79,25 @@ public class ZebraPoolManager {
 
 				return datasource;
 			} else if (value.getType().equalsIgnoreCase(Constants.CONNECTION_POOL_TYPE_DRUID)) {
-				Properties props = new Properties();
+				DruidDataSource druidDataSource = new DruidDataSource(); //DruidDataSourceFactory
+				druidDataSource.setUsername(value.getUsername());
+				druidDataSource.setDriverClassName(value.getDriverClass());
+				druidDataSource.setUrl(value.getJdbcUrl());
+				druidDataSource.setPassword(value.getPassword());
+				
+				druidDataSource.setInitialSize(getIntProperty(value,"initialPoolSize",5));
+				druidDataSource.setMaxActive(getIntProperty(value, "maxPoolSize", 20));
+				druidDataSource.setMinIdle(getIntProperty(value, "minPoolSize", 5));
+				druidDataSource.setMaxWait(getIntProperty(value, "checkoutTimeout", 1000));
 
-				props.put("driverClass", value.getDriverClass());
-
-				for (Any any : value.getProperties()) {
-					props.put(any.getName(), any.getValue());
-				}
-
-				DruidDataSource druidDataSource = (DruidDataSource) DruidDataSourceFactory.createDataSource(props);
+				druidDataSource.setRemoveAbandoned(true);
+				druidDataSource.setRemoveAbandonedTimeout(60);
+				druidDataSource.setTestOnBorrow(true);
+				druidDataSource.setTestOnReturn(false);
+				druidDataSource.setTestWhileIdle(true);
+				druidDataSource.setValidationQuery(getStringProperty(value, "preferredTestQuery", "SELECT 1"));
+				druidDataSource.setTimeBetweenEvictionRunsMillis(300000); // 30 min
+				druidDataSource.setMinEvictableIdleTimeMillis(1800000);
 
 				logger.info(String.format("New dataSource [%s] created.", value.getId()));
 
