@@ -39,8 +39,8 @@ public class LoggerLoader {
 	public static synchronized void init() {
 		final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
 		final Configuration config = ctx.getConfiguration();
-		Layout layout = PatternLayout.createLayout("%d [%t] %-5p [%c{2}] %m%n", config, null, null, true, false, null,
-				null);
+		Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss}:%p %t %c - %m%n", config, null, null, true,
+				false, null, null);
 
 		// file info
 		Filter fileInfoFilter = ThresholdFilter.createFilter(Level.ERROR, Result.DENY, Result.ACCEPT);
@@ -59,7 +59,7 @@ public class LoggerLoader {
 		config.addAppender(consoleErrorAppender);
 		consoleErrorAppender.start();
 
-		// console warn
+		// console info
 		Filter consoleWarnFilter = ThresholdFilter.createFilter(Level.ERROR, Result.DENY, Result.NEUTRAL);
 		Appender consoleWarnAppender = ConsoleAppender.createAppender(layout, consoleWarnFilter, "SYSTEM_OUT",
 				"ConsoleWarn", "false", "false");
@@ -70,11 +70,11 @@ public class LoggerLoader {
 		AppenderRef consoleErrorAppenderRef = AppenderRef.createAppenderRef("ConsoleError", Level.WARN, null);
 
 		AppenderRef[] refs = new AppenderRef[] { consoleErrorAppenderRef, consoleWarnAppenderRef, fileInfoRef };
-		
+
 		LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.INFO, "com.dianping.zebra", "true", refs,
 				null, config, null);
 		loggerConfig.addAppender(consoleErrorAppender, Level.ERROR, null);
-		loggerConfig.addAppender(consoleWarnAppender, Level.WARN, null);
+		loggerConfig.addAppender(consoleWarnAppender, Level.INFO, null);
 		loggerConfig.addAppender(fileInfoAppender, Level.INFO, null);
 
 		config.addLogger("com.dianping.zebra", loggerConfig);

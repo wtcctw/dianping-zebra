@@ -357,7 +357,7 @@ public class GroupDataSource extends C3P0StyleDataSource implements GroupDataSou
 		} else {
 			logger.info("initialize a new GroupDataSource by using jdbcRef[" + jdbcRef + "].");
 		}
-
+		
 		this.securityCheck();
 		this.initConfig();
 		this.initFilters();
