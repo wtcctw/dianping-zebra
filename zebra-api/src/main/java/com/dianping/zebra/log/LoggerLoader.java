@@ -49,8 +49,8 @@ public class LoggerLoader {
 				TimeBasedTriggeringPolicy.createPolicy("1", "true"),
 				DefaultRolloverStrategy.createStrategy("30", "1", null, Deflater.DEFAULT_COMPRESSION + "", config),
 				layout, fileInfoFilter, "false", null, null, config);
-		fileInfoAppender.start();
 		config.addAppender(fileInfoAppender);
+		fileInfoAppender.start();
 		AppenderRef fileInfoRef = AppenderRef.createAppenderRef("FileInfo", null, fileInfoFilter);
 
 		// console error
@@ -70,6 +70,7 @@ public class LoggerLoader {
 		AppenderRef consoleErrorAppenderRef = AppenderRef.createAppenderRef("ConsoleError", Level.WARN, null);
 
 		AppenderRef[] refs = new AppenderRef[] { consoleErrorAppenderRef, consoleWarnAppenderRef, fileInfoRef };
+		
 		LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.INFO, "com.dianping.zebra", "true", refs,
 				null, config, null);
 		loggerConfig.addAppender(consoleErrorAppender, Level.ERROR, null);
