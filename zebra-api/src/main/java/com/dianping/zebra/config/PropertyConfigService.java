@@ -1,12 +1,5 @@
 package com.dianping.zebra.config;
 
-import com.dianping.zebra.exception.ZebraConfigException;
-import com.dianping.zebra.group.config.AdvancedPropertyChangeEvent;
-import com.dianping.zebra.util.FileUtils;
-import com.dianping.zebra.util.StringUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -21,9 +14,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.logging.log4j.Logger;
+
+import com.dianping.zebra.exception.ZebraConfigException;
+import com.dianping.zebra.group.config.AdvancedPropertyChangeEvent;
+import com.dianping.zebra.log.LoggerLoader;
+import com.dianping.zebra.util.FileUtils;
+import com.dianping.zebra.util.StringUtils;
+
 public class PropertyConfigService implements ConfigService {
 
-	private static final Logger logger = LogManager.getLogger(PropertyConfigService.class);
+	private static final Logger logger = LoggerLoader.getLogger(PropertyConfigService.class);
 	
 	private String resourceFileName;
 

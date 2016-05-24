@@ -1,19 +1,19 @@
 package com.dianping.zebra.group.config;
 
-import com.dianping.zebra.config.ConfigService;
-import com.dianping.zebra.util.StringUtils;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.logging.log4j.Logger;
+
+import com.dianping.zebra.config.ConfigService;
+import com.dianping.zebra.log.LoggerLoader;
+import com.dianping.zebra.util.StringUtils;
+
 public abstract class AbstractConfigManager {
 
-	protected static final Logger logger = LogManager.getLogger(AbstractConfigManager.class);
+	protected static final Logger logger = LoggerLoader.getLogger(AbstractConfigManager.class);
 
 	protected final ConfigService configService;
 

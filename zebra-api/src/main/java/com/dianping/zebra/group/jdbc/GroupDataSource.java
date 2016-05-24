@@ -14,9 +14,7 @@ import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
+import org.apache.logging.log4j.Logger;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.annotation.Internal;
 import com.dianping.zebra.config.ConfigService;
@@ -59,12 +57,12 @@ public class GroupDataSource extends C3P0StyleDataSource implements GroupDataSou
 		LoggerLoader.init();
 	}
 
-	protected static final Logger logger = LogManager.getLogger(GroupDataSource.class);
+	protected static final Logger logger = LoggerLoader.getLogger(GroupDataSource.class);
 
 	// config
 	protected String jdbcRef;
 
-	protected String poolType;// support two type : "c3p0" and "tomcat-jdbc" and druid
+	protected String poolType;// support three type : "c3p0" , "tomcat-jdbc" or "druid"
 
 	protected RouterType routerType = RouterType.ROUND_ROBIN;
 

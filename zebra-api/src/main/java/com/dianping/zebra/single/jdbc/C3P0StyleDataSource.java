@@ -3,8 +3,7 @@ package com.dianping.zebra.single.jdbc;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
-
+import org.apache.logging.log4j.Logger;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 

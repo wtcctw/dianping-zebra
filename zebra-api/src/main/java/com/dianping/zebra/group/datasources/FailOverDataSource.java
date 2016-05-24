@@ -9,8 +9,7 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
@@ -19,6 +18,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.exception.MasterDsNotFoundException;
 import com.dianping.zebra.group.exception.WeakReferenceGCException;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
+import com.dianping.zebra.log.LoggerLoader;
 import com.dianping.zebra.single.jdbc.AbstractDataSource;
 import com.dianping.zebra.single.jdbc.SingleDataSource;
 import com.dianping.zebra.single.manager.SingleDataSourceManagerFactory;
@@ -31,7 +31,7 @@ import com.dianping.zebra.util.StringUtils;
  * 3. if cannot find any master database in the initial phase, fail fast.</br>
  */
 public class FailOverDataSource extends AbstractDataSource {
-	private final static Logger logger = LogManager.getLogger(FailOverDataSource.class);
+	private static final Logger logger = LoggerLoader.getLogger(FailOverDataSource.class);
 
 	private Map<String, DataSourceConfig> configs;
 

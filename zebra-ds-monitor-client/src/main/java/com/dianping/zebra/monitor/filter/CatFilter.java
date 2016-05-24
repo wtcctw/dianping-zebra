@@ -6,8 +6,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.dianping.cat.Cat;
 import com.dianping.cat.CatConstants;
@@ -21,6 +20,7 @@ import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.datasources.FailOverDataSource;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.util.SqlAliasManager;
+import com.dianping.zebra.log.LoggerLoader;
 import com.dianping.zebra.monitor.Version;
 import com.dianping.zebra.monitor.monitor.GroupDataSourceMonitor;
 import com.dianping.zebra.monitor.util.SqlMonitorUtils;
@@ -36,7 +36,7 @@ import com.site.helper.Stringizers;
 public class CatFilter extends DefaultJdbcFilter {
 	private static final String CAT_TYPE = "DAL";
 
-	protected static final Logger logger = LogManager.getLogger(CatFilter.class);
+	protected static final Logger logger = LoggerLoader.getLogger(CatFilter.class);
 
 	private GroupDataSourceMonitor monitor = null;
 

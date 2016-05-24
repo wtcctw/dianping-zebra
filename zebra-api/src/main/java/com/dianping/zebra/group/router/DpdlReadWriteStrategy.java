@@ -2,13 +2,13 @@ package com.dianping.zebra.group.router;
 
 import java.lang.reflect.Method;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
+import com.dianping.zebra.log.LoggerLoader;
 
 public class DpdlReadWriteStrategy implements ReadWriteStrategy {
-	private static final Logger logger = LogManager.getLogger(DpdlReadWriteStrategy.class);
+	private static final Logger logger = LoggerLoader.getLogger(DpdlReadWriteStrategy.class);
 
 	private static Method getContextMethod = null;
 	

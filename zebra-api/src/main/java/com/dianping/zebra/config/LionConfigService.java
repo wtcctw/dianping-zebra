@@ -1,5 +1,12 @@
 package com.dianping.zebra.config;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.apache.logging.log4j.Logger;
+
 import com.dianping.lion.EnvZooKeeperConfig;
 import com.dianping.lion.client.ConfigCache;
 import com.dianping.lion.client.ConfigChange;
@@ -7,18 +14,12 @@ import com.dianping.lion.client.LionException;
 import com.dianping.zebra.Constants;
 import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.group.config.AdvancedPropertyChangeEvent;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import com.dianping.zebra.log.LoggerLoader;
 
 public class LionConfigService implements ConfigService {
-	private static final Logger logger = LogManager.getLogger(LionConfigService.class);
-
+	
+	private static final Logger logger = LoggerLoader.getLogger(LionConfigService.class);
+	
 	private static LionConfigService configService;
 
 	private List<PropertyChangeListener> listeners = new CopyOnWriteArrayList<PropertyChangeListener>();

@@ -17,8 +17,7 @@ import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -43,6 +42,7 @@ import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.config.datasource.entity.GroupDataSourceConfig;
 import com.dianping.zebra.group.jdbc.GroupDataSource;
 import com.dianping.zebra.group.router.RouterType;
+import com.dianping.zebra.log.LoggerLoader;
 import com.dianping.zebra.monitor.model.DataSourceInfo;
 import com.dianping.zebra.monitor.util.LionUtil;
 import com.dianping.zebra.util.StringUtils;
@@ -50,7 +50,7 @@ import com.google.gson.Gson;
 
 public class DataSourceAutoReplacer implements BeanFactoryPostProcessor, PriorityOrdered {
 
-	private static final Log logger = LogFactory.getLog(DataSourceAutoReplacer.class);
+	private static final Logger logger = LoggerLoader.getLogger(DataSourceAutoReplacer.class);
 
 	// datasource class name
 	private static final String C3P0_CLASS_NAME = "com.mchange.v2.c3p0.ComboPooledDataSource";

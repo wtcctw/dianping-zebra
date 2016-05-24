@@ -10,8 +10,7 @@ import java.util.regex.Pattern;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.dianping.zebra.exception.ZebraConfigException;
 import com.dianping.zebra.filter.DefaultJdbcFilterChain;
@@ -20,6 +19,7 @@ import com.dianping.zebra.filter.JdbcFilter;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.monitor.SingleDataSourceMBean;
 import com.dianping.zebra.group.util.DataSourceState;
+import com.dianping.zebra.log.LoggerLoader;
 import com.dianping.zebra.single.pool.ZebraPoolManager;
 import com.mchange.v2.c3p0.PoolBackedDataSource;
 
@@ -29,8 +29,12 @@ import com.mchange.v2.c3p0.PoolBackedDataSource;
  *
  */
 public class SingleDataSource extends C3P0StyleDataSource implements DataSourceLifeCycle, SingleDataSourceMBean {
+	
+	static{
+		LoggerLoader.init();
+	}
 
-	private static final Logger logger = LogManager.getLogger(SingleDataSource.class);
+	private static final Logger logger = LoggerLoader.getLogger(SingleDataSource.class);
 
 	public static final Pattern JDBC_URL_PATTERN = Pattern.compile("jdbc:mysql://[^:]+:\\d+/(\\w+)");
 

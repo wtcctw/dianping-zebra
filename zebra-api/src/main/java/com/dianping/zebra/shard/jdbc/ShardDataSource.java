@@ -18,11 +18,11 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.dianping.zebra.config.ConfigService;
 import com.dianping.zebra.config.ConfigServiceFactory;
+import com.dianping.zebra.log.LoggerLoader;
 import com.dianping.zebra.shard.jdbc.parallel.SQLThreadPoolExecutor;
 import com.dianping.zebra.shard.router.RouterBuilder;
 import com.dianping.zebra.shard.router.ShardRouter;
@@ -35,7 +35,12 @@ import com.dianping.zebra.util.StringUtils;
  * @author hao.zhu
  */
 public class ShardDataSource extends AbstractDataSource {
-	private static final Logger logger = LogManager.getLogger(ShardDataSource.class);
+	
+	static {
+		LoggerLoader.init();
+	}
+	
+	protected static final Logger logger = LoggerLoader.getLogger(ShardDataSource.class);
 
 	private String ruleName;
 

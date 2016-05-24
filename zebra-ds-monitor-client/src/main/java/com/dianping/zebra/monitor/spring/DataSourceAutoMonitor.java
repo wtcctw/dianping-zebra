@@ -16,10 +16,10 @@
 package com.dianping.zebra.monitor.spring;
 
 import com.dianping.zebra.group.jdbc.GroupDataSource;
+import com.dianping.zebra.log.LoggerLoader;
 import com.dianping.zebra.monitor.sql.MonitorableDataSource;
 import com.dianping.zebra.shard.jdbc.ShardDataSource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -42,7 +42,7 @@ import java.util.Map.Entry;
  */
 public class DataSourceAutoMonitor implements BeanFactoryPostProcessor, PriorityOrdered {
 
-    private static final Log logger = LogFactory.getLog(DataSourceAutoMonitor.class);
+	private static final Logger logger = LoggerLoader.getLogger(DataSourceAutoMonitor.class);
 
     private static final String ZEBRA_DATA_SOURCE_NAME = "com.dianping.zebra.jdbc.DPDataSource";
 

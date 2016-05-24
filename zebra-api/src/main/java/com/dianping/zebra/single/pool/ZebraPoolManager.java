@@ -7,8 +7,7 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 import com.alibaba.druid.pool.DruidDataSource;
@@ -19,6 +18,7 @@ import com.dianping.zebra.exception.ZebraException;
 import com.dianping.zebra.group.config.datasource.entity.Any;
 import com.dianping.zebra.group.config.datasource.entity.DataSourceConfig;
 import com.dianping.zebra.group.util.DataSourceState;
+import com.dianping.zebra.log.LoggerLoader;
 import com.dianping.zebra.single.jdbc.SingleDataSource;
 import com.dianping.zebra.util.JdbcDriverClassHelper;
 import com.mchange.v2.c3p0.DataSources;
@@ -26,8 +26,8 @@ import com.mchange.v2.c3p0.PoolBackedDataSource;
 
 public class ZebraPoolManager {
 
-	private static final Logger logger = LogManager.getLogger(ZebraPoolManager.class);
-
+	private static final Logger logger = LoggerLoader.getLogger(ZebraPoolManager.class);
+	
 	private static final int MAX_CLOSE_ATTEMPT = 600;
 
 	public static DataSource buildDataSource(DataSourceConfig value) {
