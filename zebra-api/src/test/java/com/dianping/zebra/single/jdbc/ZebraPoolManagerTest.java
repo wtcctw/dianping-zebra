@@ -1,4 +1,4 @@
-package com.dianping.zebra.group.jdbc;
+package com.dianping.zebra.single.jdbc;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
