@@ -33,7 +33,22 @@ public class MergeContext {
 	private boolean distinct;
 	
 	private boolean aggregate;
+	
+	public MergeContext(){
+	}
 
+	public MergeContext(MergeContext ctx){
+		this.offset = ctx.offset;
+		this.limit = ctx.limit;
+		this.limitExpr = ctx.limitExpr;
+		this.groupByColumns = ctx.groupByColumns;
+		this.selectItemMap = ctx.selectItemMap;
+		this.columnNameAliasMapping = ctx.columnNameAliasMapping;
+		this.orderBy = ctx.orderBy;
+		this.distinct = ctx.distinct;
+		this.aggregate = ctx.aggregate;
+	}
+	
 	public int getOffset() {
 		return offset;
 	}

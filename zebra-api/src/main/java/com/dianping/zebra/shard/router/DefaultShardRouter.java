@@ -25,6 +25,7 @@ import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock.Limit;
 import com.dianping.zebra.shard.exception.ShardParseException;
 import com.dianping.zebra.shard.exception.ShardRouterException;
+import com.dianping.zebra.shard.merge.MergeContext;
 import com.dianping.zebra.shard.parser.DefaultSQLRewrite;
 import com.dianping.zebra.shard.parser.SQLParsedResult;
 import com.dianping.zebra.shard.parser.SQLParser;
@@ -61,16 +62,18 @@ public class DefaultShardRouter implements ShardRouter {
 		TableShardRule tableShardRule = findShardRule(parsedResult.getRouterContext(), params);
 		ShardEvalResult shardResult = tableShardRule.eval(new ShardEvalContext(parsedResult, params));
 
-		routerResult.setMergeContext(parsedResult.getMergeContext());
+		MergeContext mergeContext = new MergeContext(parsedResult.getMergeContext());
+
+		routerResult.setMergeContext(mergeContext);
 		routerResult.setSqls(buildSqls(shardResult.getDbAndTables(), parsedResult, tableShardRule.getTableName()));
-		routerResult.setParams(buildParams(params, parsedResult, routerResult));
+		routerResult.setParams(buildParams(params, routerResult));
 
 		return routerResult;
 	}
 
 	@Override
 	public boolean validate(String sql) throws ShardParseException, ShardRouterException {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -127,11 +130,11 @@ public class DefaultShardRouter implements ShardRouter {
 	}
 
 	// TODO maybe consider putting into merge later
-	private List<Object> buildParams(List<Object> params, SQLParsedResult parseResult, RouterResult rr) {
+	private List<Object> buildParams(List<Object> params, RouterResult rr) {
 		List<Object> newParams = null;
 		if (params != null) {
 			newParams = new ArrayList<Object>(params);
-			Limit limitExpr = parseResult.getMergeContext().getLimitExpr();
+			Limit limitExpr = rr.getMergeContext().getLimitExpr();
 			if (limitExpr != null) {
 				int offset = Integer.MIN_VALUE;
 				if (limitExpr.getOffset() instanceof SQLVariantRefExpr) {

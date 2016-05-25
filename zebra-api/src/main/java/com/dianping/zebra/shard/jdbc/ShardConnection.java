@@ -126,7 +126,6 @@ public class ShardConnection extends UnsupportedShardConnection implements Conne
 		stmt.setAutoCommit(autoCommit);
 		stmt.setReadOnly(readOnly);
 		stmt.setConnection(this);
-		stmt.setDataSourceRepository(dataSourceRepository);
 
 		attachedStatements.add(stmt);
 
@@ -153,32 +152,16 @@ public class ShardConnection extends UnsupportedShardConnection implements Conne
 		return stmt;
 	}
 
-	public Connection getRealConnection(String jdbcRef,boolean autoCommit) throws SQLException {
+	Connection getRealConnection(String jdbcRef, boolean autoCommit) throws SQLException {
 		Connection conn = actualConnections.get(jdbcRef);
-		
-		if(conn == null){
+
+		if (conn == null) {
 			conn = dataSourceRepository.getDataSource(jdbcRef).getConnection();
 			conn.setAutoCommit(autoCommit);
 			actualConnections.put(jdbcRef, conn);
 		}
-		
+
 		return conn;
-	}
-
-	public void setRealConnection(String jdbcRef, Connection conn) {
-		if (actualConnections.containsKey(jdbcRef)) {
-			// in case connection leak
-			Connection deadConn = actualConnections.get(jdbcRef);
-
-			if (deadConn != null) {
-				try {
-					deadConn.close();
-				} catch (SQLException ignore) {
-				}
-			}
-		}
-
-		actualConnections.put(jdbcRef, conn);
 	}
 
 	public Set<Statement> getAttachedStatements() {
@@ -220,7 +203,6 @@ public class ShardConnection extends UnsupportedShardConnection implements Conne
 		checkClosed();
 
 		ShardPreparedStatement stmt = new ShardPreparedStatement();
-		stmt.setDataSourceRepository(dataSourceRepository);
 		stmt.setRouter(router);
 		stmt.setAutoCommit(autoCommit);
 		stmt.setReadOnly(readOnly);

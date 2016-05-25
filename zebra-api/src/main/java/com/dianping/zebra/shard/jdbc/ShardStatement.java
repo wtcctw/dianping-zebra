@@ -46,8 +46,6 @@ public class ShardStatement extends UnsupportedShardStatement implements Stateme
 
 	protected ShardConnection connection;
 
-	protected DataSourceRepository dataSourceRepository;
-
 	private boolean closed;
 
 	private boolean readOnly;
@@ -437,9 +435,5 @@ public class ShardStatement extends UnsupportedShardStatement implements Stateme
 
 	public void setRouter(ShardRouter router) {
 		this.router = router;
-	}
-
-	public void setDataSourceRepository(DataSourceRepository dataSourceRepository) {
-		this.dataSourceRepository = dataSourceRepository;
 	}
 }

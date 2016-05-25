@@ -114,8 +114,6 @@ public class FailOverDataSource extends AbstractDataSource {
 				} else {
 					logger.warn(error_message, result.getException());
 				}
-			} else {
-				logger.info("FailOverDataSource find master mysql instance success!");
 			}
 		} catch (WeakReferenceGCException e) {
 			logger.error("should never be here!", e);
